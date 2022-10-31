@@ -74,9 +74,9 @@ public class EnvInitializer implements ApplicationRunner {
         String appHome = WebUtils.getAppHome();
         if (appHome == null) {
             throw new ExceptionInInitializerError(String.format("[StreamPark] System initialization check failed," +
-                " The system initialization check failed. If started local for development and debugging," +
-                " please ensure the -D%s parameter is clearly specified," +
-                " more detail: https://streampark.apache.org/docs/user-guide/development",
+                    " The system initialization check failed. If started local for development and debugging," +
+                    " please ensure the -D%s parameter is clearly specified," +
+                    " more detail: https://streampark.apache.org/docs/user-guide/development",
                 ConfigConst.KEY_APP_HOME()));
         }
 
@@ -143,7 +143,7 @@ public class EnvInitializer implements ApplicationRunner {
 
             // 1. prepare workspace dir
             if (storageType.equals(LFS)) {
-                String localDist = workspace.APP_LOCAL_DIST();
+                String localDist = Workspace.APP_LOCAL_DIST();
                 if (!fsOperator.exists(localDist)) {
                     log.info(mkdirLog, localDist);
                     fsOperator.mkdirs(localDist);
@@ -231,7 +231,7 @@ public class EnvInitializer implements ApplicationRunner {
 
             // 2.4) create maven local repository dir
 
-            String localMavenRepo = workspace.MAVEN_LOCAL_DIR();
+            String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
             if (FsOperator.lfs().exists(localMavenRepo)) {
                 FsOperator.lfs().mkdirs(localMavenRepo);
             }

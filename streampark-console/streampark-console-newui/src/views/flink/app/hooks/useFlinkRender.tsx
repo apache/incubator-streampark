@@ -34,7 +34,7 @@ import {
 import { Button } from '/@/components/Button';
 import { descriptionFilter } from '../utils';
 import { SettingTwoTone } from '@ant-design/icons-vue';
-import { reactive, ref, unref } from 'vue';
+import { ref, unref } from 'vue';
 import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
@@ -85,18 +85,16 @@ export const renderInputDropdown = (
 };
 
 export function handleCheckCheckpoint(values: Recordable) {
-  const { cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction } = values;
-  console.log('values', cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction);
+  const { cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction } = values.checkPointFailure;
   if (cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null) {
     if (cpFailureAction === 1) {
-      const alertEmail = values.alertEmail;
-      if (alertEmail == null) {
+      if (values.alertId == null) {
         // this.form.setFields({
         //   alertEmail: {
         //     errors: [new Error('checkPoint failure trigger is alert,email must not be empty')],
         //   },
         // });
-        return Promise.reject('trigger action is alert,email must not be empty');
+        return Promise.reject('trigger action is alert,Fault Alert Template must not be empty');
       } else {
         return Promise.resolve();
       }
@@ -115,21 +113,28 @@ export function handleCheckCheckpoint(values: Recordable) {
 }
 
 /* render input Group component */
-export const renderInputGroup = (model: Recordable) => {
-  const formValue = reactive({
-    cpMaxFailureInterval: model.cpMaxFailureInterval,
-    cpFailureRateInterval: model.cpFailureRateInterval,
-    cpFailureAction: model.cpFailureAction,
-  });
+export const renderInputGroup = ({ model }) => {
+  if (!Reflect.has(model, 'checkPointFailure')) {
+    model.checkPointFailure = {};
+  }
+  const handleUpdate = (value: any) => {
+    Object.assign(model, {
+      checkPointFailure: value,
+    });
+  };
   return (
     <Form.Item
       label="CheckPoint Failure Options"
-      name="CheckPointFailure"
+      name="checkPointFailure"
       rules={[{ validator: () => handleCheckCheckpoint(model) }]}
     >
       <CustomForm
-        value={formValue}
-        onUpdateValue={(value: any) => Object.assign(model, value)}
+        value={{
+          cpMaxFailureInterval: model.checkPointFailure.cpMaxFailureInterval,
+          cpFailureRateInterval: model.checkPointFailure.cpFailureRateInterval,
+          cpFailureAction: model.checkPointFailure.cpFailureAction,
+        }}
+        onUpdateValue={handleUpdate}
       ></CustomForm>
     </Form.Item>
   );
@@ -183,21 +188,41 @@ function hasOptions(items) {
   return options.filter((x) => items.includes(x.key)) as any;
 }
 /* render memory option */
-export const renderOptionsItems = (model: Recordable, field: string, reg: string) => {
-  return hasOptions(model[field] || []).map((conf) => {
-    const label = conf.name.replace(new RegExp(reg, 'g'), '').replace(/\./g, ' ');
+export const renderOptionsItems = (
+  model: Recordable,
+  parentField: string,
+  field: string,
+  reg: string,
+  replace = false,
+) => {
+  return hasOptions(model[parentField] || []).map((conf: Recordable) => {
+    let label = conf.name.replace(new RegExp(reg, 'g'), '');
+    if (replace) label = label.replace(/\./g, ' ');
+    if (!Reflect.has(model, field)) {
+      model[field] = {};
+    }
+    if (!model[field][conf.key]) {
+      model[field][conf.key] = conf.defaultValue || null;
+    }
+    if (!Reflect.has(model, conf.key)) {
+      model[conf.key] = model[field][conf.key] || conf.defaultValue || null;
+    }
+
+    function handleValueChange(value: string) {
+      model[conf.key] = value;
+      model[field][conf.key] = value;
+    }
     return (
-      <Form.Item label={label} key={conf.key}>
+      <Form.Item label={label} name={conf.key} key={`${field}.${conf.key}`}>
         {conf.type === 'number' && (
           <InputNumber
+            class="!w-full"
             min={conf.min}
             max={conf.max}
-            defaultValue={conf.defaultValue}
             step={conf.step}
-            value={model[conf.key]}
-            onChange={(value) => (model[conf.key] = value)}
+            value={model[field][conf.key]}
+            onChange={handleValueChange}
             rules={[{ validator: conf.validator }]}
-            name={conf.key}
           />
         )}
         {conf.type === 'switch' && <span class="conf-switch">({conf.placeholder})</span>}
@@ -216,7 +241,7 @@ export const renderProperties = ({ model, field }: RenderCallbackParams) => {
         name="properties"
         placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
         value={model[field]}
-        onInput={(e) => (model[field] = e.target.value)}
+        onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
       />
       <p class="conf-desc mt-10px">
         <span class="note-info">
@@ -285,6 +310,19 @@ export const renderIsSetConfig = (
       model.isSetConfig = false;
     }
   }
+  function handleMergeSubmit(data: { configOverride: string; isSetConfig: boolean }) {
+    if (data.configOverride == null || !data.configOverride.replace(/^\s+|\s+$/gm, '')) {
+      Object.assign(model, {
+        configOverride: null,
+        isSetConfig: false,
+      });
+    } else {
+      Object.assign(model, {
+        configOverride: data.configOverride,
+        isSetConfig: true,
+      });
+    }
+  }
   return (
     <div>
       <Switch
@@ -303,7 +341,7 @@ export const renderIsSetConfig = (
       )}
 
       <Mergely
-        onOk={(data) => Object.assign(model, data)}
+        onOk={handleMergeSubmit}
         onClose={() => handleEditConfClose()}
         onRegister={registerConfDrawer}
       />
@@ -426,7 +464,7 @@ export const renderCompareSelectTag = (ver: any) => {
 export const renderResourceFrom = (model: Recordable) => {
   return (
     <Select
-      onChange={(value) => (model.resourceFrom = value)}
+      onChange={(value: string) => (model.resourceFrom = value)}
       value={model.resourceFrom}
       placeholder="Please select resource from"
     >

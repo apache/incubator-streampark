@@ -46,7 +46,6 @@ export function createPermissionGuard(router: Router) {
     }
 
     const token = userStore.getToken;
-
     // Whitelist can be directly entered
     if (whitePathList.includes(to.path as PageEnum)) {
       if (to.path === LOGIN_PATH && token) {
@@ -111,7 +110,7 @@ export function createPermissionGuard(router: Router) {
       return;
     }
 
-    const routes = await permissionStore.buildRoutesAction();
+    const [routes] = await permissionStore.buildRoutesAction();
 
     routes.forEach((route) => {
       router.addRoute(route as unknown as RouteRecordRaw);

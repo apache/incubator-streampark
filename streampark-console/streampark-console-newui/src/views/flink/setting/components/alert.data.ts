@@ -22,47 +22,70 @@ export const alertFormSchema: Array<FormSchema> = [
     label: 'Fault Alert Type',
     component: 'Select',
     slot: 'type',
-    dynamicRules: () => {
-      return [{ required: true, message: 'Fault Alert Type is required' }];
-    },
+    dynamicRules: () => [{ required: true, message: 'Fault Alert Type is required' }],
   },
-  { field: 'alertEmail', label: 'Alert Email', component: 'Input', colSlot: 'alertEmail' },
+  {
+    field: 'alertEmail',
+    label: 'Alert Email',
+    component: 'Input',
+    colSlot: 'alertEmail',
+  },
   {
     field: 'alertDingURL',
     label: 'DingTalk Url',
     component: 'Input',
     colSlot: 'alertDingURL',
-    defaultValue: 'https://oapi.dingtalk.com/robot/send',
   },
   {
     field: 'dingtalkToken',
     label: 'Access Token',
     component: 'Input',
-    colSlot: 'dingtalkToken',
+    componentProps: {
+      placeholder: 'Please enter the access token of DingTalk',
+    },
+    rules: [{ required: true, message: 'Access token is required' }],
+    ifShow: ({ model }) => (model.alertType || []).includes('2'),
   },
   {
     field: 'dingtalkSecretEnable',
     label: 'Secret Enable',
-    component: 'Input',
-    colSlot: 'dingtalkSecretEnable',
+    component: 'Switch',
+    componentProps: {
+      checkedChildren: 'ON',
+      unCheckedChildren: 'OFF',
+    },
+    helpMessage: 'DingTalk ecretToken is enable',
+    ifShow: ({ model }) => (model.alertType || []).includes('2'),
   },
   {
     field: 'dingtalkSecretToken',
     label: 'Secret Token',
     component: 'Input',
-    colSlot: 'dingtalkSecretToken',
+    componentProps: {
+      placeholder: 'please enter Secret Token',
+    },
+    ifShow: ({ model }) => (model.alertType || []).includes('2') && model.dingtalkSecretEnable,
+    rules: [{ required: true, message: 'DingTalk SecretToken is required', trigger: 'blur' }],
   },
   {
     field: 'alertDingUser',
     label: 'DingTalk User',
     component: 'Input',
-    colSlot: 'alertDingUser',
+    componentProps: {
+      placeholder: 'Please enter DingTalk receive user',
+    },
+    ifShow: ({ model }) => (model.alertType || []).includes('2'),
   },
   {
     field: 'dingtalkIsAtAll',
     label: 'At All User',
-    component: 'Input',
-    colSlot: 'dingtalkIsAtAll',
+    component: 'Switch',
+    componentProps: {
+      checkedChildren: 'ON',
+      unCheckedChildren: 'OFF',
+    },
+    helpMessage: 'Whether Notify All',
+    ifShow: ({ model }) => (model.alertType || []).includes('2'),
   },
   {
     field: 'weToken',
@@ -94,6 +117,7 @@ export const alertFormSchema: Array<FormSchema> = [
       rows: 4,
       placeholder: 'SMS Template is required',
     },
+    ifShow: ({ model }) => (model.alertType || []).includes('8'),
     colSlot: 'alertSmsTemplate',
   },
   {
@@ -101,23 +125,46 @@ export const alertFormSchema: Array<FormSchema> = [
     label: 'Lark Token',
     component: 'InputTextArea',
     colSlot: 'larkToken',
+    rules: [{ required: true, message: 'Lark token is required' }],
   },
   {
     field: 'larkIsAtAll',
     label: 'At All User',
     component: 'Switch',
-    colSlot: 'larkIsAtAll',
+    componentProps: {
+      checkedChildren: 'ON',
+      unCheckedChildren: 'OFF',
+    },
+    ifShow: ({ model }) => (model.alertType || []).includes('16'),
+    helpMessage: 'Whether Notify All',
   },
   {
     field: 'larkSecretEnable',
     label: 'Secret Enable',
     component: 'Switch',
-    colSlot: 'larkSecretEnable',
+    componentProps: {
+      checkedChildren: 'ON',
+      unCheckedChildren: 'OFF',
+    },
+    helpMessage: 'Lark secretToken is enable',
+    ifShow: ({ model }) => (model.alertType || []).includes('16'),
   },
   {
     field: 'larkSecretToken',
     label: 'Lark Secret Token',
-    component: 'Switch',
-    colSlot: 'larkSecretToken',
+    component: 'Input',
+    componentProps: {
+      placeholder: 'please enter Lark Secret Token',
+    },
+    ifShow: ({ model }) => (model.alertType || []).includes('16') && model.larkSecretEnable,
+    rules: [{ required: true, message: 'Lark SecretToken is required', trigger: 'blur' }],
   },
 ];
+
+export const alertTypes = {
+  '1': { name: 'E-mail', value: 1, disabled: false, icon: 'mail' },
+  '2': { name: 'Ding Talk', value: 2, disabled: false, icon: 'dingtalk' },
+  '4': { name: 'Wechat', value: 4, disabled: false, icon: 'wecom' },
+  '8': { name: 'SMS', value: 8, disabled: true, icon: 'message' },
+  '16': { name: 'Lark', value: 16, disabled: false, icon: 'lark' },
+};

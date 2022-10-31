@@ -21,12 +21,14 @@ import { BasicTableParams } from '../model/baseModel';
 import { VariableDeleteParam, VariableListRecord, VariableParam } from './model/variableModel';
 
 enum VARIABLE_API {
-  LIST = '/variable/list',
+  PAGE = '/variable/page',
+  DEPEND = '/variable/dependApps',
   UPDATE = '/variable/update',
   POST = '/variable/post',
   DELETE = '/variable/delete',
   SELECT = '/variable/select',
   CHECK_CODE = '/variable/check/code',
+  LIST = '/variable/list',
 }
 /**
  * get variable list
@@ -34,7 +36,7 @@ enum VARIABLE_API {
  * @returns
  */
 export function fetchVariableList(data: BasicTableParams): Promise<VariableListRecord[]> {
-  return defHttp.post({ url: VARIABLE_API.LIST, data });
+  return defHttp.post({ url: VARIABLE_API.PAGE, data });
 }
 
 /**
@@ -62,6 +64,7 @@ export function fetchUpdateVariable(data: VariableParam): Promise<boolean | unde
 export function fetchVariableDelete(data: VariableDeleteParam): Promise<AxiosResponse<Result>> {
   return defHttp.delete({ url: VARIABLE_API.DELETE, data }, { isReturnNativeResponse: true });
 }
+
 /**
  * Code check
  * @param {Object} data
@@ -71,4 +74,28 @@ export function fetchCheckVariableCode(data: {
   variableCode: string;
 }): Promise<AxiosResponse<Result>> {
   return defHttp.post({ url: VARIABLE_API.CHECK_CODE, data }, { isReturnNativeResponse: true });
+}
+
+/**
+ * search depend app
+ * @param {Object} data
+ * @returns {Promise<any>}
+ */
+export function fetchDependApps(data: Recordable): Promise<any> {
+  return defHttp.post({ url: VARIABLE_API.DEPEND, data });
+}
+/**
+ * Code check
+ * @param {Object} data
+ * @returns {Promise<any>}
+ */
+export function fetchVariableContent(data: Recordable): Promise<any> {
+  return defHttp.post({ url: VARIABLE_API.DEPEND, data });
+}
+/**
+ * get all variable
+ * @returns {Promise<any>}
+ */
+export function fetchVariableAll(data?: { keyword: string }): Promise<VariableListRecord[]> {
+  return defHttp.post({ url: VARIABLE_API.LIST, data });
 }

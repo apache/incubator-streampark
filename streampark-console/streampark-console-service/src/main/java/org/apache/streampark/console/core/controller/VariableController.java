@@ -39,6 +39,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import java.util.List;
+
 @Slf4j
 @Validated
 @RestController
@@ -48,10 +50,28 @@ public class VariableController {
     @Autowired
     private VariableService variableService;
 
-    @PostMapping("list")
+    /**
+     * Get variable list by page.
+     * @param restRequest
+     * @param variable
+     * @return
+     */
+    @PostMapping("page")
     @RequiresPermissions("variable:view")
-    public RestResponse variableList(RestRequest restRequest, Variable variable) {
+    public RestResponse page(RestRequest restRequest, Variable variable) {
         IPage<Variable> variableList = variableService.page(variable, restRequest);
+        return RestResponse.success(variableList);
+    }
+
+    /**
+     * Get variables through team and search keywords.
+     * @param teamId
+     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
+     * @return
+     */
+    @PostMapping("list")
+    public RestResponse variableList(@RequestParam Long teamId, String keyword) {
+        List<Variable> variableList = variableService.findByTeamId(teamId, keyword);
         return RestResponse.success(variableList);
     }
 
@@ -97,10 +117,5 @@ public class VariableController {
     public RestResponse checkVariableCode(@RequestParam Long teamId, @NotBlank(message = "{required}") String variableCode) {
         boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
         return RestResponse.success(result);
-    }
-
-    @PostMapping("select")
-    public RestResponse selectVariables(@RequestParam Long teamId) {
-        return RestResponse.success().data(this.variableService.findByTeamId(teamId));
     }
 }

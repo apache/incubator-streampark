@@ -255,16 +255,21 @@ export const useFlinkSchema = (editModel?: string) => {
       },
     },
     {
-      field: 'cpMaxFailureInterval',
-      label: 'CheckPoint Failure Options',
-      component: 'InputNumber',
-      renderColContent: ({ model }) => renderInputGroup(model),
-      show: ({ values }) => (editModel == 'flink' ? true : ![5, 6].includes(values.executionMode)),
-    },
-    {
       field: 'alertId',
       label: 'Fault Alert Template',
       component: 'Select',
+      componentProps: {
+        placeholder: 'Alert Template',
+        options: unref(alerts),
+        fieldNames: { label: 'alertName', value: 'id', options: 'options' },
+      },
+    },
+    {
+      field: 'checkPointFailure',
+      label: 'CheckPoint Failure Options',
+      component: 'InputNumber',
+      renderColContent: renderInputGroup,
+      show: ({ values }) => (editModel == 'flink' ? true : ![5, 6].includes(values.executionMode)),
     },
     ...getConfigSchemas(),
     {
@@ -277,7 +282,8 @@ export const useFlinkSchema = (editModel?: string) => {
       field: 'totalItem',
       label: 'totalItem',
       component: 'Select',
-      renderColContent: ({ model }) => renderOptionsItems(model, 'totalOptions', '.memory'),
+      renderColContent: ({ model, field }) =>
+        renderOptionsItems(model, 'totalOptions', field, '.memory', true),
     },
     {
       field: 'jmOptions',
@@ -294,10 +300,11 @@ export const useFlinkSchema = (editModel?: string) => {
       },
     },
     {
-      field: 'jmOptionsItem',
-      label: 'jmOptionsItem',
+      field: 'jmMemoryItem',
+      label: 'jmMemoryItem',
       component: 'Select',
-      renderColContent: ({ model }) => renderOptionsItems(model, 'jmOptions', 'jobmanager.memory.'),
+      renderColContent: ({ model, field }) =>
+        renderOptionsItems(model, 'jmOptions', field, 'jobmanager.memory.'),
     },
     {
       field: 'tmOptions',
@@ -317,8 +324,8 @@ export const useFlinkSchema = (editModel?: string) => {
       field: 'tmOptionsItem',
       label: 'tmOptionsItem',
       component: 'Select',
-      renderColContent: ({ model }) =>
-        renderOptionsItems(model, 'tmOptions', 'taskmanager.memory.'),
+      renderColContent: ({ model, field }) =>
+        renderOptionsItems(model, 'tmOptions', field, 'taskmanager.memory.'),
     },
     {
       field: 'yarnQueue',
@@ -346,10 +353,8 @@ export const useFlinkSchema = (editModel?: string) => {
       field: 'args',
       label: 'Program Args',
       component: 'InputTextArea',
-      componentProps: {
-        rows: 4,
-        placeholder: '<arguments>',
-      },
+      defaultValue: '',
+      slot: 'args',
       ifShow: ({ values }) => (editModel ? true : values.jobType == 'customcode'),
     },
     {
@@ -371,7 +376,7 @@ export const useFlinkSchema = (editModel?: string) => {
         label: 'Development Mode',
         component: 'Input',
         render: ({ model }) => {
-          if (model.jobType === 1) {
+          if (model.jobType == 1) {
             return h(
               Alert,
               { type: 'info' },
@@ -428,6 +433,7 @@ export const useFlinkSchema = (editModel?: string) => {
         }
       },
     },
+    { field: 'configOverride', label: '', component: 'Input', show: false },
     {
       field: 'isSetConfig',
       label: 'Application Conf',

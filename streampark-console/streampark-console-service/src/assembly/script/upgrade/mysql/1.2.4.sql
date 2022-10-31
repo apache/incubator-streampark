@@ -62,7 +62,7 @@ where alert_type = 1;
 -- t_flink_app
 alter table `t_flink_app`
     drop column alert_email,
-    change column dynamic_option properties text comment 'allows specifying multiple generic configuration options',
+    change column dynamic_options properties text comment 'allows specifying multiple generic configuration options',
     add column `job_manager_url` varchar(255) default null after `job_id`,
     add column `option_time` datetime default null after `create_time`,
     add column `ingress_template` text collate utf8mb4_general_ci comment 'ingress模版文件',
@@ -79,6 +79,7 @@ alter table `t_flink_project`
     add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
     add index `inx_team` (`team_id`) using btree;
 
+alter table `t_flink_cluster` add column `properties` text comment 'allows specifying multiple generic configuration options' after `flink_image`;
 
 -- change `update_time` to `modify_time`
 alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime not null default current_timestamp on update current_timestamp;
@@ -257,6 +258,8 @@ create table `t_variable` (
   primary key (`id`) using btree,
   unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress域名地址', 1);
 
 set foreign_key_checks = 1;
 

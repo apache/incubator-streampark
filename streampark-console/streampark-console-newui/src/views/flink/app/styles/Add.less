@@ -84,11 +84,6 @@
     line-height: 25px;
   }
 
-  .conf-switch {
-    color: darkgrey;
-    margin-left: 5px;
-  }
-
   .ant-input-number {
     width: 100%;
   }
@@ -121,6 +116,8 @@
 
 .flinksql-tool-item {
   font-size: 12px;
+  display: flex;
+  align-items: center;
 }
 
 .pod-template-tool {
@@ -183,7 +180,7 @@
   .verify-sql {
     z-index: 99;
     position: absolute;
-    bottom: 20px;
+    bottom: 40px;
     float: right;
     right: 20px;
     cursor: pointer;
@@ -204,8 +201,8 @@
     margin-top: 15px;
     width: 100%;
     border-radius: 5px;
-    background-color: @background-color-base;
-    border: 1px solid @border-color-base;
+    background-color: #e6f7ff;
+    border: 1px solid #d9d9d9;
     display: inline-block;
     margin-bottom: -25px;
 
@@ -276,8 +273,14 @@
   }
 
   .icon-close {
-    color: rgba(0 0 0 / 45%);
+    color: #00000073;
     font-size: 12px;
+  }
+}
+
+[data-theme="dark"] {
+  .app_controller .icon-close {
+    color: #ffffff73;
   }
 }
 

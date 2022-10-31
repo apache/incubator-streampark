@@ -24,7 +24,8 @@
       <!-- <a @click="openWindow(DOC_URL)">{{ t('layout.footer.onlineDocument') }}</a> -->
     </div>
     <div :class="`${prefixCls}__copyright`">
-      Copyright &copy;2019~{{ new Date().getFullYear() }} {{ title }}
+      Copyright &copy;{{ new Date().getFullYear() }} The Apache Software Foundation. Apache
+      StreamPark, StreamPark, and its feather logo are trademarks of The Apache Software Foundation
     </div>
   </Footer>
 </template>
@@ -43,7 +44,6 @@
   import { useRouter } from 'vue-router';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useLayoutHeight } from '../content/useContentViewHeight';
-  import { useGlobSetting } from '/@/hooks/setting';
 
   export default defineComponent({
     name: 'LayoutFooter',
@@ -53,7 +53,6 @@
       const { getShowFooter } = useRootSetting();
       const { currentRoute } = useRouter();
       const { prefixCls } = useDesign('layout-footer');
-      const { title } = useGlobSetting();
       const footerRef = ref<ComponentRef>(null);
       const { setFooterHeight } = useLayoutHeight();
 
@@ -76,7 +75,6 @@
         SITE_URL,
         openWindow,
         footerRef,
-        title,
       };
     },
   });

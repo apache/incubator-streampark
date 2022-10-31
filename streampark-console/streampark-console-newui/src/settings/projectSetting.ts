@@ -43,7 +43,7 @@ const setting: ProjectConfig = {
   permissionMode: PermissionModeEnum.BACK,
 
   // Permission-related cache is stored in sessionStorage or localStorage
-  permissionCacheType: CacheTypeEnum.LOCAL,
+  permissionCacheType: CacheTypeEnum.SESSION,
 
   // Session timeout processing
   sessionTimeoutProcessing: SessionTimeoutProcessingEnum.ROUTE_JUMP,
@@ -160,7 +160,7 @@ const setting: ProjectConfig = {
 
     // Whether to open page switching loading
     // Only open when enable=true
-    openPageLoading: true,
+    openPageLoading: false,
 
     // Whether to open the top progress bar
     openNProgress: true,

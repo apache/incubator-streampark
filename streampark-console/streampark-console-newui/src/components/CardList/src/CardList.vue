@@ -26,8 +26,8 @@
         :pagination="paginationProp"
       >
         <template #header>
-          <div class="flex justify-end space-x-2"
-            ><slot name="header"></slot>
+          <div class="flex justify-end space-x-2">
+            <slot name="header"></slot>
             <Tooltip>
               <template #title>
                 <div class="w-50">Display quantity per line</div

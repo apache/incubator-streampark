@@ -122,9 +122,25 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
             .eq(Variable::getTeamId, teamId));
     }
 
+    /**
+     * get variables through team
+     * @param teamId
+     * @return
+     */
     @Override
     public List<Variable> findByTeamId(Long teamId) {
-        return baseMapper.selectByTeamId(teamId);
+        return findByTeamId(teamId, null);
+    }
+
+    /**
+     * Get variables through team and search keywords.
+     * @param teamId
+     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
+     * @return
+     */
+    @Override
+    public List<Variable> findByTeamId(Long teamId, String keyword) {
+        return baseMapper.selectByTeamId(teamId, keyword);
     }
 
     /**
