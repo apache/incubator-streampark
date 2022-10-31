@@ -49,8 +49,10 @@ export const useLog = () => {
     monaco.languages.setMonarchTokensProvider('log', {
       tokenizer: {
         root: [
-          [/\[20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+]/, 'log-date'],
-          [/\[[a-zA-Z 0-9:]+]/, 'log-date'],
+          [/\[error.*/, 'custom-error'],
+          [/\[notice.*/, 'custom-notice'],
+          [/\[info.*/, 'custom-info'],
+          [/\[[a-zA-Z 0-9:]+\]/, 'custom-date'],
         ],
       },
     });
@@ -59,7 +61,12 @@ export const useLog = () => {
       base: unref(isDark) ? 'vs-dark' : 'vs',
       inherit: true,
       colors: {},
-      rules: [{ token: 'log-date', foreground: '008800', fontStyle: 'bold' }],
+      rules: [
+        { token: 'custom-info', foreground: '808080' },
+        { token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
+        { token: 'custom-notice', foreground: 'FFA500' },
+        { token: 'custom-date', foreground: '008800' },
+      ],
     });
   }
   return { setContent, logRef };

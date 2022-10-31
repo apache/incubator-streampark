@@ -255,13 +255,6 @@ export const useFlinkSchema = (editModel?: string) => {
       },
     },
     {
-      field: 'checkPointFailure',
-      label: 'CheckPoint Failure Options',
-      component: 'InputNumber',
-      renderColContent: renderInputGroup,
-      show: ({ values }) => (editModel == 'flink' ? true : ![5, 6].includes(values.executionMode)),
-    },
-    {
       field: 'alertId',
       label: 'Fault Alert Template',
       component: 'Select',
@@ -270,6 +263,13 @@ export const useFlinkSchema = (editModel?: string) => {
         options: unref(alerts),
         fieldNames: { label: 'alertName', value: 'id', options: 'options' },
       },
+    },
+    {
+      field: 'checkPointFailure',
+      label: 'CheckPoint Failure Options',
+      component: 'InputNumber',
+      renderColContent: renderInputGroup,
+      show: ({ values }) => (editModel == 'flink' ? true : ![5, 6].includes(values.executionMode)),
     },
     ...getConfigSchemas(),
     {

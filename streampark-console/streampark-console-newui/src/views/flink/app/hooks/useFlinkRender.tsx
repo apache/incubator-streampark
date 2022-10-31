@@ -88,14 +88,13 @@ export function handleCheckCheckpoint(values: Recordable) {
   const { cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction } = values.checkPointFailure;
   if (cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null) {
     if (cpFailureAction === 1) {
-      const alertEmail = values.alertEmail;
-      if (alertEmail == null) {
+      if (values.alertId == null) {
         // this.form.setFields({
         //   alertEmail: {
         //     errors: [new Error('checkPoint failure trigger is alert,email must not be empty')],
         //   },
         // });
-        return Promise.reject('trigger action is alert,email must not be empty');
+        return Promise.reject('trigger action is alert,Fault Alert Template must not be empty');
       } else {
         return Promise.resolve();
       }

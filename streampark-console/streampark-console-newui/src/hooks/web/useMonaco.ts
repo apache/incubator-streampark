@@ -49,7 +49,7 @@ export function useMonaco(
   let editor: Editor.IStandaloneCodeEditor;
   let monacoInstance: any;
   const registerCompletionMap = new Map();
-
+  let disposable;
   const setContent = async (content: string) => {
     await until(isSetup).toBeTruthy();
     if (editor) editor.setValue(content);
@@ -109,7 +109,7 @@ export function useMonaco(
       }
       registerCompletionMap.set(languageId, 1);
 
-      monaco.languages.registerCompletionItemProvider(languageId, {
+      disposable = monaco.languages.registerCompletionItemProvider(languageId, {
         // triggerCharacters: ['${'],
         triggerCharacters: ['$', '{'],
         provideCompletionItems: async (model, position: Recordable) => {
@@ -211,6 +211,7 @@ export function useMonaco(
   tryOnUnmounted(() => {
     stop();
     disposeInstance();
+    disposable?.dispose();
   });
 
   return {

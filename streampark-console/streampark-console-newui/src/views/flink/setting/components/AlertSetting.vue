@@ -172,8 +172,8 @@
 </script>
 
 <template>
-  <div v-auth="'project:create'" class="bg-white p-10px">
-    <a-button type="dashed" style="width: 100%; margin-top: 20px" @click="openAlertModal(true, {})">
+  <div v-auth="'project:create'" class="bg-white pt-10px px-24px">
+    <a-button type="dashed" style="width: 100%; margin-top: 10px" @click="openAlertModal(true, {})">
       <PlusOutlined />
       {{ t('common.add') }}
     </a-button>
