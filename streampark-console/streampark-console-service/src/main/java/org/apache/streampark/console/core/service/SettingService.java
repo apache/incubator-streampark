@@ -48,6 +48,8 @@ public interface SettingService extends IService<Setting> {
 
     String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
 
+    String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
+
     Setting get(String key);
 
     boolean update(Setting setting);
@@ -71,4 +73,6 @@ public interface SettingService extends IService<Setting> {
     String getDockerRegisterPassword();
 
     String getDockerRegisterNamespace();
+
+    String getIngressModeDefault();
 }

@@ -151,4 +151,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     public String getMavenAuthPassword() {
         return SETTINGS.getOrDefault(SettingService.KEY_MAVEN_AUTH_PASSWORD, emptySetting).getSettingValue();
     }
+
+    @Override
+    public String getIngressModeDefault() {
+        return SETTINGS.getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting).getSettingValue();
+    }
 }

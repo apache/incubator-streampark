@@ -258,5 +258,7 @@ create table `t_variable` (
   unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
+insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress域名地址', 1);
+
 set foreign_key_checks = 1;
 
