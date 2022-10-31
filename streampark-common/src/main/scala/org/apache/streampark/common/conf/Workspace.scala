@@ -61,7 +61,7 @@ object Workspace {
   /**
    * project archives path
    */
-  lazy val ARCHIVES_FILE_PATH = s"${Workspace.remote.WORKSPACE}/historyserver/archive"
+  lazy val ARCHIVES_FILE_PATH = s"${remote.WORKSPACE}/historyserver/archive"
 
 }
 
