@@ -419,7 +419,7 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getDistHome() {
         String path = String.format("%s/%s/%s",
-            Workspace.local().APP_LOCAL_DIST(),
+            Workspace.APP_LOCAL_DIST(),
             projectId.toString(),
             getModule()
         );
