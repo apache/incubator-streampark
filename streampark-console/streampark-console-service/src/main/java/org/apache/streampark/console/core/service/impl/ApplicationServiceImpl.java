@@ -108,6 +108,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1241,6 +1242,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         String appConf;
         String flinkUserJar = null;
+        String jobId = new JobID().toHexString();
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
@@ -1362,6 +1364,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else {
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
                 AssertUtils.state(buildResult != null);
+                properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
                 String domainName = application.getDefaultModeIngress();
@@ -1396,7 +1399,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             ExecutionMode.of(application.getExecutionMode()),
             resolveOrder,
             application.getId(),
-            new JobID().toHexString(),
+            jobId,
             application.getJobName(),
             appConf,
             application.getApplicationType(),

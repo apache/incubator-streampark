@@ -322,7 +322,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     private String getBuildLogPath(Long projectId) {
-        return String.format("%s/%s/build.log", Workspace.PROJECT_BUILD_LOG_DIR(), projectId);
+        return String.format("%s/%s/build.log", Workspace.PROJECT_BUILD_LOG_PATH(), projectId);
     }
 
 }

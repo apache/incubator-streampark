@@ -41,22 +41,27 @@ object Workspace {
   /**
    * dirPath of the maven local repository with built-in compilation process
    */
-  lazy val MAVEN_LOCAL_DIR = s"$localWorkspace/mvnrepo"
+  lazy val MAVEN_LOCAL_PATH = s"$localWorkspace/mvnrepo"
 
   /**
-   * local sourceCode dir.(for git...)
+   * local sourceCode path.(for git...)
    */
-  lazy val PROJECT_LOCAL_DIR = s"$localWorkspace/project"
+  lazy val PROJECT_LOCAL_PATH = s"$localWorkspace/project"
 
   /**
-   * local log dir.
+   * local log path.
    */
-  lazy val LOG_LOCAL_DIR = s"$localWorkspace/logs"
+  lazy val LOG_LOCAL_PATH = s"$localWorkspace/logs"
 
   /**
-   * project build log dir.
+   * project build log path.
    */
-  lazy val PROJECT_BUILD_LOG_DIR = s"$LOG_LOCAL_DIR/build_logs"
+  lazy val PROJECT_BUILD_LOG_PATH = s"$LOG_LOCAL_PATH/build_logs"
+
+  /**
+   * project archives path
+   */
+  lazy val ARCHIVES_FILE_PATH = s"${remote.WORKSPACE}/historyserver/archive"
 
 }
 
