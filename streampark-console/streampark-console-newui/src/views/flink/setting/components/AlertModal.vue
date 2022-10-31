@@ -15,19 +15,17 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent } from 'vue';
-  import { omit } from 'lodash-es';
-  import { alertFormSchema } from './alert.data';
-
   export default defineComponent({
     name: 'AlertModal',
   });
 </script>
 <script setup lang="ts" name="AlertModal">
-  import { ref } from 'vue';
+  import { ref, defineComponent, h } from 'vue';
+  import { omit } from 'lodash-es';
+  import { alertFormSchema, alertTypes } from './alert.data';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { Form, Select, Input, Divider, Tooltip, Switch } from 'ant-design-vue';
+  import { Form, Select, Input, Divider } from 'ant-design-vue';
   import { SvgIcon } from '/@/components/Icon';
   import { fetchAlertAdd, fetchAlertUpdate, fetchExistsAlert } from '/@/api/flink/setting/alert';
   import { useUserStore } from '/@/store/modules/user';
@@ -39,16 +37,7 @@
 
   const emit = defineEmits(['reload', 'register']);
   const alertId = ref<string | null>(null);
-  const alertTypes = ref([
-    { name: 'E-mail', value: 1, disabled: false, icon: 'mail' },
-    { name: 'Ding Talk', value: 2, disabled: false, icon: 'dingtalk' },
-    { name: 'Wechat', value: 4, disabled: false, icon: 'wecom' },
-    { name: 'SMS', value: 8, disabled: true, icon: 'message' },
-    { name: 'Lark', value: 16, disabled: false, icon: 'lark' },
-  ]);
-  const alertType = ref<number[]>([]);
-  const dingtalkSecretEnable = ref(false);
-  const larkSecretEnable = ref(false);
+  const alertType = ref<string[]>([]);
 
   const { Swal } = useMessage();
   const userStore = useUserStore();
@@ -65,9 +54,11 @@
         label: 'Alert Name',
         component: 'Input',
         componentProps: { allowClear: true, placeholder: 'Please enter alert name' },
-        colProps: {
-          style: { marginBottom: '20px' },
-        },
+        afterItem: h(
+          'span',
+          { class: 'conf-switch' },
+          'the alert name, e.g: StreamPark team alert',
+        ),
         dynamicRules: () => {
           return [
             {
@@ -117,6 +108,7 @@
     try {
       changeOkLoading(true);
       const formValue = await validateFields();
+      console.log('formValue', formValue);
       const param = {
         id: alertId.value,
         alertName: formValue.alertName,
@@ -212,170 +204,87 @@
           placeholder="Alert Type"
           allowClear
           mode="multiple"
-          @change="(value:number[])=>alertType=value"
+          @change="(value:string[])=>alertType=value"
         >
           <SelectOption
-            v-for="(o, index) in alertTypes"
-            :key="`alertType_${index}`"
-            :disabled="o.disabled"
-            :value="o.value"
+            v-for="(v, k) in alertTypes"
+            :key="`alertType_${k}`"
+            :disabled="v.disabled"
+            :value="k"
           >
-            <SvgIcon :name="o.icon" />
-            {{ o.name }}
+            <SvgIcon :name="v.icon" />
+            {{ v.name }}
           </SelectOption>
         </Select>
       </template>
-
       <template #alertEmail="{ model, field }">
         <!-- Alert Email -->
-        <Divider v-if="alertType.indexOf(1) > -1">
-          <SvgIcon name="mail" size="20" />
-          E-mail
-        </Divider>
-        <FormItem
-          v-if="alertType.indexOf(1) > -1"
-          label="Alert Email"
-          :rules="[{ required: true, message: 'email address is required', trigger: 'blur' }]"
-          name="alertEmail"
-        >
-          <Input
-            v-model:value="model[field]"
-            placeholder="Please enter email,separate multiple emails with comma(,)"
-          />
-        </FormItem>
+        <template v-if="(alertType || []).includes('1')">
+          <Divider>
+            <SvgIcon name="mail" size="20" />
+            E-mail
+          </Divider>
+          <FormItem
+            label="Alert Email"
+            :rules="[
+              { required: true, message: 'email address is required', trigger: 'blur' },
+              { type: 'email', message: 'Incorrect format', trigger: 'blur' },
+            ]"
+            name="alertEmail"
+          >
+            <Input
+              v-model:value="model[field]"
+              placeholder="Please enter email,separate multiple emails with comma(,)"
+            />
+          </FormItem>
+        </template>
       </template>
 
-      <template #alertDingURL="{ model, field }" v-if="alertType.indexOf(2) > -1">
-        <Divider v-if="alertType.indexOf(2) > -1">
+      <template #alertDingURL="{ model, field }" v-if="(alertType || []).includes('2')">
+        <Divider>
           <SvgIcon name="dingtalk" size="20" />
           Ding Talk
         </Divider>
         <FormItem
           label="DingTalk Url"
-          defaultValue="https://oapi.dingtalk.com/robot/send"
-          name="alertEmail"
+          name="alertDingURL"
+          :rules="[
+            {
+              pattern:
+                /^((https?):\/\/)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-z]{2,6}\/?/,
+              message: 'Incorrect format',
+              trigger: 'blur',
+            },
+          ]"
         >
           <Input v-model:value="model[field]" placeholder="Please enter DingTask Url" allowClear />
         </FormItem>
       </template>
 
-      <template #dingtalkToken="{ model, field }" v-if="alertType.indexOf(2) > -1">
-        <FormItem
-          label="Access Token"
-          name="dingtalkToken"
-          :rules="[{ required: true, message: 'Access token is required' }]"
-        >
-          <Input
-            v-model:value="model[field]"
-            placeholder="Please enter the access token of DingTalk"
-            allowClear
-          />
-        </FormItem>
-      </template>
-
-      <template #dingtalkSecretEnable="{ model, field }" v-if="alertType.indexOf(2) > -1">
-        <FormItem label="Secret Enable" name="dingtalkSecretEnable">
-          <Tooltip title="DingTalk ecretToken is enable">
-            <Switch
-              v-model:checked="model[field]"
-              checked-children="ON"
-              un-checked-children="OFF"
-              allowClear
-              @change="(checked:boolean) => (dingtalkSecretEnable = checked)"
-            />
-          </Tooltip>
-        </FormItem>
-      </template>
-      <!-- Secret Token -->
-      <template
-        #dingtalkSecretToken="{ model, field }"
-        v-if="alertType.indexOf(2) > -1 && dingtalkSecretEnable"
-      >
-        <FormItem
-          label="Secret Token"
-          name="dingtalkSecretToken"
-          :rules="[{ required: true, message: 'DingTalk SecretToken is required' }]"
-        >
-          <Input
-            v-model:value="model[field]"
-            placeholder="Please enter DingTalk SecretToken"
-            allowClear
-          />
-        </FormItem>
-      </template>
-
-      <!-- DingTalk User -->
-      <template #alertDingUser="{ model, field }" v-if="alertType.indexOf(2) > -1">
-        <FormItem label="DingTalk User" name="alertDingUser">
-          <Input
-            v-model:value="model[field]"
-            placeholder="Please enter DingTalk receive user"
-            allowClear
-          />
-        </FormItem>
-      </template>
-
-      <!-- At All User -->
-      <template #dingtalkIsAtAll="{ model, field }" v-if="alertType.indexOf(2) > -1">
-        <FormItem label="At All User">
-          <Tooltip title="Whether Notify All">
-            <Switch
-              v-model:checked="model[field]"
-              checked-children="ON"
-              un-checked-children="OFF"
-            />
-          </Tooltip>
-        </FormItem>
-      </template>
-
       <!-- WeChat -->
-      <template #weToken="{ model, field, schema }" v-if="alertType.indexOf(4) > -1">
+      <template #weToken="{ model, field, schema }" v-if="(alertType || []).includes('4')">
         <Divider><SvgIcon name="wecom" size="20" /> WeChat </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
-          <Input v-model:value="model[field]" v-bind="schema.componentProps" />
+          <InputTextArea v-model:value="model[field]" v-bind="schema.componentProps" />
         </FormItem>
       </template>
 
-      <template #alertSms="{ model, field, schema }" v-if="alertType.indexOf(8) > -1">
+      <template #alertSms="{ model, field, schema }" v-if="(alertType || []).includes('8')">
         <Divider><SvgIcon name="message" size="20" /> SMS </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
           <Input v-model:value="model[field]" v-bind="schema.componentProps" />
         </FormItem>
       </template>
 
-      <template #alertSmsTemplate="{ model, field, schema }" v-if="alertType.indexOf(8) > -1">
-        <FormItem :label="schema.label" :name="field" :rules="schema.rules">
-          <InputTextArea v-model:value="model[field]" v-bind="schema.componentProps" />
-        </FormItem>
-      </template>
-
-      <template #larkToken="{ model, field, schema }" v-if="alertType.indexOf(16) > -1">
+      <!-- lark -->
+      <template #larkToken="{ model, field, schema }" v-if="(alertType || []).includes('16')">
         <Divider><SvgIcon name="lark" size="20" /> Lark </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
-          <Input v-model:value="model[field]" v-bind="schema.componentProps" />
-        </FormItem>
-      </template>
-
-      <template #larkIsAtAll="{ model, field, schema }" v-if="alertType.indexOf(16) > -1">
-        <FormItem :label="schema.label" :name="field" :rules="schema.rules">
-          <Tooltip title="Whether Notify All">
-            <Switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              allowClear
-              v-model:checked="model[field]"
-              @change="(checked:boolean) => (larkSecretEnable = checked)"
-            />
-          </Tooltip>
-        </FormItem>
-      </template>
-
-      <template
-        #larkSecretToken="{ model, field, schema }"
-        v-if="alertType.indexOf(16) > -1 && larkSecretEnable"
-      >
-        <FormItem :label="schema.label" :name="field" :rules="schema.rules">
-          <Input v-bind="schema.componentProps" v-model:checked="model[field]" />
+          <Input
+            v-model:value="model[field]"
+            placeholder="Please enter the access token of LarkTalk"
+            allow-clear
+          />
         </FormItem>
       </template>
     </BasicForm>

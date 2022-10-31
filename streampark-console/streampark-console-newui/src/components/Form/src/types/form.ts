@@ -178,7 +178,14 @@ export interface FormSchema {
 
   suffix?: string | number | ((values: RenderCallbackParams) => string | number);
 
-  itemExtra?:
+  beforeItem?:
+    | string
+    | number
+    | VNode
+    | VNode[]
+    | ((values: RenderCallbackParams) => VNode | VNode[] | string | number);
+
+  afterItem?:
     | string
     | number
     | VNode

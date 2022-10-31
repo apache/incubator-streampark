@@ -183,6 +183,7 @@ insert into `t_setting` values (12, 'docker.register.address', null, 'Docker Reg
 insert into `t_setting` values (13, 'docker.register.user', null, 'Docker Register User', 'Docker container service authentication username', 1);
 insert into `t_setting` values (14, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
 insert into `t_setting` values (15, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker namespace', 1);
+insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress domain address', 1);
 
 -- ----------------------------
 -- Records of t_user

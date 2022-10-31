@@ -64,8 +64,9 @@ public class VariableController {
     }
 
     /**
-     * Get all variables under the current team.
+     * Get variables through team and search keywords.
      * @param teamId
+     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
      * @return
      */
     @PostMapping("list")

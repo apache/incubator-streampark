@@ -135,17 +135,6 @@ function storageChange(e: any) {
     Persistent.clearAll();
     return;
   }
-  // token change reload
-  if (key === TOKEN_KEY && oldValue !== newValue) {
-    const { [TOKEN_KEY]: tokenCache } = pick(ls.get(APP_LOCAL_CACHE_KEY), TOKEN_KEY);
-    // no token or token value is invalid
-    if (tokenCache?.value !== newValue) {
-      Persistent.clearLocal();
-      return;
-    }
-    window.location.reload();
-    return;
-  }
   if (!!newValue && !!oldValue) {
     if (APP_LOCAL_CACHE_KEY === key) {
       Persistent.clearLocal();

@@ -2417,6 +2417,12 @@ export default {
       } else {
         config = null
       }
+      if (values.yarnSessionClusterId) {
+        const cluster = this.flinkClusters.filter(c => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1)[0] || null
+        values.clusterId = cluster.id
+        values.flinkClusterId = cluster.id
+        values.yarnSessionClusterId = cluster.clusterId
+      }
       const configId = this.strategy === 1 ? this.configId : null
       const params = {
         id: this.app.id,
@@ -2473,6 +2479,13 @@ export default {
         config = Base64.encode(config)
       } else {
         config = null
+      }
+
+      if (values.yarnSessionClusterId) {
+        const cluster = this.flinkClusters.filter(c => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1)[0] || null
+        values.clusterId = cluster.id
+        values.flinkClusterId = cluster.id
+        values.yarnSessionClusterId = cluster.clusterId
       }
 
       const params = {

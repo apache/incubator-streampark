@@ -21,8 +21,9 @@
         <div class="flex w-full h-full py-5 xl:h-auto xl:py-0 xl:my-0">
           <div
             :class="`${prefixCls}-form`"
-            class="relative w-auto px-12 bg-[rgba(0,0,0,0.4)] py-5 mx-auto my-auto shadow-md enter-y">
-            <LoginForm/>
+            class="relative w-auto px-12 bg-[rgba(0,0,0,0.4)] py-5 mx-auto my-auto shadow-md enter-y"
+          >
+            <LoginForm />
           </div>
         </div>
       </div>
@@ -30,137 +31,146 @@
   </div>
 </template>
 <script lang="ts" setup>
-import LoginForm from './LoginForm.vue';
-import ForgetPasswordForm from './ForgetPasswordForm.vue';
-import {useDesign} from '/@/hooks/web/useDesign';
+  import LoginForm from './LoginForm.vue';
+  import { useDesign } from '/@/hooks/web/useDesign';
 
-defineProps({
-  sessionTimeout: {
-    type: Boolean,
-  },
-});
+  defineProps({
+    sessionTimeout: {
+      type: Boolean,
+    },
+  });
 
-// const globSetting = useGlobSetting();
-const {prefixCls} = useDesign('login');
-// const title = computed(() => globSetting?.title ?? '');
+  // const globSetting = useGlobSetting();
+  const { prefixCls } = useDesign('login');
+  // const title = computed(() => globSetting?.title ?? '');
 </script>
 <style lang="less">
-@prefix-cls: ~'@{namespace}-login';
-@logo-prefix-cls: ~'@{namespace}-app-logo';
-@countdown-prefix-cls: ~'@{namespace}-countdown-input';
-@active-color: 255, 255, 255;
+  @prefix-cls: ~'@{namespace}-login';
+  @logo-prefix-cls: ~'@{namespace}-app-logo';
+  @countdown-prefix-cls: ~'@{namespace}-countdown-input';
+  @active-color: 255, 255, 255;
 
-input.fix-auto-fill, .fix-auto-fill input {
-  box-shadow: inherit !important;
-}
-
-.@{prefix-cls} {
-  min-height: 100%;
-  overflow: hidden;
-  background: url('/@/assets/images/sign-bg.jpg') no-repeat 50%;
-  background-size: cover;
-
-  .ant-input-affix-wrapper {
-    border: 1px solid rgba(@active-color, 0.55);
-    border-radius: 1px;
-    color: rgba(@active-color, 0.65);
-    margin-top: 10px;
-    background-color: rgba(@active-color, 0.05) !important;
+  input.fix-auto-fill,
+  .fix-auto-fill input {
+    box-shadow: inherit !important;
   }
 
-  .signin-title {
-    padding-top: 20px;
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.65);
-    margin-top: 12px;
-    margin-bottom: 20px;
-  }
+  .@{prefix-cls} {
+    min-height: 100%;
+    overflow: hidden;
+    background: url('/@/assets/images/sign-bg.jpg') no-repeat 50%;
+    background-size: cover;
 
-  .logo {
-    padding-top: 20px;
-    height: 130px;
-    margin: auto;
-  }
+    .ant-input-affix-wrapper {
+      border: 1px solid rgba(@active-color, 0.55);
+      border-radius: 1px;
+      color: rgba(@active-color, 0.65);
+      margin-top: 10px;
+      background-color: rgba(@active-color, 0.05) !important;
+    }
 
-  .signin-form {
-    .ant-input {
-      padding-top: 3px;
-      padding-bottom: 3px;
+    .signin-title {
+      padding-top: 20px;
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 12px;
+      margin-bottom: 20px;
+    }
 
-      .ant-input-affix-wrapper:hover, .ant-input:not(.ant-input-disabled) {
-        border-color: rgba(@active-color, .95);
+    .logo {
+      padding-top: 20px;
+      height: 130px;
+      margin: auto;
+    }
+
+    .signin-form {
+      .ant-form-item-has-error :not(.ant-input-disabled):not(.ant-input-borderless).ant-input {
+        background-color: transparent !important;
+      }
+
+      .ant-input {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        color: @white;
+
+        .ant-input-affix-wrapper:hover,
+        .ant-input:not(.ant-input-disabled) {
+          border-color: rgba(@active-color, 0.95);
+        }
+      }
+      .ant-input-password-icon {
+        color: @content-bg !important;
+      }
+      .signin-btn {
+        .ant-btn {
+          margin-top: 30px;
+          height: 40px;
+          background: rgba(@active-color, 0.4);
+          border: unset;
+        }
+      }
+
+      .text-left {
+        .ant-btn {
+          padding: 0px;
+        }
       }
     }
 
-    .signin-btn {
-      .ant-btn {
-        margin-top: 30px;
-        height: 40px;
-        background: rgba(@active-color, .40);
-        border: unset;
+    &::after {
+      content: '';
+      width: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: -20px;
+      background: inherit;
+      z-index: 2;
+      filter: blur(1px);
+    }
+
+    &-sign-in-way {
+      .anticon {
+        font-size: 22px;
+        color: #888;
+        cursor: pointer;
+
+        &:hover {
+          color: @primary-color;
+        }
       }
     }
 
-    .text-left {
-      .ant-btn {
-        padding: 0px;
+    input {
+      min-width: 300px;
+      background: transparent;
+      &:autofill {
+        background: transparent;
+      }
+      @media (max-width: @screen-xl) {
+        min-width: 260px;
+      }
+
+      @media (max-width: @screen-lg) {
+        min-width: 200px;
+      }
+
+      @media (max-width: @screen-md) {
+        min-width: 180px;
+      }
+
+      @media (max-width: @screen-sm) {
+        min-width: 100px;
       }
     }
 
-  }
-
-  &::after {
-    content: '';
-    width: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: -20px;
-    background: inherit;
-    z-index: 2;
-    filter: blur(1px);
-  }
-
-
-  &-sign-in-way {
-    .anticon {
-      font-size: 22px;
-      color: #888;
-      cursor: pointer;
-
-      &:hover {
-        color: @primary-color;
-      }
-    }
-  }
-
-  input {
-    min-width: 300px;
-
-    @media (max-width: @screen-xl) {
-      min-width: 260px;
+    .@{countdown-prefix-cls} input {
+      min-width: unset;
     }
 
-    @media (max-width: @screen-lg) {
-      min-width: 200px;
-    }
-
-    @media (max-width: @screen-md) {
-      min-width: 180px;
-    }
-
-    @media (max-width: @screen-sm) {
-      min-width: 100px;
+    .ant-divider-inner-text {
+      font-size: 12px;
+      color: @text-color-secondary;
     }
   }
-
-  .@{countdown-prefix-cls} input {
-    min-width: unset;
-  }
-
-  .ant-divider-inner-text {
-    font-size: 12px;
-    color: @text-color-secondary;
-  }
-}
 </style>

@@ -17,7 +17,7 @@
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, onMounted, reactive, ref, unref } from 'vue';
-import { executionModes, k8sRestExposedType, resolveOrder } from '../../app/data';
+import { k8sRestExposedType, resolveOrder } from '../../app/data';
 import {
   renderProperties,
   renderInputDropdown,
@@ -102,7 +102,11 @@ export const useClusterSetting = () => {
         component: 'Select',
         componentProps: {
           placeholder: 'Please enter cluster name',
-          options: executionModes,
+          options: [
+            { label: 'remote (standalone)', value: 1 },
+            { label: 'yarn session', value: 3 },
+            { label: 'kubernetes session', value: 5 },
+          ],
         },
         dynamicRules: () => {
           return [{ required: true, validator: handleCheckExecMode }];
@@ -253,7 +257,8 @@ export const useClusterSetting = () => {
         label: 'totalItem',
         ifShow: ({ values }) => [3, 5].includes(values.executionMode),
         component: 'Select',
-        renderColContent: ({ model }) => renderOptionsItems(model, 'totalOptions', '.memory'),
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'totalOptions', field, '.memory', true),
       },
       {
         field: 'jmOptions',
@@ -275,8 +280,8 @@ export const useClusterSetting = () => {
         label: 'jmOptionsItem',
         ifShow: ({ values }) => [3, 5].includes(values.executionMode),
         component: 'Select',
-        renderColContent: ({ model }) =>
-          renderOptionsItems(model, 'jmOptions', 'jobmanager.memory.'),
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'jmOptions', field, 'jobmanager.memory.'),
       },
       {
         field: 'tmOptions',
@@ -298,8 +303,8 @@ export const useClusterSetting = () => {
         label: 'tmOptionsItem',
         ifShow: ({ values }) => [3, 5].includes(values.executionMode),
         component: 'Select',
-        renderColContent: ({ model }) =>
-          renderOptionsItems(model, 'tmOptions', 'taskmanager.memory.'),
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'tmOptions', field, 'taskmanager.memory.'),
       },
       {
         field: 'properties',

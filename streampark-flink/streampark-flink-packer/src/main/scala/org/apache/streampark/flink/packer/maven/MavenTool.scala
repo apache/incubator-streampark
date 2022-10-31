@@ -187,7 +187,7 @@ object MavenTool extends Logger {
     /**
      * default maven local repository
      */
-    lazy val localRepo = new LocalRepository(Workspace.local.MAVEN_LOCAL_DIR)
+    lazy val localRepo = new LocalRepository(Workspace.MAVEN_LOCAL_DIR)
 
 
     def newRepoSystem(): RepositorySystem = {

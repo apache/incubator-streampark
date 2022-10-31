@@ -17,55 +17,20 @@
 package org.apache.streampark.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.{ConfigOption, Configuration, ExecutionOptions}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.table.api.TableEnvironment
-import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.core.SqlCommand._
 
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import java.util.{HashMap => JavaHashMap, Map => JavaMap}
 import scala.collection.mutable
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object FlinkSqlExecutor extends Logger {
 
   private[this] val lock = new ReentrantReadWriteLock().writeLock
-
-  /**
-   * all the available sql config options.
-   * see: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config
-   */
-  lazy val tableConfigOptions: JavaMap[String, ConfigOption[_]] = {
-    def extractConfig(clazz: Class[_]): JavaMap[String, ConfigOption[_]] = {
-      val configOptions = new JavaHashMap[String, ConfigOption[_]]
-      clazz.getDeclaredFields.foreach(field => {
-        if (field.getType.isAssignableFrom(classOf[ConfigOption[_]])) {
-          Try {
-            val configOption = field.get(classOf[ConfigOption[_]]).asInstanceOf[ConfigOption[_]]
-            configOptions.put(configOption.key, configOption)
-          } match {
-            case Success(_) =>
-            case Failure(e) => logError("Fail to get ConfigOption", e)
-          }
-        }
-      })
-      configOptions
-    }
-
-    val configOptions = new JavaHashMap[String, ConfigOption[_]]
-    val configList = List(
-      //classOf[PythonOptions],
-      classOf[ExecutionOptions],
-      classOf[ExecutionConfigOptions],
-      classOf[OptimizerConfigOptions],
-      classOf[TableConfigOptions]
-    )
-    configList.foreach(x => configOptions.putAll(extractConfig(x)))
-    configOptions
-  }
 
   private[streampark] def executeSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
     val flinkSql: String = if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
@@ -118,15 +83,11 @@ object FlinkSqlExecutor extends Logger {
           val tableResult = context.executeSql(x.originSql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-
         // For specific statement, such as: SET/RESET/INSERT/SELECT
         case SET =>
-          if (!tableConfigOptions.containsKey(args)) {
-            throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config")
-          }
           val operand = x.operands(1)
-          context.getConfig.getConfiguration.setString(args, operand)
           logInfo(s"$command: $args --> $operand")
+          context.getConfig.getConfiguration.setString(args, operand)
         case RESET | RESET_ALL =>
           val confDataField = classOf[Configuration].getDeclaredField("confData")
           confDataField.setAccessible(true)
