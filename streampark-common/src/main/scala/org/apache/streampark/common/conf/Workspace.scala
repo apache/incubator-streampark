@@ -58,6 +58,11 @@ object Workspace {
    */
   lazy val PROJECT_BUILD_LOG_PATH = s"$LOG_LOCAL_PATH/build_logs"
 
+  /**
+   * project archives path
+   */
+  lazy val ARCHIVES_FILE_PATH = s"${Workspace.remote.WORKSPACE}/historyserver/archive"
+
 }
 
 case class Workspace(storageType: StorageType) {
@@ -124,11 +129,6 @@ case class Workspace(storageType: StorageType) {
    * store global public jars
    */
   lazy val APP_JARS = s"$WORKSPACE/jars"
-
-  /**
-   * project archives path
-   */
-  lazy val ARCHIVES_FILE_PATH = s"${Workspace.remote.WORKSPACE}/historyserver/archive"
 
 }
 
