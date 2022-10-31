@@ -15,14 +15,15 @@
   limitations under the License.
 -->
 <template>
-  <LoginFormTitle v-show="getShow" class="enter-x mb-40px" />
+  <LoginFormTitle v-show="getShow" class="enter-x mb-40px text-light-50" />
   <Form
-    class="p-4 enter-x"
+    class="p-4 enter-x signin-form"
     :model="formData"
     :rules="getFormRules"
     ref="formRef"
     v-show="getShow"
     @keypress.enter="handleLogin"
+    autocomplete="off"
   >
     <FormItem name="account" class="enter-x">
       <Input
@@ -46,33 +47,13 @@
         </template>
       </InputPassword>
     </FormItem>
-
-    <ARow class="enter-x">
-      <ACol :span="12">
-        <FormItem>
-          <!-- No logic, you need to deal with it yourself -->
-          <Checkbox v-model:checked="rememberMe" size="small">
-            {{ t('sys.login.rememberMe') }}
-          </Checkbox>
-        </FormItem>
-      </ACol>
-      <ACol :span="12">
-        <FormItem :style="{ 'text-align': 'right' }">
-          <!-- No logic, you need to deal with it yourself -->
-          <Button type="link" size="small" @click="setLoginState(LoginStateEnum.RESET_PASSWORD)">
-            {{ t('sys.login.forgetPassword') }}
-          </Button>
-        </FormItem>
-      </ACol>
-    </ARow>
-
-    <FormItem class="enter-x">
+    <FormItem class="enter-x signin-btn">
       <Button type="primary" block @click="handleLogin" :loading="loading">
-        通过 {{ loginText.buttonText }} 登录
+        {{ loginText.buttonText }}
       </Button>
     </FormItem>
-    <FormItem class="enter-x text-center">
-      <Button type="link" @click="changeLoginType"> 使用 {{ loginText.linkText }} </Button>
+    <FormItem class="enter-x text-left">
+      <Button type="link" @click="changeLoginType"> {{ loginText.linkText }} </Button>
     </FormItem>
   </Form>
   <TeamModal v-model:visible="modelVisible" :userId="userId" @success="handleTeamSuccess" />
@@ -81,7 +62,7 @@
   import { reactive, ref, unref, computed } from 'vue';
   import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 
-  import { Checkbox, Form, Input, Row, Col, Button } from 'ant-design-vue';
+  import { Form, Input, Button } from 'ant-design-vue';
   import LoginFormTitle from './LoginFormTitle.vue';
 
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -102,9 +83,6 @@
   import { fetchUserTeam } from '/@/api/system/member';
   import { LoginResultModel } from '/@/api/system/model/userModel';
   import { Result } from '/#/axios';
-
-  const ACol = Col;
-  const ARow = Row;
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
 
@@ -112,7 +90,7 @@
   const { createErrorModal, createMessage } = useMessage();
   const { prefixCls } = useDesign('login');
   const userStore = useUserStore();
-  const { setLoginState, getLoginState } = useLoginState();
+  const { getLoginState } = useLoginState();
   const { getFormRules } = useFormRules();
   interface LoginForm {
     account: string;
@@ -122,7 +100,6 @@
   const loading = ref(false);
   const userId = ref('');
   const modelVisible = ref(false);
-  const rememberMe = ref(false);
   const loginType = ref(LoginTypeEnum.LOCAL);
   const formData = reactive<LoginForm>({
     account: '',
@@ -130,12 +107,12 @@
   });
 
   const loginText = computed(() => {
-    const localText = '本地账户';
+    const localText = 'Login';
     const ldapText = 'openLDAP';
     if (loginType.value === LoginTypeEnum.LOCAL) {
-      return { buttonText: localText, linkText: ldapText };
+      return { buttonText: localText, linkText: 'Login by openLDAP' };
     }
-    return { buttonText: ldapText, linkText: localText };
+    return { buttonText: ldapText, linkText: 'Login by Password' };
   });
 
   const { validForm } = useFormValid(formRef);
@@ -146,7 +123,7 @@
     try {
       const loginFormValue = await validForm();
       if (!loginFormValue) return;
-      handleLoginAction(loginFormValue);
+      await handleLoginAction(loginFormValue);
     } catch (error) {
       console.error(error);
     }
@@ -183,7 +160,6 @@
             userId.value = data as unknown as string;
             const teamList = await fetchUserTeam({ userId: userId.value });
             userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
-
             modelVisible.value = true;
             return;
           } else {

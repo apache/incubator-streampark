@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -97,6 +98,24 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     @Override
+    public IPage<Application> dependAppsPage(Variable variable, RestRequest request) {
+        List<Application> applications = getDependApplicationsByCode(variable);
+
+        IPage<Application> page = new Page<>();
+        if (CollectionUtils.isEmpty(applications)) {
+            return page;
+        }
+        page.setCurrent(request.getPageNum());
+        page.setSize(request.getPageSize());
+        page.setTotal(applications.size());
+        int fromIndex = (request.getPageNum() - 1) * request.getPageSize();
+        int toIndex = request.getPageNum() * request.getPageSize();
+        toIndex = toIndex > applications.size() ? applications.size() : toIndex;
+        page.setRecords(applications.subList(fromIndex, toIndex));
+        return page;
+    }
+
+    @Override
     public Variable findByVariableCode(Long teamId, String variableCode) {
         return baseMapper.selectOne(new LambdaQueryWrapper<Variable>()
             .eq(Variable::getVariableCode, variableCode)
@@ -138,26 +157,35 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     private boolean isDependByApplications(Variable variable) {
-        // Detect whether the variable is dependent on the args of the application
+        return CollectionUtils.isNotEmpty(getDependApplicationsByCode(variable));
+    }
+
+    private List<Application> getDependApplicationsByCode(Variable variable) {
+        List<Application> dependApplications = new ArrayList<>();
         List<Application> applications = applicationService.getByTeamId(variable.getTeamId());
+        Map<Long, Application> applicationMap = applications.stream().collect(Collectors.toMap(Application::getId, application -> application));
+
+        // Get applications that depend on this variable in application args
         if (applications != null) {
             for (Application app : applications) {
                 if (isDepend(variable.getVariableCode(), app.getArgs())) {
-                    return true;
+                    dependApplications.add(app);
                 }
             }
         }
-
-        // Detect whether variables are dependent on all versions of flink sql
+        // Get the application that depends on this variable in flink sql
         List<FlinkSql> flinkSqls = flinkSqlService.getByTeamId(variable.getTeamId());
         if (flinkSqls != null) {
             for (FlinkSql flinkSql : flinkSqls) {
                 if (isDepend(variable.getVariableCode(), DeflaterUtils.unzipString(flinkSql.getSql()))) {
-                    return true;
+                    Application app = applicationMap.get(flinkSql.getAppId());
+                    if (!dependApplications.contains(app)) {
+                        dependApplications.add(applicationMap.get(flinkSql.getAppId()));
+                    }
                 }
             }
         }
-        return false;
+        return dependApplications;
     }
 
     /**

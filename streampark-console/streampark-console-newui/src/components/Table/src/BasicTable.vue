@@ -19,6 +19,7 @@
     <BasicForm
       ref="formRef"
       submitOnReset
+      submitBeforeReset
       v-bind="getFormProps"
       v-if="getBindValues.useSearchForm"
       :tableAction="tableAction"

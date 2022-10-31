@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.streampark.flink.core.conf
 
-package org.apache.streampark;
+import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.configuration.Configuration
 
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello world!");
-    }
-}
+case class FlinkConfiguration(parameter: ParameterTool,
+                              envConfig: Configuration,
+                              tableConfig: Configuration)

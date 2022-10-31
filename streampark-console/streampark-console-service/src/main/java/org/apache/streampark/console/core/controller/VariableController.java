@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.service.VariableService;
 
@@ -38,22 +39,46 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import java.util.List;
+
 @Slf4j
 @Validated
 @RestController
 @RequestMapping("variable")
 public class VariableController {
 
-    private final String formatPattern = "^([A-Za-z])+([A-Za-z0-9._-])+$";
-
     @Autowired
     private VariableService variableService;
 
+    /**
+     * Get variable list by page.
+     * @param restRequest
+     * @param variable
+     * @return
+     */
     @PostMapping("list")
     @RequiresPermissions("variable:view")
     public RestResponse variableList(RestRequest restRequest, Variable variable) {
         IPage<Variable> variableList = variableService.page(variable, restRequest);
         return RestResponse.success(variableList);
+    }
+
+    /**
+     * Get all variables under the current team.
+     * @param teamId
+     * @return
+     */
+    @PostMapping("all")
+    public RestResponse all(@RequestParam Long teamId) {
+        List<Variable> variableList = variableService.findByTeamId(teamId);
+        return RestResponse.success(variableList);
+    }
+
+    @PostMapping("dependApps")
+    @RequiresPermissions("variable:dependApps")
+    public RestResponse dependApps(RestRequest restRequest, Variable variable) {
+        IPage<Application> dependApps = variableService.dependAppsPage(variable, restRequest);
+        return RestResponse.success(dependApps);
     }
 
     @PostMapping("post")
@@ -91,10 +116,5 @@ public class VariableController {
     public RestResponse checkVariableCode(@RequestParam Long teamId, @NotBlank(message = "{required}") String variableCode) {
         boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
         return RestResponse.success(result);
-    }
-
-    @PostMapping("select")
-    public RestResponse selectVariables(@RequestParam Long teamId) {
-        return RestResponse.success().data(this.variableService.findByTeamId(teamId));
     }
 }

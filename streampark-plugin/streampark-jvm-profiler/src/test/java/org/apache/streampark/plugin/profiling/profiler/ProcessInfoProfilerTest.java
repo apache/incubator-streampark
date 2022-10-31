@@ -28,10 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ProcessInfoProfilerTest {
+class ProcessInfoProfilerTest {
 
     @Test
-    public void profile() {
+    void profile() {
         final List<String> nameList = new ArrayList<>();
         final List<Map<String, Object>> metricList = new ArrayList<>();
 

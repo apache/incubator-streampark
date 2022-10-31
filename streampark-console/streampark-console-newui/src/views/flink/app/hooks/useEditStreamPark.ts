@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { FormSchema } from '/@/components/Table';
-import { computed, h, reactive, Ref, ref, unref } from 'vue';
+import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
 
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
@@ -27,7 +27,6 @@ import { fetchFlinkSql } from '/@/api/flink/app/flinkSql';
 import { toPomString } from '../utils/Pom';
 import { handleDependencyJsonToPom } from '../utils';
 import { useDrawer } from '/@/components/Drawer';
-import { AppListRecord } from '/@/api/flink/app/app.type';
 import { useRoute } from 'vue-router';
 
 export const useEditStreamParkSchema = (
@@ -36,21 +35,20 @@ export const useEditStreamParkSchema = (
   dependencyRef: Ref,
 ) => {
   const flinkSql = ref();
-  const app = reactive<Partial<AppListRecord>>({});
   const route = useRoute();
   const {
+    alerts,
+    flinkEnvs,
+    flinkClusters,
     getFlinkSqlSchema,
     getFlinkClusterSchemas,
     getFlinkFormOtherSchemas,
     getFlinkTypeSchema,
-    flinkEnvs,
-    flinkClusters,
-    alerts,
+    suggestions,
   } = useCreateAndEditSchema(dependencyRef, {
     appId: route.query.appId as string,
     mode: 'streampark',
   });
-
   const [registerDifferentDrawer, { openDrawer: openDiffDrawer }] = useDrawer();
 
   async function handleChangeSQL(v) {
@@ -137,16 +135,18 @@ export const useEditStreamParkSchema = (
         field: 'projectName',
         label: 'Project',
         component: 'Input',
-        render: () => h(Alert, { message: app.projectName, type: 'info' }),
+        render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
         ifShow: ({ values }) => values.jobType != 2,
       },
+      { field: 'project', label: 'ProjectId', component: 'Input', show: false },
       {
         field: 'module',
         label: 'Application',
         component: 'Input',
-        render: ({ values }) => h(Alert, { message: values.module, type: 'info' }),
+        render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
         ifShow: ({ values }) => values.jobType != 2,
       },
+      { field: 'configId', label: 'configId', component: 'Input', show: false },
       {
         field: 'appConf',
         label: 'Application conf',
@@ -176,11 +176,12 @@ export const useEditStreamParkSchema = (
     ];
   });
   return {
-    getEditStreamParkFormSchema,
+    alerts,
     flinkEnvs,
     flinkClusters,
+    getEditStreamParkFormSchema,
     flinkSql,
-    alerts,
     registerDifferentDrawer,
+    suggestions,
   };
 };

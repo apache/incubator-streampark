@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
-import { AppListResponse, CancelParam, DashboardResponse } from './app.type';
+import { AppListResponse, CancelParam, CreateParams, DashboardResponse } from './app.type';
 import { Result } from '/#/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
@@ -128,7 +128,7 @@ export function fetchUpload(params) {
  * @param params Create parameters
  * @returns {Promise<AxiosResponse<Result>>} Whether the data creation was successful message: error message
  */
-export function fetchCreate(data): Promise<AxiosResponse<Result>> {
+export function fetchCreate(data: CreateParams): Promise<AxiosResponse<Result>> {
   return defHttp.post({ url: APP_API.CREATE, data }, { isReturnNativeResponse: true });
 }
 /**
@@ -223,6 +223,6 @@ export function fetchCancel(data: CancelParam): Promise<boolean> {
   return defHttp.post({ url: APP_API.CANCEL, data });
 }
 
-export function fetchName(data) {
+export function fetchName(data: { config: string }) {
   return defHttp.post({ url: APP_API.NAME, data });
 }

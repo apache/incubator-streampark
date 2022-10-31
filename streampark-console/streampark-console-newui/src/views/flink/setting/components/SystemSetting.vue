@@ -34,24 +34,27 @@
   const settings = ref<SystemSetting[]>([]);
 
   const settingsList = computed(() => {
+    const filterValue = (key: string) => {
+      return settings.value.filter((i) => i.settingKey.indexOf(key) > -1);
+    };
     return [
       {
         key: 1,
         title: 'Maven Setting',
-        isPassword: (item) => item.settingKey === 'streampark.maven.auth.password',
-        data: settings.value.filter((i) => i.settingKey.indexOf('streampark.maven') > -1),
+        isPassword: (item: SystemSetting) => item.settingKey === 'streampark.maven.auth.password',
+        data: filterValue('streampark.maven'),
       },
       {
         key: 2,
         title: 'Docker Setting',
-        isPassword: (item) => item.settingKey === 'docker.register.password',
-        data: settings.value.filter((i) => i.settingKey.indexOf('docker.register') > -1),
+        isPassword: (item: SystemSetting) => item.settingKey === 'docker.register.password',
+        data: filterValue('docker.register'),
       },
       {
         key: 3,
         title: 'Sender Email Setting',
-        isPassword: (item) => item.settingKey === 'alert.email.password',
-        data: settings.value.filter((i) => i.settingKey.indexOf('alert.email') > -1),
+        isPassword: (item: SystemSetting) => item.settingKey === 'alert.email.password',
+        data: filterValue('alert.email'),
       },
       {
         key: 4,
@@ -63,7 +66,7 @@
         key: 5,
         title: 'Ingrsss Setting',
         isPassword: () => false,
-        data: settings.value.filter((i) => i.settingKey.indexOf('ingrsss') > -1),
+        data: filterValue('ingrsss.mode'),
       },
     ];
   });

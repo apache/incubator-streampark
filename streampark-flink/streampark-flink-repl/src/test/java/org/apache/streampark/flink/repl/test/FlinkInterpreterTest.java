@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-public class FlinkInterpreterTest {
+class FlinkInterpreterTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlinkInterpreterTest.class);
 
@@ -54,7 +54,7 @@ public class FlinkInterpreterTest {
     }
 
     @Test
-    public void testWordCount() {
+    void testWordCount() {
         try {
             InterpreterOutput out = new InterpreterOutput(line -> {
 
@@ -82,7 +82,7 @@ public class FlinkInterpreterTest {
     }
 
     @Test
-    public void testStream() {
+    void testStream() {
         String code = "\n" +
             "%flink.execution.mode=yarn\n" +
             "// the host and the port to connect to\n" +

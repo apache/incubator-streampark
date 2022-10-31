@@ -54,7 +54,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        itemExtra: h('span', { class: 'conf-switch' }, 'trigger savePoint before taking cancel'),
+        afterItem: h('span', { class: 'conf-switch' }, 'trigger savePoint before taking cancel'),
       },
       {
         field: 'customSavepoint',
@@ -64,7 +64,7 @@
           placeholder: 'Entry the custom savepoint path',
           allowClear: true,
         },
-        itemExtra: h(
+        afterItem: h(
           'span',
           { class: 'conf-switch' },
           'restore the application from savepoint or latest checkpoint',
@@ -80,7 +80,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        itemExtra: h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
+        afterItem: h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
       },
     ],
     colon: true,

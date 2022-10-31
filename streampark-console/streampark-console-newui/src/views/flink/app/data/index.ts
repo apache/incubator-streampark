@@ -63,7 +63,7 @@ export const getAppColumns = (): BasicColumn[] => [
       { text: 'ADDED', value: '0' },
       { text: 'STARTING', value: '3' },
       { text: 'RUNNING', value: '5' },
-      { text: 'FAILED', value: '6' },
+      { text: 'FAILED', value: '7' },
       { text: 'CANCELED', value: '9' },
       { text: 'FINISHED', value: '10' },
       { text: 'LOST', value: '13' },
@@ -84,7 +84,8 @@ export const getMonacoOptions = (readOnly: boolean) => {
     selectOnLineNumbers: false,
     foldingStrategy: 'indentation', // code fragmentation
     overviewRulerBorder: false, // Don't scroll bar borders
-    autoClosingBrackets: true,
+    autoClosingBrackets: 'always',
+    autoClosingDelete: 'always',
     tabSize: 2, // tab indent length
     readOnly,
     inherit: true,

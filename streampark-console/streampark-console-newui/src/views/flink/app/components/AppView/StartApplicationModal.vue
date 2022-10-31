@@ -61,7 +61,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        itemExtra: h('span', { class: 'conf-switch' }, 'flame Graph support'),
+        afterItem: h('span', { class: 'conf-switch' }, 'flame Graph support'),
         ifShow: () => [5, 6].includes(receiveData.executionMode),
       },
       {
@@ -73,7 +73,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        itemExtra: h(
+        afterItem: h(
           'span',
           { class: 'conf-switch' },
           'restore the application from savepoint or latest checkpoint',
@@ -86,7 +86,7 @@
           receiveData.historySavePoint && receiveData.historySavePoint.length > 0
             ? 'Select'
             : 'Input',
-        itemExtra: h(
+        afterItem: h(
           'span',
           { class: 'conf-switch' },
           'restore the application from savepoint or latest checkpoint',
@@ -103,7 +103,7 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        itemExtra: h(
+        afterItem: h(
           'span',
           { class: 'conf-switch' },
           'restore the application from savepoint or latest checkpoint',

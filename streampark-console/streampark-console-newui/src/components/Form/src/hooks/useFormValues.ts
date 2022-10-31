@@ -91,7 +91,7 @@ export function useFormValues({
         value = value.map((item) => transformDateFunc?.(item));
       }
       // Remove spaces
-      if (isString(value)) {
+      if (isString(value) && !['configOverride', 'flinkSql'].includes(key)) {
         value = value.trim();
       }
       if (!tryDeconstructArray(key, value, res) && !tryDeconstructObject(key, value, res)) {

@@ -72,16 +72,6 @@ object FlinkSqlValidator extends Logger {
       lazy val command = call.command
       command match {
         case SET | RESET =>
-          // if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
-          //   return FlinkSqlValidationResult(
-          //     success = false,
-          //     failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
-          //     lineStart = call.lineStart,
-          //     lineEnd = call.lineEnd,
-          //     sql = sql.replaceFirst(";|$", ";"),
-          //     exception = s"$args is not a valid table/sql config"
-          //   )
-          // }
           if (command == SET && args == TableConfigOptions.TABLE_SQL_DIALECT.key()) {
             sqlDialect = call.operands.last
           }

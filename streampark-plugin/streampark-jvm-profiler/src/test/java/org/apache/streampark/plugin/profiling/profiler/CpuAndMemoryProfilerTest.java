@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class CpuAndMemoryProfilerTest {
+class CpuAndMemoryProfilerTest {
 
     @Test
-    public void profile() {
+    void profile() {
         final List<String> nameList = new ArrayList<>();
         final List<Map<String, Object>> metricList = new ArrayList<>();
 

@@ -17,6 +17,7 @@
 <script lang="ts">
   import { computed, defineComponent, onMounted, reactive, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { toPomString } from '../utils/Pom';
 
   export default defineComponent({
     name: 'Dependency',
@@ -27,11 +28,18 @@
   import { getMonacoOptions } from '../data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  import { Select, Tabs } from 'ant-design-vue';
+  import { Select, Tabs, Alert, Tag, Space } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchUpload } from '/@/api/flink/app/app';
   import { fetchUploadJars } from '/@/api/flink/app/flinkHistory';
   import UploadJobJar from './UploadJobJar.vue';
+
+  interface DependencyType {
+    artifactId: string;
+    exclusions: string[];
+    groupId: string;
+    version: string;
+  }
 
   const TabPane = Tabs.TabPane;
   const SelectOption = Select.Option;
@@ -42,6 +50,7 @@
     pom: {},
   });
   const selectedHistoryUploadJars = ref<string[]>([]);
+  const dependencyRecords = ref<DependencyType[]>([]);
   const uploadJars = ref<string[]>([]);
   const loading = ref(false);
 
@@ -72,7 +81,7 @@
     },
   });
 
-  function handleApplyPom() {
+  async function handleApplyPom() {
     const versionId = props.formModel?.versionId;
     if (versionId == null) {
       Swal.fire('Failed', t('flink.app.dependencyError'), 'error');
@@ -109,7 +118,7 @@
               artifactId: artifactId,
               version: version,
             };
-            const pomExclusion = new Map();
+            const pomExclusion = {};
             if (exclusion != null) {
               const exclusions = exclusion.split('<exclusion>');
               exclusions.forEach((e) => {
@@ -117,10 +126,10 @@
                   const e_group = e.match(groupExp) ? groupExp.exec(e)![1].trim() : null;
                   const e_artifact = e.match(artifactExp) ? artifactExp.exec(e)![1].trim() : null;
                   const id = e_group + '_' + e_artifact;
-                  pomExclusion.set(id, {
+                  pomExclusion[id] = {
                     groupId: e_group,
                     artifactId: e_artifact,
-                  });
+                  };
                 }
               });
             }
@@ -136,6 +145,7 @@
       alertInvalidDependency(scalaVersion, invalidArtifact);
       return;
     }
+    handleUpdateDependency();
     setContent(defaultValue);
   }
 
@@ -163,6 +173,7 @@
   /* custom http  */
   async function handleCustomDepsRequest(data) {
     try {
+      loading.value = true;
       const formData = new FormData();
       formData.append('file', data.file);
       await fetchUpload(formData);
@@ -171,13 +182,27 @@
       Object.assign(props.formModel.historyjar, {
         [data.file.name]: data.file.name,
       });
+      dependency.jar[data.file.name] = data.file.name;
+      handleUpdateDependency();
     } catch (error) {
       console.error(error);
     } finally {
       loading.value = false;
     }
   }
-
+  // update the dependency list
+  function handleUpdateDependency() {
+    const deps: DependencyType[] = [];
+    const jars: string[] = [];
+    Object.keys(dependency.pom).forEach((v: string) => {
+      deps.push(dependency.pom[v]);
+    });
+    Object.keys(dependency.jar).forEach((v: string) => {
+      jars.push(v);
+    });
+    dependencyRecords.value = deps;
+    uploadJars.value = jars;
+  }
   /* load history config records */
   async function handleReloadHistoryUploads() {
     selectedHistoryUploadJars.value = [];
@@ -188,7 +213,35 @@
   const filteredHistoryUploadJarsOptions = computed(() => {
     return uploadJars.value.filter((o) => !Reflect.has(dependency.jar, o));
   });
+  function handleRemoveJar(jar: string) {
+    delete dependency.jar[jar];
+    selectedHistoryUploadJars.value.splice(selectedHistoryUploadJars.value.indexOf(jar), 1);
+    handleUpdateDependency();
+  }
+  function handleRemovePom(pom: Recordable) {
+    const id = pom.groupId + '_' + pom.artifactId;
+    delete dependency.pom[id];
+    handleUpdateDependency();
+  }
 
+  function handleEditPom(pom: DependencyType) {
+    const pomString = toPomString(pom);
+    activeTab.value = 'pom';
+    setContent(pomString);
+  }
+  // set default value
+  function setDefaultValue(dataSource: { pom?: DependencyType[]; jar?: string[] }) {
+    console.log('dataSource', dataSource);
+    dependencyRecords.value = dataSource.pom || [];
+    uploadJars.value = dataSource.jar || [];
+    dataSource.pom?.map((pomRecord: DependencyType) => {
+      const id = pomRecord.groupId + '_' + pomRecord.artifactId;
+      dependency.pom[id] = pomRecord;
+    });
+    dataSource.jar?.map((fileName: string) => {
+      dependency.jar[fileName] = fileName;
+    });
+  }
   onMounted(() => {
     handleReloadHistoryUploads();
   });
@@ -196,9 +249,13 @@
   onChange((data) => {
     emit('update:value', data);
   });
+
   defineExpose({
-    handleApplyPom,
+    setDefaultValue,
     dependency,
+    handleApplyPom,
+    dependencyRecords,
+    uploadJars,
   });
 </script>
 
@@ -231,11 +288,45 @@
       <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
     </TabPane>
   </Tabs>
+  <div class="dependency-box" v-if="dependencyRecords.length > 0 || uploadJars.length > 0">
+    <Alert
+      class="dependency-item"
+      v-for="(value, index) in dependencyRecords"
+      :key="`dependency_${index}`"
+      type="info"
+      @click="handleEditPom(value)"
+    >
+      <template #message>
+        <Space @click="handleEditPom(value)" class="tag-dependency-pom">
+          <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
+          {{ value.artifactId }}-{{ value.version }}.jar
+          <Icon
+            :size="12"
+            icon="ant-design:close-outlined"
+            class="icon-close cursor-pointer"
+            @click.stop="handleRemovePom(value)"
+          />
+        </Space>
+      </template>
+    </Alert>
+    <Alert
+      class="dependency-item"
+      v-for="(value, index) in uploadJars"
+      :key="`upload_jars_${index}`"
+      type="info"
+    >
+      <template #message>
+        <Space>
+          <Tag class="tag-dependency" color="#108ee9">JAR</Tag>
+          {{ value }}
+          <Icon
+            icon="ant-design:close-outlined"
+            class="icon-close cursor-pointer"
+            :size="12"
+            @click="handleRemoveJar(value)"
+          />
+        </Space>
+      </template>
+    </Alert>
+  </div>
 </template>
-<style lang="less">
-  .pom-card {
-    .ant-tabs-nav {
-      margin-bottom: 0 !important;
-    }
-  }
-</style>

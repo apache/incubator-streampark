@@ -30,23 +30,23 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class MethodProfilerStaticProxyTest {
+class MethodProfilerStaticProxyTest {
     private ClassMethodArgumentMetricBuffer buffer;
 
     @BeforeEach
-    public void before() {
+    void before() {
         buffer = new ClassMethodArgumentMetricBuffer();
         MethodArgumentCollector collector = new MethodArgumentCollector(buffer);
         MethodProfilerStaticProxy.setArgumentCollector(collector);
     }
 
     @AfterEach
-    public void after() {
+    void after() {
         MethodProfilerStaticProxy.setCollector(null);
     }
 
     @Test
-    public void collectMethodArgument_nullValue() {
+    void collectMethodArgument_nullValue() {
         MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, null);
         MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, null);
 
@@ -60,7 +60,7 @@ public class MethodProfilerStaticProxyTest {
     }
 
     @Test
-    public void collectMethodArgument_veryLongValue() {
+    void collectMethodArgument_veryLongValue() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < Constants.MAX_STRING_LENGTH; i++) {
             sb.append('a');

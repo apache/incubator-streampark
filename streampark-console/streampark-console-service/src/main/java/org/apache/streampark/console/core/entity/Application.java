@@ -419,7 +419,7 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getDistHome() {
         String path = String.format("%s/%s/%s",
-            Workspace.local().APP_LOCAL_DIST(),
+            Workspace.APP_LOCAL_DIST(),
             projectId.toString(),
             getModule()
         );
@@ -738,6 +738,22 @@ public class Application implements Serializable {
             return new DependencyInfo(mvnArts, extJars);
         }
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        return id.equals(((Application) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Data

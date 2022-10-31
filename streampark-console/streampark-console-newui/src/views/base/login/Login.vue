@@ -16,37 +16,14 @@
 -->
 <template>
   <div :class="prefixCls" class="relative w-full h-full px-4">
-    <AppLocalePicker
-      class="absolute text-white top-4 right-4 enter-x xl:text-gray-600"
-      :showText="false"
-      v-if="!sessionTimeout && showLocale"
-    />
-    <AppDarkModeToggle class="absolute top-3 right-7 enter-x" v-if="!sessionTimeout" />
-
-    <span class="-enter-x xl:hidden">
-      <AppLogo :alwaysShowTitle="true" />
-    </span>
-
-    <div class="container relative h-full py-2">
+    <div class="relative h-full">
       <div class="flex h-full">
-        <div class="hidden min-h-full pl-4 mr-4 xl:flex xl:flex-col xl:w-4/12">
-          <AppLogo class="!w-auto -enter-x" />
-          <div class="my-auto">
-            <div class="mt-10 font-medium text-white -enter-x">
-              <span class="inline-block mt-4 text-3xl"> {{ t('sys.login.signInTitle') }}</span>
-            </div>
-            <div class="mt-5 font-normal text-gray-300 text-md -enter-x">
-              {{ t('sys.login.signInDesc') }}
-            </div>
-          </div>
-        </div>
-        <div class="flex w-full h-full py-5 xl:h-auto xl:py-0 xl:my-0 xl:w-8/12">
+        <div class="flex w-full h-full py-5 xl:h-auto xl:py-0 xl:my-0">
           <div
             :class="`${prefixCls}-form`"
-            class="relative w-full px-5 py-8 mx-auto my-auto rounded-md shadow-md xl:bg-transparent sm:px-8 xl:p-4 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto enter-x"
+            class="relative w-auto px-12 bg-[rgba(0,0,0,0.4)] py-5 mx-auto my-auto shadow-md enter-y"
           >
             <LoginForm />
-            <ForgetPasswordForm />
           </div>
         </div>
       </div>
@@ -54,15 +31,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-  // import { computed } from 'vue';
-  import { AppLogo } from '/@/components/Application';
-  import { AppLocalePicker, AppDarkModeToggle } from '/@/components/Application';
   import LoginForm from './LoginForm.vue';
-  import ForgetPasswordForm from './ForgetPasswordForm.vue';
-  // import { useGlobSetting } from '/@/hooks/setting';
-  import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { useLocaleStore } from '/@/store/modules/locale';
 
   defineProps({
     sessionTimeout: {
@@ -72,108 +42,91 @@
 
   // const globSetting = useGlobSetting();
   const { prefixCls } = useDesign('login');
-  const { t } = useI18n();
-  const localeStore = useLocaleStore();
-  const showLocale = localeStore.getShowPicker;
   // const title = computed(() => globSetting?.title ?? '');
 </script>
 <style lang="less">
   @prefix-cls: ~'@{namespace}-login';
   @logo-prefix-cls: ~'@{namespace}-app-logo';
   @countdown-prefix-cls: ~'@{namespace}-countdown-input';
-  @dark-bg: #293146;
+  @active-color: 255, 255, 255;
 
-  html[data-theme='dark'] {
-    .@{prefix-cls} {
-      background-color: @dark-bg;
-
-      .ant-input-affix-wrapper {
-        background-color: #232a3b !important;
-      }
-      .ant-input,
-      .ant-input-password {
-        background-color: #232a3b;
-      }
-
-      .ant-btn:not(.ant-btn-link):not(.ant-btn-primary) {
-        border: 1px solid #4a5569;
-      }
-
-      &-form {
-        background: transparent !important;
-      }
-
-      .app-iconify {
-        color: #fff;
-      }
-    }
-
-    input.fix-auto-fill,
-    .fix-auto-fill input {
-      box-shadow: inherit !important;
-    }
+  input.fix-auto-fill,
+  .fix-auto-fill input {
+    box-shadow: inherit !important;
   }
 
   .@{prefix-cls} {
     min-height: 100%;
     overflow: hidden;
-    @media (max-width: @screen-xl) {
-      background-color: #293146;
+    background: url('/@/assets/images/sign-bg.jpg') no-repeat 50%;
+    background-size: cover;
 
-      .@{prefix-cls}-form {
-        background-color: #fff;
+    .ant-input-affix-wrapper {
+      border: 1px solid rgba(@active-color, 0.55);
+      border-radius: 1px;
+      color: rgba(@active-color, 0.65);
+      margin-top: 10px;
+      background-color: rgba(@active-color, 0.05) !important;
+    }
+
+    .signin-title {
+      padding-top: 20px;
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 12px;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      padding-top: 20px;
+      height: 130px;
+      margin: auto;
+    }
+
+    .signin-form {
+      .ant-form-item-has-error :not(.ant-input-disabled):not(.ant-input-borderless).ant-input {
+        background-color: transparent !important;
+      }
+
+      .ant-input {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        color: @white;
+
+        .ant-input-affix-wrapper:hover,
+        .ant-input:not(.ant-input-disabled) {
+          border-color: rgba(@active-color, 0.95);
+        }
+      }
+      .ant-input-password-icon {
+        color: @content-bg !important;
+      }
+      .signin-btn {
+        .ant-btn {
+          margin-top: 30px;
+          height: 40px;
+          background: rgba(@active-color, 0.4);
+          border: unset;
+        }
+      }
+
+      .text-left {
+        .ant-btn {
+          padding: 0px;
+        }
       }
     }
 
-    &::before {
+    &::after {
       content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
-      height: 100%;
-      margin-left: -66%;
-      background: linear-gradient(163.85deg, #1d2129 0%, #00308f 100%);
-      // background-image: url(/@/assets/svg/login-bg.svg);
-      // background-position: 100%;
-      // background-repeat: no-repeat;
-      // background-size: auto 100%;
-
-      @media (max-width: @screen-xl) {
-        display: none;
-      }
-    }
-
-    .@{logo-prefix-cls} {
       position: absolute;
-      top: 12px;
-      height: 30px;
-
-      &__title {
-        font-size: 16px;
-        color: #fff;
-      }
-
-      img {
-        width: 180px;
-      }
-    }
-
-    .container {
-      .@{logo-prefix-cls} {
-        display: flex;
-        width: 60%;
-        height: 80px;
-
-        &__title {
-          font-size: 24px;
-          color: #fff;
-        }
-
-        img {
-          width: 180px;
-        }
-      }
+      left: 0;
+      top: 0;
+      bottom: -20px;
+      background: inherit;
+      z-index: 2;
+      filter: blur(1px);
     }
 
     &-sign-in-way {
@@ -188,23 +141,26 @@
       }
     }
 
-    input:not([type='checkbox']) {
-      min-width: 360px;
-
-      @media (max-width: @screen-xl) {
-        min-width: 320px;
+    input {
+      min-width: 300px;
+      background: transparent;
+      &:autofill {
+        background: transparent;
       }
-
-      @media (max-width: @screen-lg) {
+      @media (max-width: @screen-xl) {
         min-width: 260px;
       }
 
+      @media (max-width: @screen-lg) {
+        min-width: 200px;
+      }
+
       @media (max-width: @screen-md) {
-        min-width: 240px;
+        min-width: 180px;
       }
 
       @media (max-width: @screen-sm) {
-        min-width: 160px;
+        min-width: 100px;
       }
     }
 

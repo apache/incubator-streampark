@@ -57,6 +57,7 @@ export const basicProps = {
   autoSubmitOnEnter: propTypes.bool.def(false),
   submitOnReset: propTypes.bool,
   submitOnChange: propTypes.bool,
+  submitBeforeReset: propTypes.bool,
   size: propTypes.oneOf(['default', 'small', 'large']).def('default'),
   // Disable the form
   disabled: propTypes.bool,

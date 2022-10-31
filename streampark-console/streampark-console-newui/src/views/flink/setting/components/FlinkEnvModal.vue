@@ -54,7 +54,7 @@
           placeholder: 'Please enter flink name',
           allowClear: true,
         },
-        itemExtra: h('span', { class: 'conf-switch' }, 'the flink name, e.g: flink-1.12'),
+        afterItem: h('span', { class: 'conf-switch' }, 'the flink name, e.g: flink-1.12'),
         rules: [{ required: true, message: 'flink name is required' }],
       },
       {
@@ -65,7 +65,7 @@
           placeholder: 'Please enter flink home',
           allowClear: true,
         },
-        itemExtra: h('span', { class: 'conf-switch' }, 'The absolute path of the FLINK_HOME'),
+        afterItem: h('span', { class: 'conf-switch' }, 'The absolute path of the FLINK_HOME'),
         rules: [{ required: true, message: 'flink home is required' }],
       },
       {

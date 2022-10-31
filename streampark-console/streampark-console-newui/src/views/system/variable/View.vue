@@ -23,6 +23,7 @@
           {{ t('common.add') }}
         </a-button>
       </template>
+      <template #resetBefore> 1111 </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <TableAction
@@ -37,6 +38,12 @@
                 icon: 'carbon:data-view-alt',
                 tooltip: 'view detail',
                 onClick: handleView.bind(null, record),
+              },
+              {
+                icon: 'icon-park-outline:mind-mapping',
+                tooltip: 'depend apps',
+                onClick: () =>
+                  router.push('/system/variable/depend_apps?id=' + record.variableCode),
               },
               {
                 icon: 'ant-design:delete-outlined',
@@ -65,16 +72,18 @@
 
 <script lang="ts" setup>
   import { defineComponent } from 'vue';
-  import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import VariableDrawer from './VariableDrawer.vue';
-  import VariableInfo from './VariableInfo.vue';
+  import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
+  import VariableDrawer from './components/VariableDrawer.vue';
+  import VariableInfo from './components/VariableInfo.vue';
   import { useDrawer } from '/@/components/Drawer';
   import { columns, searchFormSchema } from './variable.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchVariableDelete, fetchVariableList } from '/@/api/system/variable';
   import Icon from '/@/components/Icon';
+  import { useRouter } from 'vue-router';
 
+  const router = useRouter();
   const [registerDrawer, { openDrawer }] = useDrawer();
   const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
   const { createMessage } = useMessage();
@@ -87,6 +96,19 @@
       baseColProps: { style: { paddingRight: '30px' } },
       colon: true,
       schemas: searchFormSchema,
+    },
+    sortFn: (sortInfo: SorterResult) => {
+      const { field, order } = sortInfo;
+      if (field && order) {
+        return {
+          // The sort field passed to the backend you
+          sortField: field,
+          // Sorting method passed to the background asc/desc
+          sortOrder: order === 'ascend' ? 'asc' : 'desc',
+        };
+      } else {
+        return {};
+      }
     },
     rowKey: 'id',
     pagination: true,
