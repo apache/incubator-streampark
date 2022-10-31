@@ -21,14 +21,14 @@ import { BasicTableParams } from '../model/baseModel';
 import { VariableDeleteParam, VariableListRecord, VariableParam } from './model/variableModel';
 
 enum VARIABLE_API {
-  LIST = '/variable/page',
+  PAGE = '/variable/page',
   DEPEND = '/variable/dependApps',
   UPDATE = '/variable/update',
   POST = '/variable/post',
   DELETE = '/variable/delete',
   SELECT = '/variable/select',
   CHECK_CODE = '/variable/check/code',
-  ALL = '/variable/all',
+  LIST = '/variable/list',
 }
 /**
  * get variable list
@@ -36,7 +36,7 @@ enum VARIABLE_API {
  * @returns
  */
 export function fetchVariableList(data: BasicTableParams): Promise<VariableListRecord[]> {
-  return defHttp.post({ url: VARIABLE_API.LIST, data });
+  return defHttp.post({ url: VARIABLE_API.PAGE, data });
 }
 
 /**
@@ -96,6 +96,6 @@ export function fetchVariableContent(data: Recordable): Promise<any> {
  * get all variable
  * @returns {Promise<any>}
  */
-export function fetchVariableAll(data?: { key: string }): Promise<VariableListRecord[]> {
-  return defHttp.post({ url: VARIABLE_API.ALL, data });
+export function fetchVariableAll(data?: { keyword: string }): Promise<VariableListRecord[]> {
+  return defHttp.post({ url: VARIABLE_API.LIST, data });
 }

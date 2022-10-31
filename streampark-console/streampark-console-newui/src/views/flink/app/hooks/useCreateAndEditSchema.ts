@@ -375,14 +375,6 @@ export const useCreateAndEditSchema = (
         componentProps: { placeholder: 'restart max size', ...commonInputNum },
       },
       {
-        field: 'checkPointFailure',
-        label: 'CheckPoint Failure Options',
-        component: 'InputNumber',
-        renderColContent: renderInputGroup,
-        show: ({ values }) =>
-          edit?.mode == 'flink' ? true : ![5, 6].includes(values.executionMode),
-      },
-      {
         field: 'alertId',
         label: 'Fault Alert Template',
         component: 'Select',
@@ -391,6 +383,14 @@ export const useCreateAndEditSchema = (
           options: unref(alerts),
           fieldNames: { label: 'alertName', value: 'id', options: 'options' },
         },
+      },
+      {
+        field: 'checkPointFailure',
+        label: 'CheckPoint Failure Options',
+        component: 'InputNumber',
+        renderColContent: renderInputGroup,
+        show: ({ values }) =>
+          edit?.mode == 'flink' ? true : ![5, 6].includes(values.executionMode),
       },
       ...getConfigSchemas(),
       {
