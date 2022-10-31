@@ -45,4 +45,15 @@
         </where>
     </select>
 
+    <select id="selectByTeamId" resultType="variable">
+        select *
+        from t_variable
+        <where>
+            team_id = #{teamId}
+            <if test="keyword != null and keyword != ''">
+                and variable_code like concat('%', #{keyword}, '%') or description like concat('%', #{keyword}, '%')
+            </if>
+        </where>
+    </select>
+
 </mapper>

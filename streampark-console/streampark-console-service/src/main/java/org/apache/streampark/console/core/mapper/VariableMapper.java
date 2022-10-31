@@ -23,13 +23,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 public interface VariableMapper extends BaseMapper<Variable> {
     IPage<Variable> page(Page<Variable> page, @Param("variable") Variable variable);
 
-    @Select("select * from t_variable where team_id = #{teamId}")
-    List<Variable> selectByTeamId(@Param("teamId") Long teamId);
+    List<Variable> selectByTeamId(@Param("teamId") Long teamId, @Param("keyword") String keyword);
 }

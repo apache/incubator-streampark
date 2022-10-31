@@ -56,21 +56,22 @@ public class VariableController {
      * @param variable
      * @return
      */
-    @PostMapping("list")
+    @PostMapping("page")
     @RequiresPermissions("variable:view")
-    public RestResponse variableList(RestRequest restRequest, Variable variable) {
+    public RestResponse page(RestRequest restRequest, Variable variable) {
         IPage<Variable> variableList = variableService.page(variable, restRequest);
         return RestResponse.success(variableList);
     }
 
     /**
-     * Get all variables under the current team.
+     * Get variables through team and search keywords.
      * @param teamId
+     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
      * @return
      */
-    @PostMapping("all")
-    public RestResponse all(@RequestParam Long teamId) {
-        List<Variable> variableList = variableService.findByTeamId(teamId);
+    @PostMapping("list")
+    public RestResponse variableList(@RequestParam Long teamId, String keyword) {
+        List<Variable> variableList = variableService.findByTeamId(teamId, keyword);
         return RestResponse.success(variableList);
     }
 
