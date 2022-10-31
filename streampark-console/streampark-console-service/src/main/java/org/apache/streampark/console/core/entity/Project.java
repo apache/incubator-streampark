@@ -113,7 +113,7 @@ public class Project implements Serializable {
     @JsonIgnore
     public File getAppSource() {
         if (appSource == null) {
-            appSource = Workspace.PROJECT_LOCAL_DIR();
+            appSource = Workspace.PROJECT_LOCAL_PATH();
         }
         File sourcePath = new File(appSource);
         if (!sourcePath.exists()) {
