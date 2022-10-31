@@ -39,6 +39,7 @@ public class FileHeaderCheckInterceptor implements HandlerInterceptor {
 
     private static List<String> fileHeaders = new ArrayList<>();
     private int headerLength = 8;
+
     static {
         fileHeaders.add(FileType.JAR.getMagicNumber());
     }
