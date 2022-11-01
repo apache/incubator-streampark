@@ -45,7 +45,4 @@ public interface MenuMapper extends BaseMapper<Menu> {
      * @param menuId menuId
      */
     void deleteMenus(String menuId);
-
-    @Delete("delete from t_role_menu where menu_id = #{menuId}")
-    void deleteRoleMenuByMenuId(@Param("menuId") Long menuId);
 }
