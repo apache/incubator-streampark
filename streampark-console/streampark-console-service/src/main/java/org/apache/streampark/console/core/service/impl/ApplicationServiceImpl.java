@@ -130,6 +130,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1029,10 +1030,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @RefreshCache
     public boolean mapping(Application appParam) {
-        boolean mapping = this.baseMapper.mapping(appParam);
+        boolean mapping = Optional.ofNullable(appParam.getJobId()).isPresent() ? this.baseMapper.historyJobMapping(appParam) : this.baseMapper.mapping(appParam);
         Application application = getById(appParam.getId());
         if (isKubernetesApp(application)) {
-            k8SFlinkTrackMonitor.unTrackingJob(toTrackId(application));
+            k8SFlinkTrackMonitor.trackingJob(toTrackId(application));
         } else {
             FlinkTrackingTask.addTracking(application);
         }
