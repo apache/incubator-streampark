@@ -84,7 +84,7 @@ object FlinkShimsProxy extends Logger {
   // flink 1.12 1.13~1.14 1.15 1.16 parseSql class exist in different dependencies,
   // need to load all flink-table dependencies compatible with different versions
   def getVerifySqlLibClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
-    logInfo(s"add  verify sql lib,flink version:  $flinkVersion")
+    logInfo(s"add verify sql lib,flink version: $flinkVersion")
     VERIFY_SQL_CLASS_LOADER_CACHE.getOrElseUpdate(s"${flinkVersion.fullVersion}", {
       val getFlinkTable: File => Boolean = _.getName.startsWith("flink-table")
       // 1) flink/lib/flink-table*
