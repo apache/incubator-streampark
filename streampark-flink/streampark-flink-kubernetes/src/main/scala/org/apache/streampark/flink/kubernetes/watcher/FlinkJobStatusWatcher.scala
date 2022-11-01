@@ -17,6 +17,9 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
+import org.apache.commons.collections.CollectionUtils
+import org.apache.flink.core.fs.Path
+import org.apache.flink.runtime.history.FsJobArchivist
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
@@ -26,7 +29,7 @@ import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkTrackControl
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
-import org.apache.streampark.archives.FetchArchives
+import org.apache.streampark.common.conf.Workspace
 import org.json4s.{DefaultFormats, JNothing, JNull}
 import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
@@ -39,6 +42,7 @@ import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.{implicitConversions, postfixOps}
 import scala.util.{Failure, Success, Try}
+import scala.collection.JavaConversions._
 
 /**
  * Watcher for continuously monitor flink job status on kubernetes-mode,
@@ -277,7 +281,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
           }
         } else if (isConnection) {
           logger.info("The deployment is deleted and enters the task failure process.")
-          FlinkJobState.of(FetchArchives.getJobStateFromArchiveFile(trackId.jobId))
+          FlinkJobState.of(FlinkHistoryArchives.getJobStateFromArchiveFile(trackId.jobId))
         } else {
           inferSilentOrLostFromPreCache(latest)
         }
@@ -415,5 +419,42 @@ private[kubernetes] object JobDetails {
     }
 
   }
+
+}
+
+private[kubernetes] object FlinkHistoryArchives {
+
+  @transient
+  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  private[this] val FAILED_STATE = "FAILED"
+
+  def getJobStateFromArchiveFile(jobId: String): String = Try {
+    require(jobId != null, "[StreamPark] getJobStateFromArchiveFile: JobId cannot be null.")
+    val archivePath = new Path(Workspace.ARCHIVES_FILE_PATH, jobId)
+    val archivedJson = FsJobArchivist.getArchivedJsons(archivePath)
+    if (CollectionUtils.isNotEmpty(archivedJson)) {
+      archivedJson.foreach { a =>
+        if (a.getPath == "/jobs/overview") {
+          Try(parse(a.getJson)) match {
+            case Success(ok) =>
+              ok \ "jobs" match {
+                case JNothing | JNull => return FAILED_STATE
+                case JArray(arr) =>
+                  arr.foreach(x => {
+                    val jid = (x \ "jid").extractOpt[String].orNull
+                    if (jid == jobId) {
+                      return (x \ "state").extractOpt[String].orNull
+                    }
+                  })
+                case _ => return FAILED_STATE
+              }
+            case _ => return FAILED_STATE
+          }
+        }
+      }
+    }
+    FAILED_STATE
+  }.getOrElse(FAILED_STATE)
 
 }
