@@ -211,8 +211,8 @@ export function useMonaco(
 
   tryOnUnmounted(() => {
     stop();
-    disposeInstance();
     disposable?.dispose();
+    disposeInstance();
   });
 
   return {
