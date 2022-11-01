@@ -61,7 +61,7 @@
           v-if="data['state'] === 9">CANCELED</a-tag>
         <a-tag
           color="#1890ff"
-          v-if="data['state'] === 10 || data['state'] === 19">FINISHED</a-tag>
+          v-if="data['state'] === 10">FINISHED</a-tag>
         <a-tag
           color="#722ed1"
           v-if="data['state'] === 11">SUSPENDED</a-tag>
