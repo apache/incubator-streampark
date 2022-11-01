@@ -20,7 +20,6 @@ package org.apache.streampark.console.system.mapper;
 import org.apache.streampark.console.system.entity.Menu;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
