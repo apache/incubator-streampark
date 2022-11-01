@@ -16,7 +16,6 @@
  */
 import { Select } from 'ant-design-vue';
 import { ref } from 'vue';
-import { getTeamList } from '/@/api/system/team';
 import Icon from '/@/components/Icon';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useUserStore } from '/@/store/modules/user';

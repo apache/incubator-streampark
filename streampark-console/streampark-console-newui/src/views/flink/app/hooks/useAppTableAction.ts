@@ -223,7 +223,7 @@ export const useAppTableAction = (
       schemas: [
         {
           label: 'Tags',
-          field: 'tag',
+          field: 'tags',
           component: 'Select',
           componentProps: {
             placeholder: 'Tags',

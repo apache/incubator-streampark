@@ -148,6 +148,7 @@ export function useMonaco(
       });
     }
   };
+
   const disposeInstance = async () => {
     editor?.dispose();
   };

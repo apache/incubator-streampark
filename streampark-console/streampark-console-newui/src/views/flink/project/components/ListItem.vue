@@ -63,9 +63,9 @@
       </li>
     </ul>
     <div class="operation">
-      <a-tooltip title="See Build log" v-if="isBuilding">
-        <a-button type="link" @click="handleSeeLog">
-          <Icon spin icon="ant-design:sync-outlined" style="color: #4a9ff5" />
+      <a-tooltip title="See Build log">
+        <a-button shape="circle" @click="handleSeeLog">
+          <Icon icon="ant-design:eye-outlined" />
         </a-button>
       </a-tooltip>
 
@@ -77,7 +77,7 @@
             ok-text="Yes"
             @confirm="handleBuild"
           >
-            <a-button shape="circle" size="large" class="ml-8px" v-auth="'project:build'">
+            <a-button shape="circle" class="ml-8px" v-auth="'project:build'">
               <ThunderboltOutlined />
             </a-button>
           </a-popconfirm>
@@ -85,13 +85,7 @@
       </template>
 
       <a-tooltip title="Update Project">
-        <a-button
-          v-auth="'project:update'"
-          size="large"
-          @click="handleEdit"
-          shape="circle"
-          class="ml-8px"
-        >
+        <a-button v-auth="'project:update'" @click="handleEdit" shape="circle" class="ml-8px">
           <EditOutlined />
         </a-button>
       </a-tooltip>
@@ -102,7 +96,7 @@
           ok-text="Yes"
           @confirm="handleDelete"
         >
-          <a-button type="danger" shape="circle" size="large" style="margin-left: 8px">
+          <a-button type="danger" shape="circle" style="margin-left: 8px">
             <DeleteOutlined />
           </a-button>
         </a-popconfirm>

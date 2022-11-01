@@ -39,7 +39,7 @@
     data && onReceiveModalData(data);
   });
 
-  const { setContent, logRef } = useLog();
+  const { setContent, logRef, handleRevealLine } = useLog();
 
   function onReceiveModalData(data) {
     Object.assign(app, unref(data.app));
@@ -68,6 +68,7 @@
       const status = data.status || 'error';
       if (status === 'success') {
         setContent(data.data);
+        handleRevealLine();
         logTime.value = formatToDateTime(new Date());
       }
     } catch (error) {
@@ -84,12 +85,18 @@
   }
 </script>
 <template>
-  <BasicModal @register="registerModal" width="80%" :after-close="handleClose">
+  <BasicModal
+    canFullscreen
+    :scrollTop="false"
+    @register="registerModal"
+    width="80%"
+    :after-close="handleClose"
+  >
     <template #title>
       <Icon icon="ant-design:code-outlined" style="color: #477de9" />&nbsp;
       <span> {{ t('flink.app.view.logTitle', [app.jobName]) }}</span>
     </template>
-    <div ref="logRef" class="h-600px"></div>
+    <div ref="logRef" class="h-full min-h-500px"></div>
     <template #footer>
       <div class="flex align-items-center">
         <div class="flex-1 text-left">{{ t('flink.app.view.refreshTime') }}:{{ logTime }}</div>

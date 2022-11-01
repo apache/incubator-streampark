@@ -26,22 +26,9 @@ export const getAppColumns = (): BasicColumn[] => [
     fixed: 'left',
     width: 300,
   },
-  {
-    title: 'Tags',
-    ellipsis: true,
-    dataIndex: 'tags',
-    width: 150,
-  },
-  {
-    title: 'Owner',
-    dataIndex: 'nickName',
-    width: 100,
-  },
-  {
-    title: 'Flink Version',
-    dataIndex: 'flinkVersion',
-    width: 130,
-  },
+  { title: 'Tags', ellipsis: true, dataIndex: 'tags', width: 150 },
+  { title: 'Owner', dataIndex: 'nickName', width: 100 },
+  { title: 'Flink Version', dataIndex: 'flinkVersion', width: 130 },
   {
     title: 'Duration',
     dataIndex: 'duration',
@@ -49,12 +36,7 @@ export const getAppColumns = (): BasicColumn[] => [
     width: 150,
     customRender: ({ value }) => dateToDuration(value),
   },
-  {
-    title: 'Modified Time',
-    dataIndex: 'modifyTime',
-    sorter: true,
-    width: 170,
-  },
+  { title: 'Modified Time', dataIndex: 'modifyTime', sorter: true, width: 170 },
   {
     title: 'Run Status',
     dataIndex: 'state',
@@ -71,11 +53,7 @@ export const getAppColumns = (): BasicColumn[] => [
       { text: 'TERMINATED', value: '18' },
     ],
   },
-  {
-    title: 'Launch | Build',
-    dataIndex: 'launch',
-    width: 220,
-  },
+  { title: 'Launch | Build', dataIndex: 'launch', width: 220 },
 ];
 
 /* Get diff editor configuration */

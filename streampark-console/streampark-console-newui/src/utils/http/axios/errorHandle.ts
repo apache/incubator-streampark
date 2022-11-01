@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
+import { useI18n } from '/@/hooks/web/useI18n';
 import { SessionTimeoutProcessingEnum } from '/@/enums/appEnum';
 import { useMessage } from '/@/hooks/web/useMessage';
 import projectSetting from '/@/settings/projectSetting';
@@ -22,6 +23,7 @@ import { useUserStore } from '/@/store/modules/user';
 
 export function errorHandler(response: AxiosResponse<any>) {
   const { Swal, notification } = useMessage();
+  const { t } = useI18n();
   const stp = projectSetting.sessionTimeoutProcessing;
 
   if (response) {
@@ -79,8 +81,8 @@ export function errorHandler(response: AxiosResponse<any>) {
             break;
           default:
             notification.error({
-              message: errorMessage,
-              duration: 4,
+              message: errorMessage || t('sys.api.networkExceptionMsg'),
+              duration: 3,
             });
             break;
         }
