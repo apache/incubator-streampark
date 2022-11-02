@@ -130,7 +130,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1034,7 +1033,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setState(FlinkAppState.MAPPING.getValue());
         this.baseMapper.updateById(application);
         if (isKubernetesApp(application)) {
-            if (this.baseMapper.k8sJobMapping(appParam)){
+            if (this.baseMapper.k8sJobMapping(appParam)) {
                 Application app = getById(appParam.getId());
                 k8SFlinkTrackMonitor.trackingJob(toTrackId(app));
                 application.setState(FlinkAppState.RUNNING.getValue());
@@ -1043,7 +1042,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             return false;
         } else {
-            if (this.baseMapper.mapping(appParam)){
+            if (this.baseMapper.mapping(appParam)) {
                 Application app = getById(appParam.getId());
                 FlinkTrackingTask.addTracking(app);
                 application.setState(FlinkAppState.RUNNING.getValue());
