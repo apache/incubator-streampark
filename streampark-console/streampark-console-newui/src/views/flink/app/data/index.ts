@@ -48,6 +48,7 @@ export const getAppColumns = (): BasicColumn[] => [
       { text: 'FAILED', value: '7' },
       { text: 'CANCELED', value: '9' },
       { text: 'FINISHED', value: '10' },
+      { text: 'SUSPENDED', value: '11' },
       { text: 'LOST', value: '13' },
       { text: 'SILENT', value: '17' },
       { text: 'TERMINATED', value: '18' },

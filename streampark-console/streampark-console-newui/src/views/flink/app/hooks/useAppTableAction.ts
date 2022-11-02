@@ -198,7 +198,7 @@ export const useAppTableAction = (
     try {
       await fetchAppRemove(app.id);
       createMessage.success('delete successful');
-      handlePageDataReload();
+      handlePageDataReload(false);
     } catch (error) {
       console.error(error);
     } finally {
@@ -229,7 +229,7 @@ export const useAppTableAction = (
             placeholder: 'Tags',
             showSearch: true,
             options: tagsOptions.value.map((t: Recordable) => ({ label: t, value: t })),
-            onChange: handlePageDataReload,
+            onChange: handlePageDataReload.bind(null, false),
           },
         },
         {
@@ -242,7 +242,7 @@ export const useAppTableAction = (
             options: users.value.map((u: Recordable) => {
               return { label: u.nickName || u.username, value: u.userId };
             }),
-            onChange: handlePageDataReload,
+            onChange: handlePageDataReload.bind(null, false),
           },
         },
         {
@@ -256,7 +256,7 @@ export const useAppTableAction = (
               { label: 'JAR', value: JobTypeEnum.JAR },
               { label: 'SQL', value: JobTypeEnum.SQL },
             ],
-            onChange: handlePageDataReload,
+            onChange: handlePageDataReload.bind(null, false),
           },
         },
         {
@@ -265,8 +265,8 @@ export const useAppTableAction = (
           component: 'InputSearch',
           componentProps: {
             placeholder: 'Search',
-            onChange: handlePageDataReload,
-            onSearch: handlePageDataReload,
+            onChange: handlePageDataReload.bind(null, false),
+            onSearch: handlePageDataReload.bind(null, false),
           },
         },
       ],

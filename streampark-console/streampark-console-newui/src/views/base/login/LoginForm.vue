@@ -15,7 +15,12 @@
   limitations under the License.
 -->
 <template>
-  <LoginFormTitle v-show="getShow" class="enter-x mb-40px text-light-50" />
+  <div class="enter-x mb-20px text-light-50">
+    <div class="text-center enter-x">
+      <img class="logo w-140px mx-auto my-30px" src="/@/assets/images/logo.png" />
+      <div class="text-4xl form-title">{{ title }}</div>
+    </div>
+  </div>
   <Form
     class="p-4 enter-x signin-form"
     :model="formData"
@@ -28,6 +33,7 @@
     <FormItem name="account" class="enter-x">
       <Input
         v-model:value="formData.account"
+        size="large"
         :placeholder="t('sys.login.userName')"
         class="fix-auto-fill"
       >
@@ -39,6 +45,7 @@
     <FormItem name="password" class="enter-x">
       <InputPassword
         visibilityToggle
+        size="large"
         v-model:value="formData.password"
         :placeholder="t('sys.login.password')"
       >
@@ -47,8 +54,15 @@
         </template>
       </InputPassword>
     </FormItem>
-    <FormItem class="enter-x signin-btn">
-      <Button type="primary" block @click="handleLogin" :loading="loading">
+    <FormItem class="enter-x">
+      <Button
+        type="primary"
+        class="my-10px"
+        size="large"
+        block
+        @click="handleLogin"
+        :loading="loading"
+      >
         {{ loginText.buttonText }}
       </Button>
     </FormItem>
@@ -63,10 +77,10 @@
   import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 
   import { Form, Input, Button } from 'ant-design-vue';
-  import LoginFormTitle from './LoginFormTitle.vue';
 
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useGlobSetting } from '/@/hooks/setting';
 
   import { useUserStore } from '/@/store/modules/user';
   import {
@@ -86,6 +100,7 @@
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
 
+  const { title } = useGlobSetting();
   const { t } = useI18n();
   const { createErrorModal, createMessage } = useMessage();
   const { prefixCls } = useDesign('login');
