@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ref, unref } from 'vue';
+import { ref, watch } from 'vue';
 import { useMonaco, isDark } from '/@/hooks/web/useMonaco';
 
 export const useLog = () => {
   const logRef = ref();
-  const { setContent } = useMonaco(
+  const { setContent, getInstance, getMonacoInstance } = useMonaco(
     logRef,
     {
       language: 'log',
       options: {
-        theme: 'log',
+        theme: isDark.value ? 'log-dark' : 'log',
         readOnly: true,
         scrollBeyondLastLine: false,
         overviewRulerBorder: false, // Don't scroll bar borders
@@ -43,12 +43,24 @@ export const useLog = () => {
     },
     handleLogMonaco,
   );
+  watch(
+    isDark,
+    async () => {
+      const monacoInstance = await getMonacoInstance();
+      if (monacoInstance) {
+        if (isDark.value) monacoInstance.editor.setTheme('log-dark');
+        else monacoInstance.editor.setTheme('log');
+      }
+    },
+    { immediate: true },
+  );
   /* registered language */
   async function handleLogMonaco(monaco: any) {
     monaco.languages.register({ id: 'log' });
     monaco.languages.setMonarchTokensProvider('log', {
       tokenizer: {
         root: [
+          [/\[20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+]/, 'custom-date-time'],
           [/\[error.*/, 'custom-error'],
           [/\[notice.*/, 'custom-notice'],
           [/\[info.*/, 'custom-info'],
@@ -57,8 +69,8 @@ export const useLog = () => {
       },
     });
 
-    monaco.editor.defineTheme('log', {
-      base: unref(isDark) ? 'vs-dark' : 'vs',
+    monaco.editor.defineTheme('log-dark', {
+      base: 'vs-dark',
       inherit: true,
       colors: {},
       rules: [
@@ -66,8 +78,27 @@ export const useLog = () => {
         { token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
         { token: 'custom-notice', foreground: 'FFA500' },
         { token: 'custom-date', foreground: '008800' },
+        { token: 'custom-date-time', foreground: '008800' },
+      ],
+    });
+    monaco.editor.defineTheme('log', {
+      base: 'vs',
+      inherit: true,
+      colors: {},
+      rules: [
+        { token: 'custom-info', foreground: '808080' },
+        { token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
+        { token: 'custom-notice', foreground: 'FFA500' },
+        { token: 'custom-date', foreground: '008800' },
+        { token: 'custom-date-time', foreground: '008800' },
       ],
     });
   }
-  return { setContent, logRef };
+  async function handleRevealLine() {
+    const editor = await getInstance();
+    if (editor) {
+      editor.revealLine(editor.getModel()?.getLineCount() || 0);
+    }
+  }
+  return { setContent, logRef, handleRevealLine };
 };

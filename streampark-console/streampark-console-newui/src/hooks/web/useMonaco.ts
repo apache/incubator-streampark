@@ -148,6 +148,7 @@ export function useMonaco(
       });
     }
   };
+
   const disposeInstance = async () => {
     editor?.dispose();
   };
@@ -210,8 +211,8 @@ export function useMonaco(
 
   tryOnUnmounted(() => {
     stop();
-    disposeInstance();
     disposable?.dispose();
+    disposeInstance();
   });
 
   return {

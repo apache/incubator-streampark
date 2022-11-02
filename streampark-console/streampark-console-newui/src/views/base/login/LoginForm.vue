@@ -181,7 +181,6 @@
           createMessage.success(`${t('sys.login.loginSuccessTitle')} ${successText}`);
         }
       } catch (error: any) {
-        createMessage.error(error.response?.data?.data?.message || 'login failed');
         return Promise.reject(error);
       }
     } catch (error) {

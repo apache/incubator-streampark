@@ -148,7 +148,7 @@
   function handlePageDataReload() {
     nextTick(() => {
       appDashboardRef.value?.handleDashboard(false);
-      reload({ polling: true });
+      reload();
     });
   }
   const { start, stop } = useTimeoutFn(() => {

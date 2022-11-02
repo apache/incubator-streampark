@@ -45,6 +45,17 @@ jobs:
           submodules: true
       - name: Check license header
         uses: apache/skywalking-eyes/header@main
+  code-style:
+    if: github.repository == 'apache/incubator-streampark'
+    name: Code style
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Check java codestyle
+        run: ./mvnw -B -q -nsu clean checkstyle:check
   dead-link:
     if: github.repository == 'apache/incubator-streampark'
     name: Dead links

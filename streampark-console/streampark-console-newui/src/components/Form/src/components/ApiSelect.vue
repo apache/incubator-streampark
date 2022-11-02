@@ -74,6 +74,10 @@
       valueField: propTypes.string.def('value'),
       immediate: propTypes.bool.def(true),
       alwaysLoad: propTypes.bool.def(false),
+      optionsData: {
+        type: Array as PropType<any[]>,
+        detail: () => [],
+      },
     },
     emits: ['options-change', 'change'],
     setup(props, { emit }) {
@@ -89,7 +93,6 @@
 
       const getOptions = computed(() => {
         const { labelField, valueField, numberToString } = props;
-
         return unref(options).reduce((prev, next: Recordable) => {
           if (next) {
             const value = next[valueField];
@@ -156,7 +159,10 @@
       function handleChange(_, ...args) {
         emitData.value = args;
       }
-
+      // set default options
+      if (props.immediate && props.alwaysLoad) {
+        options.value = props.optionsData || [];
+      }
       return { state, attrs, getOptions, loading, t, handleFetch, handleChange };
     },
   });

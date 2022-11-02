@@ -66,7 +66,7 @@
         key: 5,
         title: 'Ingrsss Setting',
         isPassword: () => false,
-        data: filterValue('ingrsss.mode'),
+        data: filterValue('ingress.mode'),
       },
     ];
   });

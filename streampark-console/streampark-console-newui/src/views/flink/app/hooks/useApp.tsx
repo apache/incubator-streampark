@@ -206,7 +206,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       ],
       content: () => {
         return (
-          <Form class="!pt-20px">
+          <Form class="!pt-30px">
             <Form.Item
               label="Application Name"
               labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
@@ -278,7 +278,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       content: () => {
         return (
           <Form
-            class="!mt-20px"
+            class="!pt-40px"
             ref={mappingRef}
             name="mappingForm"
             labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}

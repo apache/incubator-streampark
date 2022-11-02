@@ -160,7 +160,7 @@ const setting: ProjectConfig = {
 
     // Whether to open page switching loading
     // Only open when enable=true
-    openPageLoading: false,
+    openPageLoading: true,
 
     // Whether to open the top progress bar
     openNProgress: true,
