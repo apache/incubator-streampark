@@ -141,7 +141,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             queryWrapper.eq(RoleMenu::getMenuId, Long.parseLong(menuId));
             this.roleMenuMapper.delete(queryWrapper);
             // Recursively delete these menus/buttons
-            this.baseMapper.deleteById(menuId);
+            this.removeById(Long.parseLong(menuId));
         }
     }
 
