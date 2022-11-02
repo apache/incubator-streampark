@@ -24,8 +24,10 @@ import org.apache.streampark.console.base.domain.router.VueRouter;
 import org.apache.streampark.console.base.util.TreeUtils;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.Menu;
+import org.apache.streampark.console.system.entity.RoleMenu;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.MenuMapper;
+import org.apache.streampark.console.system.mapper.RoleMenuMapper;
 import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -53,6 +55,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Autowired
     private UserService userService;
+
+    private RoleMenuMapper roleMenuMapper;
 
     @Override
     public List<String> findUserPermissions(Long userId, Long teamId) {
@@ -133,9 +137,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     public void deleteMenus(String[] menuIds) throws Exception {
         for (String menuId : menuIds) {
             // Find users associated with these menus/buttons
-            LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(StringUtils.isNotEmpty(menuId), Menu::getMenuId, Long.parseLong(menuId));
-            this.remove(queryWrapper);
+            LambdaQueryWrapper<RoleMenu> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(StringUtils.isNotEmpty(menuId), RoleMenu::getMenuId, Long.parseLong(menuId));
+            this.roleMenuMapper.delete(queryWrapper);
             // Recursively delete these menus/buttons
             this.baseMapper.deleteById(menuId);
         }
