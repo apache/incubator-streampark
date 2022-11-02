@@ -16,8 +16,7 @@
 -->
 <template>
   <div
-    class="w-full bg-light-200 relative section bg-gradient-primary pb-260px md:pt-130px px-50px overflow-hidden"
-  >
+    class="w-full bg-light-200 relative section bg-gradient-primary pb-260px md:pt-130px px-50px overflow-hidden">
     <div class="overlay bg-gradient-primary !opacity-90 -z-1"></div>
 
     <figure class="scribble scale-4 !opacity-10 top-50 left-0">
@@ -51,29 +50,6 @@
       </Row>
     </div>
 
-    <figure class="absolute -bottom-1 left-0 right-0 top-auto text-light-200 mb-0 z-8">
-      <svg
-        class="waves"
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        viewBox="0 24 150 28"
-        preserveAspectRatio="none"
-        shape-rendering="auto"
-      >
-        <defs>
-          <path
-            id="gentle-wave"
-            d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
-          />
-        </defs>
-        <g class="parallax">
-          <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.7" />
-          <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.5)" />
-          <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.3)" />
-          <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
-        </g>
-      </svg>
-    </figure>
   </div>
 </template>
 <script lang="ts" setup>
@@ -102,6 +78,7 @@
   .fix-auto-fill input {
     box-shadow: inherit !important;
   }
+
 
   .bg-gradient-primary {
     background-image: linear-gradient(
