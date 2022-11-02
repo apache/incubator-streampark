@@ -48,7 +48,7 @@ class RegexTest {
     void classLoader() throws MalformedURLException {
         List<URL> libCache = new ArrayList<>(0);
         List<URL> shimsCache = new ArrayList<>(0);
-        String regex = "(^|.*)streampark-flink-shims_flink-(1.12|1.13|1.14|1.15)-(.*).jar$";
+        String regex = "(^|.*)streampark-flink-shims_flink-(1.12|1.13|1.14|1.15|1.16)-(.*).jar$";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         String lib = "~/workspace/streampark/streampark-console-service-1.1.0-SNAPSHOT/lib";
 
