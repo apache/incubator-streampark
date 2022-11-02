@@ -20,9 +20,9 @@ import { computed, nextTick, reactive, ref, unref } from 'vue';
 import { fetchBranches, getDetail, gitCheck, isExist } from '/@/api/flink/project';
 import { useForm } from '/@/components/Form';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { filterOption } from '../app/utils';
 import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
+import { filterOption } from '../app/utils';
 
 export const useProject = () => {
   const route = useRoute();
@@ -110,11 +110,15 @@ export const useProject = () => {
         componentProps: ({ formModel }) => {
           return {
             showSearch: true,
-            optionFilterProp: 'children',
             filterOption,
             placeholder: 'Select a branch',
             options: unref(branchList),
-            onClick: () => handleBranches(formModel),
+            onDropdownVisibleChange: (open: boolean) => {
+              console.log('open', open);
+              if (open) {
+                handleBranches(formModel);
+              }
+            },
           };
         },
       },
@@ -193,7 +197,7 @@ export const useProject = () => {
         if (branchList.value.length === 0) {
           handleBranches(values);
         }
-        if (branchList.value.indexOf(values.branches) === -1) {
+        if (!branchList.value.find((v) => v.value == values.branches)) {
           createErrorSwal(
             'branch [' +
               values.branches +

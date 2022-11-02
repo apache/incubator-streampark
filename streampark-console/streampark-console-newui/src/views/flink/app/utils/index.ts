@@ -278,6 +278,6 @@ export function handleSubmitParams(
   }
 }
 
-export function filterOption(input, option) {
-  return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-}
+export const filterOption = (input: string, options: Recordable) => {
+  return options.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+};

@@ -43,7 +43,7 @@
         <Col :md="12" :span="24">
           <div
             :class="`${prefixCls}-form`"
-            class="relative w-auto m-auto max-w-460px px-12 bg-[rgba(0,0,0,0.6)] py-5 shadow-md enter-x z-100"
+            class="relative w-auto m-auto max-w-460px px-12 bg-[rgba(0,0,0,0.5)] rounded-5px py-5 shadow-2xl shadow-blue-500 enter-x z-100"
           >
             <LoginForm />
           </div>
