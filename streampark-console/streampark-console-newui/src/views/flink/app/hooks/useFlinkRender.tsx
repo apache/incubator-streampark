@@ -372,7 +372,7 @@ export const renderSqlHistory = (
       ),
       content: () => {
         return (
-          <Form>
+          <Form class="!pt-20px">
             <Form.Item
               label="Version"
               label-col={{ lg: { span: 5 }, sm: { span: 7 } }}

@@ -109,7 +109,7 @@
                 placeholder="Please enter"
                 class="ant-input"
               />
-              <div v-else style="width: 100%; text-align: right">
+              <div v-else style="width: 100%">
                 <span v-if="isPassword(item) && item.settingValue !== null"> ******** </span>
                 <span v-else>{{ item.settingValue }}</span>
               </div>

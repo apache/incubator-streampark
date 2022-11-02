@@ -147,7 +147,7 @@ export const useUserStore = defineStore({
       this.setPermissions(permissions);
     },
     // set team
-    async setTeamId(data: { teamId: string; userId?: string }): Promise<boolean> {
+    async setTeamId(data: { teamId: string; userId?: string | number }): Promise<boolean> {
       try {
         const { refreshMenu } = usePermission();
 
