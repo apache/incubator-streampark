@@ -1030,14 +1030,28 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @RefreshCache
     public boolean mapping(Application appParam) {
-        boolean mapping = Optional.ofNullable(appParam.getJobId()).isPresent() ? this.baseMapper.historyJobMapping(appParam) : this.baseMapper.mapping(appParam);
         Application application = getById(appParam.getId());
+        application.setState(FlinkAppState.MAPPING.getValue());
+        this.baseMapper.updateById(application);
         if (isKubernetesApp(application)) {
-            k8SFlinkTrackMonitor.trackingJob(toTrackId(application));
+            if (this.baseMapper.k8sJobMapping(appParam)){
+                Application app = getById(appParam.getId());
+                k8SFlinkTrackMonitor.trackingJob(toTrackId(app));
+                application.setState(FlinkAppState.RUNNING.getValue());
+                this.baseMapper.updateById(application);
+                return true;
+            }
+            return false;
         } else {
-            FlinkTrackingTask.addTracking(application);
+            if (this.baseMapper.mapping(appParam)){
+                Application app = getById(appParam.getId());
+                FlinkTrackingTask.addTracking(app);
+                application.setState(FlinkAppState.RUNNING.getValue());
+                this.baseMapper.updateById(application);
+                return true;
+            }
+            return false;
         }
-        return mapping;
     }
 
     @Override
