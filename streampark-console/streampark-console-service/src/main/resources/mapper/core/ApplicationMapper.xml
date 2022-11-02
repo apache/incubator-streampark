@@ -199,4 +199,19 @@
         </set>
         where id=#{application.id}
     </update>
+
+    <update id="mapping" parameterType="application">
+        update t_flink_app
+        <set>
+            <if test="application.jobId != null">
+                job_id=#{application.jobId},
+            </if>
+            <if test="application.appId != null">
+                app_id=#{application.appId},
+            </if>
+            end_time=null
+        </set>
+        where id=#{application.id}
+    </update>
+
 </mapper>

@@ -40,11 +40,7 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     List<Application> getByTeamId(@Param("teamId") Long teamId);
 
-    @Update("update t_flink_app set job_id=#{application.jobId},end_time=null where id=#{application.id}")
-    boolean k8sJobMapping(@Param("application") Application appParam);
-
-    @Update("update t_flink_app set app_id=#{application.appId},job_id=#{application.jobId},end_time=null where id=#{application.id}")
-    boolean mapping(@Param("application") Application appParam);
+    int mapping(@Param("application") Application appParam);
 
     @Update("update t_flink_app set option_state=0")
     void resetOptionState();
