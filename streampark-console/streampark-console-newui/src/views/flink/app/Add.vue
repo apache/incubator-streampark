@@ -271,7 +271,10 @@
           createMessage.warning('Flink Sql is required');
         } else {
           const access = await flinkSql?.value?.handleVerifySql();
-          if (!access) return;
+          if (!access) {
+            createMessage.warning('SQL check error');
+            throw new Error(access);
+          }
         }
       }
       if (formValue.jobType === 'customcode') {
@@ -295,8 +298,8 @@
     const socketId = buildUUID();
     ls.set('DOWN_SOCKET_ID', socketId);
     Object.assign(param, { socketId });
-    console.log('param', param);
     const { data } = await fetchCreate(param as CreateParams);
+    submitLoading.value = false;
     if (data.data) {
       go('/flink/app');
     } else {

@@ -79,6 +79,7 @@
         });
         const success = data.data === true || data.data === 'true';
         if (success) {
+          vertifyRes.verified = true;
           vertifyRes.errorMsg = '';
           syntaxError();
           return true;
@@ -93,7 +94,7 @@
               vertifyRes.errorMsg = "SQL is not endWith ';'";
               break;
             default:
-              vertifyRes.errorMsg = data.data.message;
+              vertifyRes.errorMsg = data.message;
               break;
           }
           syntaxError();
@@ -104,7 +105,6 @@
         return false;
       }
     }
-    vertifyRes.verified = true;
   }
 
   async function syntaxError() {
@@ -112,7 +112,6 @@
     if (editor) {
       const model = editor.getModel();
       const monaco = await getMonacoInstance();
-
       if (vertifyRes.errorMsg) {
         try {
           monaco.editor.setModelMarkers(model, 'sql', [

@@ -15,25 +15,73 @@
   limitations under the License.
 -->
 <template>
-  <div :class="prefixCls" class="relative w-full h-full px-4">
-    <div class="relative h-full">
-      <div class="flex h-full">
-        <div class="flex w-full h-full py-5 xl:h-auto xl:py-0 xl:my-0">
+  <div
+    class="w-full bg-light-200 relative section bg-gradient-primary pb-260px md:pt-130px px-50px overflow-hidden"
+  >
+    <div class="overlay bg-gradient-primary !opacity-90 -z-1"></div>
+
+    <figure class="scribble scale-4 !opacity-10 top-50 left-0">
+      <SvgIcon name="block" class="text-secondary" :size="200" />
+    </figure>
+
+    <figure class="scribble scale-5 !opacity-10 top-50 left-0">
+      <SvgIcon name="block" class="text-secondary" :size="200" />
+    </figure>
+
+    <figure class="scribble scale-6 !opacity-10 top-50 left-0">
+      <SvgIcon name="block" class="text-secondary" :size="200" />
+    </figure>
+
+    <figure class="scribble scale-7 !opacity-10 top-50 left-0">
+      <SvgIcon name="block" class="text-secondary" :size="200" />
+    </figure>
+    <div class="container px-7 pb-2">
+      <Row :gutter="24">
+        <Col :md="12" :span="24" class="self-center pr-5 z-100 -enter-x">
+          <LoginSlogan />
+        </Col>
+        <Col :md="12" :span="24">
           <div
             :class="`${prefixCls}-form`"
-            class="relative w-auto px-12 bg-[rgba(0,0,0,0.4)] py-5 mx-auto my-auto shadow-md enter-y"
+            class="relative w-auto m-auto max-w-460px px-12 bg-[rgba(0,0,0,0.5)] rounded-5px py-5 shadow-2xl shadow-blue-500 enter-x z-100"
           >
             <LoginForm />
           </div>
-        </div>
-      </div>
+        </Col>
+      </Row>
     </div>
+
+    <figure class="absolute -bottom-1 left-0 right-0 top-auto text-light-200 mb-0 z-8">
+      <svg
+        class="waves"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 24 150 28"
+        preserveAspectRatio="none"
+        shape-rendering="auto"
+      >
+        <defs>
+          <path
+            id="gentle-wave"
+            d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
+          />
+        </defs>
+        <g class="parallax">
+          <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.7" />
+          <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.5)" />
+          <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.3)" />
+          <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
+        </g>
+      </svg>
+    </figure>
   </div>
 </template>
 <script lang="ts" setup>
   import LoginForm from './LoginForm.vue';
+  import LoginSlogan from './LoginSlogan';
   import { useDesign } from '/@/hooks/web/useDesign';
-
+  import { Row, Col } from 'ant-design-vue';
+  import { SvgIcon } from '/@/components/Icon';
   defineProps({
     sessionTimeout: {
       type: Boolean,
@@ -55,122 +103,80 @@
     box-shadow: inherit !important;
   }
 
-  .@{prefix-cls} {
-    min-height: 100%;
-    overflow: hidden;
-    background: url('/@/assets/images/sign-bg.jpg') no-repeat 50%;
-    background-size: cover;
+  .bg-gradient-primary {
+    background-image: linear-gradient(
+      130deg,
+      #0e18d2 15%,
+      #3172f5 40%,
+      #3172f5 60%,
+      #60cff2 100%
+    ) !important;
+  }
 
-    .ant-input-affix-wrapper {
-      border: 1px solid rgba(@active-color, 0.55);
-      border-radius: 1px;
-      color: rgba(@active-color, 0.65);
-      margin-top: 10px;
-      background-color: rgba(@active-color, 0.05) !important;
-    }
+  .overlay {
+    border-radius: inherit;
+    height: 100%;
+    left: 0;
+    opacity: 0.5;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
 
-    .signin-title {
-      padding-top: 20px;
-      font-size: 16px;
-      color: rgba(255, 255, 255, 0.65);
-      margin-top: 12px;
-      margin-bottom: 20px;
-    }
+  .@{prefix-cls}-form {
+    .ant-input {
+      padding-top: 3px;
+      padding-bottom: 3px;
 
-    .logo {
-      padding-top: 20px;
-      height: 130px;
-      margin: auto;
-    }
-
-    .signin-form {
-      .ant-form-item-has-error :not(.ant-input-disabled):not(.ant-input-borderless).ant-input {
-        background-color: transparent !important;
-      }
-
-      .ant-input {
-        padding-top: 3px;
-        padding-bottom: 3px;
-        color: @white;
-
-        .ant-input-affix-wrapper:hover,
-        .ant-input:not(.ant-input-disabled) {
-          border-color: rgba(@active-color, 0.95);
-        }
-      }
-      .ant-input-password-icon {
-        color: @content-bg !important;
-      }
-      .signin-btn {
-        .ant-btn {
-          margin-top: 30px;
-          height: 40px;
-          background: rgba(@active-color, 0.4);
-          border: unset;
-        }
-      }
-
-      .text-left {
-        .ant-btn {
-          padding: 0px;
-        }
+      .ant-input-affix-wrapper:hover,
+      .ant-input:not(.ant-input-disabled) {
+        border-color: rgba(@active-color, 0.95);
       }
     }
-
-    &::after {
-      content: '';
-      width: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: -20px;
-      background: inherit;
-      z-index: 2;
-      filter: blur(1px);
+    .form-title {
+      font-family: Poppins, sans-serif !important;
     }
-
-    &-sign-in-way {
-      .anticon {
-        font-size: 22px;
-        color: #888;
-        cursor: pointer;
-
-        &:hover {
-          color: @primary-color;
-        }
+    .text-left {
+      .ant-btn {
+        padding: 0px;
       }
     }
+  }
 
-    input {
-      min-width: 300px;
-      background: transparent;
-      &:autofill {
-        background: transparent;
-      }
-      @media (max-width: @screen-xl) {
-        min-width: 260px;
-      }
-
-      @media (max-width: @screen-lg) {
-        min-width: 200px;
-      }
-
-      @media (max-width: @screen-md) {
-        min-width: 180px;
-      }
-
-      @media (max-width: @screen-sm) {
-        min-width: 100px;
-      }
+  .waves {
+    position: relative;
+    width: 100%;
+    height: 24vh;
+    margin-bottom: -7px; /* 修复 Safari 等浏览器下方空隙 */
+    min-height: 150px;
+    max-height: 280px;
+    width: 100%;
+  }
+  .parallax > use {
+    animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+  }
+  .parallax > use:nth-child(1) {
+    animation-delay: -2s;
+    animation-duration: 7s;
+  }
+  .parallax > use:nth-child(2) {
+    animation-delay: -3s;
+    animation-duration: 8s;
+  }
+  .parallax > use:nth-child(3) {
+    animation-delay: -4s;
+    animation-duration: 9s;
+  }
+  .parallax > use:nth-child(4) {
+    animation-delay: -5s;
+    animation-duration: 10s;
+  }
+  @keyframes move-forever {
+    0% {
+      transform: translate3d(-90px, 0, 0);
     }
-
-    .@{countdown-prefix-cls} input {
-      min-width: unset;
-    }
-
-    .ant-divider-inner-text {
-      font-size: 12px;
-      color: @text-color-secondary;
+    100% {
+      transform: translate3d(85px, 0, 0);
     }
   }
 </style>

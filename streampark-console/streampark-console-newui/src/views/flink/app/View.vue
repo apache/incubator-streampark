@@ -145,15 +145,15 @@
     optionApps[data.type].set(data.key, data.value);
   }
 
-  function handlePageDataReload() {
+  function handlePageDataReload(polling = false) {
     nextTick(() => {
       appDashboardRef.value?.handleDashboard(false);
-      reload();
+      reload({ polling });
     });
   }
   const { start, stop } = useTimeoutFn(() => {
     if (!getLoading()) {
-      handlePageDataReload();
+      handlePageDataReload(true);
     }
     start();
   }, 2000);
