@@ -138,7 +138,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         for (String menuId : menuIds) {
             // Find users associated with these menus/buttons
             LambdaQueryWrapper<RoleMenu> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(StringUtils.isNotEmpty(menuId), RoleMenu::getMenuId, Long.parseLong(menuId));
+            queryWrapper.eq(RoleMenu::getMenuId, Long.parseLong(menuId));
             this.roleMenuMapper.delete(queryWrapper);
             // Recursively delete these menus/buttons
             this.baseMapper.deleteById(menuId);
