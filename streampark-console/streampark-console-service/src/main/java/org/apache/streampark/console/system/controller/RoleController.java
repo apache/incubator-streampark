@@ -67,7 +67,7 @@ public class RoleController {
 
     @PostMapping("menu")
     public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
-        List<RoleMenu> list = this.roleMenuServie.getRoleMenusByRoleId(roleId);
+        List<RoleMenu> list = this.roleMenuServie.getByRoleId(roleId);
         List<String> roleMenus = list.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
             .collect(Collectors.toList());
