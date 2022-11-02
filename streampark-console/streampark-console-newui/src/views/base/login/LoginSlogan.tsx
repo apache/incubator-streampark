@@ -55,7 +55,7 @@ export default defineComponent({
                 <span className="badge bg-secondary-home text-xl tag">Incubating</span>
               </div>
             </div>
-            <p className="text-xl text-light-200 leading-40px">
+            <p className=" text-light-200 leading-40px" style={{ fontSize: '20px' }}>
               Make stream processing easier! easy-to-use streaming application development framework
               and operation platform
             </p>
@@ -79,7 +79,17 @@ export default defineComponent({
             </a>
           </div>
 
-          <div style={{ marginTop: '20px' }} className="shields z-3 flex items-center">
+          <div className="mt-20px shields z-3 flex items-center">
+            <img
+              src="https://img.shields.io/github/stars/apache/incubator-streampark.svg?sanitize=true"
+              className="wow fadeInUp"
+            ></img>
+            <img
+              src="https://img.shields.io/github/forks/apache/incubator-streampark.svg?sanitize=true"
+              className="wow fadeInUp"
+            ></img>
+          </div>
+          <div className="mt-20px shields z-3 flex items-center">
             <Tag color="#477de9">Version:1.2.4</Tag>
           </div>
         </div>
