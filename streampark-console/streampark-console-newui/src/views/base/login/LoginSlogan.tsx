@@ -18,7 +18,7 @@ import { Tag } from 'ant-design-vue';
 import { defineComponent } from 'vue';
 import './LoginSlogan.less';
 import Icon from '/@/components/Icon';
-
+import { version } from '../../../../package.json';
 export default defineComponent({
   name: 'LoginSlogan',
   setup() {
@@ -90,7 +90,7 @@ export default defineComponent({
             ></img>
           </div>
           <div className="mt-20px shields z-3 flex items-center">
-            <Tag color="#477de9">Version:1.2.4</Tag>
+            <Tag color="#477de9">Version: v{version}</Tag>
           </div>
         </div>
       );
