@@ -27,6 +27,7 @@ import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.MenuMapper;
 import org.apache.streampark.console.system.service.MenuService;
+import org.apache.streampark.console.system.service.RoleMenuServie;
 import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -39,6 +40,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +55,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RoleMenuServie roleMenuServie;
 
     @Override
     public List<String> findUserPermissions(Long userId, Long teamId) {
@@ -131,12 +136,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteMenus(String[] menuIds) throws Exception {
-        for (String menuId : menuIds) {
-            // Find users associated with these menus/buttons
-            this.baseMapper.deleteRoleMenuByMenuId(Long.parseLong(menuId));
-            // Recursively delete these menus/buttons
-            this.baseMapper.deleteById(menuId);
-        }
+        // Find users associated with these menus/buttons
+        this.roleMenuServie.deleteByMenuId(menuIds);
+        // Recursively delete these menus/buttons
+        this.removeByIds(Arrays.asList(menuIds));
     }
 
     @Override

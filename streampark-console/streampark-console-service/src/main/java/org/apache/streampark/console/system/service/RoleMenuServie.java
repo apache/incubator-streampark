@@ -25,9 +25,9 @@ import java.util.List;
 
 public interface RoleMenuServie extends IService<RoleMenu> {
 
-    void deleteRoleMenusByRoleId(Long roleId);
+    void deleteByRoleId(Long roleId);
 
-    void deleteRoleMenusByMenuId(String[] menuIds);
+    void deleteByMenuId(String[] menuIds);
 
-    List<RoleMenu> getRoleMenusByRoleId(String roleId);
+    List<RoleMenu> getByRoleId(String roleId);
 }

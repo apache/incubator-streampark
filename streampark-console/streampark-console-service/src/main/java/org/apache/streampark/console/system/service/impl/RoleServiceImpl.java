@@ -89,7 +89,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         AssertUtils.isTrue(userIdsByRoleId == null || userIdsByRoleId.isEmpty(),
             String.format("There are some users are bound to role %s , please unbind it first.", role.getRoleName()));
         this.removeById(roleId);
-        this.roleMenuService.deleteRoleMenusByRoleId(roleId);
+        this.roleMenuService.deleteByRoleId(roleId);
     }
 
     @Override
