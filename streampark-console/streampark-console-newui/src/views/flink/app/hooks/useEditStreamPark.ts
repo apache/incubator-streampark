@@ -21,7 +21,6 @@ import { executionModes } from '../data';
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { renderSqlHistory } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
-import { fetchGetVer } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { fetchFlinkSql } from '/@/api/flink/app/flinkSql';
 import { toPomString } from '../utils/Pom';
@@ -51,12 +50,13 @@ export const useEditStreamParkSchema = (
   });
   const [registerDifferentDrawer, { openDrawer: openDiffDrawer }] = useDrawer();
 
-  async function handleChangeSQL(v) {
-    const res = await fetchGetVer({ id: v });
+  async function handleChangeSQL(v: string) {
+    const res = await fetchFlinkSql({ id: v });
     flinkSql.value?.setContent(decodeByBase64(res.sql));
+    unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
   }
-
-  async function handleCompareOk(compareSQL) {
+  // start compare flinksql version
+  async function handleCompareOk(compareSQL: Array<string>) {
     const res = await fetchFlinkSql({ id: compareSQL.join(',') });
     const obj1 = res[0];
     const obj2 = res[1];
@@ -129,6 +129,7 @@ export const useEditStreamParkSchema = (
         ifShow: ({ values }) => {
           return values.jobType == 2 && unref(flinkSqlHistory).length > 1;
         },
+        required: true,
       },
       ...getFlinkSqlSchema.value,
       {

@@ -15,41 +15,54 @@
   limitations under the License.
 -->
 <template>
-  <div
-    class="w-full bg-light-200 relative section bg-gradient-primary pb-260px md:pt-130px px-50px overflow-hidden">
-    <div class="overlay bg-gradient-primary !opacity-90 -z-1"></div>
+  <div class="h-full bg-gradient-primary overflow-auto">
+    <div class="w-full relative h-[calc(100%-120px)] min-h-700px flex items-center section">
+      <div class="scribble-box w-[80%] h-full absolute overflow-hidden">
+        <figure class="scribble scale-2 !opacity-10 top-50 left-0">
+          <SvgIcon name="block" class="text-secondary" :size="200" />
+        </figure>
 
-    <figure class="scribble scale-4 !opacity-10 top-50 left-0">
-      <SvgIcon name="block" class="text-secondary" :size="200" />
-    </figure>
+        <figure class="scribble scale-3 !opacity-10 top-50 left-0">
+          <SvgIcon name="block" class="text-secondary" :size="200" />
+        </figure>
 
-    <figure class="scribble scale-5 !opacity-10 top-50 left-0">
-      <SvgIcon name="block" class="text-secondary" :size="200" />
-    </figure>
+        <figure class="scribble scale-4 !opacity-10 top-50 left-0">
+          <SvgIcon name="block" class="text-secondary" :size="200" />
+        </figure>
 
-    <figure class="scribble scale-6 !opacity-10 top-50 left-0">
-      <SvgIcon name="block" class="text-secondary" :size="200" />
-    </figure>
-
-    <figure class="scribble scale-7 !opacity-10 top-50 left-0">
-      <SvgIcon name="block" class="text-secondary" :size="200" />
-    </figure>
-    <div class="container px-7 pb-2">
-      <Row :gutter="24">
-        <Col :md="12" :span="24" class="self-center pr-5 z-100 -enter-x">
-          <LoginSlogan />
-        </Col>
-        <Col :md="12" :span="24">
-          <div
-            :class="`${prefixCls}-form`"
-            class="relative w-auto m-auto max-w-460px px-12 bg-[rgba(0,0,0,0.5)] rounded-5px py-5 shadow-2xl shadow-blue-500 enter-x z-100"
-          >
-            <LoginForm />
-          </div>
-        </Col>
-      </Row>
+        <figure class="scribble scale-5 !opacity-10 top-50 left-0">
+          <SvgIcon name="block" class="text-secondary" :size="200" />
+        </figure>
+      </div>
+      <div class="container pb-2">
+        <Row :gutter="24">
+          <Col :md="12" :span="24" class="self-center pr-5 z-100 -enter-x">
+            <LoginSlogan />
+          </Col>
+          <Col :md="12" :span="24">
+            <div
+              :class="`${prefixCls}-form`"
+              class="relative w-auto m-auto max-w-460px px-12 bg-[rgba(0,0,0,0.5)] rounded-5px py-5 shadow-2xl shadow-blue-500 enter-x z-100"
+            >
+              <LoginForm />
+            </div>
+          </Col>
+        </Row>
+      </div>
     </div>
-
+    <footer class="w-1150px m-auto text-center bg-transparent opacity-60">
+      <a href="https://incubator.apache.org/" target="_blank" class="w-200px m-auto inline-block">
+        <img
+          src="/@/assets/svg/apache-incubator.svg"
+          alt="Apache Incubator  logo"
+          class="w-200px my-10px mx-auto"
+        />
+      </a>
+      <p class="text-light-100 pt-10px" style="border-top: 1px solid #dad7d7">
+        Copyright © 2022 The Apache Software Foundation. Apache StreamPark, StreamPark, and its
+        feather logo are trademarks of The Apache Software Foundation.
+      </p>
+    </footer>
   </div>
 </template>
 <script lang="ts" setup>
@@ -78,7 +91,6 @@
   .fix-auto-fill input {
     box-shadow: inherit !important;
   }
-
 
   .bg-gradient-primary {
     background-image: linear-gradient(
@@ -110,9 +122,11 @@
         border-color: rgba(@active-color, 0.95);
       }
     }
+
     .form-title {
       font-family: Poppins, sans-serif !important;
     }
+
     .text-left {
       .ant-btn {
         padding: 0px;
@@ -124,34 +138,42 @@
     position: relative;
     width: 100%;
     height: 24vh;
-    margin-bottom: -7px; /* 修复 Safari 等浏览器下方空隙 */
+    margin-bottom: -7px;
+    /* 修复 Safari 等浏览器下方空隙 */
     min-height: 150px;
     max-height: 280px;
     width: 100%;
   }
+
   .parallax > use {
     animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
   }
+
   .parallax > use:nth-child(1) {
     animation-delay: -2s;
     animation-duration: 7s;
   }
+
   .parallax > use:nth-child(2) {
     animation-delay: -3s;
     animation-duration: 8s;
   }
+
   .parallax > use:nth-child(3) {
     animation-delay: -4s;
     animation-duration: 9s;
   }
+
   .parallax > use:nth-child(4) {
     animation-delay: -5s;
     animation-duration: 10s;
   }
+
   @keyframes move-forever {
     0% {
       transform: translate3d(-90px, 0, 0);
     }
+
     100% {
       transform: translate3d(85px, 0, 0);
     }

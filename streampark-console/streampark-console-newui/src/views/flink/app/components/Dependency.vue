@@ -231,7 +231,6 @@
   }
   // set default value
   function setDefaultValue(dataSource: { pom?: DependencyType[]; jar?: string[] }) {
-    console.log('dataSource', dataSource);
     dependencyRecords.value = dataSource.pom || [];
     uploadJars.value = dataSource.jar || [];
     dataSource.pom?.map((pomRecord: DependencyType) => {

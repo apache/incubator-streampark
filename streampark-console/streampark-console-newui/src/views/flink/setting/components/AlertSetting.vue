@@ -299,7 +299,7 @@
   }
   .alert-card-list {
     .ant-list-empty-text {
-      background-color: white;
+      background-color: @component-background;
     }
   }
 </style>

@@ -16,6 +16,7 @@
  */
 import { dateToDuration } from '/@/utils/dateUtil';
 import { BasicColumn } from '/@/components/Table';
+import { ExecutionModeEnum } from '/@/enums/flinkEnum';
 
 /* app */
 export const getAppColumns = (): BasicColumn[] => [
@@ -102,14 +103,18 @@ export const k8sRestExposedType = [
 ];
 
 export const executionModes = [
-  { label: 'remote (standalone)', value: 1, disabled: false },
-  { label: 'yarn application', value: 4, disabled: false },
-  { label: 'yarn session', value: 3, disabled: false },
-  { label: 'kubernetes session', value: 5, disabled: false },
-  { label: 'kubernetes application', value: 6, disabled: false },
+  { label: 'remote (standalone)', value: ExecutionModeEnum.REMOTE, disabled: false },
+  { label: 'yarn application', value: ExecutionModeEnum.YARN_APPLICATION, disabled: false },
+  { label: 'yarn session', value: ExecutionModeEnum.YARN_SESSION, disabled: false },
+  { label: 'kubernetes session', value: ExecutionModeEnum.KUBERNETES_SESSION, disabled: false },
+  {
+    label: 'kubernetes application',
+    value: ExecutionModeEnum.KUBERNETES_APPLICATION,
+    disabled: false,
+  },
   {
     label: 'yarn per-job (deprecated, please use yarn-application mode)',
-    value: 2,
+    value: ExecutionModeEnum.YARN_PER_JOB,
     disabled: false,
   },
 ];

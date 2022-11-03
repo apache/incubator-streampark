@@ -21,3 +21,27 @@ export enum BuildEnum {
   SUCCESSFUL = 1,
   FAILED = 2,
 }
+/* ExecutionMode  */
+export enum ExecutionModeEnum {
+  /* remote (standalone) */
+  REMOTE = 1,
+  /* yarn per-job (deprecated, please use yarn-application mode) */
+  YARN_PER_JOB = 2,
+  /* yarn session */
+  YARN_SESSION = 3,
+  /* yarn application */
+  YARN_APPLICATION = 4,
+  /* kubernetes session */
+  KUBERNETES_SESSION = 5,
+  /* kubernetes application */
+  KUBERNETES_APPLICATION = 6,
+}
+
+export const executionMap = {
+  REMOTE: ExecutionModeEnum.REMOTE,
+  YARN_PER_JOB: ExecutionModeEnum.YARN_PER_JOB,
+  YARN_SESSION: ExecutionModeEnum.YARN_SESSION,
+  YARN_APPLICATION: ExecutionModeEnum.YARN_APPLICATION,
+  KUBERNETES_SESSION: ExecutionModeEnum.KUBERNETES_SESSION,
+  KUBERNETES_APPLICATION: ExecutionModeEnum.KUBERNETES_APPLICATION,
+};
