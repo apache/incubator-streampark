@@ -38,6 +38,7 @@ import { ref, unref } from 'vue';
 import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { SelectValue } from 'ant-design-vue/lib/select';
 
 /* render input dropdown component */
 export const renderInputDropdown = (
@@ -357,8 +358,8 @@ export const renderSqlHistory = (
   const { createConfirm } = useMessage();
   const compareSQL = ref<string[]>([]);
 
-  function handleSelectChange(value) {
-    model.sqlId = value;
+  function handleSelectChange(value: SelectValue) {
+    model.flinkSqlHistory = value;
     handleChangeSQL(value);
   }
 
@@ -432,7 +433,7 @@ export const renderSqlHistory = (
   return (
     <div>
       <Select
-        onChange={(value) => handleSelectChange(value)}
+        onChange={(value: SelectValue) => handleSelectChange(value)}
         value={model.flinkSqlHistory}
         style="width: calc(100% - 60px)"
       >
