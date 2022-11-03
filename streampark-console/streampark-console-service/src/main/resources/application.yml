@@ -63,7 +63,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: [ 'httptrace', 'metrics' ]
+        include: [ 'health', 'httptrace', 'metrics' ]
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+      probes:
+        enabled: true
 
 # mybatis plus setting
 mybatis-plus:
