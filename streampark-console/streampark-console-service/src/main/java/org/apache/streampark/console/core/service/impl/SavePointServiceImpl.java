@@ -80,7 +80,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         if (cpThreshold == 0) {
             LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(SavePoint::getAppId, entity.getAppId());
-            queryWrapper.eq(SavePoint::getType,1);
+            queryWrapper.eq(SavePoint::getType, 1);
             this.remove(queryWrapper);
         } else {
             LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<>();
@@ -94,8 +94,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                 SavePoint savePoint = savePointPage.getRecords().get(cpThreshold - 1);
                 LambdaQueryWrapper<SavePoint> lambdaQueryWrapper = new LambdaQueryWrapper<>();
                 lambdaQueryWrapper.eq(SavePoint::getAppId, entity.getAppId());
-                lambdaQueryWrapper.eq(SavePoint::getType,1);
-                lambdaQueryWrapper.lt(SavePoint::getTriggerTime,savePoint.getTriggerTime());
+                lambdaQueryWrapper.eq(SavePoint::getType, 1);
+                lambdaQueryWrapper.lt(SavePoint::getTriggerTime, savePoint.getTriggerTime());
                 this.remove(lambdaQueryWrapper);
             }
         }
