@@ -312,6 +312,7 @@
       module: res.module,
       configId,
       sqlId: app.sqlId,
+      flinkSqlHistory: app.sqlId,
       versionId: app.versionId,
       projectName: app.projectName,
       project: app.projectId,

@@ -55,8 +55,8 @@ export const useEditStreamParkSchema = (
     const res = await fetchGetVer({ id: v });
     flinkSql.value?.setContent(decodeByBase64(res.sql));
   }
-
-  async function handleCompareOk(compareSQL) {
+  // start compare flinksql version
+  async function handleCompareOk(compareSQL: Array<string>) {
     const res = await fetchFlinkSql({ id: compareSQL.join(',') });
     const obj1 = res[0];
     const obj2 = res[1];

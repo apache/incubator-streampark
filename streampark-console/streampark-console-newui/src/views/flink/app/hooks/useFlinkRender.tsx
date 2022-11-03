@@ -349,6 +349,7 @@ export const renderIsSetConfig = (
   );
 };
 
+// render history version form item
 export const renderSqlHistory = (
   { model, flinkSqlHistory },
   { handleChangeSQL, handleCompareOk }: { handleChangeSQL: Fn; handleCompareOk: Fn },
@@ -361,6 +362,7 @@ export const renderSqlHistory = (
     handleChangeSQL(value);
   }
 
+  //version compact
   function handleCompactSQL() {
     createConfirm({
       iconType: 'info',
@@ -370,9 +372,11 @@ export const renderSqlHistory = (
           <span>Compare Flink SQL</span>
         </div>
       ),
+      okText: 'Compare',
+      width: 600,
       content: () => {
         return (
-          <Form class="!pt-20px">
+          <Form class="!pt-30px">
             <Form.Item
               label="Version"
               label-col={{ lg: { span: 5 }, sm: { span: 7 } }}
@@ -391,15 +395,16 @@ export const renderSqlHistory = (
           </Form>
         );
       },
-      onOk: handleCompareOk.bind(null, compareSQL.value),
+      onOk: () => handleCompareOk(compareSQL.value),
     });
   }
 
-  const renderSelectOptions = async (isCompareSelect = false) => {
-    const isDisabled = (ver) => {
+  const renderSelectOptions = (isCompareSelect = false) => {
+    const isDisabled = (ver: Recordable) => {
       if (!isCompareSelect) return false;
       return compareSQL.value.length == 2 && compareSQL.value.findIndex((i) => i === ver.id) === -1;
     };
+    console.log('flinkSqlHistory', flinkSqlHistory);
     return (flinkSqlHistory || []).map((ver) => {
       return (
         <Select.Option key={ver.id} disabled={isDisabled(ver)}>
@@ -428,7 +433,7 @@ export const renderSqlHistory = (
     <div>
       <Select
         onChange={(value) => handleSelectChange(value)}
-        value={model.sqlId}
+        value={model.flinkSqlHistory}
         style="width: calc(100% - 60px)"
       >
         {renderSelectOptions()}
