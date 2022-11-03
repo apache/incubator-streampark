@@ -27,6 +27,7 @@ import org.apache.streampark.common.enums.TableMode.TableMode
 import org.apache.streampark.common.enums.{ApiType, PlannerType, TableMode}
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.streampark.flink.core.conf.FlinkConfiguration
+import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import java.io.File
 import scala.collection.JavaConversions._
@@ -246,11 +247,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         }
         localStreamTableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
     }
-    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
-      case (appName: String, _) => appName
-      case (null, appName: String) => appName
-      case _ => null
-    }
+    val appName = parameter.getAppName()
     if (appName != null) {
       tableMode match {
         case TableMode.batch => localTableEnv.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)

@@ -18,6 +18,7 @@ package org.apache.streampark.flink.core
 
 import com.esotericsoftware.kryo.Serializer
 import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.flink.core.EnhancerImplicit._
 import org.apache.flink.api.common.cache.DistributedCache
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.io.{FileInputFormat, FilePathFilter, InputFormat}
@@ -67,15 +68,7 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
    * Recommended to use this Api to start tasks
    */
   def start(name: String = null): JobExecutionResult = {
-    val appName = name match {
-      case null =>
-        (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
-          case (appName: String, _) => appName
-          case (null, appName: String) => appName
-          case _ => ""
-        }
-      case x => x
-    }
+    val appName = parameter.getAppName(name, true)
     execute(appName)
   }
 
