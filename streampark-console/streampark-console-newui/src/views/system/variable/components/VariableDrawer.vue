@@ -41,6 +41,7 @@
     fetchCheckVariableCode,
     fetchUpdateVariable,
   } from '/@/api/system/variable';
+  import { h } from 'vue';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -114,6 +115,17 @@
         componentProps: { rows: 4 },
         rules: [{ max: 100, message: t('system.variable.form.descriptionMessage') }],
       },
+      {
+        field: 'sensitive',
+        label: 'Sensitive',
+        component: 'Switch',
+        componentProps: {
+          checkedChildren: 'ON',
+          unCheckedChildren: 'OFF',
+        },
+        defaultValue: false,
+        afterItem: h('span', { class: 'conf-switch' }, 'Whether it is set as sensitive information. If it is, it will be replaced by * when displayed elsewhere.'),
+      }
     ];
   });
 
@@ -161,3 +173,11 @@
     }
   }
 </script>
+
+<style lang="less">
+  .conf-switch {
+    display: inline-block;
+    margin-top: 10px;
+    color: darkgrey;
+  }
+</style>

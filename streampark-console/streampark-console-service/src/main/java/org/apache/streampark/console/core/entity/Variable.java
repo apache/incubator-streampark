@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -59,6 +60,9 @@ public class Variable implements Serializable {
 
     @NotNull(message = "{required}")
     private Long teamId;
+
+    @TableField("`sensitive`")
+    private Boolean sensitive;
 
     private transient Date createTime;
 

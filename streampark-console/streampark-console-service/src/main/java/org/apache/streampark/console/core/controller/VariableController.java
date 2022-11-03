@@ -59,8 +59,13 @@ public class VariableController {
     @PostMapping("page")
     @RequiresPermissions("variable:view")
     public RestResponse page(RestRequest restRequest, Variable variable) {
-        IPage<Variable> variableList = variableService.page(variable, restRequest);
-        return RestResponse.success(variableList);
+        IPage<Variable> page = variableService.page(variable, restRequest);
+        for (Variable v : page.getRecords()) {
+            if (v.getSensitive()) {
+                v.setVariableValue(v.getVariableValue().replaceAll("[\\s\\S]", "*"));
+            }
+        }
+        return RestResponse.success(page);
     }
 
     /**
@@ -72,6 +77,11 @@ public class VariableController {
     @PostMapping("list")
     public RestResponse variableList(@RequestParam Long teamId, String keyword) {
         List<Variable> variableList = variableService.findByTeamId(teamId, keyword);
+        for (Variable v : variableList) {
+            if (v.getSensitive()) {
+                v.setVariableValue(v.getVariableValue().replaceAll("[\\s\\S]", "*"));
+            }
+        }
         return RestResponse.success(variableList);
     }
 
