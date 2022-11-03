@@ -33,7 +33,7 @@ import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, ResolveOrder}
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils, Utils}
+import org.apache.streampark.common.util.{DeflaterUtils, Logger, SystemPropertyUtils, Utils}
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.submit.bean._
@@ -413,7 +413,7 @@ trait FlinkSubmitTrait extends Logger {
       programArgs += PARAM_KEY_FLINK_CONF
       programArgs += submitRequest.flinkYaml
       programArgs += PARAM_KEY_APP_NAME
-      programArgs += submitRequest.effectiveAppName
+      programArgs += DeflaterUtils.zipString(submitRequest.effectiveAppName)
       programArgs += PARAM_KEY_FLINK_PARALLELISM
       programArgs += getParallelism(submitRequest).toString
       submitRequest.developmentMode match {
