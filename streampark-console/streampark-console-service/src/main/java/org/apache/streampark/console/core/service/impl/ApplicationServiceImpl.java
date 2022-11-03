@@ -212,7 +212,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @PostConstruct
     public void resetOptionState() {
-        this.baseMapper.resetOptionState();
+        Application application = new Application();
+        application.setOptionState(0);
+        this.update(application);
     }
 
     private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap = new ConcurrentHashMap<>();
@@ -880,7 +882,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public List<Application> getByProjectId(Long id) {
-        return baseMapper.getByProjectId(id);
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Application::getProjectId, id);
+        return this.list(queryWrapper);
     }
 
     @Override
@@ -1029,7 +1033,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @RefreshCache
     public boolean mapping(Application appParam) {
-        boolean mapping = this.baseMapper.mapping(appParam);
+        appParam.setAppId(appParam.getAppId());
+        appParam.setJobId(appParam.getJobId());
+        appParam.setState(14);
+        appParam.setEndTime(null);
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Application::getId, appParam.getId());
+        boolean mapping = this.update(appParam, queryWrapper);
         Application application = getById(appParam.getId());
         if (isKubernetesApp(application)) {
             k8SFlinkTrackMonitor.unTrackingJob(toTrackId(application));
@@ -1114,7 +1124,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter
         );
 
-        CompletableFuture<CancelResponse> cancelFuture = CompletableFuture.supplyAsync(() -> FlinkSubmitter.cancel(cancelRequest), executorService);
+        CompletableFuture<CancelResponse> cancelFuture =
+            CompletableFuture.supplyAsync(() -> FlinkSubmitter.cancel(cancelRequest), executorService);
 
         cancelFutureMap.put(application.getId(), cancelFuture);
 
@@ -1188,10 +1199,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             final String pathPart = uri.getPath();
             String error = null;
             if (scheme == null) {
-                error = "This state.savepoints.dir value " + savepointPath + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
+                error = "This state.savepoints.dir value " + savepointPath +
+                    " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
             } else if (pathPart == null) {
-                error = "This state.savepoints.dir value " + savepointPath + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-            } else if (pathPart.length() == 0 || pathPart.equals("/")) {
+                error = "This state.savepoints.dir value " + savepointPath +
+                    " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+            } else if (pathPart.length() == 0 || "/".equals(pathPart)) {
                 error = "This state.savepoints.dir value " + savepointPath + " Cannot use the root directory for checkpoints.";
             }
             return error;
@@ -1266,14 +1279,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         appConf = String.format("%s://%s", format, applicationConfig.getContent());
                         break;
                     case APACHE_FLINK:
-                        appConf = String.format("json://{\"%s\":\"%s\"}", ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                        appConf = String.format("json://{\"%s\":\"%s\"}", ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
+                            application.getMainClass());
                         break;
                     default:
                         throw new IllegalArgumentException("[StreamPark] ApplicationType must be (StreamPark flink | Apache flink)... ");
                 }
             }
 
-            if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
+            if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
                 switch (application.getApplicationType()) {
                     case STREAMPARK_FLINK:
                         flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
@@ -1294,7 +1308,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             // 2) appConfig
             appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
             // 3) client
-            if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
+            if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
                 String clientPath = Workspace.remote().APP_CLIENT();
                 flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
             }
@@ -1359,7 +1373,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         AssertUtils.state(buildPipeline != null);
 
         BuildResult buildResult = buildPipeline.getBuildResult();
-        if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
+        if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
             buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
         } else {
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
@@ -1413,7 +1427,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter
         );
 
-        CompletableFuture<SubmitResponse> future = CompletableFuture.supplyAsync(() -> FlinkSubmitter.submit(submitRequest), executorService);
+        CompletableFuture<SubmitResponse> future =
+            CompletableFuture.supplyAsync(() -> FlinkSubmitter.submit(submitRequest), executorService);
 
         startFutureMap.put(application.getId(), future);
 

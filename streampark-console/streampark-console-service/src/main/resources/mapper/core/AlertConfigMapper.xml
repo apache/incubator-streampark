@@ -33,7 +33,7 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="getAlertConfByName" resultType="alertConfig" parameterType="alertConfig">
+    <select id="getAlertConfByName" resultType="org.apache.streampark.console.core.entity.AlertConfig" parameterType="org.apache.streampark.console.core.entity.AlertConfig">
         SELECT id
         FROM t_alert_config t
         where t.alert_name = #{alertConfig.alertName} limit 1;

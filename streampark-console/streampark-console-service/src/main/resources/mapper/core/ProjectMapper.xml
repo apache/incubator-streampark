@@ -39,17 +39,4 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="page" resultType="project" parameterType="project">
-        select * from t_flink_project t
-        <where>
-            t.team_id = #{project.teamId}
-            <if test="project.name != null and project.name != ''">
-                and t.name like '%${project.name}%'
-            </if>
-            <if test="project.buildState != null">
-                and t.build_state = #{project.buildState}
-            </if>
-        </where>
-    </select>
-
 </mapper>

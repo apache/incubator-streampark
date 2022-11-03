@@ -20,32 +20,7 @@ package org.apache.streampark.console.core.mapper;
 import org.apache.streampark.console.core.entity.SavePoint;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
-
-import java.util.Date;
 
 public interface SavePointMapper extends BaseMapper<SavePoint> {
 
-    @Update("update t_flink_savepoint set latest=false where app_id=#{appId}")
-    void obsolete(@Param("appId") Long appId);
-
-    @Select("select * from t_flink_savepoint where app_id=#{appId} and latest=true")
-    SavePoint getLatest(@Param("appId") Long appId);
-
-    @Select("select * from t_flink_savepoint where app_id=#{appId}")
-    IPage<SavePoint> page(Page<SavePoint> page, @Param("appId") Long appId);
-
-    @Delete("delete from t_flink_savepoint where app_id=#{appId}")
-    void removeApp(@Param("appId") Long appId);
-
-    @Delete("delete from t_flink_savepoint where app_id=#{appId} and type = 1 and trigger_time < #{trigger}")
-    void expire(@Param("appId") Long appId, @Param("trigger") Date triggerTime);
-
-    @Delete("delete from t_flink_savepoint where app_id=#{appId} and type = 1")
-    void expireAll(@Param("appId") Long appId);
 }

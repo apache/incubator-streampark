@@ -40,7 +40,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
 
     @Override
     public void delete(Long appId, EffectiveType effectiveType) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper();
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Effective::getAppId, appId)
             .eq(Effective::getTargetType, effectiveType.getType());
         baseMapper.delete(queryWrapper);
@@ -48,7 +48,10 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
 
     @Override
     public Effective get(Long appId, EffectiveType effectiveType) {
-        return baseMapper.get(appId, effectiveType.getType());
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Effective::getAppId, appId);
+        queryWrapper.eq(Effective::getTargetType, effectiveType.getType());
+        return this.getOne(queryWrapper);
     }
 
     @Override
@@ -75,6 +78,8 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
 
     @Override
     public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Effective::getAppId, appId);
+        this.remove(queryWrapper);
     }
 }

@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.mapper.SettingMapper;
 import org.apache.streampark.console.core.service.SettingService;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +45,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public Setting get(String key) {
-        return baseMapper.get(key);
+        LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Setting::getSettingKey, key);
+        return this.getOne(queryWrapper);
     }
 
     private final Setting emptySetting = new Setting();
@@ -60,7 +63,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         try {
             String value = StringUtils.trimToNull(setting.getSettingValue());
             setting.setSettingValue(value);
-            this.baseMapper.updateByKey(setting);
+
+            LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Setting::getSettingKey, setting.getSettingKey());
+            this.update(setting, queryWrapper);
 
             String settingKey = setting.getSettingKey();
             if (CommonConfig.MAVEN_REMOTE_URL().key().equals(settingKey)) {

@@ -30,4 +30,20 @@
         <result column="is_default" jdbcType="BOOLEAN" property="isDefault"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
+
+    <select id="getByAppId" resultType="org.apache.streampark.console.core.entity.FlinkEnv" parameterType="java.lang.Long">
+        select v.*
+        from t_flink_env v
+        inner join (
+            select version_id
+            from t_flink_app
+            where id = #{appId}
+        ) as t
+        on v.id = t.version_id
+    </select>
+
+    <update id="setDefault" parameterType="java.lang.Long">
+        update t_flink_env
+        set is_default = case id when #{id} then true else false end
+    </update>
 </mapper>

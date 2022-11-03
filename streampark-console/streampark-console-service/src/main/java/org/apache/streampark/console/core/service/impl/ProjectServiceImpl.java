@@ -45,6 +45,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -165,7 +166,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public IPage<Project> page(Project project, RestRequest request) {
         Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
-        return this.baseMapper.page(page, project);
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Project::getTeamId, project.getTeamId());
+        queryWrapper.like(StringUtils.isNotBlank(project.getName()), Project::getName, project.getName());
+        queryWrapper.eq(project.getBuildState() != null, Project::getBuildState, project.getBuildState());
+        return this.page(page, queryWrapper);
     }
 
     @Override
@@ -176,9 +181,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public void build(Long id) throws Exception {
         Project project = getById(id);
-        this.baseMapper.startBuild(project);
+        this.updateStartBuildById(project);
         CompletableFuture<Void> buildTask = CompletableFuture.runAsync(
-            new ProjectBuildTask(getBuildLogPath(id), project, baseMapper, applicationService), executorService);
+            new ProjectBuildTask(getBuildLogPath(id), project, this, applicationService), executorService);
         // TODO May need to define parameters to set the build timeout in the future.
         CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
     }
@@ -230,6 +235,31 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<Project>()
             .eq(Project::getName, project.getName());
         return this.baseMapper.selectCount(wrapper) > 0;
+    }
+
+    @Override
+    public void updateFailureBuildById(Project project) {
+        project.setBuildState(2);
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Project::getId, project.getId());
+        this.update(project, queryWrapper);
+    }
+
+    @Override
+    public void updateSuccessBuildById(Project project) {
+        project.setLastBuild(new Date());
+        project.setBuildState(1);
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Project::getId, project.getId());
+        this.update(project, queryWrapper);
+    }
+
+    @Override
+    public void updateStartBuildById(Project project) {
+        project.setBuildState(0);
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Project::getId, project.getId());
+        this.update(project, queryWrapper);
     }
 
     @Override

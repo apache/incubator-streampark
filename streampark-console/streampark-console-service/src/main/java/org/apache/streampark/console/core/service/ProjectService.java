@@ -56,4 +56,10 @@ public interface ProjectService extends IService<Project> {
 
     boolean checkExists(Project project);
 
+    void updateFailureBuildById(Project project);
+
+    void updateSuccessBuildById(Project project);
+
+    void updateStartBuildById(Project project);
+
 }

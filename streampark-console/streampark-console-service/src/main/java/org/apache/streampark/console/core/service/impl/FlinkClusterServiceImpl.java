@@ -39,6 +39,7 @@ import org.apache.streampark.flink.submit.bean.KubernetesDeployParam;
 import org.apache.streampark.flink.submit.bean.ShutDownRequest;
 import org.apache.streampark.flink.submit.bean.ShutDownResponse;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -90,7 +91,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             return "error";
         }
         //1) 检查名称是否重复,是否已经存在
-        FlinkCluster flinkCluster = this.baseMapper.getByName(cluster.getClusterName());
+        LambdaQueryWrapper<FlinkCluster> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(FlinkCluster::getClusterName, cluster.getClusterName());
+        FlinkCluster flinkCluster = this.getOne(queryWrapper);
         if (flinkCluster != null) {
             if (cluster.getId() == null || (cluster.getId() != null && !flinkCluster.getId().equals(cluster.getId()))) {
                 return "exists";
@@ -113,7 +116,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         }
         String clusterId = flinkCluster.getClusterId();
         if (StringUtils.isNoneBlank(clusterId)) {
-            FlinkCluster inDB = this.baseMapper.getByClusterId(clusterId);
+            LambdaQueryWrapper<FlinkCluster> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(FlinkCluster::getClusterId, clusterId);
+            FlinkCluster inDB = this.getOne(queryWrapper);
             if (inDB != null) {
                 result.setMsg("the clusterId" + clusterId + "is already exists,please check!");
                 result.setStatus(0);

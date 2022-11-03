@@ -23,8 +23,8 @@ import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.LaunchState;
-import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.ProjectService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CloneCommand;
@@ -42,18 +42,18 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
     final Project project;
 
-    final ProjectMapper baseMapper;
-
     final ApplicationService applicationService;
+
+    final ProjectService projectService;
 
     public ProjectBuildTask(
         String logPath,
         Project project,
-        ProjectMapper baseMapper,
+        ProjectService projectService,
         ApplicationService applicationService) {
         super(logPath, true);
         this.project = project;
-        this.baseMapper = baseMapper;
+        this.projectService = projectService;
         this.applicationService = applicationService;
     }
 
@@ -64,16 +64,16 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         boolean cloneSuccess = cloneSourceCode(project);
         if (!cloneSuccess) {
             fileLogger.error("[StreamPark] clone or pull error.");
-            this.baseMapper.failureBuild(project);
+            this.projectService.updateFailureBuildById(project);
             return;
         }
         boolean build = projectBuild(project);
         if (!build) {
-            this.baseMapper.failureBuild(project);
+            this.projectService.updateFailureBuildById(project);
             fileLogger.error("build error, project name: {} ", project.getName());
             return;
         }
-        this.baseMapper.successBuild(project);
+        this.projectService.updateSuccessBuildById(project);
         this.deploy(project);
         List<Application> applications = this.applicationService.getByProjectId(project.getId());
         // Update the deploy state
@@ -87,7 +87,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
     @Override
     protected void processException(Throwable t) {
-        this.baseMapper.failureBuild(project);
+        this.projectService.updateFailureBuildById(project);
         fileLogger.error("Build error, project name: {}", project.getName(), t);
     }
 

@@ -20,11 +20,7 @@ package org.apache.streampark.console.core.mapper;
 import org.apache.streampark.console.core.entity.Tutorial;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 public interface TutorialMapper extends BaseMapper<Tutorial> {
 
-    @Select("select * from t_flink_tutorial where name=#{name}")
-    Tutorial getByName(@Param("name") String name);
 }
