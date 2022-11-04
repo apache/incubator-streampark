@@ -48,7 +48,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-
 trait FlinkSubmitTrait extends Logger {
 
   private[submit] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
@@ -102,10 +101,13 @@ trait FlinkSubmitTrait extends Logger {
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
     //state.checkpoints.num-retained
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
-    flinkConfig.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
+    flinkConfig.safeSet(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
-    //set savepoint.ignore-unclaimed-state parameter
-    flinkConfig.setBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, submitRequest.allowNonRestoredState)
+    //set savepoint parameter
+    if (submitRequest.savePoint != null) {
+      flinkConfig.safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
+      flinkConfig.setBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, submitRequest.allowNonRestoredState)
+    }
 
     setConfig(submitRequest, flinkConfig)
 
