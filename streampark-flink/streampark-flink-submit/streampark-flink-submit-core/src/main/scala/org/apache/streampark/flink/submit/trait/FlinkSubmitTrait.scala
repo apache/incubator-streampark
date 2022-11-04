@@ -165,13 +165,8 @@ trait FlinkSubmitTrait extends Logger {
     val packageProgram = PackagedProgram
       .newBuilder
       .setJarFile(jarFile)
-      .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
-      .setArguments(
-        flinkConfig
-          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList()): _*
-      ).build()
-
+      .setConfiguration(flinkConfig)
+      .build()
     val jobGraph = PackagedProgramUtils.createJobGraph(
       packageProgram,
       flinkConfig,
