@@ -19,7 +19,7 @@ import { Icon, SvgIcon } from '/@/components/Icon';
 import options from '../data/option';
 
 import Mergely from '../components/Mergely.vue';
-import CustomForm from '../components/customForm';
+import CustomForm from '../components/CustomForm';
 import {
   Alert,
   Dropdown,

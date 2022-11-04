@@ -18,6 +18,7 @@
   import { computed, defineComponent, onMounted, reactive, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { toPomString } from '../utils/Pom';
+  import { isK8sExecMode } from '../utils';
 
   export default defineComponent({
     name: 'Dependency',
@@ -267,7 +268,7 @@
       </a-button>
     </TabPane>
     <TabPane key="jar" tab="Upload Jar">
-      <template v-if="[5, 6].includes(formModel?.executionMode)">
+      <template v-if="isK8sExecMode(formModel?.executionMode)">
         <Select
           mode="multiple"
           placeholder="Search History Uploads"

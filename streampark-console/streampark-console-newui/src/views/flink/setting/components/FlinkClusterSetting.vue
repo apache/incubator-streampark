@@ -17,6 +17,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { exceptionPropWidth } from '/@/utils';
+  import { executionMap } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'FlinkClusterSetting',
   });
@@ -56,6 +57,10 @@
     created: new Map(),
     stoped: new Map(),
   };
+  function isSessionMode(mode: number): boolean {
+    return [executionMap.YARN_SESSION, executionMap.KUBERNETES_SESSION].includes(mode);
+  }
+
   /* Get flink environmental data*/
   async function getFlinkClusterSetting() {
     const clusterList = await fetchFlinkCluster();
@@ -71,6 +76,7 @@
       }
     }
   }
+
   function handleAdd() {
     go('/flink/setting/add_cluster');
   }
@@ -211,7 +217,7 @@
       <template #actions>
         <Tooltip :title="t('flink.setting.cluster.edit')">
           <a-button
-            v-if="handleIsStart(item) && item.executionMode === 3"
+            v-if="handleIsStart(item) && item.executionMode == executionMap.YARN_SESSION"
             v-auth="'app:update'"
             :disabled="true"
             @click="handleEditCluster(item)"
@@ -222,7 +228,7 @@
             <EditOutlined />
           </a-button>
           <a-button
-            v-if="!handleIsStart(item) || item.executionMode === 1"
+            v-if="!handleIsStart(item) || item.executionMode == executionMap.REMOTE"
             v-auth="'app:update'"
             @click="handleEditCluster(item)"
             shape="circle"
@@ -235,7 +241,7 @@
         <template v-if="!handleIsStart(item)">
           <Tooltip :title="t('flink.setting.cluster.start')">
             <a-button
-              v-if="item.executionMode === 3 || item.executionMode === 5"
+              v-if="isSessionMode(item.executionMode)"
               v-auth="'cluster:create'"
               @click="handleDeployCluser(item)"
               shape="circle"

@@ -22,26 +22,32 @@ export enum BuildEnum {
   FAILED = 2,
 }
 /* ExecutionMode  */
-export enum ExecutionModeEnum {
-  /* remote (standalone) */
+export enum ExecModeEnum {
+  /** remote (standalone) */
   REMOTE = 1,
-  /* yarn per-job (deprecated, please use yarn-application mode) */
+  /** yarn per-job (deprecated, please use yarn-application mode) */
   YARN_PER_JOB = 2,
-  /* yarn session */
+  /** yarn session */
   YARN_SESSION = 3,
-  /* yarn application */
+  /** yarn application */
   YARN_APPLICATION = 4,
-  /* kubernetes session */
+  /** kubernetes session */
   KUBERNETES_SESSION = 5,
-  /* kubernetes application */
+  /** kubernetes application */
   KUBERNETES_APPLICATION = 6,
 }
 
 export const executionMap = {
-  REMOTE: ExecutionModeEnum.REMOTE,
-  YARN_PER_JOB: ExecutionModeEnum.YARN_PER_JOB,
-  YARN_SESSION: ExecutionModeEnum.YARN_SESSION,
-  YARN_APPLICATION: ExecutionModeEnum.YARN_APPLICATION,
-  KUBERNETES_SESSION: ExecutionModeEnum.KUBERNETES_SESSION,
-  KUBERNETES_APPLICATION: ExecutionModeEnum.KUBERNETES_APPLICATION,
+  /**1. remote (standalone) */
+  REMOTE: ExecModeEnum.REMOTE,
+  /**2. yarn per-job (deprecated, please use yarn-application mode) */
+  YARN_PER_JOB: ExecModeEnum.YARN_PER_JOB,
+  /**3. yarn session */
+  YARN_SESSION: ExecModeEnum.YARN_SESSION,
+  /**4. yarn application */
+  YARN_APPLICATION: ExecModeEnum.YARN_APPLICATION,
+  /**5. kubernetes session */
+  KUBERNETES_SESSION: ExecModeEnum.KUBERNETES_SESSION,
+  /**6. kubernetes application */
+  KUBERNETES_APPLICATION: ExecModeEnum.KUBERNETES_APPLICATION,
 };

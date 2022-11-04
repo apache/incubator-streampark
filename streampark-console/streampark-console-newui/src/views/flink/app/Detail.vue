@@ -16,6 +16,7 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { ExecModeEnum } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'ApplicationDetail',
   });
@@ -144,7 +145,13 @@
     });
     // Get data for the first time
     if (Object.keys(app).length == 0) {
-      if ([2, 3, 4].includes(res.executionMode)) {
+      if (
+        [
+          ExecModeEnum.YARN_PER_JOB,
+          ExecModeEnum.YARN_SESSION,
+          ExecModeEnum.YARN_APPLICATION,
+        ].includes(res.executionMode)
+      ) {
         handleYarn();
       }
       handleDetailTabs();

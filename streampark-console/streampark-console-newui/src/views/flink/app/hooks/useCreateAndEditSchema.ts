@@ -48,12 +48,13 @@ import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { isK8sExecMode } from '../utils';
 export interface HistoryRecord {
   k8sNamespace: Array<string>;
   k8sSessionClusterId: Array<string>;
   flinkImage: Array<string>;
 }
-
 export const useCreateAndEditSchema = (
   dependencyRef: Ref | null,
   edit?: { appId: string; mode: 'streampark' | 'flink' },
@@ -134,9 +135,9 @@ export const useCreateAndEditSchema = (
         component: 'Switch',
         ifShow: ({ values }) => {
           if (edit?.appId) {
-            return values?.jobType == 2 && ![5, 6].includes(values.executionMode);
+            return values?.jobType == 2 && !isK8sExecMode(values.executionMode);
           } else {
-            return values?.jobType == 'sql' && ![5, 6].includes(values.executionMode);
+            return values?.jobType == 'sql' && !isK8sExecMode(values.executionMode);
           }
         },
         render({ model, field }) {
@@ -212,7 +213,7 @@ export const useCreateAndEditSchema = (
           placeholder: 'Flink Cluster',
           options: getExecutionCluster(1, 'id'),
         },
-        ifShow: ({ values }) => values.executionMode == 1,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
         rules: [{ required: true, message: 'Flink Cluster is required' }],
       },
       {
@@ -225,14 +226,14 @@ export const useCreateAndEditSchema = (
             options: getExecutionCluster(3, 'clusterId'),
           };
         },
-        ifShow: ({ values }) => values.executionMode == 3,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         rules: [{ required: true, message: 'Flink Cluster is required' }],
       },
       {
         field: 'k8sNamespace',
         label: 'Kubernetes Namespace',
         component: 'Input',
-        ifShow: ({ values }) => [5, 6].includes(values.executionMode),
+        ifShow: ({ values }) => isK8sExecMode(values.executionMode),
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder: 'default',
@@ -249,14 +250,14 @@ export const useCreateAndEditSchema = (
             onChange: (e) => (formModel.jobName = e.target.value),
           };
         },
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         rules: [{ required: true, message: 'Kubernetes clusterId is required' }],
       },
       {
         field: 'clusterId',
         label: 'Kubernetes ClusterId',
         component: 'Select',
-        ifShow: ({ values }) => values.executionMode == 5,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         componentProps: {
           placeholder: 'Please enter Kubernetes clusterId',
           options: getExecutionCluster(5, 'clusterId'),
@@ -267,7 +268,7 @@ export const useCreateAndEditSchema = (
         field: 'flinkImage',
         label: 'Flink Base Docker Image',
         component: 'Input',
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder:
@@ -279,7 +280,7 @@ export const useCreateAndEditSchema = (
       {
         field: 'k8sRestExposedType',
         label: 'Rest-Service Exposed Type',
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         component: 'Select',
         componentProps: {
           placeholder: 'kubernetes.rest-service.exposed.type',
@@ -370,7 +371,7 @@ export const useCreateAndEditSchema = (
         field: 'restartSize',
         label: 'Fault Restart Size',
         ifShow: ({ values }) =>
-          edit?.mode == 'flink' ? true : ![5, 6].includes(values.executionMode),
+          edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode),
         component: 'InputNumber',
         componentProps: { placeholder: 'restart max size', ...commonInputNum },
       },
@@ -389,8 +390,7 @@ export const useCreateAndEditSchema = (
         label: 'CheckPoint Failure Options',
         component: 'InputNumber',
         renderColContent: renderInputGroup,
-        show: ({ values }) =>
-          edit?.mode == 'flink' ? true : ![5, 6].includes(values.executionMode),
+        show: ({ values }) => (edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode)),
       },
       ...getConfigSchemas(),
       {
@@ -453,14 +453,14 @@ export const useCreateAndEditSchema = (
         label: 'Yarn Queue',
         component: 'Input',
         componentProps: { placeholder: 'Please enter yarn queue' },
-        ifShow: ({ values }) => values.executionMode == 4,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION,
       },
       {
         field: 'podTemplate',
         label: 'Kubernetes Pod Template',
         component: 'Input',
         slot: 'podTemplate',
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
       },
       {
         field: 'properties',
@@ -542,7 +542,7 @@ export const useCreateAndEditSchema = (
     fetchK8sNamespaces().then((res) => {
       historyRecord.k8sNamespace = res;
     });
-    fetchSessionClusterIds({ executionMode: 5 }).then((res) => {
+    fetchSessionClusterIds({ executionMode: ExecModeEnum.KUBERNETES_SESSION }).then((res) => {
       historyRecord.k8sSessionClusterId = res;
     });
     fetchFlinkBaseImages().then((res) => {

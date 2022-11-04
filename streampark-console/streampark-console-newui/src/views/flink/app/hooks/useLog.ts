@@ -16,10 +16,12 @@
  */
 import { ref, watch, computed } from 'vue';
 import { useMonaco, isDark } from '/@/hooks/web/useMonaco';
+import { useThrottleFn } from '@vueuse/core';
 
 export const useLog = () => {
-  const logRef = ref();
+  const logRef = ref<HTMLElement>();
   const autoScroll = ref(true);
+  let editor: any;
   const { setContent, getInstance, getMonacoInstance } = useMonaco(
     logRef,
     {
@@ -31,6 +33,7 @@ export const useLog = () => {
         overviewRulerBorder: false, // Don't scroll bar borders
         tabSize: 2, // tab indent length
         minimap: { enabled: true },
+        smoothScrolling: true,
         scrollbar: {
           useShadows: false,
           vertical: 'visible',
@@ -55,7 +58,27 @@ export const useLog = () => {
     },
     { immediate: true },
   );
-  function serAutoScroll(scroll: boolean) {
+  watch(
+    () => logRef.value,
+    async () => {
+      if (!logRef.value) return;
+      const editorHeight = logRef.value.clientHeight;
+      editor = await getInstance();
+      editor?.onDidScrollChange(
+        useThrottleFn((e: any) => {
+          if (e.scrollTop > 0) {
+            if (editorHeight + e.scrollTop + 15 >= e.scrollHeight) {
+              autoScroll.value = true;
+            } else {
+              autoScroll.value = false;
+              console.log('close');
+            }
+          }
+        }, 500),
+      );
+    },
+  );
+  function setAutoScroll(scroll: boolean) {
     autoScroll.value = scroll;
   }
   const getAutoScroll = computed(() => {
@@ -67,10 +90,11 @@ export const useLog = () => {
     monaco.languages.setMonarchTokensProvider('log', {
       tokenizer: {
         root: [
-          [/\[20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+]/, 'custom-date-time'],
+          [/\[?20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+/, 'custom-date-time'],
           [/\[error.*/, 'custom-error'],
           [/\[notice.*/, 'custom-notice'],
           [/\[info.*/, 'custom-info'],
+          [/INFO/, 'custom-info-keyword'],
           [/\[[a-zA-Z 0-9:]+\]/, 'custom-date'],
         ],
       },
@@ -82,6 +106,7 @@ export const useLog = () => {
       colors: {},
       rules: [
         { token: 'custom-info', foreground: '808080' },
+        { token: 'custom-info-keyword', foreground: '008800' },
         { token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
         { token: 'custom-notice', foreground: 'FFA500' },
         { token: 'custom-date', foreground: '008800' },
@@ -101,17 +126,12 @@ export const useLog = () => {
       ],
     });
   }
-  async function handleRevealLine() {
+
+  function handleRevealLine() {
     if (!autoScroll.value) return;
-    const editor = await getInstance();
-    setTimeout(() => {
-      const currentModel = editor?.getModel();
-      const position = currentModel?.getPositionAt(0);
-      console.log(position);
-    }, 2000);
     if (editor) {
       editor.revealLine(editor.getModel()?.getLineCount() || 0);
     }
   }
-  return { serAutoScroll, getAutoScroll, setContent, logRef, handleRevealLine };
+  return { setAutoScroll, getInstance, getAutoScroll, setContent, logRef, handleRevealLine };
 };

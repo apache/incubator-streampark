@@ -36,6 +36,7 @@
   const getLogLoading = ref<boolean>(false);
   const showRefresh = ref<boolean>(false);
   const project = reactive<Recordable>({});
+
   const [registerModal, { changeLoading, closeModal }] = useModalInner((data) => {
     data && onReceiveModalData(data);
   });
@@ -46,11 +47,9 @@
     Object.assign(project, unref(data.project));
     changeLoading(true);
     await refreshLog();
-    // First entry scroll to the bottom
-    handleRevealLine();
     start();
   }
-  const { start, stop } = useTimeoutFn(
+  const { isPending, start, stop } = useTimeoutFn(
     () => {
       refreshLog();
     },
@@ -74,6 +73,7 @@
       logTime.value = formatToDateTime(new Date());
       if (data.data) {
         setContent(data.data);
+        handleRevealLine();
       }
     } catch (error) {
       closeModal();
@@ -85,6 +85,10 @@
   }
   async function handleClose() {
     stop();
+  }
+  function handleLogStatus() {
+    if (isPending.value) stop();
+    else start();
   }
 </script>
 <template>
@@ -105,16 +109,20 @@
       <div class="flex align-items-center">
         <div class="flex-1 text-left">{{ t('flink.app.view.refreshTime') }}:{{ logTime }}</div>
         <div class="button-group">
-          <a-button
-            key="refresh"
-            v-if="showRefresh"
-            type="primary"
-            @click="refreshLog"
-            :loading="getLogLoading"
-          >
-            {{ t('flink.app.view.refresh') }}
-          </a-button>
-          <a-button key="close" type="primary" @click="closeModal()">
+          <template v-if="showRefresh">
+            <a-button
+              key="status"
+              :type="isPending ? 'error' : 'primary'"
+              @click="handleLogStatus()"
+            >
+              {{ isPending ? 'pause' : 'resume' }}
+            </a-button>
+            <a-button key="refresh" type="primary" @click="refreshLog" :loading="getLogLoading">
+              {{ t('flink.app.view.refresh') }}
+            </a-button>
+          </template>
+
+          <a-button key="stop" type="primary" @click="closeModal()">
             {{ t('common.closeText') }}
           </a-button>
         </div>
