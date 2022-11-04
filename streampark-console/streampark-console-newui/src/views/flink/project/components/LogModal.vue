@@ -15,15 +15,14 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  export default {
+    name: 'BuildLogModal',
+  };
+</script>
+<script setup lang="ts" name="BuildLogModal">
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useLog } from '../../app/hooks/useLog';
   import { buildLog } from '/@/api/flink/project';
-  export default defineComponent({
-    name: 'BuildLogModal',
-  });
-</script>
-<script setup lang="ts" name="BuildLogModal">
   import { reactive, ref, unref } from 'vue';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { Icon } from '/@/components/Icon';
@@ -41,11 +40,14 @@
     data && onReceiveModalData(data);
   });
   const { setContent, logRef, handleRevealLine } = useLog();
-  function onReceiveModalData(data: Recordable) {
+
+  async function onReceiveModalData(data: Recordable) {
     showRefresh.value = true;
     Object.assign(project, unref(data.project));
     changeLoading(true);
-    refreshLog();
+    await refreshLog();
+    // First entry scroll to the bottom
+    handleRevealLine();
     start();
   }
   const { start, stop } = useTimeoutFn(
@@ -72,7 +74,6 @@
       logTime.value = formatToDateTime(new Date());
       if (data.data) {
         setContent(data.data);
-        handleRevealLine();
       }
     } catch (error) {
       closeModal();
@@ -89,6 +90,7 @@
 <template>
   <BasicModal
     canFullscreen
+    defaultFullscreen
     :scrollTop="false"
     @register="registerModal"
     width="80%"

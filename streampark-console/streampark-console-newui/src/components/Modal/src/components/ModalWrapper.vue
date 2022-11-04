@@ -63,7 +63,6 @@
       const spinRef = ref<ElRef>(null);
       const realHeightRef = ref(0);
       const minRealHeightRef = ref(0);
-
       let realHeight = 0;
 
       let stopElResizeFn: Fn = () => {};

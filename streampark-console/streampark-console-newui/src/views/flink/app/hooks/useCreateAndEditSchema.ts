@@ -520,7 +520,7 @@ export const useCreateAndEditSchema = (
     ];
   });
 
-  onMounted(() => {
+  onMounted(async () => {
     /* Get project data */
     fetchSelect({}).then((res) => {
       projectList.value = res;

@@ -53,6 +53,7 @@ export const useEditStreamParkSchema = (
   async function handleChangeSQL(v: string) {
     const res = await fetchFlinkSql({ id: v });
     flinkSql.value?.setContent(decodeByBase64(res.sql));
+    console.log('res', flinkSql.value);
     unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
   }
   // start compare flinksql version

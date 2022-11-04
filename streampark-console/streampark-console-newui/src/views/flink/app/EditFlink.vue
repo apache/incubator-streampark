@@ -103,6 +103,8 @@
         k8sNamespace: app.k8sNamespace,
         alertId: selectAlertId,
         yarnSessionClusterId: app.yarnSessionClusterId,
+        projectName: app.projectName,
+        module: app.module,
         ...resetParams,
       };
       if (!executionMode) {

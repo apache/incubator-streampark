@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useMonaco, isDark } from '/@/hooks/web/useMonaco';
 
 export const useLog = () => {
   const logRef = ref();
+  const autoScroll = ref(true);
   const { setContent, getInstance, getMonacoInstance } = useMonaco(
     logRef,
     {
@@ -54,6 +55,12 @@ export const useLog = () => {
     },
     { immediate: true },
   );
+  function serAutoScroll(scroll: boolean) {
+    autoScroll.value = scroll;
+  }
+  const getAutoScroll = computed(() => {
+    return autoScroll.value;
+  });
   /* registered language */
   async function handleLogMonaco(monaco: any) {
     monaco.languages.register({ id: 'log' });
@@ -95,10 +102,16 @@ export const useLog = () => {
     });
   }
   async function handleRevealLine() {
+    if (!autoScroll.value) return;
     const editor = await getInstance();
+    setTimeout(() => {
+      const currentModel = editor?.getModel();
+      const position = currentModel?.getPositionAt(0);
+      console.log(position);
+    }, 2000);
     if (editor) {
       editor.revealLine(editor.getModel()?.getLineCount() || 0);
     }
   }
-  return { setContent, logRef, handleRevealLine };
+  return { serAutoScroll, getAutoScroll, setContent, logRef, handleRevealLine };
 };

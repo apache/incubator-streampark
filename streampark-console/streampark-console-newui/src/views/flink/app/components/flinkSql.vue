@@ -21,7 +21,7 @@
 </script>
 
 <script setup lang="ts" name="FlinkSql">
-  import { computed, reactive, ref, unref } from 'vue';
+  import { computed, reactive, ref, unref, watchEffect } from 'vue';
   import { getMonacoOptions } from '../data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
@@ -145,15 +145,23 @@
       unref(flinkSql).style.height = isFullscreen.value ? '100vh' : '550px';
     }, 100);
   }
-  const { onChange, setContent, getInstance, getMonacoInstance } = useMonaco(flinkSql, {
-    language: 'sql',
-    code: props.value || defaultValue,
-    suggestions: props.suggestions,
-    options: {
-      minimap: { enabled: true },
-      ...(getMonacoOptions(false) as any),
-      autoClosingBrackets: 'never',
+  const { onChange, setContent, getInstance, getMonacoInstance, setMonacoSuggest } = useMonaco(
+    flinkSql,
+    {
+      language: 'sql',
+      code: props.value || defaultValue,
+      options: {
+        minimap: { enabled: true },
+        ...(getMonacoOptions(false) as any),
+        autoClosingBrackets: 'never',
+      },
     },
+  );
+
+  watchEffect(() => {
+    if (props.suggestions.length > 0) {
+      setMonacoSuggest(props.suggestions);
+    }
   });
   const canPreview = computed(() => {
     return /\${.+}/.test(props.value);

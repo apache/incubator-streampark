@@ -324,13 +324,19 @@ export const renderIsSetConfig = (
       });
     }
   }
+  function handleConfChange(checked: boolean) {
+    model[field] = checked;
+    if (checked) {
+      handleSQLConf(true);
+    }
+  }
   return (
     <div>
       <Switch
         checked-children="ON"
         un-checked-children="OFF"
         checked={model[field]}
-        onChange={(checked) => (model[field] = checked)}
+        onChange={handleConfChange}
       />
       {model[field] && (
         <SettingTwoTone
