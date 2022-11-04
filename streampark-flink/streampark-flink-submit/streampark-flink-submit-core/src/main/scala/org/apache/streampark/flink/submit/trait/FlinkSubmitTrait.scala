@@ -167,7 +167,6 @@ trait FlinkSubmitTrait extends Logger {
       .setJarFile(jarFile)
       .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-      .setConfiguration(flinkConfig)
       .setArguments(
         flinkConfig
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
