@@ -116,15 +116,15 @@
         rules: [{ max: 100, message: t('system.variable.form.descriptionMessage') }],
       },
       {
-        field: 'sensitive',
-        label: 'Sensitive',
+        field: 'desensitization',
+        label: 'Desensitization',
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: h('span', { class: 'conf-switch' }, 'Whether it is set as sensitive information. If it is, it will be replaced by * when displayed elsewhere.'),
+        afterItem: h('span', { class: 'conf-switch' }, 'If set to ON, the value of the variable will be displayed as ******** elsewhere.'),
       }
     ];
   });

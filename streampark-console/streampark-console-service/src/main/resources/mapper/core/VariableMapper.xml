@@ -25,7 +25,7 @@
         <result column="variable_value" jdbcType="VARCHAR" property="variableValue"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="creator_id" jdbcType="BIGINT" property="creatorId"/>
-        <result column="sensitive" jdbcType="BOOLEAN" property="sensitive"/>
+        <result column="desensitization" jdbcType="BOOLEAN" property="desensitization"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
