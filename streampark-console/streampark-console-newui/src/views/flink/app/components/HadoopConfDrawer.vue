@@ -53,7 +53,6 @@
     @register="registerHadoopConf"
     :title="t('flink.app.hadoopConfigTitle')"
     :width="800"
-    :closable="false"
     item-layout="vertical"
   >
     <Tabs tabPosition="top">

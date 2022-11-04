@@ -18,6 +18,7 @@
   import { reactive, defineComponent } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { exceptionPropWidth } from '/@/utils';
+  import { isK8sExecMode } from '../../utils';
 
   export default defineComponent({
     name: 'StartApplicationModal',
@@ -62,7 +63,7 @@
         },
         defaultValue: false,
         afterItem: h('span', { class: 'conf-switch' }, 'flame Graph support'),
-        ifShow: () => [5, 6].includes(receiveData.executionMode),
+        ifShow: () => isK8sExecMode(receiveData.executionMode),
       },
       {
         field: 'startSavePointed',

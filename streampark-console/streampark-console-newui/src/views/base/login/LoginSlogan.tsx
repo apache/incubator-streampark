@@ -24,7 +24,7 @@ export default defineComponent({
   setup() {
     return () => {
       return (
-        <div className="!text-left mt-0">
+        <div className="!text-left w-550px m-auto">
           <div className="mb-5 system_info pt-0">
             <div className="project_title fw-bold text-white mb-3">
               <div
@@ -62,15 +62,19 @@ export default defineComponent({
             </p>
           </div>
           <div className="flex items-center mt-10">
-            <a className="btn streamx-btn btn !flex items-center"
+            <a
+              className="btn streamx-btn btn !flex items-center"
               href="https://github.com/apache/incubator-streampark"
-              target="_blank">
+              target="_blank"
+            >
               <Icon icon="ant-design:github-filled"></Icon>
               <div>&nbsp; GitHub</div>
             </a>
-            <a className="btn streamx-btn btn-green !flex items-center ml-10px"
+            <a
+              className="btn streamx-btn btn-green !flex items-center ml-10px"
               href="https://streampark.apache.org"
-              target="_blank">
+              target="_blank"
+            >
               <Icon icon="carbon:document"></Icon>
               <div>&nbsp;Document</div>
             </a>
@@ -80,12 +84,12 @@ export default defineComponent({
             <Tag color="#477de9">Version: v{version}</Tag>
             <img
               src="https://img.shields.io/github/stars/apache/incubator-streampark.svg?sanitize=true"
-              className="wow fadeInUp">
-            </img>
+              className="wow fadeInUp"
+            ></img>
             <img
               src="https://img.shields.io/github/forks/apache/incubator-streampark.svg?sanitize=true"
-              className="wow fadeInUp">
-            </img>
+              className="wow fadeInUp"
+            ></img>
           </div>
         </div>
       );

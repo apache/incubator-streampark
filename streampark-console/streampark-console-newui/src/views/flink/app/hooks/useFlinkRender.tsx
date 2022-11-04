@@ -19,7 +19,7 @@ import { Icon, SvgIcon } from '/@/components/Icon';
 import options from '../data/option';
 
 import Mergely from '../components/Mergely.vue';
-import CustomForm from '../components/customForm';
+import CustomForm from '../components/CustomForm';
 import {
   Alert,
   Dropdown,
@@ -38,6 +38,7 @@ import { ref, unref } from 'vue';
 import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { SelectValue } from 'ant-design-vue/lib/select';
 
 /* render input dropdown component */
 export const renderInputDropdown = (
@@ -323,13 +324,19 @@ export const renderIsSetConfig = (
       });
     }
   }
+  function handleConfChange(checked: boolean) {
+    model[field] = checked;
+    if (checked) {
+      handleSQLConf(true);
+    }
+  }
   return (
     <div>
       <Switch
         checked-children="ON"
         un-checked-children="OFF"
         checked={model[field]}
-        onChange={(checked) => (model[field] = checked)}
+        onChange={handleConfChange}
       />
       {model[field] && (
         <SettingTwoTone
@@ -349,6 +356,7 @@ export const renderIsSetConfig = (
   );
 };
 
+// render history version form item
 export const renderSqlHistory = (
   { model, flinkSqlHistory },
   { handleChangeSQL, handleCompareOk }: { handleChangeSQL: Fn; handleCompareOk: Fn },
@@ -356,11 +364,12 @@ export const renderSqlHistory = (
   const { createConfirm } = useMessage();
   const compareSQL = ref<string[]>([]);
 
-  function handleSelectChange(value) {
-    model.sqlId = value;
+  function handleSelectChange(value: SelectValue) {
+    model.flinkSqlHistory = value;
     handleChangeSQL(value);
   }
 
+  //version compact
   function handleCompactSQL() {
     createConfirm({
       iconType: 'info',
@@ -370,9 +379,11 @@ export const renderSqlHistory = (
           <span>Compare Flink SQL</span>
         </div>
       ),
+      okText: 'Compare',
+      width: 600,
       content: () => {
         return (
-          <Form class="!pt-20px">
+          <Form class="!pt-30px">
             <Form.Item
               label="Version"
               label-col={{ lg: { span: 5 }, sm: { span: 7 } }}
@@ -391,15 +402,16 @@ export const renderSqlHistory = (
           </Form>
         );
       },
-      onOk: handleCompareOk.bind(null, compareSQL.value),
+      onOk: () => handleCompareOk(compareSQL.value),
     });
   }
 
-  const renderSelectOptions = async (isCompareSelect = false) => {
-    const isDisabled = (ver) => {
+  const renderSelectOptions = (isCompareSelect = false) => {
+    const isDisabled = (ver: Recordable) => {
       if (!isCompareSelect) return false;
       return compareSQL.value.length == 2 && compareSQL.value.findIndex((i) => i === ver.id) === -1;
     };
+    console.log('flinkSqlHistory', flinkSqlHistory);
     return (flinkSqlHistory || []).map((ver) => {
       return (
         <Select.Option key={ver.id} disabled={isDisabled(ver)}>
@@ -427,8 +439,8 @@ export const renderSqlHistory = (
   return (
     <div>
       <Select
-        onChange={(value) => handleSelectChange(value)}
-        value={model.sqlId}
+        onChange={(value: SelectValue) => handleSelectChange(value)}
+        value={model.flinkSqlHistory}
         style="width: calc(100% - 60px)"
       >
         {renderSelectOptions()}

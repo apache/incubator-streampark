@@ -15,19 +15,17 @@
  * limitations under the License.
  */
 import { FormSchema } from '/@/components/Table';
-import { computed, h, reactive, Ref, ref, unref } from 'vue';
+import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
 
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { getAlertSvgIcon } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
-import { AppListRecord } from '/@/api/flink/app/app.type';
 import { useRoute } from 'vue-router';
 import { fetchMain } from '/@/api/flink/app/app';
 
 export const useEditFlinkSchema = (jars: Ref) => {
   const flinkSql = ref();
-  const app = reactive<Partial<AppListRecord>>({});
   const route = useRoute();
   const {
     alerts,
@@ -74,7 +72,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
         field: 'module',
         label: 'Module',
         component: 'Input',
-        render: () => h(Alert, { message: app.module, type: 'info' }),
+        render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
         ifShow: ({ model }) => model.resourceFrom == 1,
       },
       {

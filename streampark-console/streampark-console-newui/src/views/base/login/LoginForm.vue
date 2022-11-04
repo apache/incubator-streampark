@@ -15,10 +15,9 @@
   limitations under the License.
 -->
 <template>
-  <div class="enter-x mb-20px text-light-50">
+  <div class="enter-x mb-50px text-light-50">
     <div class="text-center enter-x">
-      <img class="logo w-140px mx-auto my-30px" src="/@/assets/images/logo.png" />
-      <div class="text-4xl form-title">{{ title }}</div>
+      <img class="logo w-160px mx-auto my-20px" src="/@/assets/images/logo.png" />
     </div>
   </div>
   <Form
@@ -80,7 +79,6 @@
 
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { useGlobSetting } from '/@/hooks/setting';
 
   import { useUserStore } from '/@/store/modules/user';
   import {
@@ -100,7 +98,6 @@
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
 
-  const { title } = useGlobSetting();
   const { t } = useI18n();
   const { createErrorModal, createMessage } = useMessage();
   const { prefixCls } = useDesign('login');

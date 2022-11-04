@@ -95,7 +95,6 @@
   <BasicDrawer
     @register="registerDrawerInner"
     item-layout="vertical"
-    :closable="false"
     :mask-closable="false"
     :width="500"
     :title="getTitle"

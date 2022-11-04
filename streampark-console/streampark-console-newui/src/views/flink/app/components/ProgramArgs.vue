@@ -29,12 +29,12 @@
   </div>
 </template>
 <script lang="ts">
-  export default defineComponent({
+  export default {
     name: 'ProgramArg',
-  });
+  };
 </script>
 <script lang="ts" setup>
-  import { defineComponent, computed, ref, toRefs } from 'vue';
+  import { computed, ref, toRefs, watchEffect } from 'vue';
   import { getMonacoOptions } from '../data';
   import Icon from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
@@ -51,14 +51,18 @@
   const { value, suggestions } = toRefs(props);
   const emit = defineEmits(['update:value', 'preview']);
   const programArgRef = ref();
-  const { onChange, setContent } = useMonaco(programArgRef, {
+  const { onChange, setContent, setMonacoSuggest } = useMonaco(programArgRef, {
     language: 'plaintext',
     code: '',
-    suggestions: suggestions.value,
     options: {
       ...(getMonacoOptions(false) as any),
       autoClosingBrackets: 'never',
     },
+  });
+  watchEffect(() => {
+    if (suggestions.value.length > 0) {
+      setMonacoSuggest(suggestions.value);
+    }
   });
   const canReview = computed(() => {
     return /\${.+}/.test(value.value);

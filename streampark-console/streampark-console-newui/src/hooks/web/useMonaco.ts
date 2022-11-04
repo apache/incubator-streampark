@@ -101,13 +101,15 @@ export function useMonaco(
     return suggestions;
   };
 
-  const registerCompletion = (monaco: any, languageId: string, callbackIds: any[]) => {
+  const registerCompletion = async (monaco: any, languageId: string, callbackIds: any[]) => {
     if (callbackIds && callbackIds.length > 0) {
       suggestLabels = callbackIds;
       if (registerCompletionMap.has(languageId)) {
         return;
       }
       registerCompletionMap.set(languageId, 1);
+      // remove last suggestions
+      disposable?.dispose();
 
       disposable = monaco.languages.registerCompletionItemProvider(languageId, {
         // triggerCharacters: ['${'],
@@ -149,6 +151,13 @@ export function useMonaco(
     }
   };
 
+  const setMonacoSuggest = async (suggestions: any[]) => {
+    await until(isSetup).toBeTruthy();
+    if (monacoInstance) {
+      registerCompletion(monacoInstance, options.language, suggestions);
+    }
+  };
+
   const disposeInstance = async () => {
     editor?.dispose();
   };
@@ -164,9 +173,6 @@ export function useMonaco(
         const el = unref(target);
         if (!el) {
           return;
-        }
-        if (options.suggestions && options.suggestions.length > 0) {
-          registerCompletion(monaco, options.language, options.suggestions);
         }
         const model = monaco.editor.createModel(options.code, options.language);
         const defaultOptions = {
@@ -218,6 +224,7 @@ export function useMonaco(
   return {
     onChange: changeEventHook.on,
     setContent,
+    setMonacoSuggest,
     getContent,
     getInstance,
     getMonacoInstance,

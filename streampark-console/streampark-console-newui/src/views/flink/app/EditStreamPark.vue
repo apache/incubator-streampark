@@ -61,7 +61,6 @@
 
   const uploadLoading = ref(false);
   const uploadJar = ref('');
-  const flinkSql = ref();
   const dependencyRef = ref();
   const programArgRef = ref();
 
@@ -75,6 +74,7 @@
   const {
     alerts,
     flinkEnvs,
+    flinkSql,
     flinkClusters,
     getEditStreamParkFormSchema,
     registerDifferentDrawer,
@@ -312,6 +312,7 @@
       module: res.module,
       configId,
       sqlId: app.sqlId,
+      flinkSqlHistory: app.sqlId,
       versionId: app.versionId,
       projectName: app.projectName,
       project: app.projectId,

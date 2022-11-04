@@ -33,7 +33,7 @@ import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, ResolveOrder}
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils, Utils}
+import org.apache.streampark.common.util.{DeflaterUtils, Logger, SystemPropertyUtils, Utils}
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.submit.bean._
@@ -47,7 +47,6 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
-
 
 trait FlinkSubmitTrait extends Logger {
 
@@ -102,10 +101,13 @@ trait FlinkSubmitTrait extends Logger {
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
     //state.checkpoints.num-retained
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
-    flinkConfig.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
+    flinkConfig.safeSet(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
-    //set savepoint.ignore-unclaimed-state parameter
-    flinkConfig.setBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, submitRequest.allowNonRestoredState)
+    //set savepoint parameter
+    if (submitRequest.savePoint != null) {
+      flinkConfig.safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
+      flinkConfig.setBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, submitRequest.allowNonRestoredState)
+    }
 
     setConfig(submitRequest, flinkConfig)
 
@@ -164,6 +166,7 @@ trait FlinkSubmitTrait extends Logger {
       .newBuilder
       .setJarFile(jarFile)
       .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
+      .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
       .setArguments(
         flinkConfig
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
@@ -413,7 +416,7 @@ trait FlinkSubmitTrait extends Logger {
       programArgs += PARAM_KEY_FLINK_CONF
       programArgs += submitRequest.flinkYaml
       programArgs += PARAM_KEY_APP_NAME
-      programArgs += submitRequest.effectiveAppName
+      programArgs += DeflaterUtils.zipString(submitRequest.effectiveAppName)
       programArgs += PARAM_KEY_FLINK_PARALLELISM
       programArgs += getParallelism(submitRequest).toString
       submitRequest.developmentMode match {
