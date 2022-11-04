@@ -31,6 +31,7 @@
         <result column="job_name" jdbcType="VARCHAR" property="jobName"/>
         <result column="app_id" jdbcType="VARCHAR" property="appId"/>
         <result column="version_id" jdbcType="BIGINT" property="versionId"/>
+        <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
         <result column="flink_image" jdbcType="VARCHAR" property="flinkImage"/>
         <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="app_type" jdbcType="INTEGER" property="appType"/>
@@ -199,4 +200,20 @@
         </set>
         where id=#{application.id}
     </update>
+
+    <update id="mapping" parameterType="application">
+        update t_flink_app
+        <set>
+            <if test="application.jobId != null">
+                job_id=#{application.jobId},
+            </if>
+            <if test="application.appId != null">
+                app_id=#{application.appId},
+            </if>
+            end_time=null,
+            `state`=14
+        </set>
+        where id=#{application.id}
+    </update>
+
 </mapper>

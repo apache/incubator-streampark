@@ -283,23 +283,22 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             name="mappingForm"
             labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
             wrapperCol={{ lg: { span: 16 }, sm: { span: 4 } }}
-            v-model:model={formValue}
-          >
+            v-model:model={formValue}>
             <Form.Item label="Application Name">
               <Alert message={app.jobName} type="info" />
             </Form.Item>
-            <Form.Item
-              label="Application Id"
-              name="appId"
-              rules={[{ required: true, message: 'ApplicationId is required' }]}
-            >
-              <Input type="text" placeholder="ApplicationId" v-model:value={formValue.appId} />
-            </Form.Item>
+            {[2, 3, 4].includes(app.executionMode) && (
+              <Form.Item
+                label="YARN Application Id"
+                name="appId"
+                rules={[{ required: true, message: 'YARN ApplicationId is required' }]}>
+                <Input type="text" placeholder="ApplicationId" v-model:value={formValue.appId} />
+              </Form.Item>
+            )}
             <Form.Item
               label="JobId"
               name="jobId"
-              rules={[{ required: true, message: 'ApplicationId is required' }]}
-            >
+              rules={[{ required: true, message: 'ApplicationId is required' }]}>
               <Input type="text" placeholder="JobId" v-model:value={formValue.jobId} />
             </Form.Item>
           </Form>
@@ -310,11 +309,10 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       onOk: async () => {
         try {
           await mappingRef.value.validate();
-          console.log(formValue);
           await fetchMapping({
             id: app.id,
             appId: formValue.appId,
-            jobId: formValue.jobId,
+            jobId: formValue.jobId
           });
           Swal.fire({
             icon: 'success',
