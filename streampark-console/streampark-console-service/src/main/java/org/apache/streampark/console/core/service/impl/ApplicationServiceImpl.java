@@ -1032,7 +1032,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         boolean mapping = this.baseMapper.mapping(appParam);
         Application application = getById(appParam.getId());
         if (isKubernetesApp(application)) {
-            k8SFlinkTrackMonitor.unTrackingJob(toTrackId(application));
+            k8SFlinkTrackMonitor.trackingJob(toTrackId(application));
         } else {
             FlinkTrackingTask.addTracking(application);
         }
