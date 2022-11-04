@@ -124,7 +124,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: h('span', { class: 'conf-switch' }, 'If set to ON, the value of the variable will be displayed as ******** elsewhere.'),
+        afterItem: h('span', { class: 'conf-switch' }, 'Whether desensitization is required, e.g: desensitization of sensitive data such as passwords, if enable variable value will be displayed as ********'),
       }
     ];
   });
