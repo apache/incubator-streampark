@@ -18,6 +18,7 @@ import { optionsKeyMapping } from '../data/option';
 import { fetchYarn } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchActiveURL } from '/@/api/flink/setting/flinkCluster';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 
 export function handleAppBuildStatusColor(statusCode) {
   switch (statusCode) {
@@ -102,10 +103,14 @@ export function descriptionFilter(option) {
 
 export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
   const executionMode = app['executionMode'];
-  if (executionMode === 1) {
+  if (executionMode == ExecModeEnum.REMOTE) {
     const res = await fetchActiveURL(app.flinkClusterId);
     window.open(res + '/#/job/' + app.jobId + '/overview');
-  } else if ([2, 3, 4].includes(executionMode)) {
+  } else if (
+    [ExecModeEnum.YARN_PER_JOB, ExecModeEnum.YARN_SESSION, ExecModeEnum.YARN_APPLICATION].includes(
+      executionMode,
+    )
+  ) {
     if (yarn == null) {
       const res = await fetchYarn();
       window.open(res + '/proxy/' + app['appId'] + '/');
@@ -155,7 +160,7 @@ export function handleIsStart(app, optionApps) {
 }
 
 export function handleYarnQueue(values) {
-  if (values.executionMode === 4) {
+  if (values.executionMode == ExecModeEnum.YARN_APPLICATION) {
     const queue = values['yarnQueue'];
     if (queue != null && queue !== '' && queue !== undefined) {
       return queue;
@@ -268,7 +273,7 @@ export function handleSubmitParams(
     flinkImage: values.flinkImage || null,
     yarnSessionClusterId: values.yarnSessionClusterId || null,
   });
-  if (params.executionMode === 6) {
+  if (params.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
     Object.assign(params, {
       k8sPodTemplate: k8sTemplate.podTemplate,
       k8sJmPodTemplate: k8sTemplate.jmPodTemplate,
@@ -281,3 +286,12 @@ export function handleSubmitParams(
 export const filterOption = (input: string, options: Recordable) => {
   return options.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
 };
+
+// k8s mode
+export function isK8sExecMode(mode: number): boolean {
+  return [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(mode);
+}
+// session mode
+export function isSessionMode(mode: number): boolean {
+  return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
+}

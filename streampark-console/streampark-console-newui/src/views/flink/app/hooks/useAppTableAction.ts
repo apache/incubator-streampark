@@ -24,6 +24,7 @@ import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchFlamegraph } from '/@/api/flink/app/metrics';
 import { ActionItem, FormProps } from '/@/components/Table';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 export enum JobTypeEnum {
   JAR = 1,
   SQL = 2,
@@ -98,7 +99,9 @@ export const useAppTableAction = (
       },
       {
         tooltip: { title: 'See Flink Start log' },
-        ifShow: [5, 6].includes(record.executionMode),
+        ifShow: [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(
+          record.executionMode,
+        ),
         auth: 'app:detail',
         icon: 'ant-design:sync-outlined',
         onClick: () => openLogModal(true, { app: record }),

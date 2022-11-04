@@ -18,6 +18,7 @@ import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 
 import Icon, { SvgIcon } from '/@/components/Icon';
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
@@ -298,7 +299,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         component: 'Switch',
         slot: 'useSysHadoopConf',
         defaultValue: false,
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
       },
       ...getFlinkFormOtherSchemas.value,
     ];

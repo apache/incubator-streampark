@@ -17,6 +17,7 @@
 import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { renderSqlHistory } from './useFlinkRender';
@@ -53,6 +54,7 @@ export const useEditStreamParkSchema = (
   async function handleChangeSQL(v: string) {
     const res = await fetchFlinkSql({ id: v });
     flinkSql.value?.setContent(decodeByBase64(res.sql));
+    console.log('res', flinkSql.value);
     unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
   }
   // start compare flinksql version
@@ -171,7 +173,7 @@ export const useEditStreamParkSchema = (
         component: 'Switch',
         slot: 'useSysHadoopConf',
         defaultValue: false,
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
       },
       ...getFlinkFormOtherSchemas.value,
     ];

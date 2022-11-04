@@ -195,7 +195,7 @@ export const useProject = () => {
       });
       if (res === 0) {
         if (branchList.value.length === 0) {
-          handleBranches(values);
+          await handleBranches(values);
         }
         if (!branchList.value.find((v) => v.value == values.branches)) {
           createErrorSwal(
