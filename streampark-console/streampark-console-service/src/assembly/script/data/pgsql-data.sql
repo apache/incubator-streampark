@@ -106,6 +106,16 @@ insert into "public"."t_menu" VALUES (100056, 100054, 'update', NULL, NULL, 'var
 insert into "public"."t_menu" VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
 insert into "public"."t_menu" VALUES (100058, 100013, 'Depend Apps', '/system/variable/depend_apps', 'system/variable/DependApps', 'variable:dependApps', '', '0', 0, NULL, now(), now());
 insert into "public"."t_menu" VALUES (100059, 100054, 'Show Original', NULL, NULL, 'variable:showOriginal', NULL, '1', 1, NULL, now(), now());
+insert into "public"."t_menu" VALUES (100060, 100001, 'view', null, null, 'user:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100061, 100038, 'view', null, null, 'token:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100062, 100002, 'view', null, null, 'role:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100063, 100044, 'view', null, null, 'team:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100064, 100048, 'view', null, null, 'member:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100065, 100003, 'view', null, null, 'menu:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100066, 100014, 'view', null, null, 'project:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100067, 100015, 'view', null, null, 'app:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100068, 100054, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
+insert into "public"."t_menu" VALUES (100069, 100034, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 
 -- ----------------------------
 -- Records of t_role
