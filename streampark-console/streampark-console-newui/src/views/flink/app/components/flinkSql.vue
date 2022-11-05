@@ -21,7 +21,7 @@
 </script>
 
 <script setup lang="ts" name="FlinkSql">
-  import { computed, reactive, ref, unref } from 'vue';
+  import { computed, reactive, ref, unref, watchEffect } from 'vue';
   import { getMonacoOptions } from '../data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
@@ -145,15 +145,23 @@
       unref(flinkSql).style.height = isFullscreen.value ? '100vh' : '550px';
     }, 100);
   }
-  const { onChange, setContent, getInstance, getMonacoInstance } = useMonaco(flinkSql, {
-    language: 'sql',
-    code: props.value || defaultValue,
-    suggestions: props.suggestions,
-    options: {
-      minimap: { enabled: true },
-      ...(getMonacoOptions(false) as any),
-      autoClosingBrackets: 'never',
+  const { onChange, setContent, getInstance, getMonacoInstance, setMonacoSuggest } = useMonaco(
+    flinkSql,
+    {
+      language: 'sql',
+      code: props.value || defaultValue,
+      options: {
+        minimap: { enabled: true },
+        ...(getMonacoOptions(false) as any),
+        autoClosingBrackets: 'never',
+      },
     },
+  );
+
+  watchEffect(() => {
+    if (props.suggestions.length > 0) {
+      setMonacoSuggest(props.suggestions);
+    }
   });
   const canPreview = computed(() => {
     return /\${.+}/.test(props.value);
@@ -169,31 +177,20 @@
 <template>
   <div>
     <div ref="flinkScreen">
-      <div
-        class="sql-box"
-        ref="flinkSql"
-        :class="'syntax-' + (vertifyRes.errorMsg ? 'false' : 'true')"
-      ></div>
-
       <ButtonGroup class="flinksql-tool">
-        <a-button
-          class="flinksql-tool-item"
-          v-if="canPreview"
-          size="small"
-          @click="emit('preview', value)"
-        >
+        <a-button class="flinksql-tool-item" v-if="canPreview" @click="emit('preview', value)">
           <Icon icon="ant-design:eye-outlined" />
           preview
         </a-button>
-        <a-button class="flinksql-tool-item" type="primary" size="small" @click="handleVerifySql">
+        <a-button class="flinksql-tool-item" type="primary" @click="handleVerifySql">
           <Icon icon="ant-design:check-outlined" />
           {{ t('flink.app.flinkSql.verify') }}
         </a-button>
-        <a-button class="flinksql-tool-item" size="small" type="default" @click="handleFormatSql">
+        <a-button class="flinksql-tool-item" type="default" @click="handleFormatSql">
           <Icon icon="ant-design:thunderbolt-outlined" />
           {{ t('flink.app.flinkSql.format') }}
         </a-button>
-        <a-button class="flinksql-tool-item" type="default" size="small" @click="handleBigScreen">
+        <a-button class="flinksql-tool-item" type="default" @click="handleBigScreen">
           <Icon
             :icon="
               isFullscreen
@@ -205,10 +202,14 @@
           {{ t('flink.app.flinkSql.fullScreen') }}
         </a-button>
       </ButtonGroup>
-
+      <div
+        class="sql-box"
+        ref="flinkSql"
+        :class="'syntax-' + (vertifyRes.errorMsg ? 'false' : 'true')"
+      ></div>
       <p class="conf-desc mt-10px">
         <span class="text-red-600" v-if="vertifyRes.errorMsg"> {{ vertifyRes.errorMsg }} </span>
-        <span v-else class="sql-desc text-green-600">
+        <span v-else class="text-green-700">
           <span v-if="vertifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
         </span>
       </p>

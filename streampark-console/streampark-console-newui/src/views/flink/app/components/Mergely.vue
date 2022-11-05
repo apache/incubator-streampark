@@ -136,6 +136,7 @@
 <template>
   <BasicDrawer
     @register="registerMergelyDrawer"
+    :keyboard="false"
     :closable="false"
     :mask-closable="false"
     width="80%"

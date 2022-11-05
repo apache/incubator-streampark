@@ -89,15 +89,20 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     val configMap = parseConfig(config)
     val properConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
     val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
+
     // config priority: explicitly specified priority > project profiles > system profiles
-    val parameter = ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(appConf)).mergeWith(argsMap)
+    val parameter = ParameterTool.fromSystemProperties()
+      .mergeWith(ParameterTool.fromMap(properConf))
+      .mergeWith(ParameterTool.fromMap(appConf))
+      .mergeWith(argsMap)
+
     val envConfig = Configuration.fromMap(properConf)
     FlinkConfiguration(parameter, envConfig, null)
   }
 
   def parseConfig(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
-    config match {
+    val map = config match {
       case x if x.startsWith("yaml://") =>
         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("prop://") =>
@@ -122,6 +127,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
         }
     }
+    map.filter(_._2.nonEmpty)
   }
 
   def extractConfigByPrefix(configMap: Map[String, String], prefix: String): Map[String, String] = {

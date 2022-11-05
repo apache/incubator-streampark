@@ -64,7 +64,7 @@
     </ul>
     <div class="operation">
       <a-tooltip title="See Build log">
-        <a-button shape="circle" @click="handleSeeLog">
+        <a-button shape="circle" @click="handleSeeLog" class="!leading-26px">
           <Icon icon="ant-design:eye-outlined" />
         </a-button>
       </a-tooltip>

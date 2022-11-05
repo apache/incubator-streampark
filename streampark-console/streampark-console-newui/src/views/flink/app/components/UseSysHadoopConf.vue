@@ -40,27 +40,31 @@
 </script>
 
 <template>
-  <Switch
-    checked-children="ON"
-    un-checked-children="OFF"
-    :checked="hadoopConf"
-    @change="(checked) => emit('update:hadoopConf', checked)"
-  />
-  <Space>
-    <Popover title="Tips">
-      <template #content>
-        <p>Automatically copy configuration files from system environment parameters</p>
-        <p><b>HADOOP_CONF_PATH</b> and <b>HIVE_CONF_PATH</b> to Flink Docker image</p>
-      </template>
-      <Icon icon="ant-design:question-circle-outlined" class="ml-10px" />
-    </Popover>
-    <transition name="slide-fade">
-      <a-button size="small" v-if="hadoopConf" @click="openHadoopConfDrawer(true, {})">
-        <Icon icon="ant-design:eye-outlined" class="ml-10px" />
+  <div class="flex items-center">
+    <Switch
+      checked-children="ON"
+      un-checked-children="OFF"
+      :checked="hadoopConf"
+      @change="(checked) => emit('update:hadoopConf', checked)"
+    />
+    <Space>
+      <Popover title="Tips">
+        <template #content>
+          <p>Automatically copy configuration files from system environment parameters</p>
+          <p><b>HADOOP_CONF_PATH</b> and <b>HIVE_CONF_PATH</b> to Flink Docker image</p>
+        </template>
+        <Icon icon="ant-design:question-circle-outlined" class="ml-10px" />
+      </Popover>
+      <transition name="slide-fade">
+        <a-button size="small" v-if="hadoopConf" @click="openHadoopConfDrawer(true, {})">
+          <div class="flex items-center">
+            <Icon icon="ant-design:eye-outlined" class="pr-5px" />
 
-        {{ t('common.view') }}
-      </a-button>
-    </transition>
-  </Space>
+            {{ t('common.view') }}
+          </div>
+        </a-button>
+      </transition>
+    </Space>
+  </div>
   <HadoopConfDrawer @register="registerHadoopConf" />
 </template>

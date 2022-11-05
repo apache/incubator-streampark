@@ -87,6 +87,7 @@
 <template>
   <BasicModal
     canFullscreen
+    defaultFullscreen
     :scrollTop="false"
     @register="registerModal"
     width="80%"
