@@ -102,29 +102,30 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   def parseConfig(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
+    lazy val content = DeflaterUtils.unzipString(config.drop(7))
     val map = config match {
-      case x if x.startsWith("yaml://") =>
-        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.drop(7)))
-      case x if x.startsWith("prop://") =>
-        PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.drop(7)))
+      case x if x.startsWith("yaml://") => PropertiesUtils.fromYamlText(content)
+      case x if x.startsWith("conf://") => PropertiesUtils.fromHoconText(content)
+      case x if x.startsWith("prop://") => PropertiesUtils.fromPropertiesText(content)
       case x if x.startsWith("hdfs://") =>
-
         /**
          * If the configuration file with the hdfs, user will need to copy the hdfs-related configuration files under the resources dir
          */
         val text = HdfsUtils.read(x)
         extension match {
-          case "properties" => PropertiesUtils.fromPropertiesText(text)
           case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+          case "conf" => PropertiesUtils.fromHoconText(text)
+          case "properties" => PropertiesUtils.fromPropertiesText(text)
           case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
         }
       case _ =>
         val configFile = new File(config)
-        require(configFile.exists(), s"[StreamPark] Usage:flink.conf file $configFile is not found!!!")
+        require(configFile.exists(), s"[StreamPark] Usage: flink.conf file $configFile is not found!!!")
         extension match {
-          case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
           case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-          case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
+          case "conf" => PropertiesUtils.fromHoconFile(configFile.getAbsolutePath)
+          case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+          case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be (yml|conf|properties)")
         }
     }
     map.filter(_._2.nonEmpty)

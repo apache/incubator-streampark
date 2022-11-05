@@ -104,11 +104,11 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) Map.empty[String, String] else {
+      lazy val content = DeflaterUtils.unzipString(this.appConf.trim.drop(7))
       val map = this.appConf match {
-        case x if x.trim.startsWith("yaml://") =>
-          PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.trim.drop(7)))
-        case x if x.trim.startsWith("prop://") =>
-          PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.trim.drop(7)))
+        case x if x.trim.startsWith("yaml://") => PropertiesUtils.fromYamlText(content)
+        case x if x.trim.startsWith("conf://") => PropertiesUtils.fromHoconText(content)
+        case x if x.trim.startsWith("prop://") => PropertiesUtils.fromPropertiesText(content)
         case x if x.trim.startsWith("hdfs://") =>
           /*
            * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
@@ -116,8 +116,9 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
           val text = HdfsUtils.read(this.appConf)
           val extension = this.appConf.split("\\.").last.toLowerCase
           extension match {
-            case "properties" => PropertiesUtils.fromPropertiesText(text)
             case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+            case "conf" => PropertiesUtils.fromHoconText(text)
+            case "properties" => PropertiesUtils.fromPropertiesText(text)
             case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
           }
         case x if x.trim.startsWith("json://") =>
