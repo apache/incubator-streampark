@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.common.conf.ConfigConst;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -60,6 +62,8 @@ public class Variable implements Serializable {
     @NotNull(message = "{required}")
     private Long teamId;
 
+    private Boolean desensitization;
+
     private transient Date createTime;
 
     private transient Date modifyTime;
@@ -67,4 +71,10 @@ public class Variable implements Serializable {
     private transient String sortField;
 
     private transient String sortOrder;
+
+    public void dataMasking() {
+        if (desensitization) {
+            this.setVariableValue(ConfigConst.DEFAULT_DATAMASK_STRING());
+        }
+    }
 }

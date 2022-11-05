@@ -134,6 +134,7 @@ insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', 
 insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100058, 100013, 'Depend Apps', '/system/variable/depend_apps', 'system/variable/DependApps', 'variable:dependApps', '', '0', 0, NULL, now(), now());
+insert into `t_menu` VALUES (100059, 100054, 'Show Original', NULL, NULL, 'variable:showOriginal', NULL, '1', 1, NULL, now(), now());
 
 update `t_menu` set order_num=4 where menu_id=100019;
 update `t_menu` set order_num=5 where menu_id=100034;
@@ -253,6 +254,7 @@ create table `t_variable` (
   `description` text collate utf8mb4_general_ci default null comment 'More detailed description of variables',
   `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
+  `desensitization` tinyint not null default 0 comment '0 is no desensitization, 1 is desensitization, if set to desensitization, it will be replaced by * when displayed',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   primary key (`id`) using btree,

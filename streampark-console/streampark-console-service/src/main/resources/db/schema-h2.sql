@@ -292,6 +292,7 @@ create table if not exists `t_variable` (
   `description` text default null comment 'More detailed description of variables, only for display, not involved in program logic',
   `creator_id` bigint not null comment 'user id of creator',
   `team_id` bigint not null comment 'team id',
+  `desensitization` tinyint not null default 0 comment '0 is no desensitization, 1 is desensitization, if set to desensitization, it will be replaced by * when displayed',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   primary key (`id`),

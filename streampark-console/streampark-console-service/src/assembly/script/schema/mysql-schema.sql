@@ -330,6 +330,7 @@ create table `t_variable` (
   `description` text collate utf8mb4_general_ci default null comment 'More detailed description of variables',
   `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
+  `desensitization` tinyint not null default 0 comment '0 is no desensitization, 1 is desensitization, if set to desensitization, it will be replaced by * when displayed',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   primary key (`id`) using btree,
