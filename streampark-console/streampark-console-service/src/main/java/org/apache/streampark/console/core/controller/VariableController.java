@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -62,9 +61,7 @@ public class VariableController {
     public RestResponse page(RestRequest restRequest, Variable variable) {
         IPage<Variable> page = variableService.page(variable, restRequest);
         for (Variable v : page.getRecords()) {
-            if (v.getDesensitization()) {
-                v.setVariableValue(ConfigConst.DEFAULT_DATAMASK_STRING());
-            }
+            v.dataMasking();
         }
         return RestResponse.success(page);
     }
@@ -79,9 +76,7 @@ public class VariableController {
     public RestResponse variableList(@RequestParam Long teamId, String keyword) {
         List<Variable> variableList = variableService.findByTeamId(teamId, keyword);
         for (Variable v : variableList) {
-            if (v.getDesensitization()) {
-                v.setVariableValue(ConfigConst.DEFAULT_DATAMASK_STRING());
-            }
+            v.dataMasking();
         }
         return RestResponse.success(variableList);
     }
@@ -117,9 +112,9 @@ public class VariableController {
         return RestResponse.success();
     }
 
-    @PostMapping("sensitive")
-    @RequiresPermissions("variable:sensitive")
-    public RestResponse sensitive(@RequestParam Long id) {
+    @PostMapping("showOriginal")
+    @RequiresPermissions("variable:showOriginal")
+    public RestResponse showOriginal(@RequestParam Long id) {
         Variable v = this.variableService.getById(id);
         return RestResponse.success(v);
     }
