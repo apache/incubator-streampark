@@ -30,7 +30,7 @@
 </script>
 
 <script lang="ts" setup>
-  import { ref, computed, unref } from 'vue';
+  import { ref, h, computed, unref, reactive } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { Icon } from '/@/components/Icon';
@@ -40,8 +40,9 @@
     fetchAddVariable,
     fetchCheckVariableCode,
     fetchUpdateVariable,
+    fetchVariableInfo,
   } from '/@/api/system/variable';
-  import { h } from 'vue';
+  import { VariableListRecord } from '/@/api/system/model/variableModel';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -50,6 +51,7 @@
   const isUpdate = ref(false);
   const { getItemProp, setValidateStatus, setHelp } = useFormValidate();
   const variableId = ref<Nullable<number>>(null);
+  const variableInfo = reactive<Partial<VariableListRecord>>({});
 
   async function handleVariableCodeBlur(e) {
     const value = (e && e.target.value) || '';
@@ -124,8 +126,12 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: h('span', { class: 'conf-switch' }, 'Whether desensitization is required, e.g: desensitization of sensitive data such as passwords, if enable variable value will be displayed as ********'),
-      }
+        afterItem: h(
+          'span',
+          { class: 'conf-switch' },
+          'Whether desensitization is required, e.g: desensitization of sensitive data such as passwords, if enable variable value will be displayed as ********',
+        ),
+      },
     ];
   });
 
@@ -138,19 +144,33 @@
     wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
   });
 
-  const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
+  const [registerDrawer, { setDrawerProps, changeLoading, closeDrawer }] = useDrawerInner(
     async (data: Recordable) => {
-      variableId.value = null;
-      resetFields();
-      setValidateStatus('');
-      setHelp('');
-      setDrawerProps({ confirmLoading: false });
-      isUpdate.value = !!data?.isUpdate;
-      if (isUpdate.value) variableId.value = data.record.id;
-      if (unref(isUpdate)) {
-        setFieldsValue({
-          ...data.record,
-        });
+      try {
+        variableId.value = null;
+        resetFields();
+        setValidateStatus('');
+        setHelp('');
+        setDrawerProps({ confirmLoading: false });
+        isUpdate.value = !!data?.isUpdate;
+        if (unref(isUpdate)) {
+          // is desensitization variable
+          if (data.record.desensitization) {
+            changeLoading(true);
+            const res = await fetchVariableInfo({
+              id: data.record.id,
+            });
+            Object.assign(variableInfo, res);
+            changeLoading(false);
+          } else {
+            Object.assign(variableInfo, data.record);
+          }
+
+          variableId.value = data.record.id;
+          setFieldsValue(variableInfo);
+        }
+      } catch (error) {
+        changeLoading(false);
       }
     },
   );

@@ -45,7 +45,7 @@
   import { CreateParams } from '/@/api/flink/app/app.type';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
 
-  const FlinkSqlEditor = createAsyncComponent(() => import('./components/flinkSql.vue'), {
+  const FlinkSqlEditor = createAsyncComponent(() => import('./components/FlinkSql.vue'), {
     loading: true,
   });
   const Dependency = createAsyncComponent(() => import('./components/Dependency.vue'), {
