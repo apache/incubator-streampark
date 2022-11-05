@@ -1033,13 +1033,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @RefreshCache
     public boolean mapping(Application appParam) {
-        appParam.setAppId(appParam.getAppId());
-        appParam.setJobId(appParam.getJobId());
-        appParam.setState(14);
-        appParam.setEndTime(null);
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Application::getId, appParam.getId());
-        boolean mapping = this.update(appParam, queryWrapper);
+        boolean mapping = this.baseMapper.mapping(appParam);
         Application application = getById(appParam.getId());
         if (isKubernetesApp(application)) {
             k8SFlinkTrackMonitor.trackingJob(toTrackId(application));

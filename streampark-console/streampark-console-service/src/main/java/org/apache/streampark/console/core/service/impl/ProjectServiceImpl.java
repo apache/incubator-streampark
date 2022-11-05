@@ -239,27 +239,30 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public void updateFailureBuildById(Project project) {
-        project.setBuildState(2);
+        Project entity = new Project();
+        entity.setBuildState(2);
         LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Project::getId, project.getId());
-        this.update(project, queryWrapper);
+        this.update(entity, queryWrapper);
     }
 
     @Override
     public void updateSuccessBuildById(Project project) {
-        project.setLastBuild(new Date());
-        project.setBuildState(1);
+        Project entity = new Project();
+        entity.setLastBuild(new Date());
+        entity.setBuildState(1);
         LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Project::getId, project.getId());
-        this.update(project, queryWrapper);
+        this.update(entity, queryWrapper);
     }
 
     @Override
     public void updateStartBuildById(Project project) {
-        project.setBuildState(0);
+        Project entity = new Project();
+        entity.setBuildState(0);
         LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Project::getId, project.getId());
-        this.update(project, queryWrapper);
+        this.update(entity, queryWrapper);
     }
 
     @Override

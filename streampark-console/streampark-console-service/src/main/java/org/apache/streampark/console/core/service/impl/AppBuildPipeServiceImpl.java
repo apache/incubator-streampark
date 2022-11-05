@@ -234,7 +234,7 @@ public class AppBuildPipeServiceImpl
                     } else {
                         app.setOptionState(OptionState.NONE.getValue());
                         app.setLaunch(LaunchState.DONE.get());
-                        //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
+                        // If the current task is not running, or the task has just been added, directly set the candidate version to the official version
                         if (app.isFlinkSqlJob()) {
                             applicationService.toEffective(app);
                         } else {

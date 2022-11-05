@@ -118,8 +118,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         if (StringUtils.isNoneBlank(clusterId)) {
             LambdaQueryWrapper<FlinkCluster> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(FlinkCluster::getClusterId, clusterId);
-            FlinkCluster inDB = this.getOne(queryWrapper);
-            if (inDB != null) {
+            FlinkCluster inDb = this.getOne(queryWrapper);
+            if (inDb != null) {
                 result.setMsg("the clusterId" + clusterId + "is already exists,please check!");
                 result.setStatus(0);
                 return result;

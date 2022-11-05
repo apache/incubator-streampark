@@ -64,9 +64,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             String value = StringUtils.trimToNull(setting.getSettingValue());
             setting.setSettingValue(value);
 
+            Setting entity = new Setting();
+            entity.setSettingValue(setting.getSettingValue());
             LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Setting::getSettingKey, setting.getSettingKey());
-            this.update(setting, queryWrapper);
+            this.update(entity, queryWrapper);
 
             String settingKey = setting.getSettingKey();
             if (CommonConfig.MAVEN_REMOTE_URL().key().equals(settingKey)) {

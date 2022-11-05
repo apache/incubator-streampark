@@ -201,6 +201,21 @@
         where t.team_id=#{teamId}
     </select>
 
+    <update id="mapping" parameterType="org.apache.streampark.console.core.entity.Application">
+        update t_flink_app
+        <set>
+            <if test="application.jobId != null">
+                job_id=#{application.jobId},
+            </if>
+            <if test="application.appId != null">
+                app_id=#{application.appId},
+            </if>
+            end_time=null,
+            `state`=14
+        </set>
+        where id=#{application.id}
+    </update>
+
     <select id="getRecentK8sNamespace" resultType="java.lang.String" parameterType="java.lang.Integer">
         select k8s_namespace
         from (
