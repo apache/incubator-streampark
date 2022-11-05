@@ -95,14 +95,14 @@ public class VariableController {
 
     @PostMapping("post")
     @RequiresPermissions("variable:add")
-    public RestResponse addVariable(@Valid Variable variable) throws Exception {
+    public RestResponse addVariable(@Valid Variable variable) {
         this.variableService.createVariable(variable);
         return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("variable:update")
-    public RestResponse updateVariable(@Valid Variable variable) throws Exception {
+    public RestResponse updateVariable(@Valid Variable variable) {
         if (variable.getId() == null) {
             throw new ApiAlertException("Sorry, the variable id cannot be null.");
         }
@@ -113,16 +113,20 @@ public class VariableController {
         if (!findVariable.getVariableCode().equals(variable.getVariableCode())) {
             throw new ApiAlertException("Sorry, the variable code cannot be updated.");
         }
-        if (ConfigConst.DEFAULT_DATAMASK_STRING().equals(variable.getVariableValue())) {
-            variable.setVariableValue(null);
-        }
         this.variableService.updateById(variable);
         return RestResponse.success();
     }
 
+    @PostMapping("sensitive")
+    @RequiresPermissions("variable:sensitive")
+    public RestResponse sensitive(@RequestParam Long id) {
+        Variable v = this.variableService.getById(id);
+        return RestResponse.success(v);
+    }
+
     @DeleteMapping("delete")
     @RequiresPermissions("variable:delete")
-    public RestResponse deleteVariable(@Valid Variable variable) throws Exception {
+    public RestResponse deleteVariable(@Valid Variable variable) {
         this.variableService.deleteVariable(variable);
         return RestResponse.success();
     }
