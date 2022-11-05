@@ -45,8 +45,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public Setting get(String key) {
-        LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Setting::getSettingKey, key);
+        LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<Setting>()
+            .eq(Setting::getSettingKey, key);
         return this.getOne(queryWrapper);
     }
 
@@ -66,8 +66,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
             Setting entity = new Setting();
             entity.setSettingValue(setting.getSettingValue());
-            LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Setting::getSettingKey, setting.getSettingKey());
+            LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<Setting>()
+                .eq(Setting::getSettingKey, setting.getSettingKey());
             this.update(entity, queryWrapper);
 
             String settingKey = setting.getSettingKey();

@@ -96,8 +96,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public void updateRole(Role role) {
         role.setModifyTime(new Date());
         baseMapper.updateById(role);
-        roleMenuMapper.delete(
-            new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId()));
+        LambdaQueryWrapper<RoleMenu> queryWrapper = new LambdaQueryWrapper<RoleMenu>()
+            .eq(RoleMenu::getRoleId, role.getRoleId());
+        roleMenuMapper.delete(queryWrapper);
+
         String menuId = role.getMenuId();
         if (StringUtils.contains(menuId, Constant.APP_DETAIL_MENU_ID) && !StringUtils.contains(menuId, Constant.APP_MENU_ID)) {
             menuId = menuId + StringPool.COMMA + Constant.APP_MENU_ID;

@@ -180,9 +180,9 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public ApplicationConfig getLatest(Long appId) {
-        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ApplicationConfig::getAppId, appId);
-        queryWrapper.eq(ApplicationConfig::getLatest, true);
+        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
+            .eq(ApplicationConfig::getAppId, appId)
+            .eq(ApplicationConfig::getLatest, true);
         return this.getOne(queryWrapper);
     }
 
@@ -206,18 +206,18 @@ public class ApplicationConfigServiceImpl
     @Override
     public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
         Page<ApplicationConfig> page = new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
-        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ApplicationConfig::getAppId, config.getAppId());
+        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
+            .eq(ApplicationConfig::getAppId, config.getAppId());
         return this.page(page, queryWrapper);
     }
 
     @Override
     public List<ApplicationConfig> history(Application application) {
-        LambdaQueryWrapper<ApplicationConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ApplicationConfig::getAppId, application.getId())
+        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
+            .eq(ApplicationConfig::getAppId, application.getId())
             .orderByDesc(ApplicationConfig::getVersion);
 
-        List<ApplicationConfig> configList = this.baseMapper.selectList(wrapper);
+        List<ApplicationConfig> configList = this.baseMapper.selectList(queryWrapper);
         ApplicationConfig effective = getEffective(application.getId());
 
         if (effective != null) {

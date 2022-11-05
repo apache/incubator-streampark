@@ -70,7 +70,6 @@ import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -387,7 +386,8 @@ public class AppBuildPipeServiceImpl
                 log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
                 return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
             default:
-                throw new UnsupportedOperationException("Unsupported Building Application for ExecutionMode: " + app.getExecutionModeEnum());
+                throw new UnsupportedOperationException(
+                    "Unsupported Building Application for ExecutionMode: " + app.getExecutionModeEnum());
         }
     }
 
@@ -444,9 +444,10 @@ public class AppBuildPipeServiceImpl
         if (CollectionUtils.isEmpty(appIds)) {
             return Maps.newHashMap();
         }
-        QueryWrapper<AppBuildPipeline> query = new QueryWrapper<>();
-        query.select("app_id", "pipe_status").in("app_id", appIds);
-        List<Map<String, Object>> rMaps = baseMapper.selectMaps(query);
+        LambdaQueryWrapper<AppBuildPipeline> queryWrapper = new LambdaQueryWrapper<AppBuildPipeline>()
+            .select(AppBuildPipeline::getAppId, AppBuildPipeline::getPipeStatus)
+            .in(AppBuildPipeline::getAppId, appIds);
+        List<Map<String, Object>> rMaps = baseMapper.selectMaps(queryWrapper);
         if (CollectionUtils.isEmpty(rMaps)) {
             return Maps.newHashMap();
         }

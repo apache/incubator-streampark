@@ -53,10 +53,10 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
 
     @Override
     public String generateFlameGraph(FlameGraph flameGraph) throws IOException {
-        LambdaQueryWrapper<FlameGraph> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(FlameGraph::getAppId, flameGraph.getAppId());
-        queryWrapper.between(FlameGraph::getTimeline, flameGraph.getStart(), flameGraph.getEnd());
-        queryWrapper.orderByAsc(FlameGraph::getTimeline);
+        LambdaQueryWrapper<FlameGraph> queryWrapper = new LambdaQueryWrapper<FlameGraph>()
+            .eq(FlameGraph::getAppId, flameGraph.getAppId())
+            .between(FlameGraph::getTimeline, flameGraph.getStart(), flameGraph.getEnd())
+            .orderByAsc(FlameGraph::getTimeline);
         List<FlameGraph> flameGraphList = this.list(queryWrapper);
 
         if (CommonUtils.notEmpty(flameGraphList)) {
@@ -99,8 +99,8 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
 
     @Override
     public void clean(Date end) {
-        LambdaQueryWrapper<FlameGraph> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.lt(FlameGraph::getTimeline, end);
+        LambdaQueryWrapper<FlameGraph> queryWrapper = new LambdaQueryWrapper<FlameGraph>()
+            .lt(FlameGraph::getTimeline, end);
         this.remove(queryWrapper);
     }
 }

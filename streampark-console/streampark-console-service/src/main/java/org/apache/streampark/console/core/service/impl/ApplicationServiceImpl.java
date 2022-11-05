@@ -516,7 +516,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public long countByTeamId(Long teamId) {
-        return this.count(new LambdaQueryWrapper<Application>().eq(Application::getTeamId, teamId));
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
+            .eq(Application::getTeamId, teamId);
+        return this.count(queryWrapper);
     }
 
     @Override
@@ -536,9 +538,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!checkJobName(appParam.getJobName())) {
             return AppExistsState.INVALID;
         }
-        boolean inDB = this.baseMapper.selectCount(
-            new LambdaQueryWrapper<Application>()
-                .eq(Application::getJobName, appParam.getJobName())) > 0;
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
+            .eq(Application::getJobName, appParam.getJobName());
+        boolean inDB = this.baseMapper.selectCount(queryWrapper) > 0;
 
         if (appParam.getId() != null) {
             Application app = getById(appParam.getId());
@@ -625,9 +627,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @SneakyThrows
     @Transactional(rollbackFor = {Exception.class})
     public Long copy(Application appParam) {
-        long count = this.baseMapper.selectCount(
-            new LambdaQueryWrapper<Application>()
-                .eq(Application::getJobName, appParam.getJobName()));
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
+            .eq(Application::getJobName, appParam.getJobName());
+        long count = this.baseMapper.selectCount(queryWrapper);
         if (count > 0) {
             throw new IllegalArgumentException("[StreamPark] Application names cannot be repeated");
         }
@@ -882,8 +884,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public List<Application> getByProjectId(Long id) {
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Application::getProjectId, id);
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
+            .eq(Application::getProjectId, id);
         return this.list(queryWrapper);
     }
 

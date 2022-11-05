@@ -90,8 +90,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Project::getName, project.getName());
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getName, project.getName());
         long count = count(queryWrapper);
         RestResponse response = RestResponse.success();
         if (count == 0) {
@@ -148,8 +148,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public boolean delete(Long id) {
         Project project = getById(id);
         AssertUtils.state(project != null);
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Application::getProjectId, id);
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
+            .eq(Application::getProjectId, id);
         long count = applicationService.count(queryWrapper);
         if (count > 0) {
             return false;
@@ -166,16 +166,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public IPage<Project> page(Project project, RestRequest request) {
         Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Project::getTeamId, project.getTeamId());
-        queryWrapper.like(StringUtils.isNotBlank(project.getName()), Project::getName, project.getName());
-        queryWrapper.eq(project.getBuildState() != null, Project::getBuildState, project.getBuildState());
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getTeamId, project.getTeamId())
+            .like(StringUtils.isNotBlank(project.getName()), Project::getName, project.getName())
+            .eq(project.getBuildState() != null, Project::getBuildState, project.getBuildState());
         return this.page(page, queryWrapper);
     }
 
     @Override
     public long countByTeamId(Long teamId) {
-        return this.count(new LambdaQueryWrapper<Project>().eq(Project::getTeamId, teamId));
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getTeamId, teamId);
+        return this.count(queryWrapper);
     }
 
     @Override
@@ -232,17 +234,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 return false;
             }
         }
-        LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<Project>()
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
             .eq(Project::getName, project.getName());
-        return this.baseMapper.selectCount(wrapper) > 0;
+        return this.baseMapper.selectCount(queryWrapper) > 0;
     }
 
     @Override
     public void updateFailureBuildById(Project project) {
         Project entity = new Project();
         entity.setBuildState(2);
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Project::getId, project.getId());
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getId, project.getId());
         this.update(entity, queryWrapper);
     }
 
@@ -251,8 +253,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project entity = new Project();
         entity.setLastBuild(new Date());
         entity.setBuildState(1);
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Project::getId, project.getId());
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getId, project.getId());
         this.update(entity, queryWrapper);
     }
 
@@ -260,8 +262,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public void updateStartBuildById(Project project) {
         Project entity = new Project();
         entity.setBuildState(0);
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Project::getId, project.getId());
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getId, project.getId());
         this.update(entity, queryWrapper);
     }
 

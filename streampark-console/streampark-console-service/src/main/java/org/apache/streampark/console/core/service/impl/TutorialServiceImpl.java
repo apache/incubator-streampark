@@ -35,8 +35,8 @@ public class TutorialServiceImpl extends ServiceImpl<TutorialMapper, Tutorial> i
 
     @Override
     public Tutorial getByName(String name) {
-        LambdaQueryWrapper<Tutorial> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Tutorial::getName, name);
+        LambdaQueryWrapper<Tutorial> queryWrapper = new LambdaQueryWrapper<Tutorial>()
+            .eq(Tutorial::getName, name);
         return this.getOne(queryWrapper);
     }
 }

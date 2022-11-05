@@ -208,8 +208,8 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ApplicationBackUp::getAppId, appId)
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, appId)
             .eq(ApplicationBackUp::getSqlId, sqlId);
         return baseMapper.selectCount(queryWrapper) > 0;
     }

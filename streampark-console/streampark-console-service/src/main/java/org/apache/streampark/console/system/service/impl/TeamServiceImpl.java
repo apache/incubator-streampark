@@ -79,7 +79,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public Team findByName(String teamName) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<Team>().eq(Team::getTeamName, teamName));
+        LambdaQueryWrapper<Team> queryWrapper = new LambdaQueryWrapper<Team>()
+            .eq(Team::getTeamName, teamName);
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @Override

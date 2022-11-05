@@ -47,6 +47,7 @@ public class LoggerServiceImpl implements LoggerService {
      * @param limit       limit
      * @return log string data
      */
+    @Override
     public CompletionStage<String> queryLog(String nameSpace, String jobName, int skipLineNum, int limit) {
         return CompletableFuture.supplyAsync(() -> jobDeploymentsWatch(nameSpace, jobName)
         ).exceptionally(e -> {

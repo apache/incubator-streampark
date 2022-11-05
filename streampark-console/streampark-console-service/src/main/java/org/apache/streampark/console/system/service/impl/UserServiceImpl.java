@@ -69,7 +69,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User findByName(String username) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+            .eq(User::getUsername, username);
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @Override
@@ -91,7 +93,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updateLoginTime(String username) {
         User user = new User();
         user.setLastLoginTime(new Date());
-        this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+            .eq(User::getUsername, username);
+        this.baseMapper.update(user, queryWrapper);
     }
 
     @Override
@@ -133,7 +137,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updateAvatar(String username, String avatar) {
         User user = new User();
         user.setAvatar(avatar);
-        this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+            .eq(User::getUsername, username);
+        this.baseMapper.update(user, queryWrapper);
     }
 
     @Override
@@ -144,7 +150,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         password = ShaHashUtils.encrypt(salt, password);
         user.setSalt(salt);
         user.setPassword(password);
-        this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+            .eq(User::getUsername, username);
+        this.baseMapper.update(user, queryWrapper);
     }
 
     @Override
@@ -156,7 +164,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String password = ShaHashUtils.encrypt(salt, User.DEFAULT_PASSWORD);
             user.setSalt(salt);
             user.setPassword(password);
-            this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+                .eq(User::getUsername, username);
+            this.baseMapper.update(user, queryWrapper);
         }
     }
 
@@ -208,7 +218,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized config info of frontend
      *
-     * @param user  user
+     * @param user user
      * @return UserInfo
      */
     @Override
