@@ -59,8 +59,11 @@ public class VariableController {
     @PostMapping("page")
     @RequiresPermissions("variable:view")
     public RestResponse page(RestRequest restRequest, Variable variable) {
-        IPage<Variable> variableList = variableService.page(variable, restRequest);
-        return RestResponse.success(variableList);
+        IPage<Variable> page = variableService.page(variable, restRequest);
+        for (Variable v : page.getRecords()) {
+            v.dataMasking();
+        }
+        return RestResponse.success(page);
     }
 
     /**
@@ -72,6 +75,9 @@ public class VariableController {
     @PostMapping("list")
     public RestResponse variableList(@RequestParam Long teamId, String keyword) {
         List<Variable> variableList = variableService.findByTeamId(teamId, keyword);
+        for (Variable v : variableList) {
+            v.dataMasking();
+        }
         return RestResponse.success(variableList);
     }
 
@@ -84,14 +90,14 @@ public class VariableController {
 
     @PostMapping("post")
     @RequiresPermissions("variable:add")
-    public RestResponse addVariable(@Valid Variable variable) throws Exception {
+    public RestResponse addVariable(@Valid Variable variable) {
         this.variableService.createVariable(variable);
         return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("variable:update")
-    public RestResponse updateVariable(@Valid Variable variable) throws Exception {
+    public RestResponse updateVariable(@Valid Variable variable) {
         if (variable.getId() == null) {
             throw new ApiAlertException("Sorry, the variable id cannot be null.");
         }
@@ -106,9 +112,16 @@ public class VariableController {
         return RestResponse.success();
     }
 
+    @PostMapping("showOriginal")
+    @RequiresPermissions("variable:showOriginal")
+    public RestResponse showOriginal(@RequestParam Long id) {
+        Variable v = this.variableService.getById(id);
+        return RestResponse.success(v);
+    }
+
     @DeleteMapping("delete")
     @RequiresPermissions("variable:delete")
-    public RestResponse deleteVariable(@Valid Variable variable) throws Exception {
+    public RestResponse deleteVariable(@Valid Variable variable) {
         this.variableService.deleteVariable(variable);
         return RestResponse.success();
     }

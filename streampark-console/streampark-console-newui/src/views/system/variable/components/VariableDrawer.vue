@@ -41,6 +41,7 @@
     fetchCheckVariableCode,
     fetchUpdateVariable,
   } from '/@/api/system/variable';
+  import { h } from 'vue';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -114,6 +115,17 @@
         componentProps: { rows: 4 },
         rules: [{ max: 100, message: t('system.variable.form.descriptionMessage') }],
       },
+      {
+        field: 'desensitization',
+        label: 'Desensitization',
+        component: 'Switch',
+        componentProps: {
+          checkedChildren: 'ON',
+          unCheckedChildren: 'OFF',
+        },
+        defaultValue: false,
+        afterItem: h('span', { class: 'conf-switch' }, 'Whether desensitization is required, e.g: desensitization of sensitive data such as passwords, if enable variable value will be displayed as ********'),
+      }
     ];
   });
 
@@ -161,3 +173,11 @@
     }
   }
 </script>
+
+<style lang="less">
+  .conf-switch {
+    display: inline-block;
+    margin-top: 10px;
+    color: darkgrey;
+  }
+</style>
