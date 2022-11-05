@@ -32,7 +32,7 @@
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import UploadJobJar from './components/UploadJobJar.vue';
-  import FlinkSqlEditor from './components/flinkSql.vue';
+  import FlinkSqlEditor from './components/FlinkSql.vue';
   import Dependency from './components/Dependency.vue';
   import Different from './components/AppDetail/Different.vue';
   import Mergely from './components/Mergely.vue';

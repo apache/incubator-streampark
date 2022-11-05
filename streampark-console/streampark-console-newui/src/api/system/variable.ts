@@ -29,6 +29,7 @@ enum VARIABLE_API {
   SELECT = '/variable/select',
   CHECK_CODE = '/variable/check/code',
   LIST = '/variable/list',
+  SHOWORIGIN = '/variable/showOriginal',
 }
 /**
  * get variable list
@@ -98,4 +99,12 @@ export function fetchVariableContent(data: Recordable): Promise<any> {
  */
 export function fetchVariableAll(data?: { keyword: string }): Promise<VariableListRecord[]> {
   return defHttp.post({ url: VARIABLE_API.LIST, data });
+}
+
+/**
+ * get variable info
+ * @returns {Promise<any>}
+ */
+export function fetchVariableInfo(data?: { id: string }): Promise<VariableListRecord> {
+  return defHttp.post({ url: VARIABLE_API.SHOWORIGIN, data });
 }

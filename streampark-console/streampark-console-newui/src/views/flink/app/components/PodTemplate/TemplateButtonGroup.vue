@@ -39,6 +39,7 @@
   <ButtonGroup class="pod-template-tool">
     <a-button
       type="primary"
+      size="small"
       class="pod-template-tool-item"
       @click="emit('clickHistory', visualType)"
     >
@@ -47,7 +48,12 @@
         {{ t('common.history') }}
       </div>
     </a-button>
-    <a-button type="default" class="pod-template-tool-item" @click="emit('clickInit', visualType)">
+    <a-button
+      type="default"
+      size="small"
+      class="pod-template-tool-item"
+      @click="emit('clickInit', visualType)"
+    >
       <div class="flex items-center">
         <Icon icon="ant-design:copy-outlined" class="pr-5px" />
         {{ t('flink.app.pod.init') }}
@@ -55,6 +61,7 @@
     </a-button>
     <a-button
       type="default"
+      size="small"
       class="pod-template-tool-item"
       @click="emit('clickHostAlias', visualType)"
     >
