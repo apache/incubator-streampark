@@ -42,6 +42,6 @@
         inner join t_flink_effective e
         on s.id = e.target_id
         where e.app_id = #{appId}
-            and e.target_type = 1
+        and e.target_type = 1
     </select>
 </mapper>
