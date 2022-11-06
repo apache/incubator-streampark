@@ -17,9 +17,10 @@
 
 package org.apache.streampark.console.base.domain.router;
 
+import org.apache.streampark.console.system.entity.Menu;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import org.apache.streampark.console.system.entity.Menu;
 
 import java.util.ArrayList;
 import java.util.Date;
