@@ -98,7 +98,7 @@ public class Application implements Serializable {
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String appId;
 
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String jobId;
 
     /**
