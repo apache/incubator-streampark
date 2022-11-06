@@ -54,7 +54,7 @@
         resetFields();
         setDrawerProps({ confirmLoading: false });
         isUpdate.value = !!data?.isUpdate;
-
+        console.log('data.record', data.record);
         if (unref(isUpdate)) {
           setFieldsValue({
             ...data.record,
@@ -76,6 +76,7 @@
       async function handleSubmit() {
         try {
           const values = await validate();
+          values.display = !!values.display;
           setDrawerProps({ confirmLoading: true });
           unref(isUpdate) ? await editMenu(values) : await addMenu(values);
           closeDrawer();

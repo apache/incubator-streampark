@@ -26,7 +26,7 @@ export const enum TypeEnum {
   Dir = '2',
 }
 
-const isDir = (type: string) => type === TypeEnum.Dir;
+// const isDir = (type: string) => type === TypeEnum.Dir;
 const isMenu = (type: string) => type === TypeEnum.Menu;
 const isButton = (type: string) => type === TypeEnum.Button;
 
@@ -50,35 +50,17 @@ export const columns: BasicColumn[] = [
   {
     title: 'Type',
     dataIndex: 'type',
+    width: 90,
     customRender: ({ record }) => {
       const text = isMenu(record.type) ? 'menu' : 'button';
       return h(Tag, { color: isMenu(record.type) ? 'cyan' : 'pink' }, () => text);
     },
   },
-  {
-    title: 'Path',
-    dataIndex: 'path',
-  },
-  {
-    title: 'Vue Component',
-    dataIndex: 'component',
-  },
-  {
-    title: 'Permission',
-    dataIndex: 'permission',
-  },
-  {
-    title: 'Order By',
-    dataIndex: 'order',
-  },
-  {
-    title: 'Create Time',
-    dataIndex: 'createTime',
-  },
-  {
-    title: 'Modify Time',
-    dataIndex: 'modifyTime',
-  },
+  { title: 'Path', dataIndex: 'path' },
+  { title: 'Vue Component', dataIndex: 'component' },
+  { title: 'Permission', dataIndex: 'permission', width: 150 },
+  { title: 'Order By', dataIndex: 'order', width: 90 },
+  { title: 'Create Time', dataIndex: 'createTime' },
 ];
 
 export const searchFormSchema: FormSchema[] = [
@@ -146,7 +128,6 @@ export const formSchema: FormSchema[] = [
     label: 'sort',
     component: 'InputNumber',
     componentProps: { class: '!w-full' },
-    ifShow: ({ values }) => !isButton(values.type),
   },
   {
     field: 'icon',
@@ -172,16 +153,14 @@ export const formSchema: FormSchema[] = [
     label: 'Related permissions',
     component: 'Input',
     rules: [{ max: 50, message: 'Length cannot exceed 50 characters' }],
-    ifShow: ({ values }) => !isDir(values.type),
+    ifShow: ({ values }) => isButton(values.type),
   },
   {
     field: 'display',
     label: 'whether to display',
     component: 'Switch',
-    defaultValue: '1',
+    defaultValue: true,
     componentProps: {
-      checkedValue: '1',
-      unCheckedValue: '0',
       checkedChildren: 'Yes',
       unCheckedChildren: 'No',
     },
