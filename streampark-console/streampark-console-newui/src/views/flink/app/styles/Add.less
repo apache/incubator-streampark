@@ -105,20 +105,17 @@
   }
 }
 
+.pod-template-tool,
 .flinksql-tool {
   z-index: 99;
   cursor: pointer;
+  margin-top: 5px;
 }
 
 .flinksql-tool-item {
   font-size: 12px;
   display: flex;
   align-items: center;
-}
-
-.pod-template-tool {
-  z-index: 99;
-  cursor: pointer;
 }
 
 .pod-template-tool-item {
@@ -166,7 +163,14 @@
     color: #1890ff;
   }
 
-  .apply-pom,
+  .apply-pom {
+    margin-top: 17px;
+    cursor: pointer;
+    height: 26px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
   .apply-testing,
   .verify-sql {
     z-index: 99;
@@ -189,13 +193,14 @@
   }
 
   .dependency-box {
+    flex: 1;
+    margin-right: 10px;
     margin-top: 15px;
-    width: 100%;
+    margin-bottom: -10px;
     border-radius: 5px;
     background-color: #e6f7ff;
     border: 1px solid #d9d9d9;
     display: inline-block;
-    margin-bottom: -25px;
 
     .dependency-item {
       position: relative;

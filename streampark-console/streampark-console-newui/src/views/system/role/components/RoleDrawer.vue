@@ -31,6 +31,7 @@
           :treeData="treeData"
           :fieldNames="{ title: 'text', key: 'id' }"
           v-if="treeData.length > 0"
+          @check="handleTreeCheck"
           checkable
           toolbar
           title="menu assignment"
@@ -68,6 +69,7 @@
       const formType = ref(FormTypeEnum.Edit);
       const treeData = ref<TreeItem[]>([]);
       let singleNodeKeys: string[] = [];
+      let selectedKeysAndHalfCheckedKeys = ref<string[]>([]);
       const isCreate = computed(() => unref(formType) === FormTypeEnum.Create);
 
       const formSchemas = computed((): FormSchema[] => {
@@ -126,7 +128,7 @@
         }
         if (!unref(isCreate)) {
           const res = await getRoleMenu({ roleId: data.record.roleId });
-          data.record.menuId = res || [];
+          selectedKeysAndHalfCheckedKeys.value = res || [];
           const result = [...new Set(singleNodeKeys)].filter((item) => new Set(res).has(item));
           nextTick(() => {
             setFieldsValue({
@@ -152,7 +154,7 @@
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
           const params = { ...values };
-          params.menuId = values.menuId.join(',');
+          params.menuId = selectedKeysAndHalfCheckedKeys.value.join(',');
           !unref(isCreate) ? await fetchRoleUpdate(params) : await fetchRoleCreate(params);
           closeDrawer();
           emit('success');
@@ -162,7 +164,9 @@
           setDrawerProps({ confirmLoading: false });
         }
       }
-
+      function handleTreeCheck(checkedKeys: string[], e: any) {
+        selectedKeysAndHalfCheckedKeys.value = [...checkedKeys, ...e.halfCheckedKeys];
+      }
       return {
         formSchemas,
         registerDrawer,
@@ -170,6 +174,7 @@
         getTitle,
         handleSubmit,
         treeData,
+        handleTreeCheck,
       };
     },
   });

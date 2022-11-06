@@ -24,6 +24,7 @@ export interface VariableListRecord {
   teamId: string;
   createTime: string;
   modifyTime: string;
+  desensitization: boolean;
   sortField?: string;
   sortOrder?: string;
 }
