@@ -23,9 +23,9 @@ import org.apache.streampark.console.base.domain.router.VueRouter;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class TreeUtils {
+public final class VueRouterUtils {
 
-    private TreeUtils() {
+    private VueRouterUtils() {
     }
 
     private static final String TOP_NODE_ID = "0";
@@ -37,7 +37,7 @@ public final class TreeUtils {
      * @param <T>   <T>
      * @return <T> Tree<T>
      */
-    public static <T> RouterTree<T> build(List<RouterTree<T>> nodes) {
+    public static <T> RouterTree<T> buildRouterTree(List<RouterTree<T>> nodes) {
         if (nodes == null) {
             return null;
         }
@@ -96,7 +96,7 @@ public final class TreeUtils {
             }
             for (VueRouter<T> parent : routes) {
                 String id = parent.getId();
-                if (id != null && id.equals(parentId)) {
+                if (parentId.equals(id)) {
                     if (parent.getChildren() == null) {
                         parent.initChildren();
                     }

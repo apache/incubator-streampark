@@ -86,7 +86,7 @@
       render(value, data) {
         const renderIcon = () => {
           // need desensitization
-          if (data.desensitization && hasPermission('variable:showOriginal')) {
+          if (data.desensitization && hasPermission('variable:show_original')) {
             return h(Icon, {
               icon: `ant-design:${showVariableDetail.value ? 'eye' : 'eye-invisible'}-outlined`,
               color: showVariableDetail.value ? '#477de9' : '',
