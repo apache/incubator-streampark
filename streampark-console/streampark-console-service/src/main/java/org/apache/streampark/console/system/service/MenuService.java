@@ -41,8 +41,6 @@ public interface MenuService extends IService<Menu> {
 
     Map<String, Object> findMenus(Menu menu);
 
-    List<Menu> findMenuList(Menu menu);
-
     void createMenu(Menu menu);
 
     void updateMenu(Menu menu) throws Exception;

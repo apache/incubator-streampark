@@ -38,10 +38,4 @@ public interface MenuMapper extends BaseMapper<Menu> {
      */
     List<String> findUserIdsByMenuId(String menuId);
 
-    /**
-     * Recursively delete menu and buttons
-     *
-     * @param menuId menuId
-     */
-    void deleteMenus(String menuId);
 }

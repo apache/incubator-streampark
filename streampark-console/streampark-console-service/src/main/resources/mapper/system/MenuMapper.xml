@@ -63,15 +63,7 @@
         select user_id
         from t_member
         where role_id in
-              (select rm.role_id from t_role_menu rm where rm.menu_id = #{menuId})
+        (select rm.role_id from t_role_menu rm where rm.menu_id = #{menuId})
     </select>
 
-    <delete id="deleteMenus" parameterType="string">
-        DELETE
-        from t_menu
-        where menu_id in (select m.menu_id
-                          from (select menu_id
-                                from t_menu
-                                where FIND_IN_SET(menu_id, findMenuChildren(#{menuId})) > 0) m)
-    </delete>
 </mapper>

@@ -133,8 +133,8 @@ insert into `t_menu` VALUES (100054, 100013, 'Variable', '/system/variable', 'sy
 insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` VALUES (100058, 100013, 'Depend Apps', '/system/variable/depend_apps', 'system/variable/DependApps', 'variable:dependApps', '', '0', 0, NULL, now(), now());
-insert into `t_menu` VALUES (100059, 100054, 'Show Original', NULL, NULL, 'variable:showOriginal', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100058, 100013, 'Depend Apps', '/system/variable/depend_apps', 'system/variable/DependApps', 'variable:depend_apps', '', '0', 0, NULL, now(), now());
+insert into `t_menu` VALUES (100059, 100054, 'Show Original', NULL, NULL, 'variable:show_original', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100060, 100001, 'view', null, null, 'user:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100061, 100038, 'view', null, null, 'token:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100062, 100002, 'view', null, null, 'role:view', null, '1', 1, null, now(), now());
@@ -145,7 +145,7 @@ insert into `t_menu` values (100066, 100014, 'view', null, null, 'project:view',
 insert into `t_menu` values (100067, 100015, 'view', null, null, 'app:view', null, '1', 1, null, now(), now());
 insert into `t_menu` VALUES (100068, 100054, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
 insert into `t_menu` values (100069, 100034, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
-insert into `t_menu` VALUES (100070, 100054, 'Depend Apps view', null, null, 'variable:dependApps', null, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100070, 100054, 'Depend Apps view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
 
 update `t_menu` set order_num=4 where menu_id=100019;
 update `t_menu` set order_num=5 where menu_id=100034;

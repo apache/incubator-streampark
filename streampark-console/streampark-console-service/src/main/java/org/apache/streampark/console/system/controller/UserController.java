@@ -25,7 +25,6 @@ import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -61,9 +60,6 @@ public class UserController {
 
     @Autowired
     private TeamService teamService;
-
-    @Autowired
-    private RoleService roleService;
 
     @Autowired
     private CommonService commonService;

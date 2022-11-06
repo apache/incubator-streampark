@@ -22,13 +22,11 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
-import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
-import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -63,9 +61,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private MenuService menuService;
-
-    @Autowired
-    private RoleService roleService;
 
     @Override
     public User findByName(String username) {
@@ -170,10 +165,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public List<User> getNoTokenUser() {
         List<User> users = this.baseMapper.getNoTokenUser();
         if (!users.isEmpty()) {
-            users.forEach(u -> {
-                u.setPassword(null);
-                u.setSalt(null);
-            });
+            users.forEach(u -> u.dataMasking());
         }
         return users;
     }
@@ -214,7 +206,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token) {
         AssertUtils.checkNotNull(user);
-        String username = user.getUsername();
         Map<String, Object> userInfo = new HashMap<>(8);
 
         // 1) token & expire
@@ -232,15 +223,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfo.put("permissions", permissions);
 
         return userInfo;
-    }
-
-    private void setUserRoles(User user, String[] roles) {
-        Arrays.stream(roles).forEach(roleId -> {
-            Member ur = new Member();
-            ur.setUserId(user.getUserId());
-            ur.setRoleId(Long.valueOf(roleId));
-            this.memberService.save(ur);
-        });
     }
 
 }
