@@ -17,7 +17,7 @@
 package org.apache.streampark.common.util
 
 import java.text.{ParseException, SimpleDateFormat}
-import java.time.LocalDateTime
+import java.time.{Duration, LocalDateTime}
 import java.time.format.DateTimeFormatter
 import java.util._
 import java.util.concurrent.TimeUnit
@@ -137,22 +137,27 @@ object DateUtils {
   /**
    * Convert duration in seconds to rich time duration format. e.g. 2 days 3 hours 4 minutes 5 seconds
    *
-   * @param duration in second
+   * @param milliseconds
    * @return
    */
-  def toRichTimeDuration(duration: Long): String = {
-    val days = TimeUnit.SECONDS.toDays(duration)
-    val duration1 = duration - TimeUnit.DAYS.toSeconds(days)
-    val hours = TimeUnit.SECONDS.toHours(duration1)
-    val duration2 = duration1 - TimeUnit.HOURS.toSeconds(hours)
-    val minutes = TimeUnit.SECONDS.toMinutes(duration2)
-    val duration3 = duration2 - TimeUnit.MINUTES.toSeconds(minutes)
-    val seconds = TimeUnit.SECONDS.toSeconds(duration3)
+  def toDuration(milliseconds: Long): String = {
+    val duration = Duration.ofMillis(milliseconds)
+    val days = duration.toDays
+
+    val duration1 = milliseconds - TimeUnit.DAYS.toMillis(days)
+    lazy val hours = TimeUnit.MILLISECONDS.toHours(duration1)
+
+    lazy val duration2 = duration1 - TimeUnit.HOURS.toMillis(hours)
+    lazy val minutes = TimeUnit.MILLISECONDS.toMinutes(duration2)
+
+    lazy val duration3 = duration2 - TimeUnit.MINUTES.toMillis(minutes)
+    lazy val seconds = TimeUnit.MILLISECONDS.toSeconds(duration3)
+
     val builder = new StringBuilder
-    if (days != 0) builder.append(days + " days ")
-    if (days != 0 || hours != 0) builder.append(hours + " hours ")
-    if (days != 0 || hours != 0 || minutes != 0) builder.append(minutes + " minutes ")
-    builder.append(seconds + " seconds")
+    if (days > 0) builder.append(days + " days ")
+    if (hours > 0 || minutes > 0 || seconds > 0) builder.append(hours + " hours ")
+    if (minutes > 0 || seconds > 0) builder.append(minutes + " minutes ")
+    if (seconds > 0) builder.append(seconds + " seconds ")
     builder.toString
   }
 
