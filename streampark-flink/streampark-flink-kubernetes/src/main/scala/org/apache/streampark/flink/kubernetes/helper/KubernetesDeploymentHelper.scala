@@ -17,10 +17,9 @@
 
 package org.apache.streampark.flink.kubernetes.helper
 
-
 import com.google.common.base.Charsets
 import com.google.common.io.Files
-import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 import org.apache.streampark.common.util.Utils.tryWithResource
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import io.fabric8.kubernetes.api.model.Pod
@@ -82,25 +81,23 @@ object KubernetesDeploymentHelper extends Logger {
     }
   }
 
-  def watchDeploymentLog(nameSpace: String, jobName: String): String = {
+  def watchDeploymentLog(nameSpace: String, jobName: String, jobId: String): String = {
     tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
-      Try {
-        val projectPath = new File("").getCanonicalPath
-        val path = s"$projectPath/${nameSpace}_$jobName.log"
-        val file = new File(path)
-        val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
-        Files.asCharSink(file, Charsets.UTF_8).write(log)
-        path
-      }.getOrElse(null)
-    }(error => throw error)
+      val projectPath = SystemPropertyUtils.get("java.io.tmpdir", "temp")
+      val path = s"$projectPath/$jobId.log"
+      val file = new File(path)
+      val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
+      Files.asCharSink(file, Charsets.UTF_8).write(log)
+      path
+    }
   }
 
-  def watchPodTerminatedLog(nameSpace: String, jobName: String): String = {
+  def watchPodTerminatedLog(nameSpace: String, jobName: String, jobId: String): String = {
     tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         val podName = getPods(nameSpace, jobName).head.getMetadata.getName
-        val projectPath = new File("").getCanonicalPath
-        val path = s"$projectPath/${nameSpace}_${jobName}_err.log"
+        val projectPath = SystemPropertyUtils.get("java.io.tmpdir", "temp")
+        val path = s"$projectPath/${jobId}_err.log"
         val file = new File(path)
         val log = client.pods.inNamespace(nameSpace).withName(podName).terminated().withPrettyOutput.getLog
         Files.asCharSink(file, Charsets.UTF_8).write(log)

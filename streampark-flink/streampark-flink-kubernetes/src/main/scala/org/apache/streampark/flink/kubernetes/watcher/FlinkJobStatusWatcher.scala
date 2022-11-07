@@ -272,7 +272,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             FlinkJobState.K8S_INITIALIZING
           } else if (isConnection) {
             logger.info("Enter the task failure deletion process.")
-            KubernetesDeploymentHelper.watchPodTerminatedLog(trackId.namespace, trackId.clusterId)
+            KubernetesDeploymentHelper.watchPodTerminatedLog(trackId.namespace, trackId.clusterId, trackId.jobId)
             KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
             IngressController.deleteIngress(trackId.namespace, trackId.clusterId)
             FlinkJobState.FAILED
