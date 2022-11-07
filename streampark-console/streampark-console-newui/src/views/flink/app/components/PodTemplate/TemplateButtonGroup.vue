@@ -71,7 +71,7 @@
         {{ t('flink.app.pod.host') }}
       </div>
     </a-button>
-    <a-button type="default" disabled class="pod-template-tool-item">
+    <a-button type="default" disabled size="small" class="pod-template-tool-item">
       <div class="flex items-center">
         <Icon icon="ant-design:hdd-outlined" class="pr-5px" />
         PVC

@@ -17,12 +17,12 @@
 <template>
   <div>
     <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
-      <template #toolbar>
+      <!-- <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'menu:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
-      </template>
+      </template> -->
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <TableAction
@@ -52,11 +52,10 @@
   import { columns, searchFormSchema } from './menu.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'MenuManagement',
-    components: { BasicTable, MenuDrawer, TableAction, Icon },
+    components: { BasicTable, MenuDrawer, TableAction },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();
@@ -71,9 +70,7 @@
           schemas: searchFormSchema,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
-        fetchSetting: {
-          listField: 'rows.children',
-        },
+        fetchSetting: { listField: 'rows.children' },
         isTreeTable: true,
         pagination: false,
         striped: false,
@@ -82,11 +79,11 @@
         bordered: true,
         showIndexColumn: false,
         canResize: false,
-        actionColumn: {
-          width: 100,
-          title: 'Operation',
-          dataIndex: 'action',
-        },
+        // actionColumn: {
+        //   width: 100,
+        //   title: 'Operation',
+        //   dataIndex: 'action',
+        // },
       });
 
       function handleCreate() {
