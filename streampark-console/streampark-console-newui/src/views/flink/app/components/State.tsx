@@ -32,7 +32,6 @@ const stateMap = {
   8: { color: '#faad14', title: 'CANCELLING' },
   9: { color: '#fa8c16', title: 'CANCELED' },
   10: { color: '#1890ff', title: 'FINISHED' },
-  19: { color: '#1890ff', title: 'FINISHED' },
   11: { color: '#722ed1', title: 'SUSPENDED' },
   12: { color: '#eb2f96', title: 'RECONCILING', class: 'status-processing-reconciling' },
   13: { color: '#000000', title: 'LOST' },

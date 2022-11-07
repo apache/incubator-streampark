@@ -26,9 +26,12 @@
     <BasicForm @register="registerForm" :schemas="formSchemas">
       <template #menu="{ model, field }">
         <BasicTree
+          :default-expand-level="1"
           v-model:value="model[field]"
           :treeData="treeData"
           :fieldNames="{ title: 'text', key: 'id' }"
+          v-if="treeData.length > 0"
+          @check="handleTreeCheck"
           checkable
           toolbar
           title="menu assignment"
@@ -43,7 +46,7 @@
   import { handleRoleCheck } from '../role.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { BasicTree, TreeItem } from '/@/components/Tree';
-  import { addRole, editRole } from '/@/api/system/role';
+  import { fetchRoleCreate, fetchRoleUpdate } from '/@/api/system/role';
   import { getMenuList, getRoleMenu } from '/@/api/base/system';
   import { FormTypeEnum } from '/@/enums/formEnum';
 
@@ -65,16 +68,13 @@
     setup(_, { emit }) {
       const formType = ref(FormTypeEnum.Edit);
       const treeData = ref<TreeItem[]>([]);
+      let singleNodeKeys: string[] = [];
+      let selectedKeysAndHalfCheckedKeys = ref<string[]>([]);
       const isCreate = computed(() => unref(formType) === FormTypeEnum.Create);
 
       const formSchemas = computed((): FormSchema[] => {
         return [
-          {
-            field: 'roleId',
-            label: 'Role Id',
-            component: 'Input',
-            show: false,
-          },
+          { field: 'roleId', label: 'Role Id', component: 'Input', show: false },
           {
             field: 'roleName',
             label: 'Role Name',
@@ -84,11 +84,7 @@
               ? [{ required: true, validator: handleRoleCheck, trigger: 'blur' }]
               : [],
           },
-          {
-            label: 'Description',
-            field: 'remark',
-            component: 'InputTextArea',
-          },
+          { label: 'Description', field: 'remark', component: 'InputTextArea' },
           {
             label: 'permission',
             field: 'menuId',
@@ -105,6 +101,7 @@
       });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
+        // childrenNodeKeys = [];
         resetFields();
         setDrawerProps({
           confirmLoading: false,
@@ -112,30 +109,33 @@
         });
 
         formType.value = data.formType;
-        // You need to fill in treeData before setFieldsValue, otherwise the Tree component may report a key not exist warning
-        if (!unref(isCreate)) {
-          const res = await getRoleMenu({ roleId: data.record.roleId });
-          data.record.menuId = res || [];
+
+        function findSingleNode(data) {
+          data.map((item: Recordable) => {
+            if (item.children && item.children.length > 0) {
+              findSingleNode(item.children);
+            } else {
+              // Store all leaf nodes
+              singleNodeKeys.push(item.id);
+            }
+          });
         }
 
         if (unref(treeData).length === 0) {
           const res = await getMenuList();
           treeData.value = handleTreeIcon(res?.rows?.children);
+          findSingleNode(res?.rows?.children);
         }
-
         if (!unref(isCreate)) {
-          console.log('data.record', {
-            roleName: data.record.roleName,
-            roleId: data.record.roleId,
-            remark: data.record.remark,
-            menuId: [...data.record.menuId],
-          });
+          const res = await getRoleMenu({ roleId: data.record.roleId });
+          selectedKeysAndHalfCheckedKeys.value = res || [];
+          const result = [...new Set(singleNodeKeys)].filter((item) => new Set(res).has(item));
           nextTick(() => {
             setFieldsValue({
               roleName: data.record.roleName,
               roleId: data.record.roleId,
               remark: data.record.remark,
-              menuId: [...data.record.menuId],
+              menuId: [...result],
             });
           });
         }
@@ -154,8 +154,8 @@
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
           const params = { ...values };
-          params.menuId = values.menuId.join(',');
-          !unref(isCreate) ? await editRole(params) : await addRole(params);
+          params.menuId = selectedKeysAndHalfCheckedKeys.value.join(',');
+          !unref(isCreate) ? await fetchRoleUpdate(params) : await fetchRoleCreate(params);
           closeDrawer();
           emit('success');
         } catch (e) {
@@ -164,7 +164,9 @@
           setDrawerProps({ confirmLoading: false });
         }
       }
-
+      function handleTreeCheck(checkedKeys: string[], e: any) {
+        selectedKeysAndHalfCheckedKeys.value = [...checkedKeys, ...e.halfCheckedKeys];
+      }
       return {
         formSchemas,
         registerDrawer,
@@ -172,6 +174,7 @@
         getTitle,
         handleSubmit,
         treeData,
+        handleTreeCheck,
       };
     },
   });

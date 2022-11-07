@@ -34,21 +34,9 @@ const enum GenderEnum {
 }
 
 export const columns: BasicColumn[] = [
-  {
-    title: 'User Name',
-    dataIndex: 'username',
-    width: 200,
-    sorter: true,
-  },
-  {
-    title: 'Nick Name',
-    dataIndex: 'nickName',
-  },
-  {
-    title: 'User Type',
-    dataIndex: 'userType',
-    width: 180,
-  },
+  { title: 'User Name', dataIndex: 'username', sorter: true },
+  { title: 'Nick Name', dataIndex: 'nickName' },
+  { title: 'User Type', dataIndex: 'userType' },
   {
     title: 'Status',
     dataIndex: 'status',
@@ -67,24 +55,13 @@ export const columns: BasicColumn[] = [
   {
     title: 'Create Time',
     dataIndex: 'createTime',
-    width: 180,
     sorter: true,
   },
 ];
 
 export const searchFormSchema: FormSchema[] = [
-  {
-    field: 'username',
-    label: 'User Name',
-    component: 'Input',
-    colProps: { span: 8 },
-  },
-  {
-    label: 'Create Time',
-    field: 'createTime',
-    component: 'RangePicker',
-    colProps: { span: 8 },
-  },
+  { field: 'username', label: 'User Name', component: 'Input', colProps: { span: 8 } },
+  { label: 'Create Time', field: 'createTime', component: 'RangePicker', colProps: { span: 8 } },
 ];
 
 export const formSchema = (formType: string): FormSchema[] => {
@@ -93,12 +70,7 @@ export const formSchema = (formType: string): FormSchema[] => {
   const isView = formType === FormTypeEnum.View;
 
   return [
-    {
-      field: 'userId',
-      label: 'User Id',
-      component: 'Input',
-      show: false,
-    },
+    { field: 'userId', label: 'User Id', component: 'Input', show: false },
     {
       field: 'username',
       label: 'User Name',
@@ -122,23 +94,24 @@ export const formSchema = (formType: string): FormSchema[] => {
       ],
       componentProps: {
         id: 'formUserName',
-        readonly: !isCreate,
+        disabled: !isCreate,
       },
     },
     {
       field: 'nickName',
       label: 'Nick Name',
       component: 'Input',
-      rules: [{ required: isCreate, message: 'nickName is required' }],
-      componentProps: {
-        readonly: !isCreate,
+      dynamicRules: () => {
+        return [{ required: isCreate, message: 'nickName is required' }];
       },
+      componentProps: { disabled: !isCreate },
     },
     {
       field: 'password',
       label: 'Password',
       component: 'InputPassword',
       componentProps: { placeholder: 'please enter password' },
+      helpMessage: 'Password length cannot be less than 8 characters',
       rules: [
         { required: true, message: 'password is required' },
         { min: 8, message: 'Password length cannot be less than 8 characters' },
@@ -156,7 +129,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       ],
       componentProps: {
         readonly: isView,
-        placeholder: 'input email',
+        placeholder: 'please enter email',
       },
     },
     {
@@ -201,6 +174,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'description',
       label: 'Description',
       component: 'InputTextArea',
+      componentProps: { rows: 5, placeholder: 'Please enter description' },
       ifShow: isCreate,
     },
   ];

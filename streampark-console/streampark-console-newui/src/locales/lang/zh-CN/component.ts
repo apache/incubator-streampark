@@ -86,7 +86,7 @@ export default {
 
     index: '序号',
 
-    total: '共 {total} 条数据',
+    total: '展示 {0}~{1} ,共 {2} 条数据',
     operation: '操作',
   },
   time: {

@@ -13,7 +13,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---><template>
+-->
+<template>
   <a-input
     disabled
     :style="{ width }"
@@ -40,7 +41,7 @@
 
         <template #content>
           <div v-if="getPaginationList.length">
-            <ScrollContainer class="border border-solid border-t-0">
+            <ScrollContainer class="border border-solid border-transparent border-t-0">
               <ul class="flex flex-wrap px-2">
                 <li
                   v-for="icon in getPaginationList"
@@ -192,7 +193,7 @@
     }
 
     &-popover {
-      width: 300px;
+      width: 350px;
 
       .ant-popover-inner-content {
         padding: 0;

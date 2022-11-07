@@ -24,7 +24,11 @@
           </Card>
         </TabPane>
         <TabPane tab="Alert Setting" key="alert">
-          <Card :bordered="false" class="system-setting">
+          <Card
+            :bordered="false"
+            class="system-setting !bg-transparent"
+            :body-style="{ padding: 0 }"
+          >
             <AlertSetting />
           </Card>
         </TabPane>

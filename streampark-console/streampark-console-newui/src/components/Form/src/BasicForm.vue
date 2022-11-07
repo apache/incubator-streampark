@@ -60,7 +60,7 @@
   import { defineComponent, reactive, ref, computed, unref, onMounted, watch, nextTick } from 'vue';
   import { Form, Row } from 'ant-design-vue';
   import FormItem from './components/FormItem.vue';
-  import FormAction from './components/FormAction.vue';
+  import FormAction from './components/FormAction';
 
   import { dateItemType } from './helper';
   import { dateUtil } from '/@/utils/dateUtil';
@@ -106,6 +106,7 @@
 
       // Get the basic configuration of the form
       const getProps = computed((): FormProps => {
+        // @ts-ignore
         return { ...props, ...unref(propsRef) } as FormProps;
       });
 
@@ -325,18 +326,19 @@
 
   .@{prefix-cls} {
     .ant-form-item {
+      margin-bottom: 30px;
       &-label label::after {
         margin: 0 6px 0 2px;
       }
 
       &-with-help {
-        margin-bottom: 0;
+        margin-bottom: 6px;
       }
-
+      /*
       &:not(.ant-form-item-with-help) {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
       }
-
+      */
       &.suffix-item {
         .ant-form-item-children {
           display: flex;

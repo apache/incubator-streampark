@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { UserInfo } from '/#/store';
 import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
 import {
@@ -21,13 +22,15 @@ import {
   LoginResultModel,
   GetUserInfoModel,
   TeamSetResponse,
+  UserListRecord,
 } from './model/userModel';
 
 import { ErrorMessageMode, Result } from '/#/axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
+import { BasicTableParams } from '../model/baseModel';
 
 enum Api {
   Login = '/passport/signin',
+  LoginByLdap = '/passport/ldapSignin',
   Logout = '/passport/signout',
   GetUserInfo = '/getUserInfo',
   GetPermCode = '/getPermCode',
@@ -48,105 +51,82 @@ enum Api {
 
 /**
  * @description: user login api
+ * @return {Promise<AxiosResponse<Result<LoginResultModel>>>}
  */
-export function loginApi(params: LoginParams, mode: ErrorMessageMode = 'modal') {
-  return defHttp.post<AxiosResponse<Result<LoginResultModel>>>(
-    {
-      url: Api.Login,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-      errorMessageMode: mode,
-    },
+export function loginApi(
+  data: LoginParams,
+  mode: ErrorMessageMode = 'modal',
+): Promise<AxiosResponse<Result<LoginResultModel>>> {
+  return defHttp.post(
+    { url: Api.Login, data },
+    { isReturnNativeResponse: true, errorMessageMode: mode },
+  );
+}
+/**
+ * @description: user login api (ldap)
+ * @return {Promise<AxiosResponse<Result<LoginResultModel>>>}
+ */
+export function loginLadpApi(
+  data: LoginParams,
+  mode: ErrorMessageMode = 'modal',
+): Promise<AxiosResponse<Result<LoginResultModel>>> {
+  return defHttp.post(
+    { url: Api.LoginByLdap, data },
+    { isReturnNativeResponse: true, errorMessageMode: mode },
   );
 }
 
 /**
  * @description: getUserInfo
+ * @return {Promise<GetUserInfoModel>}
  */
-export function getUserInfo() {
-  return defHttp.get<GetUserInfoModel>({ url: Api.GetUserInfo }, { errorMessageMode: 'none' });
+export function getUserInfo(): Promise<GetUserInfoModel> {
+  return defHttp.get({ url: Api.GetUserInfo }, { errorMessageMode: 'none' });
 }
-
-export function getPermCode() {
-  return defHttp.get<string[]>({ url: Api.GetPermCode });
+/**
+ * get user permission code list
+ * @returns {Promise<string[]>}
+ */
+export function getPermCode(): Promise<string[]> {
+  return defHttp.get({ url: Api.GetPermCode });
 }
 
 export function doLogout() {
   return defHttp.post({ url: Api.Logout });
 }
-
-export function getUserList(params) {
-  return defHttp.post({
-    url: Api.UserList,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * get user list
+ * @param {BasicTableParams} data
+ * @returns {Promise<UserListRecord>} user array
+ */
+export function getUserList(data: BasicTableParams): Promise<UserListRecord[]> {
+  return defHttp.post({ url: Api.UserList, data });
 }
 
-export function getNoTokenUserList(params) {
-  return defHttp.post<GetUserInfoModel>({
-    url: Api.NoTokenUsers,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function getNoTokenUserList(data: Recordable): Promise<GetUserInfoModel> {
+  return defHttp.post({ url: Api.NoTokenUsers, data });
 }
 
-export function updateUser(data) {
-  return defHttp.put({
-    url: Api.UserUpdate,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function updateUser(data: Recordable) {
+  return defHttp.put({ url: Api.UserUpdate, data });
 }
 
-export function addUser(data) {
-  return defHttp.post({
-    url: Api.UserAdd,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function addUser(data: Recordable) {
+  return defHttp.post({ url: Api.UserAdd, data });
 }
 
 export function deleteUser(data) {
-  return defHttp.delete({
-    url: Api.UserDelete,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+  return defHttp.delete({ url: Api.UserDelete, data });
 }
 
 export function resetPassword(data) {
-  return defHttp.put({
-    url: Api.ResetPassword,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+  return defHttp.put({ url: Api.ResetPassword, data });
 }
 
-export function checkUserName(params) {
+export function checkUserName(data) {
   return defHttp.post({
     url: Api.CheckName,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
@@ -155,9 +135,6 @@ export function fetchUserTypes() {
     .post({
       url: Api.TYPES,
       data: {},
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
     })
     .then((res) => {
       return res.map((t: string) => ({ label: t, value: t }));
@@ -165,45 +142,36 @@ export function fetchUserTypes() {
 }
 /**
  * User change password
- * @param{String} username username
- * @param{String} password password
+ * @param {String} username username
+ * @param {String} password password
  */
-export function fetchUserPasswordUpdate(params: { username: string; password: string }) {
-  return defHttp.put<boolean>({
+export function fetchUserPasswordUpdate(data: {
+  username: string;
+  password: string;
+}): Promise<boolean> {
+  return defHttp.put({
     url: Api.Password,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function fetchAppOwners(params) {
+export function fetchAppOwners(data: Recordable): Promise<Array<UserInfo>> {
   return defHttp.post({
     url: Api.APP_OWNERS,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function fetchInitUserTeam(params: { userId: string; teamId: string }) {
+export function fetchInitUserTeam(data: { userId: string; teamId: string }) {
   return defHttp.post({
     url: Api.INIT_TEAM,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function fetchSetUserTeam(params: { teamId: string }) {
-  return defHttp.post<TeamSetResponse>({
+export function fetchSetUserTeam(data: { teamId: string }): Promise<TeamSetResponse> {
+  return defHttp.post({
     url: Api.SET_TEAM,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }

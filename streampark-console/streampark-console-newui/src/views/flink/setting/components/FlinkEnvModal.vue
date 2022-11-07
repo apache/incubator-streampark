@@ -37,7 +37,7 @@
   const emit = defineEmits(['reload', 'register']);
   const versionId = ref<string | null>(null);
   const { t } = useI18n();
-  const { createConfirm, createMessage } = useMessage();
+  const { createConfirm, Swal, createMessage } = useMessage();
   const [registerForm, { setFieldsValue, validate, resetFields }] = useForm({
     labelWidth: 120,
     colon: true,
@@ -54,7 +54,7 @@
           placeholder: 'Please enter flink name',
           allowClear: true,
         },
-        helpMessage: 'the flink name, e.g: flink-1.12 ',
+        afterItem: h('span', { class: 'conf-switch' }, 'the flink name, e.g: flink-1.12'),
         rules: [{ required: true, message: 'flink name is required' }],
       },
       {
@@ -65,7 +65,7 @@
           placeholder: 'Please enter flink home',
           allowClear: true,
         },
-        helpMessage: 'The absolute path of the FLINK_HOME',
+        afterItem: h('span', { class: 'conf-switch' }, 'The absolute path of the FLINK_HOME'),
         rules: [{ required: true, message: 'flink home is required' }],
       },
       {
@@ -93,22 +93,23 @@
       changeOkLoading(true);
       const formValue = await validate();
       // Detection environment
-      const isExist = await fetchExistsEnv({
+      const { data: resp } = await fetchExistsEnv({
         id: versionId.value,
         flinkName: formValue.flinkName,
         flinkHome: formValue.flinkHome,
       });
       // Environment detection is successful
-      if (isExist) {
+      if (resp.data) {
+        let message = '';
+        let success = false;
         // create
         if (versionId.value == null) {
           const { data } = await fetchFlinkCreate(formValue);
           if (data.data) {
-            createMessage.success('create successfully');
-            closeModal();
-            emit('reload');
+            success = true;
+            message = formValue.flinkName.concat(' create successful!');
           } else {
-            createMessage.error(data.message.replaceAll(/\[StreamPark]/g, ''));
+            message = data.message;
           }
         } else {
           // update
@@ -117,19 +118,34 @@
             ...formValue,
           });
           if (data.data) {
-            createMessage.success(formValue.flinkName.concat(' update successful!'));
-            closeModal();
-            emit('reload');
+            message = formValue.flinkName.concat(' update successful!');
+            success = true;
           } else {
-            createMessage.error(data.message.replaceAll(/\[StreamPark]/g, ''));
+            message = data.message;
           }
         }
+        if (success) {
+          Swal.fire({
+            icon: 'success',
+            title: message,
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          closeModal();
+          emit('reload');
+        } else {
+          Swal.fire('Failed', message.replaceAll(/\[StreamPark]/g, ''), 'error');
+        }
       } else {
-        createConfirm({
-          iconType: 'error',
-          title: 'Failed',
-          content: 'can no found flink-dist or found multiple flink-dist, FLINK_HOME error',
-        });
+        if (resp.status === 'error') {
+          Swal.fire(
+            'Failed',
+            'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
+            'error',
+          );
+        } else {
+          Swal.fire('Failed', 'flink name is already exists', 'error');
+        }
       }
     } catch (error: any) {
       /* custom alert message */
@@ -161,4 +177,10 @@
     <BasicForm @register="registerForm" />
   </BasicModal>
 </template>
-<style lang="less"></style>
+<style lang="less">
+  .conf-switch {
+    display: inline-block;
+    margin-top: 10px;
+    color: darkgrey;
+  }
+</style>

@@ -15,36 +15,41 @@
   limitations under the License.
 -->
 <script lang="ts">
-  export default defineComponent({
+  export default {
     name: 'EditFlink',
-  });
+  };
 </script>
 <script setup lang="ts" name="EditFlink">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { onMounted, reactive, ref, nextTick, defineComponent, unref } from 'vue';
+  import { onMounted, reactive, ref, nextTick, unref } from 'vue';
   import { Alert } from 'ant-design-vue';
   import { fetchMain, fetchUpload, fetchUpdate } from '/@/api/flink/app/app';
-  import { handleFormValue, handleYarnQueue } from './utils';
+  import { handleSubmitParams } from './utils';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import { fetchListJars } from '/@/api/flink/project';
   import { useEditFlinkSchema } from './hooks/useEditFlinkSchema';
-  import { useTabs } from '/@/hooks/web/useTabs';
   import { useEdit } from './hooks/useEdit';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useRoute } from 'vue-router';
+  import { useGo } from '/@/hooks/web/usePage';
+  import UploadJobJar from './components/UploadJobJar.vue';
+  import ProgramArgs from './components/ProgramArgs.vue';
+  import VariableReview from './components/VariableReview.vue';
+  import { useDrawer } from '/@/components/Drawer';
 
   const route = useRoute();
   const { t } = useI18n();
   const { createMessage } = useMessage();
-  const { close } = useTabs();
+  const go = useGo();
 
   const submitLoading = ref<boolean>(false);
   const jars = ref<string[]>([]);
 
   const uploadLoading = ref(false);
   const uploadJar = ref('');
+  const programArgRef = ref();
 
   const k8sTemplate = reactive({
     podTemplate: '',
@@ -52,8 +57,10 @@
     tmPodTemplate: '',
   });
 
-  const { getEditFlinkFormSchema, alerts } = useEditFlinkSchema(jars);
-  const { handleGetApplication, app, handleResetApplication, selectAlertId } = useEdit(alerts);
+  const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
+
+  const { getEditFlinkFormSchema, alerts, suggestions } = useEditFlinkSchema(jars);
+  const { handleGetApplication, app, handleResetApplication } = useEdit();
   const [registerForm, { setFieldsValue, submit }] = useForm({
     labelWidth: 120,
     colon: true,
@@ -66,22 +73,28 @@
   /* Form reset */
   function handleReset(executionMode?: string) {
     nextTick(async () => {
-      const resetParams = await handleResetApplication();
+      let selectAlertId: string | undefined;
+      if (app.alertId) {
+        selectAlertId = unref(alerts)?.filter((t) => t.id == app.alertId)[0]?.id;
+      }
+      const resetParams = handleResetApplication();
       const defaultParams = {
         jobName: app.jobName,
         tags: app.tags,
         mainClass: app.mainClass,
-        args: app.args,
+        args: app.args || '',
         jar: app.jar,
         description: app.description,
-        dynamicOptions: app.dynamicOptions,
+        properties: app.properties,
         resolveOrder: app.resolveOrder,
         executionMode: app.executionMode,
         yarnQueue: app.yarnQueue,
         restartSize: app.restartSize,
-        cpMaxFailureInterval: app.cpMaxFailureInterval,
-        cpFailureRateInterval: app.cpFailureRateInterval,
-        cpFailureAction: app.cpFailureAction,
+        checkPointFailure: {
+          cpMaxFailureInterval: app.cpMaxFailureInterval,
+          cpFailureRateInterval: app.cpFailureRateInterval,
+          cpFailureAction: app.cpFailureAction,
+        },
         versionId: app.versionId || null,
         k8sRestExposedType: app.k8sRestExposedType,
         clusterId: app.clusterId,
@@ -90,12 +103,15 @@
         k8sNamespace: app.k8sNamespace,
         alertId: selectAlertId,
         yarnSessionClusterId: app.yarnSessionClusterId,
+        projectName: app.projectName,
+        module: app.module,
         ...resetParams,
       };
       if (!executionMode) {
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }
       setFieldsValue(defaultParams);
+      app.args && programArgRef.value?.setContent(app.args);
     });
   }
   /* Custom job upload */
@@ -121,42 +137,13 @@
   function handleAppUpdate(values) {
     submitLoading.value = true;
     try {
-      const options = handleFormValue(values);
       const params = {
         id: app.id,
-        jobName: values.jobName,
-        tags: values.tags,
-        resolveOrder: values.resolveOrder,
-        versionId: values.versionId,
-        executionMode: values.executionMode,
         jar: values.jar,
         mainClass: values.mainClass,
-        args: values.args,
-        options: JSON.stringify(options),
-        yarnQueue: handleYarnQueue(values),
-        cpMaxFailureInterval: values.cpMaxFailureInterval || null,
-        cpFailureRateInterval: values.cpFailureRateInterval || null,
-        cpFailureAction: values.cpFailureAction || null,
-        dynamicOptions: values.dynamicOptions,
-        restartSize: values.restartSize,
-        // alertEmail: values.alertEmail || null,
-        alertId: values.alertId,
-        description: values.description,
-        k8sRestExposedType: values.k8sRestExposedType,
-        k8sNamespace: values.k8sNamespace || null,
-        clusterId: values.clusterId || null,
-        flinkClusterId: values.flinkClusterId || null,
-        flinkImage: values.flinkImage || null,
-        resourceFrom: values.resourceFrom,
-        yarnSessionClusterId: values.yarnSessionClusterId || null,
       };
-      if (params.executionMode === 6) {
-        Object.assign(params, {
-          k8sPodTemplate: k8sTemplate.podTemplate,
-          k8sJmPodTemplate: k8sTemplate.jmPodTemplate,
-          k8sTmPodTemplate: k8sTemplate.tmPodTemplate,
-        });
-      }
+      handleSubmitParams(params, values, k8sTemplate);
+
       handleUpdateApp(params);
     } catch (error) {
       submitLoading.value = false;
@@ -168,19 +155,19 @@
     const updated = await fetchUpdate(params);
     if (updated) {
       createMessage.success('update successful');
-      close(undefined, { path: '/flink/app' });
+      go('/flink/app');
     }
   }
 
   onMounted(async () => {
     if (!route?.query?.appId) {
-      close(undefined, { path: '/flink/app' });
+      go('/flink/app');
       createMessage.warning('appid can not be empty');
       return;
     }
     const value = await handleGetApplication();
     setFieldsValue(value);
-    if (app.resourceFrom === 1) {
+    if (app.resourceFrom == 1) {
       jars.value = await fetchListJars({
         id: app.projectId,
         module: app.module,
@@ -190,7 +177,7 @@
   });
 </script>
 <template>
-  <PageWrapper contentBackground>
+  <PageWrapper contentBackground content-class="p-26px app_controller">
     <BasicForm @register="registerForm" @submit="handleAppUpdate" :schemas="getEditFlinkFormSchema">
       <template #podTemplate>
         <PomTemplateTab
@@ -199,6 +186,7 @@
           v-model:tmPodTemplate="k8sTemplate.tmPodTemplate"
         />
       </template>
+
       <template #uploadJobJar>
         <UploadJobJar :custom-request="handleCustomJobRequest" v-model:loading="uploadLoading">
           <template #uploadInfo>
@@ -212,9 +200,20 @@
           </template>
         </UploadJobJar>
       </template>
+
+      <template #args="{ model }">
+        <ProgramArgs
+          ref="programArgRef"
+          v-if="model.args != null && model.args != undefined"
+          v-model:value="model.args"
+          :suggestions="suggestions"
+          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
+        />
+      </template>
+
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="close(undefined, { path: '/flink/app' })">
+          <a-button @click="go('/flink/app')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="submitLoading" type="primary" @click="submit()">
@@ -223,6 +222,9 @@
         </div>
       </template>
     </BasicForm>
+    <VariableReview @register="registerReviewDrawer" />
   </PageWrapper>
 </template>
-<style scoped></style>
+<style lang="less">
+  @import url('./styles/Add.less');
+</style>

@@ -33,7 +33,7 @@
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="user_id" jdbcType="BIGINT" property="userId"/>
         <result column="flink_image" jdbcType="VARCHAR" property="flinkImage"/>
-        <result column="dynamic_options" jdbcType="LONGVARCHAR" property="dynamicOptions"/>
+        <result column="properties" jdbcType="LONGVARCHAR" property="properties"/>
         <result column="k8s_rest_exposed_type" jdbcType="TINYINT" property="k8sRestExposedType"/>
         <result column="k8s_hadoop_integration" jdbcType="BOOLEAN" property="k8sHadoopIntegration"/>
         <result column="flame_graph" jdbcType="BOOLEAN" property="flameGraph"/>

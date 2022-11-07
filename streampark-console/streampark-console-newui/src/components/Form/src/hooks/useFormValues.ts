@@ -91,7 +91,7 @@ export function useFormValues({
         value = value.map((item) => transformDateFunc?.(item));
       }
       // Remove spaces
-      if (isString(value)) {
+      if (isString(value) && !['configOverride', 'flinkSql'].includes(key)) {
         value = value.trim();
       }
       if (!tryDeconstructArray(key, value, res) && !tryDeconstructObject(key, value, res)) {
@@ -113,17 +113,21 @@ export function useFormValues({
     }
 
     for (const [field, [startTimeKey, endTimeKey], format = 'YYYY-MM-DD'] of fieldMapToTime) {
-      if (!field || !startTimeKey || !endTimeKey || !values[field]) {
+      if (!field || !startTimeKey || !endTimeKey) {
         continue;
       }
-
+      //The value is empty to delete
+      if (!values[field]) {
+        Reflect.deleteProperty(values, field);
+        continue;
+      }
       const [startTime, endTime]: string[] = values[field];
 
       values[startTimeKey] = dateUtil(startTime).format(format);
       values[endTimeKey] = dateUtil(endTime).format(format);
+      console.log(field);
       Reflect.deleteProperty(values, field);
     }
-
     return values;
   }
 

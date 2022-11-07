@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
+  <BasicDrawer okText="Submit" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
       {{ getTitle }}
@@ -48,14 +48,14 @@
         });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
+        formType.value = data.formType;
         resetFields();
+        clearValidate();
+        updateSchema(formSchema(unref(formType)));
         setDrawerProps({
           confirmLoading: false,
           showFooter: data.formType !== FormTypeEnum.View,
         });
-        formType.value = data.formType;
-
-        updateSchema(formSchema(unref(formType)));
 
         if (unref(formType) !== FormTypeEnum.Create) {
           const roleIds = data.record?.roleId ?? [];
@@ -63,8 +63,6 @@
           setFieldsValue({
             ...data.record,
           });
-          clearValidate('username');
-          clearValidate('nickname');
         }
       });
 

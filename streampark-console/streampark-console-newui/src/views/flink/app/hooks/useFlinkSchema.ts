@@ -19,6 +19,8 @@ import { h, onMounted, reactive, ref, unref, toRaw } from 'vue';
 import optionData from '../data/option';
 import { fetchFlinkCluster } from '/@/api/flink/setting/flinkCluster';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
+
 import {
   fetchFlinkBaseImages,
   fetchK8sNamespaces,
@@ -30,7 +32,7 @@ import { fetchAlertSetting } from '/@/api/flink/setting/alert';
 
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import {
-  renderDynamicOption,
+  renderProperties,
   renderInputDropdown,
   renderInputGroup,
   renderTotalMemory,
@@ -42,16 +44,17 @@ import Icon from '/@/components/Icon';
 import { Alert } from 'ant-design-vue';
 import { useDrawer } from '/@/components/Drawer';
 import { fetchSelect } from '/@/api/flink/project';
+import { isK8sExecMode } from '../utils';
 
 export const useFlinkSchema = (editModel?: string) => {
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
   const getExecutionCluster = (executionMode) => {
     if (editModel) {
       return (toRaw(unref(flinkClusters)) || []).filter(
-        (o) => o.executionMode === executionMode && o.clusterState === 1,
+        (o) => o.executionMode == executionMode && o.clusterState === 1,
       );
     } else {
-      return (toRaw(unref(flinkClusters)) || []).filter((o) => o.executionMode === executionMode);
+      return (toRaw(unref(flinkClusters)) || []).filter((o) => o.executionMode == executionMode);
     }
   };
 
@@ -74,7 +77,7 @@ export const useFlinkSchema = (editModel?: string) => {
             value: i.id,
           })),
         },
-        ifShow: ({ values }) => values.executionMode == 1,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
         rules: [{ required: true, message: 'Flink Cluster is required' }],
       },
       {
@@ -88,14 +91,14 @@ export const useFlinkSchema = (editModel?: string) => {
             options: options.map((i) => ({ label: i.clusterName, value: i.clusterId })),
           };
         },
-        ifShow: ({ values }) => values.executionMode == 3,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         rules: [{ required: true, message: 'Flink Cluster is required' }],
       },
       {
         field: 'k8sNamespace',
         label: 'Kubernetes Namespace',
         component: 'Input',
-        ifShow: ({ values }) => [5, 6].includes(values.executionMode),
+        ifShow: ({ values }) => isK8sExecMode(values.executionMode),
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder: 'default',
@@ -112,14 +115,14 @@ export const useFlinkSchema = (editModel?: string) => {
             onChange: (e) => (formModel.jobName = e.target.value),
           };
         },
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         rules: [{ required: true, message: 'Kubernetes clusterId is required' }],
       },
       {
         field: 'clusterId',
         label: 'Kubernetes ClusterId',
         component: 'Select',
-        ifShow: ({ values }) => values.executionMode == 5,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         componentProps: {
           placeholder: 'Please enter Kubernetes clusterId',
           options: (getExecutionCluster(5) || []).map((i) => ({
@@ -133,7 +136,7 @@ export const useFlinkSchema = (editModel?: string) => {
         field: 'flinkImage',
         label: 'Flink Base Docker Image',
         component: 'Input',
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder:
@@ -145,7 +148,7 @@ export const useFlinkSchema = (editModel?: string) => {
       {
         field: 'k8sRestExposedType',
         label: 'Rest-Service Exposed Type',
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         component: 'Select',
         componentProps: {
           placeholder: 'kubernetes.rest-service.exposed.type',
@@ -244,8 +247,7 @@ export const useFlinkSchema = (editModel?: string) => {
     {
       field: 'restartSize',
       label: 'Fault Restart Size',
-      ifShow: ({ values }) =>
-        editModel == 'flink' ? true : ![5, 6].includes(values.executionMode),
+      ifShow: ({ values }) => (editModel == 'flink' ? true : !isK8sExecMode(values.executionMode)),
       component: 'InputNumber',
       componentProps: {
         placeholder: 'restart max size',
@@ -255,16 +257,21 @@ export const useFlinkSchema = (editModel?: string) => {
       },
     },
     {
-      field: 'cpMaxFailureInterval',
-      label: 'CheckPoint Failure Options',
-      component: 'InputNumber',
-      render: ({ model }) => renderInputGroup(model),
-      show: ({ values }) => (editModel == 'flink' ? true : ![5, 6].includes(values.executionMode)),
-    },
-    {
       field: 'alertId',
       label: 'Fault Alert Template',
       component: 'Select',
+      componentProps: {
+        placeholder: 'Alert Template',
+        options: unref(alerts),
+        fieldNames: { label: 'alertName', value: 'id', options: 'options' },
+      },
+    },
+    {
+      field: 'checkPointFailure',
+      label: 'CheckPoint Failure Options',
+      component: 'InputNumber',
+      renderColContent: renderInputGroup,
+      show: ({ values }) => (editModel == 'flink' ? true : !isK8sExecMode(values.executionMode)),
     },
     ...getConfigSchemas(),
     {
@@ -277,7 +284,8 @@ export const useFlinkSchema = (editModel?: string) => {
       field: 'totalItem',
       label: 'totalItem',
       component: 'Select',
-      renderColContent: ({ model }) => renderOptionsItems(model, 'totalOptions', '.memory'),
+      renderColContent: ({ model, field }) =>
+        renderOptionsItems(model, 'totalOptions', field, '.memory', true),
     },
     {
       field: 'jmOptions',
@@ -294,10 +302,11 @@ export const useFlinkSchema = (editModel?: string) => {
       },
     },
     {
-      field: 'jmOptionsItem',
-      label: 'jmOptionsItem',
+      field: 'jmMemoryItem',
+      label: 'jmMemoryItem',
       component: 'Select',
-      renderColContent: ({ model }) => renderOptionsItems(model, 'jmOptions', 'jobmanager.memory.'),
+      renderColContent: ({ model, field }) =>
+        renderOptionsItems(model, 'jmOptions', field, 'jobmanager.memory.'),
     },
     {
       field: 'tmOptions',
@@ -317,8 +326,8 @@ export const useFlinkSchema = (editModel?: string) => {
       field: 'tmOptionsItem',
       label: 'tmOptionsItem',
       component: 'Select',
-      renderColContent: ({ model }) =>
-        renderOptionsItems(model, 'tmOptions', 'taskmanager.memory.'),
+      renderColContent: ({ model, field }) =>
+        renderOptionsItems(model, 'tmOptions', field, 'taskmanager.memory.'),
     },
     {
       field: 'yarnQueue',
@@ -327,29 +336,27 @@ export const useFlinkSchema = (editModel?: string) => {
       componentProps: {
         placeholder: 'Please enter yarn queue',
       },
-      ifShow: ({ values }) => values.executionMode == 4,
+      ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION,
     },
     {
       field: 'podTemplate',
       label: 'Kubernetes Pod Template',
       component: 'Input',
       slot: 'podTemplate',
-      ifShow: ({ values }) => values.executionMode == 6,
+      ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
     },
     {
-      field: 'dynamicOptions',
-      label: 'Dynamic Option',
+      field: 'properties',
+      label: 'Properties',
       component: 'Input',
-      render: (renderCallbackParams) => renderDynamicOption(renderCallbackParams),
+      render: (renderCallbackParams) => renderProperties(renderCallbackParams),
     },
     {
       field: 'args',
       label: 'Program Args',
       component: 'InputTextArea',
-      componentProps: {
-        rows: 4,
-        placeholder: '<arguments>',
-      },
+      defaultValue: '',
+      slot: 'args',
       ifShow: ({ values }) => (editModel ? true : values.jobType == 'customcode'),
     },
     {
@@ -371,14 +378,14 @@ export const useFlinkSchema = (editModel?: string) => {
         label: 'Development Mode',
         component: 'Input',
         render: ({ model }) => {
-          if (model.jobType === 1) {
+          if (model.jobType == 1) {
             return h(
               Alert,
               { type: 'info' },
               {
                 message: () => [
                   h(Icon, { icon: 'ant-design:code-outlined', style: { color: '#108ee9' } }),
-                  h('span', { class: 'pl-5px' }, 'Custom Code'),
+                  h('span', { class: 'pl-8px' }, 'Custom Code'),
                 ],
               },
             );
@@ -428,15 +435,16 @@ export const useFlinkSchema = (editModel?: string) => {
         }
       },
     },
+    { field: 'configOverride', label: '', component: 'Input', show: false },
     {
       field: 'isSetConfig',
       label: 'Application Conf',
       component: 'Switch',
       ifShow: ({ values }) => {
         if (appId) {
-          return values?.jobType == 2 && ![5, 6].includes(values.executionMode);
+          return values?.jobType == 2 && !isK8sExecMode(values.executionMode);
         } else {
-          return values?.jobType == 'sql' && ![5, 6].includes(values.executionMode);
+          return values?.jobType == 'sql' && !isK8sExecMode(values.executionMode);
         }
       },
       render: ({ model, field }) =>
@@ -466,14 +474,29 @@ export const useFlinkSchema = (editModel?: string) => {
 
   onMounted(async () => {
     /* Get project data */
-    projectList.value = await fetchSelect({});
-    /* Get alarm data */
-    alerts.value = await fetchAlertSetting();
-    const cluster = await fetchFlinkCluster();
-    flinkClusters.value = cluster;
-    historyRecord.k8sNamespace = await fetchK8sNamespaces();
-    historyRecord.k8sSessionClusterId = await fetchSessionClusterIds({ executionMode: 5 });
-    historyRecord.flinkImage = await fetchFlinkBaseImages();
+    fetchSelect({}).then((res) => {
+      projectList.value = res;
+    });
+
+    /* Get alert data */
+    fetchAlertSetting().then((res) => {
+      alerts.value = res;
+    });
+
+    //get flinkCluster
+    fetchFlinkCluster().then((res) => {
+      flinkClusters.value = res;
+    });
+
+    fetchK8sNamespaces().then((res) => {
+      historyRecord.k8sNamespace = res;
+    });
+    fetchSessionClusterIds({ executionMode: ExecModeEnum.KUBERNETES_SESSION }).then((res) => {
+      historyRecord.k8sSessionClusterId = res;
+    });
+    fetchFlinkBaseImages().then((res) => {
+      historyRecord.flinkImage = res;
+    });
   });
   return {
     getFlinkClusterSchemas,

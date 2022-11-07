@@ -30,8 +30,7 @@ import scala.collection.JavaConverters._
 
 object FlinkSubmitter extends Logger {
 
-  // effective k-v regex pattern of submit.dynamicOption
-  private[this] lazy val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(.*?)=(.*?)")
+  private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
 
   private[this] val FLINK_SUBMIT_CLASS_NAME = "org.apache.streampark.flink.submit.FlinkSubmit"
 
@@ -90,18 +89,18 @@ object FlinkSubmitter extends Logger {
   }
 
   /**
-   * extract flink configuration from application.dynamicOption
+   * extract flink configuration from application.properties
    */
-  @Nonnull def extractDynamicOption(dynamicOptions: String): Map[String, String] = {
-    if (StringUtils.isEmpty(dynamicOptions)) {
+  @Nonnull def extractProperties(properties: String): Map[String, String] = {
+    if (StringUtils.isEmpty(properties)) {
       Map.empty[String, String]
     } else {
-      dynamicOptions.split("\\s?-D") match {
+      properties.split("\\s?-D") match {
         case x if Utils.isEmpty(x) => Map.empty
         case d =>
           d.filter(_.nonEmpty)
             .map(_.trim)
-            .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
+            .map(PROPERTY_PATTERN.matcher(_))
             .filter(_.matches)
             .map(m => m.group(1) -> m.group(2).replace("\"", "").trim)
             .toMap
@@ -109,6 +108,6 @@ object FlinkSubmitter extends Logger {
     }
   }
 
-  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = new util.HashMap[String, String](extractDynamicOption(dynamicOptions).asJava)
+  @Nonnull def extractPropertiesAsJava(properties: String): JavaMap[String, String] = new util.HashMap[String, String](extractProperties(properties).asJava)
 
 }

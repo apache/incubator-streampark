@@ -17,12 +17,15 @@
 <script lang="ts">
   import { reactive, defineComponent } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { exceptionPropWidth } from '/@/utils';
+  import { isK8sExecMode } from '../../utils';
 
   export default defineComponent({
     name: 'StartApplicationModal',
   });
 </script>
 <script setup lang="ts" name="StartApplicationModal">
+  import { h } from 'vue';
   import { Select, Input } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon, Icon } from '/@/components/Icon';
@@ -34,7 +37,7 @@
   const SelectOption = Select.Option;
 
   const { t } = useI18n();
-  const { createMessage, createConfirm } = useMessage();
+  const { Swal } = useMessage();
   const router = useRouter();
 
   const emits = defineEmits(['register', 'updateOption']);
@@ -59,8 +62,8 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        helpMessage: 'flame Graph support',
-        ifShow: () => [5, 6].includes(receiveData.executionMode),
+        afterItem: h('span', { class: 'conf-switch' }, 'flame Graph support'),
+        ifShow: () => isK8sExecMode(receiveData.executionMode),
       },
       {
         field: 'startSavePointed',
@@ -71,7 +74,11 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        helpMessage: 'restore the application from savepoint or latest checkpoint',
+        afterItem: h(
+          'span',
+          { class: 'conf-switch' },
+          'restore the application from savepoint or latest checkpoint',
+        ),
       },
       {
         field: 'startSavePoint',
@@ -80,7 +87,11 @@
           receiveData.historySavePoint && receiveData.historySavePoint.length > 0
             ? 'Select'
             : 'Input',
-        helpMessage: 'restore the application from savepoint or latest checkpoint',
+        afterItem: h(
+          'span',
+          { class: 'conf-switch' },
+          'restore the application from savepoint or latest checkpoint',
+        ),
         slot: 'savepoint',
         ifShow: ({ values }) => values.startSavePointed && !receiveData.latestSavePoint,
         required: true,
@@ -93,7 +104,11 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        helpMessage: 'restore the application from savepoint or latest checkpoint',
+        afterItem: h(
+          'span',
+          { class: 'conf-switch' },
+          'restore the application from savepoint or latest checkpoint',
+        ),
         defaultValue: false,
         ifShow: ({ values }) => values.startSavePointed,
       },
@@ -116,11 +131,16 @@
         id: receiveData.application.id,
         savePointed,
         savePoint: savePointPath,
-        flameGraph: formValue.flameGraph,
-        allowNonRestored: formValue.allowNonRestoredState,
+        flameGraph: formValue.flameGraph || false,
+        allowNonRestored: formValue.allowNonRestoredState || false,
       });
       if (data.data) {
-        createMessage.success('The current job is starting');
+        Swal.fire({
+          icon: 'success',
+          title: 'The current job is starting',
+          showConfirmButton: false,
+          timer: 2000,
+        });
         emits('updateOption', {
           type: 'starting',
           key: receiveData.application.id,
@@ -129,20 +149,25 @@
         closeModal();
       } else {
         closeModal();
-        createConfirm({
-          iconType: 'error',
+        Swal.fire({
           title: 'Failed',
-          content:
+          icon: 'error',
+          width: exceptionPropWidth(),
+          html:
             '<pre class="propException"> startup failed, ' +
             data.message.replaceAll(/\[StreamPark]/g, '') +
             '</pre>',
-          okText: t('common.detailText'),
-          onOk: () => {
+          showCancelButton: true,
+          confirmButtonColor: '#55BDDDFF',
+          confirmButtonText: 'Detail',
+          cancelButtonText: 'Close',
+        }).then((isConfirm: Recordable) => {
+          if (isConfirm.value) {
             router.push({
               path: '/flink/app/detail',
               query: { appId: receiveData.application.id },
             });
-          },
+          }
         });
       }
     } catch (error) {

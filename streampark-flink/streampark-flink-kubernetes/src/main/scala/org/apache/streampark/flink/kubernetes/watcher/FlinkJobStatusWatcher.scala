@@ -17,6 +17,9 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
+import org.apache.commons.collections.CollectionUtils
+import org.apache.flink.core.fs.Path
+import org.apache.flink.runtime.history.FsJobArchivist
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
@@ -26,6 +29,7 @@ import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkTrackControl
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
+import org.apache.streampark.common.conf.Workspace
 import org.json4s.{DefaultFormats, JNothing, JNull}
 import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
@@ -38,6 +42,7 @@ import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.{implicitConversions, postfixOps}
 import scala.util.{Failure, Success, Try}
+import scala.collection.JavaConversions._
 
 /**
  * Watcher for continuously monitor flink job status on kubernetes-mode,
@@ -86,48 +91,52 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * single flink job status tracking task
    */
   override def doWatch(): Unit = {
-    // get all legal tracking ids
-    val trackIds = Try(trackController.collectAllTrackIds()).filter(_.nonEmpty).getOrElse(return)
+    this.synchronized{
+      logInfo("[FlinkJobStatusWatcher]: Status monitoring process begins - " + Thread.currentThread().getName)
+      // get all legal tracking ids
+      val trackIds = Try(trackController.collectAllTrackIds()).filter(_.nonEmpty).getOrElse(return)
 
-    // retrieve flink job status in thread pool
-    val tracksFuture: Set[Future[Option[JobStatusCV]]] = trackIds.map { id =>
+      // retrieve flink job status in thread pool
+      val tracksFuture: Set[Future[Option[JobStatusCV]]] = trackIds.map { id =>
 
-      val future = Future {
-        id.executeMode match {
-          case SESSION => touchSessionJob(id)
-          case APPLICATION => touchApplicationJob(id)
+        val future = Future {
+          id.executeMode match {
+            case SESSION => touchSessionJob(id)
+            case APPLICATION => touchApplicationJob(id)
+          }
         }
+
+        future onComplete (_.getOrElse(None) match {
+          case Some(jobState) =>
+            val trackId = id.copy(jobId = jobState.jobId)
+            val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
+            if (latest == null || latest.jobState != jobState.jobState || latest.jobId != jobState.jobId) {
+              // put job status to cache
+              trackController.jobStatuses.put(trackId, jobState)
+              // set jobId to trackIds
+              trackController.trackIds.update(trackId)
+              eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
+            }
+            if (FlinkJobState.isEndState(jobState.jobState)) {
+              // remove trackId from cache of job that needs to be untracked
+              trackController.unTracking(trackId)
+              if (trackId.executeMode == APPLICATION) {
+                trackController.endpoints.invalidate(trackId.toClusterKey)
+              }
+            }
+          case _ =>
+        })
+        future
       }
 
-      future onComplete (_.getOrElse(None) match {
-        case Some(jobState) =>
-          val trackId = id.copy(jobId = jobState.jobId)
-          val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
-          if (latest == null || latest.jobState != jobState.jobState || latest.jobId != jobState.jobId) {
-            // put job status to cache
-            trackController.jobStatuses.put(trackId, jobState)
-            // set jobId to trackIds
-            trackController.trackIds.update(trackId)
-            eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
-          }
-          if (FlinkJobState.isEndState(jobState.jobState)) {
-            // remove trackId from cache of job that needs to be untracked
-            trackController.unTracking(trackId)
-            if (trackId.executeMode == APPLICATION) {
-              trackController.endpoints.invalidate(trackId.toClusterKey)
-            }
-          }
-        case _ =>
-      })
-      future
-    }
-
-    // blocking until all future are completed or timeout is reached
-    Try(Await.ready(Future.sequence(tracksFuture), conf.requestTimeoutSec seconds))
-      .failed.map { _ =>
-      logInfo(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
-        s" limitSeconds=${conf.requestTimeoutSec}," +
-        s" trackIds=${trackIds.mkString(",")}")
+      // blocking until all future are completed or timeout is reached
+      Try(Await.ready(Future.sequence(tracksFuture), conf.requestTimeoutSec seconds))
+        .failed.map { _ =>
+        logInfo(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
+          s" limitSeconds=${conf.requestTimeoutSec}," +
+          s" trackIds=${trackIds.mkString(",")}")
+      }
+      logInfo("[FlinkJobStatusWatcher]: End of status monitoring process - " + Thread.currentThread().getName)
     }
   }
 
@@ -272,7 +281,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
           }
         } else if (isConnection) {
           logger.info("The deployment is deleted and enters the task failure process.")
-          FlinkJobState.FAILED
+          FlinkJobState.of(FlinkHistoryArchives.getJobStateFromArchiveFile(trackId.jobId))
         } else {
           inferSilentOrLostFromPreCache(latest)
         }
@@ -282,7 +291,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
     val jobStatusCV = JobStatusCV(
       jobState = jobState,
-      jobId = null,
+      jobId = trackId.jobId,
       pollEmitTime = pollEmitTime,
       pollAckTime = System.currentTimeMillis
     )
@@ -410,5 +419,42 @@ private[kubernetes] object JobDetails {
     }
 
   }
+
+}
+
+private[kubernetes] object FlinkHistoryArchives {
+
+  @transient
+  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  private[this] val FAILED_STATE = "FAILED"
+
+  def getJobStateFromArchiveFile(jobId: String): String = Try {
+    require(jobId != null, "[StreamPark] getJobStateFromArchiveFile: JobId cannot be null.")
+    val archivePath = new Path(Workspace.ARCHIVES_FILE_PATH, jobId)
+    val archivedJson = FsJobArchivist.getArchivedJsons(archivePath)
+    if (CollectionUtils.isNotEmpty(archivedJson)) {
+      archivedJson.foreach { a =>
+        if (a.getPath == "/jobs/overview") {
+          Try(parse(a.getJson)) match {
+            case Success(ok) =>
+              ok \ "jobs" match {
+                case JNothing | JNull => return FAILED_STATE
+                case JArray(arr) =>
+                  arr.foreach(x => {
+                    val jid = (x \ "jid").extractOpt[String].orNull
+                    if (jid == jobId) {
+                      return (x \ "state").extractOpt[String].orNull
+                    }
+                  })
+                case _ => return FAILED_STATE
+              }
+            case _ => return FAILED_STATE
+          }
+        }
+      }
+    }
+    FAILED_STATE
+  }.getOrElse(FAILED_STATE)
 
 }

@@ -17,7 +17,7 @@
 
 import { signin, signout ,signinbycasdoor} from '@/api/passport'
 import { setTeam, initTeam } from '@/api/user'
-import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID, TEAM_ID} from '@/store/mutation-types'
+import {TOKEN, EXPIRE, PERMISSIONS, USER_INFO, USER_NAME, USER_ROUTER, INVALID, TEAM_ID} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import { getRouter } from '@/api/menu'
 
@@ -26,7 +26,6 @@ const user = {
     expire: storage.get(EXPIRE),
     token: storage.get(TOKEN),
     info: storage.get(USER_INFO),
-    roles: storage.getSession(ROLES) || storage.get(ROLES),
     permissions: storage.getSession(PERMISSIONS) || storage.get(PERMISSIONS),
     routers: storage.getSession(USER_ROUTER) || storage.get(USER_ROUTER),
     teamId: storage.getSession(TEAM_ID) || storage.get(TEAM_ID),
@@ -56,11 +55,6 @@ const user = {
       storage.set(TEAM_ID, teamId)
       state.teamId = teamId
     },
-    SET_ROLES: (state, roles) => {
-      storage.set(ROLES, roles)
-      storage.setSession(ROLES, roles)
-      state.roles = roles
-    },
     SET_PERMISSIONS: (state, permissions) => {
       storage.set(PERMISSIONS, permissions)
       storage.setSession(PERMISSIONS, permissions)
@@ -72,7 +66,6 @@ const user = {
       state.routers = routers
     },
     CLEAR_ROUTERS: (state, empty) => {
-      state.roles = null
       storage.rm(USER_ROUTER)
       storage.rmSession(USER_ROUTER)
     },
@@ -80,7 +73,6 @@ const user = {
     SET_EMPTY: (state, empty) => {
       state.token = null
       state.info = null
-      state.roles = null
       state.permissions = null
       state.name = null
       state.welcome = null
@@ -92,12 +84,10 @@ const user = {
 
       storage.rm(USER_ROUTER)
       storage.rm(TEAM_ID)
-      storage.rm(ROLES)
       storage.rm(PERMISSIONS)
 
       storage.rmSession(USER_ROUTER)
       storage.rmSession(TEAM_ID)
-      storage.rmSession(ROLES)
       storage.rmSession(PERMISSIONS)
     }
   },
@@ -114,7 +104,6 @@ const user = {
             if (respData != null && respData.token) {
               commit('SET_EXPIRE', respData.expire)
               commit('SET_TOKEN', respData.token)
-              commit('SET_ROLES', respData.roles)
               commit('SET_PERMISSIONS', respData.permissions)
               commit('SET_INFO', respData.user)
             }
@@ -181,7 +170,6 @@ const user = {
           setTeam(data).then(resp => {
             const respData = resp.data
             commit('SET_TEAM', data.teamId)
-            commit('SET_ROLES', respData.roles)
             commit('SET_PERMISSIONS', respData.permissions)
             commit('SET_INFO', respData.user)
             commit('CLEAR_ROUTERS', null)

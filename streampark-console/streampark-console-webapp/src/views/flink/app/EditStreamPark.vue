@@ -1462,14 +1462,14 @@
       </a-form-item>
 
       <a-form-item
-        label="Dynamic Option"
+        label="Properties"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
           rows="8"
-          name="dynamicOptions"
-          placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
-          v-decorator="['dynamicOptions']" />
+          name="properties"
+          placeholder="$key=$value,If there are multiple parameters,you can new line enter them"
+          v-decorator="['properties']" />
         <p class="conf-desc">
           <span class="note-info">
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
@@ -2417,6 +2417,12 @@ export default {
       } else {
         config = null
       }
+      if (values.yarnSessionClusterId) {
+        const cluster = this.flinkClusters.filter(c => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1)[0] || null
+        values.clusterId = cluster.id
+        values.flinkClusterId = cluster.id
+        values.yarnSessionClusterId = cluster.clusterId
+      }
       const configId = this.strategy === 1 ? this.configId : null
       const params = {
         id: this.app.id,
@@ -2429,7 +2435,7 @@ export default {
         args: values.args,
         options: JSON.stringify(options),
         yarnQueue: this.handleYarnQueue(values),
-        dynamicOptions: values.dynamicOptions,
+        properties: values.properties,
         cpMaxFailureInterval: values.cpMaxFailureInterval || null,
         cpFailureRateInterval: values.cpFailureRateInterval || null,
         cpFailureAction: values.cpFailureAction || null,
@@ -2475,6 +2481,13 @@ export default {
         config = null
       }
 
+      if (values.yarnSessionClusterId) {
+        const cluster = this.flinkClusters.filter(c => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1)[0] || null
+        values.clusterId = cluster.id
+        values.flinkClusterId = cluster.id
+        values.yarnSessionClusterId = cluster.clusterId
+      }
+
       const params = {
         id: this.app.id,
         sqlId: this.defaultFlinkSqlId || null,
@@ -2491,7 +2504,7 @@ export default {
         cpMaxFailureInterval: values.cpMaxFailureInterval || null,
         cpFailureRateInterval: values.cpFailureRateInterval || null,
         cpFailureAction: values.cpFailureAction || null,
-        dynamicOptions: values.dynamicOptions || null,
+        properties: values.properties || null,
         resolveOrder: values.resolveOrder,
         k8sRestExposedType: values.k8sRestExposedType,
         restartSize: values.restartSize,
@@ -2856,7 +2869,7 @@ export default {
           'tags': this.app.tags,
           'args': this.app.args,
           'description': this.app.description,
-          'dynamicOptions': this.app.dynamicOptions,
+          'properties': this.app.properties,
           'resolveOrder': this.app.resolveOrder,
           'versionId': this.app.versionId || null,
           'k8sRestExposedType': this.app.k8sRestExposedType,

@@ -16,12 +16,14 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { exceptionPropWidth } from '/@/utils';
+  import { executionMap } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'FlinkClusterSetting',
   });
 </script>
 <script lang="ts" setup name="FlinkClusterSetting">
-  import { onMounted, ref, h } from 'vue';
+  import { onMounted, ref } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
   import { List, Popconfirm, Tooltip } from 'ant-design-vue';
   import {
@@ -48,13 +50,17 @@
 
   const go = useGo();
   const { t } = useI18n();
-  const { createMessage, createConfirm } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const clusters = ref<FlinkCluster[]>([]);
   const optionClusters = {
     starting: new Map(),
     created: new Map(),
     stoped: new Map(),
   };
+  function isSessionMode(mode: number): boolean {
+    return [executionMap.YARN_SESSION, executionMap.KUBERNETES_SESSION].includes(mode);
+  }
+
   /* Get flink environmental data*/
   async function getFlinkClusterSetting() {
     const clusterList = await fetchFlinkCluster();
@@ -70,6 +76,7 @@
       }
     }
   }
+
   function handleAdd() {
     go('/flink/setting/add_cluster');
   }
@@ -98,17 +105,22 @@
         optionClusters.starting.set(item.id, new Date().getTime());
         handleMapUpdate('starting');
         getFlinkClusterSetting();
-        createMessage.success('The current cluster is started');
+        Swal.fire({
+          icon: 'success',
+          title: 'The current cluster is started',
+          showConfirmButton: false,
+          timer: 2000,
+        });
       } else {
-        createConfirm({
-          iconType: 'error',
+        Swal.fire({
           title: 'Failed',
-          content: h(
-            'div',
-            { class: 'whitespace-pre-wrap', style: { maxHeight: '550px', overflow: 'auto' } },
-            data?.data?.msg,
-          ),
-          width: '800px',
+          icon: 'error',
+          width: exceptionPropWidth(),
+          html: '<pre class="propsException">' + data?.data?.msg + '</pre>',
+          showCancelButton: true,
+          confirmButtonColor: '#55BDDDFF',
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Close',
         });
       }
     } catch (error) {
@@ -137,10 +149,15 @@
         handleMapUpdate('starting');
         createMessage.success('The current cluster is shutdown');
       } else {
-        createConfirm({
-          iconType: 'error',
+        Swal.fire({
           title: 'Failed',
-          content: h('pre', { class: 'propsException' }, data?.data?.msg),
+          icon: 'error',
+          width: exceptionPropWidth(),
+          html: '<pre class="propsException">' + data.data.msg + '</pre>',
+          showCancelButton: true,
+          confirmButtonColor: '#55BDDDFF',
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Close',
         });
       }
     } catch (error) {
@@ -170,10 +187,10 @@
     <ListItem v-for="(item, index) in clusters" :key="index">
       <ListItemMeta :title="item.clusterName" :description="item.description">
         <template #avatar>
-          <SvgIcon class="avatar" name="flink" size="25" />
+          <SvgIcon class="avatar p-15px" name="flink" size="60" />
         </template>
       </ListItemMeta>
-      <div class="list-content" style="width: 20%">
+      <div class="list-content" style="width: 15%">
         <div class="list-content-item" style="width: 60%">
           <span>ExecutionMode</span>
           <p style="margin-top: 10px">
@@ -181,7 +198,7 @@
           </p>
         </div>
       </div>
-      <div class="list-content" style="width: 20%">
+      <div class="list-content" style="width: 15%">
         <div class="list-content-item" style="width: 80%">
           <span>ClusterId</span>
           <p style="margin-top: 10px">
@@ -189,7 +206,7 @@
           </p>
         </div>
       </div>
-      <div class="list-content" style="width: 30%">
+      <div class="list-content" style="width: 20%">
         <div class="list-content-item" style="width: 60%">
           <span>Address</span>
           <p style="margin-top: 10px">
@@ -200,25 +217,23 @@
       <template #actions>
         <Tooltip :title="t('flink.setting.cluster.edit')">
           <a-button
-            v-if="handleIsStart(item) && item.executionMode === 3"
-            v-auth="'app:update'"
+            v-if="handleIsStart(item) && item.executionMode == executionMap.YARN_SESSION"
+            v-auth="'cluster:update'"
             :disabled="true"
             @click="handleEditCluster(item)"
             shape="circle"
             size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
+            class="control-button"
           >
             <EditOutlined />
           </a-button>
           <a-button
-            v-if="!handleIsStart(item) || item.executionMode === 1"
-            v-auth="'app:update'"
+            v-if="!handleIsStart(item) || item.executionMode == executionMap.REMOTE"
+            v-auth="'cluster:update'"
             @click="handleEditCluster(item)"
             shape="circle"
             size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
+            class="control-button"
           >
             <EditOutlined />
           </a-button>
@@ -226,13 +241,12 @@
         <template v-if="!handleIsStart(item)">
           <Tooltip :title="t('flink.setting.cluster.start')">
             <a-button
-              v-if="item.executionMode === 3 || item.executionMode === 5"
+              v-if="isSessionMode(item.executionMode)"
               v-auth="'cluster:create'"
               @click="handleDeployCluser(item)"
               shape="circle"
               size="large"
-              style="margin-left: 3px"
-              class="control-button ctl-btn-color"
+              class="control-button"
             >
               <PlayCircleOutlined />
             </a-button>
@@ -243,7 +257,7 @@
               shape="circle"
               size="large"
               style="margin-left: 3px"
-              class="control-button ctl-btn-color"
+              class="control-button"
             >
               <PlayCircleOutlined />
             </a-button>
@@ -259,7 +273,7 @@
               shape="circle"
               size="large"
               style="margin-left: 3px"
-              class="control-button ctl-btn-color"
+              class="control-button"
             >
               <PauseCircleOutlined />
             </a-button>
@@ -269,8 +283,7 @@
               v-auth="'cluster:create'"
               shape="circle"
               size="large"
-              style="margin-left: 3px"
-              class="control-button ctl-btn-color"
+              class="control-button"
             >
               <PauseCircleOutlined />
             </a-button>
@@ -284,8 +297,7 @@
             :disabled="true"
             shape="circle"
             size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
+            class="control-button"
           >
             <EyeOutlined />
           </a-button>
@@ -294,8 +306,7 @@
             v-auth="'app:detail'"
             shape="circle"
             size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
+            class="control-button"
             :href="item.address"
             target="_blank"
           >
@@ -309,13 +320,7 @@
           :ok-text="t('common.yes')"
           @confirm="handleDelete(item)"
         >
-          <a-button
-            type="danger"
-            shape="circle"
-            size="large"
-            style="margin-left: 3px"
-            class="control-button"
-          >
+          <a-button type="danger" shape="circle" size="large" class="control-button">
             <DeleteOutlined />
           </a-button>
         </Popconfirm>

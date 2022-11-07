@@ -42,6 +42,7 @@ export default defineComponent({
   emit: ['openMergely'],
   setup(props, { emit }) {
     const { model } = toRefs(props);
+    if (!model.value.strategy) model.value.strategy = '1';
     async function handleChangeConfig(v: string) {
       const res = await fetchGetVer({ id: v });
       model.value.configId = res.id;
@@ -58,11 +59,13 @@ export default defineComponent({
       model.value.jobName = res;
       model.value.configOverride = decodeByBase64(resp);
     }
+    console.log('configId', props.model.project);
     return () => {
       return (
         <div>
           <Input.Group compact>
             <Select
+              class="mr-10px"
               style="width: 25%"
               value={unref(model).strategy}
               onChange={(value: any) => (model.value.strategy = value)}
@@ -71,11 +74,12 @@ export default defineComponent({
               <Select.Option value="2">reselect</Select.Option>
             </Select>
             {unref(model).strategy == 1 && (
-              <Form.Item style="width: calc(75% - 65px)">
+              <Form.Item style="width: calc(75% - 75px);margin-left:10px;">
                 <Select
                   class="!w-full"
                   onChange={(value: any) => handleChangeConfig(value)}
                   value={unref(model).configId}
+                  placeholder="please select tag"
                 >
                   {props.configVersions.map((ver) => {
                     return (
@@ -91,7 +95,7 @@ export default defineComponent({
                   class="!w-full"
                   dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
                   api={fetchListConf}
-                  params={{ id: props.model.projectId, module: props.model.module }}
+                  params={{ id: props.model.project, module: props.model.module }}
                   placeholder="Please select config"
                   tree-default-expand-all
                   onChange={(value) => handleChangeNewConfig(value)}

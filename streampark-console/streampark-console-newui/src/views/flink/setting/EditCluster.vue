@@ -16,6 +16,7 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { useGo } from '/@/hooks/web/usePage';
   export default defineComponent({
     name: 'EditCluster',
   });
@@ -23,7 +24,6 @@
 <script setup lang="ts" name="EditCluster">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { useTabs } from '/@/hooks/web/useTabs';
   import { useMessage } from '/@/hooks/web/useMessage';
   import {
     fetchCheckCluster,
@@ -37,10 +37,10 @@
   import { useEdit } from '../app/hooks/useEdit';
   import { useI18n } from '/@/hooks/web/useI18n';
 
-  const { close } = useTabs();
+  const go = useGo();
   const route = useRoute();
   const { t } = useI18n();
-  const { createMessage, createErrorModal } = useMessage();
+  const { Swal } = useMessage();
   const { handleResetApplication, defaultOptions } = useEdit();
   const cluster = reactive<Recordable>({});
   const { getLoading, changeLoading, getClusterSchema, handleSubmitParams } = useClusterSetting();
@@ -67,21 +67,28 @@
         if (res === 'success') {
           const resp = await fetchUpdateCluster(params);
           if (resp.status) {
-            createMessage.success(values.clusterName.concat(' update successful!'));
-            close(undefined, { path: '/flink/setting', query: { activeKey: 'cluster' } });
+            Swal.fire({
+              icon: 'success',
+              title: values.clusterName.concat(' update successful!'),
+              showConfirmButton: false,
+              timer: 2000,
+            });
+            go('/flink/setting?activeKey=cluster');
           } else {
-            createMessage.error(resp.msg);
+            Swal.fire(resp.data.msg);
           }
         } else if (res === 'exists') {
-          createErrorModal({
-            title: 'Failed',
-            content: 'the cluster name: ' + values.clusterName + ' is already exists,please check',
-          });
+          Swal.fire(
+            'Failed',
+            'the cluster name: ' + values.clusterName + ' is already exists,please check',
+            'error',
+          );
         } else {
-          createErrorModal({
-            title: 'Failed',
-            content: 'the address is invalid or connection failure, please check',
-          });
+          Swal.fire(
+            'Failed',
+            'the address is invalid or connection failure, please check',
+            'error',
+          );
         }
       }
     } catch (error) {
@@ -106,14 +113,14 @@
         address: cluster.address,
         clusterId: cluster.clusterId,
         description: cluster.description,
-        dynamicOptions: cluster.dynamicOptions,
+        properties: cluster.properties,
         resolveOrder: cluster.resolveOrder,
         yarnQueue: cluster.yarnQueue,
         versionId: cluster.versionId || null,
         k8sRestExposedType: cluster.k8sRestExposedType,
         flinkImage: cluster.flinkImage,
         serviceAccount: cluster.serviceAccount,
-        kubeConfFile: cluster.kubeConfFile,
+        k8sConf: cluster.k8sConf,
         flameGraph: cluster.flameGraph,
         k8sNamespace: cluster.k8sNamespace,
         ...resetParams,
@@ -129,9 +136,7 @@
     <BasicForm @register="registerForm" @submit="handleSubmitCluster" :schemas="getClusterSchema">
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button
-            @click="close(undefined, { path: '/flink/setting', query: { activeKey: 'cluster' } })"
-          >
+          <a-button @click="go('/flink/setting?activeKey=cluster')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">

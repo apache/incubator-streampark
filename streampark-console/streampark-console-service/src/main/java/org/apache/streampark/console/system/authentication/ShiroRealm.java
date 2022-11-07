@@ -21,7 +21,6 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
-import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,9 +46,6 @@ public class ShiroRealm extends AuthorizingRealm {
     private UserService userService;
 
     @Autowired
-    private RoleService roleService;
-
-    @Autowired
     private AccessTokenService accessTokenService;
 
     @Override
@@ -65,16 +61,12 @@ public class ShiroRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection token) {
-        String username = JWTUtil.getUsername(token.toString());
+        Long userId = JWTUtil.getUserId(token.toString());
 
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
 
-        // Get user role set
-        Set<String> roleSet = roleService.getUserRoleName(username);
-        simpleAuthorizationInfo.setRoles(roleSet);
-
         // Get user permission set
-        Set<String> permissionSet = userService.getAllTeamPermissions(username);
+        Set<String> permissionSet = userService.getPermissions(userId, null);
         simpleAuthorizationInfo.setStringPermissions(permissionSet);
         return simpleAuthorizationInfo;
     }
@@ -90,11 +82,11 @@ public class ShiroRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         // The token here is passed from the executeLogin method of JWTFilter and has been decrypted
         String token = (String) authenticationToken.getCredentials();
-        String username = JWTUtil.getUsername(token);
+        String username = JWTUtil.getUserName(token);
         if (StringUtils.isBlank(username)) {
             throw new AuthenticationException("Token verification failed");
         }
-        // Query user information by user name
+        // Query user information by username
         User user = userService.findByName(username);
 
         if (user == null) {

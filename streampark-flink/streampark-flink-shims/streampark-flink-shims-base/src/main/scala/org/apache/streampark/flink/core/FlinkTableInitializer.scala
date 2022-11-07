@@ -26,10 +26,12 @@ import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.enums.TableMode.TableMode
 import org.apache.streampark.common.enums.{ApiType, PlannerType, TableMode}
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
+import org.apache.streampark.flink.core.conf.FlinkConfiguration
+import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import java.io.File
 import scala.collection.JavaConversions._
-import scala.collection.Map
+import scala.collection.{Map, mutable}
 import scala.util.{Failure, Success, Try}
 
 private[flink] object FlinkTableInitializer {
@@ -48,7 +50,7 @@ private[flink] object FlinkTableInitializer {
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.tableEnvironment)
+    (flinkInitializer.configuration.parameter, flinkInitializer.tableEnvironment)
   }
 
   def initialize(args: TableEnvConfig): (ParameterTool, TableEnvironment) = {
@@ -61,7 +63,7 @@ private[flink] object FlinkTableInitializer {
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.tableEnvironment)
+    (flinkInitializer.configuration.parameter, flinkInitializer.tableEnvironment)
   }
 
   def initialize(args: Array[String],
@@ -78,7 +80,7 @@ private[flink] object FlinkTableInitializer {
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
+    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
   }
 
   def initialize(args: StreamTableEnvConfig):
@@ -93,7 +95,7 @@ private[flink] object FlinkTableInitializer {
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
+    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
   }
 
 }
@@ -131,42 +133,66 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
    * In case of table SQL, the parameter conf is not required, it depends on the developer.
    */
 
-  override def initParameter(): (ParameterTool, Configuration) = {
-    val (appParameter: ParameterTool, flinkConf: Configuration) = {
+  override def initParameter(): FlinkConfiguration = {
+    val configuration = {
       val argsMap = ParameterTool.fromArgs(args)
       argsMap.get(KEY_APP_CONF(), null) match {
         case null | "" =>
           logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
-          ParameterTool.fromSystemProperties().mergeWith(argsMap) -> new Configuration()
+          val parameter = ParameterTool.fromSystemProperties().mergeWith(argsMap)
+          FlinkConfiguration(parameter, new Configuration(), new Configuration())
         case file =>
-          val (userConf, flinkConf) = super.parseConfig(file)
+          val configMap = parseConfig(file)
+          // set sql..
+          val sqlConf = mutable.Map[String, String]()
+          configMap.foreach(x => {
+            if (x._1.startsWith(KEY_SQL_PREFIX)) {
+              sqlConf += x._1.drop(KEY_SQL_PREFIX.length) -> x._2
+            }
+          })
+
           // config priority: explicitly specified priority > project profiles > system profiles
-          ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(userConf)).mergeWith(argsMap) -> Configuration.fromMap(flinkConf)
+          val properConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
+          val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
+          val tableConf = extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
+
+          val tableConfig = Configuration.fromMap(tableConf)
+          val envConfig = Configuration.fromMap(properConf)
+
+          val parameter = ParameterTool.fromSystemProperties()
+            .mergeWith(ParameterTool.fromMap(properConf))
+            .mergeWith(ParameterTool.fromMap(tableConf))
+            .mergeWith(ParameterTool.fromMap(appConf))
+            .mergeWith(ParameterTool.fromMap(sqlConf))
+            .mergeWith(argsMap)
+
+          FlinkConfiguration(parameter, envConfig, tableConfig)
       }
     }
 
-    val appParam = appParameter.get(KEY_FLINK_SQL()) match {
-      case null => appParameter
+    configuration.parameter.get(KEY_FLINK_SQL()) match {
+      case null => configuration
       case param =>
         // for streampark-console
         Try(DeflaterUtils.unzipString(param)) match {
-          case Success(value) => appParameter.mergeWith(ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value)))
+          case Success(value) =>
+            configuration.copy(parameter = configuration.parameter.mergeWith(ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value))))
           case Failure(_) =>
             val sqlFile = new File(param)
             Try(PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath)) match {
-              case Success(value) => appParameter.mergeWith(ParameterTool.fromMap(value))
+              case Success(value) =>
+                configuration.copy(parameter = configuration.parameter.mergeWith(ParameterTool.fromMap(value)))
               case Failure(e) =>
                 new IllegalArgumentException(s"[StreamPark] init sql error.$e")
-                appParameter
+                configuration
             }
         }
     }
-
-    appParam -> flinkConf
   }
 
   def initEnvironment(tableMode: TableMode): Unit = {
     val builder = EnvironmentSettings.newInstance()
+    val parameter = configuration.parameter
     val plannerType = Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER))).getOrElse(PlannerType.blink)
 
     try {
@@ -223,11 +249,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         }
         localStreamTableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
     }
-    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
-      case (appName: String, _) => appName
-      case (null, appName: String) => appName
-      case _ => null
-    }
+    val appName = parameter.getAppName()
     if (appName != null) {
       tableMode match {
         case TableMode.batch => localTableEnv.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)

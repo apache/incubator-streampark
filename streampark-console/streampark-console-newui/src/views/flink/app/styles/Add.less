@@ -85,11 +85,6 @@
     line-height: 25px;
   }
 
-  .conf-switch {
-    color: darkgrey;
-    margin-left: 5px;
-  }
-
   .ant-input-number {
     width: 100%;
   }
@@ -110,33 +105,21 @@
   }
 }
 
+.pod-template-tool,
 .flinksql-tool {
   z-index: 99;
-  bottom: 50px;
-  float: right;
-  right: 22px;
   cursor: pointer;
-  height: 26px;
-  padding: 0 10px;
+  margin-top: 5px;
 }
 
 .flinksql-tool-item {
   font-size: 12px;
-}
-
-.pod-template-tool {
-  z-index: 99;
-  position: absolute;
-  bottom: 20px;
-  float: right;
-  right: 22px;
-  cursor: pointer;
-  height: 26px;
-  padding: 0 10px;
+  display: flex;
+  align-items: center;
 }
 
 .pod-template-tool-item {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .pod-template-tool-drawer-submit-cancel {
@@ -203,13 +186,13 @@
   }
 
   .dependency-box {
+    margin-right: 10px;
     margin-top: 15px;
-    width: 100%;
+    margin-bottom: -10px;
     border-radius: 5px;
-    background-color: @background-color-base;
-    border: 1px solid @border-color-base;
+    background-color: #e6f7ff;
+    border: 1px solid #d9d9d9;
     display: inline-block;
-    margin-bottom: -25px;
 
     .dependency-item {
       position: relative;
@@ -278,8 +261,14 @@
   }
 
   .icon-close {
-    color: rgba(0 0 0 / 45%);
+    color: #00000073;
     font-size: 12px;
+  }
+}
+
+[data-theme="dark"] {
+  .app_controller .icon-close {
+    color: #ffffff73;
   }
 }
 
@@ -295,4 +284,10 @@
 .slide-fade-leave-to {
   transform: translateX(10px);
   opacity: 0;
+}
+
+.pom-card {
+  .ant-tabs-nav {
+    margin-bottom: 0 !important;
+  }
 }

@@ -41,7 +41,7 @@
         where role_id = #{roleId}
     </delete>
 
-    <select id="findUsers" resultType="member" parameterType="member">
+    <select id="findUsers" resultType="org.apache.streampark.console.system.entity.Member" parameterType="org.apache.streampark.console.system.entity.Member">
         select tur.*,
         u.username,
         r.role_name

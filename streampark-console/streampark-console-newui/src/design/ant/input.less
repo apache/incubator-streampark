@@ -38,3 +38,23 @@
     padding: 4px;
   }
 }
+
+[data-theme="dark"] {
+
+  .ant-input-group.ant-input-group-compact > * {
+    border-right-color: transparent;
+  }
+
+  .ant-input-group-addon {
+    background-color: transparent !important;
+  }
+
+  .ant-picker-input > input[disabled],
+  .ant-input[disabled] {
+    color: #939393 !important;
+  }
+
+  .ant-picker-input > input:not(:focus) {
+    border-color: transparent !important;
+  }
+}

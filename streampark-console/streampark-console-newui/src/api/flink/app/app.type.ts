@@ -69,7 +69,7 @@ export interface AppListRecord {
   hotParams?: string;
   resolveOrder: number;
   executionMode: number;
-  dynamicOptions?: string;
+  properties?: string;
   appType: number;
   flameGraph: boolean;
   tracking: number;
@@ -151,4 +151,32 @@ export interface CancelParam {
   savePointed: boolean;
   drain: boolean;
   savePoint: string;
+}
+// create Params
+export interface CreateParams {
+  jobType: number;
+  executionMode: number;
+  versionId: string;
+  flinkSql: string;
+  appType: number;
+  config?: any;
+  format?: any;
+  jobName: string;
+  tags: string;
+  args?: any;
+  dependency: string;
+  options: string;
+  cpMaxFailureInterval: number;
+  cpFailureRateInterval: number;
+  cpFailureAction: number;
+  properties: string;
+  resolveOrder: number;
+  restartSize: number;
+  alertId: string;
+  description: string;
+  k8sNamespace?: any;
+  clusterId: string;
+  flinkClusterId: string;
+  flinkImage?: any;
+  yarnSessionClusterId?: any;
 }

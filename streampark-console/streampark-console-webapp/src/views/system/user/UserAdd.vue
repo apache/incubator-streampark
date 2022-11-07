@@ -83,6 +83,7 @@
         v-bind="formItemLayout">
         <a-select
           mode="single"
+          :getPopupContainer="(triggerNode) => triggerNode.parentNode"
           :allow-clear="false"
           style="width: 100%"
           v-decorator="['userType',{rules: [{ required: true, message: 'please select user type' }]}]">

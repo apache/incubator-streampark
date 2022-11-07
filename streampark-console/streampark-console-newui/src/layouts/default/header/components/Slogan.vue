@@ -15,12 +15,21 @@
   limitations under the License.
 -->
 <script lang="ts" setup name="Slogan">
+  import { computed } from 'vue';
+  import { useMenuSetting } from '/@/hooks/setting/useMenuSetting';
   import { useDesign } from '/@/hooks/web/useDesign';
 
   const { prefixCls } = useDesign('slogan');
+  const { getCollapsed } = useMenuSetting();
+  const slognClass = computed(() => [
+    prefixCls,
+    {
+      'collapse-slogo': getCollapsed.value,
+    },
+  ]);
 </script>
 <template>
-  <div :class="`${prefixCls}`">
+  <div :class="slognClass">
     <span :class="`${prefixCls}-streampark`">
       Apache StreamPark,&nbsp; Make&nbsp; stream processing&nbsp;easier!
     </span>
@@ -55,6 +64,17 @@
       span::selection {
         -webkit-text-fill-color: #fff;
       }
+    }
+  }
+
+  @media screen and (max-width: 1585px) {
+    .@{prefix-cls}:not(.collapse-slogo) {
+      display: none;
+    }
+  }
+  @media screen and (max-width: 1420px) {
+    .@{prefix-cls}.collapse-slogo {
+      display: none;
     }
   }
 </style>

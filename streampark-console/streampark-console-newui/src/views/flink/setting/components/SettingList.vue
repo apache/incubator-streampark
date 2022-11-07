@@ -29,9 +29,10 @@
   import { useMessage } from '/@/hooks/web/useMessage';
 
   const AvatarMap = {
-    'streamx.maven.central.repository': 'maven',
-    'streamx.maven.auth.user': 'user',
-    'streamx.maven.auth.password': 'mvnpass',
+    'streampark.maven.settings': 'settings',
+    'streampark.maven.central.repository': 'maven',
+    'streampark.maven.auth.user': 'user',
+    'streampark.maven.auth.password': 'mvnpass',
     'docker.register.address': 'docker',
     'docker.register.namespace': 'namespace',
     'docker.register.user': 'auth',
@@ -42,7 +43,8 @@
     'alert.email.userName': 'user',
     'alert.email.password': 'keys',
     'alert.email.ssl': 'ssl',
-    'streamx.console.webapp.address': 'http',
+    'streampark.console.webapp.address': 'http',
+    'ingress.mode.default': 'settings',
   };
 
   const ListItem = List.Item;
@@ -107,7 +109,7 @@
                 placeholder="Please enter"
                 class="ant-input"
               />
-              <div v-else style="width: 100%; text-align: right">
+              <div v-else style="width: 100%">
                 <span v-if="isPassword(item) && item.settingValue !== null"> ******** </span>
                 <span v-else>{{ item.settingValue }}</span>
               </div>

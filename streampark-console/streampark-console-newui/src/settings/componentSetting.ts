@@ -25,7 +25,7 @@ export default {
     // support xxx.xxx.xxx
     fetchSetting: {
       // The field name of the current page passed to the background
-      pageField: 'page',
+      pageField: 'pageNum',
       // The number field name of each page displayed in the background
       sizeField: 'pageSize',
       // Field name of the form data returned by the interface
@@ -45,7 +45,7 @@ export default {
       if (field && order) {
         return {
           // The sort field passed to the backend you
-          sortField: field,
+          sortField: field.replace(/([a-z])([A-Z])/, '$1_$2').toLowerCase(),
           // Sorting method passed to the background asc/desc
           sortOrder: order === 'ascend' ? 'asc' : 'desc',
         };

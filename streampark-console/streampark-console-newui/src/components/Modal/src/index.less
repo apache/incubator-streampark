@@ -93,6 +93,16 @@
   &-confirm-body {
     .ant-modal-confirm-content {
       // color: #fff;
+      margin-top: 12px;
+      padding-bottom: 12px;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        border-top: 1px solid @border-color-dark;
+      }
 
       > * {
         color: @text-color-help-dark;

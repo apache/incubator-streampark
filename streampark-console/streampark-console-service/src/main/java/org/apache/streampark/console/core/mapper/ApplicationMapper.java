@@ -38,7 +38,8 @@ public interface ApplicationMapper extends BaseMapper<Application> {
     @Select("select * from t_flink_app where project_id=#{projectId}")
     List<Application> getByProjectId(@Param("projectId") Long projectId);
 
-    @Update("update t_flink_app set app_id=#{application.appId},job_id=#{application.jobId},state=14,end_time=null where id=#{application.id}")
+    List<Application> getByTeamId(@Param("teamId") Long teamId);
+
     boolean mapping(@Param("application") Application appParam);
 
     @Update("update t_flink_app set option_state=0")

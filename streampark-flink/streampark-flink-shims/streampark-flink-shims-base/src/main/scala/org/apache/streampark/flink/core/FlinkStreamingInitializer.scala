@@ -25,6 +25,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironment => JavaStreamEnv}
 import org.apache.flink.table.api.TableConfig
+import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
 import java.io.File
 import collection.JavaConversions._
@@ -45,7 +46,7 @@ private[flink] object FlinkStreamingInitializer {
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
+    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment)
   }
 
   def initialize(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
@@ -58,7 +59,7 @@ private[flink] object FlinkStreamingInitializer {
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
+    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment)
   }
 }
 
@@ -75,9 +76,9 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
-  lazy val (parameter: ParameterTool, flinkConf: Configuration) = initParameter()
+  lazy val configuration: FlinkConfiguration = initParameter()
 
-  def initParameter(): (ParameterTool, Configuration) = {
+  def initParameter(): FlinkConfiguration = {
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.get(KEY_APP_CONF(), null) match {
       // scalastyle:off throwerror
@@ -85,49 +86,57 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       // scalastyle:on throwerror
       case file => file
     }
-    val (userConf, flinkConf) = parseConfig(config)
+    val configMap = parseConfig(config)
+    val properConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
+    val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
+
     // config priority: explicitly specified priority > project profiles > system profiles
-    ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(userConf)).mergeWith(argsMap) -> Configuration.fromMap(flinkConf)
+    val parameter = ParameterTool.fromSystemProperties()
+      .mergeWith(ParameterTool.fromMap(properConf))
+      .mergeWith(ParameterTool.fromMap(appConf))
+      .mergeWith(argsMap)
+
+    val envConfig = Configuration.fromMap(properConf)
+    FlinkConfiguration(parameter, envConfig, null)
   }
 
-  def parseConfig(config: String): (Map[String, String], Map[String, String]) = {
+  def parseConfig(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
-    val configMap = config match {
-      case x if x.startsWith("yaml://") =>
-        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.drop(7)))
-      case x if x.startsWith("prop://") =>
-        PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.drop(7)))
+    lazy val content = DeflaterUtils.unzipString(config.drop(7))
+    val map = config match {
+      case x if x.startsWith("yaml://") => PropertiesUtils.fromYamlText(content)
+      case x if x.startsWith("conf://") => PropertiesUtils.fromHoconText(content)
+      case x if x.startsWith("prop://") => PropertiesUtils.fromPropertiesText(content)
       case x if x.startsWith("hdfs://") =>
-
         /**
          * If the configuration file with the hdfs, user will need to copy the hdfs-related configuration files under the resources dir
          */
         val text = HdfsUtils.read(x)
         extension match {
-          case "properties" => PropertiesUtils.fromPropertiesText(text)
           case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+          case "conf" => PropertiesUtils.fromHoconText(text)
+          case "properties" => PropertiesUtils.fromPropertiesText(text)
           case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
         }
       case _ =>
         val configFile = new File(config)
-        require(configFile.exists(), s"[StreamPark] Usage:flink.conf file $configFile is not found!!!")
+        require(configFile.exists(), s"[StreamPark] Usage: flink.conf file $configFile is not found!!!")
         extension match {
-          case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
           case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-          case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
+          case "conf" => PropertiesUtils.fromHoconFile(configFile.getAbsolutePath)
+          case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+          case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be (yml|conf|properties)")
         }
     }
-    val appConf = mutable.Map[String, String]()
-    val flinkConf = mutable.Map[String, String]()
-    configMap.foreach(x => {
-      if (x._1.startsWith(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)) {
-        flinkConf += x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2
-      }
-      if (!x._1.startsWith(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)) {
-        appConf += x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2
-      }
+    map.filter(_._2.nonEmpty)
+  }
+
+  def extractConfigByPrefix(configMap: Map[String, String], prefix: String): Map[String, String] = {
+    val map = mutable.Map[String, String]()
+    configMap.foreach(x => if (x._1.startsWith(prefix)) {
+      map += x._1.drop(prefix.length) -> x._2
     })
-    appConf -> flinkConf
+    map
   }
 
   def streamEnvironment: StreamExecutionEnvironment = {
@@ -142,14 +151,14 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   }
 
   def initEnvironment(): Unit = {
-    localStreamEnv = new StreamExecutionEnvironment(JavaStreamEnv.getExecutionEnvironment(flinkConf))
+    localStreamEnv = new StreamExecutionEnvironment(JavaStreamEnv.getExecutionEnvironment(configuration.envConfig))
 
     apiType match {
-      case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, parameter)
-      case ApiType.scala if streamEnvConfFunc != null => streamEnvConfFunc(localStreamEnv, parameter)
+      case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, configuration.parameter)
+      case ApiType.scala if streamEnvConfFunc != null => streamEnvConfFunc(localStreamEnv, configuration.parameter)
       case _ =>
     }
-    localStreamEnv.getConfig.setGlobalJobParameters(parameter)
+    localStreamEnv.getConfig.setGlobalJobParameters(configuration.parameter)
   }
 
 }

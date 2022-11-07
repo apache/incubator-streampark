@@ -243,7 +243,7 @@ create table "public"."t_flink_app" (
   "cp_max_failure_interval" int4,
   "cp_failure_rate_interval" int4,
   "cp_failure_action" int2,
-  "dynamic_options" text collate "pg_catalog"."default",
+  "properties" text collate "pg_catalog"."default",
   "description" varchar(255) collate "pg_catalog"."default",
   "resolve_order" int2,
   "k8s_rest_exposed_type" int2,
@@ -308,7 +308,7 @@ create table "public"."t_flink_cluster" (
   "description" varchar(255) collate "pg_catalog"."default",
   "user_id" int8,
   "flink_image" varchar(255) collate "pg_catalog"."default",
-  "dynamic_options" text collate "pg_catalog"."default",
+  "properties" text collate "pg_catalog"."default",
   "k8s_rest_exposed_type" int2 default 2,
   "k8s_hadoop_integration" boolean default false,
   "flame_graph" boolean default false,
@@ -329,7 +329,7 @@ comment on column "public"."t_flink_cluster"."version_id" is 'flink version id';
 comment on column "public"."t_flink_cluster"."k8s_namespace" is 'k8s namespace';
 comment on column "public"."t_flink_cluster"."service_account" is 'k8s service account';
 comment on column "public"."t_flink_cluster"."flink_image" is 'flink image';
-comment on column "public"."t_flink_cluster"."dynamic_options" is 'dynamic parameters';
+comment on column "public"."t_flink_cluster"."properties" is 'allows specifying multiple generic configuration options';
 comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)';
 comment on column "public"."t_flink_cluster"."flame_graph" is 'enable the flame graph';
 comment on column "public"."t_flink_cluster"."k8s_conf" is 'the path where the k 8 s configuration file is located';
@@ -617,6 +617,7 @@ create table "public"."t_variable" (
   "description" text collate "pg_catalog"."default" default null,
   "creator_id" int8 collate "pg_catalog"."default" not null,
   "team_id" int8 collate "pg_catalog"."default" not null,
+  "desensitization" boolean not null default false,
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
@@ -627,6 +628,7 @@ comment on column "public"."t_variable"."variable_value" is 'The specific value 
 comment on column "public"."t_variable"."description" is 'More detailed description of variables';
 comment on column "public"."t_variable"."creator_id" is 'user id of creator';
 comment on column "public"."t_variable"."team_id" is 'team id';
+comment on column "public"."t_variable"."desensitization" is '0 is no desensitization, 1 is desensitization, if set to desensitization, it will be replaced by * when displayed';
 comment on column "public"."t_variable"."create_time" is 'creation time';
 comment on column "public"."t_variable"."modify_time" is 'modify time';
 

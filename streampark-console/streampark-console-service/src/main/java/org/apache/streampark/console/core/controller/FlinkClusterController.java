@@ -76,7 +76,7 @@ public class FlinkClusterController {
         flinkCluster.setClusterName(cluster.getClusterName());
         flinkCluster.setAddress(cluster.getAddress());
         flinkCluster.setExecutionMode(cluster.getExecutionMode());
-        flinkCluster.setDynamicOptions(cluster.getDynamicOptions());
+        flinkCluster.setProperties(cluster.getProperties());
         flinkCluster.setFlameGraph(cluster.getFlameGraph());
         flinkCluster.setFlinkImage(cluster.getFlinkImage());
         flinkCluster.setOptions(cluster.getOptions());

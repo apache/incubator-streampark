@@ -15,24 +15,24 @@
   limitations under the License.
 -->
 <script lang="ts">
-  export default defineComponent({
+  export default {
     name: 'EditStreamPark',
-  });
+  };
 </script>
 <script setup lang="ts" name="EditStreamPark">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { onMounted, reactive, ref, nextTick, unref, defineComponent } from 'vue';
+  import { onMounted, reactive, ref, nextTick, unref } from 'vue';
   import { AppListRecord } from '/@/api/flink/app/app.type';
   import configOptions from './data/option';
   import { fetchMain, fetchUpload, fetchUpdate, fetchGet } from '/@/api/flink/app/app';
   import { useRoute } from 'vue-router';
   import { handleSubmitParams } from './utils';
   import { fetchFlinkHistory } from '/@/api/flink/app/flinkSql';
-  import { decodeByBase64 } from '/@/utils/cipher';
+  import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import UploadJobJar from './components/UploadJobJar.vue';
-  import FlinkSqlEditor from './components/flinkSql.vue';
+  import FlinkSqlEditor from './components/FlinkSql.vue';
   import Dependency from './components/Dependency.vue';
   import Different from './components/AppDetail/Different.vue';
   import Mergely from './components/Mergely.vue';
@@ -42,17 +42,18 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchConfHistory } from '/@/api/flink/config';
   import { useDrawer } from '/@/components/Drawer';
-  import { useTabs } from '/@/hooks/web/useTabs';
   import { useEditStreamParkSchema } from './hooks/useEditStreamPark';
   import { useEdit } from './hooks/useEdit';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { useGo } from '/@/hooks/web/usePage';
+  import ProgramArgs from './components/ProgramArgs.vue';
+  import VariableReview from './components/VariableReview.vue';
 
   const route = useRoute();
-  const { close } = useTabs();
+  const go = useGo();
   const { t } = useI18n();
   const { createMessage } = useMessage();
   const app = reactive<Partial<AppListRecord>>({});
-  const selectAlertId = ref<string>('');
   const flinkSqlHistory = ref<any[]>([]);
   const submitLoading = ref<boolean>(false);
 
@@ -60,17 +61,25 @@
 
   const uploadLoading = ref(false);
   const uploadJar = ref('');
-  const flinkSql = ref();
   const dependencyRef = ref();
+  const programArgRef = ref();
 
   const k8sTemplate = reactive({
     podTemplate: '',
     jmPodTemplate: '',
     tmPodTemplate: '',
   });
+
   const { handleResetApplication, defaultOptions } = useEdit();
-  const { getEditStreamParkFormSchema, registerDifferentDrawer, alerts, flinkEnvs } =
-    useEditStreamParkSchema(configVersions, flinkSqlHistory, dependencyRef);
+  const {
+    alerts,
+    flinkEnvs,
+    flinkSql,
+    flinkClusters,
+    getEditStreamParkFormSchema,
+    registerDifferentDrawer,
+    suggestions,
+  } = useEditStreamParkSchema(configVersions, flinkSqlHistory, dependencyRef);
 
   const [registerForm, { setFieldsValue, getFieldsValue, submit }] = useForm({
     labelWidth: 120,
@@ -82,26 +91,33 @@
   });
 
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
+  const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
 
   /* Form reset */
   function handleReset(executionMode?: string) {
+    let selectAlertId = '';
+    if (app.alertId) {
+      selectAlertId = unref(alerts).filter((t) => t.id == app.alertId)[0]?.id;
+    }
     nextTick(() => {
       const resetParams = handleResetApplication();
       const defaultParams = {
         jobName: app.jobName,
         tags: app.tags,
-        args: app.args,
+        args: app.args || '',
         description: app.description,
-        dynamicOptions: app.dynamicOptions,
+        properties: app.properties,
         resolveOrder: app.resolveOrder,
         versionId: app.versionId || null,
         k8sRestExposedType: app.k8sRestExposedType,
         yarnQueue: app.yarnQueue,
         restartSize: app.restartSize,
         alertId: selectAlertId,
-        cpMaxFailureInterval: app.cpMaxFailureInterval,
-        cpFailureRateInterval: app.cpFailureRateInterval,
-        cpFailureAction: app.cpFailureAction,
+        checkPointFailure: {
+          cpMaxFailureInterval: app.cpMaxFailureInterval,
+          cpFailureRateInterval: app.cpFailureRateInterval,
+          cpFailureAction: app.cpFailureAction,
+        },
         clusterId: app.clusterId,
         flinkClusterId: app.flinkClusterId,
         flinkImage: app.flinkImage,
@@ -109,10 +125,12 @@
         yarnSessionClusterId: app.yarnSessionClusterId,
         ...resetParams,
       };
+      console.log('resetParams', resetParams);
       if (!executionMode) {
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }
       setFieldsValue(defaultParams);
+      app.args && programArgRef.value?.setContent(app.args);
     });
   }
   /* Custom job upload */
@@ -123,9 +141,7 @@
       const path = await fetchUpload(formData);
       uploadLoading.value = false;
       uploadJar.value = data.file.name;
-      const res = await fetchMain({
-        jar: path,
-      });
+      const res = await fetchMain({ jar: path });
       setFieldsValue({ jar: uploadJar.value, mainClass: res });
     } catch (error) {
       console.error(error);
@@ -138,10 +154,10 @@
   async function handleAppUpdate(values) {
     try {
       submitLoading.value = true;
-      if (app.jobType === 1) {
+      if (app.jobType == 1) {
         handleSubmitCustomJob(values);
       } else {
-        if (app.jobType === 2) {
+        if (app.jobType == 2) {
           if (values.flinkSql == null || values.flinkSql.trim() === '') {
             createMessage.warning('Flink Sql is required');
           } else {
@@ -157,22 +173,36 @@
     }
   }
 
-  function handleSubmitSQL(values) {
+  function handleSubmitSQL(values: Recordable) {
     try {
       // Trigger a pom confirmation operation.
       unref(dependencyRef)?.handleApplyPom();
       // common params...
-      const dependency: { pom?: any; jar?: any } = {};
-      if (values.dependency !== null && values.dependency.length > 0) {
-        Object.assign(dependency, { pom: values.dependency });
+      const dependency: { pom?: string; jar?: string } = {};
+      const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
+      const uploadJars = unref(dependencyRef)?.uploadJars;
+      if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
+        Object.assign(dependency, {
+          pom: unref(dependencyRecords),
+        });
       }
-      if (values.uploadJars != null && values.uploadJars.length > 0) {
-        Object.assign(dependency, { jar: values.dependency });
+      if (uploadJars && unref(uploadJars).length > 0) {
+        Object.assign(dependency, {
+          jar: unref(uploadJars),
+        });
       }
-
+      if (values.yarnSessionClusterId) {
+        const cluster =
+          flinkClusters.value.filter(
+            (c) => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1,
+          )[0] || null;
+        values.clusterId = cluster.id;
+        values.flinkClusterId = cluster.id;
+        values.yarnSessionClusterId = cluster.clusterId;
+      }
       let config = values.configOverride;
       if (config != null && config.trim() !== '') {
-        config = decodeByBase64(config);
+        config = encryptByBase64(config);
       } else {
         config = null;
       }
@@ -197,18 +227,27 @@
   async function handleSubmitCustomJob(values: Recordable) {
     try {
       const format =
-        values.strategy === 1 ? app.format : values.config.endsWith('.properties') ? 2 : 1;
+        values.strategy == 1 ? app.format : (values.config || '').endsWith('.properties') ? 2 : 1;
       let config = values.configOverride || app.config;
       if (config != null && config.trim() !== '') {
-        config = decodeByBase64(config);
+        config = encryptByBase64(config);
       } else {
         config = null;
       }
-      const configId = values.strategy === 1 ? app.configId : null;
+      if (values.yarnSessionClusterId) {
+        const cluster =
+          flinkClusters.value.filter(
+            (c) => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1,
+          )[0] || null;
+        values.clusterId = cluster.id;
+        values.flinkClusterId = cluster.id;
+        values.yarnSessionClusterId = cluster.clusterId;
+      }
+      const configId = values.strategy == 1 ? app.configId : null;
       const params = {
         id: app.id,
         format: format,
-        configId: configId,
+        configId,
         config,
       };
       handleSubmitParams(params, values, k8sTemplate);
@@ -224,7 +263,7 @@
     try {
       const updated = await fetchUpdate(params);
       if (updated) {
-        close(undefined, { path: '/flink/app' });
+        go('/flink/app');
       }
     } catch (error) {
       console.error('error', error);
@@ -239,33 +278,19 @@
     const res = await fetchGet({ id: appId as string });
     let configId = '';
     const confVersion = await fetchConfHistory({ id: route.query.appId });
-    confVersion.forEach((value) => {
-      if (value.effective) {
-        configId = value.id;
+    confVersion.forEach((conf: Recordable) => {
+      if (conf.effective) {
+        configId = conf.id;
       }
     });
     configVersions.value = confVersion;
     Object.assign(app, res);
     Object.assign(defaultOptions, JSON.parse(app.options || '{}'));
-    setFieldsValue({
-      jobType: res.jobType,
-      executionMode: res.executionMode,
-      flinkSql: decodeByBase64(res.flinkSql),
-      dependency: res.dependency,
-      module: res.module,
-      configId,
-      sqlId: app.sqlId,
-      versionId: app.versionId,
-    });
-    nextTick(() => {
-      unref(flinkSql)?.setContent(decodeByBase64(res.flinkSql));
-    });
-    if (app.jobType === 2) {
-      const res = await fetchFlinkHistory({ id: appId });
-      flinkSqlHistory.value = res;
-    }
-    if (app.alertId) {
-      selectAlertId.value = unref(alerts).filter((t) => t.id == app.alertId)[0]?.id;
+
+    if (app.jobType == 2) {
+      fetchFlinkHistory({ id: appId }).then((res) => {
+        flinkSqlHistory.value = res;
+      });
     }
     let isSetConfig = false;
     let configOverride = '';
@@ -279,7 +304,27 @@
         [item.key]: item.defaultValue,
       });
     });
-    setFieldsValue(defaultFormValue);
+    setFieldsValue({
+      jobType: res.jobType,
+      executionMode: res.executionMode,
+      flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
+      dependency: '',
+      module: res.module,
+      configId,
+      sqlId: app.sqlId,
+      flinkSqlHistory: app.sqlId,
+      versionId: app.versionId,
+      projectName: app.projectName,
+      project: app.projectId,
+      ...defaultFormValue,
+    });
+    nextTick(() => {
+      unref(flinkSql)?.setContent(decodeByBase64(res.flinkSql));
+
+      setTimeout(() => {
+        unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
+      }, 1000);
+    });
     handleReset();
   }
 
@@ -297,7 +342,7 @@
   }
   onMounted(() => {
     if (!route?.query?.appId) {
-      close(undefined, { path: '/flink/app' });
+      go('/flink/app');
       createMessage.warning('appid can not be empty');
       return;
     }
@@ -318,6 +363,15 @@
           v-model:tmPodTemplate="k8sTemplate.tmPodTemplate"
         />
       </template>
+      <template #args="{ model }">
+        <ProgramArgs
+          ref="programArgRef"
+          v-if="model.args != null && model.args != undefined"
+          v-model:value="model.args"
+          :suggestions="suggestions"
+          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
+        />
+      </template>
       <template #uploadJobJar>
         <UploadJobJar :custom-request="handleCustomJobRequest" v-model:loading="uploadLoading" />
       </template>
@@ -326,6 +380,8 @@
           ref="flinkSql"
           v-model:value="model[field]"
           :versionId="model['versionId']"
+          :suggestions="suggestions"
+          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
         />
       </template>
       <template #dependency="{ model, field }">
@@ -348,7 +404,7 @@
 
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="close(undefined, { path: '/flink/app' })">
+          <a-button @click="go('/flink/app')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="submitLoading" type="primary" @click="submit()">
@@ -363,6 +419,7 @@
       @register="registerConfDrawer"
     />
     <Different @register="registerDifferentDrawer" />
+    <VariableReview @register="registerReviewDrawer" />
   </PageWrapper>
 </template>
 <style lang="less">

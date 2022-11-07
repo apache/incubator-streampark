@@ -29,10 +29,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class ProcFileUtilsTest {
+class ProcFileUtilsTest {
 
     @Test
-    public void getProcFileAsMap() throws IOException {
+    void getProcFileAsMap() throws IOException {
         File file = File.createTempFile("test", "test");
         file.deleteOnExit();
 
@@ -56,31 +56,31 @@ public class ProcFileUtilsTest {
     }
 
     @Test
-    public void getProcFileAsMap_NotExistingFile() {
+    void getProcFileAsMap_NotExistingFile() {
         Map<String, String> result = ProcFileUtils.getProcFileAsMap("/not/existing/file");
         Assertions.assertEquals(0, result.size());
     }
 
     @Test
-    public void getProcFileAsMap_Directory() {
+    void getProcFileAsMap_Directory() {
         Map<String, String> result = ProcFileUtils.getProcFileAsMap("/");
         Assertions.assertEquals(0, result.size());
     }
 
     @Test
-    public void getProcFileAsRowColumn_NotExistingFile() {
+    void getProcFileAsRowColumn_NotExistingFile() {
         List<String[]> result = ProcFileUtils.getProcFileAsRowColumn("/not/existing/file");
         Assertions.assertEquals(0, result.size());
     }
 
     @Test
-    public void getProcFileAsRowColumn_Directory() {
+    void getProcFileAsRowColumn_Directory() {
         List<String[]> result = ProcFileUtils.getProcFileAsRowColumn("/");
         Assertions.assertEquals(0, result.size());
     }
 
     @Test
-    public void getProcStatus_DefaultFile() {
+    void getProcStatus_DefaultFile() {
         Map<String, String> result = ProcFileUtils.getProcStatus();
 
         // Mac has no proc file so result will be empty.
@@ -94,7 +94,7 @@ public class ProcFileUtilsTest {
     }
 
     @Test
-    public void getProcIO_DefaultFile() {
+    void getProcIO_DefaultFile() {
         Map<String, String> result = ProcFileUtils.getProcIO();
 
         // Mac has no proc file so result will be empty.
@@ -108,7 +108,7 @@ public class ProcFileUtilsTest {
     }
 
     @Test
-    public void getBytesValue() throws IOException {
+    void getBytesValue() throws IOException {
         {
             Map<String, String> map = Collections.emptyMap();
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
@@ -304,7 +304,7 @@ public class ProcFileUtilsTest {
     }
 
     @Test
-    public void getProcStatCpuTime() throws IOException {
+    void getProcStatCpuTime() throws IOException {
         {
             Assertions.assertEquals(0, ProcFileUtils.getProcStatCpuTime(null).size());
             Assertions.assertEquals(0, ProcFileUtils.getProcStatCpuTime(new ArrayList<>()).size());
@@ -359,7 +359,7 @@ public class ProcFileUtilsTest {
     }
 
     @Test
-    public void getPid_NoValue() throws IOException {
+    void getPid_NoValue() throws IOException {
         File file = File.createTempFile("test", "test");
         file.deleteOnExit();
 
@@ -371,7 +371,7 @@ public class ProcFileUtilsTest {
     }
 
     @Test
-    public void getPid_HasValue() throws IOException {
+    void getPid_HasValue() throws IOException {
         File file = File.createTempFile("test", "test");
         file.deleteOnExit();
 
@@ -384,7 +384,7 @@ public class ProcFileUtilsTest {
     }
 
     @Test
-    public void getCmdline() throws IOException {
+    void getCmdline() {
         String result = ProcFileUtils.getCmdline();
         Assertions.assertTrue(result == null || !result.isEmpty());
     }

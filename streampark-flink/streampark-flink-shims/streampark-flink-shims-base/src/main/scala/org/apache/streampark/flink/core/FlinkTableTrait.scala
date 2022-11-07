@@ -17,6 +17,7 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.flink.core.EnhancerImplicit._
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api._
@@ -26,32 +27,22 @@ import org.apache.flink.table.functions._
 import org.apache.flink.table.module.Module
 import org.apache.flink.table.types.AbstractDataType
 
+
 import java.lang
 import java.util.Optional
 
-/**
- *
- * @param parameter
- * @param tableEnv
- */
 abstract class FlinkTableTrait(val parameter: ParameterTool,
                                private val tableEnv: TableEnvironment) extends TableEnvironment {
 
-  /**
-   * 推荐使用该Api启动任务...
-   *
-   * @return
-   */
   def start(): JobExecutionResult = {
-    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
-      case (appName: String, _) => appName
-      case (null, appName: String) => appName
-      case _ => ""
-    }
+    val appName = parameter.getAppName(required = true)
     execute(appName)
   }
 
-  def execute(jobName: String): JobExecutionResult
+  def execute(jobName: String): JobExecutionResult = {
+    printLogo(s"FlinkTable $jobName Starting...")
+    null
+  }
 
   def sql(sql: String = null): Unit = FlinkSqlExecutor.executeSql(sql, parameter, this)
 
@@ -135,12 +126,6 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
 
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
-  /**
-   *
-   * @param name
-   * @param dataStream
-   * @tparam T
-   */
   @deprecated override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
 
   @deprecated override def registerTable(name: String, table: Table): Unit = tableEnv.registerTable(name, table)

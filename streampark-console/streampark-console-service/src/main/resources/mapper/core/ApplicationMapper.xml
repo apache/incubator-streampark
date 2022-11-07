@@ -26,11 +26,12 @@
         <result column="module" jdbcType="VARCHAR" property="module"/>
         <result column="args" jdbcType="LONGVARCHAR" property="args"/>
         <result column="options" jdbcType="LONGVARCHAR" property="options"/>
-        <result column="dynamic_options" jdbcType="LONGVARCHAR" property="dynamicOptions"/>
+        <result column="properties" jdbcType="LONGVARCHAR" property="properties"/>
         <result column="hot_params" jdbcType="VARCHAR" property="hotParams"/>
         <result column="job_name" jdbcType="VARCHAR" property="jobName"/>
         <result column="app_id" jdbcType="VARCHAR" property="appId"/>
         <result column="version_id" jdbcType="BIGINT" property="versionId"/>
+        <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
         <result column="flink_image" jdbcType="VARCHAR" property="flinkImage"/>
         <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="app_type" jdbcType="INTEGER" property="appType"/>
@@ -143,6 +144,14 @@
         where t.id = #{application.id}
     </select>
 
+    <select id="getByTeamId" resultType="application" parameterType="Long">
+        select t.*, u.username, case when trim(u.nick_name) = '' then u.username else u.nick_name end as nick_name
+        from t_flink_app t
+        inner join t_user u
+        on t.user_id = u.user_id
+        where t.team_id=#{teamId}
+    </select>
+
     <update id="updateTracking" parameterType="application">
         update t_flink_app
         <set>
@@ -191,4 +200,20 @@
         </set>
         where id=#{application.id}
     </update>
+
+    <update id="mapping" parameterType="application">
+        update t_flink_app
+        <set>
+            <if test="application.jobId != null">
+                job_id=#{application.jobId},
+            </if>
+            <if test="application.appId != null">
+                app_id=#{application.appId},
+            </if>
+            end_time=null,
+            `state`=14
+        </set>
+        where id=#{application.id}
+    </update>
+
 </mapper>

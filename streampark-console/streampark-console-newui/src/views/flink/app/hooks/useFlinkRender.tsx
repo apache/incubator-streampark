@@ -17,8 +17,9 @@
 import { RenderCallbackParams } from '/@/components/Form/src/types/form';
 import { Icon, SvgIcon } from '/@/components/Icon';
 import options from '../data/option';
-import { cpTriggerAction } from '../data';
+
 import Mergely from '../components/Mergely.vue';
+import CustomForm from '../components/CustomForm';
 import {
   Alert,
   Dropdown,
@@ -37,6 +38,7 @@ import { ref, unref } from 'vue';
 import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { SelectValue } from 'ant-design-vue/lib/select';
 
 /* render input dropdown component */
 export const renderInputDropdown = (
@@ -83,18 +85,17 @@ export const renderInputDropdown = (
   );
 };
 
-function handleCheckCheckpoint(values: Recordable) {
-  const { cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction } = values;
+export function handleCheckCheckpoint(values: Recordable) {
+  const { cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction } = values.checkPointFailure;
   if (cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null) {
     if (cpFailureAction === 1) {
-      const alertEmail = values.alertEmail;
-      if (alertEmail == null) {
+      if (values.alertId == null) {
         // this.form.setFields({
         //   alertEmail: {
         //     errors: [new Error('checkPoint failure trigger is alert,email must not be empty')],
         //   },
         // });
-        return Promise.reject('trigger action is alert,email must not be empty');
+        return Promise.reject('trigger action is alert,Fault Alert Template must not be empty');
       } else {
         return Promise.resolve();
       }
@@ -113,81 +114,30 @@ function handleCheckCheckpoint(values: Recordable) {
 }
 
 /* render input Group component */
-export const renderInputGroup = (model: Recordable) => {
+export const renderInputGroup = ({ model }) => {
+  if (!Reflect.has(model, 'checkPointFailure')) {
+    model.checkPointFailure = {};
+  }
+  const handleUpdate = (value: any) => {
+    Object.assign(model, {
+      checkPointFailure: value,
+    });
+  };
   return (
-    <div>
-      <Input.Group compact>
-        <Form.Item
-          name="cpMaxFailureInterval"
-          rules={{ trigger: 'blur', validator: () => handleCheckCheckpoint(model) }}
-        >
-          <InputNumber
-            min={1}
-            step={1}
-            placeholder="checkpoint failure rate interval"
-            allow-clear
-            class="!w-260px mr-10px"
-            value={model.cpMaxFailureInterval}
-            onInput={(value) => (model.cpMaxFailureInterval = value)}
-          />
-        </Form.Item>
-
-        <Button style="width: 70px"> minute </Button>
-        <Form.Item
-          name="cpFailureRateInterval"
-          rules={{ trigger: 'blur', validator: () => handleCheckCheckpoint(model) }}
-          style="margin-left: 1%"
-        >
-          <InputNumber
-            min={1}
-            step={1}
-            placeholder="max failures per interval"
-            class="!w-200px"
-            value={model.cpFailureRateInterval}
-            onInput={(value) => (model.cpFailureRateInterval = value)}
-          />
-        </Form.Item>
-
-        <Button style="width: 70px"> count </Button>
-        <Form.Item
-          name="cpFailureAction"
-          rules={{ trigger: 'change', validator: () => handleCheckCheckpoint(model) }}
-          style="margin-left: 1%"
-        >
-          <Select
-            placeholder="trigger action"
-            allow-clear
-            class="!w-170px"
-            value={model.cpFailureAction}
-            onChange={(value) => (model.cpFailureAction = value)}
-          >
-            {cpTriggerAction.map((o) => {
-              return (
-                <Select.Option key={o.value}>
-                  <Icon
-                    icon={o.value === 1 ? 'ant-design:alert-outlined' : 'ant-design:sync-outlined'}
-                  />
-                  {o.label}
-                </Select.Option>
-              );
-            })}
-          </Select>
-        </Form.Item>
-      </Input.Group>
-
-      <p class="conf-desc my-0">
-        <span class="note-info">
-          <Tag color="#2db7f5" class="tag-note">
-            Note
-          </Tag>
-          Operation after checkpoint failure, e.g:
-          <br />
-          Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the
-          number of checkpoint failures reaches <span class="note-elem">10</span> (max failures per
-          interval),action will be triggered(alert or restart job)
-        </span>
-      </p>
-    </div>
+    <Form.Item
+      label="CheckPoint Failure Options"
+      name="checkPointFailure"
+      rules={[{ validator: () => handleCheckCheckpoint(model) }]}
+    >
+      <CustomForm
+        value={{
+          cpMaxFailureInterval: model.checkPointFailure.cpMaxFailureInterval,
+          cpFailureRateInterval: model.checkPointFailure.cpFailureRateInterval,
+          cpFailureAction: model.checkPointFailure.cpFailureAction,
+        }}
+        onUpdateValue={handleUpdate}
+      ></CustomForm>
+    </Form.Item>
   );
 };
 /*Gets the selection of totalOptions */
@@ -239,21 +189,41 @@ function hasOptions(items) {
   return options.filter((x) => items.includes(x.key)) as any;
 }
 /* render memory option */
-export const renderOptionsItems = (model: Recordable, field: string, reg: string) => {
-  return hasOptions(model[field] || []).map((conf) => {
-    const label = conf.name.replace(new RegExp(reg, 'g'), '').replace(/\./g, ' ');
+export const renderOptionsItems = (
+  model: Recordable,
+  parentField: string,
+  field: string,
+  reg: string,
+  replace = false,
+) => {
+  return hasOptions(model[parentField] || []).map((conf: Recordable) => {
+    let label = conf.name.replace(new RegExp(reg, 'g'), '');
+    if (replace) label = label.replace(/\./g, ' ');
+    if (!Reflect.has(model, field)) {
+      model[field] = {};
+    }
+    if (!model[field][conf.key]) {
+      model[field][conf.key] = conf.defaultValue || null;
+    }
+    if (!Reflect.has(model, conf.key)) {
+      model[conf.key] = model[field][conf.key] || conf.defaultValue || null;
+    }
+
+    function handleValueChange(value: string) {
+      model[conf.key] = value;
+      model[field][conf.key] = value;
+    }
     return (
-      <Form.Item label={label} key={conf.key}>
+      <Form.Item label={label} name={conf.key} key={`${field}.${conf.key}`}>
         {conf.type === 'number' && (
           <InputNumber
+            class="!w-full"
             min={conf.min}
             max={conf.max}
-            defaultValue={conf.defaultValue}
             step={conf.step}
-            value={model[conf.key]}
-            onChange={(value) => (model[conf.key] = value)}
+            value={model[field][conf.key]}
+            onChange={handleValueChange}
             rules={[{ validator: conf.validator }]}
-            name={conf.key}
           />
         )}
         {conf.type === 'switch' && <span class="conf-switch">({conf.placeholder})</span>}
@@ -264,17 +234,17 @@ export const renderOptionsItems = (model: Recordable, field: string, reg: string
 };
 
 /* render memory option */
-export const renderDynamicOption = ({ model, field }: RenderCallbackParams) => {
+export const renderProperties = ({ model, field }: RenderCallbackParams) => {
   return (
     <div>
       <Input.TextArea
         rows={8}
-        name="dynamicOptions"
+        name="properties"
         placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
         value={model[field]}
-        onInput={(e) => (model[field] = e.target.value)}
+        onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
       />
-      <p class="conf-desc">
+      <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
             Note
@@ -300,7 +270,7 @@ export const getAlertSvgIcon = (name: string, text: string) => {
       {{
         message: () => (
           <div>
-            <SvgIcon name={name} style={{ color: '#108ee9' }} />
+            <SvgIcon class="mr-8px" name={name} style={{ color: '#108ee9' }} />
             <span>{text}</span>
           </div>
         ),
@@ -341,13 +311,32 @@ export const renderIsSetConfig = (
       model.isSetConfig = false;
     }
   }
+  function handleMergeSubmit(data: { configOverride: string; isSetConfig: boolean }) {
+    if (data.configOverride == null || !data.configOverride.replace(/^\s+|\s+$/gm, '')) {
+      Object.assign(model, {
+        configOverride: null,
+        isSetConfig: false,
+      });
+    } else {
+      Object.assign(model, {
+        configOverride: data.configOverride,
+        isSetConfig: true,
+      });
+    }
+  }
+  function handleConfChange(checked: boolean) {
+    model[field] = checked;
+    if (checked) {
+      handleSQLConf(true);
+    }
+  }
   return (
     <div>
       <Switch
         checked-children="ON"
         un-checked-children="OFF"
         checked={model[field]}
-        onChange={(checked) => (model[field] = checked)}
+        onChange={handleConfChange}
       />
       {model[field] && (
         <SettingTwoTone
@@ -359,7 +348,7 @@ export const renderIsSetConfig = (
       )}
 
       <Mergely
-        onOk={(data) => Object.assign(model, data)}
+        onOk={handleMergeSubmit}
         onClose={() => handleEditConfClose()}
         onRegister={registerConfDrawer}
       />
@@ -367,6 +356,7 @@ export const renderIsSetConfig = (
   );
 };
 
+// render history version form item
 export const renderSqlHistory = (
   { model, flinkSqlHistory },
   { handleChangeSQL, handleCompareOk }: { handleChangeSQL: Fn; handleCompareOk: Fn },
@@ -374,11 +364,12 @@ export const renderSqlHistory = (
   const { createConfirm } = useMessage();
   const compareSQL = ref<string[]>([]);
 
-  function handleSelectChange(value) {
-    model.sqlId = value;
+  function handleSelectChange(value: SelectValue) {
+    model.flinkSqlHistory = value;
     handleChangeSQL(value);
   }
 
+  //version compact
   function handleCompactSQL() {
     createConfirm({
       iconType: 'info',
@@ -388,9 +379,11 @@ export const renderSqlHistory = (
           <span>Compare Flink SQL</span>
         </div>
       ),
+      okText: 'Compare',
+      width: 600,
       content: () => {
         return (
-          <Form>
+          <Form class="!pt-30px">
             <Form.Item
               label="Version"
               label-col={{ lg: { span: 5 }, sm: { span: 7 } }}
@@ -409,15 +402,16 @@ export const renderSqlHistory = (
           </Form>
         );
       },
-      onOk: handleCompareOk.bind(null, compareSQL.value),
+      onOk: () => handleCompareOk(compareSQL.value),
     });
   }
 
-  const renderSelectOptions = async (isCompareSelect = false) => {
-    const isDisabled = (ver) => {
+  const renderSelectOptions = (isCompareSelect = false) => {
+    const isDisabled = (ver: Recordable) => {
       if (!isCompareSelect) return false;
       return compareSQL.value.length == 2 && compareSQL.value.findIndex((i) => i === ver.id) === -1;
     };
+    console.log('flinkSqlHistory', flinkSqlHistory);
     return (flinkSqlHistory || []).map((ver) => {
       return (
         <Select.Option key={ver.id} disabled={isDisabled(ver)}>
@@ -445,8 +439,8 @@ export const renderSqlHistory = (
   return (
     <div>
       <Select
-        onChange={(value) => handleSelectChange(value)}
-        value={model.sqlId}
+        onChange={(value: SelectValue) => handleSelectChange(value)}
+        value={model.flinkSqlHistory}
         style="width: calc(100% - 60px)"
       >
         {renderSelectOptions()}
@@ -482,7 +476,7 @@ export const renderCompareSelectTag = (ver: any) => {
 export const renderResourceFrom = (model: Recordable) => {
   return (
     <Select
-      onChange={(value) => (model.resourceFrom = value)}
+      onChange={(value: string) => (model.resourceFrom = value)}
       value={model.resourceFrom}
       placeholder="Please select resource from"
     >

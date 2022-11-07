@@ -70,38 +70,10 @@ const anyPermit = {
   }
 }
 
-// All roles listed must be included for the element to display
-const hasRole = {
-  install (Vue) {
-    Vue.directive('hasRole', {
-      inserted (el, binding, vnode) {
-        const roles = vnode.context.$store.getters.roles
-        const value = binding.value.split(',')
-        doCheck(roles, value, false, false, el)
-      }
-    })
-  }
-}
-
-// The element will display as long as it contains any of the listed roles
-const hasAnyRole = {
-  install (Vue) {
-    Vue.directive('hasAnyRole', {
-      inserted (el, binding, vnode) {
-        const roles = vnode.context.$store.getters.roles
-        const value = binding.value.split(',')
-        doCheck(roles, value, true, true, el)
-      }
-    })
-  }
-}
-
 const Plugins = [
   permit,
   noPermit,
-  anyPermit,
-  hasRole,
-  hasAnyRole
+  anyPermit
 ]
 
 Plugins.map((plugin) => {

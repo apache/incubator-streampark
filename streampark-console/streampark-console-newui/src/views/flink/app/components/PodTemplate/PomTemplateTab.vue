@@ -268,35 +268,35 @@
   }
 </script>
 <template>
-  <Tabs type="card" v-model:activeKey="podTemplateTab">
+  <Tabs type="card" v-model:activeKey="podTemplateTab" class="pom-card">
     <TabPane key="pod-template" tab="Pod Template" forceRender>
+      <div ref="podTemplateRef" class="pod-template-box syntax-true"></div>
       <TemplateButtonGroup
         visualType="ptVisual"
         @click-history="showPodTemplateDrawer('ptVisual')"
         @click-init="handleGetInitPodTemplate('ptVisual')"
         @click-host-alias="showTemplateHostAliasDrawer('ptVisual')"
       />
-      <div ref="podTemplateRef" class="pod-template-box syntax-true"></div>
     </TabPane>
 
     <TabPane key="jm-pod-template" tab="JM Pod Template" forceRender>
+      <div ref="jmpodTemplateRef" class="jm-pod-template-box syntax-true"></div>
       <TemplateButtonGroup
         visualType="ptVisual"
         @click-history="showPodTemplateDrawer('jmPtVisual')"
         @click-init="handleGetInitPodTemplate('jmPtVisual')"
         @click-host-alias="showTemplateHostAliasDrawer('jmPtVisual')"
       />
-      <div ref="jmpodTemplateRef" class="jm-pod-template-box syntax-true"></div>
     </TabPane>
 
     <TabPane key="tm-pod-template" tab="TM Pod Template" forceRender>
+      <div ref="tmpodTemplateRef" class="tm-pod-template-box syntax-true"></div>
       <TemplateButtonGroup
         visualType="ptVisual"
         @click-history="showPodTemplateDrawer('tmPtVisual')"
         @click-init="handleGetInitPodTemplate('tmPtVisual')"
         @click-host-alias="showTemplateHostAliasDrawer('tmPtVisual')"
       />
-      <div ref="tmpodTemplateRef" class="tm-pod-template-box syntax-true"></div>
     </TabPane>
   </Tabs>
   <!--  history  -->

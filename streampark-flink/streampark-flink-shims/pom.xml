@@ -48,6 +48,7 @@
             <modules>
                 <!-- flink 1.15+ only support scala 2.12 -->
                 <module>streampark-flink-shims_flink-1.15</module>
+                <module>streampark-flink-shims_flink-1.16</module>
             </modules>
         </profile>
 

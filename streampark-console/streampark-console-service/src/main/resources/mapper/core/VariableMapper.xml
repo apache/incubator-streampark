@@ -25,6 +25,7 @@
         <result column="variable_value" jdbcType="VARCHAR" property="variableValue"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="creator_id" jdbcType="BIGINT" property="creatorId"/>
+        <result column="desensitization" jdbcType="BOOLEAN" property="desensitization"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
@@ -41,6 +42,17 @@
             </if>
             <if test="variable.variableCode != null and variable.variableCode != ''">
                 and v.variable_code like '%${variable.variableCode}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByTeamId" resultType="variable">
+        select *
+        from t_variable
+        <where>
+            team_id = #{teamId}
+            <if test="keyword != null and keyword != ''">
+                and variable_code like concat('%', #{keyword}, '%') or description like concat('%', #{keyword}, '%')
             </if>
         </where>
     </select>

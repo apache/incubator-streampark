@@ -15,55 +15,62 @@
   limitations under the License.
 -->
 <template>
-  <div :class="prefixCls" class="relative w-full h-full px-4">
-    <AppLocalePicker
-      class="absolute text-white top-4 right-4 enter-x xl:text-gray-600"
-      :showText="false"
-      v-if="!sessionTimeout && showLocale"
-    />
-    <AppDarkModeToggle class="absolute top-3 right-7 enter-x" v-if="!sessionTimeout" />
+  <div class="h-full bg-gradient-primary overflow-auto">
+    <div class="w-full relative h-[calc(100%-120px)] min-h-700px flex items-center section">
+      <div class="scribble-box w-[80%] h-full absolute overflow-hidden">
+        <figure class="scribble scale-2 !opacity-10 top-50 left-0">
+          <SvgIcon name="block" class="text-secondary" :size="200" />
+        </figure>
 
-    <span class="-enter-x xl:hidden">
-      <AppLogo :alwaysShowTitle="true" />
-    </span>
+        <figure class="scribble scale-3 !opacity-10 top-50 left-0">
+          <SvgIcon name="block" class="text-secondary" :size="200" />
+        </figure>
 
-    <div class="container relative h-full py-2">
-      <div class="flex h-full">
-        <div class="hidden min-h-full pl-4 mr-4 xl:flex xl:flex-col xl:w-4/12">
-          <AppLogo class="!w-auto -enter-x" />
-          <div class="my-auto">
-            <div class="mt-10 font-medium text-white -enter-x">
-              <span class="inline-block mt-4 text-3xl"> {{ t('sys.login.signInTitle') }}</span>
+        <figure class="scribble scale-4 !opacity-10 top-50 left-0">
+          <SvgIcon name="block" class="text-secondary" :size="200" />
+        </figure>
+
+        <figure class="scribble scale-5 !opacity-10 top-50 left-0">
+          <SvgIcon name="block" class="text-secondary" :size="200" />
+        </figure>
+      </div>
+      <div class="w-full px-100px mx-auto pb-2">
+        <Row :gutter="24">
+          <Col :md="12" :span="24" class="self-center pr-5 z-100 -enter-x">
+            <LoginSlogan />
+          </Col>
+          <Col :md="12" :span="24">
+            <div
+              :class="`${prefixCls}-form`"
+              class="relative w-auto m-auto max-w-420px bg-[rgba(0,0,0,0.5)] rounded-2px px-10 py-5 shadow-2xl shadow-blue-500 enter-x z-100"
+            >
+              <LoginForm />
             </div>
-            <div class="mt-5 font-normal text-gray-300 text-md -enter-x">
-              {{ t('sys.login.signInDesc') }}
-            </div>
-          </div>
-        </div>
-        <div class="flex w-full h-full py-5 xl:h-auto xl:py-0 xl:my-0 xl:w-8/12">
-          <div
-            :class="`${prefixCls}-form`"
-            class="relative w-full px-5 py-8 mx-auto my-auto rounded-md shadow-md xl:bg-transparent sm:px-8 xl:p-4 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto enter-x"
-          >
-            <LoginForm />
-            <ForgetPasswordForm />
-          </div>
-        </div>
+          </Col>
+        </Row>
       </div>
     </div>
+    <footer class="w-1150px m-auto text-center bg-transparent opacity-60">
+      <a href="https://incubator.apache.org/" target="_blank" class="w-200px m-auto inline-block">
+        <img
+          src="/@/assets/svg/apache-incubator.svg"
+          alt="Apache Incubator  logo"
+          class="w-200px my-10px mx-auto"
+        />
+      </a>
+      <p class="text-light-100 pt-10px" style="border-top: 1px solid #dad7d7">
+        Copyright © 2022 The Apache Software Foundation. Apache StreamPark, StreamPark, and its
+        feather logo are trademarks of The Apache Software Foundation.
+      </p>
+    </footer>
   </div>
 </template>
 <script lang="ts" setup>
-  // import { computed } from 'vue';
-  import { AppLogo } from '/@/components/Application';
-  import { AppLocalePicker, AppDarkModeToggle } from '/@/components/Application';
   import LoginForm from './LoginForm.vue';
-  import ForgetPasswordForm from './ForgetPasswordForm.vue';
-  // import { useGlobSetting } from '/@/hooks/setting';
-  import { useI18n } from '/@/hooks/web/useI18n';
+  import LoginSlogan from './LoginSlogan';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { useLocaleStore } from '/@/store/modules/locale';
-
+  import { Row, Col } from 'ant-design-vue';
+  import { SvgIcon } from '/@/components/Icon';
   defineProps({
     sessionTimeout: {
       type: Boolean,
@@ -72,147 +79,61 @@
 
   // const globSetting = useGlobSetting();
   const { prefixCls } = useDesign('login');
-  const { t } = useI18n();
-  const localeStore = useLocaleStore();
-  const showLocale = localeStore.getShowPicker;
   // const title = computed(() => globSetting?.title ?? '');
 </script>
 <style lang="less">
   @prefix-cls: ~'@{namespace}-login';
   @logo-prefix-cls: ~'@{namespace}-app-logo';
   @countdown-prefix-cls: ~'@{namespace}-countdown-input';
-  @dark-bg: #293146;
+  @active-color: 255, 255, 255;
 
-  html[data-theme='dark'] {
-    .@{prefix-cls} {
-      background-color: @dark-bg;
-
-      .ant-input,
-      .ant-input-password {
-        background-color: #232a3b;
-      }
-
-      .ant-btn:not(.ant-btn-link):not(.ant-btn-primary) {
-        border: 1px solid #4a5569;
-      }
-
-      &-form {
-        background: transparent !important;
-      }
-
-      .app-iconify {
-        color: #fff;
-      }
-    }
-
-    input.fix-auto-fill,
-    .fix-auto-fill input {
-      -webkit-text-fill-color: #c9d1d9 !important;
-      box-shadow: inherit !important;
-    }
+  input.fix-auto-fill,
+  .fix-auto-fill input {
+    box-shadow: inherit !important;
   }
 
-  .@{prefix-cls} {
-    min-height: 100%;
-    overflow: hidden;
-    @media (max-width: @screen-xl) {
-      background-color: #293146;
+  .bg-gradient-primary {
+    background-image: linear-gradient(
+      130deg,
+      #0e18d2 15%,
+      #3172f5 40%,
+      #3172f5 60%,
+      #60cff2 100%
+    ) !important;
+  }
 
-      .@{prefix-cls}-form {
-        background-color: #fff;
+  .@{prefix-cls}-form {
+    .ant-input {
+      padding-top: 3px;
+      padding-bottom: 3px;
+
+      .ant-input-affix-wrapper:hover,
+      .ant-input:not(.ant-input-disabled) {
+        border-color: rgba(@active-color, 0.95);
       }
     }
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      margin-left: -66%;
-      background: linear-gradient(163.85deg, #1d2129 0%, #00308f 100%);
-      // background-image: url(/@/assets/svg/login-bg.svg);
-      // background-position: 100%;
-      // background-repeat: no-repeat;
-      // background-size: auto 100%;
-
-      @media (max-width: @screen-xl) {
-        display: none;
-      }
+    .form-title {
+      font-family: Poppins, sans-serif !important;
     }
 
-    .@{logo-prefix-cls} {
-      position: absolute;
-      top: 12px;
-      height: 30px;
-
-      &__title {
-        font-size: 16px;
-        color: #fff;
-      }
-
-      img {
-        width: 180px;
+    .text-left {
+      .ant-btn {
+        padding: 0px;
       }
     }
-
-    .container {
-      .@{logo-prefix-cls} {
-        display: flex;
-        width: 60%;
-        height: 80px;
-
-        &__title {
-          font-size: 24px;
-          color: #fff;
-        }
-
-        img {
-          width: 180px;
+  }
+  [data-theme='dark']{
+    .@{prefix-cls}-form{
+      .ant-form-item-has-error :not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+      .ant-input-affix-wrapper,
+      .ant-input {
+        color:rgba(0, 0, 0, 0.85);
+        background-color:white;
+        &::placeholder {
+          color: #bdbdbe !important;
         }
       }
-    }
-
-    &-sign-in-way {
-      .anticon {
-        font-size: 22px;
-        color: #888;
-        cursor: pointer;
-
-        &:hover {
-          color: @primary-color;
-        }
-      }
-    }
-
-    input:not([type='checkbox']) {
-      min-width: 360px;
-
-      @media (max-width: @screen-xl) {
-        min-width: 320px;
-      }
-
-      @media (max-width: @screen-lg) {
-        min-width: 260px;
-      }
-
-      @media (max-width: @screen-md) {
-        min-width: 240px;
-      }
-
-      @media (max-width: @screen-sm) {
-        min-width: 160px;
-      }
-    }
-
-    .@{countdown-prefix-cls} input {
-      min-width: unset;
-    }
-
-    .ant-divider-inner-text {
-      font-size: 12px;
-      color: @text-color-secondary;
     }
   }
 </style>

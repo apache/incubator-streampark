@@ -136,6 +136,7 @@
 <template>
   <BasicDrawer
     @register="registerMergelyDrawer"
+    :keyboard="false"
     :closable="false"
     :mask-closable="false"
     width="80%"
@@ -154,7 +155,7 @@
             {{ t('common.cancelText') }}
           </a-button>
           <a-button v-if="changed" type="primary" class="drwaer-button-item" @click="handleNext()">
-            <Icon icon="ant-design:edit-outlined" />
+            <Icon icon="clarity:note-edit-line" />
 
             {{ t('common.next') }}
           </a-button>

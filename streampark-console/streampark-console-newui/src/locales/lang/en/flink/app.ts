@@ -63,7 +63,7 @@ export default {
     format: 'Format',
     fullScreen: 'Full Screen',
     exit: 'Exit',
-    successful: 'successful',
+    successful: 'Verification success',
     compareFlinkSQL: 'Compare Flink SQL',
   },
   hadoopConfigTitle: 'System Hadoop Conifguration',

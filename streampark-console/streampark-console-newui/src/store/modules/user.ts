@@ -35,8 +35,7 @@ import { router } from '/@/router';
 import { usePermissionStore } from '/@/store/modules/permission';
 import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
-import { h } from 'vue';
-import { SignOut } from '/@/adapter/store/modules/user';
+import { h, unref } from 'vue';
 import { getUserTeamId } from '/@/utils';
 import { usePermission } from '/@/hooks/web/usePermission';
 
@@ -87,7 +86,7 @@ export const useUserStore = defineStore({
       return this.expire || getAuthCache<string>(EXPIRE_KEY);
     },
     getRoleList(): RoleEnum[] {
-      return this.roleList.length > 0 ? this.roleList : getAuthCache<RoleEnum[]>(ROLES_KEY);
+      return this.roleList?.length > 0 ? this.roleList : getAuthCache<RoleEnum[]>(ROLES_KEY);
     },
     getSessionTimeout(): boolean {
       return !!this.sessionTimeout;
@@ -117,7 +116,7 @@ export const useUserStore = defineStore({
       setAuthCache(EXPIRE_KEY, info);
     },
     setRoleList(roleList: RoleEnum[]) {
-      this.roleList = roleList;
+      this.roleList = roleList || [];
       setAuthCache(ROLES_KEY, roleList);
     },
     setUserInfo(info: UserInfo | null) {
@@ -139,7 +138,7 @@ export const useUserStore = defineStore({
       setAuthCache(PERMISSION_KEY, permissions);
     },
     setData(data: Recordable) {
-      const { token, expire, user, permissions, roles } = data;
+      const { token, expire, user, permissions, roles = [] } = data;
 
       this.setToken(token);
       this.setExpire(expire);
@@ -148,7 +147,7 @@ export const useUserStore = defineStore({
       this.setPermissions(permissions);
     },
     // set team
-    async setTeamId(data: { teamId: string; userId?: string }): Promise<boolean> {
+    async setTeamId(data: { teamId: string; userId?: string | number }): Promise<boolean> {
       try {
         const { refreshMenu } = usePermission();
 
@@ -158,16 +157,16 @@ export const useUserStore = defineStore({
         } else {
           const resp = await fetchSetUserTeam(data);
 
-          const { permissions, roles, user } = resp;
+          const { permissions, roles = [], user } = resp;
           this.setUserInfo(user);
           this.setRoleList(roles as RoleEnum[]);
           this.setPermissions(permissions);
-          refreshMenu();
         }
         // If it returns success, it will be stored in the local cache
         this.teamId = data.teamId;
         sessionStorage.setItem(APP_TEAMID_KEY_, data.teamId);
         localStorage.setItem(APP_TEAMID_KEY_, data.teamId);
+        if (!data.userId) refreshMenu(unref(router.currentRoute)?.path);
         return Promise.resolve(true);
       } catch (error) {
         return Promise.reject(error);
@@ -185,7 +184,7 @@ export const useUserStore = defineStore({
         try {
           const permissionStore = usePermissionStore();
           if (!permissionStore.isDynamicAddedRoute) {
-            const routes = await permissionStore.buildRoutesAction();
+            const [routes] = await permissionStore.buildRoutesAction();
             routes.forEach((route) => {
               router.addRoute(route as unknown as RouteRecordRaw);
             });
@@ -210,17 +209,15 @@ export const useUserStore = defineStore({
       if (this.getToken) {
         try {
           await doLogout();
-
-          await SignOut();
         } catch {
           console.log('Token cancellation failed');
         }
       }
-      this.setToken(undefined);
       this.setSessionTimeout(false);
       this.setUserInfo(null);
       sessionStorage.removeItem(APP_TEAMID_KEY_);
       localStorage.removeItem(APP_TEAMID_KEY_);
+      this.setToken(undefined);
       goLogin && router.push(PageEnum.BASE_LOGIN);
     },
 
@@ -233,7 +230,7 @@ export const useUserStore = defineStore({
       createConfirm({
         iconType: 'warning',
         title: () => h('span', t('sys.app.logoutTip')),
-        content: () => h('span', t('sys.app.logoutMessage')),
+        content: () => h('span', { class: 'inline-block pt-20px' }, t('sys.app.logoutMessage')),
         onOk: async () => {
           await this.logout(true);
         },

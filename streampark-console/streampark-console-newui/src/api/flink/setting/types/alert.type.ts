@@ -26,6 +26,7 @@ export interface AlertSetting {
   larkParams: string;
   createTime: string;
   modifyTime: string;
+  alertTypeTags?: string[];
 }
 
 // Create an alert
@@ -63,4 +64,9 @@ interface DingTalkParams {
 
 interface EmailParams {
   contacts: string;
+}
+
+export interface AlertUpdateParam {
+  settingKey: string;
+  settingValue: boolean;
 }

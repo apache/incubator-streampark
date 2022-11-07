@@ -15,29 +15,27 @@
  * limitations under the License.
  */
 import { FormSchema } from '/@/components/Table';
-import { computed, h, reactive, Ref, ref, unref } from 'vue';
+import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
 
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { getAlertSvgIcon } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
-import { AppListRecord } from '/@/api/flink/app/app.type';
 import { useRoute } from 'vue-router';
 import { fetchMain } from '/@/api/flink/app/app';
 
 export const useEditFlinkSchema = (jars: Ref) => {
   const flinkSql = ref();
-  const app = reactive<Partial<AppListRecord>>({});
-  const resourceFrom = ref<Nullable<number>>(null);
   const route = useRoute();
   const {
+    alerts,
+    flinkEnvs,
+    flinkClusters,
     getFlinkClusterSchemas,
     getFlinkFormOtherSchemas,
     getFlinkTypeSchema,
-    flinkEnvs,
-    flinkClusters,
-    alerts,
-  } = useCreateAndEditSchema(null, { appId: route.query.appId as string, mode: 'streamx' });
+    suggestions,
+  } = useCreateAndEditSchema(null, { appId: route.query.appId as string, mode: 'streampark' });
 
   const getEditFlinkFormSchema = computed((): FormSchema[] => {
     return [
@@ -55,9 +53,9 @@ export const useEditFlinkSchema = (jars: Ref) => {
         field: 'resourceFrom',
         label: 'Resource From',
         component: 'Input',
-        render: () => {
-          if (unref(resourceFrom) === 1) return getAlertSvgIcon('github', 'CICD (build from CSV)');
-          else if (unref(resourceFrom) === 2)
+        render: ({ model }) => {
+          if (model.resourceFrom == 1) return getAlertSvgIcon('github', 'CICD (build from CSV)');
+          else if (model.resourceFrom == 2)
             return getAlertSvgIcon('upload', 'Upload (upload local job)');
           else return '';
         },
@@ -67,15 +65,15 @@ export const useEditFlinkSchema = (jars: Ref) => {
         field: 'projectName',
         label: 'Project',
         component: 'Input',
-        render: () => h(Alert, { message: app.projectName, type: 'info' }),
-        ifShow: unref(resourceFrom) === 1,
+        render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
+        ifShow: ({ model }) => model.resourceFrom == 1,
       },
       {
         field: 'module',
         label: 'Module',
         component: 'Input',
-        render: () => h(Alert, { message: app.module, type: 'info' }),
-        ifShow: unref(resourceFrom) === 1,
+        render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
+        ifShow: ({ model }) => model.resourceFrom == 1,
       },
       {
         field: 'jar',
@@ -85,10 +83,10 @@ export const useEditFlinkSchema = (jars: Ref) => {
           return {
             placeholder: 'Please select jar',
             options: unref(jars).map((i) => ({ label: i, value: i })),
-            onChange: (value) => {
+            onChange: (value: string) => {
               fetchMain({
-                projectId: app.projectId,
-                module: app.module,
+                projectId: formModel.projectId,
+                module: formModel.module,
                 jar: value,
               }).then((res) => {
                 formModel.mainClass = res;
@@ -96,7 +94,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
             },
           };
         },
-        ifShow: unref(resourceFrom) === 1,
+        ifShow: ({ model }) => model.resourceFrom == 1,
         rules: [{ required: true, message: 'Please select jar' }],
       },
       {
@@ -104,14 +102,14 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Upload Job Jar',
         component: 'Select',
         slot: 'uploadJobJar',
-        ifShow: unref(resourceFrom) !== 1,
+        ifShow: ({ model }) => model.resourceFrom != 1,
       },
       {
         field: 'jar',
         label: 'Program Jar',
         component: 'Input',
         dynamicDisabled: true,
-        ifShow: unref(resourceFrom) !== 1,
+        ifShow: ({ model }) => model.resourceFrom !== 1,
       },
       {
         field: 'mainClass',
@@ -132,5 +130,6 @@ export const useEditFlinkSchema = (jars: Ref) => {
     flinkClusters,
     flinkSql,
     alerts,
+    suggestions,
   };
 };

@@ -1,3 +1,4 @@
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,9 +18,9 @@
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, onMounted, reactive, ref, unref } from 'vue';
-import { executionModes, k8sRestExposedType, resolveOrder } from '../../app/data';
+import { k8sRestExposedType, resolveOrder } from '../../app/data';
 import {
-  renderDynamicOption,
+  renderProperties,
   renderInputDropdown,
   renderOptionsItems,
   renderTotalMemory,
@@ -33,7 +34,7 @@ import {
   fetchK8sNamespaces,
   fetchSessionClusterIds,
 } from '/@/api/flink/app/flinkHistory';
-import { handleFormValue, handleYarnQueue } from '../../app/utils';
+import { handleFormValue, handleYarnQueue, isSessionMode } from '../../app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
 
 export const useClusterSetting = () => {
@@ -45,13 +46,13 @@ export const useClusterSetting = () => {
     k8sNamespace: string[];
     k8sSessionClusterId: string[];
     serviceAccount: string[];
-    kubeConfFile: string[];
+    k8sConf: string[];
     flinkImage: string[];
   }>({
     k8sNamespace: [],
     k8sSessionClusterId: [],
     serviceAccount: [],
-    kubeConfFile: [],
+    k8sConf: [],
     flinkImage: [],
   });
 
@@ -102,7 +103,11 @@ export const useClusterSetting = () => {
         component: 'Select',
         componentProps: {
           placeholder: 'Please enter cluster name',
-          options: executionModes,
+          options: [
+            { label: 'remote (standalone)', value: 1 },
+            { label: 'yarn session', value: 3 },
+            { label: 'kubernetes session', value: 5 },
+          ],
         },
         dynamicRules: () => {
           return [{ required: true, validator: handleCheckExecMode }];
@@ -126,7 +131,7 @@ export const useClusterSetting = () => {
         componentProps: {
           placeholder: 'Please enter yarn queue',
         },
-        ifShow: ({ values }) => values.executionMode == 3,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
       },
       {
         field: 'address',
@@ -135,13 +140,13 @@ export const useClusterSetting = () => {
         componentProps: ({ formModel }) => {
           return {
             placeholder:
-              formModel.executionMode == 1
+              formModel.executionMode == ExecModeEnum.REMOTE
                 ? "Please enter cluster address, multiple addresses use ',' split e.g: http://host:port,http://host1:port2"
                 : 'Please enter cluster address,  e.g: http://host:port',
           };
         },
         dynamicRules: ({ model }) => {
-          return [{ required: model.executionMode == 1 }];
+          return [{ required: model.executionMode == ExecModeEnum.REMOTE }];
         },
       },
       {
@@ -151,12 +156,12 @@ export const useClusterSetting = () => {
         componentProps: {
           placeholder: 'Please enter Yarn Session clusterId',
         },
-        ifShow: ({ values }) => values.executionMode == 3,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
       },
       {
         field: 'k8sNamespace',
         label: 'Kubernetes Namespace',
-        ifShow: ({ values }) => values.executionMode == 5,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
@@ -167,7 +172,7 @@ export const useClusterSetting = () => {
       {
         field: 'clusterId',
         label: 'Kubernetes ClusterId',
-        ifShow: ({ values }) => values.executionMode == 5,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         defaultValue: unref(flinkEnvs).filter((v) => v.isDefault)[0],
         render: ({ model, field }) =>
@@ -179,7 +184,7 @@ export const useClusterSetting = () => {
       {
         field: 'serviceAccount',
         label: 'Service Account',
-        ifShow: ({ values }) => values.executionMode == 5,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
@@ -188,20 +193,20 @@ export const useClusterSetting = () => {
           }),
       },
       {
-        field: 'kubeConfFile',
+        field: 'k8sConf',
         label: 'Kube Conf File',
-        ifShow: ({ values }) => values.executionMode == 5,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder: '~/.kube/config',
-            options: historyRecord.kubeConfFile,
+            options: historyRecord.k8sConf,
           }),
       },
       {
         field: 'flinkImage',
         label: 'Flink Base Docker Image',
-        ifShow: ({ values }) => values.executionMode == 5,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
@@ -214,7 +219,7 @@ export const useClusterSetting = () => {
       {
         field: 'k8sRestExposedType',
         label: 'Rest-Service Exposed Type',
-        ifShow: ({ values }) => values.executionMode == 5,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Select',
         componentProps: {
           placeholder: 'kubernetes.rest-service.exposed.type',
@@ -224,7 +229,7 @@ export const useClusterSetting = () => {
       {
         field: 'resolveOrder',
         label: 'Resolve Order',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Select',
         componentProps: { placeholder: 'classloader.resolve-order', options: resolveOrder },
         rules: [{ required: true, message: 'Resolve Order is required', type: 'number' }],
@@ -232,7 +237,7 @@ export const useClusterSetting = () => {
       {
         field: 'slot',
         label: 'Task Slots',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'InputNumber',
         componentProps: {
           placeholder: 'Number of slots per TaskManager',
@@ -244,21 +249,22 @@ export const useClusterSetting = () => {
       {
         field: 'totalOptions',
         label: 'Total Memory Options',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Select',
         render: (renderCallbackParams) => renderTotalMemory(renderCallbackParams),
       },
       {
         field: 'totalItem',
         label: 'totalItem',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Select',
-        renderColContent: ({ model }) => renderOptionsItems(model, 'totalOptions', '.memory'),
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'totalOptions', field, '.memory', true),
       },
       {
         field: 'jmOptions',
         label: 'JM Memory Options',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Select',
         componentProps: {
           showSearch: true,
@@ -273,15 +279,15 @@ export const useClusterSetting = () => {
       {
         field: 'jmOptionsItem',
         label: 'jmOptionsItem',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Select',
-        renderColContent: ({ model }) =>
-          renderOptionsItems(model, 'jmOptions', 'jobmanager.memory.'),
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'jmOptions', field, 'jobmanager.memory.'),
       },
       {
         field: 'tmOptions',
         label: 'TM Memory Options',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Select',
         componentProps: {
           showSearch: true,
@@ -296,17 +302,17 @@ export const useClusterSetting = () => {
       {
         field: 'tmOptionsItem',
         label: 'tmOptionsItem',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Select',
-        renderColContent: ({ model }) =>
-          renderOptionsItems(model, 'tmOptions', 'taskmanager.memory.'),
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'tmOptions', field, 'taskmanager.memory.'),
       },
       {
-        field: 'dynamicOptions',
-        label: 'Dynamic Option',
-        ifShow: ({ values }) => [3, 5].includes(values.executionMode),
+        field: 'properties',
+        label: 'Properties',
+        ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Input',
-        render: (renderCallbackParams) => renderDynamicOption(renderCallbackParams),
+        render: (renderCallbackParams) => renderProperties(renderCallbackParams),
       },
       {
         field: 'description',
@@ -338,7 +344,7 @@ export const useClusterSetting = () => {
         Object.assign(params, {
           options: JSON.stringify(options),
           yarnQueue: handleYarnQueue(values),
-          dynamicOptions: values.dynamicOptions,
+          properties: values.properties,
           resolveOrder: values.resolveOrder,
           address: values.address,
           flameGraph: values.flameGraph,
@@ -347,12 +353,12 @@ export const useClusterSetting = () => {
       case 5:
         Object.assign(params, {
           options: JSON.stringify(options),
-          dynamicOptions: values.dynamicOptions,
+          properties: values.properties,
           resolveOrder: values.resolveOrder,
           k8sRestExposedType: values.k8sRestExposedType,
           k8sNamespace: values.k8sNamespace || null,
           serviceAccount: values.serviceAccount,
-          k8sConf: values.kubeConfFile,
+          k8sConf: values.k8sConf,
           flinkImage: values.flinkImage || null,
           address: values.address,
           flameGraph: values.flameGraph,
@@ -363,11 +369,21 @@ export const useClusterSetting = () => {
         return {};
     }
   }
-  onMounted(async () => {
-    flinkEnvs.value = await fetchFlinkEnv();
-    historyRecord.k8sNamespace = await fetchK8sNamespaces();
-    historyRecord.k8sSessionClusterId = await fetchSessionClusterIds({ executionMode: 5 });
-    historyRecord.flinkImage = await fetchFlinkBaseImages();
+  onMounted(() => {
+    fetchFlinkEnv().then((res) => {
+      flinkEnvs.value = res;
+    });
+    fetchK8sNamespaces().then((res) => {
+      historyRecord.k8sNamespace = res;
+    });
+    fetchSessionClusterIds({
+      executionMode: ExecModeEnum.KUBERNETES_SESSION,
+    }).then((res) => {
+      historyRecord.k8sSessionClusterId = res;
+    });
+    fetchFlinkBaseImages().then((res) => {
+      historyRecord.flinkImage = res;
+    });
   });
   return { getClusterSchema, handleSubmitParams, changeLoading, getLoading };
 };

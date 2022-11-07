@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.base.domain.router;
 
+import org.apache.streampark.console.system.entity.Menu;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -67,4 +69,24 @@ public class RouterTree<T> {
     public void initChildren() {
         this.children = new ArrayList<>();
     }
+
+    public RouterTree() {}
+
+    public RouterTree(Menu menu) {
+        this.setId(menu.getMenuId().toString());
+        this.setKey(this.getId());
+        this.setParentId(menu.getParentId().toString());
+        this.setText(menu.getMenuName());
+        this.setTitle(menu.getMenuName());
+        this.setIcon(menu.getIcon());
+        this.setComponent(menu.getComponent());
+        this.setCreateTime(menu.getCreateTime());
+        this.setModifyTime(menu.getModifyTime());
+        this.setPath(menu.getPath());
+        this.setOrder(menu.getOrderNum());
+        this.setPermission(menu.getPerms());
+        this.setType(menu.getType());
+        this.setDisplay(menu.isDisplay());
+    }
+
 }

@@ -131,12 +131,10 @@ window.addEventListener('beforeunload', function () {
 
 function storageChange(e: any) {
   const { key, newValue, oldValue } = e;
-
   if (!key) {
     Persistent.clearAll();
     return;
   }
-
   if (!!newValue && !!oldValue) {
     if (APP_LOCAL_CACHE_KEY === key) {
       Persistent.clearLocal();

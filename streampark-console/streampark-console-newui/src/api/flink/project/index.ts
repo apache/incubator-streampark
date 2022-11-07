@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import { defHttp } from '/@/utils/http/axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { ProjectModel } from '/@/api/flink/project/model/projectModel';
 import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
@@ -40,171 +39,105 @@ enum Api {
   SELECT = '/flink/project/select',
 }
 
-export function getList(params?) {
-  return defHttp.post<ProjectModel>({
+export function getList(data?: Recordable): Promise<ProjectModel> {
+  return defHttp.post({
     url: Api.LIST,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function isExist(params) {
+export function isExist(data: Recordable) {
   return defHttp.post({
     url: Api.EXISTS,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function gitCheck(params) {
+export function gitCheck(data: Recordable) {
   return defHttp.post({
     url: Api.GIT_CHECK,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
-
-export function branches(params) {
+/**
+ *
+ * @param data
+ * @returns
+ */
+export function fetchBranches(data: Recordable): Promise<string[]> {
   return defHttp.post({
     url: Api.BRANCHES,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function createProject(params) {
-  return defHttp.post<AxiosResponse<Result>>(
-    {
-      url: Api.CREATE,
-      data: params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function createProject(data: Recordable): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: Api.CREATE, data }, { isReturnNativeResponse: true });
 }
 
-export function getDetail(params) {
+export function getDetail(data: Recordable) {
   return defHttp.post({
     url: Api.GET,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function updateProject(params) {
+export function updateProject(data: Recordable): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.post({ url: Api.UPDATE, data }, { isReturnNativeResponse: true });
+}
+
+export function buildProject(data: Recordable): Promise<boolean> {
   return defHttp.post({
-    url: Api.UPDATE,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
-}
-
-export function buildProject(params) {
-  return defHttp.post<boolean>({
     url: Api.BUILD,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function buildLog(params) {
-  return defHttp.post(
-    {
-      url: Api.BUILD_LOG,
-      data: params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function buildLog(data: Recordable): Promise<AxiosResponse<any>> {
+  return defHttp.post({ url: Api.BUILD_LOG, data }, { isReturnNativeResponse: true });
 }
 
-export function closeBuild(params) {
+export function closeBuild(data: Recordable) {
   return defHttp.post({
     url: Api.CLOSE_BUILD,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function deleteProject(params) {
-  return defHttp.post({
-    url: Api.DELETE,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function deleteProject(data: Recordable): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.post({ url: Api.DELETE, data }, { isReturnNativeResponse: true });
 }
 
-export function modules(params) {
+export function modules(data: Recordable) {
   return defHttp.post({
     url: Api.MODULES,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function jars(params) {
+export function jars(data: Recordable) {
   return defHttp.post({
     url: Api.JARS,
-    data: params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function fetchListConf(params) {
+export function fetchListConf(data: Recordable) {
   return defHttp.post<any>({
     url: Api.LIST_CONF,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
-export function fetchSelect(params) {
+export function fetchSelect(data: Recordable) {
   return defHttp.post<any>({
     url: Api.SELECT,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function fetchListJars(params) {
-  return defHttp.post<string[]>({
+export function fetchListJars(data: Recordable): Promise<string[]> {
+  return defHttp.post({
     url: Api.JARS,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }

@@ -54,7 +54,6 @@
     :title="drawerTitleMap[visualType]"
     item-layout="vertical"
     :width="700"
-    :closable="false"
   >
     <Empty v-if="dataSource.length == 0" />
     <Card

@@ -16,6 +16,7 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { ExecModeEnum } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'ApplicationDetail',
   });
@@ -35,7 +36,7 @@
   import { getDescSchema } from './data/detail.data';
   import { fetchCheckToken, fetchCopyCurl } from '/@/api/system/token';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { baseUrl } from '/@/adapter/api/baseUrl';
+  import { baseUrl } from '/@/api/index';
   import { fetchListVer } from '/@/api/flink/config';
   import { fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
   import Mergely from './components/Mergely.vue';
@@ -46,7 +47,7 @@
   const route = useRoute();
   const router = useRouter();
 
-  const { createMessage } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const { copy } = useClipboard();
 
   const app = reactive<Partial<AppListRecord>>({});
@@ -144,7 +145,13 @@
     });
     // Get data for the first time
     if (Object.keys(app).length == 0) {
-      if ([2, 3, 4].includes(res.executionMode)) {
+      if (
+        [
+          ExecModeEnum.YARN_PER_JOB,
+          ExecModeEnum.YARN_SESSION,
+          ExecModeEnum.YARN_APPLICATION,
+        ].includes(res.executionMode)
+      ) {
         handleYarn();
       }
       handleDetailTabs();
@@ -181,9 +188,19 @@
     const resp = await fetchCheckToken({});
     const result = parseInt(resp);
     if (result === 0) {
-      createMessage.error('access token is null,please contact the administrator to add.');
+      Swal.fire({
+        icon: 'error',
+        title: 'access token is null,please contact the administrator to add.',
+        showConfirmButton: true,
+        timer: 3500,
+      });
     } else if (result === 1) {
-      createMessage.error('access token is invalid,please contact the administrator.');
+      Swal.fire({
+        icon: 'error',
+        title: 'access token is invalid,please contact the administrator.',
+        showConfirmButton: true,
+        timer: 3500,
+      });
     } else {
       const res = await fetchCopyCurl({
         appId: app.id,

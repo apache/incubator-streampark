@@ -47,8 +47,17 @@
             field: 'teamName',
             label: t('system.team.table.teamName'),
             component: 'Input',
-            componentProps: { disabled: isUpdate.value },
+            componentProps: {
+              disabled: isUpdate.value,
+              placeholder: t('system.team.table.teamNamePlaceholder'),
+            },
             required: !isUpdate.value,
+            dynamicRules: () => {
+              if (!isUpdate.value) {
+                return [{ required: true, min: 4, message: t('system.team.table.teamMessage') }];
+              }
+              return [];
+            },
           },
           {
             field: 'description',

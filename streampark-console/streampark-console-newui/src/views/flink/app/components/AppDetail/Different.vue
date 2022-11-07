@@ -35,7 +35,7 @@
 
   const title = ref('edit configuration');
   const items = ref<any[]>([]);
-
+  const renderEleMap = new Map<string, boolean>();
   const version = reactive({
     original: null,
     modified: null,
@@ -70,7 +70,11 @@
     nextTick(() => {
       const elem = document.querySelector(ele);
       handleHeight(elem, 140);
-      setupEditor(elem);
+      // no render
+      if (!renderEleMap.get(ele)) {
+        setupEditor(elem);
+        renderEleMap.set(ele, true);
+      }
     });
   }
   /* Change editor height */
@@ -82,10 +86,6 @@
   async function handleCancel() {
     await disposeEditor();
     closeDrawer();
-  }
-
-  function handleChangeTab(key: number) {
-    handleRenderTab(key);
   }
 
   defineExpose({ different });
@@ -110,7 +110,7 @@
       </a-button>
       {{ title }}
     </template>
-    <Tabs type="card" @change="handleChangeTab">
+    <Tabs type="card" @change="handleRenderTab">
       <TabPane v-for="(item, index) in items" :key="index" :tab="item.name">
         <div :id="'mergely'.concat(index.toString())"></div>
       </TabPane>

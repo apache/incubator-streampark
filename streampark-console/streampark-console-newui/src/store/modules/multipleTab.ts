@@ -120,7 +120,6 @@ export const useMultipleTabStore = defineStore({
       const go = useGo(router);
       const len = this.tabList.length;
       const { path } = unref(router.currentRoute);
-
       let toPath: PageEnum | string = PageEnum.BASE_HOME;
 
       if (len > 0) {

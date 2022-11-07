@@ -169,6 +169,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
+    public long countByTeamId(Long teamId) {
+        return this.count(new LambdaQueryWrapper<Project>().eq(Project::getTeamId, teamId));
+    }
+
+    @Override
     public void build(Long id) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
@@ -317,7 +322,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     private String getBuildLogPath(Long projectId) {
-        return String.format("%s/%s/build.log", Workspace.local().PROJECT_BUILD_LOG_DIR(), projectId);
+        return String.format("%s/%s/build.log", Workspace.PROJECT_BUILD_LOG_PATH(), projectId);
     }
 
 }

@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ProfilerRunnableTest {
+class ProfilerRunnableTest {
 
     @Test
-    public void invokeRunnable() {
+    void invokeRunnable() {
         final AtomicInteger i = new AtomicInteger(10);
 
         ProfilerRunner profilerRunnable =

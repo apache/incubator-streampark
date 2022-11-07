@@ -19,7 +19,8 @@
   <a-list-item>
     <a-list-item-meta class="item-meta">
       <template #title>
-        <a>{{ item.name }}<a-badge status="processing" title="installing" v-if="isBuilding" /></a>
+        <a-badge status="processing" title="installing" class="mr-10px" v-if="isBuilding" />
+        <span>{{ item.name }}</span>
       </template>
       <template #description>
         <a-popover arrow-point-at-center trigger="hover" :content="item.url">
@@ -62,9 +63,9 @@
       </li>
     </ul>
     <div class="operation">
-      <a-tooltip title="See Build log" v-if="isBuilding">
-        <a-button shape="circle" @click="handleSeeLog">
-          <Icon spin icon="ant-design:sync-outlined" style="color: #4a9ff5" />
+      <a-tooltip title="See Build log">
+        <a-button shape="circle" @click="handleSeeLog" class="!leading-26px">
+          <Icon icon="ant-design:eye-outlined" />
         </a-button>
       </a-tooltip>
 
@@ -120,9 +121,9 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 
-  const emit = defineEmits(['viewLog']);
+  const emit = defineEmits(['viewLog', 'success']);
 
-  const { createMessage } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const go = useGo();
   const props = defineProps({
     item: { type: Object as PropType<ProjectRecord>, required: true },
@@ -148,7 +149,12 @@
         id: props.item.id,
         socketId: buildUUID(),
       });
-      createMessage.success('The current project is building');
+      Swal.fire({
+        icon: 'success',
+        title: 'The current project is building',
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (e) {
       createMessage.error('Build Fail');
     }
@@ -160,8 +166,18 @@
 
   async function handleDelete() {
     try {
-      await deleteProject({ id: props.item.id });
-      createMessage.success('Delete Successful');
+      const { data } = await deleteProject({ id: props.item.id });
+      if (data.data) {
+        Swal.fire({
+          icon: 'success',
+          title: 'delete successful',
+          showConfirmButton: false,
+          timer: 2000,
+        });
+        emit('success', true);
+      } else {
+        Swal.fire('Failed', 'Please check if any application belongs to this project', 'error');
+      }
     } catch (e) {
       createMessage.error('Delete Fail');
     }
@@ -237,5 +253,13 @@
       margin-left: 0;
       padding-left: 0;
     }
+  }
+  .ant-tag {
+    border-radius: 0;
+    font-weight: 700;
+    text-align: center;
+    padding: 0 4px;
+    margin-right: 0;
+    cursor: default;
   }
 </style>

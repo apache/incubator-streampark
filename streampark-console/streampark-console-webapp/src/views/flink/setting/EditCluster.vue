@@ -202,11 +202,11 @@
             type="text"
             placeholder="~/.kube/config"
             allowClear
-            v-decorator="[ 'kubeConfFile']">
+            v-decorator="[ 'k8sConf']">
             <a-dropdown slot="addonAfter" placement="bottomRight">
               <a-menu slot="overlay" trigger="['click', 'hover']">
                 <a-menu-item
-                  v-for="item in historyRecord.kubeConfFile"
+                  v-for="item in historyRecord.k8sConf"
                   :key="item"
                   @click="handleSelectHistoryKubeConfFile(item)"
                   style="padding-right: 60px">
@@ -446,14 +446,14 @@
         </a-form-item>
 
         <a-form-item
-          label="Dynamic Option"
+          label="Properties"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-textarea
             rows="4"
-            name="dynamicOptions"
+            name="properties"
             placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
-            v-decorator="['dynamicOptions']"/>
+            v-decorator="['properties']"/>
           <p class="conf-desc">
             <span class="note-info">
               <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
@@ -657,14 +657,14 @@ export default {
           'address': this.cluster.address,
           'clusterId': this.cluster.clusterId,
           'description': this.cluster.description,
-          'dynamicOptions': this.cluster.dynamicOptions,
+          'properties': this.cluster.properties,
           'resolveOrder': this.cluster.resolveOrder,
           'yarnQueue': this.cluster.yarnQueue,
           'versionId': this.cluster.versionId || null,
           'k8sRestExposedType': this.cluster.k8sRestExposedType,
           'flinkImage': this.cluster.flinkImage,
           'serviceAccount': this.cluster.serviceAccount,
-          'kubeConfFile': this.cluster.kubeConfFile,
+          'k8sConf': this.cluster.k8sConf,
           'flameGraph': this.cluster.flameGraph,
           'k8sNamespace': this.cluster.k8sNamespace
         })
@@ -776,7 +776,7 @@ export default {
               versionId: values.versionId,
               options: JSON.stringify(options),
               yarnQueue: this.handleYarnQueue(values),
-              dynamicOptions: values.dynamicOptions,
+              properties: values.properties,
               resolveOrder: values.resolveOrder,
               address: values.address,
               flameGraph: values.flameGraph,
@@ -790,12 +790,12 @@ export default {
               executionMode: values.executionMode,
               versionId: values.versionId,
               options: JSON.stringify(options),
-              dynamicOptions: values.dynamicOptions,
+              properties: values.properties,
               resolveOrder: values.resolveOrder,
               k8sRestExposedType: values.k8sRestExposedType,
               k8sNamespace: values.k8sNamespace || null,
               serviceAccount: values.serviceAccount,
-              k8sConf: values.kubeConfFile,
+              k8sConf: values.k8sConf,
               flinkImage: values.flinkImage || null,
               address: values.address,
               flameGraph: values.flameGraph,
@@ -976,7 +976,7 @@ export default {
     },
 
     handleSelectHistoryKubeConfFile(value) {
-      this.form.setFieldsValue({'kubeConfFile': value})
+      this.form.setFieldsValue({'k8sConf': value})
     },
 
     handleSelectHistoryK8sSessionClusterId(value) {

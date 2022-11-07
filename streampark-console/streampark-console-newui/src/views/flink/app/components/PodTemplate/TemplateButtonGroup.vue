@@ -38,13 +38,15 @@
 <template>
   <ButtonGroup class="pod-template-tool">
     <a-button
-      size="small"
       type="primary"
+      size="small"
       class="pod-template-tool-item"
       @click="emit('clickHistory', visualType)"
     >
-      <Icon icon="ant-design:history-outlined" />
-      {{ t('common.history') }}
+      <div class="flex items-center">
+        <Icon icon="ant-design:history-outlined" class="pr-5px" />
+        {{ t('common.history') }}
+      </div>
     </a-button>
     <a-button
       type="default"
@@ -52,9 +54,10 @@
       class="pod-template-tool-item"
       @click="emit('clickInit', visualType)"
     >
-      <Icon icon="ant-design:copy-outlined" />
-
-      {{ t('flink.app.pod.init') }}
+      <div class="flex items-center">
+        <Icon icon="ant-design:copy-outlined" class="pr-5px" />
+        {{ t('flink.app.pod.init') }}
+      </div>
     </a-button>
     <a-button
       type="default"
@@ -62,13 +65,17 @@
       class="pod-template-tool-item"
       @click="emit('clickHostAlias', visualType)"
     >
-      <Icon icon="ant-design:share-alt-outlined" />
+      <div class="flex items-center">
+        <Icon icon="ant-design:share-alt-outlined" class="pr-5px" />
 
-      {{ t('flink.app.pod.host') }}
+        {{ t('flink.app.pod.host') }}
+      </div>
     </a-button>
-    <a-button type="default" size="small" disabled class="pod-template-tool-item">
-      <Icon icon="ant-design:hdd-outlined" />
-      PVC
+    <a-button type="default" disabled size="small" class="pod-template-tool-item">
+      <div class="flex items-center">
+        <Icon icon="ant-design:hdd-outlined" class="pr-5px" />
+        PVC
+      </div>
     </a-button>
   </ButtonGroup>
 </template>

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 export default {
-  footer: { onlinePreview: 'Preview', onlineDocument: 'Document' },
+  footer: { website: 'Website', onlineDocument: 'Document' },
   header: {
     // user dropdown
     dropdownItemDoc: 'Document',

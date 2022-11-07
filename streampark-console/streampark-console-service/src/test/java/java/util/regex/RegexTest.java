@@ -30,10 +30,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RegexTest {
+class RegexTest {
 
     @Test
-    public void regex() {
+    void regex() {
         String jar = "streampark-flink-shims_flink-1.11-1.1.0-SNAPSHOT.jar";
         String shimsRegex = "streampark-flink-shims_flink-(1.11|1.12)-(.*).jar$";
         Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -45,10 +45,10 @@ public class RegexTest {
     }
 
     @Test
-    public void classLoader() throws MalformedURLException {
+    void classLoader() throws MalformedURLException {
         List<URL> libCache = new ArrayList<>(0);
         List<URL> shimsCache = new ArrayList<>(0);
-        String regex = "(^|.*)streampark-flink-shims_flink-(1.12|1.13|1.14|1.15)-(.*).jar$";
+        String regex = "(^|.*)streampark-flink-shims_flink-(1.12|1.13|1.14|1.15|1.16)-(.*).jar$";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         String lib = "~/workspace/streampark/streampark-console-service-1.1.0-SNAPSHOT/lib";
 
@@ -79,7 +79,7 @@ public class RegexTest {
     }
 
     @Test
-    public void flinkVersion() {
+    void flinkVersion() {
         final Pattern flinkVersionPattern = Pattern.compile("^Version: (.*), Commit ID: (.*)$");
         String flinkHome = System.getenv("FLINK_HOME");
         String libPath = flinkHome.concat("/lib");
@@ -107,7 +107,7 @@ public class RegexTest {
     }
 
     @Test
-    public void jobName() {
+    void jobName() {
         final Pattern jobNamePattern = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_\\-\\s]+$");
         String jobName = "flink-sql demo";
         if (jobNamePattern.matcher(jobName).matches()) {

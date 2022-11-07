@@ -40,9 +40,10 @@ import { getPermCode } from '/@/api/system/user';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { PageEnum } from '/@/enums/pageEnum';
 import { fetchUserTeam } from '/@/api/system/member';
-import { Persistent } from '/@/utils/cache/persistent';
+// import { Persistent } from '/@/utils/cache/persistent';
 import { USER_INFO_KEY } from '/@/enums/cacheEnum';
 import { UserInfo } from '/#/store';
+import { getAuthCache } from '/@/utils/auth';
 
 interface PermissionState {
   // Permission code list
@@ -121,12 +122,13 @@ export const usePermissionStore = defineStore({
     },
 
     // Build routing
-    async buildRoutesAction(): Promise<AppRouteRecordRaw[]> {
+    async buildRoutesAction(nextPath = ''): Promise<[AppRouteRecordRaw[], boolean]> {
       const { t } = useI18n();
       const userStore = useUserStore();
       const appStore = useAppStoreWithOut();
       // get teamList
-      const { userId } = Persistent.getLocal(USER_INFO_KEY) as UserInfo;
+      const { userId } = getAuthCache(USER_INFO_KEY) as UserInfo;
+      let hasAuth = false;
       if (userStore.teamList.length == 0 && userId) {
         const teamList = await fetchUserTeam({ userId });
         userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
@@ -158,8 +160,7 @@ export const usePermissionStore = defineStore({
        * */
       const patchHomeAffix = (routes: AppRouteRecordRaw[]) => {
         if (!routes || routes.length === 0) return;
-        let homePath: string = userStore.getUserInfo.homePath || PageEnum.BASE_HOME;
-
+        let homePath: string = nextPath || userStore.getUserInfo.homePath || PageEnum.BASE_HOME;
         function patcher(routes: AppRouteRecordRaw[], parentPath = '') {
           if (parentPath) parentPath = parentPath + '/';
           routes.forEach((route: AppRouteRecordRaw) => {
@@ -170,6 +171,7 @@ export const usePermissionStore = defineStore({
                 homePath = route.redirect! as string;
               } else {
                 route.meta = Object.assign({}, route.meta, { affix: true });
+                hasAuth = true;
                 throw new Error('end');
               }
             }
@@ -182,7 +184,7 @@ export const usePermissionStore = defineStore({
         } catch (e) {
           // Processed out of loop
         }
-        return;
+        return hasAuth;
       };
 
       switch (permissionMode) {
@@ -239,6 +241,7 @@ export const usePermissionStore = defineStore({
                 title: t('sys.api.errorTip'),
                 content: 'No permission, please contact the administrator',
               });
+              userStore.logout();
               return Promise.reject(new Error('routeList is empty'));
             }
             routeList = (routeList[0].children as AppRouteRecordRaw[]).map((v) => {
@@ -271,7 +274,7 @@ export const usePermissionStore = defineStore({
 
       routes.push(ERROR_LOG_ROUTE);
       patchHomeAffix(routes);
-      return routes;
+      return [routes, hasAuth];
     },
   },
 });

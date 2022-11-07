@@ -18,12 +18,12 @@ import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 
 import Icon, { SvgIcon } from '/@/components/Icon';
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
-import { fetchAppConf, fetchMain } from '/@/api/flink/app/app';
+import { fetchMain, fetchName } from '/@/api/flink/app/app';
 import { modules, fetchListConf, fetchListJars } from '/@/api/flink/project';
-import { decodeByBase64 } from '/@/utils/cipher';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { renderResourceFrom } from './useFlinkRender';
@@ -52,23 +52,23 @@ export const useCreateSchema = (dependencyRef: Ref) => {
   const jars = ref<Array<any>>([]);
 
   const {
-    getFlinkSqlSchema,
-    getFlinkClusterSchemas,
-    getFlinkFormOtherSchemas,
     flinkEnvs,
     flinkClusters,
     projectList,
-    openConfDrawer,
+    getFlinkSqlSchema,
+    getFlinkClusterSchemas,
+    getFlinkFormOtherSchemas,
+    suggestions,
   } = useCreateAndEditSchema(dependencyRef);
 
-  async function handleEditConfig(config: string) {
-    console.log('config', config);
-    const res = await fetchAppConf({ config });
-    const conf = decodeByBase64(res);
-    openConfDrawer(true, {
-      configOverride: conf,
-    });
-  }
+  // async function handleEditConfig(config: string) {
+  //   console.log('config', config);
+  //   const res = await fetchAppConf({ config });
+  //   const conf = decodeByBase64(res);
+  //   openConfDrawer(true, {
+  //     configOverride: conf,
+  //   });
+  // }
   function handleCheckConfig(_rule: RuleObject, value: StoreValue) {
     if (value) {
       const isProp = value.endsWith('.properties');
@@ -145,7 +145,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         component: 'Select',
         render: ({ model }) => renderResourceFrom(model),
         rules: [{ required: true, message: 'resource from is required' }],
-        ifShow: ({ values }) => values?.jobType != 'sql',
+        show: ({ values }) => values?.jobType != 'sql',
       },
       {
         field: 'uploadJobJar',
@@ -177,7 +177,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
             modules({
               id: value,
             }).then((res) => {
-              moduleList.value = res;
+              moduleList.value = res.map((i: string) => ({ label: i, value: i }));
             });
           },
         },
@@ -215,8 +215,8 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           return {
             placeholder: 'Please select Application type',
             options: [
-              { label: 'StreamPark Flink', value: 1 },
-              { label: 'Apache Flink', value: 2 },
+              { label: 'StreamPark Flink', value: '1' },
+              { label: 'Apache Flink', value: '2' },
             ],
             onChange: () => {
               Object.assign(formModel, {
@@ -225,7 +225,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
                 configOverride: null,
               });
               fetchListJars({
-                id: formModel.projectId,
+                id: formModel.project,
                 module: formModel.module,
               }).then((res) => {
                 jars.value = res;
@@ -234,7 +234,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom !== 'upload',
-        rules: [{ required: true, message: 'Application Type is required' }],
+        dynamicRules: () => [{ required: true, message: 'Application Type is required' }],
       },
       {
         field: 'jar',
@@ -246,7 +246,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
             options: unref(jars).map((i) => ({ label: i, value: i })),
             onChange: (value) => {
               fetchMain({
-                projectId: formModel.projectId,
+                projectId: formModel.project,
                 module: formModel.module,
                 jar: value,
               }).then((res) => {
@@ -256,7 +256,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) =>
-          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == 2,
+          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == '2',
         rules: [{ required: true, message: 'Program Jar is required' }],
       },
       {
@@ -265,7 +265,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         component: 'Input',
         componentProps: { placeholder: 'Please enter Main class' },
         ifShow: ({ values }) =>
-          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == 2,
+          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == '2',
         rules: [{ required: true, message: 'Program Main is required' }],
       },
       {
@@ -273,32 +273,24 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         label: 'Application conf',
         component: 'ApiTreeSelect',
         componentProps: ({ formModel }) => {
-          const componentProps = {
+          return {
             api: fetchListConf,
-            beforeFetch: () => {
-              return {
-                id: formModel.projectId,
-                module: formModel.module,
-              };
-            },
+            params: { id: formModel.project, module: formModel.module },
             dropdownStyle: { maxHeight: '400px', overflow: 'auto' },
             placeholder: 'Please select config',
             treeDefaultExpandAll: true,
+            fieldNames: { children: 'children', label: 'title', key: 'value', value: 'value' },
+            onChange: (value: string) => {
+              fetchName({
+                config: value,
+              }).then((resp) => {
+                formModel.jobName = resp;
+              });
+            },
           };
-          if (formModel.config) {
-            Object.assign(componentProps, {
-              suffixIcon: h(Icon, {
-                icon: 'ant-design:setting-twotone',
-                twoToneColor: '#4a9ff5',
-                title: 'edit config',
-                onClick: handleEditConfig.bind(null, formModel.config),
-              }),
-            });
-          }
-          return componentProps;
         },
         ifShow: ({ values }) =>
-          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == 1,
+          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == '1',
         dynamicRules: () => [{ required: true, validator: handleCheckConfig }],
       },
       {
@@ -307,11 +299,11 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         component: 'Switch',
         slot: 'useSysHadoopConf',
         defaultValue: false,
-        ifShow: ({ values }) => values.executionMode == 6,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
       },
       ...getFlinkFormOtherSchemas.value,
     ];
   });
 
-  return { getCreateFormSchema, flinkEnvs, flinkClusters };
+  return { flinkEnvs, flinkClusters, getCreateFormSchema, suggestions };
 };

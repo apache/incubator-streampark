@@ -16,6 +16,7 @@
  */
 import { dateToDuration } from '/@/utils/dateUtil';
 import { BasicColumn } from '/@/components/Table';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 
 /* app */
 export const getAppColumns = (): BasicColumn[] => [
@@ -26,22 +27,9 @@ export const getAppColumns = (): BasicColumn[] => [
     fixed: 'left',
     width: 300,
   },
-  {
-    title: 'Tags',
-    ellipsis: true,
-    dataIndex: 'tags',
-    width: 150,
-  },
-  {
-    title: 'Owner',
-    dataIndex: 'nickName',
-    width: 100,
-  },
-  {
-    title: 'Flink Version',
-    dataIndex: 'flinkVersion',
-    width: 130,
-  },
+  { title: 'Tags', ellipsis: true, dataIndex: 'tags', width: 150 },
+  { title: 'Owner', dataIndex: 'nickName', width: 100 },
+  { title: 'Flink Version', dataIndex: 'flinkVersion', width: 130 },
   {
     title: 'Duration',
     dataIndex: 'duration',
@@ -49,12 +37,7 @@ export const getAppColumns = (): BasicColumn[] => [
     width: 150,
     customRender: ({ value }) => dateToDuration(value),
   },
-  {
-    title: 'Modified Time',
-    dataIndex: 'modifyTime',
-    sorter: true,
-    width: 170,
-  },
+  { title: 'Modified Time', dataIndex: 'modifyTime', sorter: true, width: 170 },
   {
     title: 'Run Status',
     dataIndex: 'state',
@@ -63,26 +46,16 @@ export const getAppColumns = (): BasicColumn[] => [
       { text: 'ADDED', value: '0' },
       { text: 'STARTING', value: '3' },
       { text: 'RUNNING', value: '5' },
-      { text: 'FAILED', value: '6' },
+      { text: 'FAILED', value: '7' },
       { text: 'CANCELED', value: '9' },
       { text: 'FINISHED', value: '10' },
+      { text: 'SUSPENDED', value: '11' },
       { text: 'LOST', value: '13' },
       { text: 'SILENT', value: '17' },
       { text: 'TERMINATED', value: '18' },
     ],
   },
-  {
-    title: 'Launch | Build',
-    dataIndex: 'launch',
-    width: 220,
-  },
-
-  {
-    title: 'Modified Time',
-    dataIndex: 'modifyTime',
-    sorter: true,
-    width: 170,
-  },
+  { title: 'Launch | Build', dataIndex: 'launch', width: 220 },
 ];
 
 /* Get diff editor configuration */
@@ -91,7 +64,8 @@ export const getMonacoOptions = (readOnly: boolean) => {
     selectOnLineNumbers: false,
     foldingStrategy: 'indentation', // code fragmentation
     overviewRulerBorder: false, // Don't scroll bar borders
-    autoClosingBrackets: true,
+    autoClosingBrackets: 'always',
+    autoClosingDelete: 'always',
     tabSize: 2, // tab indent length
     readOnly,
     inherit: true,
@@ -129,14 +103,18 @@ export const k8sRestExposedType = [
 ];
 
 export const executionModes = [
-  { label: 'remote (standalone)', value: 1, disabled: false },
-  { label: 'yarn application', value: 4, disabled: false },
-  { label: 'yarn session', value: 3, disabled: false },
-  { label: 'kubernetes session', value: 5, disabled: false },
-  { label: 'kubernetes application', value: 6, disabled: false },
+  { label: 'remote (standalone)', value: ExecModeEnum.REMOTE, disabled: false },
+  { label: 'yarn application', value: ExecModeEnum.YARN_APPLICATION, disabled: false },
+  { label: 'yarn session', value: ExecModeEnum.YARN_SESSION, disabled: false },
+  { label: 'kubernetes session', value: ExecModeEnum.KUBERNETES_SESSION, disabled: false },
+  {
+    label: 'kubernetes application',
+    value: ExecModeEnum.KUBERNETES_APPLICATION,
+    disabled: false,
+  },
   {
     label: 'yarn per-job (deprecated, please use yarn-application mode)',
-    value: 2,
+    value: ExecModeEnum.YARN_PER_JOB,
     disabled: false,
   },
 ];

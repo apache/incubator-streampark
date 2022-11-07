@@ -38,7 +38,7 @@ export const getDescSchema = (): DescItem[] => {
         h(
           'div',
           { class: 'app_state' },
-          h(Tag, { color: curVal === 1 ? '#545454' : '#0C7EF2' }, () =>
+          h(Tag, { color: curVal === 1 ? '#545454' : '#0C7EF2', class: 'mr-8px' }, () =>
             curVal === 1 ? 'Custom Code' : 'Flink SQL',
           ),
         ),
@@ -93,88 +93,29 @@ export const getDescSchema = (): DescItem[] => {
 };
 /* setting */
 export const getConfColumns = (): BasicColumn[] => [
-  {
-    title: 'Version',
-    dataIndex: 'version',
-  },
-  {
-    title: 'Conf Format',
-    dataIndex: 'format',
-  },
-  {
-    title: 'Effective',
-    dataIndex: 'effective',
-  },
-  {
-    title: 'Candidate',
-    dataIndex: 'candidate',
-  },
-  {
-    title: 'Modify Time',
-    dataIndex: 'createTime',
-  },
+  { title: 'Version', dataIndex: 'version' },
+  { title: 'Conf Format', dataIndex: 'format' },
+  { title: 'Effective', dataIndex: 'effective' },
+  { title: 'Candidate', dataIndex: 'candidate' },
+  { title: 'Modify Time', dataIndex: 'createTime' },
 ];
 
 export const getSavePointColumns = (): BasicColumn[] => [
-  {
-    title: 'Path',
-    dataIndex: 'path',
-    width: '45%',
-  },
-  {
-    title: 'Trigger Time',
-    dataIndex: 'triggerTime',
-    width: 250,
-  },
-  {
-    title: 'Type',
-    dataIndex: 'type',
-  },
-  {
-    title: 'Latest',
-    dataIndex: 'latest',
-  },
+  { title: 'Path', dataIndex: 'path', width: '45%' },
+  { title: 'Trigger Time', dataIndex: 'triggerTime', width: 250 },
+  { title: 'Type', dataIndex: 'type' },
+  { title: 'Latest', dataIndex: 'latest' },
 ];
 export const getBackupColumns = (): BasicColumn[] => [
-  {
-    title: 'Save Path',
-    dataIndex: 'path',
-    width: '40%',
-    align: 'left',
-  },
-  {
-    title: 'Description',
-    dataIndex: 'description',
-    width: '20%',
-  },
-  {
-    title: 'Version',
-    dataIndex: 'version',
-    width: '10%',
-  },
-  {
-    title: 'Backup Time',
-    dataIndex: 'createTime',
-  },
+  { title: 'Save Path', dataIndex: 'path', width: '40%', align: 'left' },
+  { title: 'Description', dataIndex: 'description', width: '20%' },
+  { title: 'Version', dataIndex: 'version', width: '10%' },
+  { title: 'Backup Time', dataIndex: 'createTime' },
 ];
 
 export const getOptionLogColumns = (): BasicColumn[] => [
-  {
-    title: 'Application Id',
-    dataIndex: 'yarnAppId',
-    width: '20%',
-  },
-  {
-    title: 'JobManager URL',
-    dataIndex: 'jobManagerUrl',
-    width: '25%',
-  },
-  {
-    title: 'Start Status',
-    dataIndex: 'success',
-  },
-  {
-    title: 'Option Time',
-    dataIndex: 'optionTime',
-  },
+  { title: 'Application Id', dataIndex: 'yarnAppId', width: '20%' },
+  { title: 'JobManager URL', dataIndex: 'jobManagerUrl', width: '25%' },
+  { title: 'Start Status', dataIndex: 'success' },
+  { title: 'Option Time', dataIndex: 'optionTime' },
 ];

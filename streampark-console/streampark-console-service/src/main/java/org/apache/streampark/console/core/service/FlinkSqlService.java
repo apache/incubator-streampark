@@ -49,4 +49,6 @@ public interface FlinkSqlService extends IService<FlinkSql> {
     void rollback(Application application);
 
     FlinkSqlValidationResult verifySql(String sql, Long versionId);
+
+    List<FlinkSql> getByTeamId(Long teamId);
 }

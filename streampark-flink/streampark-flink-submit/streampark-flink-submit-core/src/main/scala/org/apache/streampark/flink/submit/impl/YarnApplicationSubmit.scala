@@ -71,9 +71,10 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
             case Array(1, 13, _) => array += s"${workspace.APP_SHIMS}/flink-1.13"
             case Array(1, 14, _) => array += s"${workspace.APP_SHIMS}/flink-1.14"
             case Array(1, 15, _) => array += s"${workspace.APP_SHIMS}/flink-1.15"
+            case Array(1, 16, _) => array += s"${workspace.APP_SHIMS}/flink-1.16"
             case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
           }
-          val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
+          val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
           if (HdfsUtils.exists(jobLib)) {
             array += jobLib
           }

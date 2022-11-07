@@ -333,7 +333,8 @@
       }
 
       function renderItem() {
-        const { itemProps, slot, render, field, suffix, component } = props.schema;
+        const { itemProps, slot, render, field, suffix, beforeItem, afterItem, component } =
+          props.schema;
         const { labelCol, wrapperCol } = unref(itemLabelWidthProp);
         const { colon } = props.formProps;
 
@@ -353,7 +354,11 @@
           };
 
           const showSuffix = !!suffix;
+          const showBeforeItem = !!beforeItem;
+          const showAfterItem = !!afterItem;
           const getSuffix = isFunction(suffix) ? suffix(unref(getValues)) : suffix;
+          const getBeforeItem = isFunction(beforeItem) ? beforeItem(unref(getValues)) : beforeItem;
+          const getAfterItem = isFunction(afterItem) ? afterItem(unref(getValues)) : afterItem;
 
           return (
             <Form.Item
@@ -366,10 +371,12 @@
               labelCol={labelCol}
               wrapperCol={wrapperCol}
             >
+              {showBeforeItem && <div class="extra">{getBeforeItem}</div>}
               <div style="display:flex">
                 <div style="flex:1;">{getContent()}</div>
                 {showSuffix && <span class="suffix">{getSuffix}</span>}
               </div>
+              {showAfterItem && <div class="extra">{getAfterItem}</div>}
             </Form.Item>
           );
         }
@@ -385,7 +392,6 @@
         const realColProps = { ...baseColProps, ...colProps };
         const { isIfShow, isShow } = getShow();
         const values = unref(getValues);
-
         const getContent = () => {
           return colSlot
             ? getSlot(slots, colSlot, values)

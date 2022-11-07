@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Variable;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -44,11 +45,27 @@ public interface VariableService extends IService<Variable> {
     List<Variable> findByTeamId(Long teamId);
 
     /**
+     * Get variables through team and search keywords.
+     * @param teamId
+     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
+     * @return
+     */
+    List<Variable> findByTeamId(Long teamId, String keyword);
+
+    long countByTeamId(Long teamId);
+
+    /**
      * create variable
      *
      * @param variable variable
      */
-    void createVariable(Variable variable) throws Exception;
+    void createVariable(Variable variable);
+
+    void deleteVariable(Variable variable);
 
     Variable findByVariableCode(Long teamId, String variableCode);
+
+    String replaceVariable(Long teamId, String mixed);
+
+    IPage<Application> dependAppsPage(Variable variable, RestRequest request);
 }

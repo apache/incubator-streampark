@@ -43,17 +43,18 @@
       const isUpdate = ref(true);
 
       const [registerForm, { resetFields, setFieldsValue, updateSchema, validate }] = useForm({
-        labelWidth: 120,
+        labelWidth: 200,
         schemas: formSchema,
         showActionButtonGroup: false,
-        baseColProps: { lg: 22, md: 22 },
+        colon: true,
+        baseColProps: { span: 24 },
       });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
         resetFields();
         setDrawerProps({ confirmLoading: false });
         isUpdate.value = !!data?.isUpdate;
-
+        console.log('data.record', data.record);
         if (unref(isUpdate)) {
           setFieldsValue({
             ...data.record,
@@ -75,6 +76,7 @@
       async function handleSubmit() {
         try {
           const values = await validate();
+          values.display = !!values.display;
           setDrawerProps({ confirmLoading: true });
           unref(isUpdate) ? await editMenu(values) : await addMenu(values);
           closeDrawer();

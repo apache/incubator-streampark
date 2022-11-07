@@ -14,12 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { omit } from 'lodash-es';
 import { optionsKeyMapping } from '../data/option';
 import { fetchYarn } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchActiveURL } from '/@/api/flink/setting/flinkCluster';
-import { useUserStore } from '/@/store/modules/user';
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 
 export function handleAppBuildStatusColor(statusCode) {
   switch (statusCode) {
@@ -104,10 +103,14 @@ export function descriptionFilter(option) {
 
 export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
   const executionMode = app['executionMode'];
-  if (executionMode === 1) {
+  if (executionMode == ExecModeEnum.REMOTE) {
     const res = await fetchActiveURL(app.flinkClusterId);
     window.open(res + '/#/job/' + app.jobId + '/overview');
-  } else if ([2, 3, 4].includes(executionMode)) {
+  } else if (
+    [ExecModeEnum.YARN_PER_JOB, ExecModeEnum.YARN_SESSION, ExecModeEnum.YARN_APPLICATION].includes(
+      executionMode,
+    )
+  ) {
     if (yarn == null) {
       const res = await fetchYarn();
       window.open(res + '/proxy/' + app['appId'] + '/');
@@ -157,7 +160,7 @@ export function handleIsStart(app, optionApps) {
 }
 
 export function handleYarnQueue(values) {
-  if (values.executionMode === 4) {
+  if (values.executionMode == ExecModeEnum.YARN_APPLICATION) {
     const queue = values['yarnQueue'];
     if (queue != null && queue !== '' && queue !== undefined) {
       return queue;
@@ -167,9 +170,9 @@ export function handleYarnQueue(values) {
 }
 
 /* Splice parameters */
-export function handleFormValue(values) {
+export function handleFormValue(values: Recordable) {
   const options = {};
-  for (const k in omit(values, ['totalOptions', 'jmOptions', 'tmOptions'])) {
+  for (const k in values) {
     const v = values[k];
     if (v != null && v !== '' && v !== undefined) {
       if (k === 'parallelism') {
@@ -179,8 +182,8 @@ export function handleFormValue(values) {
       } else {
         if (
           values.totalOptions?.includes(k) ||
-          values.jmMemoryItems?.includes(k) ||
-          values.tmMemoryItems?.includes(k)
+          values.jmOptions?.includes(k) ||
+          values.tmOptions?.includes(k)
         ) {
           const opt = optionsKeyMapping.get(k);
           const unit = opt?.['unit'] || '';
@@ -246,10 +249,8 @@ export function handleSubmitParams(
   values: Recordable,
   k8sTemplate: Recordable,
 ) {
-  const useStore = useUserStore();
   const options = handleFormValue(values);
   Object.assign(params, {
-    teamId: useStore?.getTeamId,
     executionMode: values.executionMode,
     versionId: values.versionId,
     jobName: values.jobName,
@@ -257,10 +258,10 @@ export function handleSubmitParams(
     args: values.args || null,
     options: JSON.stringify(options),
     yarnQueue: handleYarnQueue(values),
-    cpMaxFailureInterval: values.cpMaxFailureInterval || null,
-    cpFailureRateInterval: values.cpFailureRateInterval || null,
-    cpFailureAction: values.cpFailureAction || null,
-    dynamicOptions: values.dynamicOptions || null,
+    cpMaxFailureInterval: values.checkPointFailure?.cpMaxFailureInterval || null,
+    cpFailureRateInterval: values.checkPointFailure?.cpFailureRateInterval || null,
+    cpFailureAction: values.checkPointFailure?.cpFailureAction || null,
+    properties: values.properties || null,
     resolveOrder: values.resolveOrder,
     k8sRestExposedType: values.k8sRestExposedType,
     restartSize: values.restartSize,
@@ -272,7 +273,7 @@ export function handleSubmitParams(
     flinkImage: values.flinkImage || null,
     yarnSessionClusterId: values.yarnSessionClusterId || null,
   });
-  if (params.executionMode === 6) {
+  if (params.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
     Object.assign(params, {
       k8sPodTemplate: k8sTemplate.podTemplate,
       k8sJmPodTemplate: k8sTemplate.jmPodTemplate,
@@ -282,6 +283,15 @@ export function handleSubmitParams(
   }
 }
 
-export function filterOption(input, option) {
-  return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+export const filterOption = (input: string, options: Recordable) => {
+  return options.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+};
+
+// k8s mode
+export function isK8sExecMode(mode: number): boolean {
+  return [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(mode);
+}
+// session mode
+export function isSessionMode(mode: number): boolean {
+  return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
 }

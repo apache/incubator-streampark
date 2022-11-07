@@ -14,22 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ref, unref } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useMonaco, isDark } from '/@/hooks/web/useMonaco';
+import { useThrottleFn } from '@vueuse/core';
 
 export const useLog = () => {
-  const logRef = ref();
-  const { setContent } = useMonaco(
+  const logRef = ref<HTMLElement>();
+  const autoScroll = ref(true);
+  let editor: any;
+  const { setContent, getInstance, getMonacoInstance } = useMonaco(
     logRef,
     {
       language: 'log',
       options: {
-        theme: 'log',
+        theme: isDark.value ? 'log-dark' : 'log',
         readOnly: true,
         scrollBeyondLastLine: false,
         overviewRulerBorder: false, // Don't scroll bar borders
         tabSize: 2, // tab indent length
         minimap: { enabled: true },
+        smoothScrolling: true,
         scrollbar: {
           useShadows: false,
           vertical: 'visible',
@@ -43,24 +47,91 @@ export const useLog = () => {
     },
     handleLogMonaco,
   );
+  watch(
+    isDark,
+    async () => {
+      const monacoInstance = await getMonacoInstance();
+      if (monacoInstance) {
+        if (isDark.value) monacoInstance.editor.setTheme('log-dark');
+        else monacoInstance.editor.setTheme('log');
+      }
+    },
+    { immediate: true },
+  );
+  watch(
+    () => logRef.value,
+    async () => {
+      if (!logRef.value) return;
+      const editorHeight = logRef.value.clientHeight;
+      editor = await getInstance();
+      editor?.onDidScrollChange(
+        useThrottleFn((e: any) => {
+          if (e.scrollTop > 0) {
+            if (editorHeight + e.scrollTop + 15 >= e.scrollHeight) {
+              autoScroll.value = true;
+            } else {
+              autoScroll.value = false;
+              console.log('close');
+            }
+          }
+        }, 500),
+      );
+    },
+  );
+  function setAutoScroll(scroll: boolean) {
+    autoScroll.value = scroll;
+  }
+  const getAutoScroll = computed(() => {
+    return autoScroll.value;
+  });
   /* registered language */
   async function handleLogMonaco(monaco: any) {
     monaco.languages.register({ id: 'log' });
     monaco.languages.setMonarchTokensProvider('log', {
       tokenizer: {
         root: [
-          [/\[20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+]/, 'log-date'],
-          [/\[[a-zA-Z 0-9:]+]/, 'log-date'],
+          [/\[?20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+/, 'custom-date-time'],
+          [/\[error.*/, 'custom-error'],
+          [/\[notice.*/, 'custom-notice'],
+          [/\[info.*/, 'custom-info'],
+          [/INFO/, 'custom-info-keyword'],
+          [/\[[a-zA-Z 0-9:]+\]/, 'custom-date'],
         ],
       },
     });
 
-    monaco.editor.defineTheme('log', {
-      base: unref(isDark) ? 'vs-dark' : 'vs',
+    monaco.editor.defineTheme('log-dark', {
+      base: 'vs-dark',
       inherit: true,
       colors: {},
-      rules: [{ token: 'log-date', foreground: '008800', fontStyle: 'bold' }],
+      rules: [
+        { token: 'custom-info', foreground: '808080' },
+        { token: 'custom-info-keyword', foreground: '008800' },
+        { token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
+        { token: 'custom-notice', foreground: 'FFA500' },
+        { token: 'custom-date', foreground: '008800' },
+        { token: 'custom-date-time', foreground: '008800' },
+      ],
+    });
+    monaco.editor.defineTheme('log', {
+      base: 'vs',
+      inherit: true,
+      colors: {},
+      rules: [
+        { token: 'custom-info', foreground: '808080' },
+        { token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
+        { token: 'custom-notice', foreground: 'FFA500' },
+        { token: 'custom-date', foreground: '008800' },
+        { token: 'custom-date-time', foreground: '008800' },
+      ],
     });
   }
-  return { setContent, logRef };
+
+  function handleRevealLine() {
+    if (!autoScroll.value) return;
+    if (editor) {
+      editor.revealLine(editor.getModel()?.getLineCount() || 0);
+    }
+  }
+  return { setAutoScroll, getInstance, getAutoScroll, setContent, logRef, handleRevealLine };
 };

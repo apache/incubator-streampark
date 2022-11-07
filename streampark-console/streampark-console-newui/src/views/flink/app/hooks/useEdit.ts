@@ -14,18 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { reactive, Ref, ref, unref } from 'vue';
+import { reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { optionsValueMapping } from '../data/option';
 import { fetchGet } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
+import { isString } from '/@/utils/is';
 
-export const useEdit = (alerts?: Ref) => {
+export const useEdit = () => {
   const route = useRoute();
 
   const app = reactive<Partial<AppListRecord>>({});
   const defaultOptions = reactive<any>({});
-  const selectAlertId = ref<Nullable<number>>(null);
   const memoryItems = reactive<{
     totalItems: string[];
     jmMemoryItems: string[];
@@ -43,26 +43,27 @@ export const useEdit = (alerts?: Ref) => {
     Object.assign(app, res);
     Object.assign(defaultOptions, JSON.parse(app.options || '{}'));
     Object.assign(returnData, {
+      jobType: res.jobType,
       versionId: res.versionId,
       executionMode: res.executionMode,
       resourceFrom: res.resourceFrom,
     });
-    if (res.alertId) {
-      selectAlertId.value = unref(alerts)?.filter((t) => t.id == app.alertId)[0]?.id;
-    }
     return returnData;
   }
   /* Form reset */
   function handleResetApplication() {
     let parallelism: Nullable<number> = null;
     let slot: Nullable<number> = null;
-    const fieldValueOptions = {};
-
+    const fieldValueOptions = {
+      totalItem: {},
+      tmOptionsItem: {},
+      jmOptionsItem: {},
+    };
     for (const k in defaultOptions) {
-      const v = defaultOptions[k];
+      let v = defaultOptions[k];
+      if (isString(v)) v = v.replace(/[k|m|g]b$/g, '');
       const key = optionsValueMapping.get(k);
       if (key) {
-        fieldValueOptions[key] = v;
         if (
           k === 'jobmanager.memory.flink.size' ||
           k === 'taskmanager.memory.flink.size' ||
@@ -70,22 +71,27 @@ export const useEdit = (alerts?: Ref) => {
           k === 'taskmanager.memory.process.size'
         ) {
           memoryItems.totalItems.push(key);
+          fieldValueOptions.totalItem[key] = parseInt(v);
         } else {
           if (k.startsWith('jobmanager.memory.')) {
             memoryItems.jmMemoryItems.push(key);
+            fieldValueOptions.jmOptionsItem[key] = parseInt(v);
           }
           if (k.startsWith('taskmanager.memory.')) {
             memoryItems.tmMemoryItems.push(key);
+            fieldValueOptions.tmOptionsItem[key] = parseInt(v);
           }
-          if (k === 'taskmanager.numberOfTaskSlots') {
-            slot = parseInt(v);
-          }
-          if (k === 'parallelism.default') {
-            parallelism = parseInt(v);
-          }
+        }
+      } else {
+        if (k === 'taskmanager.numberOfTaskSlots') {
+          slot = parseInt(v);
+        }
+        if (k === 'parallelism.default') {
+          parallelism = parseInt(v);
         }
       }
     }
+
     return {
       parallelism,
       slot,
@@ -101,6 +107,5 @@ export const useEdit = (alerts?: Ref) => {
     defaultOptions,
     app,
     memoryItems,
-    selectAlertId,
   };
 };

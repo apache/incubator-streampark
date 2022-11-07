@@ -44,8 +44,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -62,22 +60,11 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private RoleMenuServie roleMenuService;
 
     @Override
-    public Set<String> getUserRoleName(String username) {
-        List<Role> roleList = this.findUserRole(username);
-        return roleList.stream().map(Role::getRoleName).collect(Collectors.toSet());
-    }
-
-    @Override
     public IPage<Role> findRoles(Role role, RestRequest request) {
         Page<Role> page = new Page<>();
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
         return this.baseMapper.findRole(page, role);
-    }
-
-    @Override
-    public List<Role> findUserRole(String userName) {
-        return baseMapper.findUserRole(userName);
     }
 
     @Override
@@ -102,7 +89,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         AssertUtils.isTrue(userIdsByRoleId == null || userIdsByRoleId.isEmpty(),
             String.format("There are some users are bound to role %s , please unbind it first.", role.getRoleName()));
         this.removeById(roleId);
-        this.roleMenuService.deleteRoleMenusByRoleId(roleId);
+        this.roleMenuService.deleteByRoleId(roleId);
     }
 
     @Override
