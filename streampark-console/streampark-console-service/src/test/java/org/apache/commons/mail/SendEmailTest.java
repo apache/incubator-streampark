@@ -99,14 +99,13 @@ class SendEmailTest {
         } else {
             duration = application.getEndTime().getTime() - application.getStartTime().getTime();
         }
-        duration = duration / 1000 / 60;
         String format = "%s/proxy/%s/";
         String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
 
         AlertTemplate template = new AlertTemplate();
         template.setJobName(application.getJobName());
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        template.setDuration(DateUtils.toRichTimeDuration(duration));
+        template.setDuration(DateUtils.toDuration(duration));
         template.setLink(url);
         template.setEndTime(
             DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(),
@@ -114,7 +113,7 @@ class SendEmailTest {
         template.setRestart(application.isNeedRestartOnFailed());
         template.setRestartIndex(application.getRestartCount());
         template.setTotalRestart(application.getRestartSize());
-        template.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
+        template.setCpFailureRateInterval(DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
         template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
 
         return template;
