@@ -50,6 +50,7 @@
   const uploadLoading = ref(false);
   const uploadJar = ref('');
   const programArgRef = ref();
+  const podTemplateRef = ref();
 
   const k8sTemplate = reactive({
     podTemplate: '',
@@ -112,6 +113,11 @@
       }
       setFieldsValue(defaultParams);
       app.args && programArgRef.value?.setContent(app.args);
+      setTimeout(() => {
+        unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', app.k8sPodTemplate);
+        unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', app.k8sJmPodTemplate);
+        unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', app.k8sTmPodTemplate);
+      }, 1000);
     });
   }
   /* Custom job upload */
@@ -181,6 +187,7 @@
     <BasicForm @register="registerForm" @submit="handleAppUpdate" :schemas="getEditFlinkFormSchema">
       <template #podTemplate>
         <PomTemplateTab
+          ref="podTemplateRef"
           v-model:podTemplate="k8sTemplate.podTemplate"
           v-model:jmPodTemplate="k8sTemplate.jmPodTemplate"
           v-model:tmPodTemplate="k8sTemplate.tmPodTemplate"

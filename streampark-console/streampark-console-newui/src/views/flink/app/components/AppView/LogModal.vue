@@ -61,7 +61,7 @@
       getLogLoading.value = true;
       const { data } = await fetchStartLog({
         namespace: app.k8sNamespace,
-        jobName: app.jobName,
+        jobId: app.jobId,
         limit: 100000000,
         skipLineNum: 0,
       });
