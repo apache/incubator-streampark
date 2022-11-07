@@ -361,55 +361,52 @@ trait FlinkSubmitTrait extends Logger {
     val programArgs = new ArrayBuffer[String]()
 
     if (StringUtils.isNotEmpty(submitRequest.args)) {
+      val multiLineChar = "\"\"\""
+      val array = submitRequest.args.split("\\s+")
+      if (array.filter(_.startsWith(multiLineChar)).isEmpty) {
+        array.foreach(programArgs +=)
+      } else {
+        val argsArray = new ArrayBuffer[String]()
+        val tempBuffer = new ArrayBuffer[String]()
 
-      val array = submitRequest.args.split("\\s")
-      val argsArray = new ArrayBuffer[String]()
-      val tempBuffer = new ArrayBuffer[String]()
-
-      def processElement(index: Int, num: Int): Unit = {
-
-        if (index == array.length) {
-          if (tempBuffer.nonEmpty) {
-            argsArray += tempBuffer.mkString(" ")
+        def processElement(index: Int, multiLine: Boolean): Unit = {
+          if (index == array.length) {
+            if (tempBuffer.nonEmpty) {
+              argsArray += tempBuffer.mkString(" ")
+            }
+            return
           }
-          return
-        }
+          val next = index + 1
+          val elem = array(index)
 
-        val next = index + 1
-        val elem = array(index)
-
-        if (elem.trim.nonEmpty) {
-          if (num == 0) {
-            if (elem.startsWith("'")) {
-              tempBuffer += elem
-              processElement(next, 1)
-            } else if (elem.startsWith("\"")) {
-              tempBuffer += elem
-              processElement(next, 2)
+          if (elem.trim.nonEmpty) {
+            if (!multiLine) {
+              if (elem.startsWith(multiLineChar)) {
+                tempBuffer += elem.drop(3)
+                processElement(next, true)
+              } else {
+                argsArray += elem
+                processElement(next, false)
+              }
             } else {
-              argsArray += elem
-              processElement(next, 0)
+              if (elem.endsWith(multiLineChar)) {
+                tempBuffer += elem.dropRight(3)
+                argsArray += tempBuffer.mkString(" ")
+                tempBuffer.clear()
+                processElement(next, false)
+              } else {
+                tempBuffer += elem
+                processElement(next, multiLine)
+              }
             }
           } else {
             tempBuffer += elem
-            val end1 = elem.endsWith("'") && num == 1
-            val end2 = elem.endsWith("\"") && num == 2
-            if (end1 || end2) {
-              argsArray += tempBuffer.mkString(" ")
-              tempBuffer.clear()
-              processElement(next, 0)
-            } else {
-              processElement(next, num)
-            }
+            processElement(next, false)
           }
-        } else {
-          tempBuffer += elem
-          processElement(next, 0)
         }
+        processElement(0, false)
+        argsArray.foreach(x => programArgs += x.trim)
       }
-
-      processElement(0, 0)
-      argsArray.foreach(x => programArgs += x.trim.replaceAll("^[\"|']|[\"|']$", ""))
     }
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
