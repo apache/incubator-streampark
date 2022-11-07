@@ -20,5 +20,5 @@ package org.apache.streampark.console.core.service;
 import java.util.concurrent.CompletionStage;
 
 public interface LoggerService {
-    CompletionStage<String> queryLog(String namespac, String jobName, int skipLineNum, int limit);
+    CompletionStage<String> queryLog(String namespac, String jobName, String jobId, int skipLineNum, int limit);
 }

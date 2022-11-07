@@ -47,11 +47,11 @@ public class LoggerServiceImpl implements LoggerService {
      * @param limit       limit
      * @return log string data
      */
-    public CompletionStage<String> queryLog(String nameSpace, String jobName, int skipLineNum, int limit) {
-        return CompletableFuture.supplyAsync(() -> jobDeploymentsWatch(nameSpace, jobName)
+    public CompletionStage<String> queryLog(String nameSpace, String jobName, String jobId, int skipLineNum, int limit) {
+        return CompletableFuture.supplyAsync(() -> jobDeploymentsWatch(nameSpace, jobName, jobId)
         ).exceptionally(e -> {
             try {
-                return String.format("%s/%s_%s_err.log", new File("").getCanonicalPath(), nameSpace, jobName);
+                return String.format("%s/%s_err.log", new File("temp").getCanonicalPath(), jobId);
             } catch (IOException ex) {
                 log.error("Generate log path exception:{}", ex.getMessage());
                 return null;
@@ -59,8 +59,8 @@ public class LoggerServiceImpl implements LoggerService {
         }).thenApply(path -> logClient.rollViewLog(String.valueOf(path), skipLineNum, limit));
     }
 
-    private String jobDeploymentsWatch(String nameSpace, String jobName) {
-        return KubernetesDeploymentHelper.watchDeploymentLog(nameSpace, jobName);
+    private String jobDeploymentsWatch(String nameSpace, String jobName, String jobId) {
+        return KubernetesDeploymentHelper.watchDeploymentLog(nameSpace, jobName, jobId);
     }
 }
 

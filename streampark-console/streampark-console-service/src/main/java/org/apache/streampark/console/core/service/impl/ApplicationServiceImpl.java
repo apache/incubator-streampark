@@ -928,7 +928,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(app.getId());
         Application application = this.baseMapper.getApp(app);
         if (isKubernetesApp(application)) {
-            KubernetesDeploymentHelper.watchPodTerminatedLog(application.getK8sNamespace(), application.getJobName());
+            KubernetesDeploymentHelper.watchPodTerminatedLog(application.getK8sNamespace(), application.getJobName(), application.getJobId());
             KubernetesDeploymentHelper.deleteTaskDeployment(application.getK8sNamespace(), application.getJobName());
             KubernetesDeploymentHelper.deleteTaskConfigMap(application.getK8sNamespace(), application.getJobName());
             IngressController.deleteIngress(application.getK8sNamespace(), application.getJobName());
