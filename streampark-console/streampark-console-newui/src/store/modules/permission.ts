@@ -186,37 +186,6 @@ export const usePermissionStore = defineStore({
         }
         return hasAuth;
       };
-      /**
-       * @description Fix the affix tag in routes according to the homepage path set (fixed homepage)
-       * */
-      // const checkCurrentRouter = (routes: AppRouteRecordRaw[]) => {
-      //   if (!routes || routes.length === 0) return;
-      //   let homePath: string = nextPath || userStore.getUserInfo.homePath || PageEnum.BASE_HOME;
-
-      //   function patcher(routes: AppRouteRecordRaw[], parentPath = '') {
-      //     if (parentPath) parentPath = parentPath + '/';
-      //     routes.forEach((route: AppRouteRecordRaw) => {
-      //       const { path, children, redirect } = route;
-      //       const currentPath = path.startsWith('/') ? path : parentPath + path;
-      //       if (currentPath === homePath) {
-      //         if (redirect) {
-      //           homePath = route.redirect! as string;
-      //         } else {
-      //           route.meta = Object.assign({}, route.meta, { affix: true });
-      //           throw new Error('end');
-      //         }
-      //       }
-      //       children && children.length > 0 && patcher(children, currentPath);
-      //     });
-      //   }
-
-      //   try {
-      //     patcher(routes);
-      //   } catch (e) {
-      //     // Processed out of loop
-      //   }
-      //   return;
-      // };
 
       switch (permissionMode) {
         // Role authorization

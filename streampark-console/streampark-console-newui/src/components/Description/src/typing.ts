@@ -26,6 +26,7 @@ export interface DescItem {
   label: string | VNode | JSX.Element;
   // Merge column
   span?: number;
+  slot?: string;
   show?: (...arg: any) => boolean;
   // render
   render?: (

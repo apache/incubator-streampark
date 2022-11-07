@@ -25,6 +25,7 @@ import { fetchFlamegraph } from '/@/api/flink/app/metrics';
 import { ActionItem, FormProps } from '/@/components/Table';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { usePermission } from '/@/hooks/web/usePermission';
 export enum JobTypeEnum {
   JAR = 1,
   SQL = 2,
@@ -44,7 +45,7 @@ export const useAppTableAction = (
   const flinkAppStore = useFlinkAppStore();
   const router = useRouter();
   const { createMessage } = useMessage();
-
+  const { hasPermission } = usePermission();
   const {
     handleCheckLaunchApp,
     handleAppCheckStart,
@@ -210,16 +211,12 @@ export const useAppTableAction = (
   }
 
   const formConfig = computed((): Partial<FormProps> => {
-    return {
+    const tableFormConfig: FormProps = {
       baseColProps: { span: 5, style: { paddingRight: '20px' } },
       actionColOptions: { span: 4 },
       showSubmitButton: false,
+      showResetButton: false,
       colon: true,
-      resetButtonOptions: {
-        text: 'Add New',
-        color: 'primary',
-        preIcon: 'ant-design:plus-outlined',
-      },
       async resetFunc() {
         router.push({ path: '/flink/app/add' });
       },
@@ -274,6 +271,17 @@ export const useAppTableAction = (
         },
       ],
     };
+    if (hasPermission('app:create')) {
+      Object.assign(tableFormConfig, {
+        showResetButton: true,
+        resetButtonOptions: {
+          text: 'Add New',
+          color: 'primary',
+          preIcon: 'ant-design:plus-outlined',
+        },
+      });
+    }
+    return tableFormConfig;
   });
 
   /*  tag */

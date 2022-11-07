@@ -55,8 +55,6 @@ public class AlertTemplate implements Serializable {
         } else {
             duration = application.getEndTime().getTime() - application.getStartTime().getTime();
         }
-        duration = duration / 1000 / 60;
-
         AlertTemplate template = new AlertTemplate();
         template.setJobName(application.getJobName());
 
@@ -70,7 +68,7 @@ public class AlertTemplate implements Serializable {
 
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        template.setDuration(DateUtils.toRichTimeDuration(duration));
+        template.setDuration(DateUtils.toDuration(duration));
         boolean needRestart = application.isNeedRestartOnFailed() && application.getRestartCount() > 0;
         template.setRestart(needRestart);
         if (needRestart) {
@@ -92,7 +90,7 @@ public class AlertTemplate implements Serializable {
     public static AlertTemplate of(Application application, CheckPointStatus checkPointStatus) {
         AlertTemplate template = of(application);
         template.setType(2);
-        template.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
+        template.setCpFailureRateInterval(DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
         template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
         template.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
         template.setSubject(String.format("StreamPark Alert: %s, checkPoint is Failed", template.getJobName()));

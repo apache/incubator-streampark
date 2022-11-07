@@ -934,7 +934,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(app.getId());
         Application application = this.baseMapper.getApp(app);
         if (isKubernetesApp(application)) {
-            KubernetesDeploymentHelper.watchPodTerminatedLog(application.getK8sNamespace(), application.getJobName());
+            KubernetesDeploymentHelper.watchPodTerminatedLog(application.getK8sNamespace(), application.getJobName(), application.getJobId());
             KubernetesDeploymentHelper.deleteTaskDeployment(application.getK8sNamespace(), application.getJobName());
             KubernetesDeploymentHelper.deleteTaskConfigMap(application.getK8sNamespace(), application.getJobName());
             IngressController.deleteIngress(application.getK8sNamespace(), application.getJobName());
@@ -1271,8 +1271,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } else {
                 switch (application.getApplicationType()) {
                     case STREAMPARK_FLINK:
-                        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-                        appConf = String.format("%s://%s", format, applicationConfig.getContent());
+                        appConf = String.format("%s://%s", applicationConfig.configType(), applicationConfig.getContent());
                         break;
                     case APACHE_FLINK:
                         appConf = String.format("json://{\"%s\":\"%s\"}", ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),

@@ -56,7 +56,7 @@ class AlertServiceTest {
         Date date = new Date();
         alertTemplate.setStartTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-        alertTemplate.setDuration(DateUtils.toRichTimeDuration(0));
+        alertTemplate.setDuration("");
     }
 
     void before2() {
@@ -72,7 +72,7 @@ class AlertServiceTest {
         Date date = new Date();
         alertTemplate.setStartTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-        alertTemplate.setDuration(DateUtils.toRichTimeDuration(0));
+        alertTemplate.setDuration("");
     }
 
     @Test

@@ -32,7 +32,7 @@
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import UploadJobJar from './components/UploadJobJar.vue';
-  import FlinkSqlEditor from './components/flinkSql.vue';
+  import FlinkSqlEditor from './components/FlinkSql.vue';
   import Dependency from './components/Dependency.vue';
   import Different from './components/AppDetail/Different.vue';
   import Mergely from './components/Mergely.vue';
@@ -63,6 +63,7 @@
   const uploadJar = ref('');
   const dependencyRef = ref();
   const programArgRef = ref();
+  const podTemplateRef = ref();
 
   const k8sTemplate = reactive({
     podTemplate: '',
@@ -323,6 +324,9 @@
 
       setTimeout(() => {
         unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
+        unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', res.k8sPodTemplate);
+        unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', res.k8sJmPodTemplate);
+        unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', res.k8sTmPodTemplate);
       }, 1000);
     });
     handleReset();
@@ -358,6 +362,7 @@
     >
       <template #podTemplate>
         <PomTemplateTab
+          ref="podTemplateRef"
           v-model:podTemplate="k8sTemplate.podTemplate"
           v-model:jmPodTemplate="k8sTemplate.jmPodTemplate"
           v-model:tmPodTemplate="k8sTemplate.tmPodTemplate"

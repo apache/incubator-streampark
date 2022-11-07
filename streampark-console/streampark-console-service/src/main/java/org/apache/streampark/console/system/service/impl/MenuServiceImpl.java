@@ -17,11 +17,10 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.router.RouterMeta;
 import org.apache.streampark.console.base.domain.router.RouterTree;
 import org.apache.streampark.console.base.domain.router.VueRouter;
-import org.apache.streampark.console.base.util.TreeUtils;
+import org.apache.streampark.console.base.util.VueRouterUtils;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.entity.User;
@@ -89,35 +88,34 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         Map<String, Object> result = new HashMap<>(16);
         try {
             LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
-            findMenuCondition(queryWrapper, menu);
+            if (StringUtils.isNotBlank(menu.getMenuName())) {
+                queryWrapper.eq(Menu::getMenuName, menu.getMenuName());
+            }
+            if (StringUtils.isNotBlank(menu.getCreateTimeFrom())
+                && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
+                queryWrapper
+                    .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
+                    .le(Menu::getCreateTime, menu.getCreateTimeTo());
+            }
             List<Menu> menus = baseMapper.selectList(queryWrapper);
 
             List<RouterTree<Menu>> trees = new ArrayList<>();
             List<String> ids = new ArrayList<>();
-            buildTrees(trees, menus, ids);
 
+            menus.forEach(m -> {
+                ids.add(m.getMenuId().toString());
+                trees.add(new RouterTree(m));
+            });
             result.put("ids", ids);
-            if (StringUtils.equals(menu.getType(), Constant.TYPE_BUTTON)) {
-                result.put("rows", trees);
-            } else {
-                RouterTree<Menu> menuTree = TreeUtils.build(trees);
-                result.put("rows", menuTree);
-            }
             result.put("total", menus.size());
-        } catch (NumberFormatException e) {
-            log.info("Failed to query menu", e);
+            RouterTree<Menu> routerTree = VueRouterUtils.buildRouterTree(trees);
+            result.put("rows", routerTree);
+        } catch (Exception e) {
+            log.error("Failed to query menu", e);
             result.put("rows", null);
             result.put("total", 0);
         }
         return result;
-    }
-
-    @Override
-    public List<Menu> findMenuList(Menu menu) {
-        LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
-        findMenuCondition(queryWrapper, menu);
-        queryWrapper.orderByAsc(Menu::getMenuId);
-        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
@@ -160,29 +158,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             route.setMeta(new RouterMeta(true, !menu.isDisplay(), true, menu.getIcon()));
             routes.add(route);
         });
-        return TreeUtils.buildVueRouter(routes);
-    }
-
-    private void buildTrees(List<RouterTree<Menu>> trees, List<Menu> menus, List<String> ids) {
-        menus.forEach(menu -> {
-            ids.add(menu.getMenuId().toString());
-            RouterTree<Menu> tree = new RouterTree<>();
-            tree.setId(menu.getMenuId().toString());
-            tree.setKey(tree.getId());
-            tree.setParentId(menu.getParentId().toString());
-            tree.setText(menu.getMenuName());
-            tree.setTitle(tree.getText());
-            tree.setIcon(menu.getIcon());
-            tree.setComponent(menu.getComponent());
-            tree.setCreateTime(menu.getCreateTime());
-            tree.setModifyTime(menu.getModifyTime());
-            tree.setPath(menu.getPath());
-            tree.setOrder(menu.getOrderNum());
-            tree.setPermission(menu.getPerms());
-            tree.setType(menu.getType());
-            tree.setDisplay(menu.isDisplay());
-            trees.add(tree);
-        });
+        return VueRouterUtils.buildVueRouter(routes);
     }
 
     private void setMenu(Menu menu) {
@@ -196,18 +172,4 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         }
     }
 
-    private void findMenuCondition(LambdaQueryWrapper<Menu> queryWrapper, Menu menu) {
-        if (StringUtils.isNotBlank(menu.getMenuName())) {
-            queryWrapper.eq(Menu::getMenuName, menu.getMenuName());
-        }
-        if (StringUtils.isNotBlank(menu.getType())) {
-            queryWrapper.eq(Menu::getType, menu.getType());
-        }
-        if (StringUtils.isNotBlank(menu.getCreateTimeFrom())
-            && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
-            queryWrapper
-                .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
-                .le(Menu::getCreateTime, menu.getCreateTimeTo());
-        }
-    }
 }

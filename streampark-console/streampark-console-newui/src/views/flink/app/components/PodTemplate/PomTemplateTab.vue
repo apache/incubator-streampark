@@ -266,6 +266,10 @@
     }
     openHistoryDrawer(false);
   }
+
+  defineExpose({
+    handleChoicePodTemplate,
+  });
 </script>
 <template>
   <Tabs type="card" v-model:activeKey="podTemplateTab" class="pom-card">

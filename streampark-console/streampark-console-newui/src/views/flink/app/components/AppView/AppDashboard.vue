@@ -18,7 +18,7 @@
 <script lang="ts" setup>
   import { onMounted, reactive, ref } from 'vue';
   import { fetchDashboard } from '/@/api/flink/app/app';
-  import StatisticCard from './statisticCard.vue';
+  import StatisticCard from './StatisticCard.vue';
   import { Row, Col } from 'ant-design-vue';
   const dashBigScreenMap = reactive<Recordable>({});
   const dashboardLoading = ref(true);

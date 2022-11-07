@@ -42,22 +42,15 @@
   import { buildUUID } from '/@/utils/uuid';
   import { useI18n } from '/@/hooks/web/useI18n';
   import VariableReview from './components/VariableReview.vue';
+  import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
+  import UseSysHadoopConf from './components/UseSysHadoopConf.vue';
   import { CreateParams } from '/@/api/flink/app/app.type';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
 
-  const FlinkSqlEditor = createAsyncComponent(() => import('./components/flinkSql.vue'), {
+  const FlinkSqlEditor = createAsyncComponent(() => import('./components/FlinkSql.vue'), {
     loading: true,
   });
   const Dependency = createAsyncComponent(() => import('./components/Dependency.vue'), {
-    loading: true,
-  });
-  const PomTemplateTab = createAsyncComponent(
-    () => import('./components/PodTemplate/PomTemplateTab.vue'),
-    {
-      loading: true,
-    },
-  );
-  const UseSysHadoopConf = createAsyncComponent(() => import('./components/UseSysHadoopConf.vue'), {
     loading: true,
   });
 

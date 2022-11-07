@@ -134,7 +134,7 @@ public class AlertController {
         Date date = new Date();
         alertTemplate.setStartTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-        alertTemplate.setDuration(DateUtils.toRichTimeDuration(0));
+        alertTemplate.setDuration("");
         boolean alert = alertService.alert(AlertConfigWithParams.of(alertConfigService.getById(id)), alertTemplate);
         return RestResponse.success(alert);
     }

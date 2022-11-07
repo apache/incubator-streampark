@@ -218,7 +218,7 @@
         <Tooltip :title="t('flink.setting.cluster.edit')">
           <a-button
             v-if="handleIsStart(item) && item.executionMode == executionMap.YARN_SESSION"
-            v-auth="'app:update'"
+            v-auth="'cluster:update'"
             :disabled="true"
             @click="handleEditCluster(item)"
             shape="circle"
@@ -229,7 +229,7 @@
           </a-button>
           <a-button
             v-if="!handleIsStart(item) || item.executionMode == executionMap.REMOTE"
-            v-auth="'app:update'"
+            v-auth="'cluster:update'"
             @click="handleEditCluster(item)"
             shape="circle"
             size="large"

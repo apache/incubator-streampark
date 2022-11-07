@@ -42,14 +42,15 @@ function asyncImportRoute(routes: AppRouteRecordRaw[] | undefined) {
     if (!item.component && item.meta?.frameSrc) {
       item.component = 'IFRAME';
     }
-    const { component, name } = item;
-    const { children } = item;
+    const { component, name, children } = item;
     if (component) {
       const layoutFound = LayoutMap.get(component.toUpperCase());
       item.component = layoutFound || dynamicImport(dynamicViewsModules, component as string);
     } else if (name) {
       item.component = getParentLayout();
     }
+    // Determine if all submenus are hidden, add hidenChildrenInMenu if all are hidden
+    item.meta.hideChildrenInMenu = (children || []).every((child) => child.meta?.hidden);
     children && asyncImportRoute(children);
   });
 }
@@ -102,7 +103,12 @@ export function transformObjToRoute<T = AppRouteModule>(routeList: AppRouteModul
         const meta = route.meta || {};
         meta.single = true;
         meta.affix = false;
-        route.meta = meta;
+        route.meta = {
+          ...meta,
+          hidden: false,
+          test: 1,
+          hideMenu: meta.hidden,
+        };
       }
     } else {
       warn('Configure the routing correctly:' + route?.name + ' component attribute');

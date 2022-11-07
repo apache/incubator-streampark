@@ -20,19 +20,13 @@
     @register="registerDrawer"
     showFooter
     width="40%"
-    @ok="handleSubmit"
+    @ok="closeDrawer"
   >
     <template #title>
       <Icon icon="ant-design:code-outlined" />
       Variable Info
     </template>
-    <Description
-      class="variable-desc"
-      @register="registerDescription"
-      :column="1"
-      :data="variableInfo"
-      :schema="roleColumn"
-    />
+    <Description class="variable-desc" :column="1" :data="variableInfo" :schema="roleColumn" />
   </BasicDrawer>
 </template>
 <script lang="ts">
@@ -43,24 +37,45 @@
 
 <script setup lang="ts">
   import { defineComponent, h, ref } from 'vue';
-  import { useDescription, Description } from '/@/components/Description';
+  import { Description, DescItem } from '/@/components/Description';
   import Icon from '/@/components/Icon';
   import { useDrawerInner, BasicDrawer } from '/@/components/Drawer';
+  import { fetchVariableInfo } from '/@/api/system/variable';
+  import { usePermission } from '/@/hooks/web/usePermission';
 
   const variableInfo = ref<Recordable>({});
-
+  const showVariableDetail = ref(false);
+  let realVariable = '';
+  let desenVariable = '';
   const [registerDrawer, { closeDrawer }] = useDrawerInner((data: Recordable) => {
     data && onReceiveModalData(data);
   });
 
-  async function onReceiveModalData(data) {
+  function onReceiveModalData(data) {
+    realVariable = '';
     variableInfo.value = Object.assign({}, data);
+    showVariableDetail.value = false;
+    desenVariable = data.variableValue;
   }
+  async function handleVariableDetail() {
+    if (!realVariable) {
+      const res = await fetchVariableInfo({
+        id: variableInfo.value.id,
+      });
+      realVariable = res.variableValue;
+    }
 
+    Object.assign(variableInfo.value, {
+      variableValue: showVariableDetail.value ? desenVariable : realVariable,
+    });
+    showVariableDetail.value = !showVariableDetail.value;
+  }
+  // generated label
   const generatedLabelIcon = (icon: string, label: string) => {
     return h('div', null, [h(Icon, { icon }), h('span', { class: 'px-5px' }, label)]);
   };
-  const roleColumn = [
+  const { hasPermission } = usePermission();
+  const roleColumn: DescItem[] = [
     {
       label: generatedLabelIcon('ant-design:code-outlined', 'Variable Code'),
       field: 'variableCode',
@@ -68,6 +83,25 @@
     {
       label: generatedLabelIcon('ant-design:down-circle-outlined', 'Variable Value'),
       field: 'variableValue',
+      render(value, data) {
+        const renderIcon = () => {
+          // need desensitization
+          if (data.desensitization && hasPermission('variable:show_original')) {
+            return h(Icon, {
+              icon: `ant-design:${showVariableDetail.value ? 'eye' : 'eye-invisible'}-outlined`,
+              color: showVariableDetail.value ? '#477de9' : '',
+              onClick: handleVariableDetail,
+              class: 'cursor-pointer',
+            });
+          } else {
+            return null;
+          }
+        };
+        return h('div', { class: 'flex items-center' }, [
+          h('span', { class: 'pr-10px' }, value),
+          renderIcon(),
+        ]);
+      },
     },
     {
       label: generatedLabelIcon(`ant-design:user-outlined`, 'Create User'),
@@ -86,15 +120,11 @@
       field: 'description',
     },
   ];
-  const [registerDescription] = useDescription();
-  function handleSubmit() {
-    closeDrawer();
-  }
 </script>
 <style lang="less">
   .variable-desc {
     .ant-descriptions-item-label {
-      min-width: 160px;
+      width: 160px;
     }
   }
 </style>

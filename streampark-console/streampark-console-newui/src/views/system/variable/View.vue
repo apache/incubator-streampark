@@ -42,6 +42,7 @@
               {
                 icon: 'icon-park-outline:mind-mapping',
                 tooltip: 'depend apps',
+                auth: 'variable:depend_apps',
                 onClick: () =>
                   router.push('/system/variable/depend_apps?id=' + record.variableCode),
               },
