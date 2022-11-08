@@ -29,7 +29,7 @@
             :actions="[
               {
                 icon: 'ant-design:copy-outlined',
-                tooltip: 'Copy Token',
+                tooltip: t('system.token.copyToken'),
                 auth: 'token:view',
                 onClick: handleCopy.bind(null, record),
               },
@@ -37,9 +37,9 @@
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 auth: 'token:delete',
-                tooltip: 'Delete Token',
+                tooltip: t('system.token.deleteToken'),
                 popConfirm: {
-                  title: 'are you sure delete this token ?',
+                  title: t('system.token.operation.deleteTokenConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },
               },
@@ -73,7 +73,7 @@
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { clipboardRef, copiedRef } = useCopyToClipboard();
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
-        title: 'Token List',
+        title: t('system.token.table.title'),
         api: fetTokenList,
         columns,
         formConfig: {
@@ -88,7 +88,7 @@
         canResize: false,
         actionColumn: {
           width: 200,
-          title: 'Operation',
+          title: t('component.table.operation'),
           dataIndex: 'action',
         },
       });
@@ -101,25 +101,25 @@
 
       function handleCopy(record: Recordable) {
         clipboardRef.value = record.token;
-        unref(copiedRef) && createMessage.success('copy success！');
+        unref(copiedRef) && createMessage.success(t('system.token.operation.copySuccess'));
       }
 
       async function handleDelete(record: Recordable) {
         const res = await fetchTokenDelete({ tokenId: record.id });
         if (res) {
-          createMessage.success('delete token successfully');
+          createMessage.success(t('system.token.operation.deleteSuccess'));
           reload();
         } else {
-          createMessage.success('delete token failed');
+          createMessage.success(t('system.token.operation.deleteFailed'));
         }
       }
 
       function handleSuccess({ isUpdate, values }) {
         if (isUpdate) {
-          createMessage.success('update token successfully');
+          createMessage.success(t('system.token.operation.updateSuccess'));
           updateTableDataRecord(values.tokenId, values);
         } else {
-          createMessage.success('create token successfully');
+          createMessage.success(t('system.token.operation.createSuccess'));
           reload();
         }
       }

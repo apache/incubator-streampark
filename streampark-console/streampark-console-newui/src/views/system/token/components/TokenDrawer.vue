@@ -33,6 +33,7 @@
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
   import { fetchTokenCreate } from '/@/api/system/token';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({
     name: 'TokenDrawer',
@@ -40,6 +41,7 @@
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const isUpdate = ref(true);
+      const { t } = useI18n();
 
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
         labelWidth: 120,
@@ -60,7 +62,7 @@
         }
       });
 
-      const getTitle = computed(() => (!unref(isUpdate) ? 'Add Token' : 'Edit Token'));
+      const getTitle = computed(() => (!unref(isUpdate) ? t('system.token.addToken') : t('system.token.modifyToken')));
 
       async function handleSubmit() {
         try {
