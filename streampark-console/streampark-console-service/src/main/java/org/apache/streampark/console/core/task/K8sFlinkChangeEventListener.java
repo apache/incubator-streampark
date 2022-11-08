@@ -165,6 +165,7 @@ public class K8sFlinkChangeEventListener {
         app.setJobId(jobStatus.jobId());
         app.setTotalTask(jobStatus.taskTotal());
         if (FlinkJobState.isEndState(state)) {
+            IngressController.deleteIngress(app.getJobName(), app.getK8sNamespace());
             app.setOptionState(OptionState.NONE.getValue());
         }
 
