@@ -177,6 +177,11 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.ldap</groupId>
+            <artifactId>spring-ldap-core</artifactId>
+        </dependency>
+
         <!-- shiro-spring -->
         <dependency>
             <groupId>org.apache.shiro</groupId>
