@@ -21,6 +21,8 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { fetTokenStatusToggle } from '/@/api/system/token';
 import { getNoTokenUserList } from '/@/api/system/user';
 import dayjs from 'dayjs';
+import {useI18n} from "/@/hooks/web/useI18n";
+const { t } = useI18n();
 
 // status enum
 const enum StatusEnum {
@@ -30,32 +32,32 @@ const enum StatusEnum {
 
 export const columns: BasicColumn[] = [
   {
-    title: 'User Name',
+    title: t('system.token.table.userName'),
     dataIndex: 'username',
     width: 150,
     sorter: true,
   },
   {
-    title: 'Token',
+    title: t('system.token.table.token'),
     ellipsis: true,
     width: 250,
     dataIndex: 'token',
   },
   {
-    title: 'Description',
+    title: t('system.token.table.description'),
     dataIndex: 'description',
   },
   {
-    title: 'Create Time',
+    title: t('system.token.table.createTime'),
     dataIndex: 'createTime',
   },
   {
-    title: 'Expire Time',
+    title: t('system.token.table.expireTime'),
     dataIndex: 'expireTime',
     sorter: true,
   },
   {
-    title: 'Status',
+    title: t('system.token.table.status'),
     dataIndex: 'userStatus',
     width: 100,
     customRender: ({ record }) => {
@@ -88,8 +90,8 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
   {
-    field: 'username',
-    label: 'User Name',
+    field: t('system.token.table.userName'),
+    label: t('system.token.table.userName'),
     component: 'Input',
     colProps: { span: 8 },
   },
@@ -98,7 +100,7 @@ export const searchFormSchema: FormSchema[] = [
 export const formSchema: FormSchema[] = [
   {
     field: 'userId',
-    label: 'User',
+    label: t('system.token.table.userName'),
     component: 'ApiSelect',
     componentProps: {
       api: getNoTokenUserList,
@@ -106,16 +108,16 @@ export const formSchema: FormSchema[] = [
       labelField: 'username',
       valueField: 'userId',
     },
-    rules: [{ required: true, message: 'Please select a user', trigger: 'blur' }],
+    rules: [{ required: true, message: t('system.token.selectUserAlertMessage'), trigger: 'blur' }],
   },
   {
-    field: 'description',
-    label: 'Description',
+    field: t('system.token.table.description'),
+    label: t('system.token.table.description'),
     component: 'InputTextArea',
   },
   {
-    field: 'expireTime',
-    label: 'ExpireTime',
+    field: t('system.token.table.expireTime'),
+    label: t('system.token.table.expireTime'),
     component: 'DatePicker',
     defaultValue: dayjs('9999-01-01'),
     componentProps: {
