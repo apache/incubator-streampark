@@ -49,7 +49,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // require parameters
     require(
       StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
-      s"[flink-submit] stop flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
+      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
     super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(jobGraphSubmit)
   }
