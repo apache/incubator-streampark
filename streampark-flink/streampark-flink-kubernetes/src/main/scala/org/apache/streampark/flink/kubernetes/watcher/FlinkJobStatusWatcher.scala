@@ -449,10 +449,10 @@ private[kubernetes] object FlinkHistoryArchives {
                 case JArray(arr) =>
                   arr.foreach(x => {
                     val projectPath = SystemPropertyUtils.get("java.io.tmpdir", "temp")
-                    val path = s"$projectPath/$jobId.log"
+                    val path = s"${projectPath}/${jobId}_err.log"
                     val file = new File(path)
                     val log = (x \ "root-exception").extractOpt[String].orNull
-                    Files.asCharSink(file, Charsets.UTF_8, FileWriteMode.APPEND).write(log)
+                    Files.asCharSink(file, Charsets.UTF_8).write(log)
                   })
               }
           }
