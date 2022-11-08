@@ -49,6 +49,7 @@
   import { fetchRoleCreate, fetchRoleUpdate } from '/@/api/system/role';
   import { getMenuList, getRoleMenu } from '/@/api/base/system';
   import { FormTypeEnum } from '/@/enums/formEnum';
+  import { useMessage } from '/@/hooks/web/useMessage';
 
   const handleTreeIcon = (treeData: TreeItem[]): TreeItem[] => {
     if (!treeData?.length) {
@@ -70,6 +71,8 @@
       const treeData = ref<TreeItem[]>([]);
       let singleNodeKeys: string[] = [];
       let selectedKeysAndHalfCheckedKeys = ref<string[]>([]);
+
+      const { createMessage } = useMessage();
       const isCreate = computed(() => unref(formType) === FormTypeEnum.Create);
 
       const formSchemas = computed((): FormSchema[] => {
@@ -152,9 +155,20 @@
       async function handleSubmit() {
         try {
           const values = await validate();
+          // First, a simple judgment, does not contain app:view (home) this permission, the error is reported
+          if (selectedKeysAndHalfCheckedKeys.value.indexOf('100067') < 0) {
+            createMessage.warning('Must include app:view permission');
+            return;
+          }
+          console.log(
+            "selectedKeysAndHalfCheckedKeys.value.indexOf('100067')",
+            selectedKeysAndHalfCheckedKeys.value.indexOf('100067'),
+          );
           setDrawerProps({ confirmLoading: true });
-          const params = { ...values };
-          params.menuId = selectedKeysAndHalfCheckedKeys.value.join(',');
+          const params = Object.assign({}, values, {
+            menuId: selectedKeysAndHalfCheckedKeys.value.join(','),
+          });
+
           !unref(isCreate) ? await fetchRoleUpdate(params) : await fetchRoleCreate(params);
           closeDrawer();
           emit('success');

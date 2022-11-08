@@ -74,7 +74,6 @@ export const useAppTableAction = (
       {
         tooltip: { title: 'Launching Progress Detail' },
         ifShow: [-1, 2].includes(record.launch) || record['optionState'] === 1,
-        auth: 'app:update',
         icon: 'ant-design:container-outlined',
         onClick: () => openBuildDrawer(true, { appId: record.id }),
       },
