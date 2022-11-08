@@ -164,9 +164,6 @@ public class K8sFlinkChangeEventListener {
         // update relevant fields of Application from JobStatusCV
         app.setJobId(jobStatus.jobId());
         app.setTotalTask(jobStatus.taskTotal());
-        if (FlinkJobState.isEndState(state)) {
-            app.setOptionState(OptionState.NONE.getValue());
-        }
 
         // corrective start-time / end-time / duration
         long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;
@@ -178,6 +175,8 @@ public class K8sFlinkChangeEventListener {
         long duration = jobStatus.duration();
 
         if (FlinkJobState.isEndState(state)) {
+            IngressController.deleteIngress(app.getJobName(), app.getK8sNamespace());
+            app.setOptionState(OptionState.NONE.getValue());
             if (endTime < startTime) {
                 endTime = System.currentTimeMillis();
             }
