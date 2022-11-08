@@ -49,15 +49,13 @@ insert into "public"."t_flink_sql" values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1
 insert into "public"."t_menu" values (100000, 0, 'System', '/system', 'PageView', null, 'desktop', '0', 1, 1, now(), now());
 insert into "public"."t_menu" values (100001, 100000, 'User Management', '/system/user', 'system/user/User', null, 'user', '0', 1, 1, now(), now());
 insert into "public"."t_menu" values (100002, 100000, 'Role Management', '/system/role', 'system/role/Role', null, 'smile', '0', 1, 2, now(), now());
-insert into "public"."t_menu" values (100003, 100000, 'Menu Management', '/system/menu', 'system/menu/Menu', null, 'bars', '0', 1, 3, now(), now());
+insert into "public"."t_menu" values (100003, 100000, 'Menu Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', 1, 3, now(), now());
 insert into "public"."t_menu" values (100004, 100001, 'add', null, null, 'user:add', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100005, 100001, 'update', null, null, 'user:update', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100006, 100001, 'delete', null, null, 'user:delete', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100007, 100002, 'add', null, null, 'role:add', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100008, 100002, 'update', null, null, 'role:update', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100009, 100002, 'delete', null, null, 'role:delete', null, '1', 1, null, now(), now());
-insert into "public"."t_menu" values (100010, 100003, 'add', null, null, 'menu:add', null, '1', 1, null, now(), now());
-insert into "public"."t_menu" values (100011, 100003, 'update', null, null, 'menu:update', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100012, 100001, 'reset', null, null, 'user:reset', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100013, 0, 'StreamPark', '/flink', 'PageView', null, 'build', '0', 1, 2, now(), now());
 insert into "public"."t_menu" values (100014, 100013, 'Project', '/flink/project', 'flink/project/View', null, 'github', '0', 1, 1, now(), now());
@@ -111,12 +109,11 @@ insert into "public"."t_menu" values (100061, 100038, 'view', null, null, 'token
 insert into "public"."t_menu" values (100062, 100002, 'view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100063, 100044, 'view', null, null, 'team:view', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100064, 100048, 'view', null, null, 'member:view', null, '1', 1, null, now(), now());
-insert into "public"."t_menu" values (100065, 100003, 'view', null, null, 'menu:view', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100066, 100014, 'view', null, null, 'project:view', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100067, 100015, 'view', null, null, 'app:view', null, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100068, 100054, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
 insert into "public"."t_menu" values (100069, 100034, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
-insert into "public"."t_menu" values (100070, 100054, 'view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
+insert into "public"."t_menu" values (100070, 100054, 'depend view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
 
 
 
@@ -179,7 +176,13 @@ insert into "public"."t_role_menu" values (100088, 100002, 100054);
 insert into "public"."t_role_menu" values (100089, 100002, 100055);
 insert into "public"."t_role_menu" values (100090, 100002, 100056);
 insert into "public"."t_role_menu" values (100091, 100002, 100057);
-
+insert into "public"."t_role_menu" values (100092, 100001, 100066);
+insert into "public"."t_role_menu" values (100093, 100002, 100066);
+insert into "public"."t_role_menu" values (100094, 100001, 100067);
+insert into "public"."t_role_menu" values (100095, 100002, 100067);
+insert into "public"."t_role_menu" values (100096, 100002, 100064);
+insert into "public"."t_role_menu" values (100097, 100002, 100060);
+insert into "public"."t_role_menu" values (100098, 100002, 100068);
 -- ----------------------------
 -- Records of t_setting
 -- ----------------------------
