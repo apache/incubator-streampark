@@ -41,7 +41,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // require parameters
     require(
       StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
-      s"[flink-submit] stop flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
+      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
 
     // check the last building result
