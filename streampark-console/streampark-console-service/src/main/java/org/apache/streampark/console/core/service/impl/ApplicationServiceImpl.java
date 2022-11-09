@@ -666,12 +666,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setProjectId(oldApp.getProjectId());
         newApp.setModule(oldApp.getModule());
         newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
-        newApp.setYarnSessionClusterId(oldApp.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID()).toString());
         newApp.setUserId(commonService.getUserId());
         newApp.setState(FlinkAppState.ADDED.getValue());
         newApp.setLaunch(LaunchState.NEED_LAUNCH.get());
         newApp.setOptionState(OptionState.NONE.getValue());
         newApp.setCreateTime(new Date());
+        Object yarnSessionClusterId = oldApp.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
+        newApp.setYarnSessionClusterId(yarnSessionClusterId == null ? null : yarnSessionClusterId.toString());
         newApp.doSetHotParams();
 
         newApp.setJar(oldApp.getJar());
