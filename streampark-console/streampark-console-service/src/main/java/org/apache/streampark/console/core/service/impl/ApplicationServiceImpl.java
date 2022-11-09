@@ -450,7 +450,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             return false;
         }
         Long useId = FlinkTrackingTask.getCanceledJobUserId(appId);
-        return useId == null || application.getUserId().longValue() != FlinkTrackingTask.getCanceledJobUserId(appId).longValue();
+        return application.getUserId().longValue() != FlinkTrackingTask.getCanceledJobUserId(appId).longValue();
     }
 
     private void removeApp(Application application) {

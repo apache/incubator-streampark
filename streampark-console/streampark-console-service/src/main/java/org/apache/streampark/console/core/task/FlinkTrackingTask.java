@@ -416,8 +416,10 @@ public class FlinkTrackingTask {
                 cleanSavepoint(application);
                 application.setState(currentState.getValue());
                 if (StopFrom.NONE.equals(stopFrom) || applicationService.checkAlter(application)) {
-                    log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form StreamPark,savePoint obsoleted!");
-                    savePointService.obsolete(application.getId());
+                    if (StopFrom.NONE.equals(stopFrom)) {
+                        log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form StreamPark,savePoint obsoleted!");
+                        savePointService.obsolete(application.getId());
+                    }
                     stopCanceledJob(application.getId());
                     alertService.alert(application, FlinkAppState.CANCELED);
                 }
