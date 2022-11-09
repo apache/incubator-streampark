@@ -73,6 +73,7 @@ public class FlinkClusterController {
     public RestResponse update(FlinkCluster cluster) {
         FlinkCluster flinkCluster = flinkClusterService.getById(cluster.getId());
         flinkCluster.setClusterId(cluster.getClusterId());
+        flinkCluster.setVersionId(cluster.getVersionId());
         flinkCluster.setClusterName(cluster.getClusterName());
         flinkCluster.setAddress(cluster.getAddress());
         flinkCluster.setExecutionMode(cluster.getExecutionMode());
