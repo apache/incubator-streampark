@@ -31,6 +31,7 @@
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { addUser, updateUser } from '/@/api/system/user';
   import Icon from '/@/components/Icon';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({
     name: 'MenuDrawer',
@@ -38,6 +39,7 @@
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const formType = ref(FormTypeEnum.Edit);
+      const { t } = useI18n();
 
       const [registerForm, { resetFields, setFieldsValue, updateSchema, validate, clearValidate }] =
         useForm({
@@ -68,9 +70,9 @@
 
       const getTitle = computed(() => {
         return {
-          [FormTypeEnum.Create]: 'Add User',
-          [FormTypeEnum.Edit]: 'Edit User',
-          [FormTypeEnum.View]: 'View User',
+          [FormTypeEnum.Create]: t('system.user.addUser'),
+          [FormTypeEnum.Edit]: t('system.user.modifyUser'),
+          [FormTypeEnum.View]: t('system.user.viewUser'),
         }[unref(formType)];
       });
 

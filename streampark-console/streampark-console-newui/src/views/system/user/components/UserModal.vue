@@ -18,7 +18,7 @@
   <BasicModal :width="600" :show-cancel-btn="false" @register="registerModal" @ok="handleSubmit">
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
-      User Info
+      {{t('system.user.userInfo')}}
     </template>
     <Description
       @register="registerDescription"
@@ -40,7 +40,9 @@
   import { useDescription, Description } from '/@/components/Description';
   import Icon from '/@/components/Icon';
   import { useModalInner, BasicModal } from '/@/components/Modal';
+  import { useI18n } from '/@/hooks/web/useI18n';
   const userInfo = ref<Recordable>({});
+  const { t } = useI18n();
 
   const [registerModal, { closeModal }] = useModalInner((data: Recordable) => {
     data && onReceiveModalData(data);
@@ -49,13 +51,13 @@
     userInfo.value = {};
     switch (data.sex) {
       case '0':
-        data.sexText = 'male';
+        data.sexText = t('system.user.userGender.male');
         break;
       case '1':
-        data.sexText = 'female';
+        data.sexText = t('system.user.userGender.female');
         break;
       case '2':
-        data.sexText = 'secret';
+        data.sexText = t('system.user.userGender.secret');
         break;
       default:
         data.sexText = data.sex;
@@ -71,24 +73,24 @@
     ]);
   };
   const userColumn = [
-    { label: generatedLabelIcon('user', 'User Name'), field: 'username' },
-    { label: generatedLabelIcon('star', 'User Type'), field: 'userType' },
+    { label: generatedLabelIcon('user', t('system.user.table.userName')), field: 'username' },
+    { label: generatedLabelIcon('star', t('system.user.table.userType')), field: 'userType' },
     {
-      label: generatedLabelIcon('skin', 'Gender'),
+      label: generatedLabelIcon('skin', t('system.user.table.gender')),
       field: 'sex',
       render: (curVal: string) => {
         const sexMap = {
-          '0': 'male',
-          '1': 'female',
-          '2': 'secret',
+          '0': t('system.user.userGender.male'),
+          '1': t('system.user.userGender.female'),
+          '2': t('system.user.userGender.secret'),
           [curVal]: curVal,
         };
         return sexMap[curVal];
       },
     },
-    { label: generatedLabelIcon('mail', 'E-Mail'), field: 'email' },
+    { label: generatedLabelIcon('mail', t('system.user.table.email')), field: 'email' },
     {
-      label: generatedLabelIcon(`${userInfo.value?.status === '1' ? 'smile' : 'frown'}`, 'Status'),
+      label: generatedLabelIcon(`${userInfo.value?.status === '1' ? 'smile' : 'frown'}`, t('system.user.table.status')),
       field: 'status',
       render: (curVal) => {
         if (curVal === '0') {
@@ -101,15 +103,15 @@
       },
     },
     {
-      label: generatedLabelIcon(`clock-circle`, 'Creation'),
+      label: generatedLabelIcon(`clock-circle`, t('system.user.table.createTime')),
       field: 'createTime',
     },
     {
-      label: generatedLabelIcon(`login`, 'Recent Login'),
+      label: generatedLabelIcon(`login`, t('system.user.table.recentLogin')),
       field: 'lastLoginTime',
     },
     {
-      label: generatedLabelIcon(`message`, 'Description'),
+      label: generatedLabelIcon(`message`, t('system.user.table.description')),
       field: 'description',
     },
   ];
