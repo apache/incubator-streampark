@@ -664,7 +664,7 @@ public class FlinkTrackingTask {
     }
 
     public static Long getCanceledJobUserId(Long appId) {
-        return CANCELLED_JOB_MAP.get(appId);
+        return CANCELLED_JOB_MAP.get(appId) == null?-1:CANCELLED_JOB_MAP.get(appId);
     }
 
     public static Map<Long, Application> getAllTrackingApp() {
