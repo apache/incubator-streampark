@@ -20,7 +20,14 @@ package org.apache.streampark.console.core.mapper;
 import org.apache.streampark.console.core.entity.Project;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 public interface ProjectMapper extends BaseMapper<Project> {
+
+    void updateFailureBuildById(@Param("project") Project project);
+
+    void updateSuccessBuildById(@Param("project") Project project);
+
+    void updateStartBuildById(@Param("project") Project project);
 
 }

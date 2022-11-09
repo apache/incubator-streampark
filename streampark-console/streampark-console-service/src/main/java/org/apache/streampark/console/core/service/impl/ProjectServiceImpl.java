@@ -183,9 +183,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public void build(Long id) throws Exception {
         Project project = getById(id);
-        this.updateStartBuildById(project);
-        CompletableFuture<Void> buildTask = CompletableFuture.runAsync(
-            new ProjectBuildTask(getBuildLogPath(id), project, this, applicationService), executorService);
+        this.baseMapper.updateStartBuildById(project);
+        ProjectBuildTask projectBuildTask = new ProjectBuildTask(getBuildLogPath(id), project, baseMapper, applicationService);
+        CompletableFuture<Void> buildTask = CompletableFuture.runAsync(projectBuildTask, executorService);
         // TODO May need to define parameters to set the build timeout in the future.
         CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
     }
@@ -237,34 +237,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
             .eq(Project::getName, project.getName());
         return this.baseMapper.selectCount(queryWrapper) > 0;
-    }
-
-    @Override
-    public void updateFailureBuildById(Project project) {
-        Project entity = new Project();
-        entity.setBuildState(2);
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
-            .eq(Project::getId, project.getId());
-        this.update(entity, queryWrapper);
-    }
-
-    @Override
-    public void updateSuccessBuildById(Project project) {
-        Project entity = new Project();
-        entity.setLastBuild(new Date());
-        entity.setBuildState(1);
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
-            .eq(Project::getId, project.getId());
-        this.update(entity, queryWrapper);
-    }
-
-    @Override
-    public void updateStartBuildById(Project project) {
-        Project entity = new Project();
-        entity.setBuildState(0);
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
-            .eq(Project::getId, project.getId());
-        this.update(entity, queryWrapper);
     }
 
     @Override
