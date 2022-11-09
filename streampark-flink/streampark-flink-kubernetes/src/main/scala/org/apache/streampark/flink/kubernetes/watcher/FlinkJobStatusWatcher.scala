@@ -17,10 +17,13 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
+import com.google.common.base.Charsets
+import com.google.common.io.{FileWriteMode, Files}
 import org.apache.commons.collections.CollectionUtils
 import org.apache.flink.core.fs.Path
 import org.apache.flink.runtime.history.FsJobArchivist
-import org.apache.streampark.common.util.Logger
+import org.apache.flink.runtime.webmonitor.history.ArchivedJson
+import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
@@ -34,7 +37,9 @@ import org.json4s.{DefaultFormats, JNothing, JNull}
 import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
 
+import java.io.File
 import java.nio.charset.StandardCharsets
+import java.util
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
@@ -433,28 +438,44 @@ private[kubernetes] object FlinkHistoryArchives {
     require(jobId != null, "[StreamPark] getJobStateFromArchiveFile: JobId cannot be null.")
     val archivePath = new Path(Workspace.ARCHIVES_FILE_PATH, jobId)
     val archivedJson = FsJobArchivist.getArchivedJsons(archivePath)
+    var state: String = FAILED_STATE
     if (CollectionUtils.isNotEmpty(archivedJson)) {
       archivedJson.foreach { a =>
-        if (a.getPath == "/jobs/overview") {
+        if (a.getPath == s"/jobs/$jobId/exceptions") {
+          Try(parse(a.getJson)) match {
+            case Success(ok) =>
+              ok \ "root-exception" match {
+                case JNothing | JNull =>
+                case JArray(arr) =>
+                  arr.foreach(x => {
+                    val projectPath = SystemPropertyUtils.get("java.io.tmpdir", "temp")
+                    val path = s"${projectPath}/${jobId}_err.log"
+                    val file = new File(path)
+                    val log = (x \ "root-exception").extractOpt[String].orNull
+                    Files.asCharSink(file, Charsets.UTF_8).write(log)
+                  })
+              }
+          }
+        } else if (a.getPath == "/jobs/overview") {
           Try(parse(a.getJson)) match {
             case Success(ok) =>
               ok \ "jobs" match {
-                case JNothing | JNull => return FAILED_STATE
+                case JNothing | JNull =>
                 case JArray(arr) =>
-                  arr.foreach(x => {
-                    val jid = (x \ "jid").extractOpt[String].orNull
-                    if (jid == jobId) {
-                      return (x \ "state").extractOpt[String].orNull
-                    }
-                  })
-                case _ => return FAILED_STATE
+                    arr.foreach(x => {
+                      val jid = (x \ "jid").extractOpt[String].orNull
+                      if (jid == jobId) {
+                        state = (x \ "state").extractOpt[String].orNull
+                      }
+                    })
+                case _ =>
               }
-            case _ => return FAILED_STATE
+            case Failure(_) =>
           }
         }
       }
     }
-    FAILED_STATE
+    state
   }.getOrElse(FAILED_STATE)
 
 }

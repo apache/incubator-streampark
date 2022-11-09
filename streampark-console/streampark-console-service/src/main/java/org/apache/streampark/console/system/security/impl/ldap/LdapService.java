@@ -19,10 +19,9 @@ package org.apache.streampark.console.system.security.impl.ldap;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.ldap.filter.EqualsFilter;
 import org.springframework.stereotype.Component;
 
 import javax.naming.Context;
@@ -41,8 +40,6 @@ import java.util.Properties;
 @Configuration
 @Slf4j
 public class LdapService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(LdapService.class);
 
     @Value("${ldap.urls:#{null}}")
     private String ldapUrls;
@@ -75,22 +72,16 @@ public class LdapService {
     public String ldapLogin(String userId, String userPwd) {
         Properties searchEnv = getManagerLdapEnv();
         try {
-            //Connect to the LDAP server and Authenticate with a service user of whom we know the DN and credentials
             LdapContext ctx = new InitialLdapContext(searchEnv, null);
             SearchControls sc = new SearchControls();
             sc.setReturningAttributes(new String[]{ldapEmailAttribute});
             sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            String searchFilter = String.format("(%s=%s)", ldapUserIdentifyingAttribute, userId);
-
-            //Search for the user you want to authenticate, search him with some attribute
-            NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, searchFilter, sc);
-            // NamingEnumeration answer = ctx.search(usersContainer, "     (objectclass=group)", ctls);
+            EqualsFilter filter = new EqualsFilter(ldapUserIdentifyingAttribute, userId);
+            NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, filter.toString(), sc);
             if (results.hasMore()) {
-                // get the users DN (distinguishedName) from the result
                 SearchResult result = results.next();
                 NamingEnumeration attrs = result.getAttributes().getAll();
                 while (attrs.hasMore()) {
-                    //Open another connection to the LDAP server with the found DN and the password
                     searchEnv.put(Context.SECURITY_PRINCIPAL, result.getNameInNamespace());
                     searchEnv.put(Context.SECURITY_CREDENTIALS, userPwd);
                     try {
@@ -128,7 +119,7 @@ public class LdapService {
 
     public LdapUserNotExistActionType getLdapUserNotExistAction() {
         if (StringUtils.isBlank(ldapUserNotExistAction)) {
-            LOG.info("security.authentication.ldap.user.not.exist.action configuration is empty, the default value 'CREATE'");
+            log.info("security.authentication.ldap.user.not.exist.action configuration is empty, the default value 'CREATE'");
             return LdapUserNotExistActionType.CREATE;
         }
 
