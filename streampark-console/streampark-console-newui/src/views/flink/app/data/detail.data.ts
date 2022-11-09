@@ -101,21 +101,21 @@ export const getConfColumns = (): BasicColumn[] => [
 ];
 
 export const getSavePointColumns = (): BasicColumn[] => [
-  { title: 'Path', dataIndex: 'path', width: '45%' },
+  { title: 'Path', dataIndex: 'path' },
   { title: 'Trigger Time', dataIndex: 'triggerTime', width: 250 },
-  { title: 'Type', dataIndex: 'type' },
-  { title: 'Latest', dataIndex: 'latest' },
+  { title: 'Type', dataIndex: 'type', width: 170 },
+  { title: 'Latest', dataIndex: 'latest', width: 200 },
 ];
 export const getBackupColumns = (): BasicColumn[] => [
-  { title: 'Save Path', dataIndex: 'path', width: '40%', align: 'left' },
-  { title: 'Description', dataIndex: 'description', width: '20%' },
-  { title: 'Version', dataIndex: 'version', width: '10%' },
-  { title: 'Backup Time', dataIndex: 'createTime' },
+  { title: 'Save Path', dataIndex: 'path', align: 'left' },
+  { title: 'Description', dataIndex: 'description' },
+  { title: 'Version', dataIndex: 'version', width: 100, align: 'center' },
+  { title: 'Backup Time', dataIndex: 'createTime', width: 200 },
 ];
 
 export const getOptionLogColumns = (): BasicColumn[] => [
-  { title: 'Application Id', dataIndex: 'yarnAppId', width: '20%' },
-  { title: 'JobManager URL', dataIndex: 'jobManagerUrl', width: '25%' },
-  { title: 'Start Status', dataIndex: 'success' },
-  { title: 'Option Time', dataIndex: 'optionTime' },
+  { title: 'Application Id', dataIndex: 'yarnAppId' },
+  { title: 'JobManager URL', dataIndex: 'jobManagerUrl' },
+  { title: 'Start Status', dataIndex: 'success', width: 120 },
+  { title: 'Option Time', dataIndex: 'optionTime', width: 200 },
 ];

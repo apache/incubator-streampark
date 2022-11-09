@@ -15,17 +15,28 @@
   limitations under the License.
 -->
 <template>
-  <div ref="programArgRef" class="w-full border mt-5px" style="height: 120px"> </div>
-  <div class="relative flinksql-tool">
-    <a-button
-      class="flinksql-tool-item"
-      v-if="canReview"
-      @click="emit('preview', value)"
-      size="small"
-    >
-      <Icon icon="ant-design:eye-outlined" />
-      preview
-    </a-button>
+  <div ref="fullscreenRef">
+    <div ref="programArgRef" class="w-full border mt-5px" style="height: 240px"> </div>
+    <div class="relative flinksql-tool">
+      <a-button
+        class="flinksql-tool-item"
+        v-if="canReview"
+        @click="emit('preview', value)"
+        size="small"
+      >
+        <Icon icon="ant-design:eye-outlined" />
+        preview
+      </a-button>
+      <a-button
+        class="flinksql-tool-item"
+        size="small"
+        :type="isFullscreen ? 'default' : 'primary'"
+        @click="handleBigScreen"
+      >
+        <Icon :icon="`ant-design:${isFullscreen ? 'fullscreen-exit' : 'fullscreen'}-outlined`" />
+        {{ getTitle }}
+      </a-button>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -34,10 +45,11 @@
   };
 </script>
 <script lang="ts" setup>
-  import { computed, ref, toRefs, watchEffect } from 'vue';
+  import { computed, ref, toRefs, unref, watchEffect } from 'vue';
   import { getMonacoOptions } from '../data';
   import Icon from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
+  import { useFullscreenEvent } from '/@/hooks/event/useFullscreen';
   const props = defineProps({
     value: {
       type: String,
@@ -51,6 +63,8 @@
   const { value, suggestions } = toRefs(props);
   const emit = defineEmits(['update:value', 'preview']);
   const programArgRef = ref();
+  const { fullscreenRef, isFullscreen, toggle, getTitle } = useFullscreenEvent();
+
   const { onChange, setContent, setMonacoSuggest } = useMonaco(programArgRef, {
     language: 'plaintext',
     code: '',
@@ -67,6 +81,15 @@
   const canReview = computed(() => {
     return /\${.+}/.test(value.value);
   });
+  /* full screen */
+  function handleBigScreen() {
+    toggle();
+    unref(programArgRef).style.width = '0';
+    setTimeout(() => {
+      unref(programArgRef).style.width = '100%';
+      unref(programArgRef).style.height = isFullscreen.value ? 'calc(100vh - 50px)' : '240px';
+    }, 500);
+  }
   onChange((data) => {
     emit('update:value', data);
   });

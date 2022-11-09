@@ -372,11 +372,10 @@ export const renderSqlHistory = (
   //version compact
   function handleCompactSQL() {
     createConfirm({
-      iconType: 'info',
       title: () => (
         <div>
           <Icon icon="ant-design:swap-outlined" style="color: #4a9ff5" />
-          <span>Compare Flink SQL</span>
+          <span class="pl-10px">Compare Flink SQL</span>
         </div>
       ),
       okText: 'Compare',
@@ -403,6 +402,9 @@ export const renderSqlHistory = (
         );
       },
       onOk: () => handleCompareOk(compareSQL.value),
+      onCancel: () => {
+        compareSQL.value.length = 0;
+      },
     });
   }
 
