@@ -36,12 +36,12 @@
               },
               {
                 icon: 'carbon:data-view-alt',
-                tooltip: 'view detail',
+                tooltip: t('common.detail'),
                 onClick: handleView.bind(null, record),
               },
               {
                 icon: 'icon-park-outline:mind-mapping',
-                tooltip: 'depend apps',
+                tooltip: t('system.variable.table.depend'),
                 auth: 'variable:depend_apps',
                 onClick: () =>
                   router.push('/system/variable/depend_apps?id=' + record.variableCode),
@@ -95,7 +95,6 @@
     columns,
     formConfig: {
       baseColProps: { style: { paddingRight: '30px' } },
-      colon: true,
       schemas: searchFormSchema,
     },
     sortFn: (sortInfo: SorterResult) => {

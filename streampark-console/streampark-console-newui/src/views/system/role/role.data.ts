@@ -18,24 +18,25 @@ import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
 import { fetchCheckName } from '/@/api/system/role';
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
-
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 export const columns: BasicColumn[] = [
   {
-    title: 'Role Name',
+    title: t('system.role.form.roleName'),
     dataIndex: 'roleName',
   },
   {
-    title: 'Create Time',
+    title: t('common.createTime'),
     dataIndex: 'createTime',
     sorter: true,
   },
   {
-    title: 'Modify Time',
+    title: t('common.modifyTime'),
     dataIndex: 'modifyTime',
     sorter: true,
   },
   {
-    title: 'Description',
+    title: t('common.description'),
     dataIndex: 'remark',
     ellipsis: true,
   },
@@ -44,13 +45,13 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'roleName',
-    label: 'Role',
+    label: t('system.role.form.roleName'),
     component: 'Input',
     colProps: { span: 8 },
   },
   {
     field: 'createTime',
-    label: 'Create Time',
+    label: t('common.createTime'),
     component: 'RangePicker',
     colProps: { span: 8 },
   },
@@ -58,7 +59,7 @@ export const searchFormSchema: FormSchema[] = [
 export async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {
   if (value) {
     if (value.length > 255) {
-      return Promise.reject('Role name should not be longer than 255 characters');
+      return Promise.reject(t('system.role.form.roleNameLen'));
     } else {
       const res = await fetchCheckName({
         roleName: value,
@@ -66,11 +67,11 @@ export async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {
       if (res) {
         return Promise.resolve();
       } else {
-        return Promise.reject('Sorry, the role name already exists');
+        return Promise.reject(t('system.role.form.exist'));
       }
     }
   } else {
-    return Promise.reject('Role name cannot be empty');
+    return Promise.reject(t('system.role.form.empty'));
   }
 }
 export const formSchema: FormSchema[] = [
@@ -82,13 +83,13 @@ export const formSchema: FormSchema[] = [
   },
   {
     field: 'roleName',
-    label: 'Role Name',
+    label: t('system.role.form.roleName'),
     required: true,
     component: 'Input',
     rules: [{ required: true, validator: handleRoleCheck, trigger: 'blur' }],
   },
   {
-    label: 'Description',
+    label: t('common.description'),
     field: 'remark',
     component: 'InputTextArea',
   },
@@ -97,6 +98,6 @@ export const formSchema: FormSchema[] = [
     field: 'menuId',
     slot: 'menu',
     component: 'Select',
-    rules: [{ required: true, message: 'Please select the permission.' }],
+    rules: [{ required: true, message: t('system.role.form.menuIdRequired') }],
   },
 ];

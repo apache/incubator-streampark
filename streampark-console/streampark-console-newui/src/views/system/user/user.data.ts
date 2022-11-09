@@ -19,7 +19,8 @@ import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
 import { checkUserName, fetchUserTypes } from '/@/api/system/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
-
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 // user status enum
 const enum StatusEnum {
   Effective = '1',
@@ -34,11 +35,11 @@ const enum GenderEnum {
 }
 
 export const columns: BasicColumn[] = [
-  { title: 'User Name', dataIndex: 'username', sorter: true },
-  { title: 'Nick Name', dataIndex: 'nickName' },
-  { title: 'User Type', dataIndex: 'userType' },
+  { title: t('system.user.form.userName'), dataIndex: 'username', sorter: true },
+  { title: t('system.user.form.nickName'), dataIndex: 'nickName' },
+  { title: t('system.user.form.userType'), dataIndex: 'userType' },
   {
-    title: 'Status',
+    title: t('system.user.form.status'),
     dataIndex: 'status',
     customRender: ({ record }) => {
       const enable = record?.status === StatusEnum.Effective;
@@ -53,15 +54,25 @@ export const columns: BasicColumn[] = [
     filterMultiple: false,
   },
   {
-    title: 'Create Time',
+    title: t('common.createTime'),
     dataIndex: 'createTime',
     sorter: true,
   },
 ];
 
 export const searchFormSchema: FormSchema[] = [
-  { field: 'username', label: 'User Name', component: 'Input', colProps: { span: 8 } },
-  { label: 'Create Time', field: 'createTime', component: 'RangePicker', colProps: { span: 8 } },
+  {
+    field: 'username',
+    label: t('system.user.form.userName'),
+    component: 'Input',
+    colProps: { span: 8 },
+  },
+  {
+    label: t('common.createTime'),
+    field: 'createTime',
+    component: 'RangePicker',
+    colProps: { span: 8 },
+  },
 ];
 
 export const formSchema = (formType: string): FormSchema[] => {
@@ -73,12 +84,12 @@ export const formSchema = (formType: string): FormSchema[] => {
     { field: 'userId', label: 'User Id', component: 'Input', show: false },
     {
       field: 'username',
-      label: 'User Name',
+      label: t('system.user.form.userName'),
       component: 'Input',
       rules: [
-        { required: isCreate, message: 'username is required' },
-        { min: 4, message: 'username length cannot be less than 4 characters' },
-        { max: 8, message: 'exceeds maximum length limit of 8 characters' },
+        { required: isCreate, message: t('system.user.form.required') },
+        { min: 4, message: t('system.user.form.min') },
+        { max: 8, message: t('system.user.form.max') },
         {
           validator: async (_, value) => {
             if (!isCreate || !value || value.length < 4 || value.length > 8) {
@@ -86,7 +97,7 @@ export const formSchema = (formType: string): FormSchema[] => {
             }
             const res = await checkUserName({ username: value });
             if (!res) {
-              return Promise.reject(`Sorry the username already exists`);
+              return Promise.reject(t('system.user.form.exist'));
             }
           },
           trigger: 'blur',
@@ -99,7 +110,7 @@ export const formSchema = (formType: string): FormSchema[] => {
     },
     {
       field: 'nickName',
-      label: 'Nick Name',
+      label: t('system.user.form.nickName'),
       component: 'Input',
       dynamicRules: () => {
         return [{ required: isCreate, message: 'nickName is required' }];
@@ -108,13 +119,13 @@ export const formSchema = (formType: string): FormSchema[] => {
     },
     {
       field: 'password',
-      label: 'Password',
+      label: t('system.user.form.password'),
       component: 'InputPassword',
       componentProps: { placeholder: 'please enter password' },
-      helpMessage: 'Password length cannot be less than 8 characters',
+      helpMessage: t('system.user.form.passwordHelp'),
       rules: [
-        { required: true, message: 'password is required' },
-        { min: 8, message: 'Password length cannot be less than 8 characters' },
+        { required: true, message: t('system.user.form.passwordRequire') },
+        { min: 8, message: t('system.user.form.passwordHelp') },
       ],
       required: true,
       ifShow: isCreate,
@@ -124,8 +135,8 @@ export const formSchema = (formType: string): FormSchema[] => {
       label: 'E-Mail',
       component: 'Input',
       rules: [
-        { type: 'email', message: 'please enter a valid email address' },
-        { max: 50, message: 'exceeds maximum length limit of 50 characters' },
+        { type: 'email', message: t('system.user.form.email') },
+        { max: 50, message: t('system.user.form.maxEmail') },
       ],
       componentProps: {
         readonly: isView,
@@ -133,7 +144,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       },
     },
     {
-      label: 'User Type',
+      label: t('system.user.form.userType'),
       field: 'userType',
       component: 'ApiSelect',
       componentProps: {
@@ -145,7 +156,7 @@ export const formSchema = (formType: string): FormSchema[] => {
     },
     {
       field: 'status',
-      label: 'Status',
+      label: t('system.user.form.status'),
       component: 'RadioGroup',
       defaultValue: StatusEnum.Effective,
       componentProps: {
@@ -158,7 +169,7 @@ export const formSchema = (formType: string): FormSchema[] => {
     },
     {
       field: 'sex',
-      label: 'Gender',
+      label: t('system.user.form.gender'),
       component: 'RadioGroup',
       defaultValue: GenderEnum.Male,
       componentProps: {
@@ -172,7 +183,7 @@ export const formSchema = (formType: string): FormSchema[] => {
     },
     {
       field: 'description',
-      label: 'Description',
+      label: t('common.description'),
       component: 'InputTextArea',
       componentProps: { rows: 5, placeholder: 'Please enter description' },
       ifShow: isCreate,

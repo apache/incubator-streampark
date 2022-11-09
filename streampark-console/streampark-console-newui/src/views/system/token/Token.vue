@@ -78,7 +78,6 @@
         columns,
         formConfig: {
           baseColProps: { style: { paddingRight: '30px' } },
-          colon: true,
           schemas: searchFormSchema,
         },
         useSearchForm: true,

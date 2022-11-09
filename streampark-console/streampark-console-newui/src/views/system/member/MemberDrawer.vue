@@ -67,11 +67,11 @@
     if (value) {
       if (value.length > 20) {
         setValidateStatus('error');
-        setHelp('User name should not be longer than 20 characters');
+        setHelp(t('system.member.checkUserName.maxLen'));
         return Promise.reject();
       } else if (value.length < 4) {
         setValidateStatus('error');
-        setHelp('User name should not be less than 4 characters');
+        setHelp(t('system.member.checkUserName.minLen'));
         return Promise.reject();
       } else {
         setValidateStatus('validating');
@@ -80,7 +80,7 @@
         });
         if (res) {
           setValidateStatus('error');
-          setHelp("Sorry, the user name doesn't exists");
+          setHelp(t('system.member.checkUserName.noExist'));
           return Promise.reject();
         } else {
           setValidateStatus('success');
@@ -90,7 +90,7 @@
       }
     } else {
       setValidateStatus('error');
-      setHelp('User name cannot be empty');
+      setHelp(t('system.member.checkUserName.empty'));
       return Promise.reject();
     }
   }
@@ -114,7 +114,7 @@
           options: props.roleOptions,
           fieldNames: { label: 'roleName', value: 'roleId' },
         },
-        rules: [{ required: true, message: 'please select role' }],
+        rules: [{ required: true, message: t('system.member.roleRequire') }],
       },
     ];
   });

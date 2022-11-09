@@ -17,6 +17,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { ExecModeEnum } from '/@/enums/flinkEnum';
+  import { useI18n } from '/@/hooks/web/useI18n';
   export default defineComponent({
     name: 'ApplicationDetail',
   });
@@ -49,12 +50,10 @@
 
   const { Swal, createMessage } = useMessage();
   const { copy } = useClipboard();
-
-  const app = reactive<Partial<AppListRecord>>({});
-
-  createDetailProviderContext({ app });
+  const { t } = useI18n();
 
   const yarn = ref('');
+  const app = reactive<Partial<AppListRecord>>({});
   const detailTabs = reactive({
     showConf: false,
     showSaveOption: false,
@@ -62,26 +61,17 @@
     showOptionLog: false,
   });
 
+  createDetailProviderContext({ app });
+
   const [registerDescription] = useDescription({
     schema: [
       ...(getDescSchema() as any),
       {
         field: 'resetApi',
         label: h('div', null, [
-          'Rest Api',
-          h(
-            Tooltip,
-            {
-              title:
-                'Rest API external call interface,other third-party systems easy to access StreamPark',
-              placement: 'top',
-            },
-            () =>
-              h(Icon, {
-                icon: 'ant-design:question-circle-outlined',
-                class: 'pl-5px',
-                color: 'red',
-              }),
+          t('flink.app.detail.resetApi'),
+          h(Tooltip, { title: t('flink.app.detail.resetApiToolTip'), placement: 'top' }, () =>
+            h(Icon, { icon: 'ant-design:question-circle-outlined', class: 'pl-5px', color: 'red' }),
           ),
         ]),
         render: () => [
@@ -93,7 +83,10 @@
               class: 'mx-3px px-5px',
               onClick: () => handleCopyCurl('/flink/app/start'),
             },
-            () => [h(Icon, { icon: 'ant-design:copy-outlined' }), 'Copy Start cURL'],
+            () => [
+              h(Icon, { icon: 'ant-design:copy-outlined' }),
+              t('flink.app.detail.copyStartcURL'),
+            ],
           ),
           h(
             Button,
@@ -103,7 +96,10 @@
               class: 'mx-3px px-5px',
               onClick: () => handleCopyCurl('/flink/app/cancel'),
             },
-            () => [h(Icon, { icon: 'ant-design:copy-outlined' }), 'Copy Cancel cURL'],
+            () => [
+              h(Icon, { icon: 'ant-design:copy-outlined' }),
+              t('flink.app.detail.copyCancelcURL'),
+            ],
           ),
           h(
             Button,
@@ -113,7 +109,10 @@
               class: 'mx-3px px-5px',
               onClick: () => handleDocPage(),
             },
-            () => [h(Icon, { icon: 'ant-design:link-outlined' }), 'Api Doc Center'],
+            () => [
+              h(Icon, { icon: 'ant-design:link-outlined' }),
+              t('flink.app.detail.apiDocCenter'),
+            ],
           ),
         ],
       },
@@ -190,14 +189,14 @@
     if (result === 0) {
       Swal.fire({
         icon: 'error',
-        title: 'access token is null,please contact the administrator to add.',
+        title: t('flink.app.detail.nullAccessToken'),
         showConfirmButton: true,
         timer: 3500,
       });
     } else if (result === 1) {
       Swal.fire({
         icon: 'error',
-        title: 'access token is invalid,please contact the administrator.',
+        title: t('flink.app.detail.invalidAccessToken'),
         showConfirmButton: true,
         timer: 3500,
       });
@@ -208,7 +207,7 @@
         path: urlPath,
       });
       copy(res);
-      createMessage.success('copy successful');
+      createMessage.success(t('flink.app.detail.detailTab.copySuccess'));
     }
   }
 
@@ -225,7 +224,7 @@
 <template>
   <PageWrapper content-full-height content-background contentClass="p-24px">
     <div class="mb-15px">
-      <span class="app-bar">Application Info</span>
+      <span class="app-bar">{{ t('flink.app.detail.applicationTitle') }}</span>
       <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">
         <Icon icon="ant-design:arrow-left-outlined" />
       </a-button>
@@ -236,7 +235,7 @@
         class="float-right -mt-8px mr-20px"
       >
         <Icon icon="ant-design:cloud-outlined" />
-        Flink Web UI
+        {{ t('flink.app.detail.flinkWebUi') }}
       </a-button>
     </div>
     <Description @register="registerDescription" />

@@ -87,7 +87,6 @@
   const formConfig = computed((): Partial<FormProps> => {
     return {
       baseColProps: { style: { paddingRight: '30px' } },
-      colon: true,
       schemas: [
         {
           field: 'userName',
@@ -107,7 +106,7 @@
         },
         {
           field: 'createTime',
-          label: t('system.team.table.createTime'),
+          label: t('common.createTime'),
           component: 'RangePicker',
           colProps: { span: 6 },
         },
@@ -116,13 +115,13 @@
     };
   });
   const [registerTable, { reload }] = useTable({
-    title: 'Member List',
+    title: t('system.member.table.title'),
     api: fetchMemberList,
     columns: [
       { title: t('system.member.table.userName'), dataIndex: 'userName', sorter: true },
       { title: t('system.member.table.roleName'), dataIndex: 'roleName', sorter: true },
-      { title: t('system.member.table.createTime'), dataIndex: 'createTime', sorter: true },
-      { title: t('system.member.table.modifyTime'), dataIndex: 'modifyTime', sorter: true },
+      { title: t('common.createTime'), dataIndex: 'createTime', sorter: true },
+      { title: t('common.modifyTime'), dataIndex: 'modifyTime', sorter: true },
     ],
     rowKey: 'id',
     pagination: true,

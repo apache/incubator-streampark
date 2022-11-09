@@ -35,7 +35,7 @@ LayoutMap.set('BASICVIEW', LAYOUT);
 let dynamicViewsModules: Record<string, () => Promise<Recordable>>;
 
 // Dynamic introduction
-function asyncImportRoute(routes: AppRouteRecordRaw[] | undefined) {
+function asyncImportRoute(routes: AppRouteRecordRaw[] | undefined, parentName = '') {
   dynamicViewsModules = dynamicViewsModules || import.meta.glob('../../views/**/*.{vue,tsx}');
   if (!routes) return;
   routes.forEach((item) => {
@@ -51,7 +51,10 @@ function asyncImportRoute(routes: AppRouteRecordRaw[] | undefined) {
     }
     // Determine if all submenus are hidden, add hidenChildrenInMenu if all are hidden
     item.meta.hideChildrenInMenu = (children || []).every((child) => child.meta?.hidden);
-    children && asyncImportRoute(children);
+    if (item.meta.hidden) {
+      item.name = `${parentName ? parentName + '_' : ''}${item.name}`;
+    }
+    children && asyncImportRoute(children, name);
   });
 }
 
@@ -106,14 +109,13 @@ export function transformObjToRoute<T = AppRouteModule>(routeList: AppRouteModul
         route.meta = {
           ...meta,
           hidden: false,
-          test: 1,
           hideMenu: meta.hidden,
         };
       }
     } else {
       warn('Configure the routing correctly:' + route?.name + ' component attribute');
     }
-    route.children && asyncImportRoute(route.children);
+    route.children && asyncImportRoute(route.children, route.name);
   });
   return routeList as unknown as T[];
 }

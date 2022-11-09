@@ -16,7 +16,7 @@
 -->
 <template>
   <BasicDrawer
-    okText="Submit"
+    :okText="t('common.submitText')"
     @register="registerDrawer"
     showFooter
     :title="getTitle"
@@ -45,6 +45,7 @@
 
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
         labelWidth: 120,
+        colon: true,
         schemas: formSchema,
         showActionButtonGroup: false,
         baseColProps: { lg: 22, md: 22 },
@@ -62,7 +63,9 @@
         }
       });
 
-      const getTitle = computed(() => (!unref(isUpdate) ? t('system.token.addToken') : t('system.token.modifyToken')));
+      const getTitle = computed(() =>
+        !unref(isUpdate) ? t('system.token.addToken') : t('system.token.modifyToken'),
+      );
 
       async function handleSubmit() {
         try {
@@ -76,7 +79,7 @@
         }
       }
 
-      return { registerDrawer, registerForm, getTitle, handleSubmit };
+      return { t, registerDrawer, registerForm, getTitle, handleSubmit };
     },
   });
 </script>

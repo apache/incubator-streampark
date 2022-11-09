@@ -20,7 +20,7 @@
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
           <Icon icon="ant-design:plus-outlined" />
-          Add New
+          {{ t('common.add') }}
         </a-button>
       </template>
       <template #bodyCell="{ column, record }">
@@ -63,14 +63,13 @@
       const [registerModal, { openModal }] = useModal();
       const { createMessage, Swal } = useMessage();
       const [registerTable, { reload }] = useTable({
-        title: 'User List',
+        title: t('system.user.table.title'),
         api: getUserList,
         columns,
         formConfig: {
           // labelWidth: 120,
           baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
-          colon: true,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
         rowKey: 'userId',
@@ -83,7 +82,7 @@
         canResize: false,
         actionColumn: {
           width: 200,
-          title: 'Operation',
+          title: t('component.table.operation'),
           dataIndex: 'action',
         },
       });
@@ -91,23 +90,23 @@
         return [
           {
             icon: 'clarity:note-edit-line',
-            tooltip: 'modify user',
+            tooltip: t('system.user.table.modify'),
             auth: 'user:update',
             ifShow: () => record.username !== 'admin' || userName.value === 'admin',
             onClick: handleEdit.bind(null, record),
           },
           {
             icon: 'carbon:data-view-alt',
-            tooltip: 'view detail',
+            tooltip: t('common.detail'),
             onClick: handleView.bind(null, record),
           },
           {
             icon: 'bx:reset',
             auth: 'user:reset',
-            tooltip: 'reset password',
+            tooltip: t('system.user.table.reset'),
             ifShow: () => record.username !== 'admin' || userName.value === 'admin',
             popConfirm: {
-              title: 'reset password, are you sure',
+              title: t('system.user.table.resetTip'),
               confirm: handleReset.bind(null, record),
             },
           },
@@ -116,9 +115,9 @@
             color: 'error',
             auth: 'user:delete',
             ifShow: record.username !== 'admin',
-            tooltip: 'delete user',
+            tooltip: t('system.user.table.delete'),
             popConfirm: {
-              title: 'delete user, are you sure',
+              title: t('system.user.table.deleteTip'),
               confirm: handleDelete.bind(null, record),
             },
           },
@@ -146,7 +145,7 @@
         const hide = createMessage.loading('deleteing');
         try {
           await deleteUser({ userId: record.userId });
-          createMessage.success('delete successful');
+          createMessage.success(t('system.user.table.deleteSuccess'));
           reload();
         } catch (error) {
           console.error('user delete fail:', error);
@@ -159,13 +158,7 @@
         const hide = createMessage.loading('reseting');
         try {
           await resetPassword({ usernames: record.username });
-          Swal.fire(
-            'reset password successful, user [' +
-              record.username +
-              '] new password is streampark666',
-            '',
-            'success',
-          );
+          Swal.fire(t('system.user.table.resetSuccess', [record.username]), '', 'success');
         } catch (error) {
           console.error('user password fail:', error);
         } finally {

@@ -24,18 +24,18 @@ export const columns: BasicColumn[] = [
     sorter: true,
   },
   {
-    title: t('system.team.table.description'),
+    title: t('common.description'),
     dataIndex: 'description',
     ellipsis: true,
     width: 350,
   },
   {
-    title: t('system.team.table.createTime'),
+    title: t('common.createTime'),
     dataIndex: 'createTime',
     sorter: true,
   },
   {
-    title: t('system.team.table.modifyTime'),
+    title: t('common.modifyTime'),
     dataIndex: 'modifyTime',
     sorter: true,
   },
@@ -50,7 +50,7 @@ export const searchFormSchema: FormSchema[] = [
   },
   {
     field: 'createTime',
-    label: t('system.team.table.createTime'),
+    label: t('common.createTime'),
     component: 'RangePicker',
     colProps: { span: 8 },
   },

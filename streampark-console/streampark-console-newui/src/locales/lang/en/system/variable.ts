@@ -28,12 +28,23 @@ export default {
     variableCodePlaceholder: 'Please enter the variable code to search',
     variableValue: 'Variable Value',
     variableValuePlaceholder: 'Please enter description to search',
-    description: 'Description',
-
-    createTime: 'Create Time',
-    modifyTime: 'Modify Time',
+    depend: 'depend apps',
   },
   form: {
     descriptionMessage: 'exceeds maximum length limit of 100 characters',
+    len: 'Sorry, variable code length should be no less than 3 and no more than 50 characters.',
+    regExp:
+      'Sorry, variable code can only contain letters, numbers, middle bars, bottom bars and dots, and the beginning can only be letters, For example, kafka_cluster.brokers-520',
+    exists: 'Sorry, the Variable Code already exists',
+    empty: 'Variable Code cannot be empty',
+    desensitization: 'Desensitization',
+    desensitizationDesc:
+      'Whether desensitization is required, e.g: desensitization of sensitive data such as passwords, if enable variable value will be displayed as ********',
+  },
+  depend: {
+    title: 'Variable Depend Apps',
+    jobName: 'Application Name',
+    nickName: 'Owner',
+    headerTitle: 'Variable " {0} " used list',
   },
 };

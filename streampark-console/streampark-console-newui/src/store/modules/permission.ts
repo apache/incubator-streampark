@@ -186,7 +186,6 @@ export const usePermissionStore = defineStore({
         }
         return hasAuth;
       };
-
       switch (permissionMode) {
         // Role authorization
         case PermissionModeEnum.ROLE:
@@ -239,7 +238,7 @@ export const usePermissionStore = defineStore({
             if (routeList.length == 1 && routeList[0]?.children?.length === 0) {
               createErrorModal({
                 title: t('sys.api.errorTip'),
-                content: 'No permission, please contact the administrator',
+                content: t('sys.permission.noPermission'),
               });
               userStore.logout();
               return Promise.reject(new Error('routeList is empty'));
@@ -250,7 +249,6 @@ export const usePermissionStore = defineStore({
               )?.path;
               return v;
             });
-
             // Dynamically introduce components
             routeList = transformObjToRoute(routeList);
 
@@ -261,7 +259,6 @@ export const usePermissionStore = defineStore({
             // remove meta.ignoreRoute item
             routeList = filter(routeList, routeRemoveIgnoreFilter);
             routeList = routeList.filter(routeRemoveIgnoreFilter);
-
             routeList = flatMultiLevelRoutes(routeList);
             routes = [PAGE_NOT_FOUND_ROUTE, ...routeList];
           } catch (error) {
@@ -271,7 +268,6 @@ export const usePermissionStore = defineStore({
           }
           break;
       }
-
       routes.push(ERROR_LOG_ROUTE);
       patchHomeAffix(routes);
       return [routes, hasAuth];

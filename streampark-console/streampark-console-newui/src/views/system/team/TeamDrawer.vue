@@ -61,7 +61,7 @@
           },
           {
             field: 'description',
-            label: t('system.team.table.description'),
+            label: t('common.description'),
             component: 'InputTextArea',
             componentProps: { rows: 4 },
             rules: [{ max: 100, message: t('system.team.table.descriptionMessage') }],

@@ -19,7 +19,9 @@ import { FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
 import { Icon } from '/@/components/Icon';
+import { useI18n } from '/@/hooks/web/useI18n';
 
+const { t } = useI18n();
 export const enum TypeEnum {
   Menu = '0',
   Button = '1',
@@ -32,13 +34,13 @@ const isButton = (type: string) => type === TypeEnum.Button;
 
 export const columns: BasicColumn[] = [
   {
-    title: 'Name',
+    title: t('system.menu.table.name'),
     dataIndex: 'text',
     width: 200,
     align: 'left',
   },
   {
-    title: 'Icon',
+    title: t('system.menu.table.icon'),
     dataIndex: 'icon',
     width: 50,
     customRender: ({ record }) => {
@@ -48,7 +50,7 @@ export const columns: BasicColumn[] = [
     },
   },
   {
-    title: 'Type',
+    title: t('system.menu.table.icon'),
     dataIndex: 'type',
     width: 90,
     customRender: ({ record }) => {
@@ -56,23 +58,23 @@ export const columns: BasicColumn[] = [
       return h(Tag, { color: isMenu(record.type) ? 'cyan' : 'pink' }, () => text);
     },
   },
-  { title: 'Path', dataIndex: 'path' },
-  { title: 'Vue Component', dataIndex: 'component' },
-  { title: 'Permission', dataIndex: 'permission', width: 150 },
-  { title: 'Order By', dataIndex: 'order', width: 90 },
-  { title: 'Create Time', dataIndex: 'createTime' },
+  { title: t('system.menu.table.path'), dataIndex: 'path' },
+  { title: t('system.menu.table.component'), dataIndex: 'component' },
+  { title: t('system.menu.table.permission'), dataIndex: 'permission', width: 150 },
+  { title: t('system.menu.table.order'), dataIndex: 'order', width: 90 },
+  { title: t('common.createTime'), dataIndex: 'createTime' },
 ];
 
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'menuName',
-    label: 'Menu Name',
+    label: t('system.menu.table.name'),
     component: 'Input',
     colProps: { span: 8 },
   },
   {
     field: 'createTime',
-    label: 'Create Time',
+    label: t('common.createTime'),
     component: 'RangePicker',
     componentProps: {},
     colProps: { span: 8 },
