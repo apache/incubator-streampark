@@ -30,8 +30,8 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchFlinkSqlVerify } from '/@/api/flink/app/flinkSql';
   import { format } from '../FlinkSqlFormatter';
-  import { useFullscreen } from '@vueuse/core';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { useFullscreenEvent } from '/@/hooks/event/useFullscreen';
   const ButtonGroup = Button.Group;
   const { t } = useI18n();
   const vertifyRes = reactive({
@@ -41,8 +41,7 @@
     errorEnd: 0,
   });
   const flinkSql = ref();
-  const flinkScreen = ref();
-  const { isFullscreen, toggle } = useFullscreen(flinkScreen);
+  const { fullscreenRef, isFullscreen, toggle } = useFullscreenEvent();
   const emit = defineEmits(['update:value', 'preview']);
   const { createMessage } = useMessage();
 
@@ -142,8 +141,8 @@
     unref(flinkSql).style.width = '0';
     setTimeout(() => {
       unref(flinkSql).style.width = '100%';
-      unref(flinkSql).style.height = isFullscreen.value ? '100vh' : '550px';
-    }, 100);
+      unref(flinkSql).style.height = isFullscreen.value ? 'calc(100vh - 50px)' : '550px';
+    }, 500);
   }
   const { onChange, setContent, getInstance, getMonacoInstance, setMonacoSuggest } = useMonaco(
     flinkSql,
@@ -176,7 +175,7 @@
 
 <template>
   <div>
-    <div ref="flinkScreen">
+    <div ref="fullscreenRef">
       <div
         class="sql-box"
         ref="flinkSql"

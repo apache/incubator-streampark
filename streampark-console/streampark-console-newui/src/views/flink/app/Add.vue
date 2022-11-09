@@ -261,11 +261,11 @@
       submitLoading.value = true;
       if (formValue.jobType === 'sql') {
         if (formValue.flinkSql == null || formValue.flinkSql.trim() === '') {
-          createMessage.warning('Flink Sql is required');
+          createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
         } else {
           const access = await flinkSql?.value?.handleVerifySql();
           if (!access) {
-            createMessage.warning('SQL check error');
+            createMessage.warning(t('flink.app.editStreamPark.sqlCheck'));
             throw new Error(access);
           }
         }

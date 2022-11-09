@@ -18,7 +18,7 @@
   <BasicModal :width="600" :show-cancel-btn="false" @register="registerModal" @ok="handleSubmit">
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
-      User Info
+      {{ t('system.user.userInfo') }}
     </template>
     <Description
       @register="registerDescription"
@@ -40,8 +40,10 @@
   import { useDescription, Description } from '/@/components/Description';
   import Icon from '/@/components/Icon';
   import { useModalInner, BasicModal } from '/@/components/Modal';
+  import { useI18n } from '/@/hooks/web/useI18n';
   const userInfo = ref<Recordable>({});
 
+  const { t } = useI18n();
   const [registerModal, { closeModal }] = useModalInner((data: Recordable) => {
     data && onReceiveModalData(data);
   });
@@ -71,10 +73,10 @@
     ]);
   };
   const userColumn = [
-    { label: generatedLabelIcon('user', 'User Name'), field: 'username' },
-    { label: generatedLabelIcon('star', 'User Type'), field: 'userType' },
+    { label: generatedLabelIcon('user', t('system.user.form.userName')), field: 'username' },
+    { label: generatedLabelIcon('star', t('system.user.form.userType')), field: 'userType' },
     {
-      label: generatedLabelIcon('skin', 'Gender'),
+      label: generatedLabelIcon('skin', t('system.user.form.gender')),
       field: 'sex',
       render: (curVal: string) => {
         const sexMap = {
@@ -101,15 +103,15 @@
       },
     },
     {
-      label: generatedLabelIcon(`clock-circle`, 'Creation'),
+      label: generatedLabelIcon(`clock-circle`, t('common.createTime')),
       field: 'createTime',
     },
     {
-      label: generatedLabelIcon(`login`, 'Recent Login'),
+      label: generatedLabelIcon(`login`, t('system.user.form.lastLoginTime')),
       field: 'lastLoginTime',
     },
     {
-      label: generatedLabelIcon(`message`, 'Description'),
+      label: generatedLabelIcon(`message`, t('common.description')),
       field: 'description',
     },
   ];

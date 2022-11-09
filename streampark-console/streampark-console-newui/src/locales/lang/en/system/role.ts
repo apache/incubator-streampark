@@ -15,25 +15,22 @@
  * limitations under the License.
  */
 export default {
-  addMember: '添加成员',
-  modifyMember: '编辑成员',
-  deleteMember: '删除成员',
-  deletePopConfirm: '确定要删除这个成员 ?',
-  add: '添加',
-  success: '成功',
-  fail: '失败',
-  table: {
-    title: '成员列表',
-    userName: '用户名',
-    roleName: '角色',
-    createTime: '创建时间',
-    modifyTime: '修改时间',
+  deleteTip: 'Are you sure delete this Role',
+  assignment: 'menu assignment',
+  form: {
+    roleName: 'Role Name',
+    menuId: 'permission',
+    menuIdRequired: 'Please select the permission.',
+    create: 'Add Role',
+    edit: 'Edit Role',
+    delete: 'Delete Role',
+    view: 'View Role',
+    validite: 'You must include the view permission under application',
+    roleNameLen: 'Role name should not be longer than 255 characters',
+    exist: 'Sorry, the role name already exists',
+    empty: 'Role name cannot be empty',
   },
-  checkUserName: {
-    maxLen: '用户名不应超过 20 个字符',
-    minLen: '用户名不应少于 4 个字符',
-    noExist: '抱歉，用户名不存在',
-    empty: '用户名不能为空',
-  },
-  roleRequire: '请选择角色',
+  roleInfo: 'Role Info',
+  tableTitle: 'Role List',
+  modifyTime: 'Not yet modified',
 };

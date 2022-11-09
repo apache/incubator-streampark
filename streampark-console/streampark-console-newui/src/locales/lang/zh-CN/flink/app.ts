@@ -15,10 +15,19 @@
  * limitations under the License.
  */
 export default {
+  applicationTitle: 'Application 信息',
+  flinkWebUi: 'Flink Web UI',
   detail: {
     compareConfig: '比较配置',
     candidate: '侯选',
     compare: '比较',
+    resetApi: 'Rest Api',
+    resetApiToolTip: 'Rest API外部调用接口，其他第三方系统可轻松访问StreamPark。',
+    copyStartcURL: '复制启动 cURL',
+    copyCancelcURL: '复制取消 cURL',
+    apiDocCenter: 'Api文档',
+    nullAccessToken: '访问令牌为空，请联系管理员添加.',
+    invalidAccessToken: '访问令牌无效，请联系管理员。',
 
     detailTab: {
       configDetail: '查看日志详情',
@@ -51,6 +60,8 @@ export default {
     refresh: '刷新',
     start: '开启应用',
     stop: '停止应用',
+    recheck: '关联的项目已更改，需要重新检查此作业',
+    changed: '应用程序已更改。',
   },
   pod: {
     choice: '选择',
@@ -69,4 +80,28 @@ export default {
   hadoopConfigTitle: '系统 Hadoop 配置',
   dragUploadTitle: '单击或拖动 jar 到此区域以上传',
   dragUploadTip: '支持单次上传。您可以在此处上传本地 jar 以支持当前作业',
+  editStreamPark: {
+    success: '更新成功',
+    flinkSqlRequired: 'Flink Sql 为必填项',
+    appidCheck: 'appid 不能为空',
+    sqlCheck: 'SQL 检查错误',
+  },
+  launchTitle: '该应用程序的当前启动正在进行中.',
+  launchDesc: '您确定要强制进行另一次构建吗',
+  launchFail: 'lanuch application 失败,',
+  launching: '当前 Application 正在 launching',
+  tableAction: {
+    edit: '编辑 Application',
+    launch: 'Launch Application',
+    launchDetail: 'Launching 详情',
+    start: '启动 Application',
+    cancel: '取消 Application',
+    detail: '查看 Application 详情',
+    startLog: '查看 Flink 启动日志',
+    force: '强制停止Application',
+    copy: '复制 Application',
+    remapping: 'Remapping Application',
+    flameGraph: '查看 FlameGraph',
+    deleteTip: '你确定要删除这个job ?',
+  },
 };

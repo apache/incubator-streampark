@@ -111,7 +111,7 @@ export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
       executionMode,
     )
   ) {
-    if (yarn == null) {
+    if (!yarn) {
       const res = await fetchYarn();
       window.open(res + '/proxy/' + app['appId'] + '/');
     } else {

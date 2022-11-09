@@ -24,10 +24,8 @@ export default {
     title: 'Token List',
     userName: 'User Name',
     token: 'Token',
-    description: 'Description',
-    createTime: 'Create Time',
     expireTime: 'Expire Time',
-    status: 'Status'
+    status: 'Status',
   },
   operation: {
     copySuccess: 'copy success',
@@ -36,5 +34,5 @@ export default {
     deleteFailed: 'delete token failed',
     updateSuccess: 'update token successfully',
     createSuccess: 'create token successfully',
-  }
-}
+  },
+};

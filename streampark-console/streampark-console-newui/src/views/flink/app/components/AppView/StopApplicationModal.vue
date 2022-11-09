@@ -64,11 +64,7 @@
           placeholder: 'Entry the custom savepoint path',
           allowClear: true,
         },
-        afterItem: h(
-          'span',
-          { class: 'conf-switch' },
-          'restore the application from savepoint or latest checkpoint',
-        ),
+        afterItem: h('span', { class: 'conf-switch' }, 'cancel job with savepoint path'),
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
@@ -152,6 +148,6 @@
 
       {{ t('flink.app.view.stop') }}
     </template>
-    <BasicForm @register="registerForm" />
+    <BasicForm @register="registerForm" class="!pt-20px" />
   </BasicModal>
 </template>

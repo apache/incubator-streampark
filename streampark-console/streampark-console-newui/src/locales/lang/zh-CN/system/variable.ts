@@ -28,12 +28,23 @@ export default {
     variableCodePlaceholder: '输入 Variable Code 查询',
     variableValue: 'Variable Value',
     variableValuePlaceholder: '输入描述',
-    description: '描述',
-
-    createTime: '创建时间',
-    modifyTime: '修改时间',
+    depend: 'application 依赖',
   },
   form: {
     descriptionMessage: '超过 100 个字符的最大长度限制',
+    len: '对不起,变量代码长度应不少于3个,不超过50个字符。',
+    regExp:
+      '抱歉,变量代码只能包含字母、数字、-、_和. ,开头只能是字母，例如 kafka_cluster.brokers-520',
+    exists: '抱歉，变量代码已存在',
+    empty: '变量代码不能为空',
+    desensitization: '数据脱敏',
+    desensitizationDesc:
+      '是否需要脱敏，例如：对敏感数据（如密码）进行脱敏，如果启用，变量值将显示为********',
+  },
+  depend: {
+    title: '变量依赖application',
+    jobName: 'Application 名称',
+    nickName: '所属者',
+    headerTitle: '变量 " {0} " 使用列表',
   },
 };

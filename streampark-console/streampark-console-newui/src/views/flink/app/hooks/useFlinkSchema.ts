@@ -87,7 +87,7 @@ export const useFlinkSchema = (editModel?: string) => {
         componentProps: () => {
           const options = getExecutionCluster(3);
           return {
-            placeholder: 'Please enter Yarn Session clusterId',
+            placeholder: 'Please Select Yarn Session clusterId',
             options: options.map((i) => ({ label: i.clusterName, value: i.clusterId })),
           };
         },

@@ -15,7 +15,13 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer okText="Submit" @register="registerDrawer" showFooter width="650" @ok="handleSubmit">
+  <BasicDrawer
+    :okText="t('common.submitText')"
+    @register="registerDrawer"
+    showFooter
+    width="650"
+    @ok="handleSubmit"
+  >
     <template #title>
       <Icon icon="ant-design:code-outlined" />
       {{ getTitle }}
@@ -59,15 +65,11 @@
       setValidateStatus('validating');
       if (value.length < 3 || value.length > 50) {
         setValidateStatus('error');
-        setHelp(
-          'Sorry, variable code length should be no less than 3 and no more than 50 characters.',
-        );
+        setHelp(t('system.variable.form.len'));
         return Promise.reject();
       } else if (!new RegExp(/^([A-Za-z])+([A-Za-z0-9._-])+$/).test(value)) {
         setValidateStatus('error');
-        setHelp(
-          'Sorry, variable code can only contain letters, numbers, middle bars, bottom bars and dots, and the beginning can only be letters, For example, kafka_cluster.brokers-520',
-        );
+        setHelp(t('system.variable.form.regExp'));
       } else {
         const { data } = await fetchCheckVariableCode({
           variableCode: value,
@@ -82,13 +84,13 @@
           return Promise.resolve();
         } else {
           setValidateStatus('error');
-          setHelp('Sorry, the Variable Code already exists');
+          setHelp(t('system.variable.form.exists'));
           return Promise.reject();
         }
       }
     } else {
       setValidateStatus('error');
-      setHelp('Variable Code cannot be empty');
+      setHelp(t('system.variable.form.empty'));
       return Promise.reject();
     }
   }
@@ -112,14 +114,14 @@
       },
       {
         field: 'description',
-        label: t('system.variable.table.description'),
+        label: t('common.description'),
         component: 'InputTextArea',
         componentProps: { rows: 4 },
         rules: [{ max: 100, message: t('system.variable.form.descriptionMessage') }],
       },
       {
         field: 'desensitization',
-        label: 'Desensitization',
+        label: t('system.variable.form.desensitization'),
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
@@ -129,7 +131,7 @@
         afterItem: h(
           'span',
           { class: 'conf-switch' },
-          'Whether desensitization is required, e.g: desensitization of sensitive data such as passwords, if enable variable value will be displayed as ********',
+          t('system.variable.form.desensitizationDesc'),
         ),
       },
     ];

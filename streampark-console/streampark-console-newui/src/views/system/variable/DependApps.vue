@@ -25,11 +25,12 @@
   import Icon from '/@/components/Icon';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTable, useTable } from '/@/components/Table';
-
+  import { useI18n } from '/@/hooks/web/useI18n';
+  const { t } = useI18n();
   const route = useRoute();
   const router = useRouter();
   const [registerTable] = useTable({
-    title: 'Variable Depend Apps',
+    title: t('system.variable.depend.title'),
     api: fetchDependApps,
     canResize: false,
     showIndexColumn: false,
@@ -42,9 +43,9 @@
       return params;
     },
     columns: [
-      { title: 'Application Name', dataIndex: 'jobName', width: 500 },
-      { title: 'Owner', dataIndex: 'nickName' },
-      { title: 'Create Time', dataIndex: 'createTime' },
+      { title: t('system.variable.depend.jobName'), dataIndex: 'jobName', width: 500 },
+      { title: t('system.variable.depend.nickName'), dataIndex: 'nickName' },
+      { title: t('common.createTime'), dataIndex: 'createTime' },
     ],
   });
 </script>
@@ -60,7 +61,9 @@
       >
         <Icon icon="ant-design:arrow-left-outlined" />
       </a-button>
-      <span class="app-bar">Variable "{{ route.query.id }}" used list</span>
+      <span class="app-bar">
+        {{ t('system.variable.depend.headerTitle', [route.query.id]) }}
+      </span>
     </div>
     <BasicTable @register="registerTable" />
   </PageWrapper>

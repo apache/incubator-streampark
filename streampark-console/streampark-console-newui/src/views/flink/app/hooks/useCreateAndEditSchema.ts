@@ -222,7 +222,7 @@ export const useCreateAndEditSchema = (
         component: 'Select',
         componentProps: () => {
           return {
-            placeholder: 'Please enter Yarn Session clusterId',
+            placeholder: 'Please Select Yarn Session clusterId',
             options: getExecutionCluster(3, 'clusterId'),
           };
         },

@@ -23,25 +23,17 @@
   </Tooltip>
 </template>
 <script lang="ts">
-  import { defineComponent, computed, unref } from 'vue';
+  import { defineComponent } from 'vue';
   import { Tooltip } from 'ant-design-vue';
-  import { useI18n } from '/@/hooks/web/useI18n';
-  import { useFullscreen } from '@vueuse/core';
 
   import { FullscreenExitOutlined, FullscreenOutlined } from '@ant-design/icons-vue';
+  import { useFullscreenEvent } from '/@/hooks/event/useFullscreen';
   export default defineComponent({
     name: 'FullScreen',
     components: { FullscreenExitOutlined, FullscreenOutlined, Tooltip },
 
     setup() {
-      const { t } = useI18n();
-      const { toggle, isFullscreen } = useFullscreen();
-
-      const getTitle = computed(() => {
-        return unref(isFullscreen)
-          ? t('layout.header.tooltipExitFull')
-          : t('layout.header.tooltipEntryFull');
-      });
+      const { toggle, isFullscreen, getTitle } = useFullscreenEvent(true);
 
       return {
         getTitle,
