@@ -636,7 +636,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String args = appParam.getArgs();
 
         newApp.setJobName(jobName);
-        newApp.setClusterId(oldApp.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION ? oldApp.getClusterId() : jobName);
+        newApp.setClusterId(ExecutionMode.isSessionMode(oldApp.getExecutionModeEnum()) ? oldApp.getClusterId() : jobName);
         args = args != null && !"".equals(args) ? args : oldApp.getArgs();
         newApp.setArgs(args);
         newApp.setVersionId(oldApp.getVersionId());
