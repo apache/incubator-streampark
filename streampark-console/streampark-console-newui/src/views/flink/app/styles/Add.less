@@ -190,14 +190,13 @@
     margin-top: 15px;
     margin-bottom: -10px;
     border-radius: 5px;
-    background-color: #e6f7ff;
-    border: 1px solid #d9d9d9;
+    background-color: @background-color-base;
+    border: 1px solid @border-color-base;
     display: inline-block;
 
     .dependency-item {
       position: relative;
       border: unset;
-      background-color: unset;
       line-height: 35px;
       padding: 0 6px;
       width: unset;
@@ -207,6 +206,7 @@
         position: relative;
         left: 5px;
         top: 6px;
+        color: @background-color-base;
       }
     }
   }

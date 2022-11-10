@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent, nextTick, ref, unref, onUnmounted } from 'vue';
+  import { defineComponent, nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
   import { useI18n } from '/@/hooks/web/useI18n';
 
@@ -53,13 +53,14 @@
   const appDashboardRef = ref<any>();
 
   const yarn = ref<Nullable<string>>(null);
+  const currentTablePage = ref(1);
 
   const [registerStartModal, { openModal: openStartModal }] = useModal();
   const [registerStopModal, { openModal: openStopModal }] = useModal();
   const [registerLogModal, { openModal: openLogModal }] = useModal();
   const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
 
-  const [registerTable, { reload, getLoading }] = useTable({
+  const [registerTable, { reload, getLoading, setPagination }] = useTable({
     rowKey: 'id',
     api: fetchAppRecord,
     beforeFetch: (params) => {
@@ -69,6 +70,8 @@
         }
         delete params.state;
       }
+      currentTablePage.value = params.pageNum;
+      // sessionStorage.setItem('appPageNo', params.pageNum);
       return params;
     },
     afterFetch: (dataSource) => {
@@ -114,6 +117,7 @@
     tableSetting: { fullScreen: true, redo: false },
     actionColumn: { dataIndex: 'operation', title: t('component.table.operation'), width: 180 },
   });
+
   const { getTableActions, getActionDropdown, formConfig } = useAppTableAction(
     openStartModal,
     openStopModal,
@@ -159,6 +163,17 @@
     }
     start();
   }, 2000);
+
+  onMounted(() => {
+    // If there is a page, jump to the page number of the record
+    const currentPage = sessionStorage.getItem('appPageNo');
+    if (currentPage) {
+      setPagination({
+        current: Number(currentPage) || 1,
+      });
+      sessionStorage.removeItem('appPageNo');
+    }
+  });
 
   onUnmounted(() => {
     stop();
@@ -226,7 +241,7 @@
         </template>
         <template v-if="column.dataIndex === 'operation'">
           <TableAction
-            :actions="getTableActions(record)"
+            :actions="getTableActions(record, currentTablePage)"
             :dropDownActions="getActionDropdown(record)"
           />
         </template>

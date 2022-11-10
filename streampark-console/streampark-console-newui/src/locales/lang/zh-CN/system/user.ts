@@ -48,4 +48,9 @@ export default {
   },
   roleInfo: '角色信息',
   modifyTime: '尚未修改',
+  male: '男',
+  female: '女',
+  secret: '未知',
+  locked: '锁定',
+  effective: '有效',
 };

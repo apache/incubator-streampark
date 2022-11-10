@@ -373,7 +373,9 @@
             >
               {showBeforeItem && <div class="extra">{getBeforeItem}</div>}
               <div style="display:flex">
-                <div style="flex:1;">{getContent()}</div>
+                <div class="w-full" style="flex:1;">
+                  {getContent()}
+                </div>
                 {showSuffix && <span class="suffix">{getSuffix}</span>}
               </div>
               {showAfterItem && <div class="extra">{getAfterItem}</div>}
