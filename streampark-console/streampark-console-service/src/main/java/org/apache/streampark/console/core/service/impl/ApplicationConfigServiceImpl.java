@@ -180,10 +180,7 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public ApplicationConfig getLatest(Long appId) {
-        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
-            .eq(ApplicationConfig::getAppId, appId)
-            .eq(ApplicationConfig::getLatest, true);
-        return this.getOne(queryWrapper);
+        return baseMapper.getLatest(appId);
     }
 
     @Override
@@ -206,9 +203,7 @@ public class ApplicationConfigServiceImpl
     @Override
     public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
         Page<ApplicationConfig> page = new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
-        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
-            .eq(ApplicationConfig::getAppId, config.getAppId());
-        return this.page(page, queryWrapper);
+        return this.baseMapper.pageByAppId(page, config.getAppId());
     }
 
     @Override

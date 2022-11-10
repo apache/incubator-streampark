@@ -50,4 +50,11 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     List<String> getRecentK8sTmPodTemplate(@Param("limitSize") int limit);
 
+    void resetOptionState();
+
+    Integer existsByTeamId(@Param("teamId") Long teamId);
+
+    Integer existsByJobName(@Param("jobName") String jobName);
+
+    List<Application> getByProjectId(@Param("projectId") Long id);
 }

@@ -39,7 +39,6 @@ import org.apache.streampark.flink.submit.bean.KubernetesDeployParam;
 import org.apache.streampark.flink.submit.bean.ShutDownRequest;
 import org.apache.streampark.flink.submit.bean.ShutDownResponse;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -91,15 +90,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             return "error";
         }
         //1) Check if name is duplicate, if it already exists
-        LambdaQueryWrapper<FlinkCluster> queryWrapper = new LambdaQueryWrapper<FlinkCluster>()
-            .eq(FlinkCluster::getClusterName, cluster.getClusterName());
-        FlinkCluster flinkCluster = this.getOne(queryWrapper);
-        if (flinkCluster != null) {
-            boolean isExists = cluster.getId() == null || (cluster.getId() != null && !flinkCluster.getId().equals(cluster.getId()));
-            if (isExists) {
-                return "exists";
-            }
+        Boolean existsByClusterName = this.existsByClusterName(cluster.getClusterName(), cluster.getId());
+        if (existsByClusterName) {
+            return "exists";
         }
+
         if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum())) {
             //2) Check if the connection can be made to
             return cluster.verifyConnection() ? "success" : "fail";
@@ -117,10 +112,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         }
         String clusterId = flinkCluster.getClusterId();
         if (StringUtils.isNoneBlank(clusterId)) {
-            LambdaQueryWrapper<FlinkCluster> queryWrapper = new LambdaQueryWrapper<FlinkCluster>()
-                .eq(FlinkCluster::getClusterId, clusterId);
-            FlinkCluster inDb = this.getOne(queryWrapper);
-            if (inDb != null) {
+            Boolean existsByClusterId = this.existsByClusterId(clusterId);
+            if (existsByClusterId) {
                 result.setMsg("the clusterId" + clusterId + "is already exists,please check!");
                 result.setStatus(0);
                 return result;
@@ -288,6 +281,16 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             result.setMsg("shutdown cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
             return result;
         }
+    }
+
+    @Override
+    public Boolean existsByClusterId(String clusterId) {
+        return this.baseMapper.existsByClusterId(clusterId) > 0;
+    }
+
+    @Override
+    public Boolean existsByClusterName(String clusterName, Long id) {
+        return this.baseMapper.existsByClusterName(clusterName, id) > 0;
     }
 
     @Override

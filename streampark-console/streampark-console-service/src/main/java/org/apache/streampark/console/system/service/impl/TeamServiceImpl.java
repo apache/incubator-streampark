@@ -104,13 +104,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         if (team == null) {
             throw new ApiAlertException(String.format("The team[Id=%s] doesn't exists.", teamId));
         }
-        if (applicationService.countByTeamId(teamId) > 0) {
+        if (applicationService.existsByTeamId(teamId)) {
             throw new ApiAlertException(String.format("Please delete the applications under the team[name=%s] first!", team.getTeamName()));
         }
-        if (projectService.countByTeamId(teamId) > 0) {
+        if (projectService.existsByTeamId(teamId)) {
             throw new ApiAlertException(String.format("Please delete the projects under the team[name=%s] first!", team.getTeamName()));
         }
-        if (variableService.countByTeamId(teamId) > 0) {
+        if (variableService.existsByTeamId(teamId)) {
             throw new ApiAlertException(String.format("Please delete the variables under the team[name=%s] first!", team.getTeamName()));
         }
 

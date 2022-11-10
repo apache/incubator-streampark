@@ -45,7 +45,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -166,24 +165,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public IPage<Project> page(Project project, RestRequest request) {
         Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
-            .eq(Project::getTeamId, project.getTeamId())
-            .like(StringUtils.isNotBlank(project.getName()), Project::getName, project.getName())
-            .eq(project.getBuildState() != null, Project::getBuildState, project.getBuildState());
-        return this.page(page, queryWrapper);
+        return this.baseMapper.page(page, project);
     }
 
     @Override
-    public long countByTeamId(Long teamId) {
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
-            .eq(Project::getTeamId, teamId);
-        return this.count(queryWrapper);
+    public Boolean existsByTeamId(Long teamId) {
+        return this.baseMapper.existsByTeamId(teamId) > 0;
     }
 
     @Override
     public void build(Long id) throws Exception {
         Project project = getById(id);
-        this.baseMapper.updateStartBuildById(project);
+        this.baseMapper.updateBuildState(project.getId(), BuildState.BUILDING.get());
         ProjectBuildTask projectBuildTask = new ProjectBuildTask(getBuildLogPath(id), project, baseMapper, applicationService);
         CompletableFuture<Void> buildTask = CompletableFuture.runAsync(projectBuildTask, executorService);
         // TODO May need to define parameters to set the build timeout in the future.

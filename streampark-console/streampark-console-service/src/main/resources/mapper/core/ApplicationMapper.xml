@@ -79,6 +79,28 @@
         <result column="tags" jdbcType="VARCHAR" property="tags"/>
     </resultMap>
 
+    <update id="resetOptionState">
+        update t_flink_app set option_state = 0
+    </update>
+
+    <select id="existsByTeamId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        select count(1) as counter
+        from t_flink_app
+        where team_id = #{teamId}
+        limit 1
+    </select>
+
+    <select id="existsByJobName" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1) as counter
+        from t_flink_app
+        where job_name = #{jobName}
+        limit 1
+    </select>
+
+    <select id="getByProjectId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
+        select * from t_flink_app where project_id=#{projectId}
+    </select>
+
     <select id="page" resultType="org.apache.streampark.console.core.entity.Application" parameterType="org.apache.streampark.console.core.entity.Application">
         select t.*,
                p.name as projectName,

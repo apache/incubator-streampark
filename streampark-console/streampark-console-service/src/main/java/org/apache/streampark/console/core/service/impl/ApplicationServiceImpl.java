@@ -94,7 +94,6 @@ import org.apache.streampark.flink.submit.bean.KubernetesSubmitParam;
 import org.apache.streampark.flink.submit.bean.SubmitRequest;
 import org.apache.streampark.flink.submit.bean.SubmitResponse;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -212,9 +211,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @PostConstruct
     public void resetOptionState() {
-        Application application = new Application();
-        application.setOptionState(0);
-        this.update(application);
+        this.baseMapper.resetOptionState();
     }
 
     private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap = new ConcurrentHashMap<>();
@@ -516,10 +513,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public long countByTeamId(Long teamId) {
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
-            .eq(Application::getTeamId, teamId);
-        return this.count(queryWrapper);
+    public boolean existsByTeamId(Long teamId) {
+        return baseMapper.existsByTeamId(teamId) > 0;
     }
 
     @Override
@@ -539,9 +534,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!checkJobName(appParam.getJobName())) {
             return AppExistsState.INVALID;
         }
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
-            .eq(Application::getJobName, appParam.getJobName());
-        boolean inDB = this.baseMapper.selectCount(queryWrapper) > 0;
+
+        boolean existsByJobName = this.existsByJobName(appParam.getJobName());
 
         if (appParam.getId() != null) {
             Application app = getById(appParam.getId());
@@ -549,7 +543,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 return AppExistsState.NO;
             }
 
-            if (inDB) {
+            if (existsByJobName) {
                 return AppExistsState.IN_DB;
             }
 
@@ -573,7 +567,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
         } else {
-            if (inDB) {
+            if (existsByJobName) {
                 return AppExistsState.IN_DB;
             }
 
@@ -623,19 +617,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return false;
     }
 
+    private boolean existsByJobName(String jobName) {
+        return this.baseMapper.existsByJobName(jobName) > 0;
+    }
+
     @SuppressWarnings("checkstyle:WhitespaceAround")
     @Override
     @SneakyThrows
     @Transactional(rollbackFor = {Exception.class})
     public Long copy(Application appParam) {
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
-            .eq(Application::getJobName, appParam.getJobName());
-        long count = this.baseMapper.selectCount(queryWrapper);
-        if (count > 0) {
+        boolean existsByJobName = this.existsByJobName(appParam.getJobName());
+        if (existsByJobName) {
             throw new IllegalArgumentException("[StreamPark] Application names cannot be repeated");
         }
-        Application oldApp = getById(appParam.getId());
 
+        Application oldApp = getById(appParam.getId());
         Application newApp = new Application();
         String jobName = appParam.getJobName();
 
@@ -882,9 +878,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public List<Application> getByProjectId(Long id) {
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
-            .eq(Application::getProjectId, id);
-        return this.list(queryWrapper);
+        return baseMapper.getByProjectId(id);
     }
 
     @Override

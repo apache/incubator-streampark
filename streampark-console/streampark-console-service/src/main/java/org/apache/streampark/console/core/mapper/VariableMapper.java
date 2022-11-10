@@ -31,4 +31,7 @@ public interface VariableMapper extends BaseMapper<Variable> {
     IPage<Variable> page(Page<Variable> page, @Param("variable") Variable variable);
 
     List<Variable> selectByTeamId(@Param("teamId") Long teamId, @Param("keyword") String keyword);
+
+    Integer existsByTeamId(@Param("teamId") Long teamId);
+
 }

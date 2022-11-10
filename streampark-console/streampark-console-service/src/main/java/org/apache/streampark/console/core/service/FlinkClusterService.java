@@ -35,4 +35,8 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
     ResponseResult start(FlinkCluster flinkCluster);
 
     ResponseResult shutdown(FlinkCluster flinkCluster);
+
+    Boolean existsByClusterId(String clusterId);
+
+    Boolean existsByClusterName(String clusterName, Long id);
 }

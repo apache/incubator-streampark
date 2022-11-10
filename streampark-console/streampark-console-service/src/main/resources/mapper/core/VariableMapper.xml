@@ -46,6 +46,13 @@
         </where>
     </select>
 
+    <select id="existsByTeamId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        select count(1) as counter
+        from t_variable
+        where team_id = #{teamId}
+        limit 1
+    </select>
+
     <select id="selectByTeamId" resultType="org.apache.streampark.console.core.entity.Variable">
         select *
         from t_variable

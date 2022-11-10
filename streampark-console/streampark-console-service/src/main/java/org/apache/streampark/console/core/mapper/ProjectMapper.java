@@ -20,14 +20,16 @@ package org.apache.streampark.console.core.mapper;
 import org.apache.streampark.console.core.entity.Project;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 
 public interface ProjectMapper extends BaseMapper<Project> {
 
-    void updateFailureBuildById(@Param("project") Project project);
+    void updateBuildState(@Param("id") Long id, @Param("state") Integer buildState);
 
-    void updateSuccessBuildById(@Param("project") Project project);
+    IPage<Project> page(Page<Project> page, @Param("project") Project project);
 
-    void updateStartBuildById(@Param("project") Project project);
+    Integer existsByTeamId(@Param("teamId") Long teamId);
 
 }

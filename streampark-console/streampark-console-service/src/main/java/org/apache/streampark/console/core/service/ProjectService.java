@@ -38,7 +38,7 @@ public interface ProjectService extends IService<Project> {
 
     IPage<Project> page(Project project, RestRequest restRequest);
 
-    long countByTeamId(Long teamId);
+    Boolean existsByTeamId(Long teamId);
 
     void build(Long id) throws Exception;
 

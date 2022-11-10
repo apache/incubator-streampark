@@ -20,7 +20,12 @@ package org.apache.streampark.console.core.mapper;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
+
+    Integer existsByClusterId(@Param("clusterId") String clusterId);
+
+    Integer existsByClusterName(@Param("clusterName") String clusterName, @Param("id") Long id);
 
 }
