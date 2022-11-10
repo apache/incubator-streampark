@@ -29,6 +29,8 @@ import { handleDependencyJsonToPom } from '../utils';
 import { useDrawer } from '/@/components/Drawer';
 import { useRoute } from 'vue-router';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 
 export const useEditStreamParkSchema = (
   configVersions: Ref,
@@ -117,10 +119,10 @@ export const useEditStreamParkSchema = (
       ...getFlinkTypeSchema.value,
       {
         field: 'executionMode',
-        label: 'Execution Mode',
+        label: t('flink.app.table.executionMode'),
         component: 'Select',
         componentProps: {
-          placeholder: 'Execution Mode',
+          placeholder: t('flink.app.table.executionMode'),
           options: executionModes,
         },
       },

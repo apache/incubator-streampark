@@ -28,6 +28,9 @@ import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { renderResourceFrom } from './useFlinkRender';
 import { filterOption } from '../utils';
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
+
 const getJobTypeOptions = () => {
   return [
     {
@@ -86,7 +89,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     return [
       {
         field: 'jobType',
-        label: 'Development Mode',
+        label: t('flink.app.table.developmentMode'),
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {
@@ -106,7 +109,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       {
         field: 'executionMode',
-        label: 'Execution Mode',
+        label: t('flink.app.table.executionMode'),
         component: 'Select',
         componentProps: {
           placeholder: 'Please select Execution Mode',
@@ -141,7 +144,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       ...getFlinkSqlSchema.value,
       {
         field: 'resourceFrom',
-        label: 'Resource From',
+        label: t('flink.app.table.resourceFrom'),
         component: 'Select',
         render: ({ model }) => renderResourceFrom(model),
         rules: [{ required: true, message: 'resource from is required' }],
@@ -149,14 +152,14 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       {
         field: 'uploadJobJar',
-        label: 'Upload Job Jar',
+        label: t('flink.app.table.uploadJobJar'),
         component: 'Select',
         slot: 'uploadJobJar',
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
       },
       {
         field: 'mainClass',
-        label: 'Program Main',
+        label: t('flink.app.table.mainClass'),
         component: 'Input',
         componentProps: { placeholder: 'Please enter Main class' },
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
@@ -164,7 +167,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       {
         field: 'project',
-        label: 'Project',
+        label: t('flink.app.table.project'),
         component: 'Select',
         componentProps: {
           showSearch: true,
@@ -186,7 +189,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       {
         field: 'module',
-        label: 'Module',
+        label: t('flink.app.table.module'),
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {
@@ -209,7 +212,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       {
         field: 'appType',
-        label: 'Application Type',
+        label: t('flink.app.table.appType'),
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {

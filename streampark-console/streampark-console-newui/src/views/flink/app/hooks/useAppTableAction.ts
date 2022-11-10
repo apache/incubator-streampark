@@ -222,22 +222,22 @@ export const useAppTableAction = (
       },
       schemas: [
         {
-          label: 'Tags',
+          label: t('flink.app.table.tags'),
           field: 'tags',
           component: 'Select',
           componentProps: {
-            placeholder: 'Tags',
+            placeholder: t('flink.app.table.tags'),
             showSearch: true,
             options: tagsOptions.value.map((t: Recordable) => ({ label: t, value: t })),
             onChange: handlePageDataReload.bind(null, false),
           },
         },
         {
-          label: 'Owner',
+          label: t('flink.app.table.owner'),
           field: 'userId',
           component: 'Select',
           componentProps: {
-            placeholder: 'Owner',
+            placeholder: t('flink.app.table.owner'),
             showSearch: true,
             options: users.value.map((u: Recordable) => {
               return { label: u.nickName || u.username, value: u.userId };
@@ -246,11 +246,11 @@ export const useAppTableAction = (
           },
         },
         {
-          label: 'Type',
+          label: t('flink.app.table.jobType'),
           field: 'jobType',
           component: 'Select',
           componentProps: {
-            placeholder: 'Type',
+            placeholder: t('flink.app.table.jobType'),
             showSearch: true,
             options: [
               { label: 'JAR', value: JobTypeEnum.JAR },
@@ -260,11 +260,11 @@ export const useAppTableAction = (
           },
         },
         {
-          label: 'Name',
+          label: t('flink.app.table.searchName'),
           field: 'jobName',
           component: 'InputSearch',
           componentProps: {
-            placeholder: 'Search',
+            placeholder: t('flink.app.table.searchName'),
             onChange: handlePageDataReload.bind(null, false),
             onSearch: handlePageDataReload.bind(null, false),
           },
