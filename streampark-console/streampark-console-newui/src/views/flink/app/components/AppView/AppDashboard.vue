@@ -20,8 +20,10 @@
   import { fetchDashboard } from '/@/api/flink/app/app';
   import StatisticCard from './StatisticCard.vue';
   import { Row, Col } from 'ant-design-vue';
+  import { useI18n } from '/@/hooks/web/useI18n';
   const dashBigScreenMap = reactive<Recordable>({});
   const dashboardLoading = ref(true);
+  const { t } = useI18n();
 
   // Get Dashboard Metrics Data
   async function handleDashboard(showLoading: boolean) {
@@ -31,26 +33,26 @@
       if (res) {
         Object.assign(dashBigScreenMap, {
           availiableTask: {
-            staticstics: { title: 'Available Task Slots', value: res.availableSlot },
+            staticstics: { title: t('flink.app.dashboard.availableTaskSlots'), value: res.availableSlot },
             footer: [
-              { title: 'Task Slots', value: res.totalSlot },
-              { title: 'Task Managers', value: res.totalTM },
+              { title: t('flink.app.dashboard.taskSlots'), value: res.totalSlot },
+              { title: t('flink.app.dashboard.taskManagers'), value: res.totalTM },
             ],
           },
           runningJob: {
-            staticstics: { title: 'Running Jobs', value: res.runningJob },
+            staticstics: { title: t('flink.app.dashboard.runningJobs'), value: res.runningJob },
             footer: [
-              { title: 'Total Task', value: res.task.total },
-              { title: 'Running Task', value: res.task.running },
+              { title: t('flink.app.dashboard.totalTask'), value: res.task.total },
+              { title: t('flink.app.dashboard.runningTask'), value: res.task.running },
             ],
           },
           jobManager: {
-            staticstics: { title: 'JobManager Memory', value: res.jmMemory },
-            footer: [{ title: 'Total JobManager Mem', value: `${res.jmMemory} MB` }],
+            staticstics: { title: t('flink.app.dashboard.jobManagerMemory'), value: res.jmMemory },
+            footer: [{ title: t('flink.app.dashboard.totalJobManagerMemory'), value: `${res.jmMemory} MB` }],
           },
           taskManager: {
-            staticstics: { title: 'TaskManager Memory', value: res.tmMemory },
-            footer: [{ title: 'Total TaskManager Mem', value: `${res.tmMemory} MB` }],
+            staticstics: { title: t('flink.app.dashboard.taskManagerMemory'), value: res.tmMemory },
+            footer: [{ title: t('flink.app.dashboard.totalTaskManagerMemory'), value: `${res.tmMemory} MB` }],
           },
         });
       }

@@ -50,6 +50,8 @@ import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
 import { ExecModeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 export interface HistoryRecord {
   k8sNamespace: Array<string>;
   k8sSessionClusterId: Array<string>;
@@ -117,7 +119,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'dependency',
-        label: 'Dependency',
+        label: t('flink.app.table.dependency'),
         component: 'Input',
         slot: 'dependency',
         ifShow: ({ values }) => {
@@ -131,7 +133,7 @@ export const useCreateAndEditSchema = (
       { field: 'configOverride', label: '', component: 'Input', show: false },
       {
         field: 'isSetConfig',
-        label: 'Application Conf',
+        label: t('flink.app.table.applicationConf'),
         component: 'Switch',
         ifShow: ({ values }) => {
           if (edit?.appId) {
@@ -195,7 +197,7 @@ export const useCreateAndEditSchema = (
     return [
       {
         field: 'versionId',
-        label: 'Flink Version',
+        label: t('flink.app.table.flinkVersion'),
         component: 'Select',
         componentProps: {
           placeholder: 'Flink Version',
@@ -207,7 +209,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'flinkClusterId',
-        label: 'Flink Cluster',
+        label: t('flink.app.table.flinkCluster'),
         component: 'Select',
         componentProps: {
           placeholder: 'Flink Cluster',
@@ -218,7 +220,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'yarnSessionClusterId',
-        label: 'Yarn Session ClusterId',
+        label: t('flink.app.table.yarnSessionClusterId'),
         component: 'Select',
         componentProps: () => {
           return {
@@ -231,7 +233,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'k8sNamespace',
-        label: 'Kubernetes Namespace',
+        label:  t('flink.app.table.kubernetesNamespace'),
         component: 'Input',
         ifShow: ({ values }) => isK8sExecMode(values.executionMode),
         render: ({ model, field }) =>
@@ -242,7 +244,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'clusterId',
-        label: 'Kubernetes ClusterId',
+        label: t('flink.app.table.kubernetesClusterId'),
         component: 'Input',
         componentProps: ({ formModel }) => {
           return {
@@ -255,7 +257,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'clusterId',
-        label: 'Kubernetes ClusterId',
+        label: t('flink.app.table.kubernetesClusterId'),
         component: 'Select',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         componentProps: {
@@ -266,7 +268,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'flinkImage',
-        label: 'Flink Base Docker Image',
+        label: t('flink.app.table.flinkBaseDockerImage'),
         component: 'Input',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         render: ({ model, field }) =>
@@ -279,7 +281,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'k8sRestExposedType',
-        label: 'Rest-Service Exposed Type',
+        label:  t('flink.app.table.restServiceExposedType'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         component: 'Select',
         componentProps: {
@@ -330,7 +332,7 @@ export const useCreateAndEditSchema = (
     return [
       {
         field: 'jobName',
-        label: 'Application Name',
+        label: t('flink.app.table.applicationName'),
         component: 'Input',
         componentProps: { placeholder: 'Please enter jobName' },
         dynamicRules: () => {
@@ -339,7 +341,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'tags',
-        label: 'Tags',
+        label: t('flink.app.table.tags'),
         component: 'Input',
         componentProps: {
           placeholder: 'Please enter tags,if more than one, separate them with commas(,)',
@@ -347,14 +349,14 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'resolveOrder',
-        label: 'Resolve Order',
+        label: t('flink.app.table.resolveOrder'),
         component: 'Select',
         componentProps: { placeholder: 'classloader.resolve-order', options: resolveOrder },
         rules: [{ required: true, message: 'Resolve Order is required', type: 'number' }],
       },
       {
         field: 'parallelism',
-        label: 'Parallelism',
+        label: t('flink.app.table.parallelism'),
         component: 'InputNumber',
         componentProps: {
           placeholder: 'The parallelism with which to run the program',
@@ -363,13 +365,13 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'slot',
-        label: 'Task Slots',
+        label: t('flink.app.dashboard.taskSlots'),
         component: 'InputNumber',
         componentProps: { placeholder: 'Number of slots per TaskManager', ...commonInputNum },
       },
       {
         field: 'restartSize',
-        label: 'Fault Restart Size',
+        label: t('flink.app.table.restartSize'),
         ifShow: ({ values }) =>
           edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode),
         component: 'InputNumber',
@@ -377,7 +379,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'alertId',
-        label: 'Fault Alert Template',
+        label: t('flink.app.table.faultAlertTemplate'),
         component: 'Select',
         componentProps: {
           placeholder: 'Alert Template',
@@ -387,7 +389,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'checkPointFailure',
-        label: 'CheckPoint Failure Options',
+        label: t('flink.app.table.checkPointFailureOptions'),
         component: 'InputNumber',
         renderColContent: renderInputGroup,
         show: ({ values }) => (edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode)),
@@ -395,7 +397,7 @@ export const useCreateAndEditSchema = (
       ...getConfigSchemas(),
       {
         field: 'totalOptions',
-        label: 'Total Memory Options',
+        label: t('flink.app.table.totalMemoryOptions'),
         component: 'Select',
         render: renderTotalMemory,
       },
@@ -408,7 +410,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'jmOptions',
-        label: 'JM Memory Options',
+        label: t('flink.app.table.jmMemoryOptions'),
         component: 'Select',
         componentProps: {
           showSearch: true,
@@ -429,7 +431,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'tmOptions',
-        label: 'TM Memory Options',
+        label: t('flink.app.table.tmMemoryOptions'),
         component: 'Select',
         componentProps: {
           showSearch: true,
@@ -450,7 +452,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'yarnQueue',
-        label: 'Yarn Queue',
+        label: t('flink.app.table.yarnQueue'),
         component: 'Input',
         componentProps: { placeholder: 'Please enter yarn queue' },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION,
@@ -464,13 +466,13 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'properties',
-        label: 'Properties',
+        label: t('flink.app.table.properties'),
         component: 'Input',
         render: (renderCallbackParams) => renderProperties(renderCallbackParams),
       },
       {
         field: 'args',
-        label: 'Program Args',
+        label: t('flink.app.table.programArgs'),
         component: 'InputTextArea',
         defaultValue: '',
         slot: 'args',
@@ -478,7 +480,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'description',
-        label: 'Description',
+        label: t('common.description'),
         component: 'InputTextArea',
         componentProps: { rows: 4, placeholder: 'Please enter description for this application' },
       },
@@ -489,7 +491,7 @@ export const useCreateAndEditSchema = (
     return [
       {
         field: 'jobType',
-        label: 'Development Mode',
+        label: t('flink.app.table.developmentMode'),
         component: 'Input',
         render: ({ model }) => {
           if (model.jobType == 1) {
@@ -513,7 +515,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'appType',
-        label: 'Application Type',
+        label: t('flink.app.table.appType'),
         component: 'Input',
         render: () => getAlertSvgIcon('flink', 'StreamPark Flink'),
       },

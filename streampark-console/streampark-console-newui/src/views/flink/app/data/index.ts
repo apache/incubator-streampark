@@ -17,45 +17,47 @@
 import { dateToDuration } from '/@/utils/dateUtil';
 import { BasicColumn } from '/@/components/Table';
 import { ExecModeEnum } from '/@/enums/flinkEnum';
+import {useI18n} from "/@/hooks/web/useI18n";
+const { t } = useI18n();
 
 /* app */
 export const getAppColumns = (): BasicColumn[] => [
   {
-    title: 'Application Name',
+    title: t('flink.app.table.applicationName'),
     dataIndex: 'jobName',
     align: 'left',
     fixed: 'left',
     width: 300,
   },
-  { title: 'Tags', ellipsis: true, dataIndex: 'tags', width: 150 },
-  { title: 'Owner', dataIndex: 'nickName', width: 100 },
-  { title: 'Flink Version', dataIndex: 'flinkVersion', width: 130 },
+  { title: t('flink.app.table.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
+  { title: t('flink.app.table.owner'), dataIndex: 'nickName', width: 100 },
+  { title: t('flink.app.table.flinkVersion'), dataIndex: 'flinkVersion', width: 130 },
   {
-    title: 'Duration',
+    title: t('flink.app.table.duration'),
     dataIndex: 'duration',
     sorter: true,
     width: 150,
     customRender: ({ value }) => dateToDuration(value),
   },
-  { title: 'Modified Time', dataIndex: 'modifyTime', sorter: true, width: 170 },
+  { title: t('flink.app.table.modifiedTime'), dataIndex: 'modifyTime', sorter: true, width: 170 },
   {
-    title: 'Run Status',
+    title: t('flink.app.table.runStatus'),
     dataIndex: 'state',
     width: 120,
     filters: [
-      { text: 'ADDED', value: '0' },
-      { text: 'STARTING', value: '3' },
-      { text: 'RUNNING', value: '5' },
-      { text: 'FAILED', value: '7' },
-      { text: 'CANCELED', value: '9' },
-      { text: 'FINISHED', value: '10' },
-      { text: 'SUSPENDED', value: '11' },
-      { text: 'LOST', value: '13' },
-      { text: 'SILENT', value: '17' },
-      { text: 'TERMINATED', value: '18' },
+      { text: t('flink.app.runStatusOptions.added'), value: '0' },
+      { text: t('flink.app.runStatusOptions.starting'), value: '3' },
+      { text: t('flink.app.runStatusOptions.running'), value: '5' },
+      { text: t('flink.app.runStatusOptions.failed'), value: '7' },
+      { text: t('flink.app.runStatusOptions.canceled'), value: '9' },
+      { text: t('flink.app.runStatusOptions.finished'), value: '10' },
+      { text: t('flink.app.runStatusOptions.suspended'), value: '11' },
+      { text: t('flink.app.runStatusOptions.lost'), value: '13' },
+      { text: t('flink.app.runStatusOptions.silent'), value: '17' },
+      { text: t('flink.app.runStatusOptions.terminated'), value: '18' },
     ],
   },
-  { title: 'Launch | Build', dataIndex: 'launch', width: 220 },
+  { title: t('flink.app.table.launchBuild'), dataIndex: 'launch', width: 220 },
 ];
 
 /* Get diff editor configuration */
