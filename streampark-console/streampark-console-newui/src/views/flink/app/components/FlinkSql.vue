@@ -17,13 +17,16 @@
 <script lang="ts">
   export default {
     name: 'FlinkSql',
+    components: { SvgIcon },
   };
 </script>
 
 <script setup lang="ts" name="FlinkSql">
-  import { computed, reactive, ref, unref, watchEffect } from 'vue';
+  import { computed, reactive, ref, watchEffect } from 'vue';
+  import { Tooltip } from 'ant-design-vue';
+  import { FullscreenExitOutlined } from '@ant-design/icons-vue';
   import { getMonacoOptions } from '../data';
-  import { Icon } from '/@/components/Icon';
+  import { Icon, SvgIcon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
   import { Button } from 'ant-design-vue';
   import { isEmpty } from '/@/utils/is';
@@ -31,17 +34,19 @@
   import { fetchFlinkSqlVerify } from '/@/api/flink/app/flinkSql';
   import { format } from '../FlinkSqlFormatter';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { useFullscreenEvent } from '/@/hooks/event/useFullscreen';
+  import { useFullContent } from '/@/hooks/event/useFullscreen';
   const ButtonGroup = Button.Group;
   const { t } = useI18n();
+
+  const flinkSql = ref();
   const vertifyRes = reactive({
     errorMsg: '',
     verified: false,
     errorStart: 0,
     errorEnd: 0,
   });
-  const flinkSql = ref();
-  const { fullscreenRef, isFullscreen, toggle } = useFullscreenEvent();
+
+  const { toggle, fullContentClass, fullEditorClass, fullScreenStatus } = useFullContent();
   const emit = defineEmits(['update:value', 'preview']);
   const { createMessage } = useMessage();
 
@@ -115,10 +120,10 @@
         try {
           monaco.editor.setModelMarkers(model, 'sql', [
             {
-              startLineNumber: 1,
-              endLineNumber: 4,
+              startLineNumber: vertifyRes.errorStart,
+              endLineNumber: vertifyRes.errorEnd,
               severity: monaco.MarkerSeverity.Error,
-              message: 'dsadfs',
+              message: vertifyRes.errorMsg,
             },
           ]);
         } catch (e) {
@@ -136,14 +141,14 @@
     setContent(formatSql);
   }
   /* full screen */
-  function handleBigScreen() {
-    toggle();
-    unref(flinkSql).style.width = '0';
-    setTimeout(() => {
-      unref(flinkSql).style.width = '100%';
-      unref(flinkSql).style.height = isFullscreen.value ? 'calc(100vh - 50px)' : '550px';
-    }, 500);
-  }
+  // function handleBigScreen() {
+  //   toggle();
+  //   unref(flinkSql).style.width = '0';
+  //   setTimeout(() => {
+  //     unref(flinkSql).style.width = '100%';
+  //     unref(flinkSql).style.height = isFullscreen.value ? 'calc(100vh - 50px)' : '550px';
+  //   }, 500);
+  // }
   const { onChange, setContent, getInstance, getMonacoInstance, setMonacoSuggest } = useMonaco(
     flinkSql,
     {
@@ -165,6 +170,12 @@
   const canPreview = computed(() => {
     return /\${.+}/.test(props.value);
   });
+  const flinkEditorClass = computed(() => {
+    return {
+      ...fullEditorClass.value,
+      ['syntax-' + (vertifyRes.errorMsg ? 'false' : 'true')]: true,
+    };
+  });
 
   onChange((data) => {
     emit('update:value', data);
@@ -174,49 +185,85 @@
 </script>
 
 <template>
-  <div>
-    <div ref="fullscreenRef">
-      <div
-        class="sql-box"
-        ref="flinkSql"
-        :class="'syntax-' + (vertifyRes.errorMsg ? 'false' : 'true')"
-      ></div>
-      <ButtonGroup class="flinksql-tool">
-        <a-button
-          class="flinksql-tool-item"
-          size="small"
-          v-if="canPreview"
-          @click="emit('preview', value)"
-        >
-          <Icon icon="ant-design:eye-outlined" />
-          preview
-        </a-button>
-        <a-button size="small" class="flinksql-tool-item" type="primary" @click="handleVerifySql">
-          <Icon icon="ant-design:check-outlined" />
-          {{ t('flink.app.flinkSql.verify') }}
-        </a-button>
-        <a-button class="flinksql-tool-item" size="small" type="default" @click="handleFormatSql">
-          <Icon icon="ant-design:thunderbolt-outlined" />
-          {{ t('flink.app.flinkSql.format') }}
-        </a-button>
-        <a-button class="flinksql-tool-item" size="small" type="default" @click="handleBigScreen">
-          <Icon
-            :icon="
-              isFullscreen
-                ? 'ant-design:fullscreen-exit-outlined'
-                : 'ant-design:fullscreen-outlined'
-            "
-          />
-          {{ isFullscreen ? t('flink.app.flinkSql.exit') : '' }}
-          {{ t('flink.app.flinkSql.fullScreen') }}
-        </a-button>
-      </ButtonGroup>
-      <p class="conf-desc mt-10px">
-        <span class="text-red-600" v-if="vertifyRes.errorMsg"> {{ vertifyRes.errorMsg }} </span>
-        <span v-else class="text-green-700">
+  <div style="height: 550px" class="w-full" :class="fullContentClass">
+    <div
+      class="full-content-tool flex justify-between px-20px border-solid border-b pb-10px mb-10px"
+      v-if="fullScreenStatus"
+    >
+      <div class="flex items-center">
+        <SvgIcon name="fql" />
+        <div class="basic-title ml-10px">Flink Sql</div>
+      </div>
+      <Tooltip :title="t('component.modal.restore')" placement="bottom">
+        <FullscreenExitOutlined role="full" @click="toggle" style="font-size: 18px" />
+      </Tooltip>
+    </div>
+
+    <div ref="flinkSql" class="overflow-hidden w-full mt-5px" :class="flinkEditorClass"></div>
+    <ButtonGroup class="flinksql-tool" v-if="!fullScreenStatus">
+      <a-button
+        class="flinksql-tool-item"
+        size="small"
+        v-if="canPreview"
+        @click="emit('preview', value)"
+      >
+        <Icon icon="ant-design:eye-outlined" />
+        {{ t('flink.app.flinkSql.preview') }}
+      </a-button>
+      <a-button size="small" class="flinksql-tool-item" type="primary" @click="handleVerifySql">
+        <Icon icon="ant-design:check-outlined" />
+        {{ t('flink.app.flinkSql.verify') }}
+      </a-button>
+      <a-button class="flinksql-tool-item" size="small" type="default" @click="handleFormatSql">
+        <Icon icon="ant-design:thunderbolt-outlined" />
+        {{ t('flink.app.flinkSql.format') }}
+      </a-button>
+      <a-button class="flinksql-tool-item" size="small" type="default" @click="toggle">
+        <Icon icon="ant-design:fullscreen-outlined" />
+        {{ t('flink.app.flinkSql.fullScreen') }}
+      </a-button>
+    </ButtonGroup>
+    <div class="flex items-center justify-between" v-else>
+      <div class="mt-10px flex-1 mr-10px overflow-hidden whitespace-nowrap">
+        <div class="text-red-600 overflow-ellipsis overflow-hidden" v-if="vertifyRes.errorMsg">
+          {{ vertifyRes.errorMsg }}
+        </div>
+        <div v-else class="text-green-700">
           <span v-if="vertifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
-        </span>
-      </p>
+        </div>
+      </div>
+      <div class="flinksql-tool">
+        <a-button v-if="canPreview" @click="emit('preview', value)">
+          <div class="flex items-center">
+            <Icon icon="ant-design:eye-outlined" />
+            {{ t('flink.app.flinkSql.preview') }}
+          </div>
+        </a-button>
+        <a-button type="primary" @click="handleVerifySql" class="ml-10px">
+          <div class="flex items-center">
+            <Icon icon="ant-design:check-outlined" />
+            {{ t('flink.app.flinkSql.verify') }}
+          </div>
+        </a-button>
+        <a-button type="default" @click="handleFormatSql" class="ml-10px">
+          <div class="flex items-center">
+            <Icon icon="ant-design:thunderbolt-outlined" />
+            {{ t('flink.app.flinkSql.format') }}
+          </div>
+        </a-button>
+        <a-button type="default" @click="toggle" class="ml-10px">
+          <div class="flex items-center">
+            <Icon icon="ant-design:fullscreen-exit-outlined" />
+            {{ t('layout.header.tooltipExitFull') }}
+          </div>
+        </a-button>
+      </div>
     </div>
   </div>
+  <p class="conf-desc mt-10px" v-if="!fullScreenStatus">
+    <span class="text-red-600" v-if="vertifyRes.errorMsg"> {{ vertifyRes.errorMsg }} </span>
+    <span v-else class="text-green-700">
+      <span v-if="vertifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
+    </span>
+  </p>
 </template>

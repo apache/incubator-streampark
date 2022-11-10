@@ -79,6 +79,7 @@
 
   // const globSetting = useGlobSetting();
   const { prefixCls } = useDesign('login');
+  sessionStorage.removeItem('appPageNo');
   // const title = computed(() => globSetting?.title ?? '');
 </script>
 <style lang="less">

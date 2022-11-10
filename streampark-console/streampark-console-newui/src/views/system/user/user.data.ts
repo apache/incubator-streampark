@@ -22,13 +22,13 @@ import { FormTypeEnum } from '/@/enums/formEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 // user status enum
-const enum StatusEnum {
+export const enum StatusEnum {
   Effective = '1',
   Locked = '0',
 }
 
 // gender
-const enum GenderEnum {
+export const enum GenderEnum {
   Male = '0',
   Female = '1',
   Other = '2',
@@ -44,12 +44,12 @@ export const columns: BasicColumn[] = [
     customRender: ({ record }) => {
       const enable = record?.status === StatusEnum.Effective;
       const color = enable ? 'green' : 'red';
-      const text = enable ? 'Effective' : 'locked';
+      const text = enable ? t('system.user.effective') : t('system.user.locked');
       return h(Tag, { color }, () => text);
     },
     filters: [
-      { text: 'Effective', value: '1' },
-      { text: 'Locked', value: '0' },
+      { text: t('system.user.effective'), value: StatusEnum.Effective },
+      { text: t('system.user.locked'), value: StatusEnum.Locked },
     ],
     filterMultiple: false,
   },
@@ -68,8 +68,8 @@ export const searchFormSchema: FormSchema[] = [
     colProps: { span: 8 },
   },
   {
-    label: t('common.createTime'),
     field: 'createTime',
+    label: t('common.createTime'),
     component: 'RangePicker',
     colProps: { span: 8 },
   },
@@ -103,10 +103,7 @@ export const formSchema = (formType: string): FormSchema[] => {
           trigger: 'blur',
         },
       ],
-      componentProps: {
-        id: 'formUserName',
-        disabled: !isCreate,
-      },
+      componentProps: { id: 'formUserName', disabled: !isCreate },
     },
     {
       field: 'nickName',
@@ -121,7 +118,6 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'password',
       label: t('system.user.form.password'),
       component: 'InputPassword',
-      componentProps: { placeholder: 'please enter password' },
       helpMessage: t('system.user.form.passwordHelp'),
       rules: [
         { required: true, message: t('system.user.form.passwordRequire') },
@@ -140,7 +136,6 @@ export const formSchema = (formType: string): FormSchema[] => {
       ],
       componentProps: {
         readonly: isView,
-        placeholder: 'please enter email',
       },
     },
     {
@@ -150,9 +145,8 @@ export const formSchema = (formType: string): FormSchema[] => {
       componentProps: {
         disabled: isView,
         api: fetchUserTypes,
-        placeholder: 'Please select a user type',
       },
-      rules: [{ required: true, message: 'Please select a user type' }],
+      rules: [{ required: true }],
     },
     {
       field: 'status',
@@ -161,11 +155,11 @@ export const formSchema = (formType: string): FormSchema[] => {
       defaultValue: StatusEnum.Effective,
       componentProps: {
         options: [
-          { label: 'locked', value: StatusEnum.Locked },
-          { label: 'effective', value: StatusEnum.Effective },
+          { label: t('system.user.locked'), value: StatusEnum.Locked },
+          { label: t('system.user.effective'), value: StatusEnum.Effective },
         ],
       },
-      rules: [{ required: true, message: 'please select status' }],
+      rules: [{ required: true }],
     },
     {
       field: 'sex',
@@ -174,9 +168,9 @@ export const formSchema = (formType: string): FormSchema[] => {
       defaultValue: GenderEnum.Male,
       componentProps: {
         options: [
-          { label: 'male', value: GenderEnum.Male },
-          { label: 'female', value: GenderEnum.Female },
-          { label: 'secret', value: GenderEnum.Other },
+          { label: t('system.user.male'), value: GenderEnum.Male },
+          { label: t('system.user.female'), value: GenderEnum.Female },
+          { label: t('system.user.secret'), value: GenderEnum.Other },
         ],
       },
       required: true,
@@ -185,7 +179,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'description',
       label: t('common.description'),
       component: 'InputTextArea',
-      componentProps: { rows: 5, placeholder: 'Please enter description' },
+      componentProps: { rows: 5 },
       ifShow: isCreate,
     },
   ];

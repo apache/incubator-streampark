@@ -216,6 +216,7 @@ export const useUserStore = defineStore({
       this.setSessionTimeout(false);
       this.setUserInfo(null);
       sessionStorage.removeItem(APP_TEAMID_KEY_);
+      sessionStorage.removeItem('appPageNo');
       localStorage.removeItem(APP_TEAMID_KEY_);
       this.setToken(undefined);
       goLogin && router.push(PageEnum.BASE_LOGIN);

@@ -48,4 +48,9 @@ export default {
   },
   roleInfo: 'Role Info',
   modifyTime: 'Not yet modified',
+  male: 'male',
+  female: 'female',
+  secret: 'secret',
+  locked: 'locked',
+  effective: 'effective',
 };

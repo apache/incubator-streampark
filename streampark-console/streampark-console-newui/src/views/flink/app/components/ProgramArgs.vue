@@ -15,9 +15,21 @@
   limitations under the License.
 -->
 <template>
-  <div ref="fullscreenRef">
-    <div ref="programArgRef" class="w-full border mt-5px" style="height: 240px"> </div>
-    <div class="relative flinksql-tool">
+  <div style="height: 340px" :class="fullContentClass">
+    <div
+      class="full-content-tool flex justify-between px-20px border-solid border-b pb-10px mb-10px"
+      v-if="fullScreenStatus"
+    >
+      <div class="basic-title">
+        <Icon icon="material-symbols:energy-program-saving" color="#477de9" />
+        Program args
+      </div>
+      <Tooltip :title="t('component.modal.restore')" placement="bottom">
+        <FullscreenExitOutlined role="full" @click="toggle" style="font-size: 18px" />
+      </Tooltip>
+    </div>
+    <div ref="programArgRef" :class="fullEditorClass" class="w-full program-box mt-5px"> </div>
+    <div class="relative flinksql-tool" v-if="!fullScreenStatus">
       <a-button
         class="flinksql-tool-item"
         v-if="canReview"
@@ -25,16 +37,25 @@
         size="small"
       >
         <Icon icon="ant-design:eye-outlined" />
-        preview
+        {{ t('flink.app.flinkSql.preview') }}
       </a-button>
-      <a-button
-        class="flinksql-tool-item"
-        size="small"
-        :type="isFullscreen ? 'default' : 'primary'"
-        @click="handleBigScreen"
-      >
-        <Icon :icon="`ant-design:${isFullscreen ? 'fullscreen-exit' : 'fullscreen'}-outlined`" />
-        {{ getTitle }}
+      <a-button class="flinksql-tool-item" size="small" type="default" @click="toggle">
+        <Icon icon="ant-design:fullscreen-outlined" />
+        {{ t('layout.header.tooltipEntryFull') }}
+      </a-button>
+    </div>
+    <div v-else class="text-right py-10px">
+      <a-button type="primary" v-if="canReview" @click="emit('preview', value)">
+        <div class="flex items-center">
+          <Icon icon="ant-design:eye-outlined" />
+          {{ t('flink.app.flinkSql.preview') }}
+        </div>
+      </a-button>
+      <a-button type="primary" @click="toggle" class="ml-10px">
+        <div class="flex items-center">
+          <Icon icon="ant-design:fullscreen-exit-outlined" />
+          {{ t('layout.header.tooltipExitFull') }}
+        </div>
       </a-button>
     </div>
   </div>
@@ -45,11 +66,15 @@
   };
 </script>
 <script lang="ts" setup>
-  import { computed, ref, toRefs, unref, watchEffect } from 'vue';
+  import { Tooltip } from 'ant-design-vue';
+  import { FullscreenExitOutlined } from '@ant-design/icons-vue';
+  import { computed, ref, toRefs, watchEffect } from 'vue';
   import { getMonacoOptions } from '../data';
   import Icon from '/@/components/Icon';
+  import { useFullContent } from '/@/hooks/event/useFullscreen';
+  import { useI18n } from '/@/hooks/web/useI18n';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  import { useFullscreenEvent } from '/@/hooks/event/useFullscreen';
+  const { t } = useI18n();
   const props = defineProps({
     value: {
       type: String,
@@ -63,8 +88,8 @@
   const { value, suggestions } = toRefs(props);
   const emit = defineEmits(['update:value', 'preview']);
   const programArgRef = ref();
-  const { fullscreenRef, isFullscreen, toggle, getTitle } = useFullscreenEvent();
 
+  const { toggle, fullContentClass, fullEditorClass, fullScreenStatus } = useFullContent();
   const { onChange, setContent, setMonacoSuggest } = useMonaco(programArgRef, {
     language: 'plaintext',
     code: '',
@@ -81,17 +106,14 @@
   const canReview = computed(() => {
     return /\${.+}/.test(value.value);
   });
-  /* full screen */
-  function handleBigScreen() {
-    toggle();
-    unref(programArgRef).style.width = '0';
-    setTimeout(() => {
-      unref(programArgRef).style.width = '100%';
-      unref(programArgRef).style.height = isFullscreen.value ? 'calc(100vh - 50px)' : '240px';
-    }, 500);
-  }
+
   onChange((data) => {
     emit('update:value', data);
   });
   defineExpose({ setContent });
 </script>
+<style lang="less">
+  .program-box {
+    border: 1px solid @border-color-base;
+  }
+</style>

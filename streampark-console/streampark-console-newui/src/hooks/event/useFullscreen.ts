@@ -36,3 +36,35 @@ export const useFullscreenEvent = (gloabl = false) => {
     getTitle,
   };
 };
+
+export const useFullContent = () => {
+  const fullScreenStatus = ref(false);
+  const { t } = useI18n();
+
+  const getTitle = computed(() => {
+    return unref(fullScreenStatus)
+      ? t('layout.header.tooltipExitFull')
+      : t('layout.header.tooltipEntryFull');
+  });
+  function toggle() {
+    fullScreenStatus.value = !fullScreenStatus.value;
+  }
+  const fullContentClass = computed(() => {
+    return {
+      [`box-content__full`]: fullScreenStatus.value,
+    };
+  });
+  const fullEditorClass = computed(() => {
+    return {
+      [`h-[calc(100%-20px)]`]: !fullScreenStatus.value,
+      [`h-[calc(100%-88px)]`]: fullScreenStatus.value,
+    };
+  });
+  return {
+    fullEditorClass,
+    fullContentClass,
+    fullScreenStatus,
+    getTitle,
+    toggle,
+  };
+};
