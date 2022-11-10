@@ -34,7 +34,7 @@
           @check="handleTreeCheck"
           checkable
           toolbar
-          title="menu assignment"
+          :title="t('system.role.assignment')"
         />
       </template>
     </BasicForm>
@@ -50,6 +50,7 @@
   import { getMenuList, getRoleMenu } from '/@/api/base/system';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   const handleTreeIcon = (treeData: TreeItem[]): TreeItem[] => {
     if (!treeData?.length) {
@@ -67,6 +68,7 @@
     components: { BasicDrawer, BasicForm, BasicTree },
     emits: ['success', 'register'],
     setup(_, { emit }) {
+      const { t } = useI18n();
       const formType = ref(FormTypeEnum.Edit);
       const treeData = ref<TreeItem[]>([]);
       let singleNodeKeys: string[] = [];
@@ -77,28 +79,29 @@
 
       const formSchemas = computed((): FormSchema[] => {
         return [
-          { field: 'roleId', label: 'Role Id', component: 'Input', show: false },
+          { field: 'roleId', label: '', component: 'Input', show: false },
           {
             field: 'roleName',
-            label: 'Role Name',
+            label: t('system.role.form.roleName'),
             component: 'Input',
             componentProps: { disabled: !isCreate.value },
             rules: isCreate.value
               ? [{ required: true, validator: handleRoleCheck, trigger: 'blur' }]
               : [],
           },
-          { label: 'Description', field: 'remark', component: 'InputTextArea' },
+          { label: t('common.description'), field: 'remark', component: 'InputTextArea' },
           {
-            label: 'permission',
+            label: t('system.role.form.menuId'),
             field: 'menuId',
             slot: 'menu',
             component: 'Select',
-            dynamicRules: () => [{ required: true, message: 'Please select the permission.' }],
+            dynamicRules: () => [{ required: true, message: t('system.role.form.menuIdRequired') }],
           },
         ];
       });
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
         labelWidth: 120,
+        colon: true,
         baseColProps: { span: 22 },
         showActionButtonGroup: false,
       });
@@ -113,7 +116,7 @@
 
         formType.value = data.formType;
 
-        function findSingleNode(data) {
+        function findSingleNode(data: Recordable) {
           data.map((item: Recordable) => {
             if (item.children && item.children.length > 0) {
               findSingleNode(item.children);
@@ -146,9 +149,9 @@
 
       const getTitle = computed(() => {
         return {
-          [FormTypeEnum.Create]: 'Add Role',
-          [FormTypeEnum.Edit]: 'Edit Role',
-          [FormTypeEnum.View]: 'View Role',
+          [FormTypeEnum.Create]: t('system.role.form.create'),
+          [FormTypeEnum.Edit]: t('system.role.form.edit'),
+          [FormTypeEnum.View]: t('system.role.form.view'),
         }[unref(formType)];
       });
 
@@ -157,13 +160,9 @@
           const values = await validate();
           // First, a simple judgment, does not contain app:view (home) this permission, the error is reported
           if (selectedKeysAndHalfCheckedKeys.value.indexOf('100067') < 0) {
-            createMessage.warning('Must include app:view permission');
+            createMessage.warning(t('system.role.form.validite'));
             return;
           }
-          console.log(
-            "selectedKeysAndHalfCheckedKeys.value.indexOf('100067')",
-            selectedKeysAndHalfCheckedKeys.value.indexOf('100067'),
-          );
           setDrawerProps({ confirmLoading: true });
           const params = Object.assign({}, values, {
             menuId: selectedKeysAndHalfCheckedKeys.value.join(','),
@@ -182,6 +181,7 @@
         selectedKeysAndHalfCheckedKeys.value = [...checkedKeys, ...e.halfCheckedKeys];
       }
       return {
+        t,
         formSchemas,
         registerDrawer,
         registerForm,

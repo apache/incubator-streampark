@@ -76,7 +76,6 @@
         formConfig: {
           baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
-          colon: true,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
         rowKey: 'id',

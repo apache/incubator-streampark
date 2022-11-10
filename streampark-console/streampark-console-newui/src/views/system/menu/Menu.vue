@@ -16,34 +16,18 @@
 -->
 <template>
   <div>
-    <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
-      <!-- <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'menu:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
-      </template> -->
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'action'">
-          <TableAction
-            :actions="[
-              {
-                auth: 'menu:update',
-                icon: 'clarity:note-edit-line',
-                onClick: handleEdit.bind(null, record),
-              },
-            ]"
-          />
-        </template>
-      </template>
-    </BasicTable>
-    <MenuDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
+    <BasicTable @register="registerTable" @fetch-success="onFetchSuccess" />
+    <MenuDrawer
+      :okText="t('common.submitText')"
+      @register="registerDrawer"
+      @success="handleSuccess"
+    />
   </div>
 </template>
 <script lang="ts">
   import { defineComponent, nextTick } from 'vue';
 
-  import { BasicTable, useTable, TableAction } from '/@/components/Table';
+  import { BasicTable, useTable } from '/@/components/Table';
   import { getMenuList } from '/@/api/base/system';
 
   import { useDrawer } from '/@/components/Drawer';
@@ -55,18 +39,17 @@
 
   export default defineComponent({
     name: 'MenuManagement',
-    components: { BasicTable, MenuDrawer, TableAction },
+    components: { BasicTable, MenuDrawer },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();
       const { t } = useI18n();
       const [registerTable, { reload, expandAll }] = useTable({
-        title: 'Menu List',
+        title: t('system.menu.table.title'),
         api: getMenuList,
         columns,
         formConfig: {
           baseColProps: { style: { paddingRight: '30px' } },
-          colon: true,
           schemas: searchFormSchema,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },

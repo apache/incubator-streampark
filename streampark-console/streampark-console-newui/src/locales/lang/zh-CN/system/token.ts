@@ -24,10 +24,8 @@ export default {
     title: 'Token 列表',
     userName: '用户名',
     token: 'Token',
-    description: '描述',
-    createTime: '创建时间',
     expireTime: '过期时间',
-    status: '状态'
+    status: '状态',
   },
   operation: {
     copySuccess: '复制成功',
@@ -36,5 +34,5 @@ export default {
     deleteFailed: '删除失败',
     updateSuccess: '更新成功',
     createSuccess: '创建成功',
-  }
-}
+  },
+};

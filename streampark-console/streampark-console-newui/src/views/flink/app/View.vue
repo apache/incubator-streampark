@@ -17,6 +17,7 @@
 <script lang="ts">
   import { defineComponent, nextTick, ref, unref, onUnmounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({
     name: 'AppView',
@@ -42,6 +43,7 @@
   import AppDashboard from './components/AppView/AppDashboard.vue';
   import State from './components/State';
 
+  const { t } = useI18n();
   const optionApps = {
     starting: new Map(),
     stopping: new Map(),
@@ -110,7 +112,7 @@
     showTableSetting: true,
     useSearchForm: true,
     tableSetting: { fullScreen: true, redo: false },
-    actionColumn: { dataIndex: 'operation', title: 'Operation', width: 180 },
+    actionColumn: { dataIndex: 'operation', title: t('component.table.operation'), width: 180 },
   });
   const { getTableActions, getActionDropdown, formConfig } = useAppTableAction(
     openStartModal,
@@ -186,13 +188,13 @@
               v-if="record.launch === 5"
               class="build-badge"
               count="NEW"
-              title="the associated project has changed and this job need to be rechecked"
+              :title="t('flink.app.view.recheck')"
             />
             <Badge
               v-else-if="record.launch >= 2"
               class="build-badge"
               count="NEW"
-              title="the application has changed."
+              :title="t('flink.app.view.changed')"
             />
           </template>
         </template>

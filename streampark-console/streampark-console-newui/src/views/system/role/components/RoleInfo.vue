@@ -24,16 +24,11 @@
   >
     <template #title>
       <Icon icon="ant-design:smile-outlined" />
-      Role Info
+      {{ t('system.role.roleInfo') }}
     </template>
-    <Description
-      @register="registerDescription"
-      :column="1"
-      :data="roleInfo"
-      :schema="roleColumn"
-    />
+    <Description :column="1" :data="roleInfo" :schema="roleColumn" />
     <p class="mt-20px">
-      <Icon icon="ant-design:trophy-outlined" />&nbsp;&nbsp;Permission：
+      <Icon icon="ant-design:trophy-outlined" />&nbsp;&nbsp; {{ t('system.role.assignment') }}
       <Tree
         :check-strictly="false"
         :checkable="true"
@@ -54,12 +49,13 @@
 <script setup lang="ts">
   import { defineComponent, h, ref } from 'vue';
   import { Tree } from 'ant-design-vue';
-  import { useDescription, Description } from '/@/components/Description';
+  import { Description } from '/@/components/Description';
   import Icon from '/@/components/Icon';
   import { useDrawerInner, BasicDrawer } from '/@/components/Drawer';
   import { getMenuList, getRoleMenu } from '/@/api/base/system';
   import { DataNode } from 'ant-design-vue/lib/tree';
-
+  import { useI18n } from '/@/hooks/web/useI18n';
+  const { t } = useI18n();
   const roleInfo = ref<Recordable>({});
   const checkedKeys = ref<Array<string>>([]);
   const menuTreeData = ref<Array<DataNode>>([]);
@@ -102,30 +98,29 @@
   };
   const roleColumn = [
     {
-      label: generatedLabelIcon('ant-design:crown-outlined', 'Role Name'),
+      label: generatedLabelIcon('ant-design:crown-outlined', t('system.role.form.roleName')),
       field: 'roleName',
     },
     {
-      label: generatedLabelIcon('ant-design:book-outlined', 'Description'),
+      label: generatedLabelIcon('ant-design:book-outlined', t('common.description')),
       field: 'remark',
     },
     {
-      label: generatedLabelIcon(`ant-design:clock-circle-outlined`, 'Create Time'),
+      label: generatedLabelIcon(`ant-design:clock-circle-outlined`, t('common.createTime')),
       field: 'createTime',
     },
     {
-      label: generatedLabelIcon('ant-design:mail-outlined', 'Update Time'),
+      label: generatedLabelIcon('ant-design:mail-outlined', t('common.modifyTime')),
       field: 'modifyTime',
       render: (curVal: string | undefined | null) => {
         if (curVal) {
           return curVal;
         } else {
-          return 'Not yet modified';
+          return t('system.role.modifyTime');
         }
       },
     },
   ];
-  const [registerDescription] = useDescription();
   function handleSubmit() {
     closeDrawer();
   }

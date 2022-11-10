@@ -27,8 +27,6 @@ export default {
     teamName: 'Team Name',
     teamNamePlaceholder: 'please enter Team Name',
     description: 'Description',
-    createTime: 'Create Time',
-    modifyTime: 'Modify Time',
     descriptionMessage: 'exceeds maximum length limit of 100 characters',
     teamMessage: 'teamName must be at least 4 characters',
   },

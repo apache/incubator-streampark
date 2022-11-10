@@ -15,25 +15,14 @@
  * limitations under the License.
  */
 export default {
-  addMember: '添加成员',
-  modifyMember: '编辑成员',
-  deleteMember: '删除成员',
-  deletePopConfirm: '确定要删除这个成员 ?',
-  add: '添加',
-  success: '成功',
-  fail: '失败',
   table: {
-    title: '成员列表',
-    userName: '用户名',
-    roleName: '角色',
-    createTime: '创建时间',
-    modifyTime: '修改时间',
+    title: '菜单列表',
+    name: '菜单名称',
+    icon: '图标',
+    type: '类型',
+    path: '路径',
+    component: 'Vue组件',
+    permission: '权限',
+    order: '排序',
   },
-  checkUserName: {
-    maxLen: '用户名不应超过 20 个字符',
-    minLen: '用户名不应少于 4 个字符',
-    noExist: '抱歉，用户名不存在',
-    empty: '用户名不能为空',
-  },
-  roleRequire: '请选择角色',
 };

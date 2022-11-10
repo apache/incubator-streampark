@@ -29,22 +29,24 @@
             :actions="[
               {
                 icon: 'clarity:note-edit-line',
+                tooltip: t('system.role.form.edit'),
                 auth: 'role:update',
                 ifShow: record.roleName !== 'admin' || userName === 'admin',
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'carbon:data-view-alt',
-                tooltip: 'view detail',
+                tooltip: t('common.detail'),
                 onClick: handleView.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 auth: 'role:delete',
+                tooltip: t('system.role.form.delete'),
                 ifShow: record.roleName !== 'admin',
                 popConfirm: {
-                  title: 'Are you sure delete this Role',
+                  title: t('system.role.deleteTip'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },
@@ -54,7 +56,11 @@
         </template>
       </template>
     </BasicTable>
-    <RoleDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
+    <RoleDrawer
+      :okText="t('common.submitText')"
+      @register="registerDrawer"
+      @success="handleSuccess"
+    />
     <RoleInfo @register="registerInfo" />
   </div>
 </template>
@@ -88,13 +94,12 @@
       const { createMessage } = useMessage();
       const useStore = useUserStoreWithOut();
       const [registerTable, { reload }] = useTable({
-        title: 'Role List',
+        title: t('system.role.tableTitle'),
         api: getRoleListByPage,
         columns,
         formConfig: {
           baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
-          colon: true,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
         showTableSetting: true,
@@ -103,7 +108,7 @@
         canResize: false,
         actionColumn: {
           width: 200,
-          title: 'Operation',
+          title: t('component.table.operation'),
           dataIndex: 'action',
         },
       });

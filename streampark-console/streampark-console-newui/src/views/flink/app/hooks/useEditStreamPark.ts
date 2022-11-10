@@ -28,6 +28,7 @@ import { toPomString } from '../utils/Pom';
 import { handleDependencyJsonToPom } from '../utils';
 import { useDrawer } from '/@/components/Drawer';
 import { useRoute } from 'vue-router';
+import { useMessage } from '/@/hooks/web/useMessage';
 
 export const useEditStreamParkSchema = (
   configVersions: Ref,
@@ -49,6 +50,7 @@ export const useEditStreamParkSchema = (
     appId: route.query.appId as string,
     mode: 'streampark',
   });
+  const { createMessage } = useMessage();
   const [registerDifferentDrawer, { openDrawer: openDiffDrawer }] = useDrawer();
 
   async function handleChangeSQL(v: string) {
@@ -59,6 +61,10 @@ export const useEditStreamParkSchema = (
   }
   // start compare flinksql version
   async function handleCompareOk(compareSQL: Array<string>) {
+    if (compareSQL.length != 2) {
+      createMessage.warning('Two versions must be selected for comparison');
+      return Promise.reject('error, compareSQL array length less thatn 2');
+    }
     const res = await fetchFlinkSql({ id: compareSQL.join(',') });
     const obj1 = res[0];
     const obj2 = res[1];

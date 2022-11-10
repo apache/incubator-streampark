@@ -20,14 +20,14 @@ const { t } = useI18n();
 export const columns: BasicColumn[] = [
   { title: t('system.variable.table.variableCode'), dataIndex: 'variableCode' },
   { title: t('system.variable.table.variableValue'), dataIndex: 'variableValue' },
-  { title: t('system.variable.table.description'), dataIndex: 'description' },
+  { title: t('common.description'), dataIndex: 'description' },
   {
-    title: t('system.variable.table.createTime'),
+    title: t('common.createTime'),
     dataIndex: 'createTime',
     sorter: true,
   },
   {
-    title: t('system.variable.table.modifyTime'),
+    title: t('common.modifyTime'),
     dataIndex: 'modifyTime',
     sorter: true,
   },
@@ -43,7 +43,7 @@ export const searchFormSchema: FormSchema[] = [
   },
   {
     field: 'description',
-    label: t('system.variable.table.description'),
+    label: t('common.description'),
     component: 'Input',
     componentProps: { placeholder: t('system.variable.table.variableValuePlaceholder') },
     colProps: { span: 8 },

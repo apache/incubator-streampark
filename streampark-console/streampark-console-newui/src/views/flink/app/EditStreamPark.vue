@@ -160,7 +160,7 @@
       } else {
         if (app.jobType == 2) {
           if (values.flinkSql == null || values.flinkSql.trim() === '') {
-            createMessage.warning('Flink Sql is required');
+            createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
           } else {
             const access = await flinkSql?.value?.handleVerifySql();
             if (!access) return;
@@ -221,6 +221,7 @@
       handleSubmitParams(params, values, k8sTemplate);
       handleUpdateApp(params);
     } catch (error) {
+      createMessage.error('edit error');
       submitLoading.value = false;
     }
   }
@@ -347,7 +348,7 @@
   onMounted(() => {
     if (!route?.query?.appId) {
       go('/flink/app');
-      createMessage.warning('appid can not be empty');
+      createMessage.warning(t('flink.app.editStreamPark.appidCheck'));
       return;
     }
     handleStreamParkInfo();

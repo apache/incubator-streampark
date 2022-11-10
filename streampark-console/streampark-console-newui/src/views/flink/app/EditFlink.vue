@@ -160,7 +160,7 @@
   async function handleUpdateApp(params: Recordable) {
     const updated = await fetchUpdate(params);
     if (updated) {
-      createMessage.success('update successful');
+      createMessage.success(t('flink.app.editStreamPark.success'));
       go('/flink/app');
     }
   }
@@ -168,7 +168,7 @@
   onMounted(async () => {
     if (!route?.query?.appId) {
       go('/flink/app');
-      createMessage.warning('appid can not be empty');
+      createMessage.warning(t('flink.app.editStreamPark.appidCheck'));
       return;
     }
     const value = await handleGetApplication();

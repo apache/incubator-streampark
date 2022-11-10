@@ -21,7 +21,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { fetTokenStatusToggle } from '/@/api/system/token';
 import { getNoTokenUserList } from '/@/api/system/user';
 import dayjs from 'dayjs';
-import {useI18n} from "/@/hooks/web/useI18n";
+import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 
 // status enum
@@ -44,11 +44,11 @@ export const columns: BasicColumn[] = [
     dataIndex: 'token',
   },
   {
-    title: t('system.token.table.description'),
+    title: t('common.description'),
     dataIndex: 'description',
   },
   {
-    title: t('system.token.table.createTime'),
+    title: t('common.createTime'),
     dataIndex: 'createTime',
   },
   {
@@ -90,7 +90,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
   {
-    field: t('system.token.table.userName'),
+    field: 'userName',
     label: t('system.token.table.userName'),
     component: 'Input',
     colProps: { span: 8 },
@@ -111,12 +111,12 @@ export const formSchema: FormSchema[] = [
     rules: [{ required: true, message: t('system.token.selectUserAlertMessage'), trigger: 'blur' }],
   },
   {
-    field: t('system.token.table.description'),
-    label: t('system.token.table.description'),
+    field: 'description',
+    label: t('common.description'),
     component: 'InputTextArea',
   },
   {
-    field: t('system.token.table.expireTime'),
+    field: 'expireTime',
     label: t('system.token.table.expireTime'),
     component: 'DatePicker',
     defaultValue: dayjs('9999-01-01'),

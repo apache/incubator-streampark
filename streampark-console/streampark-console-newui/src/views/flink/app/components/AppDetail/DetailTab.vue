@@ -92,7 +92,7 @@
       title: t('component.table.operation'),
       dataIndex: 'operation',
       key: 'operation',
-      width: 200,
+      width: 150,
     },
   };
 
@@ -304,12 +304,12 @@
         <BasicTable @register="registerLogsTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'yarnAppId'">
-              <span class="pointer" @click="handleView(app as any, '')">
+              <a-button type="link" @click="handleView(app as any, '')">
                 {{ record.yarnAppId }}
-              </span>
+              </a-button>
             </template>
             <template v-if="column.dataIndex == 'jobManagerUrl'">
-              <a-button type="link" :href="record.jobManagerUrl" class="pointer" target="_blank">
+              <a-button type="link" :href="record.jobManagerUrl" target="_blank">
                 {{ record.jobManagerUrl }}
               </a-button>
             </template>

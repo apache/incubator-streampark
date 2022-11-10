@@ -45,10 +45,15 @@ export default {
   previous: 'Previous',
 
   view: 'View',
+  detail: 'view detail',
 
   add: 'Add New',
   edit: 'Edit',
 
   yes: 'Yes',
   no: 'No',
+
+  createTime: 'Create Time',
+  modifyTime: 'Modify Time',
+  description: 'Description',
 };

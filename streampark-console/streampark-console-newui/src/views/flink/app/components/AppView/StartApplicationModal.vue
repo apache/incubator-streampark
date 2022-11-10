@@ -104,11 +104,7 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        afterItem: h(
-          'span',
-          { class: 'conf-switch' },
-          'restore the application from savepoint or latest checkpoint',
-        ),
+        afterItem: h('span', { class: 'conf-switch' }, 'ignore savepoint then cannot be restored'),
         defaultValue: false,
         ifShow: ({ values }) => values.startSavePointed,
       },

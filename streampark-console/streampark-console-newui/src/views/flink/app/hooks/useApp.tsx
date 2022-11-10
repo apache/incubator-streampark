@@ -22,9 +22,11 @@ import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
 import { fetchLatest, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
+import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 
 export const useFlinkApplication = (openStartModal: Fn) => {
+  const { t } = useI18n();
   const { Swal, createConfirm, createMessage, createWarningModal } = useMessage();
   const users = ref<Recordable>([]);
   const appBuildDetail = reactive<Recordable>({});
@@ -43,8 +45,8 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       createWarningModal({
         title: 'WARNING',
         content: `
-          <p>The current launch of the application is in progress.</p>
-          <p>are you sure you want to force another build?</p>
+          <p>${t('flink.app.launchTitle')}</p>
+          <p>${t('flink.app.launchDesc')}</p>
         `,
         okType: 'danger',
         onOk: () => handleLaunchApp(app, true),
@@ -61,13 +63,13 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     if (!data.data) {
       Swal.fire(
         'Failed',
-        'lanuch application failed, ' + (data.message || '').replaceAll(/\[StreamPark]/g, ''),
+        t('flink.app.launchFail') + '' + (data.message || '').replaceAll(/\[StreamPark]/g, ''),
         'error',
       );
     } else {
       Swal.fire({
         icon: 'success',
-        title: 'Current Application is launching',
+        title: t('flink.app.launching'),
         showConfirmButton: false,
         timer: 2000,
       });

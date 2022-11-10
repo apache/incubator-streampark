@@ -117,4 +117,7 @@ export default {
     smsCode: 'SMS code',
     mobile: 'Mobile',
   },
+  permission: {
+    noPermission: 'No permission, please contact the administrator',
+  },
 };

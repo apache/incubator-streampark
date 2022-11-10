@@ -47,7 +47,11 @@ export default {
 
   add: '添加',
   edit: '编辑',
-
+  detail: '查看详情',
   yes: '是',
   no: '否',
+
+  createTime: '创建时间',
+  modifyTime: '修改时间',
+  description: '描述',
 };

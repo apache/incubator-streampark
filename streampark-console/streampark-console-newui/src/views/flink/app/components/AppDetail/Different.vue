@@ -85,6 +85,7 @@
 
   async function handleCancel() {
     await disposeEditor();
+    renderEleMap.clear();
     closeDrawer();
   }
 
