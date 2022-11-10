@@ -129,25 +129,6 @@ streampark:
     jwtTimeOut: 86400
     # backend authentication-free resources url
     anonUrl: >
-      /passport/**,
-      /systemName,
-      /member/teams,
-      /user/check/**,
-      /user/initTeam,
-      /websocket/**,
-      /metrics/**,
-      /index.html,
-      /assets/**,
-      /css/**,
-      /fonts/**,
-      /img/**,
-      /js/**,
-      /loading/**,
-      /*.js,
-      /*.png,
-      /*.jpg,
-      /*.less,
-      /
 
 ldap:
   ## AD server IP, default port 389
