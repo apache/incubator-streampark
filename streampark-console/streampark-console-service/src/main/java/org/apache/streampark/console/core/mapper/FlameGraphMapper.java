@@ -20,18 +20,7 @@ package org.apache.streampark.console.core.mapper;
 import org.apache.streampark.console.core.entity.FlameGraph;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-
-import java.util.Date;
-import java.util.List;
 
 public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
 
-    @Select("select * from t_flame_graph where app_id=#{appId} and timeline between #{start} and #{end} order by timeline asc")
-    List<FlameGraph> getFlameGraph(@Param("appId") Long appId, @Param("start") Date start, @Param("end") Date end);
-
-    @Delete("delete from t_flame_graph where timeline < #{end}")
-    void clean(Date end);
 }

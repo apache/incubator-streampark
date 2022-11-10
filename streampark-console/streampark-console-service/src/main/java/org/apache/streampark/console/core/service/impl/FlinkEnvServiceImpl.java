@@ -45,12 +45,12 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
     @Override
     public boolean exists(FlinkEnv version) {
         //1) check name
-        LambdaQueryWrapper<FlinkEnv> nameQuery = new LambdaQueryWrapper<FlinkEnv>()
+        LambdaQueryWrapper<FlinkEnv> queryWrapper = new LambdaQueryWrapper<FlinkEnv>()
             .eq(FlinkEnv::getFlinkName, version.getFlinkName());
         if (version.getId() != null) {
-            nameQuery.ne(FlinkEnv::getId, version.getId());
+            queryWrapper.ne(FlinkEnv::getId, version.getId());
         }
-        return this.count(nameQuery) == 0;
+        return this.count(queryWrapper) == 0;
     }
 
     @Override

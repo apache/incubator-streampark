@@ -117,13 +117,15 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
     @Override
     public Variable findByVariableCode(Long teamId, String variableCode) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<Variable>()
+        LambdaQueryWrapper<Variable> queryWrapper = new LambdaQueryWrapper<Variable>()
             .eq(Variable::getVariableCode, variableCode)
-            .eq(Variable::getTeamId, teamId));
+            .eq(Variable::getTeamId, teamId);
+        return baseMapper.selectOne(queryWrapper);
     }
 
     /**
      * get variables through team
+     *
      * @param teamId
      * @return
      */
@@ -134,6 +136,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
     /**
      * Get variables through team and search keywords.
+     *
      * @param teamId
      * @param keyword Fuzzy search keywords through variable code or description, Nullable.
      * @return
@@ -145,8 +148,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
     /**
      * Replace variable with defined variable codes.
+     *
      * @param teamId
-     * @param mixed Text with placeholders, e.g. "--cluster ${kafka.cluster}"
+     * @param mixed  Text with placeholders, e.g. "--cluster ${kafka.cluster}"
      * @return
      */
     @Override
@@ -158,7 +162,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
         if (CollectionUtils.isEmpty(variables)) {
             return mixed;
         }
-        Map<String, String> variableMap = variables.stream().collect(Collectors.toMap(Variable::getVariableCode, Variable::getVariableValue));
+        Map<String, String> variableMap =
+            variables.stream().collect(Collectors.toMap(Variable::getVariableCode, Variable::getVariableValue));
         String restore = mixed;
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(restore);
         while (matcher.find()) {
@@ -179,7 +184,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     private List<Application> getDependApplicationsByCode(Variable variable) {
         List<Application> dependApplications = new ArrayList<>();
         List<Application> applications = applicationService.getByTeamId(variable.getTeamId());
-        Map<Long, Application> applicationMap = applications.stream().collect(Collectors.toMap(Application::getId, application -> application));
+        Map<Long, Application> applicationMap =
+            applications.stream().collect(Collectors.toMap(Application::getId, application -> application));
 
         // Get applications that depend on this variable in application args
         if (applications != null) {
@@ -206,8 +212,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
     /**
      * Determine whether variableCode is dependent on mixed.
+     *
      * @param variableCode Variable code, e.g. "kafka.cluster"
-     * @param mixed Text with placeholders, e.g. "--cluster ${kafka.cluster}"
+     * @param mixed        Text with placeholders, e.g. "--cluster ${kafka.cluster}"
      * @return If mixed can match the variableCode, return true, otherwise return false
      */
     private boolean isDepend(String variableCode, String mixed) {
@@ -224,6 +231,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
     @Override
     public long countByTeamId(Long teamId) {
-        return this.count(new LambdaQueryWrapper<Variable>().eq(Variable::getTeamId, teamId));
+        LambdaQueryWrapper<Variable> queryWrapper = new LambdaQueryWrapper<Variable>()
+            .eq(Variable::getTeamId, teamId);
+        return this.count(queryWrapper);
     }
 }

@@ -29,4 +29,19 @@
         <result column="content" jdbcType="LONGVARCHAR" property="content"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
+
+    <select id="getLastVersion" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        select max(`version`) as lastVersion
+        from t_flink_config
+        where app_id = #{appId}
+    </select>
+
+    <select id="getEffective" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
+        select s.*
+        from t_flink_config s
+        inner join t_flink_effective e
+        on s.id = e.target_id
+        where e.app_id = #{appId}
+        and e.target_type = 1
+    </select>
 </mapper>

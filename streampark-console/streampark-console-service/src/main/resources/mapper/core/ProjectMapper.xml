@@ -39,17 +39,21 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="page" resultType="project" parameterType="project">
-        select * from t_flink_project t
-        <where>
-            t.team_id = #{project.teamId}
-            <if test="project.name != null and project.name != ''">
-                and t.name like '%${project.name}%'
-            </if>
-            <if test="project.buildState != null">
-                and t.build_state = #{project.buildState}
-            </if>
-        </where>
-    </select>
+    <update id="updateFailureBuildById" parameterType="org.apache.streampark.console.core.entity.Project">
+        update t_flink_project
+        set BUILD_STATE=2
+        where id=#{project.id}
+    </update>
 
+    <update id="updateSuccessBuildById" parameterType="org.apache.streampark.console.core.entity.Project">
+        update t_flink_project
+        set LAST_BUILD=now(), BUILD_STATE=1
+        where id=#{project.id}
+    </update>
+
+    <update id="updateStartBuildById" parameterType="org.apache.streampark.console.core.entity.Project">
+        update t_flink_project
+        set BUILD_STATE=0
+        where id=#{project.id}
+    </update>
 </mapper>

@@ -39,6 +39,7 @@ import org.apache.streampark.flink.submit.bean.KubernetesDeployParam;
 import org.apache.streampark.flink.submit.bean.ShutDownRequest;
 import org.apache.streampark.flink.submit.bean.ShutDownResponse;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -89,15 +90,18 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         if (null == cluster.getClusterName() || null == cluster.getExecutionMode()) {
             return "error";
         }
-        //1) 检查名称是否重复,是否已经存在
-        FlinkCluster flinkCluster = this.baseMapper.getByName(cluster.getClusterName());
+        //1) Check if name is duplicate, if it already exists
+        LambdaQueryWrapper<FlinkCluster> queryWrapper = new LambdaQueryWrapper<FlinkCluster>()
+            .eq(FlinkCluster::getClusterName, cluster.getClusterName());
+        FlinkCluster flinkCluster = this.getOne(queryWrapper);
         if (flinkCluster != null) {
-            if (cluster.getId() == null || (cluster.getId() != null && !flinkCluster.getId().equals(cluster.getId()))) {
+            boolean isExists = cluster.getId() == null || (cluster.getId() != null && !flinkCluster.getId().equals(cluster.getId()));
+            if (isExists) {
                 return "exists";
             }
         }
         if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum())) {
-            //2) 检查连接是否能连接到
+            //2) Check if the connection can be made to
             return cluster.verifyConnection() ? "success" : "fail";
         }
         return "success";
@@ -113,8 +117,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         }
         String clusterId = flinkCluster.getClusterId();
         if (StringUtils.isNoneBlank(clusterId)) {
-            FlinkCluster inDB = this.baseMapper.getByClusterId(clusterId);
-            if (inDB != null) {
+            LambdaQueryWrapper<FlinkCluster> queryWrapper = new LambdaQueryWrapper<FlinkCluster>()
+                .eq(FlinkCluster::getClusterId, clusterId);
+            FlinkCluster inDb = this.getOne(queryWrapper);
+            if (inDb != null) {
                 result.setMsg("the clusterId" + clusterId + "is already exists,please check!");
                 result.setStatus(0);
                 return result;

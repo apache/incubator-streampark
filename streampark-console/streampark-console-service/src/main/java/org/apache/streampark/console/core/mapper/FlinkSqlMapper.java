@@ -21,15 +21,13 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
-    @Select("select s.* from t_flink_sql s inner join t_flink_effective e on s.id = e.target_id where e.target_type=2 and e.app_id=#{appId}")
+
     FlinkSql getEffective(@Param("appId") Long appId);
 
-    @Select("select max(`version`) as maxVersion from t_flink_sql where app_id=#{appId}")
     Integer getLatestVersion(@Param("appId") Long appId);
 
     List<FlinkSql> getByTeamId(@Param("teamId") Long teamId);

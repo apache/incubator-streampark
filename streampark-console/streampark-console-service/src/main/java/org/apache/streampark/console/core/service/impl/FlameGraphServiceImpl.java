@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.mapper.FlameGraphMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlameGraphService;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -45,28 +46,29 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGraph>
-        implements FlameGraphService {
+    implements FlameGraphService {
 
     @Autowired
     private ApplicationService applicationService;
 
     @Override
     public String generateFlameGraph(FlameGraph flameGraph) throws IOException {
-        List<FlameGraph> flameGraphList = this.baseMapper.getFlameGraph(
-                flameGraph.getAppId(),
-                flameGraph.getStart(),
-                flameGraph.getEnd()
-        );
+        LambdaQueryWrapper<FlameGraph> queryWrapper = new LambdaQueryWrapper<FlameGraph>()
+            .eq(FlameGraph::getAppId, flameGraph.getAppId())
+            .between(FlameGraph::getTimeline, flameGraph.getStart(), flameGraph.getEnd())
+            .orderByAsc(FlameGraph::getTimeline);
+        List<FlameGraph> flameGraphList = this.list(queryWrapper);
+
         if (CommonUtils.notEmpty(flameGraphList)) {
             StringBuffer jsonBuffer = new StringBuffer();
             flameGraphList.forEach(x -> jsonBuffer.append(x.getUnzipContent()).append("\r\n"));
 
             Application application = applicationService.getById(flameGraph.getAppId());
             String jsonName = String.format(
-                    "%d_%d_%d.json",
-                    flameGraph.getAppId(),
-                    flameGraph.getStart().getTime(),
-                    flameGraph.getEnd().getTime()
+                "%d_%d_%d.json",
+                flameGraph.getAppId(),
+                flameGraph.getStart().getTime(),
+                flameGraph.getEnd().getTime()
             );
             String jsonPath = new File(WebUtils.getAppTempDir(), jsonName).getAbsolutePath();
             String foldedPath = jsonPath.replace(".json", ".folded");
@@ -80,14 +82,14 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
             String title = application.getJobName().concat(" ___ FlameGraph");
             // generate...
             List<String> commands = Arrays.asList(
-                    String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
-                    String.format(
-                            "./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ",
-                            title,
-                            flameGraph.getWidth(),
-                            foldedPath,
-                            svgPath
-                    )
+                String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
+                String.format(
+                    "./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ",
+                    title,
+                    flameGraph.getWidth(),
+                    foldedPath,
+                    svgPath
+                )
             );
             CommandUtils.execute(flameGraphPath.getAbsolutePath(), commands, (line) -> log.info("flameGraph: {} ", line));
             return svgPath;
@@ -97,6 +99,8 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
 
     @Override
     public void clean(Date end) {
-        baseMapper.clean(end);
+        LambdaQueryWrapper<FlameGraph> queryWrapper = new LambdaQueryWrapper<FlameGraph>()
+            .lt(FlameGraph::getTimeline, end);
+        this.remove(queryWrapper);
     }
 }
