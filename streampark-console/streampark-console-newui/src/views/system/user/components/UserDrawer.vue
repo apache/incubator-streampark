@@ -15,7 +15,13 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer okText="Submit" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
+  <BasicDrawer
+    :okText="t('common.submitText')"
+    @register="registerDrawer"
+    showFooter
+    width="40%"
+    @ok="handleSubmit"
+  >
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
       {{ getTitle }}
@@ -63,9 +69,7 @@
         if (unref(formType) !== FormTypeEnum.Create) {
           const roleIds = data.record?.roleId ?? [];
           data.record.roleId = Array.isArray(roleIds) ? roleIds : roleIds.split(',');
-          setFieldsValue({
-            ...data.record,
-          });
+          setFieldsValue(data.record);
         }
       });
 
@@ -89,7 +93,7 @@
         }
       }
 
-      return { registerDrawer, registerForm, getTitle, handleSubmit };
+      return { t, registerDrawer, registerForm, getTitle, handleSubmit };
     },
   });
 </script>

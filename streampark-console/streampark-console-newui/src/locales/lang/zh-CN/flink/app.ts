@@ -70,6 +70,7 @@ export default {
   },
   dependencyError: '请先检查flink 版本.',
   flinkSql: {
+    preview: '内容预览',
     verify: '验证',
     format: '格式化',
     fullScreen: '全屏',

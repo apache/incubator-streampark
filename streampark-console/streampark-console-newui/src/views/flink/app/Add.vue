@@ -94,7 +94,6 @@
     const defaultValue = {
       resolveOrder: 0,
       k8sRestExposedType: 0,
-      restartSize: 1,
     };
     options.forEach((item) => {
       defaultValue[item.key] = item.defaultValue;

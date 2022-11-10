@@ -59,13 +59,13 @@ export const useAppTableAction = (
   } = useFlinkApplication(openStartModal);
 
   /* Operation button */
-  function getTableActions(record: AppListRecord): ActionItem[] {
+  function getTableActions(record: AppListRecord, currentPgaeNo: any): ActionItem[] {
     return [
       {
         tooltip: { title: t('flink.app.tableAction.edit') },
         auth: 'app:update',
         icon: 'clarity:note-edit-line',
-        onClick: handleEdit.bind(null, record),
+        onClick: handleEdit.bind(null, record, currentPgaeNo),
       },
       {
         tooltip: { title: t('flink.app.tableAction.launch') },
@@ -118,7 +118,9 @@ export const useAppTableAction = (
     ];
   }
   /* Click to edit */
-  function handleEdit(app: AppListRecord) {
+  function handleEdit(app: AppListRecord, currentPageNo: number) {
+    // Record the current page number
+    sessionStorage.setItem('appPageNo', String(currentPageNo || 1));
     flinkAppStore.setApplicationId(app.id);
     if (app.appType === 1) {
       // jobType( 1 custom code 2: flinkSQL)

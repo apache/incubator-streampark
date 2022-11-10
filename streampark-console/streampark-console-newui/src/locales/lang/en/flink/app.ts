@@ -71,6 +71,7 @@ export default {
   },
   dependencyError: 'please set flink version first.',
   flinkSql: {
+    preview: 'Preview',
     verify: 'Verify',
     format: 'Format',
     fullScreen: 'Full Screen',
