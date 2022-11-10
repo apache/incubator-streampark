@@ -77,9 +77,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public FlinkSql getLatestFlinkSql(Long appId, boolean decode) {
         Page<FlinkSql> page = new Page<>();
         page.setCurrent(0).setSize(1).setSearchCount(false);
-        LambdaQueryWrapper<FlinkSql> queryWrapper =
-            new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId)
-                .orderByDesc(FlinkSql::getVersion);
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>()
+            .eq(FlinkSql::getAppId, appId)
+            .orderByDesc(FlinkSql::getVersion);
 
         Page<FlinkSql> flinkSqlPage = baseMapper.selectPage(page, queryWrapper);
         if (!flinkSqlPage.getRecords().isEmpty()) {
@@ -120,11 +120,11 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public List<FlinkSql> history(Application application) {
-        LambdaQueryWrapper<FlinkSql> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FlinkSql::getAppId, application.getId())
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>()
+            .eq(FlinkSql::getAppId, application.getId())
             .orderByDesc(FlinkSql::getVersion);
 
-        List<FlinkSql> sqlList = this.baseMapper.selectList(wrapper);
+        List<FlinkSql> sqlList = this.baseMapper.selectList(queryWrapper);
         FlinkSql effective = getEffective(application.getId(), false);
         if (effective != null && !sqlList.isEmpty()) {
             for (FlinkSql sql : sqlList) {
@@ -165,7 +165,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public void removeApp(Long appId) {
-        baseMapper.delete(new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId));
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>()
+            .eq(FlinkSql::getAppId, appId);
+        baseMapper.delete(queryWrapper);
     }
 
     @Override

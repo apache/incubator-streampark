@@ -64,16 +64,16 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         boolean cloneSuccess = cloneSourceCode(project);
         if (!cloneSuccess) {
             fileLogger.error("[StreamPark] clone or pull error.");
-            this.baseMapper.failureBuild(project);
+            this.baseMapper.updateFailureBuildById(project);
             return;
         }
         boolean build = projectBuild(project);
         if (!build) {
-            this.baseMapper.failureBuild(project);
+            this.baseMapper.updateFailureBuildById(project);
             fileLogger.error("build error, project name: {} ", project.getName());
             return;
         }
-        this.baseMapper.successBuild(project);
+        this.baseMapper.updateSuccessBuildById(project);
         this.deploy(project);
         List<Application> applications = this.applicationService.getByProjectId(project.getId());
         // Update the deploy state
@@ -87,7 +87,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
     @Override
     protected void processException(Throwable t) {
-        this.baseMapper.failureBuild(project);
+        this.baseMapper.updateFailureBuildById(project);
         fileLogger.error("Build error, project name: {}", project.getName(), t);
     }
 

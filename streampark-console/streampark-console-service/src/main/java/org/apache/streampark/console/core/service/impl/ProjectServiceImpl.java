@@ -45,6 +45,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -89,8 +90,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Project::getName, project.getName());
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getName, project.getName());
         long count = count(queryWrapper);
         RestResponse response = RestResponse.success();
         if (count == 0) {
@@ -147,8 +148,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public boolean delete(Long id) {
         Project project = getById(id);
         AssertUtils.state(project != null);
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Application::getProjectId, id);
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
+            .eq(Application::getProjectId, id);
         long count = applicationService.count(queryWrapper);
         if (count > 0) {
             return false;
@@ -165,20 +166,26 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public IPage<Project> page(Project project, RestRequest request) {
         Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
-        return this.baseMapper.page(page, project);
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getTeamId, project.getTeamId())
+            .like(StringUtils.isNotBlank(project.getName()), Project::getName, project.getName())
+            .eq(project.getBuildState() != null, Project::getBuildState, project.getBuildState());
+        return this.page(page, queryWrapper);
     }
 
     @Override
     public long countByTeamId(Long teamId) {
-        return this.count(new LambdaQueryWrapper<Project>().eq(Project::getTeamId, teamId));
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
+            .eq(Project::getTeamId, teamId);
+        return this.count(queryWrapper);
     }
 
     @Override
     public void build(Long id) throws Exception {
         Project project = getById(id);
-        this.baseMapper.startBuild(project);
-        CompletableFuture<Void> buildTask = CompletableFuture.runAsync(
-            new ProjectBuildTask(getBuildLogPath(id), project, baseMapper, applicationService), executorService);
+        this.baseMapper.updateStartBuildById(project);
+        ProjectBuildTask projectBuildTask = new ProjectBuildTask(getBuildLogPath(id), project, baseMapper, applicationService);
+        CompletableFuture<Void> buildTask = CompletableFuture.runAsync(projectBuildTask, executorService);
         // TODO May need to define parameters to set the build timeout in the future.
         CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
     }
@@ -227,9 +234,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 return false;
             }
         }
-        LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<Project>()
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>()
             .eq(Project::getName, project.getName());
-        return this.baseMapper.selectCount(wrapper) > 0;
+        return this.baseMapper.selectCount(queryWrapper) > 0;
     }
 
     @Override

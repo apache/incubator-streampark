@@ -20,23 +20,12 @@ package org.apache.streampark.console.core.mapper;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
 
-    @Select("select max(`version`) as lastVersion from t_flink_config where app_id=#{appId}")
     Integer getLastVersion(@Param("appId") Long appId);
 
-    @Select("select * from t_flink_config where app_id=#{appId}")
-    IPage<ApplicationConfig> page(Page<ApplicationConfig> page, @Param("appId") Long appId);
-
-    @Select("select s.* from t_flink_config s inner join t_flink_effective e on s.id = e.target_id where e.app_id=#{appId} and e.target_type=1")
     ApplicationConfig getEffective(@Param("appId") Long appId);
-
-    @Select("select * from t_flink_config where app_id=#{appId} and latest=true")
-    ApplicationConfig getLatest(@Param("appId") Long appId);
 
 }

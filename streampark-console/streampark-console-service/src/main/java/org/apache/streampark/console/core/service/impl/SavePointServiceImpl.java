@@ -51,7 +51,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Override
     public void obsolete(Long appId) {
-        this.baseMapper.obsolete(appId);
+        SavePoint savePoint = new SavePoint();
+        savePoint.setLatest(false);
+        LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
+            .eq(SavePoint::getAppId, appId);
+        this.update(savePoint, queryWrapper);
     }
 
     @Override
@@ -74,10 +78,13 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         }
 
         if (cpThreshold == 0) {
-            this.baseMapper.expireAll(entity.getAppId());
+            LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
+                .eq(SavePoint::getAppId, entity.getAppId())
+                .eq(SavePoint::getType, 1);
+            this.remove(queryWrapper);
         } else {
-            LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>();
-            queryWrapper.select(SavePoint::getTriggerTime)
+            LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
+                .select(SavePoint::getTriggerTime)
                 .eq(SavePoint::getAppId, entity.getAppId())
                 .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
                 .orderByDesc(SavePoint::getTriggerTime);
@@ -85,14 +92,21 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             Page<SavePoint> savePointPage = this.baseMapper.selectPage(new Page<>(1, cpThreshold + 1), queryWrapper);
             if (!savePointPage.getRecords().isEmpty() && savePointPage.getRecords().size() > cpThreshold) {
                 SavePoint savePoint = savePointPage.getRecords().get(cpThreshold - 1);
-                this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
+                LambdaQueryWrapper<SavePoint> lambdaQueryWrapper = new LambdaQueryWrapper<SavePoint>()
+                    .eq(SavePoint::getAppId, entity.getAppId())
+                    .eq(SavePoint::getType, 1)
+                    .lt(SavePoint::getTriggerTime, savePoint.getTriggerTime());
+                this.remove(lambdaQueryWrapper);
             }
         }
     }
 
     @Override
     public SavePoint getLatest(Long id) {
-        return this.baseMapper.getLatest(id);
+        LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
+            .eq(SavePoint::getAppId, id)
+            .eq(SavePoint::getLatest, true);
+        return this.getOne(queryWrapper);
     }
 
     @Override
@@ -113,13 +127,19 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Override
     public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
         Page<SavePoint> page = new MybatisPager<SavePoint>().getPage(request, "trigger_time", Constant.ORDER_DESC);
-        return this.baseMapper.page(page, savePoint.getAppId());
+        LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
+            .eq(SavePoint::getAppId, savePoint.getAppId());
+        return this.page(page, queryWrapper);
     }
 
     @Override
     public void removeApp(Application application) {
         Long appId = application.getId();
-        baseMapper.removeApp(application.getId());
+
+        LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
+            .eq(SavePoint::getAppId, appId);
+        this.remove(queryWrapper);
+
         try {
             application.getFsOperator().delete(application.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
         } catch (Exception e) {

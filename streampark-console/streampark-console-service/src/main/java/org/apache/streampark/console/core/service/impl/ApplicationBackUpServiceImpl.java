@@ -85,7 +85,7 @@ public class ApplicationBackUpServiceImpl
     @Override
     public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
         Page<ApplicationBackUp> page = new MybatisPager<ApplicationBackUp>().getDefaultPage(request);
-        LambdaQueryWrapper queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
             .eq(ApplicationBackUp::getAppId, backUp.getAppId());
         return this.baseMapper.selectPage(page, queryWrapper);
     }
@@ -208,8 +208,8 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.eq(ApplicationBackUp::getAppId, appId)
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, appId)
             .eq(ApplicationBackUp::getSqlId, sqlId);
         return baseMapper.selectCount(queryWrapper) > 0;
     }

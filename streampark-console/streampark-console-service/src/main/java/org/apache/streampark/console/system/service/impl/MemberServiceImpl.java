@@ -71,7 +71,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
 
     @Override
     public void deleteByTeamId(Long teamId) {
-        this.remove(new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId));
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<Member>()
+            .eq(Member::getTeamId, teamId);
+        this.remove(queryWrapper);
     }
 
     @Override
@@ -99,16 +101,16 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
 
     private Member findByUserId(Long teamId, Long userId) {
         AssertUtils.isTrue(teamId != null, "The team id is required.");
-        return baseMapper.selectOne(
-            new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId)
-                .eq(Member::getUserId, userId));
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId)
+            .eq(Member::getUserId, userId);
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @Override
     public List<Long> findUserIdsByRoleId(Long roleId) {
-        List<Member> list =
-            baseMapper.selectList(
-                new LambdaQueryWrapper<Member>().eq(Member::getRoleId, roleId));
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<Member>()
+            .eq(Member::getRoleId, roleId);
+        List<Member> list = baseMapper.selectList(queryWrapper);
         return list.stream()
             .map(Member::getUserId)
             .collect(Collectors.toList());
@@ -123,7 +125,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
         Team team = Optional.ofNullable(teamService.getById(member.getTeamId()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The teamId [%s] not found", member.getTeamId())));
         AssertUtils.isTrue(findByUserId(member.getTeamId(), user.getUserId()) == null,
-            String.format("The user [%s] has been added the team [%s], please don't add it again.", member.getUserName(), team.getTeamName()));
+            String.format("The user [%s] has been added the team [%s], please don't add it again.", member.getUserName(),
+                team.getTeamName()));
 
         member.setId(null);
         member.setUserId(user.getUserId());

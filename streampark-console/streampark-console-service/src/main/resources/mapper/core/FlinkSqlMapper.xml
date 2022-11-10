@@ -28,7 +28,22 @@
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
 
-    <select id="getByTeamId" resultType="flinkSql" parameterType="Long">
+    <select id="getEffective" resultType="org.apache.streampark.console.core.entity.FlinkSql" parameterType="java.lang.Long">
+        select s.*
+        from t_flink_sql s
+        inner join t_flink_effective e
+        on s.id = e.target_id
+        where e.target_type = 2
+        and e.app_id = #{appId}
+    </select>
+
+    <select id="getLatestVersion" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        select max(`version`) as maxVersion
+        from t_flink_sql
+        where app_id = #{appId}
+    </select>
+
+    <select id="getByTeamId" resultType="org.apache.streampark.console.core.entity.FlinkSql" parameterType="java.lang.Long">
         select s.*
         from t_flink_sql s, t_flink_app a
         where s.app_id = a.id
