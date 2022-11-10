@@ -634,12 +634,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         Application newApp = new Application();
         String jobName = appParam.getJobName();
-        String args = appParam.getArgs();
 
         newApp.setJobName(jobName);
-        newApp.setClusterId(oldApp.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION ? oldApp.getClusterId() : jobName);
-        args = args != null && !"".equals(args) ? args : oldApp.getArgs();
-        newApp.setArgs(args);
+        newApp.setClusterId(ExecutionMode.isSessionMode(oldApp.getExecutionModeEnum()) ? oldApp.getClusterId() : jobName);
+        newApp.setArgs(appParam.getArgs());
         newApp.setVersionId(oldApp.getVersionId());
 
         newApp.setFlinkClusterId(oldApp.getFlinkClusterId());
@@ -667,13 +665,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setProjectId(oldApp.getProjectId());
         newApp.setModule(oldApp.getModule());
         newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
-
         newApp.setUserId(commonService.getUserId());
         newApp.setState(FlinkAppState.ADDED.getValue());
         newApp.setLaunch(LaunchState.NEED_LAUNCH.get());
         newApp.setOptionState(OptionState.NONE.getValue());
         newApp.setCreateTime(new Date());
-        newApp.doSetHotParams();
+        newApp.setHotParams(oldApp.getHotParams());
 
         newApp.setJar(oldApp.getJar());
         newApp.setJarCheckSum(oldApp.getJarCheckSum());
