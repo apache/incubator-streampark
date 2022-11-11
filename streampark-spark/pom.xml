@@ -33,7 +33,6 @@
     <modules>
         <module>streampark-spark-core</module>
         <module>streampark-spark-connector</module>
-        <module>streampark-spark-test</module>
     </modules>
 
     <dependencies>
