@@ -49,6 +49,21 @@ Make stream processing easier
 
 webui 是用 Javascript 编写的。如果你没有 Node.js 开发环境，请[设置](https://nodejs.org/en/download/)它。需要的最低版本是 14.0。
 
+- 设置镜像源
+
+如果你遇到依赖下载缓慢需要配置 npm 镜像源,方法为在用户文件夹下找到 .npmrc 将以下内容写入
+
+```bash
+strict-peer-dependencies=false
+save-workspace-protocol = rolling
+registry = 'http://registry.npm.taobao.org'
+sass_binary_site='http://npm.taobao.org/mirrors/node-sass/'
+phantomjs_cdnurl='http://npm.taobao.org/mirrors/phantomjs'
+CHROMEDRIVER_CDNURL='http://npm.taobao.org/mirrors/chromedriver'
+electron_mirror='http://npm.taobao.org/mirrors/electron/'
+fsevents_binary_host_mirror='http://npm.taobao.org/mirrors/fsevents/'
+```
+
 - 安装依赖
 
 ```bash
