@@ -162,7 +162,7 @@ export default {
     programArgs: 'Program Args',
   },
   runStatusOptions: {
-    added : 'ADDED',
+    added: 'ADDED',
     starting: 'STARTING',
     running: 'RUNNING',
     failed: 'FAILED',
@@ -171,6 +171,6 @@ export default {
     suspended: 'SUSPENDED',
     lost: 'LOST',
     silent: 'SILENT',
-    terminated: 'TERMINATED'
-  }
+    terminated: 'TERMINATED',
+  },
 };

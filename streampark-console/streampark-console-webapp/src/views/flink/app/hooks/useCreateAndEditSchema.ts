@@ -233,7 +233,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'k8sNamespace',
-        label:  t('flink.app.table.kubernetesNamespace'),
+        label: t('flink.app.table.kubernetesNamespace'),
         component: 'Input',
         ifShow: ({ values }) => isK8sExecMode(values.executionMode),
         render: ({ model, field }) =>
@@ -281,7 +281,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'k8sRestExposedType',
-        label:  t('flink.app.table.restServiceExposedType'),
+        label: t('flink.app.table.restServiceExposedType'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         component: 'Select',
         componentProps: {

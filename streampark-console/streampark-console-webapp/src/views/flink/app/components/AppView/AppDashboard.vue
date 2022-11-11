@@ -33,7 +33,10 @@
       if (res) {
         Object.assign(dashBigScreenMap, {
           availiableTask: {
-            staticstics: { title: t('flink.app.dashboard.availableTaskSlots'), value: res.availableSlot },
+            staticstics: {
+              title: t('flink.app.dashboard.availableTaskSlots'),
+              value: res.availableSlot,
+            },
             footer: [
               { title: t('flink.app.dashboard.taskSlots'), value: res.totalSlot },
               { title: t('flink.app.dashboard.taskManagers'), value: res.totalTM },
@@ -48,11 +51,21 @@
           },
           jobManager: {
             staticstics: { title: t('flink.app.dashboard.jobManagerMemory'), value: res.jmMemory },
-            footer: [{ title: t('flink.app.dashboard.totalJobManagerMemory'), value: `${res.jmMemory} MB` }],
+            footer: [
+              {
+                title: t('flink.app.dashboard.totalJobManagerMemory'),
+                value: `${res.jmMemory} MB`,
+              },
+            ],
           },
           taskManager: {
             staticstics: { title: t('flink.app.dashboard.taskManagerMemory'), value: res.tmMemory },
-            footer: [{ title: t('flink.app.dashboard.totalTaskManagerMemory'), value: `${res.tmMemory} MB` }],
+            footer: [
+              {
+                title: t('flink.app.dashboard.totalTaskManagerMemory'),
+                value: `${res.tmMemory} MB`,
+              },
+            ],
           },
         });
       }

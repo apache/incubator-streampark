@@ -21,5 +21,5 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 cd streampark-console/streampark-console-webapp
-npm run lint
+npm run bootstrap
 npm run lint:lint-staged

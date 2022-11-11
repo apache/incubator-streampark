@@ -17,7 +17,7 @@
 import { dateToDuration } from '/@/utils/dateUtil';
 import { BasicColumn } from '/@/components/Table';
 import { ExecModeEnum } from '/@/enums/flinkEnum';
-import {useI18n} from "/@/hooks/web/useI18n";
+import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 
 /* app */

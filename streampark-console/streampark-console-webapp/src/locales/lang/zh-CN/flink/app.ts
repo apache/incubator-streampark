@@ -159,7 +159,7 @@ export default {
     programArgs: '程序参数',
   },
   runStatusOptions: {
-    added : '新增',
+    added: '新增',
     starting: '启动中',
     running: '运行中',
     failed: '失败',
@@ -168,6 +168,6 @@ export default {
     suspended: '暂停',
     lost: '丢失',
     silent: '静默',
-    terminated: '终止'
+    terminated: '终止',
   },
 };
