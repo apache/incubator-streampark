@@ -39,7 +39,7 @@ export default {
     lastLoginTime: '最近登录时间',
     password: '密码',
     passwordRequire: '密码为必填项',
-    passwordHelp: '密码长度不能少于 8 个字符',
+    passwordHelp: '密码长度不能少于 20 个字符',
     email: '请输入有效的电子邮件地址',
     maxEmail: '超过 50 个字符的最大长度限制',
     create: '创建用户',
