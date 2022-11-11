@@ -19,14 +19,14 @@
 @import 'public.less';
 @import 'ant/index.less';
 @import './theme.less';
-@import "./nprogress.less";
-@import "./swal2.less";
+@import './nprogress.less';
+@import './swal2.less';
 
 input:-webkit-autofill {
   box-shadow: 0 0 0 1000px transparent inset !important;
 }
 
-[data-theme="dark"] input:-webkit-autofill {
+[data-theme='dark'] input:-webkit-autofill {
   box-shadow: none !important;
   -webkit-text-fill-color: #fff;
 }
@@ -100,4 +100,10 @@ span {
 .basic-title {
   font-size: 18px;
   font-weight: bold;
+}
+
+*,
+::before,
+::after {
+  border-color: @border-color-base !important;
 }
