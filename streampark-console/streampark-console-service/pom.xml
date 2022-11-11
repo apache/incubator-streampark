@@ -428,22 +428,22 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>npm install</id>
+                                <id>install</id>
                                 <goals>
                                     <goal>npm</goal>
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
-                                    <arguments>install</arguments>
+                                    <arguments>run bootstrap</arguments>
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>npm run build</id>
+                                <id>build</id>
                                 <goals>
                                     <goal>npm</goal>
                                 </goals>
                                 <configuration>
-                                    <arguments>run build:mix</arguments>
+                                    <arguments>run build:no-cache</arguments>
                                 </configuration>
                             </execution>
                         </executions>
