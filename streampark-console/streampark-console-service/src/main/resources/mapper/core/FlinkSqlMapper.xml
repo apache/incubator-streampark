@@ -45,7 +45,8 @@
 
     <select id="getByTeamId" resultType="org.apache.streampark.console.core.entity.FlinkSql" parameterType="java.lang.Long">
         select s.*
-        from t_flink_sql s, t_flink_app a
+        from t_flink_sql s
+        inner join t_flink_app a
         where s.app_id = a.id
         and a.team_id = #{teamId}
     </select>

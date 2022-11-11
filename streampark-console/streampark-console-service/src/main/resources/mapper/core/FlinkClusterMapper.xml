@@ -44,15 +44,16 @@
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
 
-    <select id="existsByClusterId" resultType="java.lang.Integer" parameterType="java.lang.String">
-        select count(1) as counter
+    <select id="existsByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        select count(1)
         from t_flink_cluster
         where cluster_id=#{clusterId}
         limit 1
     </select>
 
-    <select id="existsByClusterName" resultType="java.lang.Integer" parameterType="java.util.Map">
-        select count(1) as counter from t_flink_cluster
+    <select id="existsByClusterName" resultType="java.lang.Boolean" parameterType="java.util.Map">
+        select count(1)
+        from t_flink_cluster
         <where>
             cluster_name=#{clusterName}
             <if test="id != null">

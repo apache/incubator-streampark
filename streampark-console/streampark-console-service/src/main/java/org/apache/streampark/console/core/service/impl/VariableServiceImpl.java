@@ -231,7 +231,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
     @Override
     public boolean existsByTeamId(Long teamId) {
-        return this.baseMapper.existsByTeamId(teamId) > 0;
+        return this.baseMapper.existsByTeamId(teamId);
     }
 
 }

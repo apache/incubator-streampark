@@ -32,8 +32,11 @@
     </resultMap>
 
     <select id="page" resultType="org.apache.streampark.console.core.entity.Variable" parameterType="org.apache.streampark.console.core.entity.Variable">
-        select v.*, u.username as creatorName
-        from t_variable v, t_user u
+        select
+            v.*,
+            u.username as creatorName
+        from t_variable v
+        inner join t_user u
         <where>
             v.creator_id = u.user_id
             and v.team_id = ${variable.teamId}
@@ -46,8 +49,8 @@
         </where>
     </select>
 
-    <select id="existsByTeamId" resultType="java.lang.Integer" parameterType="java.lang.Long">
-        select count(1) as counter
+    <select id="existsByTeamId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+        select count(1)
         from t_variable
         where team_id = #{teamId}
         limit 1

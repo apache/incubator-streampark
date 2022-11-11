@@ -170,7 +170,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public Boolean existsByTeamId(Long teamId) {
-        return this.baseMapper.existsByTeamId(teamId) > 0;
+        return this.baseMapper.existsByTeamId(teamId);
     }
 
     @Override

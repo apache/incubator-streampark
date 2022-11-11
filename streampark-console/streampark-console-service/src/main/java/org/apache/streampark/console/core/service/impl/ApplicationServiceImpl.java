@@ -514,7 +514,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean existsByTeamId(Long teamId) {
-        return baseMapper.existsByTeamId(teamId) > 0;
+        return baseMapper.existsByTeamId(teamId);
     }
 
     @Override
@@ -618,7 +618,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     private boolean existsByJobName(String jobName) {
-        return this.baseMapper.existsByJobName(jobName) > 0;
+        return this.baseMapper.existsByJobName(jobName);
     }
 
     @SuppressWarnings("checkstyle:WhitespaceAround")

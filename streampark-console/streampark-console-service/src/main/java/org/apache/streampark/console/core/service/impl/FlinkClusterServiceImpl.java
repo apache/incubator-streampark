@@ -285,12 +285,12 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Override
     public Boolean existsByClusterId(String clusterId) {
-        return this.baseMapper.existsByClusterId(clusterId) > 0;
+        return this.baseMapper.existsByClusterId(clusterId);
     }
 
     @Override
     public Boolean existsByClusterName(String clusterName, Long id) {
-        return this.baseMapper.existsByClusterName(clusterName, id) > 0;
+        return this.baseMapper.existsByClusterName(clusterName, id);
     }
 
     @Override

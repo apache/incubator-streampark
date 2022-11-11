@@ -52,9 +52,9 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     void resetOptionState();
 
-    Integer existsByTeamId(@Param("teamId") Long teamId);
+    Boolean existsByTeamId(@Param("teamId") Long teamId);
 
-    Integer existsByJobName(@Param("jobName") String jobName);
+    Boolean existsByJobName(@Param("jobName") String jobName);
 
     List<Application> getByProjectId(@Param("projectId") Long id);
 }

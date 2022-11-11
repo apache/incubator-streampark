@@ -30,6 +30,6 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     IPage<Project> page(Page<Project> page, @Param("project") Project project);
 
-    Integer existsByTeamId(@Param("teamId") Long teamId);
+    Boolean existsByTeamId(@Param("teamId") Long teamId);
 
 }
