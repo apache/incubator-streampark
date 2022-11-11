@@ -55,5 +55,4 @@ jobs:
       - name: Compile and Build
         run: |
           npm i
-          npm run prepare
           npm run build

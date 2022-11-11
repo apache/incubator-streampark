@@ -96,7 +96,7 @@
           ok-text="Yes"
           @confirm="handleDelete"
         >
-          <a-button type="danger" shape="circle" style="margin-left: 8px">
+          <a-button type="danger" v-auth="'project:delete'" shape="circle" style="margin-left: 8px">
             <DeleteOutlined />
           </a-button>
         </a-popconfirm>
@@ -254,6 +254,7 @@
       padding-left: 0;
     }
   }
+
   .ant-tag {
     border-radius: 0;
     font-weight: 700;
