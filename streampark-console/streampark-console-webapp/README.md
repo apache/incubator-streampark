@@ -49,19 +49,6 @@ Open the project in Gitpod (free online dev environment for GitHub) and start co
 
 Console is written using Javascript. If you don't have a Node.js development environment, please [set it up](https://nodejs.org/en/download/). The minimum version required is 14.0.
 
-- Set the npm mirror source If you are experiencing a slow download of dependencies, you need to configure the npm mirror source by finding .npmrc in the user folder and writing the following
-
-```bash
-strict-peer-dependencies=false
-save-workspace-protocol = rolling
-registry = 'http://registry.npm.taobao.org'
-sass_binary_site='http://npm.taobao.org/mirrors/node-sass/'
-phantomjs_cdnurl='http://npm.taobao.org/mirrors/phantomjs'
-CHROMEDRIVER_CDNURL='http://npm.taobao.org/mirrors/chromedriver'
-electron_mirror='http://npm.taobao.org/mirrors/electron/'
-fsevents_binary_host_mirror='http://npm.taobao.org/mirrors/fsevents/'
-```
-
 - Installation dependencies
 
 ```bash
