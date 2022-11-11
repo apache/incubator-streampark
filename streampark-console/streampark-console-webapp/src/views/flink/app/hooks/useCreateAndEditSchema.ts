@@ -200,19 +200,19 @@ export const useCreateAndEditSchema = (
         label: t('flink.app.table.flinkVersion'),
         component: 'Select',
         componentProps: {
-          placeholder: 'Flink Version',
+          placeholder: t('flink.app.table.flinkVersion'),
           options: unref(flinkEnvs),
           fieldNames: { label: 'flinkName', value: 'id', options: 'options' },
           onChange: (value) => handleFlinkVersion(value),
         },
-        rules: [{ required: true, message: 'Flink Version is required' }],
+        rules: [{ required: true, message: t('flink.app.addApplicationTips.flinkVersionIsRequiredMessage') }],
       },
       {
         field: 'flinkClusterId',
         label: t('flink.app.table.flinkCluster'),
         component: 'Select',
         componentProps: {
-          placeholder: 'Flink Cluster',
+          placeholder: t('flink.app.table.flinkCluster'),
           options: getExecutionCluster(1, 'id'),
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
@@ -224,7 +224,7 @@ export const useCreateAndEditSchema = (
         component: 'Select',
         componentProps: () => {
           return {
-            placeholder: 'Please Select Yarn Session clusterId',
+            placeholder: t('flink.app.addApplicationTips.yarnSessionClusterIdPlaceholder'),
             options: getExecutionCluster(3, 'clusterId'),
           };
         },
@@ -238,7 +238,7 @@ export const useCreateAndEditSchema = (
         ifShow: ({ values }) => isK8sExecMode(values.executionMode),
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
-            placeholder: 'default',
+            placeholder: t('flink.app.addApplicationTips.kubernetesNamespacePlaceholder'),
             options: unref(historyRecord)?.k8sNamespace || [],
           }),
       },
@@ -248,7 +248,7 @@ export const useCreateAndEditSchema = (
         component: 'Input',
         componentProps: ({ formModel }) => {
           return {
-            placeholder: 'Please enter Kubernetes clusterId',
+            placeholder: t('flink.app.addApplicationTips.kubernetesClusterIdPlaceholder'),
             onChange: (e) => (formModel.jobName = e.target.value),
           };
         },
@@ -261,10 +261,10 @@ export const useCreateAndEditSchema = (
         component: 'Select',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         componentProps: {
-          placeholder: 'Please enter Kubernetes clusterId',
+          placeholder: t('flink.app.addApplicationTips.kubernetesClusterIdPlaceholder'),
           options: getExecutionCluster(5, 'clusterId'),
         },
-        rules: [{ required: true, message: 'Kubernetes clusterId is required' }],
+        rules: [{ required: true, message: t('flink.app.addApplicationTips.kubernetesClusterIdIsRequiredMessager') }],
       },
       {
         field: 'flinkImage',
@@ -274,10 +274,10 @@ export const useCreateAndEditSchema = (
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder:
-              'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
+              t('flink.app.addApplicationTips.flinkImagePlaceholder'),
             options: unref(historyRecord)?.k8sSessionClusterId || [],
           }),
-        rules: [{ required: true, message: 'Flink Base Docker Image is required' }],
+        rules: [{ required: true, message: t('flink.app.addApplicationTips.flinkImageIsRequiredMessager') }],
       },
       {
         field: 'k8sRestExposedType',
@@ -285,7 +285,7 @@ export const useCreateAndEditSchema = (
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         component: 'Select',
         componentProps: {
-          placeholder: 'kubernetes.rest-service.exposed.type',
+          placeholder: t('flink.app.addApplicationTips.k8sRestExposedTypePlaceholder'),
           options: k8sRestExposedType,
         },
       },
@@ -295,7 +295,7 @@ export const useCreateAndEditSchema = (
   /* Detect job name field */
   async function getJobNameCheck(_rule: RuleObject, value: StoreValue) {
     if (value === null || value === undefined || value === '') {
-      return Promise.reject('Application Name is required');
+      return Promise.reject(t('flink.app.addApplicationTips.applicationNameIsRequiredMessage'));
     } else {
       const params = { jobName: value };
       if (edit?.appId) Object.assign(params, { id: edit.appId });
@@ -305,19 +305,19 @@ export const useCreateAndEditSchema = (
           return Promise.resolve();
         case 1:
           return Promise.reject(
-            'application name must be unique. The application name already exists',
+            t('flink.app.addApplicationTips.applicationNameNotUniqueMessage'),
           );
         case 2:
           return Promise.reject(
-            'The application name is already running in yarn,cannot be repeated. Please check',
+            t('flink.app.addApplicationTips.applicationNameExistsInRunningJobYarnMessage'),
           );
         case 3:
           return Promise.reject(
-            'The application name is already running in k8s,cannot be repeated. Please check',
+            t('flink.app.addApplicationTips.applicationNameExistsInRunningJobK8sMessage'),
           );
         default:
           return Promise.reject(
-            'The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check',
+            t('flink.app.addApplicationTips.applicationNameNotValid'),
           );
       }
     }
@@ -334,7 +334,7 @@ export const useCreateAndEditSchema = (
         field: 'jobName',
         label: t('flink.app.table.applicationName'),
         component: 'Input',
-        componentProps: { placeholder: 'Please enter jobName' },
+        componentProps: { placeholder: t('flink.app.addApplicationTips.applicationNamePlaceholder') },
         dynamicRules: () => {
           return [{ required: true, trigger: 'blur', validator: getJobNameCheck }];
         },
@@ -344,7 +344,7 @@ export const useCreateAndEditSchema = (
         label: t('flink.app.table.tags'),
         component: 'Input',
         componentProps: {
-          placeholder: 'Please enter tags,if more than one, separate them with commas(,)',
+          placeholder: t('flink.app.addApplicationTips.tagsPlaceholder'),
         },
       },
       {
@@ -359,7 +359,7 @@ export const useCreateAndEditSchema = (
         label: t('flink.app.table.parallelism'),
         component: 'InputNumber',
         componentProps: {
-          placeholder: 'The parallelism with which to run the program',
+          placeholder: t('flink.app.addApplicationTips.parallelismPlaceholder'),
           ...commonInputNum,
         },
       },
@@ -367,7 +367,7 @@ export const useCreateAndEditSchema = (
         field: 'slot',
         label: t('flink.app.dashboard.taskSlots'),
         component: 'InputNumber',
-        componentProps: { placeholder: 'Number of slots per TaskManager', ...commonInputNum },
+        componentProps: { placeholder: t('flink.app.addApplicationTips.slotsOfPerTaskManagerPlaceholder'), ...commonInputNum },
       },
       {
         field: 'restartSize',
@@ -375,14 +375,14 @@ export const useCreateAndEditSchema = (
         ifShow: ({ values }) =>
           edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode),
         component: 'InputNumber',
-        componentProps: { placeholder: 'restart max size', ...commonInputNum },
+        componentProps: { placeholder: t('flink.app.addApplicationTips.restartSizePlaceholder'), ...commonInputNum },
       },
       {
         field: 'alertId',
         label: t('flink.app.table.faultAlertTemplate'),
         component: 'Select',
         componentProps: {
-          placeholder: 'Alert Template',
+          placeholder: t('flink.app.addApplicationTips.alertTemplatePlaceholder'),
           options: unref(alerts),
           fieldNames: { label: 'alertName', value: 'id', options: 'options' },
         },
@@ -417,7 +417,7 @@ export const useCreateAndEditSchema = (
           allowClear: true,
           mode: 'multiple',
           maxTagCount: 2,
-          placeholder: 'Please select the resource parameters to set',
+          placeholder: t('flink.app.addApplicationTips.totalMemoryOptionsPlaceholder'),
           fieldNames: { label: 'name', value: 'key', options: 'options' },
           options: optionData.filter((x) => x.group === 'jobmanager-memory'),
         },
@@ -438,7 +438,7 @@ export const useCreateAndEditSchema = (
           allowClear: true,
           mode: 'multiple',
           maxTagCount: 2,
-          placeholder: 'Please select the resource parameters to set',
+          placeholder: t('flink.app.addApplicationTips.tmPlaceholder'),
           fieldNames: { label: 'name', value: 'key', options: 'options' },
           options: optionData.filter((x) => x.group === 'taskmanager-memory'),
         },
@@ -454,12 +454,12 @@ export const useCreateAndEditSchema = (
         field: 'yarnQueue',
         label: t('flink.app.table.yarnQueue'),
         component: 'Input',
-        componentProps: { placeholder: 'Please enter yarn queue' },
+        componentProps: { placeholder: t('flink.app.addApplicationTips.yarnQueuePlaceholder') },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION,
       },
       {
         field: 'podTemplate',
-        label: 'Kubernetes Pod Template',
+        label: t('flink.app.table.podTemplate'),
         component: 'Input',
         slot: 'podTemplate',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
@@ -482,7 +482,7 @@ export const useCreateAndEditSchema = (
         field: 'description',
         label: t('common.description'),
         component: 'InputTextArea',
-        componentProps: { rows: 4, placeholder: 'Please enter description for this application' },
+        componentProps: { rows: 4, placeholder: t('flink.app.addApplicationTips.descriptionPlaceholder') },
       },
     ];
   });
