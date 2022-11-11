@@ -52,7 +52,7 @@ public interface VariableService extends IService<Variable> {
      */
     List<Variable> findByTeamId(Long teamId, String keyword);
 
-    long countByTeamId(Long teamId);
+    boolean existsByTeamId(Long teamId);
 
     /**
      * create variable
@@ -68,4 +68,5 @@ public interface VariableService extends IService<Variable> {
     String replaceVariable(Long teamId, String mixed);
 
     IPage<Application> dependAppsPage(Variable variable, RestRequest request);
+
 }

@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
+import org.apache.streampark.console.core.enums.BuildState;
 import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -64,16 +65,16 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         boolean cloneSuccess = cloneSourceCode(project);
         if (!cloneSuccess) {
             fileLogger.error("[StreamPark] clone or pull error.");
-            this.baseMapper.updateFailureBuildById(project);
+            this.baseMapper.updateBuildState(project.getId(), BuildState.FAILED.get());
             return;
         }
         boolean build = projectBuild(project);
         if (!build) {
-            this.baseMapper.updateFailureBuildById(project);
+            this.baseMapper.updateBuildState(project.getId(), BuildState.FAILED.get());
             fileLogger.error("build error, project name: {} ", project.getName());
             return;
         }
-        this.baseMapper.updateSuccessBuildById(project);
+        this.baseMapper.updateBuildState(project.getId(), BuildState.SUCCESSFUL.get());
         this.deploy(project);
         List<Application> applications = this.applicationService.getByProjectId(project.getId());
         // Update the deploy state
@@ -87,7 +88,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
     @Override
     protected void processException(Throwable t) {
-        this.baseMapper.updateFailureBuildById(project);
+        this.baseMapper.updateBuildState(project.getId(), BuildState.FAILED.get());
         fileLogger.error("Build error, project name: {}", project.getName(), t);
     }
 

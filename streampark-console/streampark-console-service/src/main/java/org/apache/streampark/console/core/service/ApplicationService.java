@@ -35,7 +35,7 @@ public interface ApplicationService extends IService<Application> {
 
     IPage<Application> page(Application app, RestRequest request);
 
-    long countByTeamId(Long teamId);
+    boolean existsByTeamId(Long teamId);
 
     boolean create(Application app) throws IOException;
 

@@ -230,9 +230,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     @Override
-    public long countByTeamId(Long teamId) {
-        LambdaQueryWrapper<Variable> queryWrapper = new LambdaQueryWrapper<Variable>()
-            .eq(Variable::getTeamId, teamId);
-        return this.count(queryWrapper);
+    public boolean existsByTeamId(Long teamId) {
+        return this.baseMapper.existsByTeamId(teamId);
     }
+
 }

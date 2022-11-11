@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.mapper;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 
 public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
@@ -28,4 +30,7 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
 
     ApplicationConfig getEffective(@Param("appId") Long appId);
 
+    ApplicationConfig getLatest(@Param("appId") Long appId);
+
+    IPage<ApplicationConfig> pageByAppId(Page<ApplicationConfig> page, @Param("appId") Long appId);
 }
