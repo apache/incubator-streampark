@@ -1,350 +1,163 @@
 <!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
 
-    Licensed to the Apache Software Foundation (ASF) under one or more
-    contributor license agreements.  See the NOTICE file distributed with
-    this work for additional information regarding copyright ownership.
-    The ASF licenses this file to You under the Apache License, Version 2.0
-    (the "License"); you may not use this file except in compliance with
-    the License.  You may obtain a copy of the License at
+      https://www.apache.org/licenses/LICENSE-2.0
 
-       https://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 -->
-
 <template>
-  <a-card :bordered="false">
-    <div
-      class="table-page-search-wrapper">
-      <a-form
-        layout="inline">
-        <a-row
-          :gutter="48">
-          <div
-            class="fold">
-            <a-col
-              :md="8"
-              :sm="24">
-              <a-form-item
-                label="Variable Code"
-                :label-col="{span: 4}"
-                :wrapper-col="{span: 18, offset: 2}">
-                <a-input
-                  v-model="queryParams.variableCode" />
-              </a-form-item>
-            </a-col>
-            <a-col
-              :md="8"
-              :sm="24">
-              <a-form-item
-                label="Description"
-                :label-col="{span: 4}"
-                :wrapper-col="{span: 18, offset: 2}">
-                <a-input
-                  v-model="queryParams.description" />
-              </a-form-item>
-            </a-col>
-          </div>
-          <a-col
-            :md="8"
-            :sm="24">
-            <span
-              class="table-page-search-bar">
-              <a-button
-                type="primary"
-                shape="circle"
-                icon="search"
-                @click="search" />
-              <a-button
-                type="primary"
-                shape="circle"
-                icon="rest"
-                @click="reset" />
-              <a-button
-                type="primary"
-                shape="circle"
-                icon="plus"
-                v-permit="'variable:add'"
-                @click="handleAdd" />
-            </span>
-          </a-col>
-        </a-row>
-      </a-form>
-    </div>
-
-    <!-- 表格区域 -->
-    <a-table
-      ref="TableInfo"
-      :columns="columns"
-      :data-source="dataSource"
-      :pagination="pagination"
-      :loading="loading"
-      :scroll="{ x: 900 }"
-      @change="handleTableChange">
-      <template
-        slot="email"
-        slot-scope="text">
-        <a-popover
-          placement="topLeft">
-          <template
-            slot="content">
-            <div>
-              {{ text }}
-            </div>
-          </template>
-          <p
-            style="width: 150px;margin-bottom: 0">
-            {{ text }}
-          </p>
-        </a-popover>
+  <div>
+    <BasicTable @register="registerTable">
+      <template #toolbar>
+        <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
+        </a-button>
       </template>
-      <template
-        slot="operation"
-        slot-scope="text, record">
-        <svg-icon
-          v-permit="'variable:update'"
-          name="edit"
-          border
-          @click.native="handleEdit(record)"
-          title="modify" />
-        <svg-icon
-          name="see"
-          border
-          @click.native="handleView(record)"
-          title="view" />
-        <svg-icon
-          name="mapping"
-          border
-          @click.native="handleDependApps(record)"
-          title="depend apps" />
-        <a-popconfirm
-          v-permit="'variable:delete'"
-          title="Are you sure delete this variable ?"
-          cancel-text="No"
-          ok-text="Yes"
-          @confirm="handleDelete(record)">
-          <svg-icon name="remove" border/>
-        </a-popconfirm>
+      <template #resetBefore> 1111 </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'clarity:note-edit-line',
+                auth: 'variable:update',
+                tooltip: t('system.variable.modifyVariable'),
+                onClick: handleEdit.bind(null, record),
+              },
+              {
+                icon: 'carbon:data-view-alt',
+                tooltip: t('common.detail'),
+                onClick: handleView.bind(null, record),
+              },
+              {
+                icon: 'icon-park-outline:mind-mapping',
+                tooltip: t('system.variable.table.depend'),
+                auth: 'variable:depend_apps',
+                onClick: () =>
+                  router.push('/system/variable/depend_apps?id=' + record.variableCode),
+              },
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                tooltip: t('system.variable.deleteVariable'),
+                auth: 'team:delete',
+                popConfirm: {
+                  title: t('system.variable.deletePopConfirm'),
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
       </template>
-    </a-table>
-
-    <!-- view variable -->
-    <variable-info
-      :data="variableInfo.data"
-      :visible="variableInfo.visible"
-      @close="handleVariableInfoClose" />
-    <!-- add variable -->
-    <variable-add
-      @close="handleVariableAddClose"
-      @success="handleVariableAddSuccess"
-      :visible="variableAdd.visible" />
-    <!-- edit variable -->
-    <variable-edit
-      ref="variableEdit"
-      @close="handleVariableEditClose"
-      @success="handleVariableEditSuccess"
-      :visible="variableEdit.visible" />
-  </a-card>
+    </BasicTable>
+    <VariableDrawer @register="registerDrawer" @success="handleSuccess" />
+    <VariableInfo @register="registerInfo" />
+  </div>
 </template>
+<script lang="ts">
+  export default defineComponent({
+    name: 'Variable',
+  });
+</script>
 
-<script>
-import VariableInfo from './Detail'
-import VariableAdd from './Add'
-import VariableEdit from './Edit'
-import SvgIcon from '@/components/SvgIcon'
-import {list, deleteVariable} from '@/api/variable'
-import {mapActions} from 'vuex'
+<script lang="ts" setup>
+  import { defineComponent } from 'vue';
+  import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
+  import VariableDrawer from './components/VariableDrawer.vue';
+  import VariableInfo from './components/VariableInfo.vue';
+  import { useDrawer } from '/@/components/Drawer';
+  import { columns, searchFormSchema } from './variable.data';
+  import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import { fetchVariableDelete, fetchVariableList } from '/@/api/system/variable';
+  import Icon from '/@/components/Icon';
+  import { useRouter } from 'vue-router';
 
-export default {
-  name: 'Variable',
-  components: {VariableInfo, VariableAdd, VariableEdit, SvgIcon},
-  data () {
-    return {
-      variableInfo: {
-        visible: false,
-        data: {}
-      },
-      variableAdd: {
-        visible: false
-      },
-      variableEdit: {
-        visible: false
-      },
-      queryParams: {},
-      filteredInfo: null,
-      sortedInfo: null,
-      paginationInfo: null,
-      dataSource: [],
-      loading: false,
-      pagination: {
-        pageSizeOptions: ['10', '20', '30', '40', '100'],
-        defaultCurrent: 1,
-        defaultPageSize: 10,
-        showQuickJumper: true,
-        showSizeChanger: true,
-        showTotal: (total, range) => `display ${range[0]} ~ ${range[1]} records，total ${total}`
-      }
-    }
-  },
-  computed: {
-    columns () {
-      let { sortedInfo, filteredInfo } = this  // eslint-disable-line no-unused-vars
-      sortedInfo = sortedInfo || {}
-      filteredInfo = filteredInfo || {}
-      return [{
-        title: 'Variable Code',
-        dataIndex: 'variableCode'
-      }, {
-        title: 'Variable Value',
-        dataIndex: 'variableValue'
-      }, {
-        title: 'Description',
-        dataIndex: 'description'
-      }, {
-        title: 'Create Time',
-        dataIndex: 'createTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
-      }, {
-        title: 'Modify Time',
-        dataIndex: 'modifyTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order
-      }, {
-          title: 'Operation',
-          dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' }
-      }]
-    }
-  },
-
-  mounted () {
-    this.fetch()
-  },
-
-  methods: {
-    ...mapActions(['SetVariableCode']),
-
-    handleView (record) {
-      this.variableInfo.data = record
-      this.variableInfo.visible = true
+  const router = useRouter();
+  const [registerDrawer, { openDrawer }] = useDrawer();
+  const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
+  const { createMessage } = useMessage();
+  const { t } = useI18n();
+  const [registerTable, { reload }] = useTable({
+    title: t('system.variable.table.title'),
+    api: fetchVariableList,
+    columns,
+    formConfig: {
+      baseColProps: { style: { paddingRight: '30px' } },
+      schemas: searchFormSchema,
     },
-    handleDependApps(record) {
-      this.SetVariableCode(record.variableCode)
-      this.$router.push({'path': '/system/variable/depend_apps'})
-    },
-    handleAdd () {
-      this.variableAdd.visible = true
-    },
-    handleVariableAddClose () {
-      this.variableAdd.visible = false
-    },
-    handleVariableAddSuccess () {
-      this.variableAdd.visible = false
-      this.$message.success('add variable successfully')
-      this.search()
-    },
-    handleEdit (record) {
-      this.$refs.variableEdit.setFormValues(record)
-      this.variableEdit.visible = true
-    },
-    handleVariableEditClose () {
-      this.variableEdit.visible = false
-    },
-    handleVariableEditSuccess () {
-      this.variableEdit.visible = false
-      this.$message.success('modify variable successfully')
-      this.search()
-    },
-    handleVariableInfoClose () {
-      this.variableInfo.visible = false
-    },
-    handleDelete (record) {
-      deleteVariable({
-        id: record.id,
-        teamId : record.teamId,
-        variableCode : record.variableCode,
-        variableValue : record.variableValue
-      }).then((resp) => {
-        if (resp.status === 'success') {
-          this.$message.success('delete successful')
-          this.search()
-        } else {
-          this.$swal.fire(
-            'Failed',
-            resp.message,
-            'error'
-          )
-        }
-      })
-    },
-    search () {
-      const { sortedInfo, filteredInfo } = this
-      let sortField, sortOrder
-      if (sortedInfo) {
-        sortField = sortedInfo.field
-        sortOrder = sortedInfo.order
-      }
-      this.fetch({
-        sortField: sortField,
-        sortOrder: sortOrder,
-        ...this.queryParams,
-        ...filteredInfo
-      })
-    },
-    reset () {
-      this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
-      if (this.paginationInfo) {
-        this.paginationInfo.current = this.pagination.defaultCurrent
-        this.paginationInfo.pageSize = this.pagination.defaultPageSize
-      }
-      this.filteredInfo = null
-      this.sortedInfo = null
-      this.queryParams = {}
-      this.$refs.createTime.reset()
-      this.fetch()
-    },
-    handleTableChange (pagination, filters, sorter) {
-      this.paginationInfo = pagination
-      this.filteredInfo = filters
-      this.sortedInfo = sorter
-      this.variableInfo.visible = false
-      this.fetch({
-        sortField: sorter.field,
-        sortOrder: sorter.order,
-        ...this.queryParams,
-        ...filters
-      })
-    },
-    fetch (params = {}) {
-      this.loading = true
-      if (this.paginationInfo) {
-        this.$refs.TableInfo.pagination.current = this.paginationInfo.current
-        this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
-        params.pageSize = this.paginationInfo.pageSize
-        params.pageNum = this.paginationInfo.current
+    sortFn: (sortInfo: SorterResult) => {
+      const { field, order } = sortInfo;
+      if (field && order) {
+        return {
+          // The sort field passed to the backend you
+          sortField: field,
+          // Sorting method passed to the background asc/desc
+          sortOrder: order === 'ascend' ? 'asc' : 'desc',
+        };
       } else {
-        params.pageSize = this.pagination.defaultPageSize
-        params.pageNum = this.pagination.defaultCurrent
+        return {};
       }
-      if(params.status != null && params.status.length>0) {
-        params.status = params.status[0]
-      } else {
-        delete params.status
-      }
-      list({ ...params }).then((resp) => {
-        const pagination = { ...this.pagination }
-        pagination.total = parseInt(resp.data.total)
-        this.dataSource = resp.data.records
-        this.pagination = pagination
-        this.loading = false
-      })
+    },
+    rowKey: 'id',
+    pagination: true,
+    useSearchForm: true,
+    showTableSetting: true,
+    showIndexColumn: false,
+    canResize: false,
+    actionColumn: {
+      width: 200,
+      title: t('component.table.operation'),
+      dataIndex: 'action',
+    },
+  });
+
+  function handleCreate() {
+    openDrawer(true, {
+      isUpdate: false,
+    });
+  }
+
+  function handleEdit(record: Recordable) {
+    openDrawer(true, {
+      record,
+      isUpdate: true,
+    });
+  }
+  function handleView(record: Recordable) {
+    openInfoDraw(true, record);
+  }
+  /* Delete the organization */
+  async function handleDelete(record: Recordable) {
+    const { data } = await fetchVariableDelete({
+      id: record.id,
+      teamId: record.teamId,
+      variableCode: record.variableCode,
+      variableValue: record.variableValue,
+    });
+    if (data.status === 'success') {
+      createMessage.success(t('system.variable.deleteVariable') + t('system.variable.success'));
+      reload();
+    } else {
+      createMessage.error(t('system.variable.deleteVariable') + t('system.variable.fail'));
     }
   }
-}
+
+  function handleSuccess(isUpdate: boolean) {
+    createMessage.success(
+      `${isUpdate ? t('common.edit') : t('system.variable.add')}${t('system.variable.success')}`,
+    );
+    reload();
+  }
 </script>

@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 .setting {
-  .ant-tabs-bar {
-    margin: 0px;
+  .ant-tabs-nav {
+    margin: 0;
   }
-  .system_setting {
+
+  .system-setting {
+
     .ant-card-body {
-      padding: 0px 24px !important;
+      padding: 0 24px;
     }
 
     .collapse {
@@ -34,7 +35,7 @@
     }
 
     .ant-tabs-bar {
-      margin: 0px !important;
+      margin: 0 !important;
     }
 
     .ant-list-split .ant-list-item {
@@ -59,9 +60,9 @@
         line-height: 15px;
       }
 
-      .ant-input {
-        text-align: right;
-      }
+      // .ant-input {
+      //   text-align: right;
+      // }
 
       .ant-list-item-action {
         .ctl-btn-color {
@@ -75,12 +76,18 @@
     }
 
     .avatar {
+      width: 70px;
+      height: 70px;
+      text-align: center;
+      line-height: 70px;
       border-radius: 50%;
       background-color: @border-color-base;
-      border: 5px solid @border-color-base;
 
       svg {
-        padding: 10px;
+        width: 40px !important;
+        height: 40px !important;
+        vertical-align: middle;
+        // padding: 10px;
       }
     }
   }
@@ -108,13 +115,16 @@
     }
   }
 
-  .sql-box,.pom-box {
+  .sql-box,
+  .pom-box {
     height: 550px;
     width: 100%;
     overflow: hidden;
   }
 
-  .pod-template-box,.jm-pod-template-box,.tm-pod-template-box {
+  .pod-template-box,
+  .jm-pod-template-box,
+  .tm-pod-template-box {
     resize: vertical;
     outline: none;
     height: 400px;
@@ -123,7 +133,7 @@
   }
 
   .syntax-true {
-    border: 1px solid @border-color-base ;
+    border: 1px solid @border-color-base;
   }
 
   .syntax-false {
@@ -133,7 +143,7 @@
   .cluster_controller {
 
     .sql-keyword {
-      color: RED;
+      color: red;
     }
 
     .ant-alert.ant-alert-no-icon {
@@ -154,7 +164,7 @@
 
     .conf-desc {
       color: darkgrey;
-      margin-bottom: 0
+      margin-bottom: 0;
     }
 
     .sql-desc {
@@ -180,11 +190,11 @@
       margin-top: -5px;
     }
 
-    .ant-switch-loading, .ant-switch-disabled {
+    .ant-switch-loading,
+    .ant-switch-disabled {
       cursor: not-allowed;
       opacity: unset !important;
     }
-
   }
 
   .flinksql-tool {
@@ -212,7 +222,7 @@
     padding: 0 10px;
   }
 
-  .pod-template-tool-item{
+  .pod-template-tool-item {
     font-size: 12px;
   }
 
@@ -228,7 +238,8 @@
     z-index: 1;
   }
 
-  .cluster_controller,.bigScreen-sql-model {
+  .cluster_controller,
+  .bigScreen-sql-model {
 
     .format-sql {
       color: dimgrey;
@@ -251,11 +262,14 @@
       cursor: pointer;
     }
 
-    .big-screen:hover,.format-sql:hover {
+    .big-screen:hover,
+    .format-sql:hover {
       color: #1890ff;
     }
 
-    .apply-pom, .apply-testing, .verify-sql {
+    .apply-pom,
+    .apply-testing,
+    .verify-sql {
       z-index: 99;
       position: absolute;
       bottom: 20px;
@@ -316,23 +330,23 @@
     }
 
     .tag-dependency {
-      padding: 1px 1px !important;
+      padding: 1px !important;
       font-size: 10px;
-      transform: scale(0.80) !important;
-      margin-right: 0px;
+      transform: scale(0.8) !important;
+      margin-right: 0;
       line-height: 12px;
     }
 
     .note-info {
       color: #666;
       line-height: 25px;
-      display: inline-table
+      display: inline-table;
     }
 
     .note-elem {
       border: 1px solid @border-color-base;
       background-color: @background-color-base;
-      padding: 0px 4px;
+      padding: 0 4px;
       border-radius: 4px;
     }
 
@@ -345,32 +359,34 @@
     }
 
     .tag-note {
-      padding: 2px 2px !important;
+      padding: 2px !important;
       border-radius: 2px;
       line-height: 12px;
     }
 
     .icon-close {
-      color: rgba(0, 0, 0, 0.45);
-      font-size: 12px
+      color: rgba(0 0 0 45%);
+      font-size: 12px;
     }
-
   }
 
   .slide-fade-enter-active {
-    transition: all .3s ease;
+    transition: all 0.3s ease;
   }
+
   .slide-fade-leave-active {
-    transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+    transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
   }
-  .slide-fade-enter, .slide-fade-leave-to {
+
+  .slide-fade-enter,
+  .slide-fade-leave-to {
     transform: translateX(10px);
     opacity: 0;
   }
 
   .propsException {
     font-size: 10px;
-    text-align: center
+    text-align: center;
   }
 
   .full-modal {
@@ -380,14 +396,15 @@
       padding-bottom: 0;
       margin: 0;
     }
+
     .ant-modal-content {
       display: flex;
       flex-direction: column;
       height: calc(100vh);
     }
+
     .ant-modal-body {
       flex: 1;
     }
   }
 }
-

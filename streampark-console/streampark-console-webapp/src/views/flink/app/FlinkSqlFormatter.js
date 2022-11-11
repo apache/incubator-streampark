@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import Formatter from 'sql-formatter/lib/core/Formatter'
-import Tokenizer from 'sql-formatter/lib/core/Tokenizer'
+import Formatter from 'sql-formatter/lib/core/Formatter';
+import Tokenizer from 'sql-formatter/lib/core/Tokenizer';
 
 // https://jakewheat.github.io/sql-overview/sql-2008-foundation-grammar.html#reserved-word
 const reservedWords = [
@@ -316,7 +316,7 @@ const reservedWords = [
   'WITHIN',
   'WITHOUT',
   'YEAR',
-]
+];
 
 const reservedTopLevelWords = [
   'ADD',
@@ -343,7 +343,7 @@ const reservedTopLevelWords = [
   'UPDATE',
   'VALUES',
   'WHERE',
-]
+];
 
 const reservedTopLevelWordsNoIndent = [
   'INTERSECT',
@@ -355,7 +355,7 @@ const reservedTopLevelWordsNoIndent = [
   'EXCEPT',
   'EXCEPT ALL',
   'EXCEPT DISTINCT',
-]
+];
 
 const reservedNewlineWords = [
   'AND',
@@ -373,7 +373,7 @@ const reservedNewlineWords = [
   'FULL OUTER JOIN',
   'CROSS JOIN',
   'NATURAL JOIN',
-]
+];
 
 class FlinkSqlFormatter extends Formatter {
   tokenizer() {
@@ -388,7 +388,7 @@ class FlinkSqlFormatter extends Formatter {
       indexedPlaceholderTypes: ['?'],
       namedPlaceholderTypes: [],
       lineCommentTypes: ['--'],
-    })
+    });
   }
 }
 
@@ -404,5 +404,5 @@ class FlinkSqlFormatter extends Formatter {
  * @return {String}
  */
 export const format = (query, config = {}) => {
-  return new FlinkSqlFormatter(config).format(query)
-}
+  return new FlinkSqlFormatter(config).format(query);
+};

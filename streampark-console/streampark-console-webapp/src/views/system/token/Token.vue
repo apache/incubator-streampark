@@ -1,365 +1,137 @@
 <!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
 
-    Licensed to the Apache Software Foundation (ASF) under one or more
-    contributor license agreements.  See the NOTICE file distributed with
-    this work for additional information regarding copyright ownership.
-    The ASF licenses this file to You under the Apache License, Version 2.0
-    (the "License"); you may not use this file except in compliance with
-    the License.  You may obtain a copy of the License at
+      https://www.apache.org/licenses/LICENSE-2.0
 
-       https://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 -->
-
 <template>
-  <a-card :bordered="false">
-    <div
-      class="table-page-search-wrapper">
-      <a-form
-        layout="inline">
-        <a-row
-          :gutter="48">
-          <div
-            class="fold">
-            <a-col
-              :md="8"
-              :sm="24">
-              <a-form-item
-                label="User Name"
-                :label-col="{span: 4}"
-                :wrapper-col="{span: 18, offset: 2}">
-                <a-input
-                  v-model="queryParams.username"/>
-              </a-form-item>
-            </a-col>
-
-          </div>
-
-          <a-col
-            :md="8"
-            :sm="24">
-            <span
-              class="table-page-search-bar">
-              <a-button
-                type="primary"
-                shape="circle"
-                icon="search"
-                @click.native="search"/>
-              <a-button
-                type="primary"
-                shape="circle"
-                icon="plus"
-                v-permit="'token:add'"
-                @click="handleAdd" />
-            </span>
-          </a-col>
-        </a-row>
-      </a-form>
-    </div>
-
-    <!-- table area -->
-    <a-table
-      ref="TableInfo"
-      :columns="columns"
-      :data-source="dataSource"
-      :pagination="pagination"
-      :loading="loading"
-      :scroll="{ x: 900 }"
-      @change="handleTableChange">
-      <template
-        slot="token-text"
-        slot-scope="text,record">
-        <ellipsis
-          :length="24"
-          tooltip
-          placement="rightBottom">
-          {{ record.token }}
-        </ellipsis>
+  <div>
+    <BasicTable @register="registerTable">
+      <template #toolbar>
+        <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
+        </a-button>
       </template>
-
-      <template
-        slot="token-status"
-        slot-scope="text,record">
-        <a-switch
-          checked-children="on"
-          un-checked-children="off"
-          :checked="Boolean(record.finalStatus)"
-          @change="handleToggle(record)"/>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'ant-design:copy-outlined',
+                tooltip: t('system.token.copyToken'),
+                auth: 'token:view',
+                onClick: handleCopy.bind(null, record),
+              },
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                auth: 'token:delete',
+                tooltip: t('system.token.deleteToken'),
+                popConfirm: {
+                  title: t('system.token.operation.deleteTokenConfirm'),
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
       </template>
-
-      <template
-        slot="operation"
-        slot-scope="text, record">
-
-        <a-tooltip title="Copy Token">
-          <a-button
-            v-permit="'token:view'"
-            name="copy"
-            @click.native="copyToken(record)"
-            shape="circle"
-            size="small"
-            style="margin-left: 8px"
-            class="control-button ctl-btn-color">
-            <a-icon type="copy"/>
-          </a-button>
-        </a-tooltip>
-
-        <a-tooltip title="Delete Token">
-          <a-popconfirm
-            v-permit="'token:delete'"
-            title="Are you sure delete this token ?"
-            cancel-text="No"
-            ok-text="Yes"
-            @confirm="handleDelete(record)">
-            <a-button
-              type="danger"
-              shape="circle"
-              size="small"
-              style="margin-left: 8px"
-              class="control-button">
-              <a-icon type="delete"/>
-            </a-button>
-          </a-popconfirm>
-        </a-tooltip>
-      </template>
-    </a-table>
-
-
-    <token-add
-      ref="tokenAdd"
-      @close="handleTokenAddClose"
-      @success="handleTokenAddSuccess"
-      :visible="tokenAdd.visible"/>
-
-  </a-card>
+    </BasicTable>
+    <TokenDrawer @register="registerDrawer" @success="handleSuccess" />
+  </div>
 </template>
+<script lang="ts">
+  import { defineComponent, unref } from 'vue';
 
-<script>
-import TokenAdd from './TokenAdd'
-import RangeDate from '@/components/DateTime/RangeDate'
-import SvgIcon from '@/components/SvgIcon'
+  import { BasicTable, useTable, TableAction } from '/@/components/Table';
+  import TokenDrawer from './components/TokenDrawer.vue';
+  import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
+  import { useDrawer } from '/@/components/Drawer';
+  import { fetchTokenDelete, fetTokenList } from '/@/api/system/token';
+  import { columns, searchFormSchema } from './token.data';
+  import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
-import {deleteToken, list, toggle} from '@/api/token'
-import storage from '@/utils/storage'
-import {USER_NAME} from '@/store/mutation-types'
-import Ellipsis from '@/components/Ellipsis'
+  export default defineComponent({
+    name: 'UserToken',
+    components: { BasicTable, TokenDrawer, TableAction, Icon },
+    setup() {
+      const { t } = useI18n();
+      const { createMessage } = useMessage();
+      const [registerDrawer, { openDrawer }] = useDrawer();
+      const { clipboardRef, copiedRef } = useCopyToClipboard();
+      const [registerTable, { reload, updateTableDataRecord }] = useTable({
+        title: t('system.token.table.title'),
+        api: fetTokenList,
+        columns,
+        formConfig: {
+          baseColProps: { style: { paddingRight: '30px' } },
+          schemas: searchFormSchema,
+        },
+        useSearchForm: true,
+        showTableSetting: true,
+        rowKey: 'tokenId',
+        showIndexColumn: false,
+        canResize: false,
+        actionColumn: {
+          width: 200,
+          title: t('component.table.operation'),
+          dataIndex: 'action',
+        },
+      });
 
-export default {
-  name: 'Token',
-  components: {RangeDate, SvgIcon, TokenAdd, Ellipsis},
-  data() {
-    return {
-      tokenAdd: {
-        visible: false
-      },
-      queryParams: {},
-      filteredInfo: {},
-      sortedInfo: null,
-      paginationInfo: null,
-      dataSource: [],
-      loading: false,
-      pagination: {
-        pageSizeOptions: ['10', '20', '30', '40', '100'],
-        defaultCurrent: 1,
-        defaultPageSize: 10,
-        showQuickJumper: true,
-        showSizeChanger: true,
-        showTotal: (total, range) => `display ${range[0]} ~ ${range[1]} records，total ${total}`
+      function handleCreate() {
+        openDrawer(true, {
+          isUpdate: false,
+        });
       }
-    }
-  },
-  computed: {
 
-    columns() {
-      let {sortedInfo} = this
-      sortedInfo = sortedInfo || {}
-      return [{
-        title: 'User Name',
-        dataIndex: 'username',
-        width: 150,
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'username' && sortedInfo.order
-      }, {
-        title: 'Token',
-        width: 250,
-        dataIndex: 'token',
-        scopedSlots: {customRender: 'token-text'}
-      }, {
-        title: 'Description',
-        dataIndex: 'description'
-      }, {
-        title: 'Create Time',
-        dataIndex: 'createTime'
-      }, {
-        title: 'Expire Time',
-        dataIndex: 'expireTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'expireTime' && sortedInfo.order
-      }, {
-        title: 'Status',
-        dataIndex: 'status',
-        width: 100,
-        scopedSlots: {customRender: 'token-status'}
-      },
-        {
-          title: 'Operation',
-          width: 150,
-          dataIndex: 'operation',
-          scopedSlots: {customRender: 'operation'}
-        }]
-    },
-    userName() {
-      return storage.get(USER_NAME)
-    }
-  },
-
-  mounted() {
-    this.fetch()
-  },
-
-  methods: {
-    handleToggle(record) {
-      toggle({
-        tokenId: record.id
-      }).then((resp) => {
-        if (resp.code !== undefined && resp.code.toString() === '2000') {
-          this.$message.success('update status successful')
-          this.search()
-        } else if (resp.code !== undefined && resp.code.toString() === '3001') {
-          this.$message.error(resp.message)
-          this.search()
-        } else if (resp.status === 'error') {
-          this.$message.error('update failed')
-          this.search()
-        }
-      })
-    },
-    search() {
-      const {sortedInfo, filteredInfo} = this
-      let sortField, sortOrder
-      // Get the sorting of the current column and the filter rules of the column
-      if (sortedInfo) {
-        sortField = sortedInfo.field
-        sortOrder = sortedInfo.order
+      function handleCopy(record: Recordable) {
+        clipboardRef.value = record.token;
+        unref(copiedRef) && createMessage.success(t('system.token.operation.copySuccess'));
       }
-      this.fetch({
-        sortField: sortField,
-        sortOrder: sortOrder,
-        ...this.queryParams,
-        ...filteredInfo
-      })
-    },
 
-    handleDelete(record) {
-      record.id = parseInt(record.id)
-      deleteToken({
-        tokenId: record.id
-      }).then((resp) => {
-        if (resp.status === 'success') {
-          this.$message.success('delete successful')
-          this.search()
+      async function handleDelete(record: Recordable) {
+        const res = await fetchTokenDelete({ tokenId: record.id });
+        if (res) {
+          createMessage.success(t('system.token.operation.deleteSuccess'));
+          reload();
         } else {
-          this.$message.error('delete failed')
+          createMessage.success(t('system.token.operation.deleteFailed'));
         }
-        this.$refs.tokenAdd.fetch()
-      })
-    },
-    handleAdd() {
-      this.tokenAdd.visible = true
-    },
-    handleTokenAddClose() {
-      this.tokenAdd.visible = false
-    },
-    handleTokenAddSuccess() {
-      this.tokenAdd.visible = false
-      this.$message.success('create Account Token Successful!')
-      this.search()
-    },
-
-    copyToken(record) {
-      const oInput = document.createElement('input')
-      oInput.value = record.token
-      document.body.appendChild(oInput)
-      // select object
-      oInput.select()
-      document.execCommand('Copy')
-      this.$message.success('copy successful')
-      oInput.remove()
-    },
-    handleDateChange(value) {
-      if (value) {
-        this.queryParams.createTimeFrom = value[0]
-        this.queryParams.createTimeTo = value[1]
-      }
-    },
-    reset() {
-      // reset pagination
-      this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
-      if (this.paginationInfo) {
-        this.paginationInfo.current = this.pagination.defaultCurrent
-        this.paginationInfo.pageSize = this.pagination.defaultPageSize
-      }
-      // Reset column filter rules
-      this.filteredInfo = {}
-      // reset column collation
-      this.sortedInfo = null
-      // reset query parameters
-      this.queryParams = {}
-      this.$refs.createTime.reset()
-      this.fetch()
-    },
-    handleTableChange(pagination, filters, sorter) {
-      // Assign these three parameters to Vue data for subsequent use
-      this.paginationInfo = pagination
-      this.filteredInfo = filters || {}
-      this.sortedInfo = sorter
-      this.fetch({
-        sortField: sorter.field,
-        sortOrder: sorter.order,
-        ...this.queryParams,
-        ...filters
-      })
-    },
-    fetch(params = {}) {
-      // show loading
-      this.loading = true
-      if (this.paginationInfo) {
-        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
-        this.$refs.TableInfo.pagination.current = this.paginationInfo.current
-        this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
-        params.pageSize = this.paginationInfo.pageSize
-        params.pageNum = this.paginationInfo.current
-      } else {
-        // If pagination information is empty, set to default
-        params.pageSize = this.pagination.defaultPageSize
-        params.pageNum = this.pagination.defaultCurrent
-      }
-      if (params.status != null && params.status.length > 0) {
-        params.status = params.status[0]
-      } else {
-        delete params.status
       }
 
-      if (params.sortField === 'createTime') {
-        params.sortField = 'create_time'
+      function handleSuccess({ isUpdate, values }) {
+        if (isUpdate) {
+          createMessage.success(t('system.token.operation.updateSuccess'));
+          updateTableDataRecord(values.tokenId, values);
+        } else {
+          createMessage.success(t('system.token.operation.createSuccess'));
+          reload();
+        }
       }
 
-      list({...params}).then((resp) => {
-        const pagination = {...this.pagination}
-        pagination.total = parseInt(resp.data.total)
-        this.dataSource = resp.data.records
-        this.pagination = pagination
-        // After the data is loaded, close the loading
-        this.loading = false
-      })
-    }
-  }
-}
+      return {
+        t,
+        registerTable,
+        registerDrawer,
+        handleCreate,
+        handleCopy,
+        handleDelete,
+        handleSuccess,
+      };
+    },
+  });
 </script>
-
