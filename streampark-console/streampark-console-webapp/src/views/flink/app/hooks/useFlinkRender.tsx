@@ -234,12 +234,12 @@ export const renderOptionsItems = (
 };
 
 /* render memory option */
-export const renderProperties = ({ model, field }: RenderCallbackParams) => {
+export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) => {
   return (
     <div>
       <Input.TextArea
         rows={8}
-        name="properties"
+        name="dynamicProperties"
         placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
         value={model[field]}
         onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}

@@ -224,7 +224,7 @@
 <template>
   <PageWrapper content-full-height content-background contentClass="p-24px">
     <div class="mb-15px">
-      <span class="app-bar">{{ t('flink.app.detail.applicationTitle') }}</span>
+      <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
       <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">
         <Icon icon="ant-design:arrow-left-outlined" />
       </a-button>

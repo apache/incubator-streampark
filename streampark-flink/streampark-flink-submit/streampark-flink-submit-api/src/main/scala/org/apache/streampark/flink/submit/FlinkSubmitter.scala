@@ -91,7 +91,7 @@ object FlinkSubmitter extends Logger {
   /**
    * extract flink configuration from application.properties
    */
-  @Nonnull def extractProperties(properties: String): Map[String, String] = {
+  @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
     if (StringUtils.isEmpty(properties)) {
       Map.empty[String, String]
     } else {
@@ -108,6 +108,6 @@ object FlinkSubmitter extends Logger {
     }
   }
 
-  @Nonnull def extractPropertiesAsJava(properties: String): JavaMap[String, String] = new util.HashMap[String, String](extractProperties(properties).asJava)
+  @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] = new util.HashMap[String, String](extractDynamicProperties(properties).asJava)
 
 }

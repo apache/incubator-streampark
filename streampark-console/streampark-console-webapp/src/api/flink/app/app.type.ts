@@ -69,7 +69,7 @@ export interface AppListRecord {
   hotParams?: string;
   resolveOrder: number;
   executionMode: number;
-  properties?: string;
+  dynamicProperties?: string;
   appType: number;
   flameGraph: boolean;
   tracking: number;
@@ -169,7 +169,7 @@ export interface CreateParams {
   cpMaxFailureInterval: number;
   cpFailureRateInterval: number;
   cpFailureAction: number;
-  properties: string;
+  dynamicProperties: string;
   resolveOrder: number;
   restartSize: number;
   alertId: string;

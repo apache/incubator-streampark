@@ -119,10 +119,10 @@ export const useEditStreamParkSchema = (
       ...getFlinkTypeSchema.value,
       {
         field: 'executionMode',
-        label: t('flink.app.table.executionMode'),
+        label: t('flink.app.executionMode'),
         component: 'Select',
         componentProps: {
-          placeholder: t('flink.app.table.executionMode'),
+          placeholder: t('flink.app.executionMode'),
           options: executionModes,
         },
       },

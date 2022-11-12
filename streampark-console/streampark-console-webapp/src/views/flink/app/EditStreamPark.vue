@@ -107,7 +107,7 @@
         tags: app.tags,
         args: app.args || '',
         description: app.description,
-        properties: app.properties,
+        dynamicProperties: app.dynamicProperties,
         resolveOrder: app.resolveOrder,
         versionId: app.versionId || null,
         k8sRestExposedType: app.k8sRestExposedType,

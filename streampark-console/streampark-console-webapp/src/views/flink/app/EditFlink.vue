@@ -86,7 +86,7 @@
         args: app.args || '',
         jar: app.jar,
         description: app.description,
-        properties: app.properties,
+        dynamicProperties: app.dynamicProperties,
         resolveOrder: app.resolveOrder,
         executionMode: app.executionMode,
         yarnQueue: app.yarnQueue,
