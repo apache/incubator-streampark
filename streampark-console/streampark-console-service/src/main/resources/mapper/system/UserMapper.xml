@@ -75,7 +75,7 @@
         where u.user_id = t.user_id
     </select>
 
-    <update id="clearTeamId" parameterType="java.lang.Long">
+    <update id="unbindTeam" parameterType="java.lang.Long">
         update t_user
         set team_id = null
         where user_id = #{userId}

@@ -120,7 +120,7 @@ public interface UserService extends IService<User> {
 
     void setLatestTeam(Long teamId, Long userId);
 
-    void clearDeletedTeamId(Long userId, Long teamId);
+    void unbindTeam(Long userId, Long teamId);
 
     void fillInTeam(User user);
 

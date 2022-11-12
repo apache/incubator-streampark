@@ -189,13 +189,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void clearDeletedTeamId(Long userId, Long teamId) {
+    public void unbindTeam(Long userId, Long teamId) {
         User user = getById(userId);
         AssertUtils.checkArgument(user != null);
         if (!teamId.equals(user.getTeamId())) {
             return;
         }
-        this.baseMapper.clearTeamId(userId);
+        this.baseMapper.unbindTeam(userId);
     }
 
     @Override
