@@ -30,7 +30,7 @@ public interface MemberService extends IService<Member> {
 
     void deleteByRoleIds(String[] roleIds);
 
-    void deleteByUserIds(String[] userIds);
+    void deleteByUserId(Long userId);
 
     void deleteByTeamId(Long teamId);
 

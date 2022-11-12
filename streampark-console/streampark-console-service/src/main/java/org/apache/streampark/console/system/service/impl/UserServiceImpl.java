@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -115,10 +114,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteUsers(String[] userIds) {
-        List<String> list = Arrays.asList(userIds);
-        removeByIds(list);
-        this.memberService.deleteByUserIds(userIds);
+    public void deleteUser(Long userId) {
+        removeById(userId);
+        this.memberService.deleteByUserId(userId);
     }
 
     @Override

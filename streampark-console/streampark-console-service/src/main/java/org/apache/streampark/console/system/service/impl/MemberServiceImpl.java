@@ -66,8 +66,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
 
     @Override
     @Transactional
-    public void deleteByUserIds(String[] userIds) {
-        Arrays.stream(userIds).forEach(id -> baseMapper.deleteByUserId(Long.valueOf(id)));
+    public void deleteByUserId(Long userId) {
+        baseMapper.deleteByUserId(userId);
     }
 
     @Override
