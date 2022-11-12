@@ -55,4 +55,5 @@ jobs:
       - name: Compile and Build
         run: |
           npm i
+          npm run lint:lint-staged
           npm run build
