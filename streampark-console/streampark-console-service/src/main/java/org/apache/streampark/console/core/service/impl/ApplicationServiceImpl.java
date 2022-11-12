@@ -644,7 +644,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setRestartSize(oldApp.getRestartSize());
         newApp.setJobType(oldApp.getJobType());
         newApp.setOptions(oldApp.getOptions());
-        newApp.setProperties(oldApp.getProperties());
+        newApp.setDynamicProperties(oldApp.getDynamicProperties());
         newApp.setResolveOrder(oldApp.getResolveOrder());
         newApp.setExecutionMode(oldApp.getExecutionMode());
         newApp.setFlinkImage(oldApp.getFlinkImage());
@@ -753,7 +753,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setVersionId(appParam.getVersionId());
             application.setArgs(appParam.getArgs());
             application.setOptions(appParam.getOptions());
-            application.setProperties(appParam.getProperties());
+            application.setDynamicProperties(appParam.getDynamicProperties());
             application.setResolveOrder(appParam.getResolveOrder());
             application.setExecutionMode(appParam.getExecutionMode());
             application.setClusterId(appParam.getClusterId());
@@ -1108,7 +1108,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getDrain(),
             customSavepoint,
             application.getK8sNamespace(),
-            application.getProperties(),
+            application.getDynamicProperties(),
             extraParameter
         );
 
@@ -1303,7 +1303,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             throw new UnsupportedOperationException("Unsupported...");
         }
 
-        Map<String, String> properties = FlinkSubmitter.extractPropertiesAsJava(application.getProperties());
+        Map<String, String> properties = FlinkSubmitter.extractDynamicPropertiesAsJava(application.getDynamicProperties());
 
         Map<String, Object> extraParameter = new HashMap<>(0);
 
@@ -1519,7 +1519,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
         String savepointPath = FlinkSubmitter
-            .extractPropertiesAsJava(application.getProperties())
+            .extractDynamicPropertiesAsJava(application.getDynamicProperties())
             .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
         // Application conf configuration has the second priority. If it is a streampark|flinksql type task,

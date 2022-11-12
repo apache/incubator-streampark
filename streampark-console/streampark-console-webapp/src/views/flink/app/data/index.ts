@@ -23,25 +23,25 @@ const { t } = useI18n();
 /* app */
 export const getAppColumns = (): BasicColumn[] => [
   {
-    title: t('flink.app.table.applicationName'),
+    title: t('flink.app.appName'),
     dataIndex: 'jobName',
     align: 'left',
     fixed: 'left',
     width: 300,
   },
-  { title: t('flink.app.table.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
-  { title: t('flink.app.table.owner'), dataIndex: 'nickName', width: 100 },
-  { title: t('flink.app.table.flinkVersion'), dataIndex: 'flinkVersion', width: 130 },
+  { title: t('flink.app.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
+  { title: t('flink.app.owner'), dataIndex: 'nickName', width: 100 },
+  { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion', width: 130 },
   {
-    title: t('flink.app.table.duration'),
+    title: t('flink.app.duration'),
     dataIndex: 'duration',
     sorter: true,
     width: 150,
     customRender: ({ value }) => dateToDuration(value),
   },
-  { title: t('flink.app.table.modifiedTime'), dataIndex: 'modifyTime', sorter: true, width: 170 },
+  { title: t('flink.app.modifiedTime'), dataIndex: 'modifyTime', sorter: true, width: 170 },
   {
-    title: t('flink.app.table.runStatus'),
+    title: t('flink.app.runStatus'),
     dataIndex: 'state',
     width: 120,
     filters: [
@@ -57,7 +57,7 @@ export const getAppColumns = (): BasicColumn[] => [
       { text: t('flink.app.runStatusOptions.terminated'), value: '18' },
     ],
   },
-  { title: t('flink.app.table.launchBuild'), dataIndex: 'launch', width: 220 },
+  { title: t('flink.app.launchBuild'), dataIndex: 'launch', width: 220 },
 ];
 
 /* Get diff editor configuration */

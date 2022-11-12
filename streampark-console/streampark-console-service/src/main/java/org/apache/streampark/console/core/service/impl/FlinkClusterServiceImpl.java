@@ -166,7 +166,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
             Map<String, Object> extraParameter = flinkCluster.getOptionMap();
             ResolveOrder resolveOrder = ResolveOrder.of(flinkCluster.getResolveOrder());
-            Map<String, String> properties = FlinkSubmitter.extractPropertiesAsJava(flinkCluster.getProperties());
+            Map<String, String> properties = FlinkSubmitter.extractDynamicPropertiesAsJava(flinkCluster.getDynamicProperties());
             DeployRequest deployRequest = new DeployRequest(
                 flinkEnv.getFlinkVersion(),
                 flinkCluster.getClusterId(),

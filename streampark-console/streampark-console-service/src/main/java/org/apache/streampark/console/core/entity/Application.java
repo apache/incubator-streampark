@@ -166,7 +166,7 @@ public class Application implements Serializable {
     private String hotParams;
     private Integer resolveOrder;
     private Integer executionMode;
-    private String properties;
+    private String dynamicProperties;
     private Integer appType;
     private Boolean flameGraph;
 
@@ -585,15 +585,15 @@ public class Application implements Serializable {
             return false;
         }
 
-        if (this.getProperties() != null) {
-            if (other.getProperties() != null) {
-                if (!this.getProperties().trim().equals(other.getProperties().trim())) {
+        if (this.getDynamicProperties() != null) {
+            if (other.getDynamicProperties() != null) {
+                if (!this.getDynamicProperties().trim().equals(other.getDynamicProperties().trim())) {
                     return false;
                 }
             } else {
                 return false;
             }
-        } else if (other.getProperties() != null) {
+        } else if (other.getDynamicProperties() != null) {
             return false;
         }
 

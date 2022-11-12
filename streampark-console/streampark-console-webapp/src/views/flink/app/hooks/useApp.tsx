@@ -45,8 +45,8 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       createWarningModal({
         title: 'WARNING',
         content: `
-          <p>${t('flink.app.launchTitle')}</p>
-          <p>${t('flink.app.launchDesc')}</p>
+          <p>${t('flink.app.launch.launchTitle')}</p>
+          <p>${t('flink.app.launch.launchDesc')}</p>
         `,
         okType: 'danger',
         onOk: () => handleLaunchApp(app, true),
@@ -63,13 +63,13 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     if (!data.data) {
       Swal.fire(
         'Failed',
-        t('flink.app.launchFail') + '' + (data.message || '').replaceAll(/\[StreamPark]/g, ''),
+        t('flink.app.launch.launchFail') + '' + (data.message || '').replaceAll(/\[StreamPark]/g, ''),
         'error',
       );
     } else {
       Swal.fire({
         icon: 'success',
-        title: t('flink.app.launching'),
+        title: t('flink.app.launch.launching'),
         showConfirmButton: false,
         timer: 2000,
       });

@@ -113,7 +113,7 @@
         address: cluster.address,
         clusterId: cluster.clusterId,
         description: cluster.description,
-        properties: cluster.properties,
+        dynamicProperties: cluster.dynamicProperties,
         resolveOrder: cluster.resolveOrder,
         yarnQueue: cluster.yarnQueue,
         versionId: cluster.versionId || null,
