@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -115,10 +114,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteUsers(String[] userIds) {
-        List<String> list = Arrays.asList(userIds);
-        removeByIds(list);
-        this.memberService.deleteByUserIds(userIds);
+    public void deleteUser(Long userId) {
+        removeById(userId);
+        this.memberService.deleteByUserId(userId);
     }
 
     @Override
@@ -175,7 +173,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public List<User> getNoTokenUser() {
         List<User> users = this.baseMapper.getNoTokenUser();
         if (!users.isEmpty()) {
-            users.forEach(u -> u.dataMasking());
+            users.forEach(User::dataMasking);
         }
         return users;
     }
@@ -186,6 +184,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         AssertUtils.checkArgument(user != null);
         user.setTeamId(teamId);
         this.baseMapper.updateById(user);
+    }
+
+    @Override
+    public void unbindTeam(Long userId, Long teamId) {
+        User user = getById(userId);
+        AssertUtils.checkArgument(user != null);
+        if (!teamId.equals(user.getTeamId())) {
+            return;
+        }
+        this.baseMapper.unbindTeam(userId);
     }
 
     @Override

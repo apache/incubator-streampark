@@ -92,8 +92,8 @@ public class UserController {
 
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
-    public RestResponse deleteUsers(Long userId) {
-        this.userService.removeById(userId);
+    public RestResponse deleteUser(Long userId) throws Exception {
+        this.userService.deleteUser(userId);
         return RestResponse.success();
     }
 
