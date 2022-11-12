@@ -279,6 +279,7 @@
           attrs.class,
           {
             ['box-content__full']: tableFullScreen.value,
+            ['!px-10px']: tableFullScreen.value,
             [`${prefixCls}-form-container`]: values.useSearchForm,
             [`${prefixCls}--inset`]: values.inset,
           },
