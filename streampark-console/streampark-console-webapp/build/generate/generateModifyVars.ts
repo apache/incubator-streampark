@@ -41,13 +41,15 @@ export function generateModifyVars(dark = false) {
     ...primaryColorObj,
     'info-color': primary,
     'processing-color': primary,
-    'success-color': '#55D187', //  Success color
-    'error-color': '#ED6F6F', //  False color
-    'warning-color': '#EFBD47', //   Warning color
-    //'border-color-base': '#EEEEEE',
+    'success-color': '#31CE36', //  Success color
+    'error-color': '#F25961', //  False color
+    'warning-color': '#FFAD46', //   Warning color
+    'border-color-base': '#ebecec',
     'font-size-base': '14px', //  Main font size
-    'border-radius-base': '2px', //  Component/float fillet
+    'border-radius-base': '4px',
+    'border-radius-sm': '2px',
     'link-color': primary, //   Link color
-    'app-content-background': '#fafafa', //   Link color
+    'app-content-background': '#f9fafc', //   Link color
+    'shadow-color': '#e4e8f0', //   Link color
   };
 }

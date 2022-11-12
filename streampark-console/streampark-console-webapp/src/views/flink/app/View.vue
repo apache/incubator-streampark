@@ -182,7 +182,7 @@
 <template>
   <PageWrapper contentFullHeight>
     <AppDashboard ref="appDashboardRef" />
-    <BasicTable @register="registerTable" class="app_list !px-0 mt-20px" :formConfig="formConfig">
+    <BasicTable @register="registerTable" class="app_list !px-0 pt-20px" :formConfig="formConfig">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'jobName'">
           <span class="app_type app_jar" v-if="record['jobType'] === 1"> JAR </span>
