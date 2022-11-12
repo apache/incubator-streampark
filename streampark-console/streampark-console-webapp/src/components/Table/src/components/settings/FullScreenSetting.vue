@@ -24,10 +24,9 @@
   </Tooltip>
 </template>
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { computed, defineComponent } from 'vue';
   import { Tooltip } from 'ant-design-vue';
   import { FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons-vue';
-  import { useFullscreen } from '@vueuse/core';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useTableContext } from '../../hooks/useTableContext';
 
@@ -42,8 +41,14 @@
     setup() {
       const table = useTableContext();
       const { t } = useI18n();
-      const { toggle, isFullscreen } = useFullscreen(table.wrapRef);
-
+      // const { toggle, isFullscreen } = useFullscreen(table.wrapRef);
+      const isFullscreen = computed(() => {
+        return table.tableFullScreen.value;
+      });
+      console.log('isFullscreen', isFullscreen);
+      function toggle() {
+        table.tableFullScreen.value = !isFullscreen.value;
+      }
       return {
         toggle,
         isFullscreen,

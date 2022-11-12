@@ -76,7 +76,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     if (value) {
       const isProp = value.endsWith('.properties');
       const isYaml = value.endsWith('.yaml') || value.endsWith('.yml');
-      const isConf = value.endsWith('.conf')
+      const isConf = value.endsWith('.conf');
       if (!isProp && !isYaml && !isConf) {
         return Promise.reject('The configuration file must be (.properties|.yaml|.yml |.conf)');
       } else {
@@ -106,7 +106,9 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         defaultValue: 'sql',
-        rules: [{ required: true, message: t('flink.app.addAppTips.developmentModeIsRequiredMessage') }],
+        rules: [
+          { required: true, message: t('flink.app.addAppTips.developmentModeIsRequiredMessage') },
+        ],
       },
       {
         field: 'executionMode',
@@ -129,9 +131,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
                     if (res) {
                       return Promise.resolve();
                     } else {
-                      return Promise.reject(
-                        t('flink.app.addAppTips.hadoopEnvInitMessage'),
-                      );
+                      return Promise.reject(t('flink.app.addAppTips.hadoopEnvInitMessage'));
                     }
                   }
                   return Promise.resolve();
@@ -238,7 +238,9 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom !== 'upload',
-        dynamicRules: () => [{ required: true, message: t('flink.app.addAppTips.appTypeIsRequiredMessage') }],
+        dynamicRules: () => [
+          { required: true, message: t('flink.app.addAppTips.appTypeIsRequiredMessage') },
+        ],
       },
       {
         field: 'jar',

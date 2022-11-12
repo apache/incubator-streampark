@@ -186,6 +186,7 @@
 
     .@{prefix-cls}-content {
       margin: 16px;
+      border-radius: @border-radius-base;
     }
 
     .ant-page-header {

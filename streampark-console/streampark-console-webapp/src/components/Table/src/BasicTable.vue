@@ -111,6 +111,7 @@
     ],
     setup(props, { attrs, emit, slots, expose }) {
       const tableElRef = ref(null);
+      const tableFullScreen = ref(false);
       const tableData = ref<Recordable[]>([]);
 
       const wrapRef = ref(null);
@@ -277,6 +278,7 @@
           prefixCls,
           attrs.class,
           {
+            ['box-content__full']: tableFullScreen.value,
             [`${prefixCls}-form-container`]: values.useSearchForm,
             [`${prefixCls}--inset`]: values.inset,
           },
@@ -332,7 +334,7 @@
           return unref(getBindValues).size as SizeType;
         },
       };
-      createTableContext({ ...tableAction, wrapRef, getBindValues });
+      createTableContext({ ...tableAction, wrapRef, tableFullScreen, getBindValues });
 
       expose(tableAction);
 
@@ -365,10 +367,20 @@
 
   @prefix-cls: ~'@{namespace}-basic-table';
 
+  .table-radius {
+    box-shadow: 0 2px 3px #e4e8f0;
+    border-radius: 5px;
+  }
+
   [data-theme='dark'] {
     .ant-table-tbody > tr:hover.ant-table-row-selected > td,
     .ant-table-tbody > tr.ant-table-row-selected td {
       background-color: #262626;
+    }
+
+    .ant-table-wrapper,
+    .ant-form {
+      box-shadow: 0 2px 3px #262626 !important;
     }
   }
 
@@ -390,6 +402,7 @@
         margin-bottom: 16px;
         background-color: @component-background;
         border-radius: 2px;
+        .table-radius;
       }
     }
 
@@ -398,9 +411,10 @@
     }
 
     .ant-table-wrapper {
-      padding: 6px;
+      padding: 10px;
       background-color: @component-background;
       border-radius: 2px;
+      .table-radius;
 
       .ant-table-title {
         min-height: 40px;

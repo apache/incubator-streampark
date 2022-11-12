@@ -47,8 +47,9 @@
   list-style: none;
   font-feature-settings: 'tnum';
   position: relative;
-  border-radius: 2px;
+  border-radius: @border-radius-base;
   transition: all 0.3s;
+  box-shadow: 0 2px 3px @shadow-color;
 
   .ant-divider-horizontal {
     margin: 10px 0;
@@ -81,7 +82,6 @@
 }
 
 .app_list {
-
   .app_type {
     display: inline-block;
     text-align: center;
@@ -166,6 +166,6 @@
   }
 }
 
-[data-theme="dark"] .app_list .app_sql {
+[data-theme='dark'] .app_list .app_sql {
   color: #f4f5f6;
 }

@@ -187,7 +187,7 @@
 <template>
   <div style="height: 550px" class="w-full" :class="fullContentClass">
     <div
-      class="full-content-tool flex justify-between px-20px border-solid border-b pb-10px mb-10px"
+      class="full-content-tool flex justify-between px-20px pb-10px mb-10px"
       v-if="fullScreenStatus"
     >
       <div class="flex items-center">

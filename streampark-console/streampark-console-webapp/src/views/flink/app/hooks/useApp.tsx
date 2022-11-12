@@ -63,7 +63,9 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     if (!data.data) {
       Swal.fire(
         'Failed',
-        t('flink.app.launch.launchFail') + '' + (data.message || '').replaceAll(/\[StreamPark]/g, ''),
+        t('flink.app.launch.launchFail') +
+          '' +
+          (data.message || '').replaceAll(/\[StreamPark]/g, ''),
         'error',
       );
     } else {
