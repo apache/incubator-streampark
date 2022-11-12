@@ -136,14 +136,17 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
     }
 
     @Override
-    public void deleteMember(Member member) {
+    public void deleteMember(Member memberArg) {
+        Member member = Optional.ofNullable(this.getById(memberArg.getId()))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The member [id=%s] not found", memberArg.getId())));
         this.removeById(member);
+        userService.clearDeletedTeamId(member.getUserId(), member.getTeamId());
     }
 
     @Override
     public void updateMember(Member member) {
         Member oldMember = Optional.ofNullable(this.getById(member.getId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The mapping [id=%s] not found", member.getId())));
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The member [id=%s] not found", member.getId())));
         AssertUtils.isTrue(oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
         AssertUtils.isTrue(oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
         Optional.ofNullable(roleService.getById(member.getRoleId()))

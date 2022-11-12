@@ -175,7 +175,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public List<User> getNoTokenUser() {
         List<User> users = this.baseMapper.getNoTokenUser();
         if (!users.isEmpty()) {
-            users.forEach(u -> u.dataMasking());
+            users.forEach(User::dataMasking);
         }
         return users;
     }
@@ -186,6 +186,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         AssertUtils.checkArgument(user != null);
         user.setTeamId(teamId);
         this.baseMapper.updateById(user);
+    }
+
+    @Override
+    public void clearDeletedTeamId(Long userId, Long teamId) {
+        User user = getById(userId);
+        AssertUtils.checkArgument(user != null);
+        if (!teamId.equals(user.getTeamId())) {
+            return;
+        }
+        this.baseMapper.clearTeamId(userId);
     }
 
     @Override
