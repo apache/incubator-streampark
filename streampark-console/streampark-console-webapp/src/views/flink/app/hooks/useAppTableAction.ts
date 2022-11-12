@@ -70,12 +70,14 @@ export const useAppTableAction = (
       {
         tooltip: { title: t('flink.app.tableAction.launch') },
         ifShow: [-1, 1, 4].includes(record.launch) && record['optionState'] === 0,
+        auth: 'app:launch',
         icon: 'ant-design:cloud-upload-outlined',
         onClick: handleCheckLaunchApp.bind(null, record),
       },
       {
         tooltip: { title: t('flink.app.tableAction.launchDetail') },
         ifShow: [-1, 2].includes(record.launch) || record['optionState'] === 1,
+        auth: 'app:launch',
         icon: 'ant-design:container-outlined',
         onClick: () => openBuildDrawer(true, { appId: record.id }),
       },

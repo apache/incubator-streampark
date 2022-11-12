@@ -30,7 +30,7 @@ export default {
     userName: 'User Name',
     required: 'username is required',
     min: 'username length cannot be less than 4 characters',
-    max: 'exceeds maximum length limit of 8 characters',
+    max: 'exceeds maximum length limit of 20 characters',
     exist: 'Sorry the username already exists',
     nickName: 'Nick Name',
     userType: 'User Type',

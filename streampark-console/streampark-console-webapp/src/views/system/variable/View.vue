@@ -50,7 +50,7 @@
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('system.variable.deleteVariable'),
-                auth: 'team:delete',
+                auth: 'variable:delete',
                 popConfirm: {
                   title: t('system.variable.deletePopConfirm'),
                   confirm: handleDelete.bind(null, record),
