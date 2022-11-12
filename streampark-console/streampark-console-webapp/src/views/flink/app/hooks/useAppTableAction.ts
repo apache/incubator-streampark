@@ -98,7 +98,7 @@ export const useAppTableAction = (
       {
         tooltip: { title: t('flink.app.tableAction.detail') },
         auth: 'app:detail',
-        icon: 'ant-design:eye-outlined',
+        icon: 'carbon:data-view-alt',
         onClick: handleDetail.bind(null, record),
       },
       {
