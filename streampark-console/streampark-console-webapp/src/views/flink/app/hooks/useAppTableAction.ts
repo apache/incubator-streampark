@@ -62,47 +62,47 @@ export const useAppTableAction = (
   function getTableActions(record: AppListRecord, currentPgaeNo: any): ActionItem[] {
     return [
       {
-        tooltip: { title: t('flink.app.tableAction.edit') },
+        tooltip: { title: t('flink.app.operation.edit') },
         auth: 'app:update',
         icon: 'clarity:note-edit-line',
         onClick: handleEdit.bind(null, record, currentPgaeNo),
       },
       {
-        tooltip: { title: t('flink.app.tableAction.launch') },
+        tooltip: { title: t('flink.app.operation.launch') },
         ifShow: [-1, 1, 4].includes(record.launch) && record['optionState'] === 0,
         auth: 'app:launch',
         icon: 'ant-design:cloud-upload-outlined',
         onClick: handleCheckLaunchApp.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.tableAction.launchDetail') },
+        tooltip: { title: t('flink.app.operation.launchDetail') },
         ifShow: [-1, 2].includes(record.launch) || record['optionState'] === 1,
         auth: 'app:launch',
         icon: 'ant-design:container-outlined',
         onClick: () => openBuildDrawer(true, { appId: record.id }),
       },
       {
-        tooltip: { title: t('flink.app.tableAction.start') },
+        tooltip: { title: t('flink.app.operation.start') },
         ifShow: handleIsStart(record, optionApps),
         auth: 'app:start',
         icon: 'ant-design:play-circle-outlined',
         onClick: handleAppCheckStart.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.tableAction.cancel') },
+        tooltip: { title: t('flink.app.operation.cancel') },
         ifShow: record.state === 5 && record['optionState'] === 0,
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.tableAction.detail') },
+        tooltip: { title: t('flink.app.operation.detail') },
         auth: 'app:detail',
         icon: 'carbon:data-view-alt',
         onClick: handleDetail.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.tableAction.startLog') },
+        tooltip: { title: t('flink.app.operation.startLog') },
         ifShow: [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(
           record.executionMode,
         ),
@@ -111,7 +111,7 @@ export const useAppTableAction = (
         onClick: () => openLogModal(true, { app: record }),
       },
       {
-        tooltip: { title: t('flink.app.tableAction.force') },
+        tooltip: { title: t('flink.app.operation.force') },
         ifShow: handleCanStop(record),
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
@@ -148,20 +148,20 @@ export const useAppTableAction = (
   function getActionDropdown(record: AppListRecord): ActionItem[] {
     return [
       {
-        label: t('flink.app.tableAction.copy'),
+        label: t('flink.app.operation.copy'),
         auth: 'app:copy',
         icon: 'ant-design:copy-outlined',
         onClick: handleCopy.bind(null, record),
       },
       {
-        label: t('flink.app.tableAction.remapping'),
+        label: t('flink.app.operation.remapping'),
         ifShow: [0, 7, 10, 11, 13].includes(record.state),
         auth: 'app:mapping',
         icon: 'ant-design:deployment-unit-outlined',
         onClick: handleMapping.bind(null, record),
       },
       {
-        label: t('flink.app.tableAction.flameGraph'),
+        label: t('flink.app.operation.flameGraph'),
         ifShow: record.flameGraph,
         auth: 'app:flameGraph',
         icon: 'ant-design:fire-outlined',
@@ -169,7 +169,7 @@ export const useAppTableAction = (
       },
       {
         popConfirm: {
-          title: t('flink.app.tableAction.deleteTip'),
+          title: t('flink.app.operation.deleteTip'),
           confirm: handleDelete.bind(null, record),
         },
         label: t('common.delText'),
@@ -266,7 +266,7 @@ export const useAppTableAction = (
         {
           label: t('flink.app.searchName'),
           field: 'jobName',
-          component: 'InputSearch',
+          component: 'Input',
           componentProps: {
             placeholder: t('flink.app.searchName'),
             onChange: handlePageDataReload.bind(null, false),

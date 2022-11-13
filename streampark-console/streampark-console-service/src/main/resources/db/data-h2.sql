@@ -97,11 +97,11 @@ insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:updat
 insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100054, 100013, 'Variable', '/system/variable', 'system/variable/View', null, 'code', '0', 1, 3, now(), now());
+insert into `t_menu` values (100054, 100013, 'Variable', '/flink/variable', 'flink/variable/View', null, 'code', '0', 1, 3, now(), now());
 insert into `t_menu` values (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (100058, 100054, 'depend apps', '/system/variable/depend_apps', 'system/variable/DependApps', 'variable:depend_apps', '', '0', 0, NULL, now(), now());
+insert into `t_menu` values (100058, 100054, 'depend apps', '/flink/variable/depend_apps', 'flink/variable/DependApps', 'variable:depend_apps', '', '0', 0, NULL, now(), now());
 insert into `t_menu` values (100059, 100054, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100060, 100001, 'view', null, null, 'user:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100061, 100038, 'view', null, null, 'token:view', null, '1', 1, null, now(), now());

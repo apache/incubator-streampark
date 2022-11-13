@@ -31,7 +31,7 @@
               {
                 icon: 'clarity:note-edit-line',
                 auth: 'variable:update',
-                tooltip: t('system.variable.modifyVariable'),
+                tooltip: t('flink.variable.modifyVariable'),
                 onClick: handleEdit.bind(null, record),
               },
               {
@@ -41,18 +41,18 @@
               },
               {
                 icon: 'icon-park-outline:mind-mapping',
-                tooltip: t('system.variable.table.depend'),
+                tooltip: t('flink.variable.table.depend'),
                 auth: 'variable:depend_apps',
                 onClick: () =>
-                  router.push('/system/variable/depend_apps?id=' + record.variableCode),
+                  router.push('/flink/variable/depend_apps?id=' + record.variableCode),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
-                tooltip: t('system.variable.deleteVariable'),
+                tooltip: t('flink.variable.deleteVariable'),
                 auth: 'variable:delete',
                 popConfirm: {
-                  title: t('system.variable.deletePopConfirm'),
+                  title: t('flink.variable.deletePopConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },
               },
@@ -80,7 +80,7 @@
   import { columns, searchFormSchema } from './variable.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { fetchVariableDelete, fetchVariableList } from '/@/api/system/variable';
+  import { fetchVariableDelete, fetchVariableList } from '/@/api/flink/variable';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
 
@@ -90,7 +90,7 @@
   const { createMessage } = useMessage();
   const { t } = useI18n();
   const [registerTable, { reload }] = useTable({
-    title: t('system.variable.table.title'),
+    title: t('flink.variable.table.title'),
     api: fetchVariableList,
     columns,
     formConfig: {
@@ -147,16 +147,16 @@
       variableValue: record.variableValue,
     });
     if (data.status === 'success') {
-      createMessage.success(t('system.variable.deleteVariable') + t('system.variable.success'));
+      createMessage.success(t('flink.variable.deleteVariable') + t('flink.variable.success'));
       reload();
     } else {
-      createMessage.error(t('system.variable.deleteVariable') + t('system.variable.fail'));
+      createMessage.error(t('flink.variable.deleteVariable') + t('flink.variable.fail'));
     }
   }
 
   function handleSuccess(isUpdate: boolean) {
     createMessage.success(
-      `${isUpdate ? t('common.edit') : t('system.variable.add')}${t('system.variable.success')}`,
+      `${isUpdate ? t('common.edit') : t('flink.variable.add')}${t('flink.variable.success')}`,
     );
     reload();
   }

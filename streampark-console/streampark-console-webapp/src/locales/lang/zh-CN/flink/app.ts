@@ -132,7 +132,7 @@ export default {
     appidCheck: 'appid 不能为空',
     sqlCheck: 'SQL 检查错误',
   },
-  tableAction: {
+  operation: {
     edit: '编辑作业',
     launch: '发布作业',
     launchDetail: '发布详情',
