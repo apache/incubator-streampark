@@ -30,9 +30,9 @@ export function errorHandler(response: AxiosResponse<any>) {
       case 501:
         Swal.fire({
           icon: 'error',
-          title: 'Oops...',
+          title: t('sys.api.errorTip'),
           text: response.data.message,
-          footer: '<a href="https://streampark.apache.org/">View the official documentation?</a>',
+          footer: t('sys.api.error501'),
         });
         break;
       case 502:
@@ -43,23 +43,19 @@ export function errorHandler(response: AxiosResponse<any>) {
         width *= 0.96;
         Swal.fire({
           icon: 'error',
-          title: 'Oops...',
+          title: t('sys.api.errorTip'),
           width: width,
           html: '<pre class="propException">' + response.data.message + '</pre>',
-          footer:
-            '<a href="https://github.com/apache/incubator-streampark/issues/new/choose">report issue ?</a>',
+          footer: t('sys.api.error502'),
           focusConfirm: false,
         });
         break;
       default:
-        const errorMessage =
-          response.data === null
-            ? 'System error，Please contact the administrator'
-            : response.data.message;
+        const errorMessage = response.data === null ? t('sys.api.errorMsg') : response.data.message;
         switch (response.status) {
           case 404:
             notification.error({
-              message: 'Sorry, resource not found',
+              message: t('sys.api.error404'),
               duration: 4,
             });
             break;
@@ -74,8 +70,7 @@ export function errorHandler(response: AxiosResponse<any>) {
             }
             setTimeout(() => {
               notification.warn({
-                message:
-                  "Sorry, you can't access. May be because you don't have permissions or the Sign In is invalid",
+                message: t('sys.api.error403'),
                 duration: 4,
               });
             }, 500);
