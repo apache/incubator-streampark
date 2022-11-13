@@ -18,8 +18,8 @@ import { BasicColumn, FormSchema } from '/@/components/Table';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 export const columns: BasicColumn[] = [
-  { title: t('system.variable.table.variableCode'), dataIndex: 'variableCode' },
-  { title: t('system.variable.table.variableValue'), dataIndex: 'variableValue' },
+  { title: t('flink.variable.table.variableCode'), dataIndex: 'variableCode' },
+  { title: t('flink.variable.table.variableValue'), dataIndex: 'variableValue' },
   { title: t('common.description'), dataIndex: 'description' },
   {
     title: t('common.createTime'),
@@ -36,16 +36,16 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'variableCode',
-    label: t('system.variable.table.variableCode'),
+    label: t('flink.variable.table.variableCode'),
     component: 'Input',
-    componentProps: { placeholder: t('system.variable.table.variableCodePlaceholder') },
+    componentProps: { placeholder: t('flink.variable.table.variableCodePlaceholder') },
     colProps: { span: 8 },
   },
   {
     field: 'description',
     label: t('common.description'),
     component: 'Input',
-    componentProps: { placeholder: t('system.variable.table.variableValuePlaceholder') },
+    componentProps: { placeholder: t('flink.variable.table.variableValuePlaceholder') },
     colProps: { span: 8 },
   },
 ];

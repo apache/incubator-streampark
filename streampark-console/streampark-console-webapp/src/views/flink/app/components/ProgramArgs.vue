@@ -39,9 +39,11 @@
         <Icon icon="ant-design:eye-outlined" />
         {{ t('flink.app.flinkSql.preview') }}
       </a-button>
-      <a-button class="flinksql-tool-item" size="small" type="default" @click="toggle">
-        <Icon icon="ant-design:fullscreen-outlined" />
-        {{ t('layout.header.tooltipEntryFull') }}
+      <a-button class="flinksql-tool-item" size="small" type="primary" @click="toggle">
+        <div class="flex items-center">
+          <Icon icon="ant-design:fullscreen-outlined" />
+          {{ t('flink.app.flinkSql.fullScreen') }}
+        </div>
       </a-button>
     </div>
     <div v-else class="text-right py-10px">
@@ -51,10 +53,10 @@
           {{ t('flink.app.flinkSql.preview') }}
         </div>
       </a-button>
-      <a-button type="primary" @click="toggle" class="ml-10px">
+      <a-button class="flinksql-tool-item" size="small" type="primary" @click="toggle">
         <div class="flex items-center">
-          <Icon icon="ant-design:fullscreen-exit-outlined" />
-          {{ t('layout.header.tooltipExitFull') }}
+          <Icon icon="ant-design:fullscreen-outlined" />
+          {{ t('flink.app.flinkSql.fullScreen') }}
         </div>
       </a-button>
     </div>

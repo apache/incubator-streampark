@@ -40,7 +40,7 @@ export const getParentLayout = (_name?: string) => {
 };
 const projectPath = '/flink/project';
 const settingPath = '/flink/setting';
-const variablePath = '/system/variable';
+const variablePath = '/flink/variable';
 
 const applicationPath = '/flink/app';
 export const menuMap = {

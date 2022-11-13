@@ -35,7 +35,7 @@ import { useDrawer } from '/@/components/Drawer';
 import { Alert } from 'ant-design-vue';
 import Icon from '/@/components/Icon';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { fetchVariableAll } from '/@/api/system/variable';
+import { fetchVariableAll } from '/@/api/flink/variable';
 import {
   fetchFlinkBaseImages,
   fetchK8sNamespaces,
