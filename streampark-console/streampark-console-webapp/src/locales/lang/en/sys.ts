@@ -37,6 +37,13 @@ export default {
     errMsg503: 'The service is unavailable, the server is temporarily overloaded or maintained!',
     errMsg504: 'Network timeout!',
     errMsg505: 'The http version does not support the request!',
+    error403:
+      "Sorry, you can't access. May be because you don't have permissions or the Sign In is invalid",
+    error404: 'Sorry, resource not found',
+    error501: '<a href="https://streampark.apache.org/">View the official documentation?</a>',
+    error502:
+      '<a href="https://github.com/apache/incubator-streampark/issues/new/choose">report issue ?</a>',
+    errorMsg: 'System error,Please contact the administrator',
   },
   app: {
     logoutTip: 'Reminder',
@@ -98,6 +105,9 @@ export default {
     forgetPassword: 'Forget Password?',
     otherSignIn: 'Sign in with',
 
+    ldapTip: 'Sign in with LDAP',
+    passwordTip: 'Sign in with LDAP',
+
     // notify
     loginSuccessTitle: 'Login successful',
     loginSuccessDesc: 'Welcome back',
@@ -105,6 +115,7 @@ export default {
     // placeholder
     accountPlaceholder: 'Please input username',
     passwordPlaceholder: 'Please input password',
+    confirmPasswordPlaceholder: 'Please input confirm password',
     smsPlaceholder: 'Please input sms code',
     mobilePlaceholder: 'Please input mobile',
     policyPlaceholder: 'Register after checking',
@@ -119,5 +130,10 @@ export default {
   },
   permission: {
     noPermission: 'No permission, please contact the administrator',
+  },
+  modifyPassword: {
+    title: 'Change Password',
+    success: 'The password has been changed successfully, and you are about to exit the system',
+    logout: 'Immediate exit',
   },
 };

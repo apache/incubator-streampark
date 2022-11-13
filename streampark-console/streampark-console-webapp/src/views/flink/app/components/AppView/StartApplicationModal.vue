@@ -62,7 +62,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: h('span', { class: 'conf-switch' }, 'flame Graph support'),
+        afterItem: () => h('span', { class: 'conf-switch' }, 'flame Graph support'),
         ifShow: () => isK8sExecMode(receiveData.executionMode),
       },
       {
@@ -74,11 +74,12 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        afterItem: h(
-          'span',
-          { class: 'conf-switch' },
-          'restore the application from savepoint or latest checkpoint',
-        ),
+        afterItem: () =>
+          h(
+            'span',
+            { class: 'conf-switch' },
+            'restore the application from savepoint or latest checkpoint',
+          ),
       },
       {
         field: 'startSavePoint',
@@ -87,11 +88,12 @@
           receiveData.historySavePoint && receiveData.historySavePoint.length > 0
             ? 'Select'
             : 'Input',
-        afterItem: h(
-          'span',
-          { class: 'conf-switch' },
-          'restore the application from savepoint or latest checkpoint',
-        ),
+        afterItem: () =>
+          h(
+            'span',
+            { class: 'conf-switch' },
+            'restore the application from savepoint or latest checkpoint',
+          ),
         slot: 'savepoint',
         ifShow: ({ values }) => values.startSavePointed && !receiveData.latestSavePoint,
         required: true,
@@ -104,7 +106,8 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        afterItem: h('span', { class: 'conf-switch' }, 'ignore savepoint then cannot be restored'),
+        afterItem: () =>
+          h('span', { class: 'conf-switch' }, 'ignore savepoint then cannot be restored'),
         defaultValue: false,
         ifShow: ({ values }) => values.startSavePointed,
       },

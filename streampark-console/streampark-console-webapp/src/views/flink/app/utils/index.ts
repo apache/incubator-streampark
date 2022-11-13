@@ -18,7 +18,7 @@ import { optionsKeyMapping } from '../data/option';
 import { fetchYarn } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchActiveURL } from '/@/api/flink/setting/flinkCluster';
-import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { ExecModeEnum, LaunchStateEnum } from '/@/enums/flinkEnum';
 
 export function handleAppBuildStatusColor(statusCode) {
   switch (statusCode) {
@@ -152,7 +152,7 @@ export function handleIsStart(app, optionApps) {
    * The posted task has been revoked REVOKED(10);
    */
 
-  const launch = [0, 3].includes(app.launch);
+  const launch = [LaunchStateEnum.DONE, LaunchStateEnum.NEED_RESTART].includes(app.launch);
 
   const optionState = !optionApps.starting.get(app.id) || app['optionState'] === 0 || false;
 

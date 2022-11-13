@@ -119,7 +119,7 @@
       }
       /* change password */
       function openChangePassword() {
-        openPasswordModal(true);
+        openPasswordModal(true, {});
       }
 
       function handleMenuClick(e: MenuInfo) {

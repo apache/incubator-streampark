@@ -177,7 +177,8 @@ export default {
     developmentModeIsRequiredMessage: 'Job Type is required',
     executionModePlaceholder: 'please select execution mode',
     executionModeIsRequiredMessage: 'Execution Mode is required',
-    hadoopEnvInitMessage: 'Hadoop environment initialization failed, please check the environment settings',
+    hadoopEnvInitMessage:
+      'Hadoop environment initialization failed, please check the environment settings',
     resourceFromMessage: 'resource from is required',
     mainClassPlaceholder: 'Please enter Main class',
     mainClassIsRequiredMessage: 'Program Main is required',
@@ -192,9 +193,12 @@ export default {
     appNamePlaceholder: 'Please enter application Name',
     appNameIsRequiredMessage: 'The application Name is required',
     appNameNotUniqueMessage: 'The application Name is already exists, must be unique. ',
-    appNameExistsInYarnMessage: 'The application name is already exists in YARN, cannot be repeated. Please check',
-    appNameExistsInK8sMessage: 'The application name is already exists in Kubernetes,cannot be repeated. Please check',
-    appNameNotValid: 'The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check',
+    appNameExistsInYarnMessage:
+      'The application name is already exists in YARN, cannot be repeated. Please check',
+    appNameExistsInK8sMessage:
+      'The application name is already exists in Kubernetes,cannot be repeated. Please check',
+    appNameNotValid:
+      'The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check',
     tagsPlaceholder: 'Please enter tags,if more than one, separate them with commas(,)',
     parallelismPlaceholder: 'The parallelism with which to run the program',
     slotsOfPerTaskManagerPlaceholder: 'Number of slots per TaskManager',
@@ -208,9 +212,11 @@ export default {
     kubernetesNamespacePlaceholder: 'Please enter kubernetes Namespace, e.g: default',
     kubernetesClusterIdPlaceholder: 'Please enter Kubernetes clusterId',
     kubernetesClusterIdIsRequiredMessage: 'Kubernetes clusterId is required',
-    flinkImagePlaceholder: 'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
+    flinkImagePlaceholder:
+      'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
     flinkImageIsRequiredMessage: 'Flink Base Docker Image is required',
     k8sRestExposedTypePlaceholder: 'kubernetes.rest-service.exposed.type',
-    hadoopXmlConfigFileTips: 'Automatically copy configuration files from system environment parameters',
+    hadoopXmlConfigFileTips:
+      'Automatically copy configuration files from system environment parameters',
   },
 };

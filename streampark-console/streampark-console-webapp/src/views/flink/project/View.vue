@@ -43,7 +43,7 @@
     <a-card :bordered="false">
       <a-spin :spinning="loading">
         <a-list>
-          <list-item
+          <ListItem
             :key="item.id"
             v-for="item in projectDataSource"
             :item="item"
@@ -60,7 +60,7 @@
   import { defineComponent, onUnmounted, reactive, ref, unref, watch } from 'vue';
 
   import { PageWrapper } from '/@/components/Page';
-  import { statusList, BuildStatusEnum } from './project.data';
+  import { statusList } from './project.data';
   import { RadioGroup, Radio, Input, Card, List, Spin } from 'ant-design-vue';
   import { getList } from '/@/api/flink/project';
   import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
@@ -96,7 +96,7 @@
       const loading = ref(false);
 
       const queryParams = reactive({
-        buildState: BuildStatusEnum.All,
+        buildState: '',
       });
 
       let projectDataSource = ref<Array<ProjectRecord>>([]);

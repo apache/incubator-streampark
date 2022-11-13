@@ -200,7 +200,7 @@
 
           <template v-if="record['jobType'] === 1">
             <Badge
-              v-if="record.launch === 5"
+              v-if="record.launch == 5"
               class="build-badge"
               count="NEW"
               :title="t('flink.app.view.recheck')"
@@ -231,7 +231,7 @@
           <State option="state" :data="record" />
         </template>
         <template v-if="column.dataIndex === 'launch'">
-          <State option="launch" :title="launchTitleMap.get(record.launch)" :data="record" />
+          <State option="launch" :title="launchTitleMap[record.launch] || ''" :data="record" />
           <Divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus != null" />
           <State
             option="build"

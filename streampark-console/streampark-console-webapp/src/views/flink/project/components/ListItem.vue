@@ -64,8 +64,13 @@
     </ul>
     <div class="operation">
       <a-tooltip title="See Build log">
-        <a-button shape="circle" @click="handleSeeLog" class="!leading-26px">
-          <Icon icon="ant-design:eye-outlined" />
+        <a-button
+          shape="circle"
+          @click="handleSeeLog"
+          class="!leading-26px"
+          v-auth="'project:build'"
+        >
+          <Icon icon="ant-design:code-outlined" />
         </a-button>
       </a-tooltip>
 
@@ -114,12 +119,13 @@
     EditOutlined,
     ThunderboltOutlined,
   } from '@ant-design/icons-vue';
-  import { BuildStatusEnum, ProjectType, buildStateMap } from '../project.data';
+  import { ProjectType, buildStateMap } from '../project.data';
   import { computed } from 'vue';
   import { buildProject, deleteProject } from '/@/api/flink/project';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useGo } from '/@/hooks/web/usePage';
   import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
+  import { BuildStateEnum } from '/@/enums/flinkEnum';
 
   const emit = defineEmits(['viewLog', 'success']);
 
@@ -128,10 +134,10 @@
   const props = defineProps({
     item: { type: Object as PropType<ProjectRecord>, required: true },
   });
-  const needBuild = computed(() => props.item.buildState == BuildStatusEnum.NeedBuild);
-  const isBuilding = computed(() => props.item.buildState == BuildStatusEnum.Building);
+  const needBuild = computed(() => props.item.buildState == BuildStateEnum.NEED_REBUILD);
+  const isBuilding = computed(() => props.item.buildState == BuildStateEnum.BUILDING);
   const buildState = computed(() => {
-    return buildStateMap[props.item.buildState] || buildStateMap[BuildStatusEnum.BuildFail];
+    return buildStateMap[props.item.buildState] || buildStateMap[BuildStateEnum.FAILED];
   });
   const tagClass = computed(() => buildState.value.className || '');
   const svgName = computed(() => {

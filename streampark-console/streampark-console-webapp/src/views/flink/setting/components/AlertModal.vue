@@ -30,11 +30,12 @@
   import { fetchAlertAdd, fetchAlertUpdate, fetchExistsAlert } from '/@/api/flink/setting/alert';
   import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   const FormItem = Form.Item;
   const SelectOption = Select.Option;
   const InputTextArea = Input.TextArea;
-
+  const { t } = useI18n();
   const emit = defineEmits(['reload', 'register']);
   const alertId = ref<string | null>(null);
   const alertType = ref<string[]>([]);
@@ -54,11 +55,8 @@
         label: 'Alert Name',
         component: 'Input',
         componentProps: { allowClear: true, placeholder: 'Please enter alert name' },
-        afterItem: h(
-          'span',
-          { class: 'conf-switch' },
-          'the alert name, e.g: StreamPark team alert',
-        ),
+        afterItem: () =>
+          h('span', { class: 'conf-switch' }, 'the alert name, e.g: StreamPark team alert'),
         dynamicRules: () => {
           return [
             {
@@ -123,9 +121,7 @@
           secretEnable: formValue.dingtalkSecretEnable,
           secretToken: formValue.dingtalkSecretToken,
         },
-        weComParams: {
-          token: formValue.weToken,
-        },
+        weComParams: { token: formValue.weToken },
         larkParams: {
           token: formValue.larkToken,
           isAtAll: formValue.larkIsAtAll,
@@ -134,7 +130,6 @@
         },
         isJsonType: true,
       };
-      console.log('Update alarm parameters：' + JSON.stringify(param));
 
       // No id means new operation
       if (!param.id) {
@@ -192,7 +187,12 @@
 </script>
 
 <template>
-  <BasicModal ok-text="Submit" @register="registerModal" v-bind="$attrs" @ok="handleSubmit">
+  <BasicModal
+    :ok-text="t('common.submitText')"
+    @register="registerModal"
+    v-bind="$attrs"
+    @ok="handleSubmit"
+  >
     <template #title>
       <SvgIcon name="alarm" size="25" />
       Alert Setting
