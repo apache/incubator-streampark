@@ -201,18 +201,19 @@
 
     <div ref="flinkSql" class="overflow-hidden w-full mt-5px" :class="flinkEditorClass"></div>
     <ButtonGroup class="flinksql-tool" v-if="!fullScreenStatus">
+      <a-button size="small" class="flinksql-tool-item" type="primary" @click="handleVerifySql">
+        <Icon icon="ant-design:check-outlined" />
+        {{ t('flink.app.flinkSql.verify') }}
+      </a-button>
       <a-button
         class="flinksql-tool-item"
         size="small"
+        type="default"
         v-if="canPreview"
         @click="emit('preview', value)"
       >
         <Icon icon="ant-design:eye-outlined" />
         {{ t('flink.app.flinkSql.preview') }}
-      </a-button>
-      <a-button size="small" class="flinksql-tool-item" type="primary" @click="handleVerifySql">
-        <Icon icon="ant-design:check-outlined" />
-        {{ t('flink.app.flinkSql.verify') }}
       </a-button>
       <a-button class="flinksql-tool-item" size="small" type="default" @click="handleFormatSql">
         <Icon icon="ant-design:thunderbolt-outlined" />
@@ -233,16 +234,16 @@
         </div>
       </div>
       <div class="flinksql-tool">
-        <a-button v-if="canPreview" @click="emit('preview', value)">
-          <div class="flex items-center">
-            <Icon icon="ant-design:eye-outlined" />
-            {{ t('flink.app.flinkSql.preview') }}
-          </div>
-        </a-button>
-        <a-button type="primary" @click="handleVerifySql" class="ml-10px">
+        <a-button type="primary" @click="handleVerifySql">
           <div class="flex items-center">
             <Icon icon="ant-design:check-outlined" />
             {{ t('flink.app.flinkSql.verify') }}
+          </div>
+        </a-button>
+        <a-button v-if="canPreview" @click="emit('preview', value)" class="ml-10px">
+          <div class="flex items-center">
+            <Icon icon="ant-design:eye-outlined" />
+            {{ t('flink.app.flinkSql.preview') }}
           </div>
         </a-button>
         <a-button type="default" @click="handleFormatSql" class="ml-10px">

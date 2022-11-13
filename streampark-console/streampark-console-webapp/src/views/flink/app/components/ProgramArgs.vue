@@ -29,37 +29,32 @@
       </Tooltip>
     </div>
     <div ref="programArgRef" :class="fullEditorClass" class="w-full program-box mt-5px"> </div>
-    <div class="relative flinksql-tool" v-if="!fullScreenStatus">
+    <ButtonGroup class="flinksql-tool" v-if="!fullScreenStatus">
       <a-button
         class="flinksql-tool-item"
         v-if="canReview"
+        type="primary"
         @click="emit('preview', value)"
         size="small"
       >
         <Icon icon="ant-design:eye-outlined" />
         {{ t('flink.app.flinkSql.preview') }}
       </a-button>
-      <a-button class="flinksql-tool-item" size="small" type="primary" @click="toggle">
-        <div class="flex items-center">
-          <Icon icon="ant-design:fullscreen-outlined" />
-          {{ t('layout.header.tooltipEntryFull') }}
-        </div>
+      <a-button class="flinksql-tool-item" size="small" :type="canReview?'default':'primary'" @click="toggle">
+        <Icon icon="ant-design:fullscreen-outlined" />
+        {{ t('layout.header.tooltipEntryFull') }}
       </a-button>
-    </div>
-    <div v-else class="text-right py-10px">
-      <a-button type="primary" v-if="canReview" @click="emit('preview', value)">
-        <div class="flex items-center">
-          <Icon icon="ant-design:eye-outlined" />
-          {{ t('flink.app.flinkSql.preview') }}
-        </div>
+    </ButtonGroup>
+    <ButtonGroup v-else class="flinksql-tool">
+      <a-button type="primary" class="flinksql-tool-item" v-if="canReview" @click="emit('preview', value)">
+        <Icon icon="ant-design:eye-outlined" />
+        {{ t('flink.app.flinkSql.preview') }}
       </a-button>
-      <a-button class="flinksql-tool-item" size="small" type="primary" @click="toggle">
-        <div class="flex items-center">
-          <Icon icon="ant-design:fullscreen-exit-outlined" />
-          {{ t('layout.header.tooltipExitFull') }}
-        </div>
+      <a-button class="flinksql-tool-item" size="small" :type="canReview?'default':'primary'" @click="toggle">
+        <Icon icon="ant-design:fullscreen-exit-outlined" />
+        {{ t('layout.header.tooltipExitFull') }}
       </a-button>
-    </div>
+    </ButtonGroup>
   </div>
 </template>
 <script lang="ts">
