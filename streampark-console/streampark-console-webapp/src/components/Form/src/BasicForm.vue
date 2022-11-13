@@ -280,7 +280,7 @@
 
       const formActionType: Partial<FormActionType> = {
         getFieldsValue,
-        setFieldsValue:setFieldsValue as any,
+        setFieldsValue: setFieldsValue as any,
         resetFields,
         updateSchema,
         resetSchema,
