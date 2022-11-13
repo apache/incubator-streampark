@@ -42,7 +42,7 @@
       <a-button class="flinksql-tool-item" size="small" type="primary" @click="toggle">
         <div class="flex items-center">
           <Icon icon="ant-design:fullscreen-outlined" />
-          {{ t('flink.app.flinkSql.fullScreen') }}
+          {{ t('layout.header.tooltipEntryFull') }}
         </div>
       </a-button>
     </div>
@@ -55,8 +55,8 @@
       </a-button>
       <a-button class="flinksql-tool-item" size="small" type="primary" @click="toggle">
         <div class="flex items-center">
-          <Icon icon="ant-design:fullscreen-outlined" />
-          {{ t('flink.app.flinkSql.fullScreen') }}
+          <Icon icon="ant-design:fullscreen-exit-outlined" />
+          {{ t('layout.header.tooltipExitFull') }}
         </div>
       </a-button>
     </div>
