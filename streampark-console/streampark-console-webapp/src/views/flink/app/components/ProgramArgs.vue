@@ -40,17 +40,32 @@
         <Icon icon="ant-design:eye-outlined" />
         {{ t('flink.app.flinkSql.preview') }}
       </a-button>
-      <a-button class="flinksql-tool-item" size="small" :type="canReview?'default':'primary'" @click="toggle">
+      <a-button
+        class="flinksql-tool-item"
+        size="small"
+        :type="canReview ? 'default' : 'primary'"
+        @click="toggle"
+      >
         <Icon icon="ant-design:fullscreen-outlined" />
         {{ t('layout.header.tooltipEntryFull') }}
       </a-button>
     </ButtonGroup>
     <ButtonGroup v-else class="flinksql-tool">
-      <a-button type="primary" class="flinksql-tool-item" v-if="canReview" @click="emit('preview', value)">
+      <a-button
+        type="primary"
+        class="flinksql-tool-item"
+        v-if="canReview"
+        @click="emit('preview', value)"
+      >
         <Icon icon="ant-design:eye-outlined" />
         {{ t('flink.app.flinkSql.preview') }}
       </a-button>
-      <a-button class="flinksql-tool-item" size="small" :type="canReview?'default':'primary'" @click="toggle">
+      <a-button
+        class="flinksql-tool-item"
+        size="small"
+        :type="canReview ? 'default' : 'primary'"
+        @click="toggle"
+      >
         <Icon icon="ant-design:fullscreen-exit-outlined" />
         {{ t('layout.header.tooltipExitFull') }}
       </a-button>
@@ -63,7 +78,7 @@
   };
 </script>
 <script lang="ts" setup>
-  import { Tooltip } from 'ant-design-vue';
+  import { Button, Tooltip } from 'ant-design-vue';
   import { FullscreenExitOutlined } from '@ant-design/icons-vue';
   import { computed, ref, toRefs, watchEffect } from 'vue';
   import { getMonacoOptions } from '../data';
@@ -72,6 +87,8 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMonaco } from '/@/hooks/web/useMonaco';
   const { t } = useI18n();
+  const ButtonGroup = Button.Group;
+
   const props = defineProps({
     value: {
       type: String,

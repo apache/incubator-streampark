@@ -45,7 +45,7 @@ export const searchFormSchema: FormSchema[] = [
     field: 'description',
     label: t('common.description'),
     component: 'Input',
-    componentProps: { placeholder: t('flink.variable.table.variableValuePlaceholder') },
+    componentProps: { placeholder: t('flink.variable.table.descriptionPlaceholder') },
     colProps: { span: 8 },
   },
 ];

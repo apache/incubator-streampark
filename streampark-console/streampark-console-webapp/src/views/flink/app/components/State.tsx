@@ -18,6 +18,7 @@
 import { defineComponent, toRefs, unref } from 'vue';
 import { Tag, Tooltip } from 'ant-design-vue';
 import './State.less';
+import { LaunchStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 
 /*  state map*/
 const stateMap = {
@@ -41,23 +42,39 @@ const stateMap = {
 };
 /*  option state map*/
 const optionStateMap = {
-  1: { color: '#1ABBDC', title: 'LAUNCHING', class: 'status-processing-deploying' },
-  2: { color: '#faad14', title: 'CANCELLING', class: 'status-processing-cancelling' },
-  3: { color: '#1AB58E', title: 'STARTING', class: 'status-processing-starting' },
-  4: { color: '#faad14', title: 'SAVEPOINT', class: 'status-processing-cancelling' },
+  [OptionStateEnum.LAUNCHING]: {
+    color: '#1ABBDC',
+    title: 'LAUNCHING',
+    class: 'status-processing-deploying',
+  },
+  [OptionStateEnum.CANCELLING]: {
+    color: '#faad14',
+    title: 'CANCELLING',
+    class: 'status-processing-cancelling',
+  },
+  [OptionStateEnum.STARTING]: {
+    color: '#1AB58E',
+    title: 'STARTING',
+    class: 'status-processing-starting',
+  },
+  [OptionStateEnum.SAVEPOINTING]: {
+    color: '#faad14',
+    title: 'SAVEPOINT',
+    class: 'status-processing-cancelling',
+  },
 };
 
 /* launch state map*/
 const launchStateMap = {
-  0: { color: '#52c41a', title: 'DONE' },
-  1: { color: '#fa8c16', title: 'WAITING' },
-  2: {
+  [LaunchStateEnum.DONE]: { color: '#52c41a', title: 'DONE' },
+  [LaunchStateEnum.NEED_LAUNCH]: { color: '#fa8c16', title: 'WAITING' },
+  [LaunchStateEnum.LAUNCHING]: {
     color: '#52c41a',
     title: 'LAUNCHING',
     class: 'status-processing-deploying',
   },
-  3: { color: '#fa8c16', title: 'PENDING' },
-  4: { color: '#fa8c16', title: 'WAITING' },
+  [LaunchStateEnum.NEED_RESTART]: { color: '#fa8c16', title: 'PENDING' },
+  [LaunchStateEnum.NEED_ROLLBACK]: { color: '#fa8c16', title: 'WAITING' },
 };
 launchStateMap[-1] = { color: '#f5222d', title: 'FAILED' };
 
@@ -129,7 +146,7 @@ export default defineComponent({
       });
     }
     const renderOtherOption = () => {
-      if ([4, 5, 6].includes(unref(data)?.state || unref(data)?.optionState === 4)) {
+      if ([4, 5, 6].includes(unref(data)?.state || unref(data)?.optionState == 4)) {
         return (
           <div class="task-tag">
             {unref(data).totalTask && (

@@ -98,6 +98,9 @@ export default {
     forgetPassword: 'Forget Password?',
     otherSignIn: 'Sign in with',
 
+    ldapTip: 'Sign in with LDAP',
+    passwordTip: 'Sign in with LDAP',
+
     // notify
     loginSuccessTitle: 'Login successful',
     loginSuccessDesc: 'Welcome back',
@@ -105,6 +108,7 @@ export default {
     // placeholder
     accountPlaceholder: 'Please input username',
     passwordPlaceholder: 'Please input password',
+    confirmPasswordPlaceholder: 'Please input confirm password',
     smsPlaceholder: 'Please input sms code',
     mobilePlaceholder: 'Please input mobile',
     policyPlaceholder: 'Register after checking',
@@ -119,5 +123,10 @@ export default {
   },
   permission: {
     noPermission: 'No permission, please contact the administrator',
+  },
+  modifyPassword: {
+    title: 'Change Password',
+    success: 'The password has been changed successfully, and you are about to exit the system',
+    logout: 'Immediate exit',
   },
 };

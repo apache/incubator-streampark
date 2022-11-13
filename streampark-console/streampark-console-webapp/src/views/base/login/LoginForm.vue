@@ -119,12 +119,12 @@
   });
 
   const loginText = computed(() => {
-    const localText = 'Sign in';
-    const ldapText = 'Sign in with LDAP';
+    const localText = t('sys.login.loginButton');
+    const ldapText = t('sys.login.ldapTip');
     if (loginType.value === LoginTypeEnum.LOCAL) {
-      return { buttonText: localText, linkText: 'Sign in with LDAP' };
+      return { buttonText: localText, linkText: t('sys.login.ldapTip') };
     }
-    return { buttonText: ldapText, linkText: 'Sign in with password' };
+    return { buttonText: ldapText, linkText: t('sys.login.passwordTip') };
   });
 
   const { validForm } = useFormValid(formRef);

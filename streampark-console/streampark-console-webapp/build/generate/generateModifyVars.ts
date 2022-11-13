@@ -50,6 +50,5 @@ export function generateModifyVars(dark = false) {
     'border-radius-sm': '2px',
     'link-color': primary, //   Link color
     'app-content-background': '#f9fafc', //   Link color
-    'shadow-color': '#e4e8f0', //   Link color
   };
 }

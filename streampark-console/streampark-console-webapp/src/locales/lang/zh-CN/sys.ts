@@ -92,6 +92,9 @@ export default {
     forgetPassword: '忘记密码?',
     otherSignIn: '其他登录方式',
 
+    ldapTip: '通过LDAP登录',
+    passwordTip: '通过密码登录',
+
     // notify
     loginSuccessTitle: '登录成功',
     loginSuccessDesc: '欢迎回来',
@@ -99,6 +102,7 @@ export default {
     // placeholder
     accountPlaceholder: '请输入账号',
     passwordPlaceholder: '请输入密码',
+    confirmPasswordPlaceholder: '请输入确认密码',
     smsPlaceholder: '请输入验证码',
     mobilePlaceholder: '请输入手机号码',
     policyPlaceholder: '勾选后才能注册',
@@ -113,5 +117,10 @@ export default {
   },
   permission: {
     noPermission: '没有权限，请联系管理员',
+  },
+  modifyPassword: {
+    title: '修改密码',
+    success: '密码已成功更改,您即将退出系统',
+    logout: '立即退出',
   },
 };

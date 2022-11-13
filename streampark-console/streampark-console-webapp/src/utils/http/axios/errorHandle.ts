@@ -25,7 +25,6 @@ export function errorHandler(response: AxiosResponse<any>) {
   const { Swal, notification } = useMessage();
   const { t } = useI18n();
   const stp = projectSetting.sessionTimeoutProcessing;
-
   if (response) {
     switch (response?.data?.code) {
       case 501:
@@ -68,16 +67,18 @@ export function errorHandler(response: AxiosResponse<any>) {
           case 401:
             const userStore = useUserStore();
             userStore.setToken(undefined);
-            notification.warn({
-              message:
-                "Sorry, you can't access. May be because you don't have permissions or the Sign In is invalid",
-              duration: 4,
-            });
             if (stp === SessionTimeoutProcessingEnum.PAGE_COVERAGE) {
               userStore.setSessionTimeout(true);
             } else {
               userStore.logout(true);
             }
+            setTimeout(() => {
+              notification.warn({
+                message:
+                  "Sorry, you can't access. May be because you don't have permissions or the Sign In is invalid",
+                duration: 4,
+              });
+            }, 500);
             break;
           default:
             notification.error({
