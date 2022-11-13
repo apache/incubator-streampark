@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -65,8 +66,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
 
     @Override
     @Transactional
-    public void deleteByUserIds(String[] userIds) {
-        Arrays.stream(userIds).forEach(id -> baseMapper.deleteByUserId(Long.valueOf(id)));
+    public void deleteByUserId(Long userId) {
+        baseMapper.deleteByUserId(userId);
     }
 
     @Override
@@ -119,11 +120,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
     @Override
     public void createMember(Member member) {
         User user = Optional.ofNullable(userService.findByName(member.getUserName()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", member.getUserName())));
+            .orElseThrow(() -> new ApiAlertException(String.format("The username [%s] not found", member.getUserName())));
         Optional.ofNullable(roleService.getById(member.getRoleId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The roleId [%s] not found", member.getRoleId())));
+            .orElseThrow(() -> new ApiAlertException(String.format("The roleId [%s] not found", member.getRoleId())));
         Team team = Optional.ofNullable(teamService.getById(member.getTeamId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The teamId [%s] not found", member.getTeamId())));
+            .orElseThrow(() -> new ApiAlertException(String.format("The teamId [%s] not found", member.getTeamId())));
         AssertUtils.isTrue(findByUserId(member.getTeamId(), user.getUserId()) == null,
             String.format("The user [%s] has been added the team [%s], please don't add it again.", member.getUserName(),
                 team.getTeamName()));
@@ -136,18 +137,21 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
     }
 
     @Override
-    public void deleteMember(Member member) {
+    public void deleteMember(Member memberArg) {
+        Member member = Optional.ofNullable(this.getById(memberArg.getId()))
+            .orElseThrow(() -> new ApiAlertException(String.format("The member [id=%s] not found", memberArg.getId())));
         this.removeById(member);
+        userService.unbindTeam(member.getUserId(), member.getTeamId());
     }
 
     @Override
     public void updateMember(Member member) {
         Member oldMember = Optional.ofNullable(this.getById(member.getId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The mapping [id=%s] not found", member.getId())));
+            .orElseThrow(() -> new ApiAlertException(String.format("The member [id=%s] not found", member.getId())));
         AssertUtils.isTrue(oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
         AssertUtils.isTrue(oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
         Optional.ofNullable(roleService.getById(member.getRoleId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The roleId [%s] not found", member.getRoleId())));
+            .orElseThrow(() -> new ApiAlertException(String.format("The roleId [%s] not found", member.getRoleId())));
         oldMember.setRoleId(member.getRoleId());
         updateById(oldMember);
     }

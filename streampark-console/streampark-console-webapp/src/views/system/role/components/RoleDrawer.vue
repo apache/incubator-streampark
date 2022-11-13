@@ -160,7 +160,7 @@
           const values = await validate();
           // First, a simple judgment, does not contain app:view (home) this permission, the error is reported
           if (selectedKeysAndHalfCheckedKeys.value.indexOf('100067') < 0) {
-            createMessage.warning(t('system.role.form.validite'));
+            createMessage.warning(t('system.role.form.noViewPermission'));
             return;
           }
           setDrawerProps({ confirmLoading: true });

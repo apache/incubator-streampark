@@ -29,7 +29,7 @@ export interface FlinkCluster {
   options: string;
   yarnQueue: string;
   k8sHadoopIntegration: boolean;
-  properties: string;
+  dynamicProperties: string;
   k8sRestExposedType: number;
   flameGraph: boolean;
   k8sConf?: any;

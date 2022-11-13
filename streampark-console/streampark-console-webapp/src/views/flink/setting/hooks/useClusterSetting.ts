@@ -20,7 +20,7 @@ import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, onMounted, reactive, ref, unref } from 'vue';
 import { k8sRestExposedType, resolveOrder } from '../../app/data';
 import {
-  renderProperties,
+  renderDynamicProperties,
   renderInputDropdown,
   renderOptionsItems,
   renderTotalMemory,
@@ -308,11 +308,11 @@ export const useClusterSetting = () => {
           renderOptionsItems(model, 'tmOptions', field, 'taskmanager.memory.'),
       },
       {
-        field: 'properties',
-        label: 'Properties',
+        field: 'dynamicProperties',
+        label: 'Dynamic Properties',
         ifShow: ({ values }) => isSessionMode(values.executionMode),
         component: 'Input',
-        render: (renderCallbackParams) => renderProperties(renderCallbackParams),
+        render: (renderCallbackParams) => renderDynamicProperties(renderCallbackParams),
       },
       {
         field: 'description',
@@ -344,7 +344,7 @@ export const useClusterSetting = () => {
         Object.assign(params, {
           options: JSON.stringify(options),
           yarnQueue: handleYarnQueue(values),
-          properties: values.properties,
+          dynamicProperties: values.dynamicProperties,
           resolveOrder: values.resolveOrder,
           address: values.address,
           flameGraph: values.flameGraph,
@@ -353,7 +353,7 @@ export const useClusterSetting = () => {
       case 5:
         Object.assign(params, {
           options: JSON.stringify(options),
-          properties: values.properties,
+          dynamicProperties: values.dynamicProperties,
           resolveOrder: values.resolveOrder,
           k8sRestExposedType: values.k8sRestExposedType,
           k8sNamespace: values.k8sNamespace || null,

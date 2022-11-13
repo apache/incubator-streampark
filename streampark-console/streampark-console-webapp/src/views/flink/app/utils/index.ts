@@ -261,7 +261,7 @@ export function handleSubmitParams(
     cpMaxFailureInterval: values.checkPointFailure?.cpMaxFailureInterval || null,
     cpFailureRateInterval: values.checkPointFailure?.cpFailureRateInterval || null,
     cpFailureAction: values.checkPointFailure?.cpFailureAction || null,
-    properties: values.properties || null,
+    dynamicProperties: values.dynamicProperties || null,
     resolveOrder: values.resolveOrder,
     k8sRestExposedType: values.k8sRestExposedType,
     restartSize: values.restartSize,

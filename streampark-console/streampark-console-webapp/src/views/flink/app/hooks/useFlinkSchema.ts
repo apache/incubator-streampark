@@ -32,7 +32,7 @@ import { fetchAlertSetting } from '/@/api/flink/setting/alert';
 
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import {
-  renderProperties,
+  renderDynamicProperties,
   renderInputDropdown,
   renderInputGroup,
   renderTotalMemory,
@@ -346,10 +346,10 @@ export const useFlinkSchema = (editModel?: string) => {
       ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
     },
     {
-      field: 'properties',
-      label: 'Properties',
+      field: 'dynamicProperties',
+      label: 'Dynamic Properties',
       component: 'Input',
-      render: (renderCallbackParams) => renderProperties(renderCallbackParams),
+      render: (renderCallbackParams) => renderDynamicProperties(renderCallbackParams),
     },
     {
       field: 'args',

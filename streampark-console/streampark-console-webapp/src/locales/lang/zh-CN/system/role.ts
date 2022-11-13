@@ -25,7 +25,7 @@ export default {
     edit: '编辑角色',
     delete: '删除角色',
     view: '查看角色',
-    validite: '必须要包含application下的view权限',
+    noViewPermission: '必须要包含Application下的view权限',
     roleNameLen: '角色名称不应超过 255 个字符',
     exist: '角色名已存在',
     empty: '角色名不能为空',

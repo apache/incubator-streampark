@@ -98,7 +98,7 @@ export const useAppTableAction = (
       {
         tooltip: { title: t('flink.app.tableAction.detail') },
         auth: 'app:detail',
-        icon: 'ant-design:eye-outlined',
+        icon: 'carbon:data-view-alt',
         onClick: handleDetail.bind(null, record),
       },
       {
@@ -226,22 +226,22 @@ export const useAppTableAction = (
       },
       schemas: [
         {
-          label: t('flink.app.table.tags'),
+          label: t('flink.app.tags'),
           field: 'tags',
           component: 'Select',
           componentProps: {
-            placeholder: t('flink.app.table.tags'),
+            placeholder: t('flink.app.tags'),
             showSearch: true,
             options: tagsOptions.value.map((t: Recordable) => ({ label: t, value: t })),
             onChange: handlePageDataReload.bind(null, false),
           },
         },
         {
-          label: t('flink.app.table.owner'),
+          label: t('flink.app.owner'),
           field: 'userId',
           component: 'Select',
           componentProps: {
-            placeholder: t('flink.app.table.owner'),
+            placeholder: t('flink.app.owner'),
             showSearch: true,
             options: users.value.map((u: Recordable) => {
               return { label: u.nickName || u.username, value: u.userId };
@@ -250,11 +250,11 @@ export const useAppTableAction = (
           },
         },
         {
-          label: t('flink.app.table.jobType'),
+          label: t('flink.app.jobType'),
           field: 'jobType',
           component: 'Select',
           componentProps: {
-            placeholder: t('flink.app.table.jobType'),
+            placeholder: t('flink.app.jobType'),
             showSearch: true,
             options: [
               { label: 'JAR', value: JobTypeEnum.JAR },
@@ -264,11 +264,11 @@ export const useAppTableAction = (
           },
         },
         {
-          label: t('flink.app.table.searchName'),
+          label: t('flink.app.searchName'),
           field: 'jobName',
           component: 'InputSearch',
           componentProps: {
-            placeholder: t('flink.app.table.searchName'),
+            placeholder: t('flink.app.searchName'),
             onChange: handlePageDataReload.bind(null, false),
             onSearch: handlePageDataReload.bind(null, false),
           },

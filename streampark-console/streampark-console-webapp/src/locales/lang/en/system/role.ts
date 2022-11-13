@@ -25,7 +25,7 @@ export default {
     edit: 'Edit Role',
     delete: 'Delete Role',
     view: 'View Role',
-    validite: 'You must include the view permission under application',
+    noViewPermission: 'You must include the view permission under application',
     roleNameLen: 'Role name should not be longer than 255 characters',
     exist: 'Sorry, the role name already exists',
     empty: 'Role name cannot be empty',

@@ -71,11 +71,11 @@ public interface UserService extends IService<User> {
     void updateUser(User user) throws Exception;
 
     /**
-     * delete user list
+     * delete user
      *
-     * @param userIds user id list
+     * @param userId user id
      */
-    void deleteUsers(String[] userIds) throws Exception;
+    void deleteUser(Long userId) throws Exception;
 
     /**
      * update user
@@ -119,6 +119,8 @@ public interface UserService extends IService<User> {
     List<User> getNoTokenUser();
 
     void setLatestTeam(Long teamId, Long userId);
+
+    void unbindTeam(Long userId, Long teamId);
 
     void fillInTeam(User user);
 

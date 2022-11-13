@@ -33,4 +33,7 @@ public interface UserMapper extends BaseMapper<User> {
     List<User> getNoTokenUser();
 
     List<User> findByAppOwner(@Param("teamId") Long teamId);
+
+    void unbindTeam(@Param("userId") Long userId);
+
 }

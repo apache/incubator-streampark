@@ -76,8 +76,9 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     if (value) {
       const isProp = value.endsWith('.properties');
       const isYaml = value.endsWith('.yaml') || value.endsWith('.yml');
-      if (!isProp && !isYaml) {
-        return Promise.reject('The configuration file must be (.properties|.yaml|.yml)');
+      const isConf = value.endsWith('.conf');
+      if (!isProp && !isYaml && !isConf) {
+        return Promise.reject('The configuration file must be (.properties|.yaml|.yml |.conf)');
       } else {
         return Promise.resolve();
       }
@@ -89,11 +90,11 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     return [
       {
         field: 'jobType',
-        label: t('flink.app.table.developmentMode'),
+        label: t('flink.app.developmentMode'),
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {
-            placeholder: t('flink.app.addApplicationTips.developmentModePlaceholder'),
+            placeholder: t('flink.app.addAppTips.developmentModePlaceholder'),
             options: getJobTypeOptions(),
             onChange: (value) => {
               if (value === 'sql') {
@@ -105,14 +106,16 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         defaultValue: 'sql',
-        rules: [{ required: true, message: t('flink.app.addApplicationTips.developmentModeIsRequiredMessage') }],
+        rules: [
+          { required: true, message: t('flink.app.addAppTips.developmentModeIsRequiredMessage') },
+        ],
       },
       {
         field: 'executionMode',
-        label: t('flink.app.table.executionMode'),
+        label: t('flink.app.executionMode'),
         component: 'Select',
         componentProps: {
-          placeholder: t('flink.app.addApplicationTips.executionModePlaceholder'),
+          placeholder: t('flink.app.addAppTips.executionModePlaceholder'),
           options: executionModes,
         },
         dynamicRules: () => {
@@ -121,16 +124,14 @@ export const useCreateSchema = (dependencyRef: Ref) => {
               required: true,
               validator: async (_rule, value) => {
                 if (value === null || value === undefined || value === '') {
-                  return Promise.reject(t('flink.app.addApplicationTips.executionModeIsRequiredMessage'));
+                  return Promise.reject(t('flink.app.addAppTips.executionModeIsRequiredMessage'));
                 } else {
                   if ([2, 3, 4].includes(value)) {
                     const res = await fetchCheckHadoop();
                     if (res) {
                       return Promise.resolve();
                     } else {
-                      return Promise.reject(
-                        t('flink.app.addApplicationTips.hadoopEnvInitiMessage'),
-                      );
+                      return Promise.reject(t('flink.app.addAppTips.hadoopEnvInitMessage'));
                     }
                   }
                   return Promise.resolve();
@@ -144,36 +145,36 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       ...getFlinkSqlSchema.value,
       {
         field: 'resourceFrom',
-        label: t('flink.app.table.resourceFrom'),
+        label: t('flink.app.resourceFrom'),
         component: 'Select',
         render: ({ model }) => renderResourceFrom(model),
-        rules: [{ required: true, message: t('flink.app.addApplicationTips.resourceFromMessage') }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.resourceFromMessage') }],
         show: ({ values }) => values?.jobType != 'sql',
       },
       {
         field: 'uploadJobJar',
-        label: t('flink.app.table.uploadJobJar'),
+        label: t('flink.app.uploadJobJar'),
         component: 'Select',
         slot: 'uploadJobJar',
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
       },
       {
         field: 'mainClass',
-        label: t('flink.app.table.mainClass'),
+        label: t('flink.app.mainClass'),
         component: 'Input',
-        componentProps: { placeholder: t('flink.app.addApplicationTips.mainClassPlaceholder') },
+        componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
-        rules: [{ required: true, message: t('flink.app.addApplicationTips.mainClassIsRequiredMessage') }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
         field: 'project',
-        label: t('flink.app.table.project'),
+        label: t('flink.app.project'),
         component: 'Select',
         componentProps: {
           showSearch: true,
           optionFilterProp: 'children',
           filterOption,
-          placeholder: t('flink.app.addApplicationTips.projectPlaceholder'),
+          placeholder: t('flink.app.addAppTips.projectPlaceholder'),
           fieldNames: { label: 'name', value: 'id', options: 'options' },
           options: unref(projectList),
           onChange: (value: string) => {
@@ -185,18 +186,18 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           },
         },
         ifShow: ({ values }) => values?.jobType != 'sql' && values.resourceFrom != 'upload',
-        rules: [{ required: true, message: t('flink.app.addApplicationTips.projectIsRequiredMessage') }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.projectIsRequiredMessage') }],
       },
       {
         field: 'module',
-        label: t('flink.app.table.module'),
+        label: t('flink.app.module'),
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {
             showSearch: true,
             optionFilterProp: 'children',
             filterOption,
-            placeholder: t('flink.app.addApplicationTips.projectModulePlaceholder'),
+            placeholder: t('flink.app.addAppTips.projectModulePlaceholder'),
             options: unref(moduleList),
             onChange: () => {
               Object.assign(formModel, {
@@ -208,15 +209,15 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) => values?.jobType != 'sql' && values?.resourceFrom != 'upload',
-        rules: [{ required: true, message: t('flink.app.addApplicationTips.projectIsRequiredMessage') }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.projectIsRequiredMessage') }],
       },
       {
         field: 'appType',
-        label: t('flink.app.table.appType'),
+        label: t('flink.app.appType'),
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {
-            placeholder: t('flink.app.addApplicationTips.applicationTypePlaceholder'),
+            placeholder: t('flink.app.addAppTips.appTypePlaceholder'),
             options: [
               { label: 'StreamPark Flink', value: '1' },
               { label: 'Apache Flink', value: '2' },
@@ -237,7 +238,9 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom !== 'upload',
-        dynamicRules: () => [{ required: true, message: t('flink.app.addApplicationTips.applicationTypeIsRequiredMessage') }],
+        dynamicRules: () => [
+          { required: true, message: t('flink.app.addAppTips.appTypeIsRequiredMessage') },
+        ],
       },
       {
         field: 'jar',
@@ -245,7 +248,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {
-            placeholder: t('flink.app.addApplicationTips.applicationTypePlaceholder'),
+            placeholder: t('flink.app.addAppTips.appTypePlaceholder'),
             options: unref(jars).map((i) => ({ label: i, value: i })),
             onChange: (value) => {
               fetchMain({
@@ -260,20 +263,20 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         },
         ifShow: ({ values }) =>
           values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == '2',
-        rules: [{ required: true, message: t('flink.app.addApplicationTips.programJarIsRequiredMessage') }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.programJarIsRequiredMessage') }],
       },
       {
         field: 'mainClass',
-        label: t('flink.app.table.mainClass'),
+        label: t('flink.app.mainClass'),
         component: 'Input',
-        componentProps: { placeholder: t('flink.app.addApplicationTips.mainClassPlaceholder') },
+        componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
         ifShow: ({ values }) =>
           values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == '2',
-        rules: [{ required: true, message: t('flink.app.addApplicationTips.mainClassIsRequiredMessage') }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
         field: 'config',
-        label: t('flink.app.table.applicationConf'),
+        label: t('flink.app.appConf'),
         component: 'ApiTreeSelect',
         componentProps: ({ formModel }) => {
           return {
@@ -298,7 +301,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       {
         field: 'useSysHadoopConf',
-        label: t('flink.app.addApplicationTips.useSysHadoopConf'),
+        label: t('flink.app.addAppTips.useSysHadoopConf'),
         component: 'Switch',
         slot: 'useSysHadoopConf',
         defaultValue: false,
