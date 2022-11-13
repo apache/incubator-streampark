@@ -134,7 +134,7 @@ export default {
     appidCheck: 'appid can not be empty',
     sqlCheck: 'SQL check error',
   },
-  tableAction: {
+  operation: {
     edit: 'Edit Application',
     launch: 'Launch Application',
     launchDetail: 'Launching Progress Detail',

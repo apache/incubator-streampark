@@ -21,7 +21,7 @@
 </script>
 <script setup lang="ts" name="DependApp">
   import { useRoute, useRouter } from 'vue-router';
-  import { fetchDependApps } from '/@/api/system/variable';
+  import { fetchDependApps } from '/@/api/flink/variable';
   import Icon from '/@/components/Icon';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTable, useTable } from '/@/components/Table';
@@ -30,7 +30,7 @@
   const route = useRoute();
   const router = useRouter();
   const [registerTable] = useTable({
-    title: t('system.variable.depend.title'),
+    title: t('flink.variable.depend.title'),
     api: fetchDependApps,
     canResize: false,
     showIndexColumn: false,
@@ -43,8 +43,8 @@
       return params;
     },
     columns: [
-      { title: t('system.variable.depend.jobName'), dataIndex: 'jobName', width: 500 },
-      { title: t('system.variable.depend.nickName'), dataIndex: 'nickName' },
+      { title: t('flink.variable.depend.jobName'), dataIndex: 'jobName', width: 500 },
+      { title: t('flink.variable.depend.nickName'), dataIndex: 'nickName' },
       { title: t('common.createTime'), dataIndex: 'createTime' },
     ],
   });
@@ -62,7 +62,7 @@
         <Icon icon="ant-design:arrow-left-outlined" />
       </a-button>
       <span class="app-bar">
-        {{ t('system.variable.depend.headerTitle', [route.query.id]) }}
+        {{ t('flink.variable.depend.headerTitle', [route.query.id]) }}
       </span>
     </div>
     <BasicTable @register="registerTable" />

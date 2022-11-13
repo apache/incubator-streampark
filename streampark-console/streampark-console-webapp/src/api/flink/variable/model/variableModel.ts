@@ -42,3 +42,10 @@ export interface VariableDeleteParam {
   variableValue: string;
   teamId: string;
 }
+
+export interface BasicTableParams {
+  page: number;
+  pageSize: number;
+  teamId: string;
+  [key: string]: Nullable<string | number>;
+}

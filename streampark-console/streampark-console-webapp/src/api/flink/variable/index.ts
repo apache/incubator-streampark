@@ -17,8 +17,7 @@
 import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
 import { Result } from '/#/axios';
-import { BasicTableParams } from '../model/baseModel';
-import { VariableDeleteParam, VariableListRecord, VariableParam } from './model/variableModel';
+import { BasicTableParams, VariableDeleteParam, VariableListRecord, VariableParam } from './model/variableModel';
 
 enum VARIABLE_API {
   PAGE = '/variable/page',

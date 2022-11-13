@@ -47,8 +47,8 @@
     fetchCheckVariableCode,
     fetchUpdateVariable,
     fetchVariableInfo,
-  } from '/@/api/system/variable';
-  import { VariableListRecord } from '/@/api/system/model/variableModel';
+  } from '/@/api/flink/variable';
+  import { VariableListRecord } from '/@/api/flink/variable/model/variableModel';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -65,11 +65,11 @@
       setValidateStatus('validating');
       if (value.length < 3 || value.length > 50) {
         setValidateStatus('error');
-        setHelp(t('system.variable.form.len'));
+        setHelp(t('flink.variable.form.len'));
         return Promise.reject();
       } else if (!new RegExp(/^([A-Za-z])+([A-Za-z0-9._-])+$/).test(value)) {
         setValidateStatus('error');
-        setHelp(t('system.variable.form.regExp'));
+        setHelp(t('flink.variable.form.regExp'));
       } else {
         const { data } = await fetchCheckVariableCode({
           variableCode: value,
@@ -84,13 +84,13 @@
           return Promise.resolve();
         } else {
           setValidateStatus('error');
-          setHelp(t('system.variable.form.exists'));
+          setHelp(t('flink.variable.form.exists'));
           return Promise.reject();
         }
       }
     } else {
       setValidateStatus('error');
-      setHelp(t('system.variable.form.empty'));
+      setHelp(t('flink.variable.form.empty'));
       return Promise.reject();
     }
   }
@@ -99,7 +99,7 @@
     return [
       {
         field: 'variableCode',
-        label: t('system.variable.table.variableCode'),
+        label: t('flink.variable.table.variableCode'),
         component: 'Input',
         componentProps: { disabled: unref(isUpdate), onblur: handleVariableCodeBlur },
         itemProps: getItemProp.value,
@@ -107,7 +107,7 @@
       },
       {
         field: 'variableValue',
-        label: t('system.variable.table.variableValue'),
+        label: t('flink.variable.table.variableValue'),
         component: 'InputTextArea',
         componentProps: { rows: 4, placeholder: 'Please enter Variable Value' },
         rules: [{ required: true, message: 'please enter Variable Value' }],
@@ -117,11 +117,11 @@
         label: t('common.description'),
         component: 'InputTextArea',
         componentProps: { rows: 4 },
-        rules: [{ max: 100, message: t('system.variable.form.descriptionMessage') }],
+        rules: [{ max: 100, message: t('flink.variable.form.descriptionMessage') }],
       },
       {
         field: 'desensitization',
-        label: t('system.variable.form.desensitization'),
+        label: t('flink.variable.form.desensitization'),
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
@@ -131,7 +131,7 @@
         afterItem: h(
           'span',
           { class: 'conf-switch' },
-          t('system.variable.form.desensitizationDesc'),
+          t('flink.variable.form.desensitizationDesc'),
         ),
       },
     ];
@@ -178,7 +178,7 @@
   );
 
   const getTitle = computed(() =>
-    !unref(isUpdate) ? t('system.variable.addVariable') : t('system.variable.modifyVariable'),
+    !unref(isUpdate) ? t('flink.variable.addVariable') : t('flink.variable.modifyVariable'),
   );
   // form submit
   async function handleSubmit() {

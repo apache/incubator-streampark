@@ -40,7 +40,7 @@
   import { Description, DescItem } from '/@/components/Description';
   import Icon from '/@/components/Icon';
   import { useDrawerInner, BasicDrawer } from '/@/components/Drawer';
-  import { fetchVariableInfo } from '/@/api/system/variable';
+  import { fetchVariableInfo } from '/@/api/flink/variable';
   import { usePermission } from '/@/hooks/web/usePermission';
 
   const variableInfo = ref<Recordable>({});
