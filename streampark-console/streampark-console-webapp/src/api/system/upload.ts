@@ -31,7 +31,7 @@ export function uploadApi(
   return defHttp.uploadFile<UploadApiResult>(
     {
       url: uploadUrl,
-      onUploadProgress,
+      onUploadProgress: onUploadProgress as any,
     },
     params,
   );

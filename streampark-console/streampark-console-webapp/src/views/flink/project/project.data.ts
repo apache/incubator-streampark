@@ -14,14 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export enum BuildStatusEnum {
-  All = ' ',
-  NotBuild = '-1',
-  Building = '0',
-  BuildSuccess = '1',
-  BuildFail = '2',
-  NeedBuild = '-2',
-}
+
+import { BuildStateEnum } from '/@/enums/flinkEnum';
 
 interface Status {
   label?: string;
@@ -29,23 +23,23 @@ interface Status {
 }
 
 export const statusList: Status[] = [
-  { label: 'All', key: BuildStatusEnum.All },
-  { label: 'Not Build', key: BuildStatusEnum.NotBuild },
-  { label: 'Building', key: BuildStatusEnum.Building },
-  { label: 'Build Success', key: BuildStatusEnum.BuildSuccess },
-  { label: 'Build Failed', key: BuildStatusEnum.BuildFail },
+  { label: 'All', key: '' },
+  { label: 'Not Build', key: String(BuildStateEnum.NOT_BUDIL) },
+  { label: 'Building', key: String(BuildStateEnum.BUILDING) },
+  { label: 'Build Success', key: String(BuildStateEnum.SUCCESSFUL) },
+  { label: 'Build Failed', key: String(BuildStateEnum.FAILED) },
 ];
 
 export const buildStateMap = {
-  [BuildStatusEnum.NotBuild]: { color: '#C0C0C0', label: 'NOT BUILD' },
-  [BuildStatusEnum.NeedBuild]: { color: '#FFA500', label: 'NEED REBUILD' },
-  [BuildStatusEnum.Building]: {
+  [String(BuildStateEnum.NOT_BUDIL)]: { color: '#C0C0C0', label: 'NOT BUILD' },
+  [String(BuildStateEnum.NEED_REBUILD)]: { color: '#FFA500', label: 'NEED REBUILD' },
+  [String(BuildStateEnum.BUILDING)]: {
     color: '#1AB58E',
     label: 'BUILDING',
     className: 'status-processing-building',
   },
-  [BuildStatusEnum.BuildSuccess]: { color: '#52c41a', label: 'SUCCESSFUL' },
-  [BuildStatusEnum.BuildFail]: { color: '#f5222d', label: 'FAILED' },
+  [String(BuildStateEnum.SUCCESSFUL)]: { color: '#52c41a', label: 'SUCCESSFUL' },
+  [String(BuildStateEnum.FAILED)]: { color: '#f5222d', label: 'FAILED' },
 };
 
 export enum ProjectType {

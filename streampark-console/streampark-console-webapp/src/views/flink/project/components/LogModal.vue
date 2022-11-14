@@ -101,7 +101,7 @@
   >
     <template #title>
       <Icon icon="ant-design:code-outlined" style="color: #477de9" />&nbsp;
-      <span>{{ project.projectName }} build Log </span>
+      <span>{{ project.projectName }} Build Log </span>
     </template>
     <div ref="logRef" class="h-full min-h-500px"></div>
     <template #footer>

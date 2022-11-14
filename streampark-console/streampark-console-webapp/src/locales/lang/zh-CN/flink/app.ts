@@ -192,7 +192,8 @@ export default {
     appNameNotUniqueMessage: '作业名称必须唯一, 输入的作业名称已经存在',
     appNameExistsInYarnMessage: '应用程序名称已经在YARN集群中存在，不能重复。请检查',
     appNameExistsInK8sMessage: '该应用程序名称已经在K8S集群中存在，不能重复。请检查',
-    appNameNotValid: '应用程序名称无效。字符必须是(中文|英文|"-"|"_")，不能出现两个连续的空格，请检查',
+    appNameNotValid:
+      '应用程序名称无效。字符必须是(中文|英文|"-"|"_")，不能出现两个连续的空格，请检查',
     tagsPlaceholder: '请输入标签，如果超过一个，用逗号（，）分隔',
     parallelismPlaceholder: '运行程序的并行度',
     slotsOfPerTaskManagerPlaceholder: '每个TaskManager的插槽数',

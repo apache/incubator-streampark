@@ -27,7 +27,8 @@ export default {
     variableCode: 'Variable Code',
     variableCodePlaceholder: 'Please enter the variable code to search',
     variableValue: 'Variable Value',
-    variableValuePlaceholder: 'Please enter description to search',
+    variableValuePlaceholder: 'Please enter Variable Value',
+    descriptionPlaceholder: 'Please enter description to search',
     depend: 'depend apps',
   },
   form: {

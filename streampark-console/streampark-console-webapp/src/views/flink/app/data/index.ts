@@ -16,7 +16,7 @@
  */
 import { dateToDuration } from '/@/utils/dateUtil';
 import { BasicColumn } from '/@/components/Table';
-import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { ExecModeEnum, LaunchStateEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 
@@ -124,9 +124,10 @@ export const cpTriggerAction = [
   { label: 'alert', value: 1 },
   { label: 'restart', value: 2 },
 ];
-export const launchTitleMap = new Map();
-launchTitleMap.set(-1, 'launch failed');
-launchTitleMap.set(1, 'current job need relaunch');
-launchTitleMap.set(2, 'launching');
-launchTitleMap.set(3, 'launch finished,need restart');
-launchTitleMap.set(4, 'application is rollbacked,need relaunch');
+export const launchTitleMap = {
+  [LaunchStateEnum.FAILED]: 'launch failed',
+  [LaunchStateEnum.NEED_LAUNCH]: 'current job need relaunch',
+  [LaunchStateEnum.LAUNCHING]: 'launching',
+  [LaunchStateEnum.NEED_RESTART]: 'launch finished,need restart',
+  [LaunchStateEnum.NEED_ROLLBACK]: 'application is rollbacked,need relaunch',
+};

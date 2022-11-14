@@ -45,7 +45,6 @@
       const isFullscreen = computed(() => {
         return table.tableFullScreen.value;
       });
-      console.log('isFullscreen', isFullscreen);
       function toggle() {
         table.tableFullScreen.value = !isFullscreen.value;
       }

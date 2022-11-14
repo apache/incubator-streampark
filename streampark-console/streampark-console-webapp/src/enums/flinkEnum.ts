@@ -14,11 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export enum BuildEnum {
-  NOT_BUDIL = -1,
+
+export enum BuildStateEnum {
+  /** has changed, need rebuild */
   NEED_REBUILD = -2,
+  /** has cancelled, not build */
+  NOT_BUDIL = -1,
+  /** building */
   BUILDING = 0,
+  /** build successful */
   SUCCESSFUL = 1,
+  /** build failed  */
   FAILED = 2,
 }
 /* ExecutionMode  */
@@ -51,3 +57,39 @@ export const executionMap = {
   /**6. kubernetes application */
   KUBERNETES_APPLICATION: ExecModeEnum.KUBERNETES_APPLICATION,
 };
+
+export enum LaunchStateEnum {
+  /** launch failed */
+  FAILED = -1,
+  /** launch done */
+  DONE = 0,
+  /** need relaunch after modify task */
+  NEED_LAUNCH = 1,
+  /** launching */
+  LAUNCHING = 2,
+  /** launch complete, need restart */
+  NEED_RESTART = 3,
+  /**  need rollback */
+  NEED_ROLLBACK = 4,
+  /**
+   * project has changed, need to check the jar whether to be re-selected
+   */
+  NEED_CHECK = 5,
+  /**
+   * revoked
+   */
+  REVOKED = 10,
+}
+
+export enum OptionStateEnum {
+  /**  Application which is currently action: none. */
+  NONE = 0,
+  /** Application which is currently action: deploying. */
+  LAUNCHING = 1,
+  /** Application which is currently action: cancelling. */
+  CANCELLING = 2,
+  /** Application which is currently action: starting. */
+  STARTING = 3,
+  /** Application which is currently action: savepointing. */
+  SAVEPOINTING = 4,
+}
