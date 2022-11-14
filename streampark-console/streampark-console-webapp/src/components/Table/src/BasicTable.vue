@@ -364,13 +364,13 @@
   });
 </script>
 <style lang="less">
-  @border-color: #cecece4d;
+  @border-color-dark: #303030;
 
   @prefix-cls: ~'@{namespace}-basic-table';
 
   .table-radius {
     box-shadow: 0 2px 3px #e4e8f0;
-    border-radius: 5px;
+    border-radius: 4px;
   }
 
   [data-theme='dark'] {
@@ -378,10 +378,12 @@
     .ant-table-tbody > tr.ant-table-row-selected td {
       background-color: #262626;
     }
-
-    .ant-table-wrapper,
-    .ant-form {
-      box-shadow: 0 2px 3px #262626 !important;
+    .@{prefix-cls} {
+      .ant-table-wrapper,
+      .ant-form {
+        border: 1px solid rgba(255, 255, 255, 0.02);
+        box-shadow: 0 1px 6px #000;
+      }
     }
   }
 
@@ -402,8 +404,8 @@
         padding: 12px 10px 6px;
         margin-bottom: 16px;
         background-color: @component-background;
-        border-radius: 2px;
-        .table-radius;
+        border: 1px solid @border-color-base;
+        border-radius: 4px;
       }
     }
 
@@ -414,8 +416,8 @@
     .ant-table-wrapper {
       padding: 10px;
       background-color: @component-background;
-      border-radius: 2px;
-      .table-radius;
+      border-radius: 4px !important;
+      border: 1px solid @border-color-base;
 
       .ant-table-title {
         min-height: 40px;
