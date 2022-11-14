@@ -113,7 +113,7 @@ class ParameterTestCase {
     val dynamicProperties =
       """
         |-Denv.java.opts1="-Dfile.encoding=UTF-8"
-        |-Denv.java.opts2 = "-Dfile.encoding=UTF-8"
+        |-Denv.java.opts2 = "-Dfile.enc\"oding=UTF-8"
         |-Denv.java.opts3 = " -Dfile.encoding=UTF-8"
         |-Dyarn.application.id=123
         |-Dyarn.application.name="streampark job"
@@ -121,11 +121,11 @@ class ParameterTestCase {
         |""".stripMargin
 
     val map = FlinkSubmitter.extractDynamicProperties(dynamicProperties)
-    Assertions.assertEquals(map("env.java.opts1"), "\"-Dfile.encoding=UTF-8\"")
-    Assertions.assertEquals(map("env.java.opts2"), "\"-Dfile.encoding=UTF-8\"")
-    Assertions.assertEquals(map("env.java.opts3"), "\" -Dfile.encoding=UTF-8\"")
+    Assertions.assertEquals(map("env.java.opts1"), "-Dfile.encoding=UTF-8")
+    Assertions.assertEquals(map("env.java.opts2"), "-Dfile.enc\\\"oding=UTF-8")
+    Assertions.assertEquals(map("env.java.opts3"), " -Dfile.encoding=UTF-8")
     Assertions.assertEquals(map("yarn.application.id"), "123")
-    Assertions.assertEquals(map("yarn.application.name"), "\"streampark job\"")
+    Assertions.assertEquals(map("yarn.application.name"), "streampark job")
     Assertions.assertEquals(map("yarn.application.queue"), "flink")
   }
 
