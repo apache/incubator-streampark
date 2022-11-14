@@ -47,9 +47,9 @@
   list-style: none;
   font-feature-settings: 'tnum';
   position: relative;
-  border-radius: @border-radius-base;
+  border-radius: 4px;
   transition: all 0.3s;
-  box-shadow: 0 2px 3px @shadow-color;
+  border: 1px solid @border-color-base;
 
   .ant-divider-horizontal {
     margin: 10px 0;
@@ -172,6 +172,7 @@
   }
 
   .gutter-box {
-    box-shadow: 0 2px 3px #000;
+    box-shadow: 0 1px 6px #000;
+    border: 1px solid rgba(255, 255, 255, 0.02);
   }
 }
