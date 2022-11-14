@@ -223,9 +223,9 @@ object ConfigConst {
     println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ")
     println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ")
     println("                                       /_/                        \n\n")
-    println("    Version:  1.2.4                                                   ")
+    println("    Version:  2.0.0                                                   ")
     println("    WebSite:  https://streampark.apache.org                           ")
-    println("    GitHub :  https://github.com/apache/streampark                    ")
+    println("    GitHub :  https://github.com/apache/incubator-streampark                    ")
     println(s"    Info   :  $info                                 ")
     println(s"    Time   :  ${LocalDateTime.now}              \n\n")
     // scalastyle:on println

@@ -503,19 +503,19 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.apache.spark/spark-streaming-kafka-0-10_2.12/3.2.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.spark/spark-tags_2.12/3.2.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.spark/spark-token-provider-kafka-0-10_2.12/3.2.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-common_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-connector-base_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-core_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-kubernetes_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-packer_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-proxy_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-shims-base_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-sqlclient_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-submit-api_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-jvm-profiler/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-spark-connector-base_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-spark-connector-kafka_2.12/1.2.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-spark-core_2.12/1.2.4 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-common_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-connector-base_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-core_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-kubernetes_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-packer_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-proxy_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-shims-base_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-sqlclient_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-submit-api_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-jvm-profiler/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-spark-connector-base_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-spark-connector-kafka_2.12/2.0.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.streampark/streampark-spark-core_2.12/2.0.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-el/9.0.65 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.yetus/audience-annotations/0.5.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper/3.4.6 Apache-2.0
