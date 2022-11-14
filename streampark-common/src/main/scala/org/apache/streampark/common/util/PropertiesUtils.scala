@@ -78,11 +78,8 @@ object PropertiesUtils extends Logger {
   }
 
   def fromHoconText(conf: String): Map[String, String] = {
-    try {
-      val reader = new StringReader(conf)
-      val config = ConfigFactory.parseReader(reader)
-      config.entrySet().map(x => x.getKey -> x.getValue.render()).toMap
-    } catch {
+    require(conf != null, s"[StreamPark] fromHoconText: Hocon content must not be null")
+    try parseHoconByReader(new StringReader(conf)) catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading Hocon ", e)
     }
   }
@@ -140,10 +137,22 @@ object PropertiesUtils extends Logger {
 
   def fromHoconFile(inputStream: InputStream): Map[String, String] = {
     require(inputStream != null, s"[StreamPark] fromHoconFile: Hocon inputStream  must not be null")
+    try
+      parseHoconByReader(new InputStreamReader(inputStream))
+    catch {
+      case e: IOException => throw new IllegalArgumentException(s"Failed when loading Hocon ", e)
+    }
+  }
+
+  private[this] def parseHoconByReader(reader: Reader): Map[String, String] = {
     try {
-      val reader = new InputStreamReader(inputStream)
-      val config = ConfigFactory.parseReader(reader)
-      config.entrySet().map(x => x.getKey -> x.getValue.render()).toMap
+      ConfigFactory.parseReader(reader)
+        .entrySet()
+        .map { x =>
+          val k = x.getKey.trim.replaceAll("\"", "")
+          val v = x.getValue.unwrapped().toString.trim
+          k -> v
+        }.toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading Hocon ", e)
     }
