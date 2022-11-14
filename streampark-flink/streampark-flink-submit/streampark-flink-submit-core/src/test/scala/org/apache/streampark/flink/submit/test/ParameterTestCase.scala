@@ -118,6 +118,8 @@ class ParameterTestCase {
         |-Dyarn.application.id=123
         |-Dyarn.application.name="streampark job"
         |-Dyarn.application.queue=flink
+        |-Ddiy.param.name=apache streampark
+        |
         |""".stripMargin
 
     val map = FlinkSubmitter.extractDynamicProperties(dynamicProperties)
@@ -127,6 +129,7 @@ class ParameterTestCase {
     Assertions.assertEquals(map("yarn.application.id"), "123")
     Assertions.assertEquals(map("yarn.application.name"), "streampark job")
     Assertions.assertEquals(map("yarn.application.queue"), "flink")
+    Assertions.assertEquals(map("diy.param.name"), "apache streampark")
   }
 
 }
