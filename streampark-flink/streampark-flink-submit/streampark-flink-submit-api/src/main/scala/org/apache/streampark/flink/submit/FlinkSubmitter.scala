@@ -116,7 +116,7 @@ object FlinkSubmitter extends Logger {
         val opts = matcher.group()
         val index = opts.indexOf("=")
         val key = opts.substring(2, index).trim
-        val value = opts.substring(index + 1).trim.replaceAll("(^\"|\"$)","")
+        val value = opts.substring(index + 1).trim.replaceAll("(^\"|\"$)", "")
         map += key -> value
       }
       map.toMap
