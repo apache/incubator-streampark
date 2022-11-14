@@ -98,27 +98,28 @@ object FlinkSubmitter extends Logger {
    */
   @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
     if (StringUtils.isEmpty(properties)) Map.empty[String, String] else {
+      val map = mutable.Map[String, String]()
       val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
-      val map = simple.split("\\s?-D") match {
-        case x if Utils.isEmpty(x) => Map.empty
-        case d =>
-          d.filter(_.nonEmpty)
-            .map(_.trim)
-            .map(PROPERTY_PATTERN.matcher(_))
-            .filter(_.matches)
-            .map(m => m.group(1).trim -> m.group(2).trim)
-            .toMap
+      simple.split("\\s?-D") match {
+        case d if Utils.notEmpty(d) => d.foreach(x => {
+          if (x.nonEmpty) {
+            val p = PROPERTY_PATTERN.matcher(x.trim)
+            if (p.matches) {
+              map += p.group(1).trim -> p.group(2).trim
+            }
+          }
+        })
+        case _ =>
       }
-      val result = mutable.Map[String, String](map.toArray: _*)
       val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)
       while (matcher.find()) {
         val opts = matcher.group()
         val index = opts.indexOf("=")
         val key = opts.substring(2, index).trim
         val value = opts.substring(index + 1).trim
-        result += key -> value
+        map += key -> value
       }
-      result.toMap
+      map.toMap
     }
   }
 
