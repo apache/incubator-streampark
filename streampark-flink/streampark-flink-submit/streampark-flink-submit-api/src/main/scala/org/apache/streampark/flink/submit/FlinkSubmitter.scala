@@ -27,10 +27,15 @@ import java.util.regex.Pattern
 import java.util.{Map => JavaMap}
 import javax.annotation.Nonnull
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object FlinkSubmitter extends Logger {
 
   private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
+
+  private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*\\\"(.*?)\\\""
+
+  private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
 
   private[this] val FLINK_SUBMIT_CLASS_NAME = "org.apache.streampark.flink.submit.FlinkSubmit"
 
@@ -92,22 +97,32 @@ object FlinkSubmitter extends Logger {
    * extract flink configuration from application.properties
    */
   @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
-    if (StringUtils.isEmpty(properties)) {
-      Map.empty[String, String]
-    } else {
-      properties.split("\\s?-D") match {
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String] else {
+      val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
+      val map = simple.split("\\s?-D") match {
         case x if Utils.isEmpty(x) => Map.empty
         case d =>
           d.filter(_.nonEmpty)
             .map(_.trim)
             .map(PROPERTY_PATTERN.matcher(_))
             .filter(_.matches)
-            .map(m => m.group(1) -> m.group(2).replace("\"", "").trim)
+            .map(m => m.group(1).trim -> m.group(2).trim)
             .toMap
       }
+      val result = mutable.Map[String, String](map.toArray: _*)
+      val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)
+      while (matcher.find()) {
+        val opts = matcher.group()
+        val index = opts.indexOf("=")
+        val key = opts.substring(2, index).trim
+        val value = opts.substring(index + 1).trim
+        result += key -> value
+      }
+      result.toMap
     }
   }
 
   @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] = new util.HashMap[String, String](extractDynamicProperties(properties).asJava)
+
 
 }
