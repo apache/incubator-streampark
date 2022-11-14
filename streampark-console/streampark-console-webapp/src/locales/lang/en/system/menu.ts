@@ -24,5 +24,6 @@ export default {
     component: 'Vue Component',
     permission: 'Permission',
     order: 'order',
+    display: 'display',
   },
 };

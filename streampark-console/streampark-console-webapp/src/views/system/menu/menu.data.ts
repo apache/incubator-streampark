@@ -50,7 +50,7 @@ export const columns: BasicColumn[] = [
     },
   },
   {
-    title: t('system.menu.table.icon'),
+    title: t('system.menu.table.type'),
     dataIndex: 'type',
     width: 90,
     customRender: ({ record }) => {
@@ -60,9 +60,19 @@ export const columns: BasicColumn[] = [
   },
   { title: t('system.menu.table.path'), dataIndex: 'path' },
   { title: t('system.menu.table.component'), dataIndex: 'component' },
-  { title: t('system.menu.table.permission'), dataIndex: 'permission', width: 150 },
-  { title: t('system.menu.table.order'), dataIndex: 'order', width: 90 },
-  { title: t('common.createTime'), dataIndex: 'createTime' },
+  { title: t('system.menu.table.permission'), dataIndex: 'permission', width: 160 },
+  { title: t('system.menu.table.order'), dataIndex: 'order', width: 60 },
+  {
+    title: t('system.menu.table.display'),
+    dataIndex: 'display',
+    width: 80,
+    align: 'center',
+    customRender: ({ record }) => {
+      const text = record.display ? t('common.yes') : t('common.no');
+      return h(Tag, { color: record.display ? 'green' : 'red' }, () => text);
+    },
+  },
+  { title: t('common.createTime'), dataIndex: 'createTime', width: 180 },
 ];
 
 export const searchFormSchema: FormSchema[] = [

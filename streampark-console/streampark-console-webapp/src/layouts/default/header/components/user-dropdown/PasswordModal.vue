@@ -30,7 +30,9 @@
   const userStore = useUserStoreWithOut();
   const { t } = useI18n();
   const { createConfirm } = useMessage();
-  const [registerModal, { changeOkLoading, closeModal }] = useModalInner();
+  const [registerModal, { changeOkLoading, closeModal }] = useModalInner(() => {
+    resetFields();
+  });
   const [registerForm, { validate, resetFields }] = useForm({
     labelWidth: 140,
     colon: true,
@@ -39,23 +41,23 @@
     schemas: [
       {
         field: 'username',
-        label: 'UserName',
+        label: t('sys.login.userName'),
         component: 'Input',
         render: () => h(Alert, { type: 'info', message: userStore.getUserInfo?.username }),
       },
       {
         field: 'password',
-        label: 'Password',
+        label: t('sys.login.password'),
         component: 'InputPassword',
         itemProps: { hasFeedback: true },
         rules: [
-          { required: true, message: 'Please input your password!', trigger: 'blur' },
-          { min: 4, max: 16, message: 'The password contains 4 to 16 characters', trigger: 'blur' },
+          { required: true, message: t('sys.login.passwordPlaceholder'), trigger: 'blur' },
+          { min: 8, message: t('system.user.form.passwordHelp'), trigger: 'blur' },
         ],
       },
       {
         field: 'confirmpassword',
-        label: 'Confirm Password',
+        label: t('sys.login.confirmPassword'),
         component: 'InputPassword',
         itemProps: { hasFeedback: true },
         dynamicRules: ({ values }) => {
@@ -64,10 +66,10 @@
               required: true,
               validator: (_, value) => {
                 if (!value) {
-                  return Promise.reject('Please confirm your password!');
+                  return Promise.reject(t('sys.login.confirmPasswordPlaceholder'));
                 }
                 if (value !== values.password) {
-                  return Promise.reject('Two passwords that you enter is inconsistent!');
+                  return Promise.reject(t('sys.login.diffPwd'));
                 }
                 return Promise.resolve();
               },
@@ -81,17 +83,16 @@
     try {
       changeOkLoading(true);
       const formValue = await validate();
-      console.log('formValue', formValue);
       await fetchUserPasswordUpdate({
         username: userStore.getUserInfo?.username,
         password: formValue.password,
       });
-      resetFields();
+
       createConfirm({
         iconType: 'success',
-        title: t('routes.demo.system.password'),
-        content: 'The password has been changed successfully, and you are about to exit the system',
-        okText: '立即退出',
+        title: t('sys.modifyPassword.title'),
+        content: t('sys.modifyPassword.success'),
+        okText: t('sys.logoutNow'),
         okType: 'danger',
         onOk: () => {
           userStore.logout(true);
@@ -109,7 +110,7 @@
   <BasicModal v-bind="$attrs" @register="registerModal" @ok="handleChangePassword">
     <template #title>
       <SettingOutlined style="color: green" />
-      {{ t('routes.demo.system.password') }}
+      {{ t('sys.modifyPassword.title') }}
     </template>
     <BasicForm @register="registerForm" />
   </BasicModal>

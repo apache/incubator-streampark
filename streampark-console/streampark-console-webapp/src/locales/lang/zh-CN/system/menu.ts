@@ -24,5 +24,6 @@ export default {
     component: 'Vue组件',
     permission: '权限',
     order: '排序',
+    display: '展示',
   },
 };

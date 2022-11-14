@@ -24,7 +24,7 @@ import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchFlamegraph } from '/@/api/flink/app/metrics';
 import { ActionItem, FormProps } from '/@/components/Table';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { ExecModeEnum, LaunchStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 import { usePermission } from '/@/hooks/web/usePermission';
 import { useI18n } from '/@/hooks/web/useI18n';
 export enum JobTypeEnum {
@@ -69,14 +69,21 @@ export const useAppTableAction = (
       },
       {
         tooltip: { title: t('flink.app.operation.launch') },
-        ifShow: [-1, 1, 4].includes(record.launch) && record['optionState'] === 0,
+        ifShow:
+          [
+            LaunchStateEnum.FAILED,
+            LaunchStateEnum.NEED_LAUNCH,
+            LaunchStateEnum.NEED_ROLLBACK,
+          ].includes(record.launch) && record['optionState'] == OptionStateEnum.NONE,
         auth: 'app:launch',
         icon: 'ant-design:cloud-upload-outlined',
         onClick: handleCheckLaunchApp.bind(null, record),
       },
       {
         tooltip: { title: t('flink.app.operation.launchDetail') },
-        ifShow: [-1, 2].includes(record.launch) || record['optionState'] === 1,
+        ifShow:
+          [LaunchStateEnum.FAILED, LaunchStateEnum.LAUNCHING].includes(record.launch) ||
+          record['optionState'] == OptionStateEnum.LAUNCHING,
         auth: 'app:launch',
         icon: 'ant-design:container-outlined',
         onClick: () => openBuildDrawer(true, { appId: record.id }),
@@ -90,7 +97,7 @@ export const useAppTableAction = (
       },
       {
         tooltip: { title: t('flink.app.operation.cancel') },
-        ifShow: record.state === 5 && record['optionState'] === 0,
+        ifShow: record.state === 5 && record['optionState'] == OptionStateEnum.NONE,
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
@@ -107,7 +114,7 @@ export const useAppTableAction = (
           record.executionMode,
         ),
         auth: 'app:detail',
-        icon: 'ant-design:sync-outlined',
+        icon: 'ant-design:code-outlined',
         onClick: () => openLogModal(true, { app: record }),
       },
       {
@@ -124,10 +131,10 @@ export const useAppTableAction = (
     // Record the current page number
     sessionStorage.setItem('appPageNo', String(currentPageNo || 1));
     flinkAppStore.setApplicationId(app.id);
-    if (app.appType === 1) {
+    if (app.appType == 1) {
       // jobType( 1 custom code 2: flinkSQL)
       router.push({ path: '/flink/app/edit_streampark', query: { appId: app.id } });
-    } else if (app.appType === 2) {
+    } else if (app.appType == 2) {
       //Apache Flink
       router.push({ path: '/flink/app/edit_flink', query: { appId: app.id } });
     }
@@ -140,7 +147,7 @@ export const useAppTableAction = (
   }
   // click stop application
   function handleCancel(app: AppListRecord) {
-    if (!optionApps.stopping.get(app.id) || app['optionState'] === 0) {
+    if (!optionApps.stopping.get(app.id) || app['optionState'] == OptionStateEnum.NONE) {
       openStopModal(true, { application: app });
     }
   }

@@ -36,6 +36,12 @@ export default {
     errMsg503: '服务不可用，服务器暂时过载或维护!',
     errMsg504: '网络超时!',
     errMsg505: 'http版本不支持该请求!',
+    error403: '抱歉，您无法访问。可能是因为你没有权限或登录无效',
+    error404: '抱歉，未找到资源',
+    error501: '<a href="https://streampark.apache.org/">查看官方文档?</a>',
+    error502:
+      '<a href="https://github.com/apache/incubator-streampark/issues/new/choose">报告问题 ?</a>',
+    errorMsg: '系统错误，请联系管理员',
   },
   app: { logoutTip: '温馨提醒', logoutMessage: '是否确认退出系统?', menuLoading: '菜单加载中...' },
   errorLog: {
@@ -92,6 +98,9 @@ export default {
     forgetPassword: '忘记密码?',
     otherSignIn: '其他登录方式',
 
+    ldapTip: '通过LDAP登录',
+    passwordTip: '通过密码登录',
+
     // notify
     loginSuccessTitle: '登录成功',
     loginSuccessDesc: '欢迎回来',
@@ -99,6 +108,7 @@ export default {
     // placeholder
     accountPlaceholder: '请输入账号',
     passwordPlaceholder: '请输入密码',
+    confirmPasswordPlaceholder: '请输入确认密码',
     smsPlaceholder: '请输入验证码',
     mobilePlaceholder: '请输入手机号码',
     policyPlaceholder: '勾选后才能注册',
@@ -113,5 +123,10 @@ export default {
   },
   permission: {
     noPermission: '没有权限，请联系管理员',
+  },
+  modifyPassword: {
+    title: '修改密码',
+    success: '密码已成功更改,您即将退出系统',
+    logout: '立即退出',
   },
 };

@@ -26,6 +26,7 @@
   import { updateProject } from '/@/api/flink/project';
   import { BasicForm } from '/@/components/Form';
   import { PageWrapper } from '/@/components/Page';
+  import { BuildStateEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   const { getLoading, registerForm, submit, handleSubmit, handleGet, projectResource } =
@@ -47,7 +48,7 @@
       projectResource.branches !== values.branches ||
       projectResource.pom !== values.pom
     ) {
-      buildState.value = -2;
+      buildState.value = BuildStateEnum.NEED_REBUILD;
     } else {
       buildState.value = projectResource.buildState;
     }

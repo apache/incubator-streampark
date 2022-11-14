@@ -109,8 +109,11 @@
         field: 'variableValue',
         label: t('flink.variable.table.variableValue'),
         component: 'InputTextArea',
-        componentProps: { rows: 4, placeholder: 'Please enter Variable Value' },
-        rules: [{ required: true, message: 'please enter Variable Value' }],
+        componentProps: {
+          rows: 4,
+          placeholder: t('flink.variable.table.variableValuePlaceholder'),
+        },
+        rules: [{ required: true, message: t('flink.variable.table.variableValuePlaceholder') }],
       },
       {
         field: 'description',
@@ -128,11 +131,8 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: h(
-          'span',
-          { class: 'conf-switch' },
-          t('flink.variable.form.desensitizationDesc'),
-        ),
+        afterItem: () =>
+          h('span', { class: 'conf-switch' }, t('flink.variable.form.desensitizationDesc')),
       },
     ];
   });

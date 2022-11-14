@@ -378,10 +378,11 @@
     .ant-table-tbody > tr.ant-table-row-selected td {
       background-color: #262626;
     }
-
-    .ant-table-wrapper,
-    .ant-form {
-      box-shadow: 0 2px 3px #262626 !important;
+    .@{prefix-cls} {
+      .ant-table-wrapper,
+      .ant-form {
+        box-shadow: 0 2px 3px #262626 !important;
+      }
     }
   }
 
