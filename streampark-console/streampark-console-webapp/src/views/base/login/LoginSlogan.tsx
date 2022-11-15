@@ -63,7 +63,7 @@ export default defineComponent({
           </div>
           <div className="flex items-center mt-10">
             <a
-              className="btn streamx-btn btn !flex items-center"
+              className="btn streampark-btn btn !flex items-center"
               href="https://github.com/apache/incubator-streampark"
               target="_blank"
             >
@@ -71,7 +71,7 @@ export default defineComponent({
               <div>&nbsp; GitHub</div>
             </a>
             <a
-              className="btn streamx-btn btn-green !flex items-center ml-10px"
+              className="btn streampark-btn btn-green !flex items-center ml-10px"
               href="https://streampark.apache.org"
               target="_blank"
             >

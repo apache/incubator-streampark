@@ -20,4 +20,4 @@ version, and it includes schema changes and data changes.
 For example:
 
 - `1.2.3.sql` needs to be executed when StreamPark is upgraded from `1.2.2` to `1.2.3`.
-- `1.2.3.sql` and `1.2.4.sql`  needs to be executed when StreamPark is upgraded from `1.2.2` to `1.2.4`. 
+- `1.2.3.sql` and `2.0.0.sql`  needs to be executed when StreamPark is upgraded from `1.2.2` to `2.0.0`. 

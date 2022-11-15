@@ -19,9 +19,9 @@
 # watchNamespaces: ["streampark"]
 
 image:
-  repository: "streamxhub/streampark"
+  repository: "apache/streampark"
   pullPolicy: "IfNotPresent"
-  tag: "1.2.4"
+  tag: "2.0.0"
   pullSecret: ""
 
 rbac:
@@ -51,7 +51,7 @@ spec:
 
 ingress:
   enabled: true
-  host: "streamxhub.com"
+  host: "streampark.apache.org"
   path: "/streampark"
   annotations: {}
 

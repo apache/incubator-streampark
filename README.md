@@ -64,22 +64,22 @@ click [Document](https://streampark.apache.org/docs/intro) for more information
 
 ## 💋 our users
 
-Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/apache/streampark/issues/163)
+Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/apache/incubator-streampark/issues/163)
 
 ![Our users](https://streampark.apache.org/image/users.png)
 
 
 ## 🤝 Contribution
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/apache/streampark/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/apache/incubator-streampark/pulls)
 
-You can submit any ideas as [pull requests](https://github.com/apache/streampark/pulls) or as [GitHub issues](https://github.com/apache/streampark/issues/new/choose).
+You can submit any ideas as [pull requests](https://github.com/apache/incubator-streampark/pulls) or as [GitHub issues](https://github.com/apache/incubator-streampark/issues/new/choose).
 
 > If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
 Thank you to all the people who already contributed to StreamPark!
 
-<a href="https://github.com/apache/streampark/graphs/contributors">
+<a href="https://github.com/apache/incubator-streampark/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=apache/streampark" />
 </a>
 
