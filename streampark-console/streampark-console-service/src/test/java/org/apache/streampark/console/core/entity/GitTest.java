@@ -30,7 +30,7 @@ class GitTest {
 
     @BeforeEach
     void before() {
-        project.setUrl("https://github.com/streamxhub/streampark-quickstart");
+        project.setUrl("https://github.com/apache/incubator-streampark-quickstart");
     }
 
     @Test

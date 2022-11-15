@@ -705,7 +705,7 @@
                                                                                         style="padding: 5px 20px; font-family: Arial, Helvetica, sans-serif; font-size: 1em; font-weight: 400; color: rgb(222,222,222); text-align: left;"
                                                                                         class="tblCell">
                                                                                         <div style="line-height: 125%; text-align: center;">
-                                                                                            <img src="http://assets.streamxhub.com/logo_white.svg"
+                                                                                            <img src="https://streampark.apache.org/image/logo_name_white.png"
                                                                                                  alt=""
                                                                                                  height="150px"
                                                                                                  class="img-illustration"
@@ -1002,7 +1002,7 @@
                                                                                 <td style="border: 0 none transparent; text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 1em; padding: 15px 40px; font-weight: bold; background-color: #1890ff;"
                                                                                     class="bmeButtonText">
                                                                                             <span style="font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 1em; color: rgb(255, 255, 255);">
-                                                                                                <a href="http://www.streamxhub.com"
+                                                                                                <a href="https://streampark.apache.org"
                                                                                                    style="color:#FFFFFF;text-decoration:none;"
                                                                                                    target="_blank">Website</a>
                                                                                             </span>
@@ -1012,7 +1012,7 @@
                                                                                 <td style="border: 3px solid rgb(0, 174, 84); text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 1em; padding: 15px 30px; font-weight: bold; border-collapse: separate; background-color: rgb(0, 174, 84);"
                                                                                     class="bmeButtonText">
                                                                                             <span style="font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 1em; color: rgb(255, 255, 255);">
-                                                                                                <a href="https://github.com/streamxhub/streampark"
+                                                                                                <a href="https://streampark.apache.org"
                                                                                                    style="color:#FFFFFF;text-decoration:none;">GitHub</a>
                                                                                             </span>
                                                                                 </td>

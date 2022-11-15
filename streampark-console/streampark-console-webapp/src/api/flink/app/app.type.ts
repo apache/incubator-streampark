@@ -137,7 +137,7 @@ export interface AppListRecord {
   k8sPodTemplates: {
     empty: boolean;
   };
-  streamXJob: boolean;
+  streamParkJob: boolean;
 }
 
 interface AppControl {
