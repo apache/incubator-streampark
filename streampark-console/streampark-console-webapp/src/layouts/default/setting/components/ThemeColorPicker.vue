@@ -47,7 +47,7 @@
     props: {
       colorList: {
         type: Array as PropType<string[]>,
-        defualt: [],
+        default: () => [],
       },
       event: {
         type: Number as PropType<HandlerEnum>,
