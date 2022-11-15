@@ -17,8 +17,7 @@
 import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
-import { ExecModeEnum } from '/@/enums/flinkEnum';
-
+import { ExecModeEnum, JobTypeEnum, StrategyEnum } from '/@/enums/flinkEnum';
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { renderSqlHistory } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
@@ -137,7 +136,7 @@ export const useEditStreamParkSchema = (
             { handleChangeSQL, handleCompareOk },
           ),
         ifShow: ({ values }) => {
-          return values.jobType == 2 && unref(flinkSqlHistory).length > 1;
+          return values.jobType == JobTypeEnum.SQL && unref(flinkSqlHistory).length > 1;
         },
         required: true,
       },
@@ -147,7 +146,7 @@ export const useEditStreamParkSchema = (
         label: 'Project',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
-        ifShow: ({ values }) => values.jobType != 2,
+        ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
       },
       { field: 'project', label: 'ProjectId', component: 'Input', show: false },
       {
@@ -155,7 +154,7 @@ export const useEditStreamParkSchema = (
         label: 'Application',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
-        ifShow: ({ values }) => values.jobType != 2,
+        ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
       },
       { field: 'configId', label: 'configId', component: 'Input', show: false },
       {
@@ -163,7 +162,7 @@ export const useEditStreamParkSchema = (
         label: 'Application conf',
         component: 'Input',
         slot: 'appConf',
-        ifShow: ({ values }) => values.jobType != 2,
+        ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
       },
       {
         field: 'compareConf',
@@ -172,7 +171,11 @@ export const useEditStreamParkSchema = (
         slot: 'compareConf',
         defaultValue: [],
         ifShow: ({ values }) => {
-          return values.jobType != 2 && values.strategy == 1 && unref(configVersions).length > 1;
+          return (
+            values.jobType != 2 &&
+            values.strategy == StrategyEnum.USE_EXIST &&
+            unref(configVersions).length > 1
+          );
         },
       },
       {

@@ -39,6 +39,7 @@ import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
+import { CandidateTypeEnum } from '/@/enums/flinkEnum';
 
 /* render input dropdown component */
 export const renderInputDropdown = (
@@ -427,7 +428,7 @@ export const renderSqlHistory = (
               </Tag>
             )}
 
-            {[1, 2].includes(ver.candidate) && (
+            {[CandidateTypeEnum.NEW, CandidateTypeEnum.HISTORY].includes(ver.candidate) && (
               <Tag color="cyan" style=";margin-left: 5px;" size="small">
                 Candidate
               </Tag>
@@ -466,7 +467,7 @@ export const renderCompareSelectTag = (ver: any) => {
         </Tag>
       )}
 
-      {[1, 2].includes(ver.candidate) && (
+      {[CandidateTypeEnum.NEW, CandidateTypeEnum.HISTORY].includes(ver.candidate) && (
         <Tag color="cyan" style=";margin-left: 5px;" size="small">
           Candidate
         </Tag>

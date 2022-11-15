@@ -48,6 +48,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
+  import { ClusterStateEnum, JobTypeEnum, StrategyEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const go = useGo();
@@ -195,7 +196,9 @@
       if (values.yarnSessionClusterId) {
         const cluster =
           flinkClusters.value.filter(
-            (c) => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1,
+            (c) =>
+              c.clusterId === values.yarnSessionClusterId &&
+              c.clusterState === ClusterStateEnum.STARTED,
           )[0] || null;
         values.clusterId = cluster.id;
         values.flinkClusterId = cluster.id;
@@ -229,7 +232,11 @@
   async function handleSubmitCustomJob(values: Recordable) {
     try {
       const format =
-        values.strategy == 1 ? app.format : (values.config || '').endsWith('.properties') ? 2 : 1;
+        values.strategy == StrategyEnum.USE_EXIST
+          ? app.format
+          : (values.config || '').endsWith('.properties')
+          ? 2
+          : 1;
       let config = values.configOverride || app.config;
       if (config != null && config.trim() !== '') {
         config = encryptByBase64(config);
@@ -238,14 +245,17 @@
       }
       if (values.yarnSessionClusterId) {
         const cluster =
-          flinkClusters.value.filter(
-            (c) => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1,
-          )[0] || null;
+          flinkClusters.value.filter((c) => {
+            return (
+              c.clusterId === values.yarnSessionClusterId &&
+              c.clusterState === ClusterStateEnum.STARTED
+            );
+          })[0] || null;
         values.clusterId = cluster.id;
         values.flinkClusterId = cluster.id;
         values.yarnSessionClusterId = cluster.clusterId;
       }
-      const configId = values.strategy == 1 ? app.configId : null;
+      const configId = values.strategy == StrategyEnum.USE_EXIST ? app.configId : null;
       const params = {
         id: app.id,
         format: format,
@@ -289,7 +299,7 @@
     Object.assign(app, res);
     Object.assign(defaultOptions, JSON.parse(app.options || '{}'));
 
-    if (app.jobType == 2) {
+    if (app.jobType == JobTypeEnum.SQL) {
       fetchFlinkHistory({ id: appId }).then((res) => {
         flinkSqlHistory.value = res;
       });
@@ -333,7 +343,7 @@
     handleReset();
   }
 
-  function handleMergely(configOverride) {
+  function handleMergely(configOverride: string) {
     openConfDrawer(true, {
       configOverride,
     });

@@ -48,6 +48,7 @@
   import ExecOptionModal from './ExecOptionModal.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useClipboard } from '@vueuse/core';
+  import { AppTypeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 
   const DescriptionItem = Descriptions.Item;
   const TabPane = Tabs.TabPane;
@@ -169,12 +170,12 @@
   }
 
   /* delete configuration */
-  async function handleDeleteConf(record) {
+  async function handleDeleteConf(record: Recordable) {
     await fetchRemoveConf({ id: record.id });
     reloadConf();
   }
 
-  function handleCompare(record) {
+  function handleCompare(record: Recordable) {
     openCompareModal(true, {
       id: record.id,
       version: record.version,
@@ -202,7 +203,7 @@
     ];
   }
   /* delete savePoint */
-  async function handleDeleteSavePoint(record) {
+  async function handleDeleteSavePoint(record: Recordable) {
     await fetchRemoveSavePoint({ id: record.id });
     reloadSavePoint();
   }
@@ -234,7 +235,11 @@
           </DescriptionItem>
         </Descriptions>
       </TabPane>
-      <TabPane key="2" tab="Configuration" v-if="app && app.appType == 1 && tabConf.showConf">
+      <TabPane
+        key="2"
+        tab="Configuration"
+        v-if="app && app.appType == AppTypeEnum.STREAMPARK_FLINK && tabConf.showConf"
+      >
         <BasicTable @register="registerConfigTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'format'">
@@ -260,7 +265,7 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="3" tab="Flink SQL" v-if="app.jobType === 2">
+      <TabPane key="3" tab="Flink SQL" v-if="app.jobType === JobTypeEnum.JAR">
         <div class="sql-box syntax-true" ref="flinkSql" style="height: 600px"></div>
       </TabPane>
       <TabPane key="4" tab="Savepoints" v-if="tabConf.showSaveOption">

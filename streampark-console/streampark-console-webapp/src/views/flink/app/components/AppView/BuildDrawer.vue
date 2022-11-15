@@ -76,7 +76,7 @@
     data && onReceiveData(data);
   });
   /* data reception */
-  function onReceiveData(data) {
+  function onReceiveData(data: Recordable) {
     appId.value = data.appId;
     if (!isPending.value) start();
   }

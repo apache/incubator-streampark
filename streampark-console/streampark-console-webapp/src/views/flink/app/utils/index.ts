@@ -18,9 +18,15 @@ import { optionsKeyMapping } from '../data/option';
 import { fetchYarn } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchActiveURL } from '/@/api/flink/setting/flinkCluster';
-import { ExecModeEnum, LaunchStateEnum } from '/@/enums/flinkEnum';
+import {
+  AppStateEnum,
+  ExecModeEnum,
+  LaunchStateEnum,
+  OptionStateEnum,
+  PipelineStepEnum,
+} from '/@/enums/flinkEnum';
 
-export function handleAppBuildStatusColor(statusCode) {
+export function handleAppBuildStatusColor(statusCode: number) {
   switch (statusCode) {
     case 0:
       return '#99A3A4';
@@ -75,21 +81,16 @@ export function handleAppBuildStepTimelineColor(step) {
   }
 }
 
-export function handleAppBuildStepText(stepStatus) {
-  switch (stepStatus) {
-    case 0:
-      return 'UNKNOWN';
-    case 1:
-      return 'WAITING';
-    case 2:
-      return 'RUNNING';
-    case 3:
-      return 'SUCCESS';
-    case 4:
-      return 'FAILURE';
-    case 5:
-      return 'SKIPPED';
-  }
+export function handleAppBuildStepText(stepStatus: number) {
+  const buildStepMap = {
+    [PipelineStepEnum.UNKNOWN]: 'UNKNOWN',
+    [PipelineStepEnum.WAITING]: 'WAITING',
+    [PipelineStepEnum.RUNNING]: 'RUNNING',
+    [PipelineStepEnum.SUCCESS]: 'SUCCESS',
+    [PipelineStepEnum.FAILURE]: 'FAILURE',
+    [PipelineStepEnum.SKIPPED]: 'SKIPPED',
+  };
+  return buildStepMap[stepStatus];
 }
 
 // Field Description Filter
@@ -124,22 +125,20 @@ export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
   }
 }
 
-export function handleIsStart(app, optionApps) {
-  /**
-   * FAILED(7),
-   * CANCELED(9),
-   * FINISHED(10),
-   * SUSPENDED(11),
-   * LOST(13),
-   * OTHER(15),
-   * REVOKED(16),
-   * TERMINATED(18),
-   * POS_TERMINATED(19),
-   * SUCCEEDED(20),
-   * KILLED(-9)
-   * @type {boolean}
-   */
-  const status = [0, 7, 9, 10, 11, 13, 16, 18, 19, 20, -9].includes(app.state);
+export function handleIsStart(app: Recordable, optionApps: Recordable) {
+  const status = [
+    AppStateEnum.ADDED,
+    AppStateEnum.FAILED,
+    AppStateEnum.CANCELED,
+    AppStateEnum.FINISHED,
+    AppStateEnum.SUSPENDED,
+    AppStateEnum.LOST,
+    AppStateEnum.REVOKED,
+    AppStateEnum.TERMINATED,
+    AppStateEnum.POS_TERMINATED,
+    AppStateEnum.SUCCEEDED,
+    AppStateEnum.KILLED,
+  ].includes(app.state);
 
   /**
    * Deployment failed FAILED(-1),
@@ -154,12 +153,13 @@ export function handleIsStart(app, optionApps) {
 
   const launch = [LaunchStateEnum.DONE, LaunchStateEnum.NEED_RESTART].includes(app.launch);
 
-  const optionState = !optionApps.starting.get(app.id) || app['optionState'] === 0 || false;
+  const optionState =
+    !optionApps.starting.get(app.id) || app['optionState'] === OptionStateEnum.NONE || false;
 
   return status && launch && optionState;
 }
 
-export function handleYarnQueue(values) {
+export function handleYarnQueue(values: Recordable) {
   if (values.executionMode == ExecModeEnum.YARN_APPLICATION) {
     const queue = values['yarnQueue'];
     if (queue != null && queue !== '' && queue !== undefined) {

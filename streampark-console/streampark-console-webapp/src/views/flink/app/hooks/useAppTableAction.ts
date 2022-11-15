@@ -24,13 +24,16 @@ import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchFlamegraph } from '/@/api/flink/app/metrics';
 import { ActionItem, FormProps } from '/@/components/Table';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { ExecModeEnum, LaunchStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
+import {
+  AppTypeEnum,
+  ExecModeEnum,
+  LaunchStateEnum,
+  OptionStateEnum,
+  AppStateEnum,
+  JobTypeEnum,
+} from '/@/enums/flinkEnum';
 import { usePermission } from '/@/hooks/web/usePermission';
 import { useI18n } from '/@/hooks/web/useI18n';
-export enum JobTypeEnum {
-  JAR = 1,
-  SQL = 2,
-}
 
 // Create form configurations and operation functions in the application table
 export const useAppTableAction = (
@@ -97,7 +100,8 @@ export const useAppTableAction = (
       },
       {
         tooltip: { title: t('flink.app.operation.cancel') },
-        ifShow: record.state === 5 && record['optionState'] == OptionStateEnum.NONE,
+        ifShow:
+          record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
@@ -131,10 +135,10 @@ export const useAppTableAction = (
     // Record the current page number
     sessionStorage.setItem('appPageNo', String(currentPageNo || 1));
     flinkAppStore.setApplicationId(app.id);
-    if (app.appType == 1) {
+    if (app.appType == AppTypeEnum.STREAMPARK_FLINK) {
       // jobType( 1 custom code 2: flinkSQL)
       router.push({ path: '/flink/app/edit_streampark', query: { appId: app.id } });
-    } else if (app.appType == 2) {
+    } else if (app.appType == AppTypeEnum.APACHE_FLINK) {
       //Apache Flink
       router.push({ path: '/flink/app/edit_flink', query: { appId: app.id } });
     }
@@ -162,7 +166,13 @@ export const useAppTableAction = (
       },
       {
         label: t('flink.app.operation.remapping'),
-        ifShow: [0, 7, 10, 11, 13].includes(record.state),
+        ifShow: [
+          AppStateEnum.ADDED,
+          AppStateEnum.FAILED,
+          AppStateEnum.FINISHED,
+          AppStateEnum.SUSPENDED,
+          AppStateEnum.LOST,
+        ].includes(record.state),
         auth: 'app:mapping',
         icon: 'ant-design:deployment-unit-outlined',
         onClick: handleMapping.bind(null, record),
@@ -180,7 +190,15 @@ export const useAppTableAction = (
           confirm: handleDelete.bind(null, record),
         },
         label: t('common.delText'),
-        ifShow: [0, 7, 9, 10, 13, 18, 19].includes(record.state),
+        ifShow: [
+          AppStateEnum.ADDED,
+          AppStateEnum.FAILED,
+          AppStateEnum.CANCELED,
+          AppStateEnum.FINISHED,
+          AppStateEnum.LOST,
+          AppStateEnum.TERMINATED,
+          AppStateEnum.POS_TERMINATED,
+        ].includes(record.state),
         auth: 'app:delete',
         icon: 'ant-design:delete-outlined',
         color: 'error',
