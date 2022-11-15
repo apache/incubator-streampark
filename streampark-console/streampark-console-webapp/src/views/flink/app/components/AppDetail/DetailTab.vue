@@ -77,7 +77,8 @@
 
   watch(
     () => props.app.flinkSql,
-    () => {
+    (val) => {
+      if (!val) return;
       setContent(decodeByBase64(props.app.flinkSql));
     },
   );
