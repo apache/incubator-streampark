@@ -257,7 +257,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             createMessage.error(
               error.response.data.message
                 .replaceAll(/\[StreamPark\]/g, '')
-                .replaceAll(/\[StreamX\]/g, '') || 'copy failed',
+                .replaceAll(/\[StreamPark\]/g, '') || 'copy failed',
             );
           }
           return Promise.reject();

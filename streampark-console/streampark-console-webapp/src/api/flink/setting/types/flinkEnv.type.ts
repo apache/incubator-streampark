@@ -25,7 +25,7 @@ export interface FlinkEnv {
   version: string;
   isDefault: boolean;
   createTime: string;
-  streamxScalaVersion: string;
+  streamParkScalaVersion: string;
 }
 
 export interface FlinkCreate {

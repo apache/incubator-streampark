@@ -39,7 +39,7 @@ import java.io.File;
  *                                     /_/
  *
  *   WebSite:  https://streampark.apache.org
- *   GitHub :  https://github.com/apache/streampark
+ *   GitHub :  https://github.com/apache/incubator-streampark
  *
  *   [StreamPark] Make stream processing easier ô~ô!
  *
