@@ -46,7 +46,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       createWarningModal({
         title: 'WARNING',
         content: `
-          <p>${t('flink.app.launch.launchTitle')}</p>
+          <p class="pt-10px">${t('flink.app.launch.launchTitle')}</p>
           <p>${t('flink.app.launch.launchDesc')}</p>
         `,
         okType: 'danger',
@@ -89,10 +89,12 @@ export const useFlinkApplication = (openStartModal: Fn) => {
         content: () => {
           const content: Array<VNode> = [];
           if (appBuildDetail.pipeline == null) {
-            content.push(h('p', null, 'No build record exists for the current application.'));
+            content.push(
+              h('p', { class: 'pt-10px' }, 'No build record exists for the current application.'),
+            );
           } else {
             content.push(
-              h('p', null, [
+              h('p', { class: 'pt-10px' }, [
                 'The current build state of the application is',
                 h(
                   Tag,
