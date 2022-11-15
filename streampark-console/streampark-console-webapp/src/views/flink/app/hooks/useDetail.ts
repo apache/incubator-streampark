@@ -61,12 +61,12 @@ export const userDetail = (
   }
 
   /* delete configuration */
-  async function handleDeleteConf(record) {
+  async function handleDeleteConf(record: Recordable) {
     await fetchRemoveConf({ id: record.id });
     reloadConf();
   }
 
-  function handleCompare(record) {
+  function handleCompare(record: Recordable) {
     openCompareModal(true, {
       id: record.id,
       version: record.version,
@@ -105,7 +105,7 @@ export const userDetail = (
     }
   }
   /* delete savePoint */
-  async function handleDeleteSavePoint(record) {
+  async function handleDeleteSavePoint(record: Recordable) {
     await fetchRemoveSavePoint({ id: record.id });
     reloadSavePoint();
   }

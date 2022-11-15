@@ -16,7 +16,7 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
-  import { ExecModeEnum } from '/@/enums/flinkEnum';
+  import { AppStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   export default defineComponent({
     name: 'ApplicationDetail',
@@ -231,7 +231,9 @@
       <a-button
         type="danger"
         @click="handleFlinkView"
-        :disabled="app.state !== 5 || (yarn === null && app.flinkRestUrl === null)"
+        :disabled="
+          app.state !== AppStateEnum.RUNNING || (yarn === null && app.flinkRestUrl === null)
+        "
         class="float-right -mt-8px mr-20px"
       >
         <Icon icon="ant-design:cloud-outlined" />

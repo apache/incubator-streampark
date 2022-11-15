@@ -17,6 +17,7 @@
 <script lang="ts">
   import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { CandidateTypeEnum } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'CompareModal',
   });
@@ -99,7 +100,6 @@
   function handleCompareTarget(v: string) {
     compareRecord.value.target = v;
   }
-
   const filterNotCurrConfig = computed(() => {
     return allConfigVersions.value.filter((x) => x.version !== compareRecord.value.version);
   });
@@ -132,7 +132,7 @@
                 color="cyan"
                 class="ml-5px"
                 size="small"
-                v-if="ver.candidate == 1 || ver.candidate == 2"
+                v-if="[CandidateTypeEnum.NEW, CandidateTypeEnum.HISTORY].includes(ver.candidate)"
               >
                 {{ t('flink.app.detail.candidate') }}
               </Tag>

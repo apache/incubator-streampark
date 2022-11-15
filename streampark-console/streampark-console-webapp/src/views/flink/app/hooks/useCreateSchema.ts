@@ -29,6 +29,7 @@ import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { renderResourceFrom } from './useFlinkRender';
 import { filterOption } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { AppTypeEnum } from '/@/enums/flinkEnum';
 const { t } = useI18n();
 
 const getJobTypeOptions = () => {
@@ -96,7 +97,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           return {
             placeholder: t('flink.app.addAppTips.developmentModePlaceholder'),
             options: getJobTypeOptions(),
-            onChange: (value) => {
+            onChange: (value: string) => {
               if (value === 'sql') {
                 formModel.tableEnv = 1;
               } else {
@@ -126,7 +127,13 @@ export const useCreateSchema = (dependencyRef: Ref) => {
                 if (value === null || value === undefined || value === '') {
                   return Promise.reject(t('flink.app.addAppTips.executionModeIsRequiredMessage'));
                 } else {
-                  if ([2, 3, 4].includes(value)) {
+                  if (
+                    [
+                      ExecModeEnum.YARN_PER_JOB,
+                      ExecModeEnum.YARN_SESSION,
+                      ExecModeEnum.YARN_APPLICATION,
+                    ].includes(value)
+                  ) {
                     const res = await fetchCheckHadoop();
                     if (res) {
                       return Promise.resolve();
@@ -219,8 +226,8 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           return {
             placeholder: t('flink.app.addAppTips.appTypePlaceholder'),
             options: [
-              { label: 'StreamPark Flink', value: '1' },
-              { label: 'Apache Flink', value: '2' },
+              { label: 'StreamPark Flink', value: String(AppTypeEnum.STREAMPARK_FLINK) },
+              { label: 'Apache Flink', value: String(AppTypeEnum.APACHE_FLINK) },
             ],
             onChange: () => {
               Object.assign(formModel, {
@@ -262,7 +269,9 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) =>
-          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == '2',
+          values?.jobType != 'sql' &&
+          values?.resourceFrom != 'upload' &&
+          values.appType == String(AppTypeEnum.APACHE_FLINK),
         rules: [{ required: true, message: t('flink.app.addAppTips.programJarIsRequiredMessage') }],
       },
       {
@@ -271,7 +280,9 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         component: 'Input',
         componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
         ifShow: ({ values }) =>
-          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == '2',
+          values?.jobType != 'sql' &&
+          values?.resourceFrom != 'upload' &&
+          values.appType == String(AppTypeEnum.APACHE_FLINK),
         rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
@@ -296,7 +307,9 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) =>
-          values?.jobType != 'sql' && values?.resourceFrom != 'upload' && values.appType == '1',
+          values?.jobType != 'sql' &&
+          values?.resourceFrom != 'upload' &&
+          values.appType == String(AppTypeEnum.STREAMPARK_FLINK),
         dynamicRules: () => [{ required: true, validator: handleCheckConfig }],
       },
       {

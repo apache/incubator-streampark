@@ -19,7 +19,7 @@ import { h, onMounted, reactive, ref, unref, toRaw } from 'vue';
 import optionData from '../data/option';
 import { fetchFlinkCluster } from '/@/api/flink/setting/flinkCluster';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
-import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { ExecModeEnum, ClusterStateEnum } from '/@/enums/flinkEnum';
 
 import {
   fetchFlinkBaseImages,
@@ -45,13 +45,14 @@ import { Alert } from 'ant-design-vue';
 import { useDrawer } from '/@/components/Drawer';
 import { fetchSelect } from '/@/api/flink/project';
 import { isK8sExecMode } from '../utils';
-
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 export const useFlinkSchema = (editModel?: string) => {
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
   const getExecutionCluster = (executionMode) => {
     if (editModel) {
       return (toRaw(unref(flinkClusters)) || []).filter(
-        (o) => o.executionMode == executionMode && o.clusterState === 1,
+        (o) => o.executionMode == executionMode && o.clusterState === ClusterStateEnum.STARTED,
       );
     } else {
       return (toRaw(unref(flinkClusters)) || []).filter((o) => o.executionMode == executionMode);
@@ -62,17 +63,20 @@ export const useFlinkSchema = (editModel?: string) => {
     return [
       {
         field: 'versionId',
-        label: 'Flink Version',
+        label: t('flink.app.flinkVersion'),
         component: 'Select',
+        componentProps: {
+          placeholder: t('flink.app.flinkVersion'),
+        },
         rules: [{ required: true, message: 'Flink Version is required' }],
       },
       {
         field: 'flinkClusterId',
-        label: 'Flink Cluster',
+        label: t('flink.app.flinkCluster'),
         component: 'Select',
         componentProps: {
-          placeholder: 'Flink Cluster',
-          options: (getExecutionCluster(1) || []).map((i) => ({
+          placeholder: t('flink.app.flinkCluster'),
+          options: (getExecutionCluster(ExecModeEnum.REMOTE) || []).map((i) => ({
             label: i.clusterName,
             value: i.id,
           })),
@@ -82,12 +86,12 @@ export const useFlinkSchema = (editModel?: string) => {
       },
       {
         field: 'yarnSessionClusterId',
-        label: 'Yarn Session ClusterId',
+        label: t('flink.app.yarnSessionClusterId'),
         component: 'Select',
         componentProps: () => {
-          const options = getExecutionCluster(3);
+          const options = getExecutionCluster(ExecModeEnum.YARN_SESSION);
           return {
-            placeholder: 'Please Select Yarn Session clusterId',
+            placeholder: t('flink.app.addAppTips.yarnSessionClusterIdPlaceholder'),
             options: options.map((i) => ({ label: i.clusterName, value: i.clusterId })),
           };
         },
@@ -96,62 +100,68 @@ export const useFlinkSchema = (editModel?: string) => {
       },
       {
         field: 'k8sNamespace',
-        label: 'Kubernetes Namespace',
+        label: t('flink.app.kubernetesNamespace'),
         component: 'Input',
         ifShow: ({ values }) => isK8sExecMode(values.executionMode),
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
-            placeholder: 'default',
+            placeholder: t('flink.app.addAppTips.kubernetesNamespacePlaceholder'),
             options: historyRecord.k8sNamespace,
           }),
       },
       {
         field: 'clusterId',
-        label: 'Kubernetes ClusterId',
+        label: t('flink.app.kubernetesClusterId'),
         component: 'Input',
         componentProps: ({ formModel }) => {
           return {
-            placeholder: 'Please enter Kubernetes clusterId',
-            onChange: (e) => (formModel.jobName = e.target.value),
+            placeholder: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder'),
+            onChange: (e: ChangeEvent) => (formModel.jobName = e.target.value),
           };
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
-        rules: [{ required: true, message: 'Kubernetes clusterId is required' }],
+        rules: [
+          { required: true, message: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder') },
+        ],
       },
       {
         field: 'clusterId',
-        label: 'Kubernetes ClusterId',
+        label: t('flink.app.kubernetesClusterId'),
         component: 'Select',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         componentProps: {
-          placeholder: 'Please enter Kubernetes clusterId',
-          options: (getExecutionCluster(5) || []).map((i) => ({
+          placeholder: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder'),
+          options: (getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION) || []).map((i) => ({
             label: i.clusterName,
             value: i.clusterId,
           })),
         },
-        rules: [{ required: true, message: 'Kubernetes clusterId is required' }],
+        rules: [
+          {
+            required: true,
+            message: t('flink.app.addAppTips.kubernetesClusterIdIsRequiredMessage'),
+          },
+        ],
       },
       {
         field: 'flinkImage',
-        label: 'Flink Base Docker Image',
+        label: t('flink.app.flinkBaseDockerImage'),
         component: 'Input',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
-            placeholder:
-              'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
+            placeholder: t('flink.app.addAppTips.flinkImagePlaceholder'),
             options: historyRecord.k8sSessionClusterId,
           }),
-        rules: [{ required: true, message: 'Flink Base Docker Image is required' }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.flinkImageIsRequiredMessage') }],
       },
       {
         field: 'k8sRestExposedType',
-        label: 'Rest-Service Exposed Type',
+        label: t('flink.app.restServiceExposedType'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         component: 'Select',
         componentProps: {
-          placeholder: 'kubernetes.rest-service.exposed.type',
+          placeholder: t('flink.app.addAppTips.k8sRestExposedTypePlaceholder'),
           options: k8sRestExposedType,
         },
       },
@@ -161,10 +171,10 @@ export const useFlinkSchema = (editModel?: string) => {
   const getFlinkFormOtherSchemas = (appId?: string): FormSchema[] => [
     {
       field: 'jobName',
-      label: 'Application Name',
+      label: t('flink.app.appName'),
       component: 'Input',
       componentProps: {
-        placeholder: 'Please enter jobName',
+        placeholder: t('flink.app.addAppTips.appNamePlaceholder'),
       },
       dynamicRules: () => {
         return [
@@ -173,7 +183,7 @@ export const useFlinkSchema = (editModel?: string) => {
             trigger: 'blur',
             validator: async (_rule, value) => {
               if (value === null || value === undefined || value === '') {
-                return Promise.reject('Application Name is required');
+                return Promise.reject(t('flink.app.addAppTips.appNameIsRequiredMessage'));
               } else {
                 const params = { jobName: value };
                 if (appId) Object.assign(params, { id: appId });
@@ -182,21 +192,13 @@ export const useFlinkSchema = (editModel?: string) => {
                   case 0:
                     return Promise.resolve();
                   case 1:
-                    return Promise.reject(
-                      'application name must be unique. The application name already exists',
-                    );
+                    return Promise.reject(t('flink.app.addAppTips.appNameNotUniqueMessage'));
                   case 2:
-                    return Promise.reject(
-                      'The application name is already running in yarn,cannot be repeated. Please check',
-                    );
+                    return Promise.reject(t('flink.app.addAppTips.appNameExistsInYarnMessage'));
                   case 3:
-                    return Promise.reject(
-                      'The application name is already running in k8s,cannot be repeated. Please check',
-                    );
+                    return Promise.reject(t('flink.app.addAppTips.appNameExistsInK8sMessage'));
                   default:
-                    return Promise.reject(
-                      'The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check',
-                    );
+                    return Promise.reject(t('flink.app.addAppTips.appNameNotValid'));
                 }
               }
             },
@@ -206,15 +208,15 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'tags',
-      label: 'Tags',
+      label: t('flink.app.tags'),
       component: 'Input',
       componentProps: {
-        placeholder: 'Please enter tags,if more than one, separate them with commas(,)',
+        placeholder: t('flink.app.addAppTips.tagsPlaceholder'),
       },
     },
     {
       field: 'resolveOrder',
-      label: 'Resolve Order',
+      label: t('flink.app.resolveOrder'),
       component: 'Select',
       componentProps: {
         placeholder: 'classloader.resolve-order',
@@ -224,10 +226,10 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'parallelism',
-      label: 'Parallelism',
+      label: t('flink.app.parallelism'),
       component: 'InputNumber',
       componentProps: {
-        placeholder: 'The parallelism with which to run the program',
+        placeholder: t('flink.app.addAppTips.parallelismPlaceholder'),
         min: 1,
         step: 1,
         class: '!w-full',
@@ -235,10 +237,10 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'slot',
-      label: 'Task Slots',
+      label: t('flink.app.dashboard.taskSlots'),
       component: 'InputNumber',
       componentProps: {
-        placeholder: 'Number of slots per TaskManager',
+        placeholder: t('flink.app.addAppTips.slotsOfPerTaskManagerPlaceholder'),
         min: 1,
         step: 1,
         class: '!w-full',
@@ -246,11 +248,11 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'restartSize',
-      label: 'Fault Restart Size',
+      label: t('flink.app.restartSize'),
       ifShow: ({ values }) => (editModel == 'flink' ? true : !isK8sExecMode(values.executionMode)),
       component: 'InputNumber',
       componentProps: {
-        placeholder: 'restart max size',
+        placeholder: t('flink.app.addAppTips.restartSizePlaceholder'),
         min: 1,
         step: 1,
         class: '!w-full',
@@ -258,17 +260,17 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'alertId',
-      label: 'Fault Alert Template',
+      label: t('flink.app.faultAlertTemplate'),
       component: 'Select',
       componentProps: {
-        placeholder: 'Alert Template',
+        placeholder: t('flink.app.addAppTips.alertTemplatePlaceholder'),
         options: unref(alerts),
         fieldNames: { label: 'alertName', value: 'id', options: 'options' },
       },
     },
     {
       field: 'checkPointFailure',
-      label: 'CheckPoint Failure Options',
+      label: t('flink.app.checkPointFailureOptions'),
       component: 'InputNumber',
       renderColContent: renderInputGroup,
       show: ({ values }) => (editModel == 'flink' ? true : !isK8sExecMode(values.executionMode)),
@@ -276,7 +278,7 @@ export const useFlinkSchema = (editModel?: string) => {
     ...getConfigSchemas(),
     {
       field: 'totalOptions',
-      label: 'Total Memory Options',
+      label: t('flink.app.totalMemoryOptions'),
       component: 'Select',
       render: (renderCallbackParams) => renderTotalMemory(renderCallbackParams),
     },
@@ -289,14 +291,14 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'jmOptions',
-      label: 'JM Memory Options',
+      label: t('flink.app.jmMemoryOptions'),
       component: 'Select',
       componentProps: {
         showSearch: true,
         allowClear: true,
         mode: 'multiple',
         maxTagCount: 2,
-        placeholder: 'Please select the resource parameters to set',
+        placeholder: t('flink.app.addAppTips.totalMemoryOptionsPlaceholder'),
         fieldNames: { label: 'name', value: 'key', options: 'options' },
         options: optionData.filter((x) => x.group === 'jobmanager-memory'),
       },
@@ -310,14 +312,14 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'tmOptions',
-      label: 'TM Memory Options',
+      label: t('flink.app.tmMemoryOptions'),
       component: 'Select',
       componentProps: {
         showSearch: true,
         allowClear: true,
         mode: 'multiple',
         maxTagCount: 2,
-        placeholder: 'Please select the resource parameters to set',
+        placeholder: t('flink.app.addAppTips.tmPlaceholder'),
         fieldNames: { label: 'name', value: 'key', options: 'options' },
         options: optionData.filter((x) => x.group === 'taskmanager-memory'),
       },
@@ -331,29 +333,27 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'yarnQueue',
-      label: 'Yarn Queue',
+      label: t('flink.app.yarnQueue'),
       component: 'Input',
-      componentProps: {
-        placeholder: 'Please enter yarn queue',
-      },
+      componentProps: { placeholder: t('flink.app.addAppTips.yarnQueuePlaceholder') },
       ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION,
     },
     {
       field: 'podTemplate',
-      label: 'Kubernetes Pod Template',
+      label: t('flink.app.podTemplate'),
       component: 'Input',
       slot: 'podTemplate',
       ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
     },
     {
       field: 'dynamicProperties',
-      label: 'Dynamic Properties',
+      label: t('flink.app.dynamicProperties'),
       component: 'Input',
       render: (renderCallbackParams) => renderDynamicProperties(renderCallbackParams),
     },
     {
       field: 'args',
-      label: 'Program Args',
+      label: t('flink.app.programArgs'),
       component: 'InputTextArea',
       defaultValue: '',
       slot: 'args',
@@ -361,11 +361,11 @@ export const useFlinkSchema = (editModel?: string) => {
     },
     {
       field: 'description',
-      label: 'Description',
+      label: t('common.description'),
       component: 'InputTextArea',
       componentProps: {
         rows: 4,
-        placeholder: 'Please enter description for this application',
+        placeholder: t('flink.app.addAppTips.descriptionPlaceholder'),
       },
     },
   ];
@@ -375,7 +375,7 @@ export const useFlinkSchema = (editModel?: string) => {
     return [
       {
         field: 'jobType',
-        label: 'Development Mode',
+        label: t('flink.app.developmentMode'),
         component: 'Input',
         render: ({ model }) => {
           if (model.jobType == 1) {
@@ -396,7 +396,7 @@ export const useFlinkSchema = (editModel?: string) => {
       },
       {
         field: 'appType',
-        label: 'Application Type',
+        label: t('flink.app.appType'),
         component: 'Input',
         render: () => getAlertSvgIcon('flink', 'StreamPark Flink'),
       },

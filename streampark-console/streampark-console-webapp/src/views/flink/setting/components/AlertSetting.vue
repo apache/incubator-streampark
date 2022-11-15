@@ -17,6 +17,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { AlertTypeEnum } from '/@/enums/flinkEnum';
 
   export default defineComponent({
     name: 'AlertSetting',
@@ -55,11 +56,11 @@
     alerts.value = res;
   }
   const alertTypeMap = {
-    1: 'mail',
-    2: 'dingtalk',
-    4: 'wecom',
-    8: 'message',
-    16: 'lark',
+    [AlertTypeEnum.MAIL]: 'mail',
+    [AlertTypeEnum.DINGTALK]: 'dingtalk',
+    [AlertTypeEnum.WECOM]: 'wecom',
+    [AlertTypeEnum.MESSAGE]: 'message',
+    [AlertTypeEnum.LARK]: 'lark',
   };
   /* compute type */
   function computeAlertType(level: number) {
@@ -103,15 +104,15 @@
     if (item.alertTypeTags?.includes('1')) {
       emailParams = JSON.parse(item.emailParams);
     }
-    if (item.alertTypeTags?.includes('2')) {
+    if (item.alertTypeTags?.includes(String(AlertTypeEnum.DINGTALK))) {
       dingTalkParams = JSON.parse(item.dingTalkParams);
       // dingtalkIsAtAll = dingTalkParams.isAtAll;
       // dingtalkSecretEnable = dingTalkParams.secretEnable;
     }
-    if (item.alertTypeTags?.includes('4')) {
+    if (item.alertTypeTags?.includes(String(AlertTypeEnum.WECOM))) {
       weComParams = JSON.parse(item.weComParams) as Recordable;
     }
-    if (item.alertTypeTags?.includes('16')) {
+    if (item.alertTypeTags?.includes(String(AlertTypeEnum.LARK))) {
       larkParams = JSON.parse(item.larkParams) as Recordable;
       // larkIsAtAll = larkParams.isAtAll;
       // larkSecretEnable = larkParams.secretEnable;
@@ -259,29 +260,29 @@
           </template>
 
           <AlertTypeInfo
-            alertType="1"
+            :alertType="String(AlertTypeEnum.MAIL)"
             :alertSource="item"
-            v-if="item.alertTypeTags.includes('1')"
+            v-if="item.alertTypeTags.includes(String(AlertTypeEnum.MAIL))"
           />
           <AlertTypeInfo
-            alertType="2"
+            :alertType="String(AlertTypeEnum.WECOM)"
             :alertSource="item"
-            v-if="item.alertTypeTags.includes('2')"
+            v-if="item.alertTypeTags.includes(String(AlertTypeEnum.WECOM))"
           />
           <AlertTypeInfo
-            alertType="4"
+            :alertType="String(AlertTypeEnum.DINGTALK)"
             :alertSource="item"
-            v-if="item.alertTypeTags.includes('4')"
+            v-if="item.alertTypeTags.includes(String(AlertTypeEnum.DINGTALK))"
           />
           <AlertTypeInfo
-            alertType="8"
+            :alertType="String(AlertTypeEnum.MESSAGE)"
             :alertSource="item"
-            v-if="item.alertTypeTags.includes('8')"
+            v-if="item.alertTypeTags.includes(String(AlertTypeEnum.MESSAGE))"
           />
           <AlertTypeInfo
-            alertType="16"
+            :alertType="String(AlertTypeEnum.LARK)"
             :alertSource="item"
-            v-if="item.alertTypeTags.includes('16')"
+            v-if="item.alertTypeTags.includes(String(AlertTypeEnum.LARK))"
           />
         </Card>
       </ListItem>

@@ -47,7 +47,7 @@
     props: {
       menuTypeList: {
         type: Array as PropType<typeof menuTypeList>,
-        defualt: () => [],
+        default: () => [],
       },
       handler: {
         type: Function as PropType<Fn>,
