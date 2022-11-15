@@ -46,7 +46,7 @@
   import UseSysHadoopConf from './components/UseSysHadoopConf.vue';
   import { CreateParams } from '/@/api/flink/app/app.type';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
-  import { AppTypeEnum, ClusterStateEnum, JobTypeEnum } from '/@/enums/flinkEnum';
+  import { AppTypeEnum, ClusterStateEnum, JobTypeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
 
   const FlinkSqlEditor = createAsyncComponent(() => import('./components/FlinkSql.vue'), {
     loading: true,
@@ -177,7 +177,7 @@
   async function handleSubmitCustomJob(values) {
     handleCluster(values);
     const params = {
-      jobType: 1,
+      jobType: JobTypeEnum.JAR,
       projectId: values.project || null,
       module: values.module || null,
       appType: values.appType,
@@ -187,9 +187,9 @@
     const resourceFrom = values.resourceFrom;
     if (resourceFrom != null) {
       if (resourceFrom === 'csv') {
-        params['resourceFrom'] = 1;
+        params['resourceFrom'] = ResourceFromEnum.CICD;
         //streampark flink
-        if (values.appType === '1') {
+        if (values.appType == AppTypeEnum.STREAMPARK_FLINK) {
           const configVal = values['config'];
           params['format'] = configVal.endsWith('.properties') ? 2 : 1;
           if (values.configOverride == null) {
@@ -208,7 +208,7 @@
       } else {
         // from upload
         Object.assign(params, {
-          resourceFrom: 2,
+          resourceFrom: ResourceFromEnum.UPLOAD,
           appType: AppTypeEnum.APACHE_FLINK,
           jar: unref(uploadJar),
           mainClass: values.mainClass,

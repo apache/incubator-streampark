@@ -17,7 +17,7 @@
 import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
-import { ExecModeEnum, JobTypeEnum, StrategyEnum } from '/@/enums/flinkEnum';
+import { ExecModeEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { renderSqlHistory } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
@@ -172,8 +172,8 @@ export const useEditStreamParkSchema = (
         defaultValue: [],
         ifShow: ({ values }) => {
           return (
-            values.jobType != 2 &&
-            values.strategy == StrategyEnum.USE_EXIST &&
+            values.jobType == JobTypeEnum.JAR &&
+            values.strategy == UseStrategyEnum.USE_EXIST &&
             unref(configVersions).length > 1
           );
         },

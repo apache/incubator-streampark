@@ -165,11 +165,17 @@ export enum ResourceFromEnum {
   /** upload local jar */
   UPLOAD = 2,
 }
-export enum StrategyEnum {
+
+export enum UseStrategyEnum {
   /** use existing */
   USE_EXIST = 1,
   /** reselect */
   RESELECT = 2,
+}
+
+export enum SavePointEnum {
+  CHECK_POINT = 1,
+  SAVE_POINT = 2
 }
 
 export enum PipelineStepEnum {
