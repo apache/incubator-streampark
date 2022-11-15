@@ -18,6 +18,7 @@ package org.apache.streampark.flink.submit.test
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.streampark.flink.submit.FlinkSubmitter
 import org.junit.jupiter.api.{Assertions, Test}
 
 import scala.collection.mutable.ArrayBuffer
@@ -107,4 +108,28 @@ class ParameterTestCase {
     Assertions.assertEquals("d", programArgs(5))
     Assertions.assertEquals("yyy", programArgs(7))
   }
+
+  @Test def testDynamicProperties(): Unit = {
+    val dynamicProperties =
+      """
+        |-Denv.java.opts1="-Dfile.encoding=UTF-8"
+        |-Denv.java.opts2 = "-Dfile.enc\"oding=UTF-8"
+        |-Denv.java.opts3 = " -Dfile.encoding=UTF-8"
+        |-Dyarn.application.id=123
+        |-Dyarn.application.name="streampark job"
+        |-Dyarn.application.queue=flink
+        |-Ddiy.param.name=apache streampark
+        |
+        |""".stripMargin
+
+    val map = FlinkSubmitter.extractDynamicProperties(dynamicProperties)
+    Assertions.assertEquals(map("env.java.opts1"), "-Dfile.encoding=UTF-8")
+    Assertions.assertEquals(map("env.java.opts2"), "-Dfile.enc\\\"oding=UTF-8")
+    Assertions.assertEquals(map("env.java.opts3"), " -Dfile.encoding=UTF-8")
+    Assertions.assertEquals(map("yarn.application.id"), "123")
+    Assertions.assertEquals(map("yarn.application.name"), "streampark job")
+    Assertions.assertEquals(map("yarn.application.queue"), "flink")
+    Assertions.assertEquals(map("diy.param.name"), "apache streampark")
+  }
+
 }

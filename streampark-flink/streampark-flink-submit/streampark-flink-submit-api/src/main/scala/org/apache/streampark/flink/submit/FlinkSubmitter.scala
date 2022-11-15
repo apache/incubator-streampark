@@ -27,10 +27,15 @@ import java.util.regex.Pattern
 import java.util.{Map => JavaMap}
 import javax.annotation.Nonnull
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object FlinkSubmitter extends Logger {
 
   private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
+
+  private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*\\\"(.*)\\\""
+
+  private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
 
   private[this] val FLINK_SUBMIT_CLASS_NAME = "org.apache.streampark.flink.submit.FlinkSubmit"
 
@@ -92,22 +97,33 @@ object FlinkSubmitter extends Logger {
    * extract flink configuration from application.properties
    */
   @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
-    if (StringUtils.isEmpty(properties)) {
-      Map.empty[String, String]
-    } else {
-      properties.split("\\s?-D") match {
-        case x if Utils.isEmpty(x) => Map.empty
-        case d =>
-          d.filter(_.nonEmpty)
-            .map(_.trim)
-            .map(PROPERTY_PATTERN.matcher(_))
-            .filter(_.matches)
-            .map(m => m.group(1) -> m.group(2).replace("\"", "").trim)
-            .toMap
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String] else {
+      val map = mutable.Map[String, String]()
+      val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
+      simple.split("\\s?-D") match {
+        case d if Utils.notEmpty(d) => d.foreach(x => {
+          if (x.nonEmpty) {
+            val p = PROPERTY_PATTERN.matcher(x.trim)
+            if (p.matches) {
+              map += p.group(1).trim -> p.group(2).trim
+            }
+          }
+        })
+        case _ =>
       }
+      val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)
+      while (matcher.find()) {
+        val opts = matcher.group()
+        val index = opts.indexOf("=")
+        val key = opts.substring(2, index).trim
+        val value = opts.substring(index + 1).trim.replaceAll("(^\"|\"$)", "")
+        map += key -> value
+      }
+      map.toMap
     }
   }
 
   @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] = new util.HashMap[String, String](extractDynamicProperties(properties).asJava)
+
 
 }
