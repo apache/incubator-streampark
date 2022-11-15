@@ -108,7 +108,7 @@ public class AppBuildPipeline {
 
     @Nonnull
     @JsonIgnore
-    public PipelineStatus getPipeStatus() {
+    public PipelineStatus getPipelineStatus() {
         return PipelineStatus.of(pipeStatusCode);
     }
 

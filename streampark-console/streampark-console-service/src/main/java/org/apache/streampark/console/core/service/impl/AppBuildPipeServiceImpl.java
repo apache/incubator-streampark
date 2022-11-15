@@ -435,7 +435,7 @@ public class AppBuildPipeServiceImpl
     @Override
     public boolean allowToBuildNow(@Nonnull Long appId) {
         return getCurrentBuildPipeline(appId)
-            .map(pipeline -> PipelineStatus.running != pipeline.getPipeStatus())
+            .map(pipeline -> PipelineStatus.running != pipeline.getPipelineStatus())
             .orElse(true);
     }
 
@@ -451,9 +451,10 @@ public class AppBuildPipeServiceImpl
         if (CollectionUtils.isEmpty(rMaps)) {
             return Maps.newHashMap();
         }
+
         return rMaps.stream().collect(Collectors.toMap(
             e -> (Long) e.get("app_id"),
-            e -> PipelineStatus.of((Integer) e.get("pipe_status"))));
+            e -> PipelineStatus.of((Integer) e.get("pipeStatusCode"))));
     }
 
     @Override
