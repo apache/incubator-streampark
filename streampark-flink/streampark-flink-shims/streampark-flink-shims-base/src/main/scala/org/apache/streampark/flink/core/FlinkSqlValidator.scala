@@ -84,16 +84,15 @@ object FlinkSqlValidator extends Logger {
           Try {
             val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS))
             sqlDialect.toUpperCase() match {
-              case "HIVE" | "DEFAULT" =>
+              case "HIVE" =>
+              case "DEFAULT" =>
+                val parser = calciteClass.getConstructor(Array(classOf[Config]): _*).newInstance(sqlParserConfigMap(sqlDialect.toUpperCase()))
+                val method = parser.getClass.getDeclaredMethod("parse", classOf[String])
+                method.setAccessible(true)
+                method.invoke(parser, call.originSql)
               case _ =>
                 throw new UnsupportedOperationException(s"unsupported dialect: ${sqlDialect}")
             }
-
-            val parser = calciteClass.getConstructor(Array(classOf[Config]): _*).newInstance(sqlParserConfigMap(sqlDialect.toUpperCase()))
-            val method = parser.getClass.getDeclaredMethod("parse", classOf[String])
-            method.setAccessible(true)
-            method.invoke(parser, call.originSql)
-
           } match {
             case Failure(e) =>
               val exception = ExceptionUtils.stringifyException(e)
