@@ -15,15 +15,15 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent, nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
-  import { useAppTableAction } from './hooks/useAppTableAction';
-  import { useI18n } from '/@/hooks/web/useI18n';
-
   export default defineComponent({
     name: 'AppView',
   });
 </script>
 <script lang="ts" setup name="AppView">
+  import { defineComponent, nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
+  import { useAppTableAction } from './hooks/useAppTableAction';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import { AppStateEnum, JobTypeEnum, OptionStateEnum, LaunchStateEnum } from '/@/enums/flinkEnum';
   import { useTimeoutFn } from '@vueuse/core';
   import { Tooltip, Badge, Divider, Tag } from 'ant-design-vue';
   import { fetchAppRecord } from '/@/api/flink/app/app';
@@ -87,7 +87,7 @@
             availableSlot: x.availableSlot,
           },
         ];
-        if (x['optionState'] === 0) {
+        if (x['optionState'] === OptionStateEnum.NONE) {
           if (optionApps.starting.get(x.id)) {
             if (timestamp - optionApps.starting.get(x.id) > 2000 * 2) {
               optionApps.starting.delete(x.id);
@@ -135,7 +135,7 @@
   /* view */
   async function handleJobView(app: AppListRecord) {
     // Task is running, restarting, in savePoint
-    if ([4, 5].includes(app.state) || app['optionState'] === 4) {
+    if ([4, 5].includes(app.state) || app['optionState'] === OptionStateEnum.SAVEPOINTING) {
       console.log(app);
       // yarn-per-job|yarn-session|yarn-application
       handleView(app, unref(yarn));
@@ -191,22 +191,24 @@
           <span
             class="link"
             :class="{
-              pointer: [4, 5].includes(record.state) || record['optionState'] === 4,
+              pointer:
+                [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(record.state) ||
+                record['optionState'] === OptionStateEnum.SAVEPOINTING,
             }"
             @click="handleJobView(record)"
           >
             <Tooltip :title="record.description"> {{ record.jobName }} </Tooltip>
           </span>
 
-          <template v-if="record['jobType'] === 1">
+          <template v-if="record['jobType'] === JobTypeEnum.JAR">
             <Badge
-              v-if="record.launch == 5"
+              v-if="record.launch == LaunchStateEnum.NEED_CHECK"
               class="build-badge"
               count="NEW"
               :title="t('flink.app.view.recheck')"
             />
             <Badge
-              v-else-if="record.launch >= 2"
+              v-else-if="record.launch >= LaunchStateEnum.LAUNCHING"
               class="build-badge"
               count="NEW"
               :title="t('flink.app.view.changed')"

@@ -143,7 +143,12 @@
   }
 </script>
 <template>
-  <BasicModal @register="registerModal" @ok="handleSubmit" okText="Apply" cancelText="Cancel">
+  <BasicModal
+    @register="registerModal"
+    @ok="handleSubmit"
+    :okText="t('common.apply')"
+    :cancelText="t('common.cancelText')"
+  >
     <template #title>
       <SvgIcon name="shutdown" style="color: red" />
 

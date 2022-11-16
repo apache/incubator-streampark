@@ -434,7 +434,7 @@
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
-                                    <arguments>install</arguments>
+                                    <arguments>install --ignore-scripts</arguments>
                                 </configuration>
                             </execution>
                             <execution>

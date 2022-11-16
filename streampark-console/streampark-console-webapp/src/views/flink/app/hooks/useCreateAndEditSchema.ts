@@ -48,7 +48,7 @@ import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
-import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
@@ -93,7 +93,7 @@ export const useCreateAndEditSchema = (
       .filter((o) => {
         // Edit mode has one more filter condition
         if (edit?.mode) {
-          return o.executionMode == executionMode && o.clusterState === 1;
+          return o.executionMode == executionMode && o.clusterState === ClusterStateEnum.STARTED;
         } else {
           return o.executionMode == executionMode;
         }
@@ -110,7 +110,7 @@ export const useCreateAndEditSchema = (
         slot: 'flinkSql',
         ifShow: ({ values }) => {
           if (edit?.appId) {
-            return values?.jobType == 2;
+            return values?.jobType == JobTypeEnum.SQL;
           } else {
             return values?.jobType == 'sql';
           }
@@ -124,7 +124,7 @@ export const useCreateAndEditSchema = (
         slot: 'dependency',
         ifShow: ({ values }) => {
           if (edit?.appId) {
-            return values.jobType == 2;
+            return values.jobType == JobTypeEnum.SQL;
           } else {
             return values?.jobType == 'sql';
           }
@@ -137,7 +137,7 @@ export const useCreateAndEditSchema = (
         component: 'Switch',
         ifShow: ({ values }) => {
           if (edit?.appId) {
-            return values?.jobType == 2 && !isK8sExecMode(values.executionMode);
+            return values?.jobType == JobTypeEnum.SQL && !isK8sExecMode(values.executionMode);
           } else {
             return values?.jobType == 'sql' && !isK8sExecMode(values.executionMode);
           }
@@ -215,7 +215,7 @@ export const useCreateAndEditSchema = (
         component: 'Select',
         componentProps: {
           placeholder: t('flink.app.flinkCluster'),
-          options: getExecutionCluster(1, 'id'),
+          options: getExecutionCluster(ExecModeEnum.REMOTE, 'id'),
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
         rules: [{ required: true, message: 'Flink Cluster is required' }],
@@ -227,7 +227,7 @@ export const useCreateAndEditSchema = (
         componentProps: () => {
           return {
             placeholder: t('flink.app.addAppTips.yarnSessionClusterIdPlaceholder'),
-            options: getExecutionCluster(3, 'clusterId'),
+            options: getExecutionCluster(ExecModeEnum.YARN_SESSION, 'clusterId'),
           };
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
@@ -251,7 +251,7 @@ export const useCreateAndEditSchema = (
         componentProps: ({ formModel }) => {
           return {
             placeholder: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder'),
-            onChange: (e) => (formModel.jobName = e.target.value),
+            onChange: (e: ChangeEvent) => (formModel.jobName = e.target.value),
           };
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
@@ -264,7 +264,7 @@ export const useCreateAndEditSchema = (
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         componentProps: {
           placeholder: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder'),
-          options: getExecutionCluster(5, 'clusterId'),
+          options: getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION, 'clusterId'),
         },
         rules: [
           {
@@ -498,7 +498,7 @@ export const useCreateAndEditSchema = (
         label: t('flink.app.developmentMode'),
         component: 'Input',
         render: ({ model }) => {
-          if (model.jobType == 1) {
+          if (model.jobType == JobTypeEnum.JAR) {
             return h(
               Alert,
               { type: 'info' },

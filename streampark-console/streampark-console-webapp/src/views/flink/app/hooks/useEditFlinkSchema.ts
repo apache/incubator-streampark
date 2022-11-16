@@ -23,6 +23,7 @@ import { getAlertSvgIcon } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
 import { fetchMain } from '/@/api/flink/app/app';
+import { ResourceFromEnum } from '/@/enums/flinkEnum';
 
 export const useEditFlinkSchema = (jars: Ref) => {
   const flinkSql = ref();
@@ -54,8 +55,9 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Resource From',
         component: 'Input',
         render: ({ model }) => {
-          if (model.resourceFrom == 1) return getAlertSvgIcon('github', 'CICD (build from CSV)');
-          else if (model.resourceFrom == 2)
+          if (model.resourceFrom == ResourceFromEnum.CICD)
+            return getAlertSvgIcon('github', 'CICD (build from CSV)');
+          else if (model.resourceFrom == ResourceFromEnum.UPLOAD)
             return getAlertSvgIcon('upload', 'Upload (upload local job)');
           else return '';
         },
@@ -66,14 +68,14 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Project',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
-        ifShow: ({ model }) => model.resourceFrom == 1,
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD,
       },
       {
         field: 'module',
         label: 'Module',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
-        ifShow: ({ model }) => model.resourceFrom == 1,
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD,
       },
       {
         field: 'jar',
@@ -94,7 +96,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
             },
           };
         },
-        ifShow: ({ model }) => model.resourceFrom == 1,
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD,
         rules: [{ required: true, message: 'Please select jar' }],
       },
       {
@@ -102,14 +104,14 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Upload Job Jar',
         component: 'Select',
         slot: 'uploadJobJar',
-        ifShow: ({ model }) => model.resourceFrom != 1,
+        ifShow: ({ model }) => model.resourceFrom != ResourceFromEnum.CICD,
       },
       {
         field: 'jar',
         label: 'Program Jar',
         component: 'Input',
         dynamicDisabled: true,
-        ifShow: ({ model }) => model.resourceFrom !== 1,
+        ifShow: ({ model }) => model.resourceFrom !== ResourceFromEnum.CICD,
       },
       {
         field: 'mainClass',

@@ -26,9 +26,15 @@ input:-webkit-autofill {
   box-shadow: 0 0 0 1000px transparent inset !important;
 }
 
-[data-theme='dark'] input:-webkit-autofill {
-  box-shadow: none !important;
-  -webkit-text-fill-color: #fff;
+[data-theme='dark'] {
+  input:-webkit-autofill {
+    box-shadow: none !important;
+    -webkit-text-fill-color: #fff;
+  }
+
+  .@{namespace}-login-form input:-webkit-autofill {
+    -webkit-text-fill-color: #000 !important;
+  }
 }
 
 :-webkit-autofill {

@@ -132,7 +132,7 @@
         { immediate: false },
       );
       /* View log */
-      function handleViewLog(value) {
+      function handleViewLog(value: Recordable) {
         openLogModal(true, { project: value });
       }
       // teamid update

@@ -22,6 +22,7 @@ import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
 import { fetchLatest, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
+import { AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 
@@ -38,14 +39,14 @@ export const useFlinkApplication = (openStartModal: Fn) => {
   };
 
   /* check */
-  function handleCheckLaunchApp(app) {
+  function handleCheckLaunchApp(app: Recordable) {
     if (app['appControl']['allowBuild'] === true) {
       handleLaunchApp(app, false);
     } else {
       createWarningModal({
         title: 'WARNING',
         content: `
-          <p>${t('flink.app.launch.launchTitle')}</p>
+          <p class="pt-10px">${t('flink.app.launch.launchTitle')}</p>
           <p>${t('flink.app.launch.launchDesc')}</p>
         `,
         okType: 'danger',
@@ -55,7 +56,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
   }
 
   /* Launch App */
-  async function handleLaunchApp(app, force: boolean) {
+  async function handleLaunchApp(app: Recordable, force: boolean) {
     const { data } = await fetchBuild({
       appId: app.id,
       forceBuild: force,
@@ -79,7 +80,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
   }
 
   /* start application */
-  function handleAppCheckStart(app) {
+  function handleAppCheckStart(app: Recordable) {
     // when then app is building, show forced starting modal
     if (app['appControl']['allowStart'] === false) {
       handleFetchBuildDetail(app);
@@ -88,10 +89,12 @@ export const useFlinkApplication = (openStartModal: Fn) => {
         content: () => {
           const content: Array<VNode> = [];
           if (appBuildDetail.pipeline == null) {
-            content.push(h('p', null, 'No build record exists for the current application.'));
+            content.push(
+              h('p', { class: 'pt-10px' }, 'No build record exists for the current application.'),
+            );
           } else {
             content.push(
-              h('p', null, [
+              h('p', { class: 'pt-10px' }, [
                 'The current build state of the application is',
                 h(
                   Tag,
@@ -115,11 +118,11 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     }
   }
 
-  async function handleStart(app) {
+  async function handleStart(app: Recordable) {
     if (app.flinkVersion == null) {
       Swal.fire('Failed', 'please set flink version first.', 'error');
     } else {
-      if (!optionApps.starting.get(app.id) || app['optionState'] === 0) {
+      if (!optionApps.starting.get(app.id) || app['optionState'] === OptionStateEnum.NONE) {
         const res = await fetchLatest({
           appId: app.id,
         });
@@ -129,7 +132,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             pageNum: 1,
             pageSize: 9999,
           });
-          historySavePoint.value = resp.records.filter((x) => x.path);
+          historySavePoint.value = resp.records.filter((x: Recordable) => x.path);
         }
         openStartModal(true, {
           latestSavePoint: res,
@@ -141,7 +144,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     }
   }
 
-  async function handleFetchBuildDetail(app) {
+  async function handleFetchBuildDetail(app: Recordable) {
     const res = await fetchBuildDetail({
       appId: app.id,
     });
@@ -149,24 +152,37 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     appBuildDetail.docker = res.docker;
   }
 
-  function handleCanStop(app) {
+  function handleCanStop(app: Recordable) {
     const optionTime = new Date(app['optionTime']).getTime();
     const nowTime = new Date().getTime();
     if (nowTime - optionTime >= 60 * 1000) {
       const state = app['optionState'];
-      if (state === 0) {
-        return [3, 4, 8].includes(app.state) || false;
+      if (state === OptionStateEnum.NONE) {
+        return (
+          [AppStateEnum.STARTING, AppStateEnum.RESTARTING, AppStateEnum.CANCELLING].includes(
+            app.state,
+          ) || false
+        );
       }
       return true;
     }
     return false;
   }
-  function handleForcedStop(app) {
+  function handleForcedStop(app: Recordable) {
     let option = 'starting';
     const optionState = app['optionState'];
-    const stateMap = { 3: 'starting', 4: 'restarting', 8: 'cancelling' };
-    const optionStateMap = { 1: 'launching', 2: 'cancelling', 3: 'starting', 4: 'savePointing' };
-    if (optionState === 0) {
+    const stateMap = {
+      [AppStateEnum.STARTING]: 'starting',
+      [AppStateEnum.RESTARTING]: 'restarting',
+      [AppStateEnum.CANCELLING]: 'cancelling',
+    };
+    const optionStateMap = {
+      [OptionStateEnum.LAUNCHING]: 'launching',
+      [OptionStateEnum.CANCELLING]: 'cancelling',
+      [OptionStateEnum.STARTING]: 'starting',
+      [OptionStateEnum.SAVEPOINTING]: 'savePointing',
+    };
+    if (optionState === OptionStateEnum.NONE) {
       option = stateMap[app.state];
     } else {
       option = optionStateMap[optionState];
@@ -292,7 +308,11 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             <Form.Item label="Application Name">
               <Alert message={app.jobName} type="info" />
             </Form.Item>
-            {[2, 3, 4].includes(app.executionMode) && (
+            {[
+              ExecModeEnum.YARN_PER_JOB,
+              ExecModeEnum.YARN_SESSION,
+              ExecModeEnum.YARN_APPLICATION,
+            ].includes(app.executionMode) && (
               <Form.Item
                 label="YARN Application Id"
                 name="appId"

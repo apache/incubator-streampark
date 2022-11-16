@@ -46,6 +46,7 @@
   import UseSysHadoopConf from './components/UseSysHadoopConf.vue';
   import { CreateParams } from '/@/api/flink/app/app.type';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
+  import { AppTypeEnum, ClusterStateEnum, JobTypeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
 
   const FlinkSqlEditor = createAsyncComponent(() => import('./components/FlinkSql.vue'), {
     loading: true,
@@ -151,13 +152,16 @@
     }
   }
 
-  function handleCluster(values) {
+  function handleCluster(values: Recordable) {
     const cluster =
       unref(flinkClusters).filter((c) => {
         if (values.flinkClusterId) {
-          return c.id == values.flinkClusterId && c.clusterState === 1;
+          return c.id == values.flinkClusterId && c.clusterState === ClusterStateEnum.STARTED;
         } else {
-          return c.clusterId == values.yarnSessionClusterId && c.clusterState === 1;
+          return (
+            c.clusterId == values.yarnSessionClusterId &&
+            c.clusterState === ClusterStateEnum.STARTED
+          );
         }
       })[0] || null;
     if (cluster) {
@@ -173,7 +177,7 @@
   async function handleSubmitCustomJob(values) {
     handleCluster(values);
     const params = {
-      jobType: 1,
+      jobType: JobTypeEnum.JAR,
       projectId: values.project || null,
       module: values.module || null,
       appType: values.appType,
@@ -183,9 +187,9 @@
     const resourceFrom = values.resourceFrom;
     if (resourceFrom != null) {
       if (resourceFrom === 'csv') {
-        params['resourceFrom'] = 1;
+        params['resourceFrom'] = ResourceFromEnum.CICD;
         //streampark flink
-        if (values.appType === '1') {
+        if (values.appType == AppTypeEnum.STREAMPARK_FLINK) {
           const configVal = values['config'];
           params['format'] = configVal.endsWith('.properties') ? 2 : 1;
           if (values.configOverride == null) {
@@ -204,8 +208,8 @@
       } else {
         // from upload
         Object.assign(params, {
-          resourceFrom: 2,
-          appType: 2,
+          resourceFrom: ResourceFromEnum.UPLOAD,
+          appType: AppTypeEnum.APACHE_FLINK,
           jar: unref(uploadJar),
           mainClass: values.mainClass,
         });
@@ -214,7 +218,7 @@
     }
   }
   /* flink sql mode */
-  async function handleSubmitSQL(values) {
+  async function handleSubmitSQL(values: Recordable) {
     // Trigger a pom confirmation operation.
     await unref(dependencyRef)?.handleApplyPom();
     // common params...
@@ -241,9 +245,9 @@
 
     handleCluster(values);
     const params = {
-      jobType: 2,
+      jobType: JobTypeEnum.SQL,
       flinkSql: values.flinkSql,
-      appType: 1,
+      appType: AppTypeEnum.STREAMPARK_FLINK,
       config,
       format: values.isSetConfig ? 1 : null,
       dependency:

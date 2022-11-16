@@ -43,21 +43,6 @@ export enum ExecModeEnum {
   KUBERNETES_APPLICATION = 6,
 }
 
-export const executionMap = {
-  /**1. remote (standalone) */
-  REMOTE: ExecModeEnum.REMOTE,
-  /**2. yarn per-job (deprecated, please use yarn-application mode) */
-  YARN_PER_JOB: ExecModeEnum.YARN_PER_JOB,
-  /**3. yarn session */
-  YARN_SESSION: ExecModeEnum.YARN_SESSION,
-  /**4. yarn application */
-  YARN_APPLICATION: ExecModeEnum.YARN_APPLICATION,
-  /**5. kubernetes session */
-  KUBERNETES_SESSION: ExecModeEnum.KUBERNETES_SESSION,
-  /**6. kubernetes application */
-  KUBERNETES_APPLICATION: ExecModeEnum.KUBERNETES_APPLICATION,
-};
-
 export enum LaunchStateEnum {
   /** launch failed */
   FAILED = -1,
@@ -69,20 +54,16 @@ export enum LaunchStateEnum {
   LAUNCHING = 2,
   /** launch complete, need restart */
   NEED_RESTART = 3,
-  /**  need rollback */
+  /** need rollback */
   NEED_ROLLBACK = 4,
-  /**
-   * project has changed, need to check the jar whether to be re-selected
-   */
+  /** project has changed, need to check the jar whether to be re-selected */
   NEED_CHECK = 5,
-  /**
-   * revoked
-   */
+  /** revoked  */
   REVOKED = 10,
 }
 
 export enum OptionStateEnum {
-  /**  Application which is currently action: none. */
+  /** Application which is currently action: none. */
   NONE = 0,
   /** Application which is currently action: deploying. */
   LAUNCHING = 1,
@@ -92,4 +73,129 @@ export enum OptionStateEnum {
   STARTING = 3,
   /** Application which is currently action: savepointing. */
   SAVEPOINTING = 4,
+}
+
+export enum AppStateEnum {
+  /** added new job to database  */
+  ADDED = 0,
+  /** The job has been received by the Dispatcher, and is waiting for the job manager to be created. */
+  INITIALIZING = 1,
+  /** Job is newly created, no task has started to run. */
+  CREATED = 2,
+  /** Application which is currently starting. */
+  STARTING = 3,
+  /** Application which is currently running. */
+  RESTARTING = 4,
+  /** Some tasks are scheduled or running, some may be pending, some may be finished. */
+  RUNNING = 5,
+  /** The job has failed and is currently waiting for the cleanup to complete. */
+  FAILING = 6,
+  /** The job has failed with a non-recoverable task failure.*/
+  FAILED = 7,
+  /** Job is being cancelled. */
+  CANCELLING = 8,
+  /** Job has been cancelled. */
+  CANCELED = 9,
+  /** All of the job's tasks have successfully finished. */
+  FINISHED = 10,
+  /** The job has been suspended which means that it has been stopped but not been removed from a potential HA job store. */
+  SUSPENDED = 11,
+  /** The job is currently reconciling and waits for task execution report to recover state. */
+  RECONCILING = 12,
+  /** Lost */
+  LOST = 13,
+  /** MAPPING */
+  MAPPING = 14,
+  /** OTHER */
+  OTHER = 15,
+  /** has rollback */
+  REVOKED = 16,
+  /**
+   * Lost track of flink job temporarily.
+   * A complete loss of flink job tracking translates into LOST state.
+   */
+  SILENT = 17,
+  /** Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED */
+  TERMINATED = 18,
+  /** Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED */
+  POS_TERMINATED = 19,
+  /** job SUCCEEDED on yarn */
+  SUCCEEDED = 20,
+  /** has killed in Yarn */
+  KILLED = -9,
+}
+
+export enum ClusterStateEnum {
+  /** The cluster was just created but not started */
+  CREATED = 0,
+  /** cluster started */
+  STARTED = 1,
+  /** cluster stopped */
+  STOPED = 2,
+}
+
+export enum AppTypeEnum {
+  /** StreamPark Flink */
+  STREAMPARK_FLINK = 1,
+  /** Apache Flink */
+  APACHE_FLINK = 2,
+  /** StreamPark Spark */
+  STREAMPARK_SPARK = 3,
+  /** Apache Spark */
+  APACHE_SPARK = 4,
+}
+
+export enum JobTypeEnum {
+  JAR = 1,
+  SQL = 2,
+}
+
+export enum CandidateTypeEnum {
+  /** non candidate */
+  NONE = 0,
+  /** newly added record becomes a candidate */
+  NEW = 1,
+  /** specific history becomes a candidate */
+  HISTORY = 2,
+}
+
+export enum ResourceFromEnum {
+  /** cicd(build from cvs) */
+  CICD = 1,
+  /** upload local jar */
+  UPLOAD = 2,
+}
+
+export enum UseStrategyEnum {
+  /** use existing */
+  USE_EXIST = 1,
+  /** reselect */
+  RESELECT = 2,
+}
+
+export enum SavePointEnum {
+  CHECK_POINT = 1,
+  SAVE_POINT = 2
+}
+
+export enum PipelineStepEnum {
+  UNKNOWN = 0,
+  WAITING = 1,
+  RUNNING = 2,
+  SUCCESS = 3,
+  FAILURE = 4,
+  SKIPPED = 5,
+}
+
+export enum AlertTypeEnum {
+  /** mail */
+  MAIL = 1,
+  /** dingtalk */
+  DINGTALK = 2,
+  /** wecom */
+  WECOM = 4,
+  /**message */
+  MESSAGE = 8,
+  /** lark */
+  LARK = 16,
 }

@@ -21,6 +21,7 @@ import { h } from 'vue';
 import State from '../components/State';
 import Icon from '/@/components/Icon';
 import { dateToDuration } from '/@/utils/dateUtil';
+import { AppTypeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 
 export const getDescSchema = (): DescItem[] => {
   return [
@@ -43,14 +44,14 @@ export const getDescSchema = (): DescItem[] => {
           ),
         ),
     },
-    { field: 'module', label: 'Module', show: (data) => data.jobType != 2 },
-    { field: 'projectName', label: 'Project', show: (data) => data.jobType != 2 },
+    { field: 'module', label: 'Module', show: (data) => data.jobType != JobTypeEnum.SQL },
+    { field: 'projectName', label: 'Project', show: (data) => data.jobType != JobTypeEnum.SQL },
     {
       field: 'appType',
       label: 'Application Type',
       render: (curVal) =>
-        h(Tag, { color: curVal == 1 ? 'cyan' : 'blue' }, () =>
-          curVal == 1 ? 'StreamPark Flink' : 'Apache Flink',
+        h(Tag, { color: curVal == AppTypeEnum.STREAMPARK_FLINK ? 'cyan' : 'blue' }, () =>
+          curVal == AppTypeEnum.STREAMPARK_FLINK ? 'StreamPark Flink' : 'Apache Flink',
         ),
     },
     {
