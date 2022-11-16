@@ -31,7 +31,7 @@ class AlertTypeTest {
 
     @Test
     void encodeTest() {
-        int level = AlertType.encode(Arrays.asList(AlertType.dingTalk, AlertType.email));
+        int level = AlertType.encode(Arrays.asList(AlertType.DING_TALK, AlertType.EMAIL));
         System.out.println(level);
     }
 }

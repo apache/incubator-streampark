@@ -18,27 +18,59 @@
 import { defineComponent, toRefs, unref } from 'vue';
 import { Tag, Tooltip } from 'ant-design-vue';
 import './State.less';
-import { LaunchStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
+import { AppStateEnum, LaunchStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 
 /*  state map*/
 const stateMap = {
-  0: { color: '#2f54eb', title: 'ADDED' },
-  1: { color: '#738df8', title: 'INITIALIZING', class: 'status-processing-initializing' },
-  2: { color: '#2f54eb', title: 'CREATED' },
-  3: { color: '#1AB58E', title: 'STARTING', class: 'status-processing-starting' },
-  4: { color: '#13c2c2', title: 'RESTARTING', class: 'status-processing-restarting' },
-  5: { color: '#52c41a', title: 'RUNNING', class: 'status-processing-running' },
-  6: { color: '#fa541c', title: 'FAILING', class: 'status-processing-failing' },
-  7: { color: '#f5222d', title: 'FAILED' },
-  8: { color: '#faad14', title: 'CANCELLING' },
-  9: { color: '#fa8c16', title: 'CANCELED' },
-  10: { color: '#1890ff', title: 'FINISHED' },
-  11: { color: '#722ed1', title: 'SUSPENDED' },
-  12: { color: '#eb2f96', title: 'RECONCILING', class: 'status-processing-reconciling' },
-  13: { color: '#000000', title: 'LOST' },
-  14: { color: '#13c2c2', title: 'MAPPING', class: 'status-processing-restarting' },
-  17: { color: '#738df8', title: 'SILENT', class: 'status-processing-initializing' },
-  18: { color: '#8E50FF', title: 'TERMINATED' },
+  [AppStateEnum.ADDED]: { color: '#2f54eb', title: 'ADDED' },
+  [AppStateEnum.INITIALIZING]: {
+    color: '#738df8',
+    title: 'INITIALIZING',
+    class: 'status-processing-initializing',
+  },
+  [AppStateEnum.CREATED]: { color: '#2f54eb', title: 'CREATED' },
+  [AppStateEnum.STARTING]: {
+    color: '#1AB58E',
+    title: 'STARTING',
+    class: 'status-processing-starting',
+  },
+  [AppStateEnum.RESTARTING]: {
+    color: '#13c2c2',
+    title: 'RESTARTING',
+    class: 'status-processing-restarting',
+  },
+  [AppStateEnum.RUNNING]: {
+    color: '#52c41a',
+    title: 'RUNNING',
+    class: 'status-processing-running',
+  },
+  [AppStateEnum.FAILING]: {
+    color: '#fa541c',
+    title: 'FAILING',
+    class: 'status-processing-failing',
+  },
+  [AppStateEnum.FAILED]: { color: '#f5222d', title: 'FAILED' },
+  [AppStateEnum.CANCELLING]: { color: '#faad14', title: 'CANCELLING' },
+  [AppStateEnum.CANCELED]: { color: '#fa8c16', title: 'CANCELED' },
+  [AppStateEnum.FINISHED]: { color: '#1890ff', title: 'FINISHED' },
+  [AppStateEnum.SUSPENDED]: { color: '#722ed1', title: 'SUSPENDED' },
+  [AppStateEnum.RECONCILING]: {
+    color: '#eb2f96',
+    title: 'RECONCILING',
+    class: 'status-processing-reconciling',
+  },
+  [AppStateEnum.LOST]: { color: '#000000', title: 'LOST' },
+  [AppStateEnum.MAPPING]: {
+    color: '#13c2c2',
+    title: 'MAPPING',
+    class: 'status-processing-restarting',
+  },
+  [AppStateEnum.SILENT]: {
+    color: '#738df8',
+    title: 'SILENT',
+    class: 'status-processing-initializing',
+  },
+  [AppStateEnum.TERMINATED]: { color: '#8E50FF', title: 'TERMINATED' },
 };
 /*  option state map*/
 const optionStateMap = {
@@ -122,7 +154,7 @@ export default defineComponent({
     };
 
     const renderState = () => {
-      if (unref(data).optionState === 0) {
+      if (unref(data).optionState === OptionStateEnum.NONE) {
         return <div class="app_state">{renderTag(stateMap, unref(data).state)}</div>;
       } else {
         return <div class="app_state">{renderTag(optionStateMap, unref(data).optionState)}</div>;
@@ -146,7 +178,11 @@ export default defineComponent({
       });
     }
     const renderOtherOption = () => {
-      if ([4, 5, 6].includes(unref(data)?.state || unref(data)?.optionState == 4)) {
+      if (
+        [AppStateEnum.RESTARTING, AppStateEnum.RUNNING, AppStateEnum.FAILING].includes(
+          unref(data)?.state || unref(data)?.optionState == OptionStateEnum.SAVEPOINTING,
+        )
+      ) {
         return (
           <div class="task-tag">
             {unref(data).totalTask && (

@@ -17,7 +17,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { exceptionPropWidth } from '/@/utils';
-  import { executionMap } from '/@/enums/flinkEnum';
+  import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'FlinkClusterSetting',
   });
@@ -58,7 +58,7 @@
     stoped: new Map(),
   };
   function isSessionMode(mode: number): boolean {
-    return [executionMap.YARN_SESSION, executionMap.KUBERNETES_SESSION].includes(mode);
+    return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
   }
 
   /* Get flink environmental data*/
@@ -67,9 +67,9 @@
     clusters.value = clusterList;
     for (const key in clusterList) {
       const cluster = clusterList[key];
-      if (cluster.clusterState === 0) {
+      if (cluster.clusterState === ClusterStateEnum.CREATED) {
         optionClusters.created.set(cluster.id, new Date().getTime());
-      } else if (cluster.clusterState === 1) {
+      } else if (cluster.clusterState === ClusterStateEnum.STARTED) {
         optionClusters.starting.set(cluster.id, new Date().getTime());
       } else {
         optionClusters.stoped.set(cluster.id, new Date().getTime());
@@ -217,7 +217,7 @@
       <template #actions>
         <Tooltip :title="t('flink.setting.cluster.edit')">
           <a-button
-            v-if="handleIsStart(item) && item.executionMode == executionMap.YARN_SESSION"
+            v-if="handleIsStart(item) && item.executionMode == ExecModeEnum.YARN_SESSION"
             v-auth="'cluster:update'"
             :disabled="true"
             @click="handleEditCluster(item)"
@@ -228,7 +228,7 @@
             <EditOutlined />
           </a-button>
           <a-button
-            v-if="!handleIsStart(item) || item.executionMode == executionMap.REMOTE"
+            v-if="!handleIsStart(item) || item.executionMode == ExecModeEnum.REMOTE"
             v-auth="'cluster:update'"
             @click="handleEditCluster(item)"
             shape="circle"

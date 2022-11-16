@@ -434,7 +434,7 @@
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
-                                    <arguments>install</arguments>
+                                    <arguments>install --ingore-scripts</arguments>
                                 </configuration>
                             </execution>
                             <execution>

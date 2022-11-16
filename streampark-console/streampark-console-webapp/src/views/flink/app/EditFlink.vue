@@ -38,6 +38,7 @@
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
   import { useDrawer } from '/@/components/Drawer';
+  import { ResourceFromEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const { t } = useI18n();
@@ -173,7 +174,7 @@
     }
     const value = await handleGetApplication();
     setFieldsValue(value);
-    if (app.resourceFrom == 1) {
+    if (app.resourceFrom == ResourceFromEnum.CICD) {
       jars.value = await fetchListJars({
         id: app.projectId,
         module: app.module,

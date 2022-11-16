@@ -16,7 +16,7 @@
  */
 import { dateToDuration } from '/@/utils/dateUtil';
 import { BasicColumn } from '/@/components/Table';
-import { ExecModeEnum, LaunchStateEnum } from '/@/enums/flinkEnum';
+import { ExecModeEnum, LaunchStateEnum, AppStateEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 
@@ -45,16 +45,16 @@ export const getAppColumns = (): BasicColumn[] => [
     dataIndex: 'state',
     width: 120,
     filters: [
-      { text: t('flink.app.runStatusOptions.added'), value: '0' },
-      { text: t('flink.app.runStatusOptions.starting'), value: '3' },
-      { text: t('flink.app.runStatusOptions.running'), value: '5' },
-      { text: t('flink.app.runStatusOptions.failed'), value: '7' },
-      { text: t('flink.app.runStatusOptions.canceled'), value: '9' },
-      { text: t('flink.app.runStatusOptions.finished'), value: '10' },
-      { text: t('flink.app.runStatusOptions.suspended'), value: '11' },
-      { text: t('flink.app.runStatusOptions.lost'), value: '13' },
-      { text: t('flink.app.runStatusOptions.silent'), value: '17' },
-      { text: t('flink.app.runStatusOptions.terminated'), value: '18' },
+      { text: t('flink.app.runStatusOptions.added'), value: String(AppStateEnum.ADDED) },
+      { text: t('flink.app.runStatusOptions.starting'), value: String(AppStateEnum.STARTING) },
+      { text: t('flink.app.runStatusOptions.running'), value: String(AppStateEnum.RUNNING) },
+      { text: t('flink.app.runStatusOptions.failed'), value: String(AppStateEnum.FAILED) },
+      { text: t('flink.app.runStatusOptions.canceled'), value: String(AppStateEnum.CANCELED) },
+      { text: t('flink.app.runStatusOptions.finished'), value: String(AppStateEnum.FINISHED) },
+      { text: t('flink.app.runStatusOptions.suspended'), value: String(AppStateEnum.SUSPENDED) },
+      { text: t('flink.app.runStatusOptions.lost'), value: String(AppStateEnum.LOST) },
+      { text: t('flink.app.runStatusOptions.silent'), value: String(AppStateEnum.SILENT) },
+      { text: t('flink.app.runStatusOptions.terminated'), value: String(AppStateEnum.TERMINATED) },
     ],
   },
   { title: t('flink.app.launchBuild'), dataIndex: 'launch', width: 220 },

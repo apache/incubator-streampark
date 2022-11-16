@@ -25,7 +25,7 @@ import { propTypes } from '/@/utils/propTypes';
 export const basicProps = {
   model: {
     type: Object as PropType<Recordable>,
-    default: {},
+    default: () => ({}),
   },
   // Label width Fixed width
   labelWidth: {
