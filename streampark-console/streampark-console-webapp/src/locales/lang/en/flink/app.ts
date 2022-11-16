@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 export default {
+  id: 'ID',
   appName: 'Application Name',
   searchName: 'Name',
   tags: 'Tags',
@@ -61,6 +62,9 @@ export default {
   dragUploadTip:
     'Support for a single upload. You can upload a local jar here to support for current Job',
   dependencyError: 'please set flink version first.',
+  status: 'Status',
+  startTime: 'Start Time',
+  endTime: 'End Time',
   launch: {
     launchTitle: 'The current launch of the application is in progress.',
     launchDesc: 'are you sure you want to force another build',
