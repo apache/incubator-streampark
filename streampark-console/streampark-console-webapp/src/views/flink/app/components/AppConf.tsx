@@ -26,7 +26,7 @@ import { ApiTreeSelect } from '/@/components/Form';
 import { fetchAppConf, fetchName } from '/@/api/flink/app/app';
 import { SettingTwoTone } from '@ant-design/icons-vue';
 import { fetchListConf } from '/@/api/flink/project';
-import { StrategyEnum } from '/@/enums/flinkEnum';
+import { UseStrategyEnum } from '/@/enums/flinkEnum';
 
 export default defineComponent({
   name: 'AppConf',
@@ -70,10 +70,10 @@ export default defineComponent({
               value={unref(model).strategy}
               onChange={(value: any) => (model.value.strategy = value)}
             >
-              <Select.Option value={StrategyEnum.USE_EXIST}>use existing</Select.Option>
-              <Select.Option value={StrategyEnum.RESELECT}>reselect</Select.Option>
+              <Select.Option value={UseStrategyEnum.USE_EXIST}>use existing</Select.Option>
+              <Select.Option value={UseStrategyEnum.RESELECT}>reselect</Select.Option>
             </Select>
-            {unref(model).strategy == StrategyEnum.USE_EXIST && (
+            {unref(model).strategy == UseStrategyEnum.USE_EXIST && (
               <Form.Item style="width: calc(75% - 75px);margin-left:10px;">
                 <Select
                   class="!w-full"
@@ -89,7 +89,7 @@ export default defineComponent({
                 </Select>
               </Form.Item>
             )}
-            {unref(model).strategy == StrategyEnum.RESELECT && (
+            {unref(model).strategy == UseStrategyEnum.RESELECT && (
               <Form.Item style="width: calc(75% - 60px)">
                 <ApiTreeSelect
                   class="!w-full"
@@ -105,7 +105,7 @@ export default defineComponent({
 
             <Button
               disabled={
-                unref(model).strategy == StrategyEnum.USE_EXIST
+                unref(model).strategy == UseStrategyEnum.USE_EXIST
                   ? false
                   : unref(model).config
                   ? false

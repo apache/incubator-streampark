@@ -76,7 +76,7 @@ public final class WebUtils {
      * @return underscore
      */
     public static String camelToUnderscore(String value) {
-        if (StringUtils.isBlank(value)) {
+        if (StringUtils.isBlank(value) || value.contains("_")) {
             return value;
         }
         String[] arr = StringUtils.splitByCharacterTypeCamelCase(value);

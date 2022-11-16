@@ -48,7 +48,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
-  import { ClusterStateEnum, JobTypeEnum, StrategyEnum } from '/@/enums/flinkEnum';
+  import { ClusterStateEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const go = useGo();
@@ -232,7 +232,7 @@
   async function handleSubmitCustomJob(values: Recordable) {
     try {
       const format =
-        values.strategy == StrategyEnum.USE_EXIST
+        values.strategy == UseStrategyEnum.USE_EXIST
           ? app.format
           : (values.config || '').endsWith('.properties')
           ? 2
@@ -255,7 +255,7 @@
         values.flinkClusterId = cluster.id;
         values.yarnSessionClusterId = cluster.clusterId;
       }
-      const configId = values.strategy == StrategyEnum.USE_EXIST ? app.configId : null;
+      const configId = values.strategy == UseStrategyEnum.USE_EXIST ? app.configId : null;
       const params = {
         id: app.id,
         format: format,
