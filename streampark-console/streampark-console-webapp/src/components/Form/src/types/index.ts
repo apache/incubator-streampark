@@ -124,7 +124,6 @@ export type ComponentType =
   | 'WeekPicker'
   | 'TimePicker'
   | 'Switch'
-  | 'StrengthMeter'
   | 'Upload'
   | 'IconPicker'
   | 'Render'

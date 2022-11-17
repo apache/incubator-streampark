@@ -146,7 +146,7 @@ export const useEditStreamParkSchema = (
         label: 'Project',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
-        ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
+        ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.projectName,
       },
       { field: 'project', label: 'ProjectId', component: 'Input', show: false },
       {
@@ -154,7 +154,7 @@ export const useEditStreamParkSchema = (
         label: 'Application',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
-        ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
+        ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.module,
       },
       { field: 'configId', label: 'configId', component: 'Input', show: false },
       {

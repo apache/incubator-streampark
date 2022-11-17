@@ -43,10 +43,12 @@
   });
   function handleUploadJar(info) {
     const status = info.file.status;
-    if (status === 'error') {
+    if (status === 'done') {
+      emit('update:loading', false);
+    } else if (status === 'error') {
+      emit('update:loading', false);
       createMessage.error(`${info.file.name} file upload failed.`);
     }
-    emit('update:loading', false);
   }
   /* Callback before file upload */
   function handleBeforeUpload(file) {
