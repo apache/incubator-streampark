@@ -67,7 +67,7 @@
     }
   }
 
-  @media screen and (max-width: 1585px) {
+  @media screen and (max-width: 1626px) {
     .@{prefix-cls}:not(.collapse-slogo) {
       display: none;
     }

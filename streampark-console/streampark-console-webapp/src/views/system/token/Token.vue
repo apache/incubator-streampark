@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <div>
+  <PageWrapper>
     <BasicTable @register="registerTable">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
@@ -49,7 +49,7 @@
       </template>
     </BasicTable>
     <TokenDrawer @register="registerDrawer" @success="handleSuccess" />
-  </div>
+  </PageWrapper>
 </template>
 <script lang="ts">
   import { defineComponent, unref } from 'vue';
@@ -63,10 +63,10 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
-
+  import { PageWrapper } from '/@/components/Page';
   export default defineComponent({
     name: 'UserToken',
-    components: { BasicTable, TokenDrawer, TableAction, Icon },
+    components: { BasicTable, TokenDrawer, TableAction, Icon, PageWrapper },
     setup() {
       const { t } = useI18n();
       const { createMessage } = useMessage();
@@ -75,12 +75,19 @@
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
         title: t('system.token.table.title'),
         api: fetTokenList,
+        // beforeFetch: (params) => {
+        //   if (params.user) {
+        //     params.username = params.user;
+        //     delete params.user;
+        //   }
+        //   return params;
+        // },
         columns,
         formConfig: {
           baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
         },
-        useSearchForm: true,
+        useSearchForm: false,
         showTableSetting: true,
         rowKey: 'tokenId',
         showIndexColumn: false,
