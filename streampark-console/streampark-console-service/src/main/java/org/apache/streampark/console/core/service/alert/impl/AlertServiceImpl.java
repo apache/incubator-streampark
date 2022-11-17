@@ -27,7 +27,6 @@ import org.apache.streampark.console.core.enums.AlertType;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
-import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +78,7 @@ public class AlertServiceImpl implements AlertService {
         Tuple2<Boolean, AlertException> reduce = alertTypes.stream().map(alertType -> {
             try {
                 boolean alertRes = SpringContextUtils
-                    .getBean(alertType.getServiceType(), AlertNotifyService.class)
+                    .getBean(alertType.getServiceClass())
                     .doAlert(params, alertTemplate);
                 return new Tuple2<Boolean, AlertException>(alertRes, null);
             } catch (AlertException e) {

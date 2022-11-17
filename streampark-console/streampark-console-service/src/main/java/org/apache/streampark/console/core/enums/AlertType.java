@@ -17,6 +17,14 @@
 
 package org.apache.streampark.console.core.enums;
 
+import org.apache.streampark.console.core.service.alert.AlertNotifyService;
+import org.apache.streampark.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
+import org.apache.streampark.console.core.service.alert.impl.EmailAlertNotifyServiceImpl;
+import org.apache.streampark.console.core.service.alert.impl.HttpCallbackAlertNotifyServiceImpl;
+import org.apache.streampark.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
+import org.apache.streampark.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
 import org.springframework.util.CollectionUtils;
@@ -26,21 +34,21 @@ import java.util.List;
 import java.util.Map;
 
 public enum AlertType {
-    EMAIL(1, "email"),
-    DING_TALK(2, "dingTalk"),
-    WE_COM(4, "weCom"),
-    HTTP_CALLBACK(8, "httpCallback"),
-    LARK(16, "lark");
+    EMAIL(1, EmailAlertNotifyServiceImpl.class),
+    DING_TALK(2, DingTalkAlertNotifyServiceImpl.class),
+    WE_COM(4, WeComAlertNotifyServiceImpl.class),
+    HTTP_CALLBACK(8, HttpCallbackAlertNotifyServiceImpl.class),
+    LARK(16, LarkAlertNotifyServiceImpl.class);
 
     private final Integer code;
 
-    private final String name;
+    private final Class serviceClass;
 
     private static Map<Integer, AlertType> cacheMap;
 
-    AlertType(Integer code, String name) {
+    AlertType(Integer code, Class serviceClass) {
         this.code = code;
-        this.name = name;
+        this.serviceClass = serviceClass;
     }
 
     /**
@@ -83,13 +91,14 @@ public enum AlertType {
         return cacheMap.get(code);
     }
 
-    public String getServiceType() {
-        return this.name + "AlertNotifyServiceImpl";
-    }
-
     @JsonValue
     public int getCode() {
         return this.code;
+    }
+
+    @JsonIgnore
+    public Class<AlertNotifyService> getServiceClass() {
+        return this.serviceClass;
     }
 
 }
