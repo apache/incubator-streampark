@@ -26,17 +26,21 @@ import java.util.List;
 import java.util.Map;
 
 public enum AlertType {
-    EMAIL(1),
-    DING_TALK(2),
-    WE_COM(4),
-    HTTP_CALLBACK(8),
-    LARK(16);
+    EMAIL(1, "email"),
+    DING_TALK(2, "dingTalk"),
+    WE_COM(4, "weCom"),
+    HTTP_CALLBACK(8, "httpCallback"),
+    LARK(16, "lark");
 
     private final Integer code;
+
+    private final String name;
+
     private static Map<Integer, AlertType> cacheMap;
 
-    AlertType(Integer code) {
+    AlertType(Integer code, String name) {
         this.code = code;
+        this.name = name;
     }
 
     /**
@@ -80,11 +84,12 @@ public enum AlertType {
     }
 
     public String getServiceType() {
-        return this.name() + "AlertNotifyServiceImpl";
+        return this.name + "AlertNotifyServiceImpl";
     }
 
     @JsonValue
     public int getCode() {
         return this.code;
     }
+
 }
