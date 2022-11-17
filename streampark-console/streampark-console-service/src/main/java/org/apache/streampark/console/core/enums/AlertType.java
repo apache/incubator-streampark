@@ -33,6 +33,7 @@ public enum AlertType {
     LARK(16);
 
     private final Integer code;
+
     private static Map<Integer, AlertType> cacheMap;
 
     AlertType(Integer code) {
@@ -79,12 +80,9 @@ public enum AlertType {
         return cacheMap.get(code);
     }
 
-    public String getServiceType() {
-        return this.name() + "AlertNotifyServiceImpl";
-    }
-
     @JsonValue
     public int getCode() {
         return this.code;
     }
+
 }
