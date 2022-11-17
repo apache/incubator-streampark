@@ -181,10 +181,11 @@
         userStore.setData(data);
         let successText = t('sys.login.loginSuccessDesc');
         if (data?.user) {
-          const { teamId, nickName } = data.user;
-          userStore.teamId = teamId || '';
-          sessionStorage.setItem(APP_TEAMID_KEY_, teamId || '');
-          localStorage.setItem(APP_TEAMID_KEY_, teamId || '');
+          const { lastTeamId, nickName } = data.user;
+          // The lastTeamId of user as the current teamId.
+          userStore.teamId = lastTeamId || '';
+          sessionStorage.setItem(APP_TEAMID_KEY_, userStore.teamId);
+          localStorage.setItem(APP_TEAMID_KEY_, userStore.teamId);
           successText += `: ${nickName}`;
         }
 

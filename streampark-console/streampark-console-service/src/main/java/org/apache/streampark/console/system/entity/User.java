@@ -101,7 +101,7 @@ public class User implements Serializable {
     /**
      * The last set teamId
      */
-    private Long teamId;
+    private Long lastTeamId;
 
     public void dataMasking() {
         String dataMask = ConfigConst.DEFAULT_DATAMASK_STRING();
