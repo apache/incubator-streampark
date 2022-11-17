@@ -17,14 +17,6 @@
 
 package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.console.core.service.alert.AlertNotifyService;
-import org.apache.streampark.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
-import org.apache.streampark.console.core.service.alert.impl.EmailAlertNotifyServiceImpl;
-import org.apache.streampark.console.core.service.alert.impl.HttpCallbackAlertNotifyServiceImpl;
-import org.apache.streampark.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
-import org.apache.streampark.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
 import org.springframework.util.CollectionUtils;
@@ -34,21 +26,18 @@ import java.util.List;
 import java.util.Map;
 
 public enum AlertType {
-    EMAIL(1, EmailAlertNotifyServiceImpl.class),
-    DING_TALK(2, DingTalkAlertNotifyServiceImpl.class),
-    WE_COM(4, WeComAlertNotifyServiceImpl.class),
-    HTTP_CALLBACK(8, HttpCallbackAlertNotifyServiceImpl.class),
-    LARK(16, LarkAlertNotifyServiceImpl.class);
+    EMAIL(1),
+    DING_TALK(2),
+    WE_COM(4),
+    HTTP_CALLBACK(8),
+    LARK(16);
 
     private final Integer code;
 
-    private final Class serviceClass;
-
     private static Map<Integer, AlertType> cacheMap;
 
-    AlertType(Integer code, Class serviceClass) {
+    AlertType(Integer code) {
         this.code = code;
-        this.serviceClass = serviceClass;
     }
 
     /**
@@ -94,11 +83,6 @@ public enum AlertType {
     @JsonValue
     public int getCode() {
         return this.code;
-    }
-
-    @JsonIgnore
-    public Class<AlertNotifyService> getServiceClass() {
-        return this.serviceClass;
     }
 
 }

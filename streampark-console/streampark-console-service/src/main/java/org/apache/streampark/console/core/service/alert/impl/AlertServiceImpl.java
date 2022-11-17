@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.alert.impl;
 
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.core.bean.AlertConfigWithParams;
@@ -27,6 +28,7 @@ import org.apache.streampark.console.core.enums.AlertType;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
+import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -77,9 +79,9 @@ public class AlertServiceImpl implements AlertService {
         // No use thread pool, ensure that the alarm can be sent successfully
         Tuple2<Boolean, AlertException> reduce = alertTypes.stream().map(alertType -> {
             try {
-                boolean alertRes = SpringContextUtils
-                    .getBean(alertType.getServiceClass())
-                    .doAlert(params, alertTemplate);
+                Class<? extends AlertNotifyService> notifyServiceClass = getAlertServiceImpl(alertType);
+                AssertUtils.state(notifyServiceClass != null);
+                boolean alertRes = SpringContextUtils.getBean(notifyServiceClass).doAlert(params, alertTemplate);
                 return new Tuple2<Boolean, AlertException>(alertRes, null);
             } catch (AlertException e) {
                 return new Tuple2<>(false, e);
@@ -102,4 +104,22 @@ public class AlertServiceImpl implements AlertService {
 
         return reduce.f0;
     }
+
+    private Class<? extends AlertNotifyService> getAlertServiceImpl(AlertType alertType) {
+        switch (alertType) {
+            case EMAIL:
+                return EmailAlertNotifyServiceImpl.class;
+            case DING_TALK:
+                return DingTalkAlertNotifyServiceImpl.class;
+            case WE_COM:
+                return WeComAlertNotifyServiceImpl.class;
+            case LARK:
+                return LarkAlertNotifyServiceImpl.class;
+            case HTTP_CALLBACK:
+                return HttpCallbackAlertNotifyServiceImpl.class;
+            default:
+                return null;
+        }
+    }
+
 }
