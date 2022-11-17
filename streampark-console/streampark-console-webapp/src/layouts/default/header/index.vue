@@ -52,7 +52,7 @@
     <!-- action  -->
     <div :class="`${prefixCls}-action`">
       <a-button type="link" size="small" class="!hidden !md:block">
-        <span>Version:</span>
+        <span>{{ t('layout.header.version') }}:</span>
         <span class="pl-2px">{{ version }}</span>
       </a-button>
       <Divider type="vertical" />
@@ -119,6 +119,8 @@
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
   import { useLocale } from '/@/locales/useLocale';
   import { version } from '../../../../package.json';
+  import { useI18n } from '/@/hooks/web/useI18n';
+
   export default defineComponent({
     name: 'LayoutHeader',
     components: {
@@ -146,6 +148,7 @@
       fixed: propTypes.bool,
     },
     setup(props) {
+      const { t } = useI18n();
       const { prefixCls } = useDesign('layout-header');
       const {
         getShowTopMenu,
@@ -214,6 +217,7 @@
       });
 
       return {
+        t,
         prefixCls,
         getHeaderClass,
         getShowHeaderLogo,
