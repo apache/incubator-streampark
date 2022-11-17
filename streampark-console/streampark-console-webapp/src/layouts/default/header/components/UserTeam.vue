@@ -14,11 +14,17 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+<script lang="ts">
+  export default {
+    name: 'UserTeam',
+  };
+</script>
 <script setup lang="ts">
   import { ApiSelect } from '/@/components/Form';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { fetchUserTeam } from '/@/api/system/member';
-
+  import { useI18n } from '/@/hooks/web/useI18n';
+  const { t } = useI18n();
   const userStore = useUserStoreWithOut();
 
   function handleSetTeamId(value: string) {
@@ -36,7 +42,7 @@
 
 <template>
   <div class="flex items-center min-w-160px">
-    <span class="text-blue-500 pr-10px"> Team : </span>
+    <span class="text-blue-500 pr-10px"> {{ t('system.team.team') }} : </span>
     <ApiSelect
       :api="fetchUserTeam as any"
       labelField="teamName"

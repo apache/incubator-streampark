@@ -36,6 +36,7 @@
   import { columns, searchFormSchema } from './menu.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { isArray } from '/@/utils/is';
 
   export default defineComponent({
     name: 'MenuManagement',
@@ -47,6 +48,14 @@
       const [registerTable, { reload, expandAll }] = useTable({
         title: t('system.menu.table.title'),
         api: getMenuList,
+        afterFetch(result) {
+          try {
+            handleMenuName(result);
+          } catch (error) {
+            console.error(error);
+          }
+          return result;
+        },
         columns,
         formConfig: {
           baseColProps: { style: { paddingRight: '30px' } },
@@ -68,7 +77,16 @@
         //   dataIndex: 'action',
         // },
       });
-
+      function handleMenuName(menus: Recordable[]) {
+        if (isArray(menus)) {
+          menus.forEach((menu: Recordable) => {
+            if (menu.children && menu.children.length > 0) handleMenuName(menu.children);
+            if (menu.display && menu.type == '0' && /^\w+\.\w+$/.test(menu.title)) {
+              menu.text = t(`menu.${menu.text}`);
+            }
+          });
+        }
+      }
       function handleCreate() {
         openDrawer(true, { isUpdate: false });
       }

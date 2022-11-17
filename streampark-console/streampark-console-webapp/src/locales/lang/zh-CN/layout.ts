@@ -17,6 +17,7 @@
 export default {
   footer: { website: '官网', onlineDocument: '在线文档' },
   header: {
+    version: '版本',
     // user dropdown
     dropdownItemDoc: '文档',
     ChangePassword: '更改密码',

@@ -17,6 +17,7 @@
 export default {
   footer: { website: 'Website', onlineDocument: 'Document' },
   header: {
+    version: 'Version',
     // user dropdown
     dropdownItemDoc: 'Document',
     ChangePassword: 'ChangePassword',

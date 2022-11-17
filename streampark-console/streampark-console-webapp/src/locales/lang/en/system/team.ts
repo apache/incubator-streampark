@@ -16,6 +16,7 @@
  */
 export default {
   addTeam: 'Add Team',
+  team: 'Team',
   modifyTeam: 'Modify Team',
   deleteTeam: 'Delete Team',
   deletePopConfirm: 'Are you sure delete this team ?',
