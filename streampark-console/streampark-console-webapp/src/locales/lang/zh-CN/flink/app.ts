@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 export default {
-  id: '作业编号',
+  id: '作业ID',
   appName: '作业名称',
   searchName: '名称',
   tags: '作业标签',
