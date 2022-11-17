@@ -115,6 +115,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         }
 
         memberService.deleteByTeamId(teamId);
+        userService.clearLastTeam(teamId);
         this.removeById(teamId);
     }
 
