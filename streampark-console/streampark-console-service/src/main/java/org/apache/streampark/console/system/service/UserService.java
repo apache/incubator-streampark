@@ -118,9 +118,11 @@ public interface UserService extends IService<User> {
 
     List<User> getNoTokenUser();
 
-    void setLatestTeam(Long teamId, Long userId);
+    void setLastTeam(Long teamId, Long userId);
 
-    void unbindTeam(Long userId, Long teamId);
+    void clearLastTeam(Long userId, Long teamId);
+
+    void clearLastTeam(Long teamId);
 
     void fillInTeam(User user);
 
