@@ -289,7 +289,7 @@ export const renderIsSetConfig = (
   /* Open the sqlConf drawer */
   async function handleSQLConf(checked: boolean) {
     if (checked) {
-      if (unref(model.configOverride) != null) {
+      if (unref(model.configOverride)) {
         openConfDrawer(true, {
           configOverride: unref(model.configOverride),
         });

@@ -182,7 +182,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void setLatestTeam(Long teamId, Long userId) {
         User user = getById(userId);
         AssertUtils.checkArgument(user != null);
-        user.setTeamId(teamId);
+        user.setLastTeamId(teamId);
         this.baseMapper.updateById(user);
     }
 
@@ -190,7 +190,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void unbindTeam(Long userId, Long teamId) {
         User user = getById(userId);
         AssertUtils.checkArgument(user != null);
-        if (!teamId.equals(user.getTeamId())) {
+        if (!teamId.equals(user.getLastTeamId())) {
             return;
         }
         this.baseMapper.unbindTeam(userId);
@@ -198,13 +198,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void fillInTeam(User user) {
-        if (user.getTeamId() == null) {
+        if (user.getLastTeamId() == null) {
             List<Team> teams = memberService.findUserTeams(user.getUserId());
             if (CollectionUtils.isEmpty(teams)) {
                 throw new ApiAlertException("The current user not belong to any team, please contact the administrator!");
             } else if (teams.size() == 1) {
                 Team team = teams.get(0);
-                user.setTeamId(team.getId());
+                user.setLastTeamId(team.getId());
                 this.baseMapper.updateById(user);
             }
         }

@@ -211,7 +211,7 @@ add index `inx_team` (`team_id`) using btree;
 -- Update user
 alter table `t_user`
 add column `user_type` int  not null default 2 comment 'user type 1:admin 2:user' after `email`,
-add column `team_id` bigint default null comment 'latest team id' after `user_type`;
+add column `last_team_id` bigint default null comment 'last team id' after `user_type`;
 
 -- after adding team module, admin has all permissions by default, so admin does not need to add permissions separately, so delete admin related roles and associations
 update `t_user` set `user_type` = 1

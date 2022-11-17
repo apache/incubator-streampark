@@ -97,7 +97,7 @@ public class PassportController {
         userService.fillInTeam(user);
 
         //no team.
-        if (user.getTeamId() == null) {
+        if (user.getLastTeamId() == null) {
             return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
         }
 
@@ -110,7 +110,7 @@ public class PassportController {
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, user.getTeamId(), jwtToken);
+        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
         return new RestResponse().data(userInfo);
     }
 }

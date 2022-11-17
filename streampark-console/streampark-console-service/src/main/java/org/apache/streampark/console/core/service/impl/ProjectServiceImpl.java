@@ -28,6 +28,7 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.FileUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
@@ -56,6 +57,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -186,10 +188,25 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<String> modules(Long id) {
         Project project = getById(id);
-        File appHome = project.getDistHome();
-        List<String> list = new ArrayList<>();
-        Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x) -> list.add(x.getName()));
-        return list;
+        AssertUtils.state(project != null);
+        BuildState buildState = BuildState.of(project.getBuildState());
+        if (BuildState.SUCCESSFUL.equals(buildState)) {
+            File appHome = project.getDistHome();
+            if (appHome.exists()) {
+                List<String> list = new ArrayList<>();
+                File[] files = appHome.listFiles();
+                if (CommonUtils.notEmpty(files)) {
+                    for (File file: files) {
+                        list.add(file.getName());
+                    }
+                }
+                return list;
+            } else {
+                return Collections.emptyList();
+            }
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override
