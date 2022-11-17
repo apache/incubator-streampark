@@ -96,6 +96,7 @@ alter table `t_flink_savepoint` add column `chk_id` bigint after `app_id`;
 update `t_access_token` set `modify_time` = current_timestamp where `modify_time` is null;
 update `t_role` set `modify_time` = current_timestamp where `modify_time` is null;
 update `t_user` set `modify_time` = current_timestamp where `modify_time` is null;
+update `t_menu` set `modify_time` = current_timestamp where `modify_time` is null;
 
 alter table `t_app_backup` modify `create_time` datetime not null default current_timestamp;
 alter table `t_flink_app` modify `create_time` datetime not null default current_timestamp;
@@ -135,7 +136,7 @@ insert into `t_menu` values (100015, 100013, 'menu.application', '/flink/app', '
 insert into `t_menu` values (100016, 100015, 'add', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100017, 100014, 'add', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100018, 100015, 'detail app', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', 0, null, now(), now());
---insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', 1, 4, now(), now());
+-- insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', 1, 4, now(), now());
 insert into `t_menu` values (100020, 100015, 'edit flink', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100021, 100015, 'edit streampark', '/flink/app/edit_streampark', 'flink/app/EditStreamPark', 'app:update', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100022, 100014, 'build', null, null, 'project:build', null, '1', 1, null, now(), now());
@@ -225,7 +226,7 @@ insert into `t_role_menu` values (100060, 100002, 100014);
 insert into `t_role_menu` values (100061, 100002, 100016);
 insert into `t_role_menu` values (100062, 100002, 100017);
 insert into `t_role_menu` values (100063, 100002, 100018);
---insert into `t_role_menu` values (100064, 100002, 100019);
+-- insert into `t_role_menu` values (100064, 100002, 100019);
 insert into `t_role_menu` values (100065, 100002, 100020);
 insert into `t_role_menu` values (100066, 100002, 100021);
 insert into `t_role_menu` values (100067, 100002, 100022);
