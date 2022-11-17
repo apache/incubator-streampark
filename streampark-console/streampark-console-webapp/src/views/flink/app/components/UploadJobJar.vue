@@ -68,7 +68,6 @@
       name="file"
       :multiple="true"
       @change="handleUploadJar"
-      :showUploadList="loading"
       :customRequest="customRequest"
       :beforeUpload="handleBeforeUpload"
     >

@@ -23,12 +23,10 @@ import { warn } from '/@/utils/log';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
 export type LayoutMapKey = 'LAYOUT';
-const IFRAME = () => import('/@/views/base/iframe/FrameBlank.vue');
 
 const LayoutMap = new Map<string, () => Promise<typeof import('*.vue')>>();
 
 LayoutMap.set('LAYOUT', LAYOUT);
-LayoutMap.set('IFRAME', IFRAME);
 LayoutMap.set('PAGEVIEW', LAYOUT);
 LayoutMap.set('BASICVIEW', LAYOUT);
 

@@ -324,7 +324,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             <Form.Item
               label="JobId"
               name="jobId"
-              rules={[{ required: true, message: 'ApplicationId is required' }]}
+              rules={[{ required: true, message: 'jobId is required' }]}
             >
               <Input type="text" placeholder="JobId" v-model:value={formValue.jobId} />
             </Form.Item>
