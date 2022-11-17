@@ -163,7 +163,10 @@
             createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
           } else {
             const access = await flinkSql?.value?.handleVerifySql();
-            if (!access) return;
+            if (!access) {
+              createMessage.warning(t('flink.app.editStreamPark.sqlCheck'));
+              throw new Error(access);
+            }
             handleSubmitSQL(values);
           }
         }
