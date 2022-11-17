@@ -62,7 +62,7 @@ export default {
   dragUploadTip:
     'Support for a single upload. You can upload a local jar here to support for current Job',
   dependencyError: 'please set flink version first.',
-  status: 'Status',
+  status: 'Run Status',
   startTime: 'Start Time',
   endTime: 'End Time',
   launch: {
