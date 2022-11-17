@@ -262,10 +262,12 @@
 <template>
   <Tabs type="card" v-model:activeKey="activeTab" class="pom-card">
     <TabPane key="pom" tab="Maven pom">
-      <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
-      <a-button type="primary" class="apply-pom" @click="handleApplyPom()">
-        {{ t('common.apply') }}
-      </a-button>
+      <div class="relative">
+        <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
+        <a-button type="primary" class="apply-pom" @click="handleApplyPom()">
+          {{ t('common.apply') }}
+        </a-button>
+      </div>
     </TabPane>
     <TabPane key="jar" tab="Upload Jar">
       <template v-if="isK8sExecMode(formModel?.executionMode)">
