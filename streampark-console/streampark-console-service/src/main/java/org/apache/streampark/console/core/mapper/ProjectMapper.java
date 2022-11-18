@@ -28,6 +28,8 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     void updateBuildState(@Param("id") Long id, @Param("state") Integer buildState);
 
+    void updateBuildTime(@Param("id") Long id);
+
     IPage<Project> page(Page<Project> page, @Param("project") Project project);
 
     Boolean existsByTeamId(@Param("teamId") Long teamId);
