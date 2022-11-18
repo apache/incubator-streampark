@@ -69,10 +69,7 @@ public class AuthenticatorImpl implements Authenticator {
         newUser.setUserType(UserType.USER);
         newUser.setStatus("1");
         newUser.setSex("1");
-        String salt = ShaHashUtils.getRandomSalt();
-        String saltPass = ShaHashUtils.encrypt(salt, password);
-        newUser.setSalt(salt);
-        newUser.setPassword(saltPass);
+        newUser.setPassword(password);
         usersService.createUser(newUser);
         return newUser;
     }
