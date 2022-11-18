@@ -297,6 +297,7 @@ public class Application implements Serializable {
     private transient String backUpDescription;
     private transient String yarnQueue;
     private transient String yarnSessionClusterId;
+    private transient String k8sImagePullPolicy;
 
     /**
      * Flink Web UI Url
@@ -654,21 +655,7 @@ public class Application implements Serializable {
 
     @SneakyThrows
     public void doSetHotParams() {
-        Map<String, String> hotParams = new HashMap<>();
-        ExecutionMode executionModeEnum = this.getExecutionModeEnum();
-        if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
-            if (StringUtils.isNotEmpty(this.getYarnQueue())) {
-                hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.getYarnQueue());
-            }
-        }
-        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
-            if (StringUtils.isNotEmpty(this.getYarnSessionClusterId())) {
-                hotParams.put("yarn.application.id", this.getYarnSessionClusterId());
-            }
-        }
-        if (!hotParams.isEmpty()) {
-            this.setHotParams(JacksonUtils.write(hotParams));
-        }
+        updateHotParams(this);
     }
 
     @SneakyThrows
@@ -679,13 +666,18 @@ public class Application implements Serializable {
             if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
             }
-        }
-        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
+        } else if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
             if (StringUtils.isNotEmpty(appParam.getYarnSessionClusterId())) {
                 hotParams.put(ConfigConst.KEY_YARN_APP_ID(), appParam.getYarnSessionClusterId());
             }
+        } else if (ExecutionMode.isKubernetesMode(executionModeEnum)) {
+            if (StringUtils.isEmpty(appParam.getK8sImagePullPolicy())) {
+                hotParams.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), this.getK8sImagePullPolicy());
+            }
         }
-        this.setHotParams(JacksonUtils.write(hotParams));
+        if (!hotParams.isEmpty()) {
+            this.setHotParams(JacksonUtils.write(hotParams));
+        }
     }
 
     @Data
