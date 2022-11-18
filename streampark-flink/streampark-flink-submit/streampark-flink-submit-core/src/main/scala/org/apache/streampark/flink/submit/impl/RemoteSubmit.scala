@@ -41,16 +41,6 @@ object RemoteSubmit extends FlinkSubmitTrait {
    * @param flinkConfig
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
-    flinkConfig
-      .safeSet(RestOptions.ADDRESS, submitRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet[JavaInt](RestOptions.PORT, submitRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
-
-    logInfo(
-      s"""
-         |------------------------------------------------------------------
-         |Effective submit configuration: $flinkConfig
-         |------------------------------------------------------------------
-         |""".stripMargin)
   }
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
@@ -62,8 +52,8 @@ object RemoteSubmit extends FlinkSubmitTrait {
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, cancelRequest.executionMode.getName)
-      .safeSet(RestOptions.ADDRESS, cancelRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet[JavaInt](RestOptions.PORT, cancelRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
+      .safeSet(RestOptions.ADDRESS, cancelRequest.option.get(RestOptions.ADDRESS.key()).toString)
+      .safeSet[JavaInt](RestOptions.PORT, cancelRequest.option.get(RestOptions.PORT.key()).toString.toInt)
     logInfo(
       s"""
          |------------------------------------------------------------------
