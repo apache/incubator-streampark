@@ -75,6 +75,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
             return;
         }
         this.baseMapper.updateBuildState(project.getId(), BuildState.SUCCESSFUL.get());
+        this.baseMapper.updateBuildTime(project.getId());
         this.deploy(project);
         List<Application> applications = this.applicationService.getByProjectId(project.getId());
         // Update the deploy state

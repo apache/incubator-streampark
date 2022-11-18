@@ -52,6 +52,12 @@
         where id = #{id}
     </update>
 
+    <update id="updateBuildTime" parameterType="java.lang.Long">
+        update t_flink_project
+        set last_build = now()
+        where id = #{id}
+    </update>
+
     <select id="page" resultType="org.apache.streampark.console.core.entity.Project" parameterType="org.apache.streampark.console.core.entity.Project">
         select *
         from t_flink_project t
