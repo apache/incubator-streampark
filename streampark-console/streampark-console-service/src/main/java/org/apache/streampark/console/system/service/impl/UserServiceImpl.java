@@ -179,7 +179,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void setLatestTeam(Long teamId, Long userId) {
+    public void setLastTeam(Long teamId, Long userId) {
         User user = getById(userId);
         AssertUtils.checkArgument(user != null);
         user.setLastTeamId(teamId);
@@ -187,13 +187,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void unbindTeam(Long userId, Long teamId) {
+    public void clearLastTeam(Long userId, Long teamId) {
         User user = getById(userId);
         AssertUtils.checkArgument(user != null);
         if (!teamId.equals(user.getLastTeamId())) {
             return;
         }
-        this.baseMapper.unbindTeam(userId);
+        this.baseMapper.clearLastTeamByUserId(userId);
+    }
+
+    @Override
+    public void clearLastTeam(Long teamId) {
+        this.baseMapper.clearLastTeamByTeamId(teamId);
     }
 
     @Override

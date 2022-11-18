@@ -127,15 +127,14 @@
     formData.append('file', data.file);
     try {
       const path = await fetchUpload(formData);
-      uploadLoading.value = false;
       uploadJar.value = data.file.name;
       const res = await fetchMain({
         jar: path,
       });
+      uploadLoading.value = false;
       setFieldsValue({ mainClass: res, jar: unref(uploadJar) });
     } catch (error) {
       console.error(error);
-    } finally {
       uploadLoading.value = false;
     }
   }

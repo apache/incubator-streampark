@@ -66,7 +66,7 @@ function getIcon(iconType: string) {
 
 function renderContent({ content }: Pick<ModalOptionsEx, 'content'>) {
   if (isString(content)) {
-    return <div innerHTML={`<div>${content as string}</div>`}></div>;
+    return <div innerHTML={`<div class='pt-20px'>${content as string}</div>`}></div>;
   } else {
     return content;
   }

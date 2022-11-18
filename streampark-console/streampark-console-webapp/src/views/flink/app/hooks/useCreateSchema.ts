@@ -251,7 +251,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       {
         field: 'jar',
-        label: t('flink.app.talbe.programJar'),
+        label: t('flink.app.programJar'),
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {

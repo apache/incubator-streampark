@@ -129,7 +129,8 @@ export const usePermissionStore = defineStore({
       // get teamList
       const { userId } = getAuthCache(USER_INFO_KEY) as UserInfo;
       let hasAuth = false;
-      if (userStore.teamList.length == 0 && userId) {
+      // Get the team list when building a route to ensure data consistency
+      if (userId) {
         const teamList = await fetchUserTeam({ userId });
         userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
       }
