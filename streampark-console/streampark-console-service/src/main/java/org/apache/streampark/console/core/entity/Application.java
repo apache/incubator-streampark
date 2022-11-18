@@ -297,7 +297,6 @@ public class Application implements Serializable {
     private transient String backUpDescription;
     private transient String yarnQueue;
     private transient String yarnSessionClusterId;
-    private transient String k8sImagePullPolicy;
 
     /**
      * Flink Web UI Url
@@ -669,10 +668,6 @@ public class Application implements Serializable {
         } else if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
             if (StringUtils.isNotEmpty(appParam.getYarnSessionClusterId())) {
                 hotParams.put(ConfigConst.KEY_YARN_APP_ID(), appParam.getYarnSessionClusterId());
-            }
-        } else if (ExecutionMode.isKubernetesMode(executionModeEnum)) {
-            if (StringUtils.isEmpty(appParam.getK8sImagePullPolicy())) {
-                hotParams.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), this.getK8sImagePullPolicy());
             }
         }
         if (!hotParams.isEmpty()) {

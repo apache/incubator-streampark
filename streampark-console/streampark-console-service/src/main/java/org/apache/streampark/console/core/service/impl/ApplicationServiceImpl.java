@@ -1000,10 +1000,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_ID())) {
                     application.setYarnSessionClusterId(application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID()).toString());
                 }
-            } else if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
-                if (application.getHotParamsMap().containsKey(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY())) {
-                    application.setK8sImagePullPolicy(application.getHotParamsMap().get(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY()).toString());
-                }
             }
         }
         return application;
@@ -1323,10 +1319,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 optionMap.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
             }
         } else if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
-            String k8sImagePullPolicy = (String) application.getHotParamsMap().get(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY());
-            if (k8sImagePullPolicy != null) {
-                optionMap.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), k8sImagePullPolicy);
-            }
+            optionMap.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
         }
 
         Map<String, Object> extraParameter = new HashMap<>(0);
