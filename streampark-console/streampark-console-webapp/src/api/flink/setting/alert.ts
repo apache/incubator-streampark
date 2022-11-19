@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AlertCreate, AlertSetting, AlertUpdateParam } from './types/alert.type';
+import { AlertCreate, AlertSetting } from './types/alert.type';
 import { Result } from '/#/axios';
 import { defHttp } from '/@/utils/http/axios';
 import { AxiosResponse } from 'axios';
@@ -77,11 +77,3 @@ export function fetchAlertUpdate(data: AlertCreate): Promise<AxiosResponse<Resul
   return defHttp.postJson({ url: ALERT_APi.UPDATE, data }, { isReturnNativeResponse: true });
 }
 
-/**
- * Update system settings
- * @param {AlertUpdateParam} data key
- * @returns {Promise<boolean>}
- */
-export function fetchSystemSettingUpdate(data: AlertUpdateParam): Promise<boolean> {
-  return defHttp.post({ url: ALERT_APi.UPDATE, data });
-}

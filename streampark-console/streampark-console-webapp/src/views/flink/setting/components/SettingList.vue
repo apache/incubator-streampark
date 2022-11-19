@@ -119,7 +119,7 @@
                 checked-children="ON"
                 un-checked-children="OFF"
                 style="float: right; margin-right: 30px"
-                :default-checked="item.settingValue === 'true'"
+                :checked="item.settingValue === 'true'"
                 @change="handleSwitch(item)"
               />
             </template>

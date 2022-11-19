@@ -26,7 +26,7 @@
   import { fetchSystemSetting } from '/@/api/flink/setting';
   import { SystemSetting } from '/@/api/flink/setting/types/setting.type';
   import SettingList from './SettingList.vue';
-  import { fetchSystemSettingUpdate } from '/@/api/flink/setting/alert';
+  import { fetchSystemSettingUpdate } from '/@/api/flink/setting';
   import { useMessage } from '/@/hooks/web/useMessage';
 
   const CollapsePane = Collapse.Panel;
