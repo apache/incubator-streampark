@@ -137,7 +137,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
-    flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.option.get(KEY_YARN_APP_ID).toString)
+    flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.properties.get(KEY_YARN_APP_ID).toString)
     flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(
       s"""
@@ -172,7 +172,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
          |    clusterId        : ${deployRequest.clusterId}
-         |    resolveOrder     : ${deployRequest.resolveOrder.getName}
          |    flameGraph       : ${deployRequest.flameGraph != null}
          |    properties       : ${deployRequest.properties.mkString(" ")}
          |-------------------------------------------------------------------------------------------
@@ -180,10 +179,9 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     var clusterDescriptor: YarnClusterDescriptor = null
     var client: ClusterClient[ApplicationId] = null
     try {
-      val flinkConfig = extractConfiguration(deployRequest.flinkVersion.flinkHome,
-        deployRequest.properties,
-        deployRequest.extraParameter,
-        deployRequest.resolveOrder)
+      val flinkConfig = extractConfiguration(
+        deployRequest.flinkVersion.flinkHome,
+        deployRequest.properties)
       setConfig(deployRequest, flinkConfig)
       val yarnClusterDescriptor = getSessionClusterDeployDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
@@ -222,7 +220,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     var client: ClusterClient[ApplicationId] = null
     try {
       val flinkConfig = getFlinkDefaultConfiguration(shutDownRequest.flinkVersion.flinkHome)
-      shutDownRequest.extraParameter.foreach(m => m._2 match {
+      shutDownRequest.properties.foreach(m => m._2 match {
         case v if v != null => flinkConfig.setString(m._1, m._2.toString)
         case _ =>
       })

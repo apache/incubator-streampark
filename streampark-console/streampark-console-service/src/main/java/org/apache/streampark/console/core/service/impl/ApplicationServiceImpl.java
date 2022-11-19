@@ -38,6 +38,7 @@ import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
@@ -107,6 +108,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
@@ -1061,7 +1063,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        Map<String, Object> optionMap = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
 
         if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
             FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -1070,15 +1072,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         "the cluster has been deleted. Please contact the Admin.",
                     application.getFlinkClusterId()));
             URI activeAddress = cluster.getActiveAddress();
-            optionMap.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
-            optionMap.put(RestOptions.PORT.key(), activeAddress.getPort());
+            properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
+            properties.put(RestOptions.PORT.key(), activeAddress.getPort());
         } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
             if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
                 FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
                 AssertUtils.state(cluster != null,
                     String.format("The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or " +
                         "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
-                optionMap.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
+                properties.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
             }
         }
 
@@ -1096,7 +1098,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getDrain(),
             customSavepoint,
             application.getK8sNamespace(),
-            optionMap
+            properties
         );
 
         CompletableFuture<CancelResponse> cancelFuture =
@@ -1217,6 +1219,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         AssertUtils.state(application != null);
 
+        FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
+        if (flinkEnv == null) {
+            throw new ApiAlertException("[StreamPark] can no found flink version");
+        }
+
         // if manually started, clear the restart flag
         if (!auto) {
             application.setRestartCount(0);
@@ -1277,7 +1284,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
             AssertUtils.state(flinkSql != null);
             // 1) dist_userJar
-            FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
             String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
             // 2) appConfig
             appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
@@ -1290,38 +1296,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             throw new UnsupportedOperationException("Unsupported...");
         }
 
-        Map<String, String> properties = FlinkSubmitter.extractDynamicPropertiesAsJava(application.getDynamicProperties());
-
-        Map<String, Object> optionMap = application.getOptionMap();
-
-        if (appParam.getAllowNonRestored()) {
-            optionMap.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
-        }
-
-        if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
-            FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-            AssertUtils.state(cluster != null,
-                String.format("The clusterId=%s cannot be find, maybe the clusterId is wrong or " +
-                    "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
-            URI activeAddress = cluster.getActiveAddress();
-            optionMap.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
-            optionMap.put(RestOptions.PORT.key(), activeAddress.getPort());
-        } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
-            String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
-            if (yarnQueue != null) {
-                properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
-            }
-            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-                AssertUtils.state(cluster != null,
-                    String.format("The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or " +
-                        "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
-                optionMap.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
-            }
-        } else if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
-            optionMap.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
-        }
-
         Map<String, Object> extraParameter = new HashMap<>(0);
         if (application.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
@@ -1331,17 +1305,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
         }
 
-        ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
-
         KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
             application.getClusterId(),
             application.getK8sNamespace(),
-            application.getK8sRestExposedTypeEnum());
-
-        FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
-        if (flinkEnv == null) {
-            throw new IllegalArgumentException("[StreamPark] can no found flink version");
-        }
+            application.getK8sRestExposedTypeEnum()
+        );
 
         AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
 
@@ -1353,7 +1321,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else {
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
                 AssertUtils.state(buildResult != null);
-                properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
                 String domainName = application.getDefaultModeIngress();
@@ -1386,7 +1353,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             flinkEnv.getFlinkConf(),
             DevelopmentMode.of(application.getJobType()),
             ExecutionMode.of(application.getExecutionMode()),
-            resolveOrder,
             application.getId(),
             jobId,
             application.getJobName(),
@@ -1394,8 +1360,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.getApplicationType(),
             getSavePointed(appParam),
             appParam.getFlameGraph() ? getFlameGraph(application) : null,
-            optionMap,
-            properties,
+            getProperties(application),
             applicationArgs,
             buildResult,
             kubernetesSubmitParam,
@@ -1476,6 +1441,50 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             startFutureMap.remove(application.getId());
         });
 
+    }
+
+    private Map<String, Object> getProperties(Application application) {
+        Map<String, Object> properties = application.getOptionMap();
+        if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+            FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+            AssertUtils.state(cluster != null,
+                String.format("The clusterId=%s cannot be find, maybe the clusterId is wrong or " +
+                    "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
+            URI activeAddress = cluster.getActiveAddress();
+            properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
+            properties.put(RestOptions.PORT.key(), activeAddress.getPort());
+        } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
+            String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
+            if (yarnQueue != null) {
+                properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
+            }
+            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                AssertUtils.state(cluster != null,
+                    String.format("The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or " +
+                        "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
+                properties.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
+            }
+        } else if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
+            properties.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
+        }
+
+        if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+            properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
+        }
+
+        if (application.getAllowNonRestored()) {
+            properties.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
+        }
+
+        Map<String, String> dynamicProperties = FlinkSubmitter.extractDynamicPropertiesAsJava(application.getDynamicProperties());
+        properties.putAll(dynamicProperties);
+        ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
+        if (resolveOrder != null) {
+            properties.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
+        }
+
+        return properties;
     }
 
     private void updateToStopped(Application app) {

@@ -52,8 +52,8 @@ object RemoteSubmit extends FlinkSubmitTrait {
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, cancelRequest.executionMode.getName)
-      .safeSet(RestOptions.ADDRESS, cancelRequest.option.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet[JavaInt](RestOptions.PORT, cancelRequest.option.get(RestOptions.PORT.key()).toString.toInt)
+      .safeSet(RestOptions.ADDRESS, cancelRequest.properties.get(RestOptions.ADDRESS.key()).toString)
+      .safeSet[JavaInt](RestOptions.PORT, cancelRequest.properties.get(RestOptions.PORT.key()).toString.toInt)
     logInfo(
       s"""
          |------------------------------------------------------------------
