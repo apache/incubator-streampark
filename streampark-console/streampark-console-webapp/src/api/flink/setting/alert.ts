@@ -76,4 +76,3 @@ export function fetchAlertAdd(data: AlertCreate): Promise<AxiosResponse<Result<b
 export function fetchAlertUpdate(data: AlertCreate): Promise<AxiosResponse<Result<boolean>>> {
   return defHttp.postJson({ url: ALERT_APi.UPDATE, data }, { isReturnNativeResponse: true });
 }
-

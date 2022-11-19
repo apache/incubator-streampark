@@ -175,7 +175,7 @@ export enum UseStrategyEnum {
 
 export enum SavePointEnum {
   CHECK_POINT = 1,
-  SAVE_POINT = 2
+  SAVE_POINT = 2,
 }
 
 export enum PipelineStepEnum {
