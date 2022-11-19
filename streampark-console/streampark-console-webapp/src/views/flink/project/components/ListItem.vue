@@ -24,7 +24,9 @@
       </template>
       <template #description>
         <a-popover arrow-point-at-center trigger="hover" :content="item.url">
-          <a-button class="desc-btn">{{ item.description }}</a-button>
+          <a-button class="desc-btn" target="_blank" :href="item.url">
+            {{ item.description }}
+          </a-button>
         </a-popover>
       </template>
       <template #avatar>

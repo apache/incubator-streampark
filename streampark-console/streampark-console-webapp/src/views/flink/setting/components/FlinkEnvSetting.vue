@@ -98,14 +98,14 @@
         </template>
       </ListItemMeta>
 
-      <div class="list-content" style="width: 40%">
-        <div class="list-content-item" style="width: 60%">
+      <div class="list-content flex" style="width: 40%">
+        <div class="list-content-item">
           <span>Flink Home</span>
           <p style="margin-top: 10px">
             {{ item.flinkHome }}
           </p>
         </div>
-        <div class="list-content-item" style="width: 30%">
+        <div class="list-content-item">
           <span>Default</span>
           <p style="margin-top: 10px">
             <Switch
