@@ -1086,11 +1086,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!application.getUserId().equals(userId)) {
             FlinkTrackingTask.addCanceledApp(application.getId(), userId);
         }
-
+        String clusterId = null;
+        if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+            clusterId = application.getClusterId();
+        } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            clusterId = application.getAppId();
+        }
         CancelRequest cancelRequest = new CancelRequest(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
-            application.getClusterId(),
+            clusterId,
             application.getJobId(),
             appParam.getSavePointed(),
             appParam.getDrain(),
