@@ -1090,7 +1090,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         CancelRequest cancelRequest = new CancelRequest(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
-            application.getAppId(),
+            application.getClusterId(),
             application.getJobId(),
             appParam.getSavePointed(),
             appParam.getDrain(),

@@ -124,13 +124,15 @@
       }
     }
   }
+
   [data-theme='dark']{
     .@{prefix-cls}-form{
       .ant-form-item-has-error :not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
       .ant-input-affix-wrapper,
       .ant-input {
-        color:rgba(0, 0, 0, 0.85);
-        background-color:white;
+        color: rgba(0, 0, 0, 0.85);
+        background-color: white;
+
         &::placeholder {
           color: #bdbdbe !important;
         }
