@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.core.bean.ResponseResult;
@@ -164,18 +163,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                     return result;
             }
             FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
-            Map<String, Object> extraParameter = flinkCluster.getOptionMap();
-            ResolveOrder resolveOrder = ResolveOrder.of(flinkCluster.getResolveOrder());
-            Map<String, String> properties = FlinkSubmitter.extractDynamicPropertiesAsJava(flinkCluster.getDynamicProperties());
             DeployRequest deployRequest = new DeployRequest(
                 flinkEnv.getFlinkVersion(),
                 flinkCluster.getClusterId(),
                 executionModeEnum,
-                resolveOrder,
                 flinkCluster.getFlameGraph() ? getFlameGraph(flinkCluster) : null,
-                properties,
-                kubernetesDeployParam,
-                extraParameter
+                flinkCluster.getProperties(),
+                kubernetesDeployParam
             );
             log.info("deploy cluster request " + deployRequest);
             Future<DeployResponse> future = executorService.submit(() -> FlinkSubmitter.deploy(deployRequest));
@@ -251,13 +245,12 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             return result;
         }
         FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
-        Map<String, Object> extraParameter = flinkCluster.getOptionMap();
         ShutDownRequest stopRequest = new ShutDownRequest(
             flinkEnv.getFlinkVersion(),
             executionModeEnum,
             clusterId,
             kubernetesDeployParam,
-            extraParameter
+            flinkCluster.getProperties()
         );
         LambdaUpdateWrapper<FlinkCluster> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());

@@ -26,5 +26,4 @@ case class ShutDownRequest(flinkVersion: FlinkVersion,
                             executionMode: ExecutionMode,
                             clusterId: String,
                             @Nullable kubernetesDeployParam: KubernetesDeployParam,
-                            @Nullable extraParameter: JavaMap[String, Any]
-                          )
+                            @Nullable properties: JavaMap[String, Any])
