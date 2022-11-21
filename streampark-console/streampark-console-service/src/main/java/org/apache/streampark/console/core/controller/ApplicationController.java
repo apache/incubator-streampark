@@ -142,8 +142,13 @@ public class ApplicationController {
             if (pipeStates.containsKey(e.getId())) {
                 e.setBuildStatus(pipeStates.get(e.getId()).getCode());
             }
-        }).peek(e -> e.setAppControl(new AppControl().setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus())).setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack()).setAllowStop(e.isRunning()))).collect(Collectors.toList());
-
+        }).peek(e -> {
+            AppControl appControl = new AppControl()
+                .setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
+                .setAllowStart(!e.shouldBeTrack() && PipelineStatus.success.getCode().equals(e.getBuildStatus()))
+                .setAllowStop(e.isRunning());
+            e.setAppControl(appControl);
+        }).collect(Collectors.toList());
         applicationList.setRecords(appRecords);
         return RestResponse.success(applicationList);
     }

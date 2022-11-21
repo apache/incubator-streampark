@@ -445,16 +445,13 @@ public class AppBuildPipeServiceImpl
             return Maps.newHashMap();
         }
         LambdaQueryWrapper<AppBuildPipeline> queryWrapper = new LambdaQueryWrapper<AppBuildPipeline>()
-            .select(AppBuildPipeline::getAppId, AppBuildPipeline::getPipeStatusCode)
             .in(AppBuildPipeline::getAppId, appIds);
-        List<Map<String, Object>> rMaps = baseMapper.selectMaps(queryWrapper);
-        if (CollectionUtils.isEmpty(rMaps)) {
+
+        List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
+        if (CollectionUtils.isEmpty(appBuildPipelines)) {
             return Maps.newHashMap();
         }
-
-        return rMaps.stream().collect(Collectors.toMap(
-            e -> (Long) e.get("app_id"),
-            e -> PipelineStatus.of((Integer) e.get("pipeStatusCode"))));
+        return appBuildPipelines.stream().collect(Collectors.toMap(e -> e.getAppId(), e -> e.getPipelineStatus()));
     }
 
     @Override
