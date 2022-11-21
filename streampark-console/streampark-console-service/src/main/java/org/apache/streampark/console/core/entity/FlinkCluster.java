@@ -21,8 +21,10 @@ import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
+import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.flink.submit.FlinkSubmitter;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -33,6 +35,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.apache.flink.configuration.CoreOptions;
 import org.apache.http.client.config.RequestConfig;
 
 import java.io.Serializable;
@@ -166,6 +169,19 @@ public class FlinkCluster implements Serializable {
         Map<String, String> config = new HashMap<>(0);
         confList.forEach(k -> config.put(k.get("key"), k.get("value")));
         return config;
+    }
+
+    @JsonIgnore
+    public Map<String, Object> getProperties() {
+        Map<String, Object> map = new HashMap<>();
+        Map<String, String> dynamicProperties = FlinkSubmitter.extractDynamicPropertiesAsJava(this.getDynamicProperties());
+        map.putAll(this.getOptionMap());
+        map.putAll(dynamicProperties);
+        ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
+        if (resolveOrder != null) {
+            map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
+        }
+        return map;
     }
 
 }

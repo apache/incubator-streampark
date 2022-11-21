@@ -68,11 +68,9 @@ trait FlinkSubmitTrait extends Logger {
          |    k8sNamespace     : ${submitRequest.k8sSubmitParam.kubernetesNamespace}
          |    flinkExposedType : ${submitRequest.k8sSubmitParam.flinkRestExposedType}
          |    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
-         |    resolveOrder     : ${submitRequest.resolveOrder.getName}
          |    applicationType  : ${submitRequest.applicationType.getName}
          |    flameGraph       : ${submitRequest.flameGraph != null}
          |    savePoint        : ${submitRequest.savePoint}
-         |    option           : ${submitRequest.option}
          |    properties       : ${submitRequest.properties.mkString(" ")}
          |    args             : ${submitRequest.args}
          |    appConf          : ${submitRequest.appConf}
@@ -93,7 +91,6 @@ trait FlinkSubmitTrait extends Logger {
       .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
       .safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-      .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
       .safeSet(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
       .safeSet(ApplicationConfiguration.APPLICATION_ARGS, extractProgramArgs(submitRequest))
       .safeSet(PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID, submitRequest.jobId)
@@ -230,8 +227,8 @@ trait FlinkSubmitTrait extends Logger {
   }
 
   private[submit] def getParallelism(submitRequest: SubmitRequest): Integer = {
-    if (submitRequest.option.containsKey(KEY_FLINK_PARALLELISM())) {
-      Integer.valueOf(submitRequest.option.get(KEY_FLINK_PARALLELISM()).toString)
+    if (submitRequest.properties.containsKey(KEY_FLINK_PARALLELISM())) {
+      Integer.valueOf(submitRequest.properties.get(KEY_FLINK_PARALLELISM()).toString)
     } else {
       getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome).getInteger(
         CoreOptions.DEFAULT_PARALLELISM,
@@ -287,20 +284,10 @@ trait FlinkSubmitTrait extends Logger {
         array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
       }
 
-      // The priority of the parameters defined on the page is greater than the app conf file, property parameters etc.
-      if (MapUtils.isNotEmpty(submitRequest.option)) {
-        submitRequest.option.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+      // app properties
+      if (MapUtils.isNotEmpty(submitRequest.properties)) {
+        submitRequest.properties.foreach(x => array += s"-D${x._1}=${x._2}")
       }
-
-      //-D other dynamic parameter
-      if (submitRequest.properties != null && submitRequest.properties.nonEmpty) {
-        submitRequest.properties
-          .filter(_._1 != "classloader.resolve-order")
-          .foreach(x => array += s"-D${x._1}=${x._2}")
-      }
-
-      array += s"-Dclassloader.resolve-order=${submitRequest.resolveOrder.getName}"
-
       array.toArray
     }
 
@@ -328,25 +315,16 @@ trait FlinkSubmitTrait extends Logger {
     FlinkRunOption.mergeOptions(CliFrontendParser.getRunCommandOptions, customCommandLineOptions)
   }
 
-  private[submit] def extractConfiguration(flinkHome: String,
-                                           properties: JavaMap[String, String],
-                                           extraParameter: JavaMap[String, Any],
-                                           resolveOrder: ResolveOrder): Configuration = {
+  private[submit] def extractConfiguration(flinkHome: String, properties: JavaMap[String, Any]): Configuration = {
     val commandLine = {
       val commandLineOptions = getCommandLineOptions(flinkHome)
       //read and verify user config...
       val cliArgs = {
         val array = new ArrayBuffer[String]()
         // The priority of the parameters defined on the page is greater than the app conf file, property parameters etc.
-        if (MapUtils.isNotEmpty(extraParameter)) {
-          extraParameter.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+        if (MapUtils.isNotEmpty(properties)) {
+          properties.foreach(x => array += s"-D${x._1}=${x._2.toString.trim}")
         }
-        if (properties != null && properties.nonEmpty) {
-          properties
-            .filter(_._1 != "classloader.resolve-order")
-            .foreach(x => array += s"-D${x._1}=${x._2}")
-        }
-        array += s"-Dclassloader.resolve-order=${resolveOrder.getName}"
         array.toArray
       }
       FlinkRunOption.parse(commandLineOptions, cliArgs, true)
