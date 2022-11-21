@@ -90,7 +90,7 @@ object ParameterCli {
                 val key = x._1.drop(propertyPrefix.length).trim
                 val value = x._2.trim
                 if (key == ConfigConst.KEY_FLINK_APP_NAME) {
-                  buffer.append(s" -D$key=${value.replace(" ", "")}")
+                  buffer.append(s" -D$key=${value.replace(" ", "_")}")
                 } else {
                   buffer.append(s" -D$key=$value")
                 }
