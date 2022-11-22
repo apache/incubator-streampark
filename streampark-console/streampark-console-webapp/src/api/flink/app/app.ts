@@ -196,23 +196,13 @@ export function fetchStartLog(data): Promise<AxiosResponse<any>> {
  * @param {Object} data app Id
  * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchCheckSavepointPath(data: { id: string }): Promise<AxiosResponse<Result>> {
+export function fetchCheckSavepointPath(data: { id?: string, savePoint?: string }): Promise<AxiosResponse<Result>> {
   return defHttp.post(
     { url: APP_API.CHECK_SAVEPOINT_PATH, data },
     { isReturnNativeResponse: true },
   );
 }
-/**
- * verify Schema
- * @param {String} path
- * @returns {Promise<AxiosResponse<Result>>}
- */
-export function fetchVerifySchema(data: { path: string }): Promise<AxiosResponse<Result>> {
-  return defHttp.post(
-    { url: APP_API.CHECK_SAVEPOINT_PATH, data },
-    { isReturnNativeResponse: true },
-  );
-}
+
 
 /**
  * Cancel
