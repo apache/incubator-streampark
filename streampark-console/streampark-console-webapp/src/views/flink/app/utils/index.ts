@@ -119,7 +119,7 @@ export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
       window.open(yarn + '/proxy/' + app['appId'] + '/');
     }
   } else {
-    if (app.flinkRestUrl != null) {
+    if (app.flinkRestUrl) {
       window.open(app.flinkRestUrl);
     }
   }
