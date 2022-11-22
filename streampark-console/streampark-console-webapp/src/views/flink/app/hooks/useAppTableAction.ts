@@ -213,7 +213,7 @@ export const useAppTableAction = (
         appId: app.id,
         width: document.documentElement.offsetWidth || document.body.offsetWidth,
       });
-      if (data != null) {
+      if (data) {
         const blob = new Blob([data], { type: 'image/svg+xml' });
         const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob);
         window.open(imageUrl);

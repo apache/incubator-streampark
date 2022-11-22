@@ -99,7 +99,7 @@
       };
 
       if (stopSavePointed) {
-        if (customSavepoint != null) {
+        if (customSavepoint) {
           const { data } = await fetchVerifySchema({
             path: customSavepoint,
           });
