@@ -1174,7 +1174,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public String checkSavepointPath(Application appParam) throws Exception {
-        String savepointPath = getSavePointPath(appParam);
+        String savepointPath = appParam.getSavePoint();
+        if (StringUtils.isBlank(savepointPath)) {
+            savepointPath = getSavePointPath(appParam);
+        }
+
         if (StringUtils.isNotBlank(savepointPath)) {
             final URI uri = URI.create(savepointPath);
             final String scheme = uri.getScheme();
