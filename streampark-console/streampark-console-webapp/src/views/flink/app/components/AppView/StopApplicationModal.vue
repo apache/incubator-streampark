@@ -27,7 +27,7 @@
   import { SvgIcon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { fetchCancel, fetchCheckSavepointPath, fetchVerifySchema } from '/@/api/flink/app/app';
+  import { fetchCancel, fetchCheckSavepointPath } from '/@/api/flink/app/app';
   import { CancelParam } from '/@/api/flink/app/app.type';
   import { h } from 'vue';
   const emit = defineEmits(['register', 'updateOption']);
@@ -99,9 +99,9 @@
       };
 
       if (stopSavePointed) {
-        if (customSavepoint != null) {
-          const { data } = await fetchVerifySchema({
-            path: customSavepoint,
+        if (customSavepoint) {
+          const { data } = await fetchCheckSavepointPath({
+            savePoint: customSavepoint,
           });
           if (data.data === false) {
             createErrorSwal('custom savePoint path is invalid, ' + data.message);
