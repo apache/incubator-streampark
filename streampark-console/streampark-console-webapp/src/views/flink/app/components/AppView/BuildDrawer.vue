@@ -96,7 +96,7 @@
       <Icon icon="ant-design:dashboard-outlined" />
       Summary
     </h3>
-    <template v-if="appBuildDetail.pipeline != null">
+    <template v-if="appBuildDetail.pipeline">
       <div>
         <Progress
           v-if="appBuildDetail.pipeline.hasError"
@@ -136,7 +136,7 @@
 
       {{ t('flink.app.view.stepTitle') }}
     </h3>
-    <template v-if="appBuildDetail.pipeline != null">
+    <template v-if="appBuildDetail.pipeline">
       <Timeline style="margin-top: 20px">
         <TimelineItem
           v-for="stepItem in appBuildDetail.pipeline.steps"

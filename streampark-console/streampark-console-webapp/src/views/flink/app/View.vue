@@ -236,7 +236,7 @@
         </template>
         <template v-if="column.dataIndex === 'launch'">
           <State option="launch" :title="launchTitleMap[record.launch] || ''" :data="record" />
-          <Divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus != null" />
+          <Divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus" />
           <State
             option="build"
             :click="openBuildProgressDetailDrawer.bind(null, record)"

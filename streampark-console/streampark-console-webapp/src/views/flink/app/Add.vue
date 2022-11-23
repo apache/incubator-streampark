@@ -110,7 +110,7 @@
   /* Open the sqlConf drawer */
   async function handleSQLConf(checked: boolean, model: Recordable) {
     if (checked) {
-      if (model.configOverride != null) {
+      if (model.configOverride) {
         openConfDrawer(true, {
           configOverride: model.configOverride,
         });
@@ -184,7 +184,7 @@
     handleSubmitParams(params, values, k8sTemplate);
     // common params...
     const resourceFrom = values.resourceFrom;
-    if (resourceFrom != null) {
+    if (resourceFrom) {
       if (resourceFrom === 'csv') {
         params['resourceFrom'] = ResourceFromEnum.CICD;
         //streampark flink
