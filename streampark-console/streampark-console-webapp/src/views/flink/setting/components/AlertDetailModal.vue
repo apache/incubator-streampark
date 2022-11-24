@@ -25,6 +25,9 @@
   import { SvgIcon } from '/@/components/Icon';
   import { DescItem, Description } from '/@/components/Description';
   import { Divider, Tag, Typography } from 'ant-design-vue';
+  import { useI18n } from '/@/hooks/web/useI18n';
+
+  const { t } = useI18n();
   const typographyParagraph = Typography.Paragraph;
   interface DingTalkType {
     token: string;
@@ -65,16 +68,16 @@
     }
   });
   const dingTalkColumn: DescItem[] = [
-    { label: 'DingTalk Url', field: 'alertDingURL', span: 2, labelMinWidth: 50 },
-    { label: 'Access Token', field: 'token', span: 2, render: renderTypl },
-    { label: 'Secret Token', field: 'secretToken', span: 2, render: renderTypl },
-    { label: 'DingTalk User', field: 'contacts' },
-    { label: 'At All User', field: 'isAtAll', render: renderTag },
+    { label: t('flink.setting.alert.dingTalkUrl'), field: 'alertDingURL', span: 2, labelMinWidth: 50 },
+    { label: t('flink.setting.alert.dingtalkAccessToken'), field: 'token', span: 2, render: renderTypl },
+    { label: t('flink.setting.alert.secretToken'), field: 'secretToken', span: 2, render: renderTypl },
+    { label: t('flink.setting.alert.dingTalkUser'), field: 'contacts' },
+    { label: t('flink.setting.alert.dingtalkIsAtAll'), field: 'isAtAll', render: renderTag },
   ];
   const larkColumn: DescItem[] = [
-    { label: 'Lark Token', field: 'token', span: 2, render: renderTypl },
-    { label: 'Lark Secret Token', field: 'secretToken', span: 2, render: renderTypl },
-    { label: 'At All User', field: 'isAtAll', render: renderTag },
+    { label: t('flink.setting.alert.larkToken'), field: 'token', span: 2, render: renderTypl },
+    { label: t('flink.setting.alert.larkSecretToken'), field: 'secretToken', span: 2, render: renderTypl },
+    { label: t('flink.setting.alert.larkIsAtAll'), field: 'isAtAll', render: renderTag },
   ];
   function renderTag(value: boolean) {
     return h(Tag, { color: value ? 'green' : 'red', class: '!leading-20px' }, () => String(value));
@@ -89,40 +92,40 @@
   <BasicModal :show-ok-btn="false" @register="registerModal" class="alert-detail">
     <template #title>
       <SvgIcon name="alarm" size="25" />
-      Alert Detail
+      {{t('flink.setting.alert.alertDetail')}}
     </template>
     <template v-if="alertTypeTags.includes('1')">
       <Divider>
         <SvgIcon name="mail" size="20" />
-        E-mail
+        {{t('flink.setting.alert.email')}}
       </Divider>
       <Description
         class="alert-detail"
         :column="1"
         :data="emailInfo"
-        :schema="[{ label: 'Alert Email', field: 'contacts' }]"
+        :schema="[{ label: t('flink.setting.alert.alertEmail'), field: 'contacts' }]"
       />
     </template>
     <template v-if="alertTypeTags.includes('2')">
       <Divider>
         <SvgIcon name="dingtalk" size="20" />
-        Ding Talk
+        {{t('flink.setting.alert.dingTalk')}}
       </Divider>
       <Description class="alert-detail" :column="2" :data="dingTalk" :schema="dingTalkColumn" />
     </template>
     <template v-if="alertTypeTags.includes('4')">
-      <Divider><SvgIcon name="wecom" size="20" /> WeChat </Divider>
+      <Divider><SvgIcon name="wecom" size="20" /> {{t('flink.setting.alert.weChat')}} </Divider>
       <Description
         class="alert-detail"
         :column="1"
         :data="weChat"
-        :schema="[{ label: 'WeChat token', field: 'token', render: renderTypl }]"
+        :schema="[{ label: t('flink.setting.alert.weChattoken'), field: 'token', render: renderTypl }]"
       />
     </template>
     <template v-if="alertTypeTags.includes('16')">
       <Divider>
         <SvgIcon name="dingtalk" size="20" />
-        Ding Talk
+        {{t('flink.setting.alert.lark')}}
       </Divider>
       <Description :column="2" :data="lark" :schema="larkColumn" class="alert-detail" />
     </template>
