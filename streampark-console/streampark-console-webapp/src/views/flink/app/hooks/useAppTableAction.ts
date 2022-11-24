@@ -198,6 +198,8 @@ export const useAppTableAction = (
           AppStateEnum.LOST,
           AppStateEnum.TERMINATED,
           AppStateEnum.POS_TERMINATED,
+          AppStateEnum.SUCCEEDED,
+          AppStateEnum.KILLED,
         ].includes(record.state),
         auth: 'app:delete',
         icon: 'ant-design:delete-outlined',
