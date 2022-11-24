@@ -174,10 +174,10 @@ export const renderTotalMemory = ({ model, field }: RenderCallbackParams) => {
           <Tag color="#2db7f5" class="tag-note">
             Note
           </Tag>
-          Explicitly configuring both "total process memory" and "total Flink memory" is not recommended. It may lead to
-          deployment failures due to potential memory configuration conflicts. Configuring other
-          memory components also requires caution as it can produce further configuration conflicts,
-          The easiest way is to set "total process memory"
+          Explicitly configuring both "total process memory" and "total Flink memory" is not
+          recommended. It may lead to deployment failures due to potential memory configuration
+          conflicts. Configuring other memory components also requires caution as it can produce
+          further configuration conflicts, The easiest way is to set "total process memory"
         </span>
       </p>
     </div>

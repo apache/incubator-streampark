@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { Alert, Form, Input, Tag } from 'ant-design-vue';
-import { h, onMounted, ref, reactive, VNode, unref } from 'vue';
+import { h, onMounted, reactive, ref, unref, VNode } from 'vue';
 import { handleAppBuildStatueText } from '../utils';
 import { fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app/app';
 import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
@@ -159,9 +159,14 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       const state = app['optionState'];
       if (state === OptionStateEnum.NONE) {
         return (
-          [AppStateEnum.STARTING, AppStateEnum.RESTARTING, AppStateEnum.CANCELLING].includes(
-            app.state,
-          ) || false
+          [
+            AppStateEnum.INITIALIZING,
+            AppStateEnum.STARTING,
+            AppStateEnum.RESTARTING,
+            AppStateEnum.CANCELLING,
+            AppStateEnum.RECONCILING,
+            AppStateEnum.MAPPING,
+          ].includes(app.state) || false
         );
       }
       return true;

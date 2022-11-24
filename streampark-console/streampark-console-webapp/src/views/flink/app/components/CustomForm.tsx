@@ -103,8 +103,9 @@ export default defineComponent({
               <Tag color="#2db7f5" class="tag-note">
                 Note
               </Tag>
-              Operation after checkpoint failure, e.g: Within 5 minutes (checkpoint failure rate interval), if
-              the number of checkpoint failures reaches 10 (max failures per interval),action will be triggered(alert or restart job)
+              Operation after checkpoint failure, e.g: Within 5 minutes (checkpoint failure rate
+              interval), if the number of checkpoint failures reaches 10 (max failures per
+              interval),action will be triggered(alert or restart job)
             </span>
           </p>
         </div>

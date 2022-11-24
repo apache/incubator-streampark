@@ -24,7 +24,9 @@ export const alertFormSchema: Array<FormSchema> = [
     label: t('flink.setting.alert.faultAlertType'),
     component: 'Select',
     slot: 'type',
-    dynamicRules: () => [{ required: true, message: t('flink.setting.alert.faultAlertTypeIsRequired') }],
+    dynamicRules: () => [
+      { required: true, message: t('flink.setting.alert.faultAlertTypeIsRequired') },
+    ],
   },
   {
     field: 'alertEmail',
@@ -67,7 +69,13 @@ export const alertFormSchema: Array<FormSchema> = [
       placeholder: t('flink.setting.alert.secretTokenPlaceholder'),
     },
     ifShow: ({ model }) => (model.alertType || []).includes('2') && model.dingtalkSecretEnable,
-    rules: [{ required: true, message: t('flink.setting.alert.dingTalkSecretTokenIsRequired'), trigger: 'blur' }],
+    rules: [
+      {
+        required: true,
+        message: t('flink.setting.alert.dingTalkSecretTokenIsRequired'),
+        trigger: 'blur',
+      },
+    ],
   },
   {
     field: 'alertDingUser',
@@ -159,7 +167,13 @@ export const alertFormSchema: Array<FormSchema> = [
       placeholder: t('flink.setting.alert.larkSecretTokenPlaceholder'),
     },
     ifShow: ({ model }) => (model.alertType || []).includes('16') && model.larkSecretEnable,
-    rules: [{ required: true, message: t('flink.setting.alert.larkSecretTokenIsRequired'), trigger: 'blur' }],
+    rules: [
+      {
+        required: true,
+        message: t('flink.setting.alert.larkSecretTokenIsRequired'),
+        trigger: 'blur',
+      },
+    ],
   },
 ];
 
