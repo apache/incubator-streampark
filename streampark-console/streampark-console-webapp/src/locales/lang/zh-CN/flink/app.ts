@@ -216,4 +216,16 @@ export default {
     k8sRestExposedTypePlaceholder: 'K8S服务对外类型',
     hadoopXmlConfigFileTips: '从系统环境参数自动复制配置文件',
   },
+  noteInfo: {
+    note: '提示',
+    minutes: '分钟',
+    count: '次数',
+    checkPointFailureOptions: 'CheckPoint失败策略',
+    checkpointFailureRateInterval: 'checkpoint失败间隔',
+    maxFailuresPerInterval: '最大失败次数',
+    checkPointFailureNote:
+      'checkpoint 失败处理策略, 例如: 在 5 分钟内 (checkpoint的失败间隔), 如果 checkpoint 失败次数超过 10 次 (checkpoint最大失败次数),会触发操作(发送告警或者重启作业)',
+    totalMemoryNote:
+      '不建议同时配置 "total process memory" 和 "total Flink memory"。 由于潜在的内存配置冲突，它可能会导致部署失败。 配置其他内存组件也需要谨慎，因为它会产生进一步的配置冲突，最简单的方法是设置"total process memory"',
+  },
 };
