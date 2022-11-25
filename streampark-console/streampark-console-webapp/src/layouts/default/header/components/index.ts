@@ -30,6 +30,7 @@ export const Github = createAsyncComponent(() => import('./Github.vue'));
 export const Slogan = createAsyncComponent(() => import('./Slogan.vue'));
 /* User Team */
 export const UserTeam = createAsyncComponent(() => import('./UserTeam.vue'));
+export const LockScreen = createAsyncComponent(() => import('./LockScreen.vue'));
 
 export const ErrorAction = createAsyncComponent(() => import('./ErrorAction.vue'));
 

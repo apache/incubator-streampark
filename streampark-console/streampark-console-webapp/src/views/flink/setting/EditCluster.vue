@@ -54,6 +54,7 @@
     showActionButtonGroup: false,
   });
 
+  // submit edit
   async function handleSubmitCluster(values: Recordable) {
     try {
       changeLoading(true);
@@ -101,7 +102,7 @@
   async function getClusterInfo() {
     const res = await fetchGetCluster({ id: route?.query?.clusterId });
     Object.assign(cluster, res);
-    defaultOptions.value = JSON.parse(res.options || '{}');
+    Object.assign(defaultOptions, JSON.parse(res.options || '{}'));
     handleReset();
   }
   function handleReset() {
