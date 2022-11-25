@@ -47,7 +47,12 @@
     <select id="existsByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.String">
         select count(1)
         from t_flink_cluster
-        where cluster_id=#{clusterId}
+        <where>
+            cluster_id=#{clusterId}
+            <if test="id != null">
+                and id &lt;&gt; #{id}
+            </if>
+        </where>
         limit 1
     </select>
 

@@ -50,7 +50,8 @@
       const params = handleSubmitParams(values);
       if (Object.keys(params).length > 0) {
         const res = await fetchCheckCluster(params);
-        if (res === 'success') {
+        const status = parseInt(res.status);
+        if (status === 0) {
           const resp = await fetchCreateCluster(params);
           if (resp.status) {
             Swal.fire({
@@ -63,18 +64,8 @@
           } else {
             Swal.fire(resp.msg);
           }
-        } else if (res === 'exists') {
-          Swal.fire(
-            'Failed',
-            'the cluster name: ' + values.clusterName + ' is already exists,please check',
-            'error',
-          );
         } else {
-          Swal.fire(
-            'Failed',
-            'the address is invalid or connection failure, please check',
-            'error',
-          );
+          Swal.fire('Failed', res.msg, 'error');
         }
       }
     } catch (error) {

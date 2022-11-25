@@ -57,7 +57,7 @@ public class FlinkClusterController {
 
     @PostMapping("check")
     public RestResponse check(FlinkCluster cluster) {
-        String checkResult = flinkClusterService.check(cluster);
+        ResponseResult checkResult = flinkClusterService.check(cluster);
         return RestResponse.success(checkResult);
     }
 
@@ -78,7 +78,6 @@ public class FlinkClusterController {
         flinkCluster.setAddress(cluster.getAddress());
         flinkCluster.setExecutionMode(cluster.getExecutionMode());
         flinkCluster.setDynamicProperties(cluster.getDynamicProperties());
-        flinkCluster.setFlameGraph(cluster.getFlameGraph());
         flinkCluster.setFlinkImage(cluster.getFlinkImage());
         flinkCluster.setOptions(cluster.getOptions());
         flinkCluster.setYarnQueue(cluster.getYarnQueue());

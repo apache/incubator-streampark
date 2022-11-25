@@ -482,9 +482,12 @@ public class Application implements Serializable {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public Map<String, Object> getOptionMap() {
-        Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
-        map.entrySet().removeIf(entry -> entry.getValue() == null);
-        return map;
+        if (StringUtils.isNotEmpty(this.options)) {
+            Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
+            map.entrySet().removeIf(entry -> entry.getValue() == null);
+            return map;
+        }
+        return Collections.emptyMap();
     }
 
     @JsonIgnore
