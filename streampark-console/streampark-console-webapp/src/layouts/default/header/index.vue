@@ -68,6 +68,8 @@
 
       <FullScreen v-if="getShowFullScreen" :class="`${prefixCls}-action__item fullscreen-item`" />
 
+      <LockScreen :class="`${prefixCls}-action__item lockscreen-item`" />
+
       <AppLocalePicker
         v-if="getShowLocalePicker"
         :reload="true"
@@ -107,6 +109,7 @@
     ErrorAction,
     Github,
     Slogan,
+    LockScreen,
   } from './components';
   import { useAppInject } from '/@/hooks/web/useAppInject';
   import { useDesign } from '/@/hooks/web/useDesign';
@@ -131,6 +134,7 @@
       ErrorAction,
       Github,
       Slogan,
+      LockScreen,
       Divider,
       AppDarkModeToggle,
     },

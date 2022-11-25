@@ -78,6 +78,18 @@ export default {
     start: '开启集群',
     edit: '编辑集群',
     delete: '确定要删除此集群 ?',
+    form: {
+      addType: '添加类型',
+      addExisting: '已有集群',
+      addNew: '全新集群',
+    },
+    placeholder: {
+      addType: '请选择集群添加类型',
+    },
+    required: {
+      address: '必须填写集群地址',
+      clusterId: 'Yarn Session ClusterId 为必填项',
+    },
   },
   env: {
     conf: 'Flink 配置',
