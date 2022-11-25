@@ -71,18 +71,6 @@ management:
       probes:
         enabled: true
 
-# mybatis plus setting
-mybatis-plus:
-  type-aliases-package: org.apache.streampark.console.*.entity
-  mapper-locations: classpath:mapper/*/*.xml
-  configuration:
-    jdbc-type-for-null: null
-  global-config:
-    db-config:
-      id-type: auto
-    # close mybatis-plus banner
-    banner: false
-
 streampark:
   proxy:
     # knox process address https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
