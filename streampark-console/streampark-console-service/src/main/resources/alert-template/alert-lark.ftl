@@ -8,7 +8,7 @@
       "elements": [
         {
           "tag": "plain_text",
-          "content": "StreamPark , Make stream processing easier!"
+          "content": "Apache StreamPark , Make stream processing easier!"
         }
       ]
     },
@@ -21,7 +21,7 @@
       "elements": [
         {
           "tag": "plain_text",
-          "content": "I'm sorry to inform you that something wrong with your task"
+          "content": "Oops! I'm sorry to inform you that something wrong with your app"
         }
       ]
     },
