@@ -18,12 +18,11 @@
 package org.apache.streampark.flink.kubernetes.watcher
 
 import com.google.common.base.Charsets
-import com.google.common.io.{FileWriteMode, Files}
+import com.google.common.io.Files
 import org.apache.commons.collections.CollectionUtils
 import org.apache.flink.core.fs.Path
 import org.apache.flink.runtime.history.FsJobArchivist
-import org.apache.flink.runtime.webmonitor.history.ArchivedJson
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
+import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
@@ -39,7 +38,6 @@ import org.json4s.jackson.JsonMethods.parse
 
 import java.io.File
 import java.nio.charset.StandardCharsets
-import java.util
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
@@ -96,7 +94,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * single flink job status tracking task
    */
   override def doWatch(): Unit = {
-    this.synchronized{
+    this.synchronized {
       logInfo("[FlinkJobStatusWatcher]: Status monitoring process begins - " + Thread.currentThread().getName)
       // get all legal tracking ids
       val trackIds = Try(trackController.collectAllTrackIds()).filter(_.nonEmpty).getOrElse(return)
@@ -444,17 +442,11 @@ private[kubernetes] object FlinkHistoryArchives {
         if (a.getPath == s"/jobs/$jobId/exceptions") {
           Try(parse(a.getJson)) match {
             case Success(ok) =>
-              ok \ "root-exception" match {
-                case JNothing | JNull =>
-                case JArray(arr) =>
-                  arr.foreach(x => {
-                    val projectPath = SystemPropertyUtils.get("java.io.tmpdir", "temp")
-                    val path = s"${projectPath}/${jobId}_err.log"
-                    val file = new File(path)
-                    val log = (x \ "root-exception").extractOpt[String].orNull
-                    Files.asCharSink(file, Charsets.UTF_8).write(log)
-                  })
-              }
+              val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)
+              val file = new File(path)
+              val log = (ok \ "root-exception").extractOpt[String].orNull
+              Files.asCharSink(file, Charsets.UTF_8).write(log)
+            case _ =>
           }
         } else if (a.getPath == "/jobs/overview") {
           Try(parse(a.getJson)) match {
@@ -462,12 +454,12 @@ private[kubernetes] object FlinkHistoryArchives {
               ok \ "jobs" match {
                 case JNothing | JNull =>
                 case JArray(arr) =>
-                    arr.foreach(x => {
-                      val jid = (x \ "jid").extractOpt[String].orNull
-                      if (jid == jobId) {
-                        state = (x \ "state").extractOpt[String].orNull
-                      }
-                    })
+                  arr.foreach(x => {
+                    val jid = (x \ "jid").extractOpt[String].orNull
+                    if (jid == jobId) {
+                      state = (x \ "state").extractOpt[String].orNull
+                    }
+                  })
                 case _ =>
               }
             case Failure(_) =>
