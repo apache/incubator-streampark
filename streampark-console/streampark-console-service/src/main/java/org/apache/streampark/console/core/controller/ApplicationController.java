@@ -39,10 +39,11 @@ import org.apache.streampark.console.core.service.LoggerService;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Api(tags = {"FLINK_APPLICATION_TAG"})
 @Slf4j
 @Validated
 @RestController
@@ -101,7 +103,7 @@ public class ApplicationController {
     }
 
     @ApiAccess
-    @ApiOperation(value = "App Copy", notes = "App Copy", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
+    @ApiOperation(value = "Copy application from the exist app", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "id", value = "copy target app id", required = true, paramType = "query", dataTypeClass = Long.class),
         @ApiImplicitParam(name = "jobName", value = "name of the copied application", required = true, paramType = "query", dataTypeClass = String.class, defaultValue = ""),
@@ -168,12 +170,12 @@ public class ApplicationController {
     }
 
     @ApiAccess
-    @ApiOperation(value = "App Start", notes = "App Start", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
+    @ApiOperation(value = "Start application", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "query", dataTypeClass = Long.class),
         @ApiImplicitParam(name = "savePointed", value = "restored app from the savepoint or latest checkpoint", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false"),
         @ApiImplicitParam(name = "savePoint", value = "savepoint or checkpoint path", required = true, paramType = "query", dataTypeClass = String.class, defaultValue = ""),
-        @ApiImplicitParam(name = "flameGraph", value = "flame Graph support", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false"),
+        @ApiImplicitParam(name = "flameGraph", value = "whether the flame graph support", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false"),
         @ApiImplicitParam(name = "allowNonRestored", value = "ignore savepoint then cannot be restored", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false")})
     @PostMapping(value = "start", consumes = "application/x-www-form-urlencoded")
     @RequiresPermissions("app:start")
@@ -189,10 +191,10 @@ public class ApplicationController {
     }
 
     @ApiAccess
-    @ApiOperation(value = "App Cancel", notes = "App Cancel", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
+    @ApiOperation(value = "Cancel application", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "savePointed", value = "trigger savePoint before taking stopping", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false"),
+        @ApiImplicitParam(name = "id", value = "app id", required = true, paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "savePointed", value = "whether trigger savepoint before taking stopping", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false"),
         @ApiImplicitParam(name = "savePoint", value = "savepoint path", paramType = "query", dataTypeClass = String.class, defaultValue = "hdfs:///tm/xxx"),
         @ApiImplicitParam(name = "drain", value = "send max watermark before canceling", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false")})
     @PostMapping(value = "cancel", consumes = "application/x-www-form-urlencoded")
@@ -336,13 +338,20 @@ public class ApplicationController {
         }
     }
 
-    @ApiOperation(value = "APP detail")
+    @ApiOperation(value = "Read flink on k8s deploy log")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "namespace", value = "ks8 namespace"),
+        @ApiImplicitParam(name = "jobName", value = "job name"),
+        @ApiImplicitParam(name = "jobId", value = "job id"),
+        @ApiImplicitParam(name = "skipLineNum", value = "number of log lines skipped loading"),
+        @ApiImplicitParam(name = "limit", value = "number of log lines loaded at once")
+    })
     @PostMapping(value = "/detail")
-    public RestResponse detail(@ApiParam("K8s name spaces") @RequestParam(value = "namespace", required = false) String namespace,
-                               @ApiParam("Job name") @RequestParam(value = "jobName", required = false) String jobName,
-                               @ApiParam("Job id") @RequestParam(value = "jobId", required = false) String jobId,
-                               @ApiParam("Number of log lines skipped loading") @RequestParam(value = "skipLineNum", required = false) Integer skipLineNum,
-                               @ApiParam("Number of log lines loaded at once") @RequestParam(value = "limit", required = false) Integer limit) {
+    public RestResponse detail(@RequestParam(value = "namespace", required = false) String namespace,
+                               @RequestParam(value = "jobName", required = false) String jobName,
+                               @RequestParam(value = "jobId", required = false) String jobId,
+                               @RequestParam(value = "skipLineNum", required = false) Integer skipLineNum,
+                               @RequestParam(value = "limit", required = false) Integer limit) {
         return RestResponse.success(MoreFutures.derefUsingDefaultTimeout(logService.queryLog(namespace, jobName, jobId, skipLineNum, limit)));
     }
 
