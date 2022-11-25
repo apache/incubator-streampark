@@ -39,7 +39,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { ClusterAddTypeEnum } from '/@/enums/appEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 
-export const useClusterSetting = (isEdit = false) => {
+export const useClusterSetting = () => {
   const { createMessage } = useMessage();
   const { t } = useI18n();
 
@@ -155,7 +155,6 @@ export const useClusterSetting = (isEdit = false) => {
             },
           ],
         },
-        show: !isEdit,
       },
       {
         field: 'address',

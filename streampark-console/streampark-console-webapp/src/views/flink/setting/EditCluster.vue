@@ -43,8 +43,7 @@
   const { Swal } = useMessage();
   const { handleResetApplication, defaultOptions } = useEdit();
   const cluster = reactive<Recordable>({});
-  const { getLoading, changeLoading, getClusterSchema, handleSubmitParams } =
-    useClusterSetting(true);
+  const { getLoading, changeLoading, getClusterSchema, handleSubmitParams } = useClusterSetting();
 
   const [registerForm, { submit, setFieldsValue }] = useForm({
     labelWidth: 120,
