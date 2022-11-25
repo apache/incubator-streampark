@@ -15,16 +15,16 @@
 # limitations under the License.
 #
 
-# p6spy configuration and use https://p6spy.readthedocs.io/en/latest/configandusage.htmlp6spy configuration and use https://p6spy.readthedocs.io/en/latest/configandusage.html
-# Use logging system to record sql
-appender=com.p6spy.engine.spy.appender.Slf4JLogger
-# Customized log printing
-logMessageFormat=org.apache.streampark.console.base.config.P6spySqlFormatConfig
-# Whether to enable slow sql logging
-outagedetection=true
-# Slow SQL logging standards:second
-outagedetectioninterval=2
-# Whether to enable log filtering default false, this configuration takes effect if include/exclude/sqlexpression is configuredz
-filter=true
-# Comma-separated list of table names excluded when filtering Logs Default is empty
-exclude=QRTZ
+security:
+  kerberos:
+    ttl: 2h # unit [s|m|h|d]
+    login:
+      enable: false
+      debug: false
+      principal:
+      krb5:
+      keytab:
+java:
+  security:
+    krb5:
+      conf:
