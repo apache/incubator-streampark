@@ -30,7 +30,7 @@ import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
 
 import java.io.File
-import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
+import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 // scalastyle:off println
