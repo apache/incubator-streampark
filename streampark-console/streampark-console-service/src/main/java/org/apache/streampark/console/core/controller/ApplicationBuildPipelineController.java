@@ -29,6 +29,7 @@ import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineType;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Api(tags = {"FLINK_APPLICATION_BUILD_PIPELINE_TAG"})
 @Slf4j
 @Validated
 @RestController

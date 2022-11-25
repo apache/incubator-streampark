@@ -43,6 +43,7 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.Contact;
 import springfox.documentation.service.HttpAuthenticationScheme;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
@@ -88,8 +89,11 @@ public class SwaggerConfig implements WebMvcConfigurer {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-            .title("StreamPark Api Docs")
-            .description("StreamPark Api Docs")
+            .title("Apache StreamPark Api Docs")
+            .description("Apache StreamPark Api Docs")
+            .contact(new Contact("Apache StreamPark", "https://streampark.apache.org/", "dev@streampark.apache.org"))
+            .version("2.0.0")
+            .license("Apache-2.0 license")
             .build();
     }
 
