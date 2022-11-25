@@ -69,7 +69,7 @@ export default {
     alertDetail: 'Alert Detail',
     alertOperationMessage: {
       updateAlertConfigFailed: 'Update AlertConfig Failed!',
-      updateAlertConfigSuccessfull: 'Update AlertConfig successful!'
+      updateAlertConfigSuccessfull: 'Update AlertConfig successful!',
     },
     delete: 'Are you sure delete this alert conf ?',
   },

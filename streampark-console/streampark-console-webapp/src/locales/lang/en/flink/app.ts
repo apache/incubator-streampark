@@ -223,4 +223,16 @@ export default {
     hadoopXmlConfigFileTips:
       'Automatically copy configuration files from system environment parameters',
   },
+  noteInfo: {
+    note: 'Note',
+    minute: 'minute',
+    count: 'count',
+    checkPointFailureOptions: 'CheckPoint Failure Options',
+    checkpointFailureRateInterval: 'checkpoint failure rate interval',
+    maxFailuresPerInterval: 'max failures per interval',
+    checkPointFailureNote:
+      'Operation after checkpoint failure, e.g: Within 5 minutes (checkpoint failure rate interval), if the number of checkpoint failures reaches 10 (max failures per interval),action will be triggered(alert or restart job)',
+    totalMemoryNote:
+      'Explicitly configuring both "total process memory" and "total Flink memory" is not recommended. It may lead to deployment failures due to potential memory configuration conflicts. Configuring other memory components also requires caution as it can produce further configuration conflicts, The easiest way is to set "total process memory"',
+  },
 };

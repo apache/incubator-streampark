@@ -17,7 +17,9 @@
 
 package org.apache.streampark.console.core.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -37,6 +39,7 @@ public class Setting implements Serializable {
     @TableId(type = IdType.INPUT)
     private String settingKey;
 
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String settingValue;
 
     private Integer type;

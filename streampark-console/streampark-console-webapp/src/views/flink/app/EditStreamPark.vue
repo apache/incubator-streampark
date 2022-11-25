@@ -155,10 +155,10 @@
   async function handleAppUpdate(values) {
     try {
       submitLoading.value = true;
-      if (app.jobType == 1) {
+      if (app.jobType == JobTypeEnum.JAR) {
         handleSubmitCustomJob(values);
       } else {
-        if (app.jobType == 2) {
+        if (app.jobType == JobTypeEnum.SQL) {
           if (values.flinkSql == null || values.flinkSql.trim() === '') {
             createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
           } else {

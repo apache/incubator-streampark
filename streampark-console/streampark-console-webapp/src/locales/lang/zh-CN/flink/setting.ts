@@ -68,7 +68,7 @@ export default {
     alertDetail: '告警(配置)详情',
     alertOperationMessage: {
       updateAlertConfigFailed: '告警配置更新失败!',
-      updateAlertConfigSuccessfull: '告警配置更新成功!'
+      updateAlertConfigSuccessfull: '告警配置更新成功!',
     },
     delete: '是否确定删除此警报 ?',
   },

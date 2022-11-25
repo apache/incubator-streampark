@@ -293,10 +293,10 @@
   <div class="dependency-box" v-if="dependencyRecords.length > 0 || uploadJars.length > 0">
     <Alert
       class="dependency-item"
-      v-for="(value, index) in dependencyRecords"
+      v-for="(dept, index) in dependencyRecords"
       :key="`dependency_${index}`"
       type="info"
-      @click="handleEditPom(value)"
+      @click="handleEditPom(dept)"
     >
       <template #message>
         <Space @click="handleEditPom(value)" class="tag-dependency-pom">
@@ -313,8 +313,8 @@
     </Alert>
     <Alert
       class="dependency-item"
-      v-for="(value, index) in uploadJars"
-      :key="`upload_jars_${index}`"
+      v-for="jar in uploadJars"
+      :key="`upload_jars_${jar}`"
       type="info"
     >
       <template #message>

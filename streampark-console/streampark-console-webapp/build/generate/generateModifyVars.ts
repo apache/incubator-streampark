@@ -44,7 +44,7 @@ export function generateModifyVars(dark = false) {
     'success-color': '#31CE36', //  Success color
     'error-color': '#F25961', //  False color
     'warning-color': '#FFAD46', //   Warning color
-    'border-color-base': '#ebecec',
+    'border-color-base': '#d9d9d9',
     'font-size-base': '14px', //  Main font size
     'border-radius-base': '4px',
     'border-radius-sm': '2px',
