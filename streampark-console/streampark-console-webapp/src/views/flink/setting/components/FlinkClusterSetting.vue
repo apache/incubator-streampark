@@ -77,10 +77,6 @@
     }
   }
 
-  function handleAdd() {
-    go('/flink/setting/add_cluster');
-  }
-
   function handleIsStart(item) {
     /**
      The cluster was just created but not started
@@ -102,7 +98,7 @@
     try {
       const { data } = await fetchClusterStart(item.id);
       if (data?.data?.status) {
-        optionClusters.starting.set(item.id, new Date().getTime());
+        // optionClusters.starting.set(item.id, new Date().getTime());
         handleMapUpdate('starting');
         getFlinkClusterSetting();
         Swal.fire({
@@ -133,7 +129,7 @@
   async function handleDelete(item: FlinkCluster) {
     const { data } = await fetchClusterRemove(item.id);
     if (data?.data?.status) {
-      optionClusters.starting.delete(item.id);
+      // optionClusters.starting.delete(item.id);
       handleMapUpdate('starting');
       getFlinkClusterSetting();
       createMessage.success('The current cluster is remove');
@@ -145,8 +141,9 @@
     try {
       const { data } = await fetchClusterShutdown(item.id);
       if (data?.data?.status) {
-        optionClusters.starting.delete(item.id);
+        // optionClusters.starting.delete(item.id);
         handleMapUpdate('starting');
+        getFlinkClusterSetting();
         createMessage.success('The current cluster is shutdown');
       } else {
         Swal.fire({
@@ -178,7 +175,11 @@
 </script>
 <template>
   <div v-auth="'project:create'">
-    <a-button type="dashed" style="width: 100%; margin-top: 20px" @click="handleAdd">
+    <a-button
+      type="dashed"
+      style="width: 100%; margin-top: 20px"
+      @click="go('/flink/setting/add_cluster')"
+    >
       <PlusOutlined />
       {{ t('common.add') }}
     </a-button>
@@ -267,7 +268,11 @@
         <template v-else>
           <Tooltip :title="t('flink.setting.cluster.stop')">
             <a-button
-              v-if="[3, 5].includes(item.executionMode)"
+              v-if="
+                [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(
+                  item.executionMode,
+                )
+              "
               v-auth="'cluster:create'"
               @click="handleShutdownCluster(item)"
               shape="circle"

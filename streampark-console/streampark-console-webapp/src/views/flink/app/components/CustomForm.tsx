@@ -24,6 +24,7 @@ export interface CheckPointFailure {
   cpFailureAction: string;
 }
 import { cpTriggerAction } from '../data';
+import { useI18n } from '/@/hooks/web/useI18n';
 export default defineComponent({
   props: {
     value: {
@@ -33,6 +34,7 @@ export default defineComponent({
   },
   emits: ['updateValue'],
   setup(props, { emit }) {
+    const { t } = useI18n();
     const formItemContext = Form.useInjectFormItemContext();
     const triggerChange = (changedValue: Partial<CheckPointFailure>) => {
       emit('updateValue', { ...props.value, ...changedValue });
@@ -56,25 +58,25 @@ export default defineComponent({
               min={1}
               step={1}
               name="cpMaxFailureInterval"
-              placeholder="checkpoint failure rate interval"
+              placeholder={t('flink.app.noteInfo.checkpointFailureRateInterval')}
               allow-clear
               class="!w-260px mr-10px"
               value={props.value?.cpMaxFailureInterval}
               onChange={(value: any) => handleCpMaxFailureIntervalChange(value)}
             />
-            <Button style="width: 70px"> minute </Button>
+            <Button style="width: 70px"> {t('flink.app.noteInfo.minute')} </Button>
             <InputNumber
               style="margin-left: 1%"
               name="cpFailureRateInterval"
               min={1}
               step={1}
-              placeholder="max failures per interval"
+              placeholder={t('flink.app.noteInfo.maxFailuresPerInterval')}
               class="!mb-0 !w-200px"
               value={props.value?.cpFailureRateInterval}
               onChange={(value: any) => handleCpFailureRateIntervalChange(value)}
             />
 
-            <Button style="width: 70px"> count </Button>
+            <Button style="width: 70px"> {t('flink.app.noteInfo.count')} </Button>
             <Select
               name="cpFailureAction"
               style="margin-left: 1%"
@@ -101,11 +103,9 @@ export default defineComponent({
           <p class="conf-desc mt-10px">
             <span class="note-info">
               <Tag color="#2db7f5" class="tag-note">
-                Note
+                {t('flink.app.noteInfo.note')}
               </Tag>
-              Operation after checkpoint failure, e.g: Within 5 minutes (checkpoint failure rate
-              interval), if the number of checkpoint failures reaches 10 (max failures per
-              interval),action will be triggered(alert or restart job)
+              {t('flink.app.noteInfo.checkPointFailureNote')}
             </span>
           </p>
         </div>

@@ -79,6 +79,18 @@ export default {
     start: 'Start Cluster',
     edit: 'Edit Cluster',
     delete: 'Are you sure delete this cluster ?',
+    form: {
+      addType: 'Add Type',
+      addExisting: 'existing cluster',
+      addNew: 'new cluster',
+    },
+    placeholder: {
+      addType: 'Please select cluster Add Type',
+    },
+    required: {
+      address: 'cluster address is required',
+      clusterId: 'Yarn Session ClusterId is required',
+    },
   },
   env: {
     conf: 'Flink Conf',

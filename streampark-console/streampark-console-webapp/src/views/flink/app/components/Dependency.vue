@@ -299,14 +299,14 @@
       @click="handleEditPom(dept)"
     >
       <template #message>
-        <Space @click="handleEditPom(value)" class="tag-dependency-pom">
+        <Space @click="handleEditPom(dept)" class="tag-dependency-pom">
           <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
-          {{ value.artifactId }}-{{ value.version }}.jar
+          {{ dept.artifactId }}-{{ dept.version }}.jar
           <Icon
             :size="12"
             icon="ant-design:close-outlined"
             class="icon-close cursor-pointer"
-            @click.stop="handleRemovePom(value)"
+            @click.stop="handleRemovePom(dept)"
           />
         </Space>
       </template>
@@ -320,12 +320,12 @@
       <template #message>
         <Space>
           <Tag class="tag-dependency" color="#108ee9">JAR</Tag>
-          {{ value }}
+          {{ jar }}
           <Icon
             icon="ant-design:close-outlined"
             class="icon-close cursor-pointer"
             :size="12"
-            @click="handleRemoveJar(value)"
+            @click="handleRemoveJar(jar)"
           />
         </Space>
       </template>

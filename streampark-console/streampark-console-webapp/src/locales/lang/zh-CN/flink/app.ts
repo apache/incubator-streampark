@@ -218,7 +218,7 @@ export default {
   },
   noteInfo: {
     note: '提示',
-    minutes: '分钟',
+    minute: '分钟',
     count: '次数',
     checkPointFailureOptions: 'CheckPoint失败策略',
     checkpointFailureRateInterval: 'checkpoint失败间隔',
