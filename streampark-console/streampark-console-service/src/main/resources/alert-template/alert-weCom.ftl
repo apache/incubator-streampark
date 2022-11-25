@@ -1,10 +1,10 @@
-> StreamPark , Make stream processing easier!
+> Apache StreamPark , Make stream processing easier!
 
 # ${subject}
 
 ### **Dear StreamPark user:**
 
-`I'm sorry to inform you that something wrong with your task`
+`Oops! I'm sorry to inform you that something wrong with your app`
 
 -   **Job Name：${jobName}**
 <#if  type == 1 >
