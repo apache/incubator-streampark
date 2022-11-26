@@ -67,18 +67,14 @@
         const res = await fetchCheckCluster(params);
         const status = parseInt(res.status);
         if (status === 0) {
-          const resp = await fetchUpdateCluster(params);
-          if (resp.status) {
-            Swal.fire({
-              icon: 'success',
-              title: values.clusterName.concat(' update successful!'),
-              showConfirmButton: false,
-              timer: 2000,
-            });
-            go('/flink/setting?activeKey=cluster');
-          } else {
-            Swal.fire(resp.data.msg);
-          }
+          fetchUpdateCluster(params);
+          Swal.fire({
+            icon: 'success',
+            title: values.clusterName.concat(' update successful!'),
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          go('/flink/setting?activeKey=cluster');
         } else {
           Swal.fire('Failed', res.msg, 'error');
         }

@@ -371,7 +371,6 @@ export const useClusterSetting = () => {
   function handleSubmitParams(values: Recordable) {
     const options = handleFormValue(values);
     const params = {
-      clusterId: values.clusterId || null,
       clusterName: values.clusterName,
       executionMode: values.executionMode,
       versionId: values.versionId,
@@ -386,6 +385,7 @@ export const useClusterSetting = () => {
       case ExecModeEnum.YARN_SESSION:
         if (values.addType === ClusterAddTypeEnum.ADD_EXISTING) {
           Object.assign(params, {
+            clusterId: values.clusterId,
             address: values.address,
           });
         } else {
@@ -399,6 +399,7 @@ export const useClusterSetting = () => {
         return params;
       case ExecModeEnum.KUBERNETES_SESSION:
         Object.assign(params, {
+          clusterId: values.clusterId,
           options: JSON.stringify(options),
           dynamicProperties: values.dynamicProperties,
           resolveOrder: values.resolveOrder,

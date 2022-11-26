@@ -144,7 +144,7 @@ public class FlinkCluster implements Serializable {
         return null;
     }
 
-    public boolean verifyConnection() {
+    public boolean verifyRemoteCluster() {
         if (address == null) {
             return false;
         }
@@ -156,7 +156,9 @@ public class FlinkCluster implements Serializable {
                 return false;
             }
             try {
-                HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(2000).build());
+                String overviewUrl = url + "/overview";
+                String result = HttpClientUtils.httpGetRequest(overviewUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                JacksonUtils.read(result, Overview.class);
                 return true;
             } catch (Exception ignored) {
                 //

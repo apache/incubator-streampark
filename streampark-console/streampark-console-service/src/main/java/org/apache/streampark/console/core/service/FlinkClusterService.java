@@ -26,15 +26,15 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
     ResponseResult check(FlinkCluster flinkCluster);
 
-    ResponseResult create(FlinkCluster flinkCluster);
+    Boolean create(FlinkCluster flinkCluster);
 
-    ResponseResult delete(FlinkCluster flinkCluster);
+    void delete(FlinkCluster flinkCluster);
 
-    ResponseResult update(FlinkCluster flinkCluster);
+    void update(FlinkCluster flinkCluster);
 
-    ResponseResult start(FlinkCluster flinkCluster);
+    void start(FlinkCluster flinkCluster);
 
-    ResponseResult shutdown(FlinkCluster flinkCluster);
+    void shutdown(FlinkCluster flinkCluster);
 
     Boolean existsByClusterId(String clusterId, Long id);
 

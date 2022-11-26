@@ -64,8 +64,8 @@ public class FlinkClusterController {
     @PostMapping("create")
     @RequiresPermissions("cluster:create")
     public RestResponse create(FlinkCluster cluster) {
-        ResponseResult result = flinkClusterService.create(cluster);
-        return RestResponse.success(result);
+        Boolean success = flinkClusterService.create(cluster);
+        return RestResponse.success(success);
     }
 
     @PostMapping("update")
@@ -88,7 +88,8 @@ public class FlinkClusterController {
         flinkCluster.setResolveOrder(cluster.getResolveOrder());
         flinkCluster.setServiceAccount(cluster.getServiceAccount());
         flinkCluster.setDescription(cluster.getDescription());
-        return RestResponse.success(flinkClusterService.update(flinkCluster));
+        flinkClusterService.update(flinkCluster);
+        return RestResponse.success();
     }
 
     @PostMapping("get")
@@ -100,21 +101,21 @@ public class FlinkClusterController {
     @PostMapping("start")
     public RestResponse start(FlinkCluster flinkCluster) {
         FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
-        ResponseResult start = flinkClusterService.start(cluster);
-        return RestResponse.success(start);
+        flinkClusterService.start(cluster);
+        return RestResponse.success();
     }
 
     @PostMapping("shutdown")
     public RestResponse shutdown(FlinkCluster flinkCluster) {
         FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
-        ResponseResult shutdown = flinkClusterService.shutdown(cluster);
-        return RestResponse.success(shutdown);
+        flinkClusterService.shutdown(cluster);
+        return RestResponse.success();
     }
 
     @PostMapping("delete")
     public RestResponse delete(FlinkCluster flinkCluster) {
         FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
-        ResponseResult delete = flinkClusterService.delete(cluster);
-        return RestResponse.success(delete);
+        flinkClusterService.delete(cluster);
+        return RestResponse.success();
     }
 }
