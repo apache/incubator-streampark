@@ -124,7 +124,6 @@
         flinkClusterId: app.flinkClusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
-        yarnSessionClusterId: app.yarnSessionClusterId,
         ...resetParams,
       };
       console.log('resetParams', resetParams);
@@ -195,17 +194,6 @@
           jar: unref(uploadJars),
         });
       }
-      if (values.yarnSessionClusterId) {
-        const cluster =
-          flinkClusters.value.filter(
-            (c) =>
-              c.clusterId === values.yarnSessionClusterId &&
-              c.clusterState === ClusterStateEnum.STARTED,
-          )[0] || null;
-        values.clusterId = cluster.id;
-        values.flinkClusterId = cluster.id;
-        values.yarnSessionClusterId = cluster.clusterId;
-      }
       let config = values.configOverride;
       if (config != null && config.trim() !== '') {
         config = encryptByBase64(config);
@@ -244,18 +232,6 @@
         config = encryptByBase64(config);
       } else {
         config = null;
-      }
-      if (values.yarnSessionClusterId) {
-        const cluster =
-          flinkClusters.value.filter((c) => {
-            return (
-              c.clusterId === values.yarnSessionClusterId &&
-              c.clusterState === ClusterStateEnum.STARTED
-            );
-          })[0] || null;
-        values.clusterId = cluster.id;
-        values.flinkClusterId = cluster.id;
-        values.yarnSessionClusterId = cluster.clusterId;
       }
       const configId = values.strategy == UseStrategyEnum.USE_EXIST ? app.configId : null;
       const params = {

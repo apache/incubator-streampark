@@ -156,19 +156,10 @@
       unref(flinkClusters).filter((c) => {
         if (values.flinkClusterId) {
           return c.id == values.flinkClusterId && c.clusterState === ClusterStateEnum.STARTED;
-        } else {
-          return (
-            c.clusterId == values.yarnSessionClusterId &&
-            c.clusterState === ClusterStateEnum.STARTED
-          );
         }
       })[0] || null;
     if (cluster) {
-      Object.assign(values, {
-        clusterId: cluster.id,
-        flinkClusterId: cluster.id,
-        yarnSessionClusterId: cluster.clusterId,
-      });
+      Object.assign(values, { flinkClusterId: cluster.id });
     }
   }
 

@@ -37,9 +37,7 @@ import scala.util.Try
 trait YarnSubmitTrait extends FlinkSubmitTrait {
 
   override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
-
     val jobID = getJobID(cancelRequest.jobId)
-
     val clusterClient = {
       flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.clusterId)
       val clusterClientFactory = new YarnClusterClientFactory

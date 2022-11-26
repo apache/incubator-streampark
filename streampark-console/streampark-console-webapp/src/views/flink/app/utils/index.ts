@@ -271,7 +271,6 @@ export function handleSubmitParams(
     clusterId: values.clusterId || null,
     flinkClusterId: values.flinkClusterId || null,
     flinkImage: values.flinkImage || null,
-    yarnSessionClusterId: values.yarnSessionClusterId || null,
   });
   if (params.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
     Object.assign(params, {

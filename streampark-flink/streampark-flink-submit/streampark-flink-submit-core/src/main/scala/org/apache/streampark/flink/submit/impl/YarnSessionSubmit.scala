@@ -49,7 +49,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
-
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -137,8 +136,9 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
-    flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.properties.get(KEY_YARN_APP_ID).toString)
-    flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+    flinkConfig
+      .safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.properties.get(KEY_YARN_APP_ID).toString)
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -229,7 +229,8 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       clusterDescriptor = yarnClusterDescriptor._2
       if (FinalApplicationStatus.UNDEFINED.equals(clusterDescriptor.getYarnClient.getApplicationReport(ApplicationId.fromString(shutDownRequest.clusterId)).getFinalApplicationStatus)) {
         val clientProvider = clusterDescriptor.retrieve(yarnClusterDescriptor._1)
-        clientProvider.getClusterClient.shutDownCluster()
+        client = clientProvider.getClusterClient
+        client.shutDownCluster()
       }
       logInfo(s"the ${shutDownRequest.clusterId}'s final status is ${clusterDescriptor.getYarnClient.getApplicationReport(ConverterUtils.toApplicationId(shutDownRequest.clusterId)).getFinalApplicationStatus}")
       ShutDownResponse()

@@ -29,7 +29,6 @@ import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
-import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkTrackingTask;
 import org.apache.streampark.flink.submit.FlinkSubmitter;
 import org.apache.streampark.flink.submit.bean.DeployRequest;
@@ -77,9 +76,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     @Autowired
     private CommonService commonService;
 
-    @Autowired
-    private SettingService settingService;
-
     @Override
     public ResponseResult check(FlinkCluster cluster) {
         ResponseResult result = new ResponseResult();
@@ -105,21 +101,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         }
 
         // 3) Check connection
-        if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum())) {
-            if (!cluster.verifyRemoteCluster()) {
-                result.setMsg("the remote cluster connection failed, please check!");
+        if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum()) ||
+            ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum())) {
+            if (!cluster.verifyClusterConnection()) {
+                result.setMsg("the cluster connection failed, please check!");
                 result.setStatus(3);
                 return result;
             }
-        } else if (ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum())) {
-            if (cluster.getId() == null && !StringUtils.isAllBlank(cluster.getAddress(), cluster.getClusterId())) {
-                if (!cluster.verifyFlinkYarnCluster()) {
-                    result.setMsg("the flink cluster connection failed, please check!");
-                    result.setStatus(4);
-                    return result;
-                }
-            }
         }
+
         return result;
     }
 

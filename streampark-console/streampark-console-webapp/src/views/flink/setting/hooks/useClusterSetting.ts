@@ -193,10 +193,10 @@ export const useClusterSetting = () => {
       },
       {
         field: 'clusterId',
-        label: 'Yarn Session ClusterId',
+        label: 'Yarn Session Cluster',
         component: 'Input',
         componentProps: {
-          placeholder: 'Please enter Yarn Session clusterId',
+          placeholder: 'Please enter Yarn Session cluster',
         },
         ifShow: ({ values }) => isAddExistYarnSession(values),
         rules: [{ required: true, message: t('flink.setting.cluster.required.clusterId') }],

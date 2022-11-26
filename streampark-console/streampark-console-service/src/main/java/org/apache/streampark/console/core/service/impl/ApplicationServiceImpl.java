@@ -998,10 +998,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
                     application.setYarnQueue(application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
                 }
-            } else if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-                if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_ID())) {
-                    application.setYarnSessionClusterId(application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID()).toString());
-                }
             }
         }
         return application;

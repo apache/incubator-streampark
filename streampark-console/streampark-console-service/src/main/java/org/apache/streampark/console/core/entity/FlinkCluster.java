@@ -144,49 +144,34 @@ public class FlinkCluster implements Serializable {
         return null;
     }
 
-    public boolean verifyRemoteCluster() {
-        if (address == null) {
-            return false;
-        }
-        String[] array = address.split(",");
-        for (String url : array) {
-            try {
-                new URI(url);
-            } catch (Exception ignored) {
+    public boolean verifyClusterConnection() {
+        if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum()) ||
+            ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+            if (address == null) {
                 return false;
             }
-            try {
-                String overviewUrl = url + "/overview";
-                String result = HttpClientUtils.httpGetRequest(overviewUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-                JacksonUtils.read(result, Overview.class);
-                return true;
-            } catch (Exception ignored) {
-                //
+            String[] array = address.split(",");
+            for (String url : array) {
+                try {
+                    new URI(url);
+                } catch (Exception ignored) {
+                    return false;
+                }
+                try {
+                    String restUrl;
+                    if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
+                        restUrl = url + "/overview";
+                    } else {
+                        restUrl = url + "/proxy/" + this.clusterId + "/overview";
+                    }
+                    String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                    JacksonUtils.read(result, Overview.class);
+                    return true;
+                } catch (Exception ignored) {
+                    //
+                }
             }
-        }
-        return false;
-    }
-
-    public boolean verifyFlinkYarnCluster() {
-        if (address == null) {
             return false;
-        }
-        String[] array = address.split(",");
-        for (String url : array) {
-            try {
-                new URI(url);
-            } catch (Exception ignored) {
-                return false;
-            }
-            try {
-                String format = "%s/proxy/%s/overview";
-                String yarnSessionUrl = String.format(format, url, this.clusterId);
-                String result = HttpClientUtils.httpGetRequest(yarnSessionUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-                JacksonUtils.read(result, Overview.class);
-                return true;
-            } catch (Exception ignored) {
-                //
-            }
         }
         return false;
     }
