@@ -206,7 +206,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     @Override
-    public void shutdown(FlinkCluster flinkCluster) {
+    public void shutdown(FlinkCluster cluster) {
+        FlinkCluster flinkCluster = this.getById(cluster.getId());
         //1) check mode
         ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
         String clusterId = flinkCluster.getClusterId();

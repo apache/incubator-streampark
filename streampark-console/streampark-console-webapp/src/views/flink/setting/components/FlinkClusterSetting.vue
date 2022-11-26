@@ -55,7 +55,7 @@
   const optionClusters = {
     starting: new Map(),
     created: new Map(),
-    stoped: new Map(),
+    canceled: new Map(),
   };
   function isSessionMode(mode: number): boolean {
     return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
@@ -72,7 +72,7 @@
       } else if (cluster.clusterState === ClusterStateEnum.STARTED) {
         optionClusters.starting.set(cluster.id, new Date().getTime());
       } else {
-        optionClusters.stoped.set(cluster.id, new Date().getTime());
+        optionClusters.canceled.set(cluster.id, new Date().getTime());
       }
     }
   }
@@ -83,8 +83,8 @@
      CREATED(0),
      cluster started
      STARTED(1),
-     cluster stopped
-     STOPED(2);
+     cluster canceled
+     CANCELED(2);
     */
     return optionClusters.starting.get(item.id);
   }
@@ -93,14 +93,14 @@
     go(`/flink/setting/edit_cluster?clusterId=${item.id}`);
   }
   /* deploy */
-  async function handleDeployCluser(item: FlinkCluster) {
+  async function handleDeployCluster(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is starting', 0);
     try {
       await fetchClusterStart(item.id);
       // optionClusters.starting.set(item.id, new Date().getTime());
       handleMapUpdate('starting');
-      getFlinkClusterSetting();
-      Swal.fire({
+      await getFlinkClusterSetting();
+      await Swal.fire({
         icon: 'success',
         title: 'The current cluster is started',
         showConfirmButton: false,
@@ -116,9 +116,10 @@
   async function handleDelete(item: FlinkCluster) {
     const { data } = await fetchClusterRemove(item.id);
     if (data?.data?.status) {
-      // optionClusters.starting.delete(item.id);
-      handleMapUpdate('starting');
-      getFlinkClusterSetting();
+      optionClusters.starting.delete(item.id);
+      optionClusters.canceled.delete(item.id);
+      optionClusters.created.delete(item.id);
+      await getFlinkClusterSetting();
       createMessage.success('The current cluster is remove');
     }
   }
@@ -126,10 +127,10 @@
   async function handleShutdownCluster(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is canceling', 0);
     try {
-      const { data } = await fetchClusterShutdown(item.id);
-      // optionClusters.starting.delete(item.id);
-      handleMapUpdate('starting');
-      getFlinkClusterSetting();
+      await fetchClusterShutdown(item.id);
+      optionClusters.starting.delete(item.id);
+      handleMapUpdate('canceled');
+      await getFlinkClusterSetting();
       createMessage.success('The current cluster is shutdown');
     } catch (error) {
       console.error(error);
@@ -218,7 +219,7 @@
             <a-button
               v-if="isSessionMode(item.executionMode)"
               v-auth="'cluster:create'"
-              @click="handleDeployCluser(item)"
+              @click="handleDeployCluster(item)"
               shape="circle"
               size="large"
               class="control-button"

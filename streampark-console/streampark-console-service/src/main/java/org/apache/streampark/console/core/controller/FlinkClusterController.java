@@ -107,8 +107,7 @@ public class FlinkClusterController {
 
     @PostMapping("shutdown")
     public RestResponse shutdown(FlinkCluster flinkCluster) {
-        FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
-        flinkClusterService.shutdown(cluster);
+        flinkClusterService.shutdown(flinkCluster);
         return RestResponse.success();
     }
 

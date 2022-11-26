@@ -275,7 +275,7 @@ export const useClusterSetting = () => {
         ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         componentProps: { placeholder: 'classloader.resolve-order', options: resolveOrder },
-        rules: [{ required: true, message: 'Resolve Order is required', type: 'number' }],
+        rules: [{ message: 'Resolve Order is required', type: 'number' }],
       },
       {
         field: 'slot',
