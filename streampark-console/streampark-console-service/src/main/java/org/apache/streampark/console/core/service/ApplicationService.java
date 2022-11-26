@@ -98,4 +98,5 @@ public interface ApplicationService extends IService<Application> {
 
     void forcedStop(Application app);
 
+    boolean existsRunningJobByClusterId(Long clusterId);
 }

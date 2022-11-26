@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
+import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -76,6 +77,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     @Autowired
     private CommonService commonService;
 
+
+    @Autowired
+    private ApplicationService applicationService;
+
     @Override
     public ResponseResult check(FlinkCluster cluster) {
         ResponseResult result = new ResponseResult();
@@ -101,12 +106,19 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         }
 
         // 3) Check connection
-        if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum()) ||
-            ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum())) {
+        if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum())) {
             if (!cluster.verifyClusterConnection()) {
-                result.setMsg("the cluster connection failed, please check!");
+                result.setMsg("the remote cluster connection failed, please check!");
                 result.setStatus(3);
                 return result;
+            }
+        } else if (ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum())) {
+            if (cluster.getId() == null && !StringUtils.isAllBlank(cluster.getAddress(), cluster.getClusterId())) {
+                if (!cluster.verifyClusterConnection()) {
+                    result.setMsg("the flink cluster connection failed, please check!");
+                    result.setStatus(4);
+                    return result;
+                }
             }
         }
 
@@ -165,7 +177,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             log.info("deploy cluster request " + deployRequest);
             Future<DeployResponse> future = executorService.submit(() -> FlinkSubmitter.deploy(deployRequest));
             DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
-            if (null != deployResponse) {
+            if (deployResponse != null) {
                 updateWrapper.set(FlinkCluster::getAddress, deployResponse.address());
                 updateWrapper.set(FlinkCluster::getClusterId, deployResponse.clusterId());
                 updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STARTED.getValue());
@@ -195,6 +207,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Override
     public void shutdown(FlinkCluster flinkCluster) {
+        //1) check mode
         ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
         String clusterId = flinkCluster.getClusterId();
         KubernetesDeployParam kubernetesDeployParam = null;
@@ -216,6 +229,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         if (StringUtils.isBlank(clusterId)) {
             throw new ApiAlertException("the clusterId can not be empty!");
         }
+
+        //2) check job if running on cluster
+        boolean existsRunningJob = applicationService.existsRunningJobByClusterId(flinkCluster.getId());
+        if (existsRunningJob) {
+            throw new ApiAlertException("has running job on this cluster, the cluster cannot be shutdown");
+        }
+
+        //3) shutdown
         FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
         ShutDownRequest stopRequest = new ShutDownRequest(
             flinkEnv.getFlinkVersion(),
@@ -229,11 +250,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         try {
             Future<ShutDownResponse> future = executorService.submit(() -> FlinkSubmitter.shutdown(stopRequest));
             ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
-            if (null != shutDownResponse) {
+            if (shutDownResponse != null) {
                 updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STOPED.getValue());
                 update(updateWrapper);
             } else {
-                throw new ApiAlertException("clusterId is not exists!");
+                throw new ApiAlertException("get shutdown response failed");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

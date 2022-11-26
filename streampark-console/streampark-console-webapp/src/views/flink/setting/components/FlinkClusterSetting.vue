@@ -96,29 +96,16 @@
   async function handleDeployCluser(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is starting', 0);
     try {
-      const { data } = await fetchClusterStart(item.id);
-      if (data?.data?.status) {
-        // optionClusters.starting.set(item.id, new Date().getTime());
-        handleMapUpdate('starting');
-        getFlinkClusterSetting();
-        Swal.fire({
-          icon: 'success',
-          title: 'The current cluster is started',
-          showConfirmButton: false,
-          timer: 2000,
-        });
-      } else {
-        Swal.fire({
-          title: 'Failed',
-          icon: 'error',
-          width: exceptionPropWidth(),
-          html: '<pre class="propsException">' + data?.data?.msg + '</pre>',
-          showCancelButton: true,
-          confirmButtonColor: '#55BDDDFF',
-          confirmButtonText: 'OK',
-          cancelButtonText: 'Close',
-        });
-      }
+      await fetchClusterStart(item.id);
+      // optionClusters.starting.set(item.id, new Date().getTime());
+      handleMapUpdate('starting');
+      getFlinkClusterSetting();
+      Swal.fire({
+        icon: 'success',
+        title: 'The current cluster is started',
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (error) {
       console.error(error);
     } finally {
@@ -140,23 +127,10 @@
     const hide = createMessage.loading('The current cluster is canceling', 0);
     try {
       const { data } = await fetchClusterShutdown(item.id);
-      if (data?.data?.status) {
-        // optionClusters.starting.delete(item.id);
-        handleMapUpdate('starting');
-        getFlinkClusterSetting();
-        createMessage.success('The current cluster is shutdown');
-      } else {
-        Swal.fire({
-          title: 'Failed',
-          icon: 'error',
-          width: exceptionPropWidth(),
-          html: '<pre class="propsException">' + data.data.msg + '</pre>',
-          showCancelButton: true,
-          confirmButtonColor: '#55BDDDFF',
-          confirmButtonText: 'OK',
-          cancelButtonText: 'Close',
-        });
-      }
+      // optionClusters.starting.delete(item.id);
+      handleMapUpdate('starting');
+      getFlinkClusterSetting();
+      createMessage.success('The current cluster is shutdown');
     } catch (error) {
       console.error(error);
     } finally {

@@ -520,6 +520,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public boolean existsRunningJobByClusterId(Long clusterId) {
+        return baseMapper.existsRunningJobByClusterId(clusterId);
+    }
+
+    @Override
     public String getYarnName(Application appParam) {
         String[] args = new String[2];
         args[0] = "--name";
@@ -942,7 +947,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (startFuture == null && cancelFuture == null) {
             this.updateToStopped(app);
         }
-
     }
 
     @Override
