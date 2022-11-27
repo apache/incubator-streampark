@@ -39,6 +39,7 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
@@ -436,10 +437,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             envInitializer.checkFlinkEnv(application.getStorageType(), flinkEnv);
             envInitializer.storageInitialize(application.getStorageType());
+
+            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())
+                || ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
+                FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
+                boolean conned = flinkCluster.verifyClusterConnection();
+                if (!conned) {
+                    throw new ApiAlertException("the target cluster is unavailable, please check!");
+                }
+            }
             return true;
         } catch (Exception e) {
             log.error(ExceptionUtils.stringifyException(e));
-            throw new ApplicationException(e);
+            throw new ApiDetailException(e);
         }
     }
 
@@ -1062,6 +1072,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setOptionTime(new Date());
         this.baseMapper.updateById(application);
 
+        Long userId = commonService.getUserId();
+        if (!application.getUserId().equals(userId)) {
+            FlinkTrackingTask.addCanceledApp(application.getId(), userId);
+        }
+
         FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
 
         // infer savepoint
@@ -1070,6 +1085,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             customSavepoint = appParam.getSavePoint();
             if (StringUtils.isBlank(customSavepoint)) {
                 customSavepoint = getSavePointPath(appParam);
+            }
+        }
+
+        String clusterId = null;
+        if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+            clusterId = application.getClusterId();
+        } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                AssertUtils.state(cluster != null,
+                    String.format("The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or " +
+                        "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
+                clusterId = cluster.getClusterId();
+            } else {
+                clusterId = application.getAppId();
             }
         }
 
@@ -1084,26 +1114,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             URI activeAddress = cluster.getActiveAddress();
             properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
             properties.put(RestOptions.PORT.key(), activeAddress.getPort());
-        } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
-            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-                AssertUtils.state(cluster != null,
-                    String.format("The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or " +
-                        "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
-                properties.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
-            }
         }
 
-        Long userId = commonService.getUserId();
-        if (!application.getUserId().equals(userId)) {
-            FlinkTrackingTask.addCanceledApp(application.getId(), userId);
-        }
-        String clusterId = null;
-        if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
-            clusterId = application.getClusterId();
-        } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-            clusterId = application.getAppId();
-        }
         CancelRequest cancelRequest = new CancelRequest(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),

@@ -49,7 +49,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
     Try {
-      val savepointDir = cancelJob(cancelRequest, jobID, clusterClient)
+      val savepointDir = super.cancelJob(cancelRequest, jobID, clusterClient)
       CancelResponse(savepointDir)
     }.recover {
       case e => throw new FlinkException(s"[StreamPark] Triggering a savepoint for the job ${cancelRequest.jobId} failed. detail: ${ExceptionUtils.stringifyException(e)}");

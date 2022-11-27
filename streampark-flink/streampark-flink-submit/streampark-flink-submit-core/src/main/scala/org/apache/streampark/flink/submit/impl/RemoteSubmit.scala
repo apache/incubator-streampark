@@ -30,7 +30,6 @@ import java.io.File
 import java.lang.{Integer => JavaInt}
 import scala.util.{Failure, Success, Try}
 
-
 /**
  * Submit Job to Remote Cluster
  */
@@ -66,7 +65,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
     try {
       client = standAloneDescriptor._2.retrieve(standAloneDescriptor._1).getClusterClient
       val jobID = JobID.fromHexString(cancelRequest.jobId)
-      val actionResult = cancelJob(cancelRequest, jobID, client)
+      val actionResult = super.cancelJob(cancelRequest, jobID, client)
       CancelResponse(actionResult)
     } catch {
       case e: Exception =>

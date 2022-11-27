@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.submit.impl
 
-import org.apache.streampark.common.conf.ConfigConst.KEY_YARN_APP_ID
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.submit.`trait`.YarnSubmitTrait
 import org.apache.streampark.flink.submit.bean._
@@ -137,7 +136,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
 
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     flinkConfig
-      .safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.properties.get(KEY_YARN_APP_ID).toString)
+      .safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.clusterId)
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(
       s"""
@@ -153,7 +152,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       clusterDescriptor = yarnClusterDescriptor._2
       client = clusterDescriptor.retrieve(yarnClusterDescriptor._1).getClusterClient
       val jobID = JobID.fromHexString(cancelRequest.jobId)
-      val actionResult = cancelJob(cancelRequest, jobID, client)
+      val actionResult = super.cancelJob(cancelRequest, jobID, client)
       CancelResponse(actionResult)
     } catch {
       case e: Exception => logError(s"stop flink yarn session job fail")
