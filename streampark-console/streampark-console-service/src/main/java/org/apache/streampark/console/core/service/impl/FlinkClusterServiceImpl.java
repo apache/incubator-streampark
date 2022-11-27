@@ -145,7 +145,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void start(FlinkCluster flinkCluster) {
+    public void start(FlinkCluster cluster) {
+        FlinkCluster flinkCluster = getById(cluster.getId());
         LambdaUpdateWrapper<FlinkCluster> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
         try {
@@ -197,7 +198,24 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     @Override
-    public void update(FlinkCluster flinkCluster) {
+    public void update(FlinkCluster cluster) {
+        FlinkCluster flinkCluster = getById(cluster.getId());
+        flinkCluster.setClusterId(cluster.getClusterId());
+        flinkCluster.setVersionId(cluster.getVersionId());
+        flinkCluster.setClusterName(cluster.getClusterName());
+        flinkCluster.setAddress(cluster.getAddress());
+        flinkCluster.setExecutionMode(cluster.getExecutionMode());
+        flinkCluster.setDynamicProperties(cluster.getDynamicProperties());
+        flinkCluster.setFlinkImage(cluster.getFlinkImage());
+        flinkCluster.setOptions(cluster.getOptions());
+        flinkCluster.setYarnQueue(cluster.getYarnQueue());
+        flinkCluster.setK8sHadoopIntegration(cluster.getK8sHadoopIntegration());
+        flinkCluster.setK8sConf(cluster.getK8sConf());
+        flinkCluster.setK8sNamespace(cluster.getK8sNamespace());
+        flinkCluster.setK8sRestExposedType(cluster.getK8sRestExposedType());
+        flinkCluster.setResolveOrder(cluster.getResolveOrder());
+        flinkCluster.setServiceAccount(cluster.getServiceAccount());
+        flinkCluster.setDescription(cluster.getDescription());
         try {
             updateById(flinkCluster);
         } catch (Exception e) {
@@ -234,7 +252,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         //2) check job if running on cluster
         boolean existsRunningJob = applicationService.existsRunningJobByClusterId(flinkCluster.getId());
         if (existsRunningJob) {
-            throw new ApiAlertException("has running job on this cluster, the cluster cannot be shutdown");
+            throw new ApiAlertException("some app is running on this cluster, the cluster cannot be shutdown");
         }
 
         //3) shutdown
@@ -276,23 +294,16 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     @Override
-    public void delete(FlinkCluster flinkCluster) {
-        if (StringUtils.isNoneBlank(flinkCluster.getClusterId())
-            && ClusterState.STARTED.equals(flinkCluster.getClusterStateEnum())
-            && !ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
-            try {
-                shutdown(flinkCluster);
-            } catch (Exception e) {
-                if (e instanceof ApiDetailException) {
-                    throw e;
-                } else if (e instanceof ApiAlertException) {
-                    throw new ApiAlertException("shutdown cluster failed: " + e.getMessage());
-                } else {
-                    throw new ApiDetailException("shutdown cluster failed: " + ExceptionUtils.getStackTrace(e));
-                }
-            }
+    public void delete(FlinkCluster cluster) {
+        Long id = cluster.getId();
+        FlinkCluster flinkCluster = getById(id);
+        if (flinkCluster == null) {
+            throw new ApiAlertException("flink cluster not exist, please check.");
         }
-        removeById(flinkCluster.getId());
+        if (applicationService.existsRunningJobByClusterId(id)) {
+            throw new ApiAlertException("some app is running on this cluster, the cluster cannot be delete");
+        }
+        removeById(id);
     }
 
 }

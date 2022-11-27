@@ -96,16 +96,17 @@
   async function handleDeployCluster(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is starting', 0);
     try {
-      await fetchClusterStart(item.id);
-      // optionClusters.starting.set(item.id, new Date().getTime());
-      handleMapUpdate('starting');
-      await getFlinkClusterSetting();
-      await Swal.fire({
-        icon: 'success',
-        title: 'The current cluster is started',
-        showConfirmButton: false,
-        timer: 2000,
-      });
+      const { data } = await fetchClusterStart(item.id);
+      if (data?.code == 200) {
+        handleMapUpdate('starting');
+        await getFlinkClusterSetting();
+        await Swal.fire({
+          icon: 'success',
+          title: 'The current cluster is started',
+          showConfirmButton: false,
+          timer: 2000,
+        });
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -115,7 +116,7 @@
   /* delete */
   async function handleDelete(item: FlinkCluster) {
     const { data } = await fetchClusterRemove(item.id);
-    if (data?.data?.status) {
+    if (data?.code == 200) {
       optionClusters.starting.delete(item.id);
       optionClusters.canceled.delete(item.id);
       optionClusters.created.delete(item.id);
@@ -127,11 +128,13 @@
   async function handleShutdownCluster(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is canceling', 0);
     try {
-      await fetchClusterShutdown(item.id);
-      optionClusters.starting.delete(item.id);
-      handleMapUpdate('canceled');
-      await getFlinkClusterSetting();
-      createMessage.success('The current cluster is shutdown');
+      const { data } = await fetchClusterShutdown(item.id);
+      if (data?.code == 200) {
+        optionClusters.starting.delete(item.id);
+        handleMapUpdate('canceled');
+        await getFlinkClusterSetting();
+        createMessage.success('The current cluster is shutdown');
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -300,7 +303,16 @@
           :ok-text="t('common.yes')"
           @confirm="handleDelete(item)"
         >
-          <a-button type="danger" shape="circle" size="large" class="control-button">
+          <a-button
+            v-if="item.clusterState !== ClusterStateEnum.STARTED"
+            type="danger"
+            shape="circle"
+            size="large"
+            class="control-button"
+          >
+            <DeleteOutlined />
+          </a-button>
+          <a-button :disabled="true" v-else shape="circle" size="large" class="control-button">
             <DeleteOutlined />
           </a-button>
         </Popconfirm>

@@ -71,24 +71,7 @@ public class FlinkClusterController {
     @PostMapping("update")
     @RequiresPermissions("cluster:update")
     public RestResponse update(FlinkCluster cluster) {
-        FlinkCluster flinkCluster = flinkClusterService.getById(cluster.getId());
-        flinkCluster.setClusterId(cluster.getClusterId());
-        flinkCluster.setVersionId(cluster.getVersionId());
-        flinkCluster.setClusterName(cluster.getClusterName());
-        flinkCluster.setAddress(cluster.getAddress());
-        flinkCluster.setExecutionMode(cluster.getExecutionMode());
-        flinkCluster.setDynamicProperties(cluster.getDynamicProperties());
-        flinkCluster.setFlinkImage(cluster.getFlinkImage());
-        flinkCluster.setOptions(cluster.getOptions());
-        flinkCluster.setYarnQueue(cluster.getYarnQueue());
-        flinkCluster.setK8sHadoopIntegration(cluster.getK8sHadoopIntegration());
-        flinkCluster.setK8sConf(cluster.getK8sConf());
-        flinkCluster.setK8sNamespace(cluster.getK8sNamespace());
-        flinkCluster.setK8sRestExposedType(cluster.getK8sRestExposedType());
-        flinkCluster.setResolveOrder(cluster.getResolveOrder());
-        flinkCluster.setServiceAccount(cluster.getServiceAccount());
-        flinkCluster.setDescription(cluster.getDescription());
-        flinkClusterService.update(flinkCluster);
+        flinkClusterService.update(cluster);
         return RestResponse.success();
     }
 
@@ -99,21 +82,19 @@ public class FlinkClusterController {
     }
 
     @PostMapping("start")
-    public RestResponse start(FlinkCluster flinkCluster) {
-        FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
+    public RestResponse start(FlinkCluster cluster) {
         flinkClusterService.start(cluster);
         return RestResponse.success();
     }
 
     @PostMapping("shutdown")
-    public RestResponse shutdown(FlinkCluster flinkCluster) {
-        flinkClusterService.shutdown(flinkCluster);
+    public RestResponse shutdown(FlinkCluster cluster) {
+        flinkClusterService.shutdown(cluster);
         return RestResponse.success();
     }
 
     @PostMapping("delete")
-    public RestResponse delete(FlinkCluster flinkCluster) {
-        FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
+    public RestResponse delete(FlinkCluster cluster) {
         flinkClusterService.delete(cluster);
         return RestResponse.success();
     }
