@@ -99,6 +99,13 @@
         limit 1
     </select>
 
+    <select id="existsJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+        select count(1)
+        from t_flink_app
+        where flink_cluster_id = #{clusterId}
+        limit 1
+    </select>
+
     <select id="existsRunningJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
         select count(1)
         from t_flink_app

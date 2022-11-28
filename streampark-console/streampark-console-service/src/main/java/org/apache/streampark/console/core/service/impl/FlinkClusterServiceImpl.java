@@ -300,8 +300,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         if (flinkCluster == null) {
             throw new ApiAlertException("flink cluster not exist, please check.");
         }
-        if (applicationService.existsRunningJobByClusterId(id)) {
-            throw new ApiAlertException("some app is running on this cluster, the cluster cannot be delete");
+        if (applicationService.existsJobByClusterId(id)) {
+            throw new ApiAlertException("some app on this cluster, the cluster cannot be delete, please check.");
         }
         removeById(id);
     }

@@ -545,6 +545,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public boolean existsJobByClusterId(Long clusterId) {
+        return baseMapper.existsJobByClusterId(clusterId);
+    }
+
+    @Override
     public String getYarnName(Application appParam) {
         String[] args = new String[2];
         args[0] = "--name";
