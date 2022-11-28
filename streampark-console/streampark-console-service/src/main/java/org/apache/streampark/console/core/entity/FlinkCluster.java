@@ -181,11 +181,14 @@ public class FlinkCluster implements Serializable {
         URI activeAddress = this.getActiveAddress();
         String restUrl = activeAddress.toURL() + "/jobmanager/config";
         String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-        List<Map<String, String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
-        });
-        Map<String, String> config = new HashMap<>(0);
-        confList.forEach(k -> config.put(k.get("key"), k.get("value")));
-        return config;
+        if (StringUtils.isNotEmpty(json)) {
+            List<Map<String, String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
+            });
+            Map<String, String> config = new HashMap<>(0);
+            confList.forEach(k -> config.put(k.get("key"), k.get("value")));
+            return config;
+        }
+        return Collections.emptyMap();
     }
 
     @JsonIgnore
