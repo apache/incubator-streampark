@@ -249,13 +249,29 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             throw new ApiAlertException("the clusterId can not be empty!");
         }
 
-        //2) check job if running on cluster
+        LambdaUpdateWrapper<FlinkCluster> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
+
+        //2) check cluster is active
+        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum) || ExecutionMode.REMOTE.equals(executionModeEnum)) {
+            if (ClusterState.STARTED.equals(ClusterState.of(flinkCluster.getClusterState()))) {
+                if (!flinkCluster.verifyClusterConnection()) {
+                    updateWrapper.set(FlinkCluster::getClusterState, ClusterState.LOST.getValue());
+                    update(updateWrapper);
+                    throw new ApiAlertException("current cluster is not active, please check");
+                }
+            } else {
+                throw new ApiAlertException("current cluster is not active, please check");
+            }
+        }
+
+        //3) check job if running on cluster
         boolean existsRunningJob = applicationService.existsRunningJobByClusterId(flinkCluster.getId());
         if (existsRunningJob) {
             throw new ApiAlertException("some app is running on this cluster, the cluster cannot be shutdown");
         }
 
-        //3) shutdown
+        //4) shutdown
         FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
         ShutDownRequest stopRequest = new ShutDownRequest(
             flinkEnv.getFlinkVersion(),
@@ -264,8 +280,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             kubernetesDeployParam,
             flinkCluster.getProperties()
         );
-        LambdaUpdateWrapper<FlinkCluster> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
+
         try {
             Future<ShutDownResponse> future = executorService.submit(() -> FlinkSubmitter.shutdown(stopRequest));
             ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);

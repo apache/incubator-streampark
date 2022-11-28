@@ -23,6 +23,7 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
+import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.flink.submit.FlinkSubmitter;
@@ -152,9 +153,7 @@ public class FlinkCluster implements Serializable {
             }
             String[] array = address.split(",");
             for (String url : array) {
-                try {
-                    new URI(url);
-                } catch (Exception ignored) {
+                if (!CommonUtils.checkUrlIsLegal(url)) {
                     return false;
                 }
                 try {
@@ -181,14 +180,14 @@ public class FlinkCluster implements Serializable {
         URI activeAddress = this.getActiveAddress();
         String restUrl = activeAddress.toURL() + "/jobmanager/config";
         String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-        if (StringUtils.isNotEmpty(json)) {
-            List<Map<String, String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
-            });
-            Map<String, String> config = new HashMap<>(0);
-            confList.forEach(k -> config.put(k.get("key"), k.get("value")));
-            return config;
+        if (StringUtils.isEmpty(json)) {
+            return Collections.emptyMap();
         }
-        return Collections.emptyMap();
+        List<Map<String, String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
+        });
+        Map<String, String> config = new HashMap<>(0);
+        confList.forEach(k -> config.put(k.get("key"), k.get("value")));
+        return config;
     }
 
     @JsonIgnore

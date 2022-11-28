@@ -56,6 +56,7 @@
     starting: new Map(),
     created: new Map(),
     canceled: new Map(),
+    lost: new Map(),
   };
   function isSessionMode(mode: number): boolean {
     return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
@@ -71,21 +72,15 @@
         optionClusters.created.set(cluster.id, new Date().getTime());
       } else if (cluster.clusterState === ClusterStateEnum.STARTED) {
         optionClusters.starting.set(cluster.id, new Date().getTime());
-      } else {
+      } else if (cluster.clusterState === ClusterStateEnum.CANCELED) {
         optionClusters.canceled.set(cluster.id, new Date().getTime());
+      } else {
+        optionClusters.lost.set(cluster.id, new Date().getTime());
       }
     }
   }
 
   function handleIsStart(item) {
-    /**
-     The cluster was just created but not started
-     CREATED(0),
-     cluster started
-     STARTED(1),
-     cluster canceled
-     CANCELED(2);
-    */
     return optionClusters.starting.get(item.id);
   }
   /* Go to edit cluster */
@@ -120,6 +115,7 @@
       optionClusters.starting.delete(item.id);
       optionClusters.canceled.delete(item.id);
       optionClusters.created.delete(item.id);
+      optionClusters.lost.delete(item.id);
       await getFlinkClusterSetting();
       createMessage.success('The current cluster is remove');
     }
@@ -196,19 +192,8 @@
       <template #actions>
         <Tooltip :title="t('flink.setting.cluster.edit')">
           <a-button
-            v-if="handleIsStart(item) && item.executionMode == ExecModeEnum.YARN_SESSION"
             v-auth="'cluster:update'"
-            :disabled="true"
-            @click="handleEditCluster(item)"
-            shape="circle"
-            size="large"
-            class="control-button"
-          >
-            <EditOutlined />
-          </a-button>
-          <a-button
-            v-if="!handleIsStart(item) || item.executionMode == ExecModeEnum.REMOTE"
-            v-auth="'cluster:update'"
+            :disabled="handleIsStart(item)"
             @click="handleEditCluster(item)"
             shape="circle"
             size="large"
@@ -217,40 +202,10 @@
             <EditOutlined />
           </a-button>
         </Tooltip>
-        <template v-if="!handleIsStart(item)">
-          <Tooltip :title="t('flink.setting.cluster.start')">
-            <a-button
-              v-if="isSessionMode(item.executionMode)"
-              v-auth="'cluster:create'"
-              @click="handleDeployCluster(item)"
-              shape="circle"
-              size="large"
-              class="control-button"
-            >
-              <PlayCircleOutlined />
-            </a-button>
-            <a-button
-              v-else
-              :disabled="true"
-              v-auth="'cluster:create'"
-              shape="circle"
-              size="large"
-              style="margin-left: 3px"
-              class="control-button"
-            >
-              <PlayCircleOutlined />
-            </a-button>
-          </Tooltip>
-        </template>
-
-        <template v-else>
+        <template v-if="handleIsStart(item)">
           <Tooltip :title="t('flink.setting.cluster.stop')">
             <a-button
-              v-if="
-                [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(
-                  item.executionMode,
-                )
-              "
+              :disabled="item.executionMode === ExecModeEnum.REMOTE"
               v-auth="'cluster:create'"
               @click="handleShutdownCluster(item)"
               shape="circle"
@@ -260,38 +215,30 @@
             >
               <PauseCircleOutlined />
             </a-button>
+          </Tooltip>
+        </template>
+        <template v-else>
+          <Tooltip :title="t('flink.setting.cluster.start')">
             <a-button
-              v-else
-              :disabled="true"
+              :disabled="!isSessionMode(item.executionMode)"
               v-auth="'cluster:create'"
+              @click="handleDeployCluster(item)"
               shape="circle"
               size="large"
               class="control-button"
             >
-              <PauseCircleOutlined />
+              <PlayCircleOutlined />
             </a-button>
           </Tooltip>
         </template>
-
         <Tooltip :title="t('flink.setting.cluster.detail')">
           <a-button
-            v-if="!handleIsStart(item)"
-            v-auth="'app:detail'"
-            :disabled="true"
-            shape="circle"
-            size="large"
-            class="control-button"
-          >
-            <EyeOutlined />
-          </a-button>
-          <a-button
-            v-else
+            :disabled="!handleIsStart(item)"
             v-auth="'app:detail'"
             shape="circle"
-            size="large"
-            class="control-button"
             :href="item.address"
-            target="_blank"
+            size="large"
+            class="control-button"
           >
             <EyeOutlined />
           </a-button>
@@ -304,15 +251,12 @@
           @confirm="handleDelete(item)"
         >
           <a-button
-            v-if="item.clusterState !== ClusterStateEnum.STARTED"
+            :disabled="item.clusterState === ClusterStateEnum.STARTED"
             type="danger"
             shape="circle"
             size="large"
             class="control-button"
           >
-            <DeleteOutlined />
-          </a-button>
-          <a-button :disabled="true" v-else shape="circle" size="large" class="control-button">
             <DeleteOutlined />
           </a-button>
         </Popconfirm>

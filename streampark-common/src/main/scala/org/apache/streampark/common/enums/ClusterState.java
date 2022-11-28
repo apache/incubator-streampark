@@ -34,7 +34,12 @@ public enum ClusterState implements Serializable {
     /**
      * cluster stopped
      */
-    STOPED(2);
+    STOPED(2),
+
+    /**
+     * cluster lost
+     */
+    LOST(3);
 
     private final Integer value;
 

@@ -132,6 +132,8 @@ export enum ClusterStateEnum {
   STARTED = 1,
   /** cluster canceled */
   CANCELED = 2,
+  /** cluster lost */
+  LOST = 3,
 }
 
 export enum AppTypeEnum {

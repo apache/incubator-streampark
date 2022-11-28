@@ -532,16 +532,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public boolean existsRunningJobByClusterId(Long clusterId) {
         boolean exists = baseMapper.existsRunningJobByClusterId(clusterId);
-        if (!exists) {
-            for (Application application : FlinkTrackingTask.getAllTrackingApp().values()) {
-                if (clusterId.equals(application.getFlinkClusterId())) {
-                    if (FlinkAppState.RUNNING.equals(application.getFlinkAppStateEnum())) {
-                        return true;
-                    }
-                }
+        if (exists) {
+            return true;
+        }
+        for (Application application : FlinkTrackingTask.getAllTrackingApp().values()) {
+            if (clusterId.equals(application.getFlinkClusterId()) &&
+                FlinkAppState.RUNNING.equals(application.getFlinkAppStateEnum())) {
+                return true;
             }
         }
-        return exists;
+        return false;
     }
 
     @Override
