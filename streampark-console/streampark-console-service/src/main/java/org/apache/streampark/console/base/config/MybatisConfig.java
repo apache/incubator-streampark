@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.config;
 
+import org.apache.ibatis.type.JdbcType;
 import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLPrepareInterceptor;
 import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLQueryInterceptor;
 
@@ -79,7 +80,7 @@ public class MybatisConfig {
             properties.setTypeAliasesPackage("org.apache.streampark.console.*.entity");
             properties.setMapperLocations(new String[]{"classpath:mapper/*/*.xml"});
             MybatisConfiguration mybatisConfiguration = new MybatisConfiguration();
-            mybatisConfiguration.setJdbcTypeForNull(null);
+            mybatisConfiguration.setJdbcTypeForNull(JdbcType.NULL);
             properties.setConfiguration(mybatisConfiguration);
             GlobalConfig globalConfig = GlobalConfigUtils.getGlobalConfig(mybatisConfiguration);
             GlobalConfig.DbConfig dbConfig = globalConfig.getDbConfig();
