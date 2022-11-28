@@ -16,7 +16,6 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
-  import { exceptionPropWidth } from '/@/utils';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'FlinkClusterSetting',
@@ -52,36 +51,12 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const clusters = ref<FlinkCluster[]>([]);
-  const optionClusters = {
-    starting: new Map(),
-    created: new Map(),
-    canceled: new Map(),
-    lost: new Map(),
-  };
   function isSessionMode(mode: number): boolean {
     return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
   }
 
-  /* Get flink environmental data*/
-  async function getFlinkClusterSetting() {
-    const clusterList = await fetchFlinkCluster();
-    clusters.value = clusterList;
-    for (const key in clusterList) {
-      const cluster = clusterList[key];
-      if (cluster.clusterState === ClusterStateEnum.CREATED) {
-        optionClusters.created.set(cluster.id, new Date().getTime());
-      } else if (cluster.clusterState === ClusterStateEnum.STARTED) {
-        optionClusters.starting.set(cluster.id, new Date().getTime());
-      } else if (cluster.clusterState === ClusterStateEnum.CANCELED) {
-        optionClusters.canceled.set(cluster.id, new Date().getTime());
-      } else {
-        optionClusters.lost.set(cluster.id, new Date().getTime());
-      }
-    }
-  }
-
   function handleIsStart(item) {
-    return optionClusters.starting.get(item.id);
+    return item.clusterState === ClusterStateEnum.STARTED;
   }
   /* Go to edit cluster */
   function handleEditCluster(item: FlinkCluster) {
@@ -91,17 +66,13 @@
   async function handleDeployCluster(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is starting', 0);
     try {
-      const { data } = await fetchClusterStart(item.id);
-      if (data?.code == 200) {
-        handleMapUpdate('starting');
-        await getFlinkClusterSetting();
-        await Swal.fire({
-          icon: 'success',
-          title: 'The current cluster is started',
-          showConfirmButton: false,
-          timer: 2000,
-        });
-      }
+      await fetchClusterStart(item.id);
+      await Swal.fire({
+        icon: 'success',
+        title: 'The current cluster is started',
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (error) {
       console.error(error);
     } finally {
@@ -110,27 +81,15 @@
   }
   /* delete */
   async function handleDelete(item: FlinkCluster) {
-    const { data } = await fetchClusterRemove(item.id);
-    if (data?.code == 200) {
-      optionClusters.starting.delete(item.id);
-      optionClusters.canceled.delete(item.id);
-      optionClusters.created.delete(item.id);
-      optionClusters.lost.delete(item.id);
-      await getFlinkClusterSetting();
-      createMessage.success('The current cluster is remove');
-    }
+    await fetchClusterRemove(item.id);
+    createMessage.success('The current cluster is remove');
   }
   /* shutdown */
   async function handleShutdownCluster(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is canceling', 0);
     try {
-      const { data } = await fetchClusterShutdown(item.id);
-      if (data?.code == 200) {
-        optionClusters.starting.delete(item.id);
-        handleMapUpdate('canceled');
-        await getFlinkClusterSetting();
-        createMessage.success('The current cluster is shutdown');
-      }
+      await fetchClusterShutdown(item.id);
+      createMessage.success('The current cluster is shutdown');
     } catch (error) {
       console.error(error);
     } finally {
@@ -138,13 +97,14 @@
     }
   }
 
-  function handleMapUpdate(type: string) {
-    const map = optionClusters[type];
-    optionClusters[type] = new Map(map);
+  async function getFlinkCluster() {
+    const clusterList = await fetchFlinkCluster();
+    clusters.value = clusterList;
   }
 
   onMounted(() => {
-    getFlinkClusterSetting();
+    getFlinkCluster();
+    setInterval(() => getFlinkCluster(), 1000 * 3);
   });
 </script>
 <template>

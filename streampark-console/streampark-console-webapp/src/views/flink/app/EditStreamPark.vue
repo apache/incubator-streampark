@@ -48,7 +48,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
-  import { ClusterStateEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
+  import { JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const go = useGo();
@@ -77,7 +77,6 @@
     alerts,
     flinkEnvs,
     flinkSql,
-    flinkClusters,
     getEditStreamParkFormSchema,
     registerDifferentDrawer,
     suggestions,
