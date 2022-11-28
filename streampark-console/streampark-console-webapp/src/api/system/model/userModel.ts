@@ -48,7 +48,7 @@ export interface GetUserInfoModel {
   nickName: string;
   avatar: string;
   desc?: string;
-  teamId?: string;
+  lastTeamId?: string;
 }
 export interface TeamSetResponse {
   permissions: string[];

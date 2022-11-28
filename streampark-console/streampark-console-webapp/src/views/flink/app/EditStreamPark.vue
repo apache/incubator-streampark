@@ -141,13 +141,12 @@
     formData.append('file', data.file);
     try {
       const path = await fetchUpload(formData);
-      uploadLoading.value = false;
       uploadJar.value = data.file.name;
       const res = await fetchMain({ jar: path });
+      uploadLoading.value = false;
       setFieldsValue({ jar: uploadJar.value, mainClass: res });
     } catch (error) {
       console.error(error);
-    } finally {
       uploadLoading.value = false;
     }
   }
@@ -156,15 +155,18 @@
   async function handleAppUpdate(values) {
     try {
       submitLoading.value = true;
-      if (app.jobType == 1) {
+      if (app.jobType == JobTypeEnum.JAR) {
         handleSubmitCustomJob(values);
       } else {
-        if (app.jobType == 2) {
+        if (app.jobType == JobTypeEnum.SQL) {
           if (values.flinkSql == null || values.flinkSql.trim() === '') {
             createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
           } else {
             const access = await flinkSql?.value?.handleVerifySql();
-            if (!access) return;
+            if (!access) {
+              createMessage.warning(t('flink.app.editStreamPark.sqlCheck'));
+              throw new Error(access);
+            }
             handleSubmitSQL(values);
           }
         }

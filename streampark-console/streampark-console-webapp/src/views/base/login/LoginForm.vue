@@ -17,7 +17,7 @@
 <template>
   <div class="enter-x mb-50px text-light-50">
     <div class="text-center enter-x">
-      <img class="logo w-160px mx-auto my-20px" src="/@/assets/images/logo.png" />
+      <img class="logo w-160px mx-auto my-20px" src="/@/assets/images/logo.svg" />
     </div>
   </div>
   <Form
@@ -181,11 +181,12 @@
         userStore.setData(data);
         let successText = t('sys.login.loginSuccessDesc');
         if (data?.user) {
-          const { teamId, nickName } = data.user;
-          userStore.teamId = teamId || '';
-          sessionStorage.setItem(APP_TEAMID_KEY_, teamId || '');
-          localStorage.setItem(APP_TEAMID_KEY_, teamId || '');
-          successText += `: ${nickName}`;
+          const { lastTeamId, nickName } = data.user;
+          // The lastTeamId of user as the current teamId.
+          userStore.teamId = lastTeamId || '';
+          sessionStorage.setItem(APP_TEAMID_KEY_, userStore.teamId);
+          localStorage.setItem(APP_TEAMID_KEY_, userStore.teamId);
+          if (nickName) successText += `: ${nickName}`;
         }
 
         const loginSuccess = await userStore.afterLoginAction(true);

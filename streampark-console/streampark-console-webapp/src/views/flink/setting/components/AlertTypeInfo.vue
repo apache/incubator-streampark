@@ -21,6 +21,9 @@
   import { SvgIcon } from '/@/components/Icon';
   import { BasicTitle } from '/@/components/Basic';
   import { alertTypes } from './alert.data';
+  import { useI18n } from '/@/hooks/web/useI18n';
+
+  const { t } = useI18n();
   const props = defineProps({
     alertType: {
       type: String,
@@ -63,27 +66,27 @@
   </BasicTitle>
   <Descriptions size="small" :column="1" class="pl-15px mt-10px">
     <template v-if="alertType === '1'">
-      <DescriptionsItem label="Alert Email">
+      <DescriptionsItem :label="t('flink.setting.alert.alertEmail')">
         <span class="text-blue-500">{{ emailInfo.contacts || '' }}</span>
       </DescriptionsItem>
     </template>
     <template v-else-if="alertType === '2'">
-      <DescriptionsItem label="DingTalk User">
+      <DescriptionsItem :label="t('flink.setting.alert.dingTalkUser')">
         {{ dingTalk.contacts || '' }}
       </DescriptionsItem>
-      <DescriptionsItem label="At All User">
+      <DescriptionsItem :label="t('flink.setting.alert.larkIsAtAll')">
         <Tag :color="dingTalk.isAtAll ? 'green' : 'red'" class="!leading-20px">
           {{ dingTalk.isAtAll }}
         </Tag>
       </DescriptionsItem>
     </template>
     <template v-else-if="alertType === '4'">
-      <DescriptionsItem label="WeChat token">
+      <DescriptionsItem :label="t('flink.setting.alert.weChattoken')">
         {{ desensitization(weChat.token || '') }}
       </DescriptionsItem>
     </template>
     <template v-else-if="alertType === '16'">
-      <DescriptionsItem label="At All User">
+      <DescriptionsItem :label="t('flink.setting.alert.larkIsAtAll')">
         <Tag :color="lark.isAtAll ? 'green' : 'red'" class="!leading-20px">
           {{ lark.isAtAll }}
         </Tag>

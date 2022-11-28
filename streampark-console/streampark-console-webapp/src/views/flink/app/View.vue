@@ -135,8 +135,10 @@
   /* view */
   async function handleJobView(app: AppListRecord) {
     // Task is running, restarting, in savePoint
-    if ([4, 5].includes(app.state) || app['optionState'] === OptionStateEnum.SAVEPOINTING) {
-      console.log(app);
+    if (
+      [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(app.state) ||
+      app['optionState'] === OptionStateEnum.SAVEPOINTING
+    ) {
       // yarn-per-job|yarn-session|yarn-application
       handleView(app, unref(yarn));
     }
@@ -191,7 +193,7 @@
           <span
             class="link"
             :class="{
-              pointer:
+              'cursor-pointer':
                 [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(record.state) ||
                 record['optionState'] === OptionStateEnum.SAVEPOINTING,
             }"
@@ -234,7 +236,7 @@
         </template>
         <template v-if="column.dataIndex === 'launch'">
           <State option="launch" :title="launchTitleMap[record.launch] || ''" :data="record" />
-          <Divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus != null" />
+          <Divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus" />
           <State
             option="build"
             :click="openBuildProgressDetailDrawer.bind(null, record)"

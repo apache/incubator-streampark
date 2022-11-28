@@ -130,7 +130,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
          |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
          |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
-         |    resolveOrder     : ${deployRequest.resolveOrder.getName}
          |    flameGraph       : ${deployRequest.flameGraph != null}
          |    properties       : ${deployRequest.properties.mkString(" ")}
          |-------------------------------------------------------------------------------------------
@@ -139,12 +138,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     var client: ClusterClient[String] = null
     var kubeClient: FlinkKubeClient = null
     try {
-      val flinkConfig = extractConfiguration(
-        deployRequest.flinkVersion.flinkHome,
-        deployRequest.properties,
-        deployRequest.extraParameter,
-        deployRequest.resolveOrder)
-
+      val flinkConfig = extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
       flinkConfig
         .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
         .safeSet(KubernetesConfigOptions.NAMESPACE, deployRequest.k8sDeployParam.kubernetesNamespace)
@@ -181,7 +175,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     var kubeClient: FlinkKubeClient = null
     try {
       val flinkConfig = getFlinkDefaultConfiguration(shutDownRequest.flinkVersion.flinkHome)
-      shutDownRequest.extraParameter.foreach(m => m._2 match {
+      shutDownRequest.properties.foreach(m => m._2 match {
         case v if v != null => flinkConfig.setString(m._1, m._2.toString)
         case _ =>
       })

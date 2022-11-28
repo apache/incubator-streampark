@@ -61,35 +61,35 @@ public class AlertController {
     @Autowired
     private AlertService alertService;
 
-    @ApiOperation(value = "createAlertConfig")
+    @ApiOperation(value = "Create alert config")
     @PostMapping(value = "/add")
     public RestResponse createAlertConfig(@RequestBody AlertConfigWithParams params) {
         boolean save = alertConfigService.save(AlertConfig.of(params));
         return RestResponse.success(save);
     }
 
-    @ApiOperation(value = "existsAlertConfig")
+    @ApiOperation(value = "Exist alert config")
     @PostMapping(value = "/exists")
     public RestResponse existsAlertConfig(@RequestBody AlertConfigWithParams params) {
         boolean exist = alertConfigService.exist(AlertConfig.of(params));
         return RestResponse.success(exist);
     }
 
-    @ApiOperation(value = "updateAlertConfig")
+    @ApiOperation(value = "Update alert config")
     @PostMapping(value = "/update")
     public RestResponse updateAlertConfig(@RequestBody AlertConfigWithParams params) {
         boolean update = alertConfigService.updateById(AlertConfig.of(params));
         return RestResponse.success(update);
     }
 
-    @ApiOperation(value = "getAlertConfig")
+    @ApiOperation(value = "Get alert config")
     @PostMapping("/get")
     public RestResponse getAlertConfig(@RequestBody AlertConfigWithParams params) {
         AlertConfig alertConfig = alertConfigService.getById(params.getId());
         return RestResponse.success(AlertConfigWithParams.of(alertConfig));
     }
 
-    @ApiOperation(value = "listPageAlertConfigs")
+    @ApiOperation(value = "List alert configs(Pagination)")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "pageSize", value = "page size", required = true, example = "10", dataTypeClass = Integer.class),
         @ApiImplicitParam(name = "pageNum", value = "page num", required = true, example = "1", dataTypeClass = Integer.class),
@@ -102,14 +102,14 @@ public class AlertController {
         return RestResponse.success(page);
     }
 
-    @ApiOperation(value = "listAlertConfigs")
+    @ApiOperation(value = "List alert configs")
     @PostMapping(value = "/listWithOutPage")
     public RestResponse listAlertConfigs() {
         List<AlertConfig> page = alertConfigService.list();
         return RestResponse.success(page);
     }
 
-    @ApiOperation(value = "deleteAlertConfig")
+    @ApiOperation(value = "Delete alert config")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "id", value = "config id", required = true, paramType = "query", dataTypeClass = Long.class)
     })

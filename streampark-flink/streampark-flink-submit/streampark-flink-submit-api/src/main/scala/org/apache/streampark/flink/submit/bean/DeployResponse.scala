@@ -19,5 +19,4 @@ package org.apache.streampark.flink.submit.bean
 
 case class DeployResponse(address: String,
                           clusterId: String,
-                          message: String = null
-                         )
+                          message: String = null)

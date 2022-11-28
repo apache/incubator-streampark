@@ -21,7 +21,6 @@ import { clone } from 'lodash-es';
 import type { RequestOptions, Result } from '/#/axios';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { VAxios } from './Axios';
-// import { checkStatus } from './checkStatus';
 import { useGlobSetting } from '/@/hooks/setting';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
@@ -179,8 +178,6 @@ const transform: AxiosTransform = {
     // const msg: string = response?.data?.error?.message ?? '';
     const err: string = error?.toString?.() ?? '';
     let errMessage = '';
-
-    console.log('response', response);
     try {
       if (code === 'ECONNABORTED' && message.indexOf('timeout') !== -1) {
         errMessage = t('sys.api.apiTimeoutMessage');
@@ -200,7 +197,6 @@ const transform: AxiosTransform = {
       throw new Error(error as unknown as string);
     }
     errorHandler(response);
-    // checkStatus(error?.response?.status, msg, errorMessageMode);
 
     // Added an automatic retry mechanism for insurance purposes only for GET requests
     const retryRequest = new AxiosRetry();

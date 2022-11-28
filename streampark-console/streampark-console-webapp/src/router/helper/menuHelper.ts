@@ -21,7 +21,8 @@ import { cloneDeep } from 'lodash-es';
 import { isUrl } from '/@/utils/is';
 import { RouteParams } from 'vue-router';
 import { toRaw } from 'vue';
-
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 export function getAllParentPath<T = Recordable>(treeData: T[], path: string) {
   const menuList = findPath(treeData, (n) => n.path === path) as Menu[];
   return (menuList || []).map((item) => item.path);
@@ -31,6 +32,10 @@ export function getAllParentPath<T = Recordable>(treeData: T[], path: string) {
 function joinParentPath(menus: Menu[], parentPath = '') {
   for (let index = 0; index < menus.length; index++) {
     const menu = menus[index];
+    // use i18n
+    if (!menu.hideMenu && /^\w+\.\w+$/.test(menu.name)) {
+      menu.name = t(`menu.${menu.name}`);
+    }
     // https://next.router.vuejs.org/guide/essentials/nested-routes.html
     // Note that nested paths that start with / will be treated as a root path.
     // This allows you to leverage the component nesting without having to use a nested URL.

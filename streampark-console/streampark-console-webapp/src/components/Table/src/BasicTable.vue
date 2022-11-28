@@ -381,7 +381,7 @@
     .@{prefix-cls} {
       .ant-table-wrapper,
       .ant-form {
-        border: 1px solid rgba(255, 255, 255, 0.02);
+        border: none;
         box-shadow: 0 1px 6px #000;
       }
     }
@@ -404,7 +404,7 @@
         padding: 12px 10px 6px;
         margin-bottom: 16px;
         background-color: @component-background;
-        border: 1px solid @border-color-base;
+        border: none;
         border-radius: 4px;
       }
     }
@@ -417,7 +417,6 @@
       padding: 10px;
       background-color: @component-background;
       border-radius: 4px !important;
-      border: 1px solid @border-color-base;
 
       .ant-table-title {
         min-height: 40px;

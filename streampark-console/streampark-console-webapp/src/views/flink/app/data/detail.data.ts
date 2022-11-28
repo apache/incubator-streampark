@@ -22,19 +22,21 @@ import State from '../components/State';
 import Icon from '/@/components/Icon';
 import { dateToDuration } from '/@/utils/dateUtil';
 import { AppTypeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
+import { useI18n } from '/@/hooks/web/useI18n';
 
+const { t } = useI18n();
 export const getDescSchema = (): DescItem[] => {
   return [
     {
       field: 'id',
-      label: 'ID',
+      label: t('flink.app.id'),
       render: (curVal) =>
         h(TypographyParagraph, { copyable: true, style: { color: '#477de9' } }, () => curVal),
     },
-    { field: 'jobName', label: 'Application Name' },
+    { field: 'jobName', label: t('flink.app.appName') },
     {
       field: 'jobType',
-      label: 'Development Mode',
+      label: t('flink.app.developmentMode'),
       render: (curVal) =>
         h(
           'div',
@@ -44,11 +46,19 @@ export const getDescSchema = (): DescItem[] => {
           ),
         ),
     },
-    { field: 'module', label: 'Module', show: (data) => data.jobType != JobTypeEnum.SQL },
-    { field: 'projectName', label: 'Project', show: (data) => data.jobType != JobTypeEnum.SQL },
+    {
+      field: 'module',
+      label: t('flink.app.module'),
+      show: (data) => data.jobType != JobTypeEnum.SQL,
+    },
+    {
+      field: 'projectName',
+      label: t('flink.app.project'),
+      show: (data) => data.jobType != JobTypeEnum.SQL,
+    },
     {
       field: 'appType',
-      label: 'Application Type',
+      label: t('flink.app.appType'),
       render: (curVal) =>
         h(Tag, { color: curVal == AppTypeEnum.STREAMPARK_FLINK ? 'cyan' : 'blue' }, () =>
           curVal == AppTypeEnum.STREAMPARK_FLINK ? 'StreamPark Flink' : 'Apache Flink',
@@ -56,12 +66,12 @@ export const getDescSchema = (): DescItem[] => {
     },
     {
       field: 'state',
-      label: 'Status',
+      label: t('flink.app.status'),
       render: (_curVal, data) => h(State, { option: 'state', data }),
     },
     {
       field: 'startTime',
-      label: 'Start Time',
+      label: t('flink.app.startTime'),
       render: (curVal) =>
         h(
           'div',
@@ -73,7 +83,7 @@ export const getDescSchema = (): DescItem[] => {
     },
     {
       field: 'endTime',
-      label: 'End Time',
+      label: t('flink.app.endTime'),
       render: (curVal) =>
         h(
           'div',
@@ -85,11 +95,11 @@ export const getDescSchema = (): DescItem[] => {
     },
     {
       field: 'duration',
-      label: 'Duration',
+      label: t('flink.app.duration'),
       render: (curVal) => dateToDuration(curVal),
       show: (data) => data.duration,
     },
-    { field: 'description', label: 'Description', span: 2 },
+    { field: 'description', label: t('common.description'), span: 2 },
   ];
 };
 /* setting */

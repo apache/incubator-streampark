@@ -67,12 +67,12 @@
     }
   }
 
-  @media screen and (max-width: 1585px) {
+  @media screen and (max-width: 1670px) {
     .@{prefix-cls}:not(.collapse-slogo) {
       display: none;
     }
   }
-  @media screen and (max-width: 1420px) {
+  @media screen and (max-width: 1460px) {
     .@{prefix-cls}.collapse-slogo {
       display: none;
     }

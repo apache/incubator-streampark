@@ -40,12 +40,6 @@
         />
         <MenuDivider v-if="getShowDoc" />
         <MenuItem
-          v-if="getUseLockPage"
-          key="lock"
-          :text="t('layout.header.tooltipLock')"
-          icon="ion:lock-closed-outline"
-        />
-        <MenuItem
           key="logout"
           :text="t('layout.header.dropdownItemLoginOut')"
           icon="ion:power-outline"
@@ -53,7 +47,6 @@
       </Menu>
     </template>
   </Dropdown>
-  <LockAction @register="register" />
   <PasswordModal @register="registerPasswordModal" />
 </template>
 <script lang="ts">
@@ -85,7 +78,6 @@
       Menu,
       MenuItem: createAsyncComponent(() => import('./DropMenuItem.vue')),
       MenuDivider: Menu.Divider,
-      LockAction: createAsyncComponent(() => import('../lock/LockModal.vue')),
       PasswordModal: createAsyncComponent(() => import('./PasswordModal.vue')),
     },
     props: {
@@ -94,7 +86,7 @@
     setup() {
       const { prefixCls } = useDesign('header-user-dropdown');
       const { t } = useI18n();
-      const { getShowDoc, getUseLockPage } = useHeaderSetting();
+      const { getShowDoc } = useHeaderSetting();
       const userStore = useUserStore();
 
       const getUserInfo = computed(() => {
@@ -102,11 +94,6 @@
         return { username, avatar: avatar && avatar !== 'default.jpg' ? avatar : headerImg, desc };
       });
       const [registerPasswordModal, { openModal: openPasswordModal }] = useModal();
-      const [register, { openModal }] = useModal();
-
-      function handleLock() {
-        openModal(true);
-      }
 
       //  login out
       function handleLoginOut() {
@@ -133,9 +120,6 @@
           case 'password':
             openChangePassword();
             break;
-          case 'lock':
-            handleLock();
-            break;
         }
       }
 
@@ -145,8 +129,6 @@
         getUserInfo,
         handleMenuClick,
         getShowDoc,
-        register,
-        getUseLockPage,
         registerPasswordModal,
       };
     },

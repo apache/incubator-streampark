@@ -68,14 +68,14 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Project',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
-        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD,
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD && model.projectName,
       },
       {
         field: 'module',
         label: 'Module',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
-        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD,
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD && model.module,
       },
       {
         field: 'jar',

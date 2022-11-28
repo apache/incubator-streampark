@@ -34,6 +34,8 @@ public interface UserMapper extends BaseMapper<User> {
 
     List<User> findByAppOwner(@Param("teamId") Long teamId);
 
-    void unbindTeam(@Param("userId") Long userId);
+    void clearLastTeamByUserId(@Param("userId") Long userId);
+
+    void clearLastTeamByTeamId(@Param("teamId") Long teamId);
 
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 export default {
-  flinkWebUi: 'Flink Web UI',
+  id: '作业ID',
   appName: '作业名称',
   searchName: '名称',
   tags: '作业标签',
@@ -61,6 +61,9 @@ export default {
   dragUploadTitle: '单击或拖动 jar 到此区域以上传',
   dragUploadTip: '支持单次上传。您可以在此处上传本地 jar 以支持当前作业',
   dependencyError: '请先检查flink 版本.',
+  status: '运行状态',
+  startTime: '启动时间',
+  endTime: '结束时间',
   launch: {
     launchTitle: '该应用程序的当前启动正在进行中.',
     launchDesc: '您确定要强制进行另一次构建吗',
@@ -69,10 +72,11 @@ export default {
   },
   detail: {
     detailTitle: '作业详情',
+    flinkWebUi: 'Flink原生引擎界面',
     compareConfig: '比较配置',
     candidate: '侯选',
     compare: '比较',
-    resetApi: 'Rest Api',
+    resetApi: '外部系统调用API',
     resetApiToolTip: 'Rest API外部调用接口，其他第三方系统可轻松对接StreamPark',
     copyStartcURL: '复制启动 cURL',
     copyCancelcURL: '复制取消 cURL',
@@ -211,5 +215,17 @@ export default {
     flinkImageIsRequiredMessage: 'Flink基础docker镜像是必填的',
     k8sRestExposedTypePlaceholder: 'K8S服务对外类型',
     hadoopXmlConfigFileTips: '从系统环境参数自动复制配置文件',
+  },
+  noteInfo: {
+    note: '提示',
+    minute: '分钟',
+    count: '次数',
+    checkPointFailureOptions: 'CheckPoint失败策略',
+    checkpointFailureRateInterval: 'checkpoint失败间隔',
+    maxFailuresPerInterval: '最大失败次数',
+    checkPointFailureNote:
+      'checkpoint 失败处理策略, 例如: 在 5 分钟内 (checkpoint的失败间隔), 如果 checkpoint 失败次数超过 10 次 (checkpoint最大失败次数),会触发操作(发送告警或者重启作业)',
+    totalMemoryNote:
+      '不建议同时配置 "total process memory" 和 "total Flink memory"。 由于潜在的内存配置冲突，它可能会导致部署失败。 配置其他内存组件也需要谨慎，因为它会产生进一步的配置冲突，最简单的方法是设置"total process memory"',
   },
 };

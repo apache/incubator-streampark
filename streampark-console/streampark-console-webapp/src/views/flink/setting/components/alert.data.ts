@@ -15,14 +15,18 @@
  * limitations under the License.
  */
 import { FormSchema } from '/@/components/Form';
+import { useI18n } from '/@/hooks/web/useI18n';
 
+const { t } = useI18n();
 export const alertFormSchema: Array<FormSchema> = [
   {
     field: 'alertType',
-    label: 'Fault Alert Type',
+    label: t('flink.setting.alert.faultAlertType'),
     component: 'Select',
     slot: 'type',
-    dynamicRules: () => [{ required: true, message: 'Fault Alert Type is required' }],
+    dynamicRules: () => [
+      { required: true, message: t('flink.setting.alert.faultAlertTypeIsRequired') },
+    ],
   },
   {
     field: 'alertEmail',
@@ -38,133 +42,145 @@ export const alertFormSchema: Array<FormSchema> = [
   },
   {
     field: 'dingtalkToken',
-    label: 'Access Token',
+    label: t('flink.setting.alert.dingtalkAccessToken'),
     component: 'Input',
     componentProps: {
-      placeholder: 'Please enter the access token of DingTalk',
+      placeholder: t('flink.setting.alert.dingtalkAccessTokenPlaceholder'),
     },
     rules: [{ required: true, message: 'Access token is required' }],
     ifShow: ({ model }) => (model.alertType || []).includes('2'),
   },
   {
     field: 'dingtalkSecretEnable',
-    label: 'Secret Enable',
+    label: t('flink.setting.alert.secretEnable'),
     component: 'Switch',
     componentProps: {
       checkedChildren: 'ON',
       unCheckedChildren: 'OFF',
     },
-    helpMessage: 'DingTalk ecretToken is enable',
+    helpMessage: t('flink.setting.alert.secretTokenEnableHelpMessage'),
     ifShow: ({ model }) => (model.alertType || []).includes('2'),
   },
   {
     field: 'dingtalkSecretToken',
-    label: 'Secret Token',
+    label: t('flink.setting.alert.secretToken'),
     component: 'Input',
     componentProps: {
-      placeholder: 'please enter Secret Token',
+      placeholder: t('flink.setting.alert.secretTokenPlaceholder'),
     },
     ifShow: ({ model }) => (model.alertType || []).includes('2') && model.dingtalkSecretEnable,
-    rules: [{ required: true, message: 'DingTalk SecretToken is required', trigger: 'blur' }],
+    rules: [
+      {
+        required: true,
+        message: t('flink.setting.alert.dingTalkSecretTokenIsRequired'),
+        trigger: 'blur',
+      },
+    ],
   },
   {
     field: 'alertDingUser',
-    label: 'DingTalk User',
+    label: t('flink.setting.alert.dingTalkUser'),
     component: 'Input',
     componentProps: {
-      placeholder: 'Please enter DingTalk receive user',
+      placeholder: t('flink.setting.alert.dingTalkUserPlaceholder'),
     },
     ifShow: ({ model }) => (model.alertType || []).includes('2'),
   },
   {
     field: 'dingtalkIsAtAll',
-    label: 'At All User',
+    label: t('flink.setting.alert.dingtalkIsAtAll'),
     component: 'Switch',
     componentProps: {
       checkedChildren: 'ON',
       unCheckedChildren: 'OFF',
     },
-    helpMessage: 'Whether Notify All',
+    helpMessage: t('flink.setting.alert.whetherNotifyAll'),
     ifShow: ({ model }) => (model.alertType || []).includes('2'),
   },
   {
     field: 'weToken',
-    label: 'WeChat token',
+    label: t('flink.setting.alert.weChattoken'),
     component: 'InputTextArea',
     colSlot: 'weToken',
     componentProps: {
       rows: 4,
-      placeholder: 'Please enter WeChart Token',
+      placeholder: t('flink.setting.alert.weChattokenPlaceholder'),
     },
-    rules: [{ required: true, message: 'WeChat Token is required' }],
+    rules: [{ required: true, message: t('flink.setting.alert.weChattokenIsRequired') }],
   },
   {
     field: 'alertSms',
-    label: 'SMS',
+    label: t('flink.setting.alert.sms'),
     component: 'Input',
     componentProps: {
-      placeholder: 'Please enter mobile number',
+      placeholder: t('flink.setting.alert.smsPlaceholder'),
       allowClear: true,
     },
     colSlot: 'alertSms',
-    rules: [{ required: true, message: 'mobile number is required' }],
+    rules: [{ required: true, message: t('flink.setting.alert.mobileNumberIsRequired') }],
   },
   {
     field: 'alertSmsTemplate',
-    label: 'SMS Template',
+    label: t('flink.setting.alert.smsTemplate'),
     component: 'InputTextArea',
     componentProps: {
       rows: 4,
-      placeholder: 'SMS Template is required',
+      placeholder: t('flink.setting.alert.smsTemplateIsRequired'),
     },
     ifShow: ({ model }) => (model.alertType || []).includes('8'),
     colSlot: 'alertSmsTemplate',
   },
   {
     field: 'larkToken',
-    label: 'Lark Token',
+    label: t('flink.setting.alert.larkToken'),
     component: 'InputTextArea',
     colSlot: 'larkToken',
     rules: [{ required: true, message: 'Lark token is required' }],
   },
   {
     field: 'larkIsAtAll',
-    label: 'At All User',
+    label: t('flink.setting.alert.larkIsAtAll'),
     component: 'Switch',
     componentProps: {
       checkedChildren: 'ON',
       unCheckedChildren: 'OFF',
     },
     ifShow: ({ model }) => (model.alertType || []).includes('16'),
-    helpMessage: 'Whether Notify All',
+    helpMessage: t('flink.setting.alert.whetherNotifyAll'),
   },
   {
     field: 'larkSecretEnable',
-    label: 'Secret Enable',
+    label: t('flink.setting.alert.larkSecretEnable'),
     component: 'Switch',
     componentProps: {
       checkedChildren: 'ON',
       unCheckedChildren: 'OFF',
     },
-    helpMessage: 'Lark secretToken is enable',
+    helpMessage: t('flink.setting.alert.larkTokenEnableHelpMessage'),
     ifShow: ({ model }) => (model.alertType || []).includes('16'),
   },
   {
     field: 'larkSecretToken',
-    label: 'Lark Secret Token',
+    label: t('flink.setting.alert.larkSecretToken'),
     component: 'Input',
     componentProps: {
-      placeholder: 'please enter Lark Secret Token',
+      placeholder: t('flink.setting.alert.larkSecretTokenPlaceholder'),
     },
     ifShow: ({ model }) => (model.alertType || []).includes('16') && model.larkSecretEnable,
-    rules: [{ required: true, message: 'Lark SecretToken is required', trigger: 'blur' }],
+    rules: [
+      {
+        required: true,
+        message: t('flink.setting.alert.larkSecretTokenIsRequired'),
+        trigger: 'blur',
+      },
+    ],
   },
 ];
 
 export const alertTypes = {
-  '1': { name: 'E-mail', value: 1, disabled: false, icon: 'mail' },
-  '2': { name: 'Ding Talk', value: 2, disabled: false, icon: 'dingtalk' },
-  '4': { name: 'Wechat', value: 4, disabled: false, icon: 'wecom' },
-  '8': { name: 'SMS', value: 8, disabled: true, icon: 'message' },
-  '16': { name: 'Lark', value: 16, disabled: false, icon: 'lark' },
+  '1': { name: t('flink.setting.alert.email'), value: 1, disabled: false, icon: 'mail' },
+  '2': { name: t('flink.setting.alert.dingTalk'), value: 2, disabled: false, icon: 'dingtalk' },
+  '4': { name: t('flink.setting.alert.weChat'), value: 4, disabled: false, icon: 'wecom' },
+  '8': { name: t('flink.setting.alert.sms'), value: 8, disabled: true, icon: 'message' },
+  '16': { name: t('flink.setting.alert.lark'), value: 16, disabled: false, icon: 'lark' },
 };

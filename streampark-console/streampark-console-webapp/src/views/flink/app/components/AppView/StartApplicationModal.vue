@@ -153,7 +153,7 @@
           icon: 'error',
           width: exceptionPropWidth(),
           html:
-            '<pre class="propException"> startup failed, ' +
+            '<pre class="api-exception"> startup failed, ' +
             data.message.replaceAll(/\[StreamPark]/g, '') +
             '</pre>',
           showCancelButton: true,

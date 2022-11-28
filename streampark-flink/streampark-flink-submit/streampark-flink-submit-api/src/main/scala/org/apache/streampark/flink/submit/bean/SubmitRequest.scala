@@ -46,7 +46,6 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          flinkYaml: String,
                          developmentMode: DevelopmentMode,
                          executionMode: ExecutionMode,
-                         resolveOrder: ResolveOrder,
                          id: Long,
                          jobId: String,
                          appName: String,
@@ -54,8 +53,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          applicationType: ApplicationType,
                          savePoint: String,
                          flameGraph: JavaMap[String, java.io.Serializable],
-                         option: JavaMap[String, Any],
-                         properties: JavaMap[String, String],
+                         properties: JavaMap[String, Any],
                          args: String,
                          @Nullable buildResult: BuildResult,
                          @Nullable k8sSubmitParam: KubernetesSubmitParam,
@@ -74,7 +72,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 
   lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
 
-  lazy val allowNonRestoredState = Try(extraParameter.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean).getOrElse(false)
+  lazy val allowNonRestoredState = Try(properties.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean).getOrElse(false)
 
   lazy val savepointRestoreSettings: SavepointRestoreSettings = {
     savePoint match {

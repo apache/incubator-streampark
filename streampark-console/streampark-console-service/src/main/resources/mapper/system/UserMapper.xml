@@ -33,7 +33,7 @@
         <result column="sex" jdbcType="CHAR" property="sex"/>
         <result column="avatar" jdbcType="VARCHAR" property="avatar"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
+        <result column="last_team_id" jdbcType="BIGINT" property="lastTeamId"/>
     </resultMap>
 
     <select id="findUserDetail" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
@@ -75,10 +75,16 @@
         where u.user_id = t.user_id
     </select>
 
-    <update id="unbindTeam" parameterType="java.lang.Long">
+    <update id="clearLastTeamByUserId" parameterType="java.lang.Long">
         update t_user
-        set team_id = null
+        set last_team_id = null
         where user_id = #{userId}
+    </update>
+
+    <update id="clearLastTeamByTeamId" parameterType="java.lang.Long">
+        update t_user
+        set last_team_id = null
+        where last_team_id = #{teamId}
     </update>
 
 </mapper>

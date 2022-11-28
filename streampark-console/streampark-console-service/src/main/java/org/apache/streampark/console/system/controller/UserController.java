@@ -166,7 +166,7 @@ public class UserController {
         if (team == null) {
             return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
         }
-        userService.setLatestTeam(teamId, userId);
+        userService.setLastTeam(teamId, userId);
         return RestResponse.success();
     }
 
@@ -180,7 +180,7 @@ public class UserController {
         User user = commonService.getCurrentUser();
 
         //1) set the latest team
-        userService.setLatestTeam(teamId, user.getUserId());
+        userService.setLastTeam(teamId, user.getUserId());
 
         //2) get latest userInfo
         user.dataMasking();

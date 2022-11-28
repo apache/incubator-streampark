@@ -14,32 +14,30 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+<script lang="ts" setup>
+  import { Tooltip } from 'ant-design-vue';
+  import Icon from '/@/components/Icon';
+  import { useModal } from '/@/components/Modal';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
+  const LockAction = createAsyncComponent(() => import('./lock/LockModal.vue'));
+
+  const [register, { openModal }] = useModal();
+  const { t } = useI18n();
+  function handleLock() {
+    openModal(true);
+  }
+</script>
 <template>
-  <div v-if="showFrame">
-    <template v-for="frame in getFramePages" :key="frame.path">
-      <FramePage
-        v-if="frame.meta.frameSrc && hasRenderFrame(frame.name)"
-        v-show="showIframe(frame)"
-        :frameSrc="frame.meta.frameSrc"
+  <div>
+    <Tooltip :title="t('layout.header.tooltipLock')" placement="bottom" :mouseEnterDelay="0.5">
+      <Icon
+        icon="ant-design:lock-outlined"
+        class="!px-8px"
+        style="font-size: 19px !important"
+        @click="handleLock"
       />
-    </template>
+    </Tooltip>
+    <LockAction @register="register" />
   </div>
 </template>
-<script lang="ts">
-  import { defineComponent, unref, computed } from 'vue';
-  import FramePage from '/@/views/base/iframe/index.vue';
-
-  import { useFrameKeepAlive } from './useFrameKeepAlive';
-
-  export default defineComponent({
-    name: 'FrameLayout',
-    components: { FramePage },
-    setup() {
-      const { getFramePages, hasRenderFrame, showIframe } = useFrameKeepAlive();
-
-      const showFrame = computed(() => unref(getFramePages).length > 0);
-
-      return { getFramePages, hasRenderFrame, showIframe, showFrame };
-    },
-  });
-</script>

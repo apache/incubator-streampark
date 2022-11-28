@@ -52,7 +52,7 @@
     <!-- action  -->
     <div :class="`${prefixCls}-action`">
       <a-button type="link" size="small" class="!hidden !md:block">
-        <span>Version:</span>
+        <span>{{ t('layout.header.version') }}:</span>
         <span class="pl-2px">{{ version }}</span>
       </a-button>
       <Divider type="vertical" />
@@ -62,13 +62,13 @@
       <!-- Theme Switch -->
       <appDarkModeToggle />
 
-      <AppSearch :class="`${prefixCls}-action__item `" v-if="getShowSearch" />
-
       <ErrorAction v-if="getUseErrorHandle" :class="`${prefixCls}-action__item error-action`" />
 
       <Notify v-if="getShowNotice" :class="`${prefixCls}-action__item notify-item`" />
 
       <FullScreen v-if="getShowFullScreen" :class="`${prefixCls}-action__item fullscreen-item`" />
+
+      <LockScreen :class="`${prefixCls}-action__item lockscreen-item`" />
 
       <AppLocalePicker
         v-if="getShowLocalePicker"
@@ -78,8 +78,6 @@
       />
       <UserTeam />
       <UserDropDown :theme="getHeaderTheme" />
-
-      <SettingDrawer v-if="getShowSetting" :class="`${prefixCls}-action__item`" />
     </div>
   </Header>
 </template>
@@ -92,7 +90,6 @@
   import LayoutMenu from '../menu/index.vue';
   import LayoutTrigger from '../trigger/index.vue';
 
-  import { AppSearch } from '/@/components/Application';
   import { AppDarkModeToggle } from '/@/components/Application';
 
   import { useHeaderSetting } from '/@/hooks/setting/useHeaderSetting';
@@ -112,13 +109,15 @@
     ErrorAction,
     Github,
     Slogan,
+    LockScreen,
   } from './components';
   import { useAppInject } from '/@/hooks/web/useAppInject';
   import { useDesign } from '/@/hooks/web/useDesign';
 
-  import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
   import { useLocale } from '/@/locales/useLocale';
   import { version } from '../../../../package.json';
+  import { useI18n } from '/@/hooks/web/useI18n';
+
   export default defineComponent({
     name: 'LayoutHeader',
     components: {
@@ -132,20 +131,18 @@
       AppLocalePicker,
       FullScreen,
       Notify,
-      AppSearch,
       ErrorAction,
       Github,
       Slogan,
+      LockScreen,
       Divider,
       AppDarkModeToggle,
-      SettingDrawer: createAsyncComponent(() => import('/@/layouts/default/setting/index.vue'), {
-        loading: true,
-      }),
     },
     props: {
       fixed: propTypes.bool,
     },
     setup(props) {
+      const { t } = useI18n();
       const { prefixCls } = useDesign('layout-header');
       const {
         getShowTopMenu,
@@ -214,6 +211,7 @@
       });
 
       return {
+        t,
         prefixCls,
         getHeaderClass,
         getShowHeaderLogo,

@@ -198,6 +198,8 @@ export const useAppTableAction = (
           AppStateEnum.LOST,
           AppStateEnum.TERMINATED,
           AppStateEnum.POS_TERMINATED,
+          AppStateEnum.SUCCEEDED,
+          AppStateEnum.KILLED,
         ].includes(record.state),
         auth: 'app:delete',
         icon: 'ant-design:delete-outlined',
@@ -213,7 +215,7 @@ export const useAppTableAction = (
         appId: app.id,
         width: document.documentElement.offsetWidth || document.body.offsetWidth,
       });
-      if (data != null) {
+      if (data) {
         const blob = new Blob([data], { type: 'image/svg+xml' });
         const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob);
         window.open(imageUrl);

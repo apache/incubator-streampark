@@ -262,10 +262,12 @@
 <template>
   <Tabs type="card" v-model:activeKey="activeTab" class="pom-card">
     <TabPane key="pom" tab="Maven pom">
-      <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
-      <a-button type="primary" class="apply-pom" @click="handleApplyPom()">
-        {{ t('common.apply') }}
-      </a-button>
+      <div class="relative">
+        <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
+        <a-button type="primary" class="apply-pom" @click="handleApplyPom()">
+          {{ t('common.apply') }}
+        </a-button>
+      </div>
     </TabPane>
     <TabPane key="jar" tab="Upload Jar">
       <template v-if="isK8sExecMode(formModel?.executionMode)">
@@ -291,39 +293,39 @@
   <div class="dependency-box" v-if="dependencyRecords.length > 0 || uploadJars.length > 0">
     <Alert
       class="dependency-item"
-      v-for="(value, index) in dependencyRecords"
+      v-for="(dept, index) in dependencyRecords"
       :key="`dependency_${index}`"
       type="info"
-      @click="handleEditPom(value)"
+      @click="handleEditPom(dept)"
     >
       <template #message>
-        <Space @click="handleEditPom(value)" class="tag-dependency-pom">
+        <Space @click="handleEditPom(dept)" class="tag-dependency-pom">
           <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
-          {{ value.artifactId }}-{{ value.version }}.jar
+          {{ dept.artifactId }}-{{ dept.version }}.jar
           <Icon
             :size="12"
             icon="ant-design:close-outlined"
             class="icon-close cursor-pointer"
-            @click.stop="handleRemovePom(value)"
+            @click.stop="handleRemovePom(dept)"
           />
         </Space>
       </template>
     </Alert>
     <Alert
       class="dependency-item"
-      v-for="(value, index) in uploadJars"
-      :key="`upload_jars_${index}`"
+      v-for="jar in uploadJars"
+      :key="`upload_jars_${jar}`"
       type="info"
     >
       <template #message>
         <Space>
           <Tag class="tag-dependency" color="#108ee9">JAR</Tag>
-          {{ value }}
+          {{ jar }}
           <Icon
             icon="ant-design:close-outlined"
             class="icon-close cursor-pointer"
             :size="12"
-            @click="handleRemoveJar(value)"
+            @click="handleRemoveJar(jar)"
           />
         </Space>
       </template>

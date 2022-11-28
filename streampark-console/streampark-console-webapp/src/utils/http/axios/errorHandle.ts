@@ -26,7 +26,8 @@ export function errorHandler(response: AxiosResponse<any>) {
   const { t } = useI18n();
   const stp = projectSetting.sessionTimeoutProcessing;
   if (response) {
-    switch (response?.data?.code) {
+    const code = parseInt(response?.data?.code);
+    switch (code) {
       case 501:
         Swal.fire({
           icon: 'error',
@@ -45,7 +46,7 @@ export function errorHandler(response: AxiosResponse<any>) {
           icon: 'error',
           title: t('sys.api.errorTip'),
           width: width,
-          html: '<pre class="propException">' + response.data.message + '</pre>',
+          html: '<pre class="api-exception">' + response.data.message + '</pre>',
           footer: t('sys.api.error502'),
           focusConfirm: false,
         });

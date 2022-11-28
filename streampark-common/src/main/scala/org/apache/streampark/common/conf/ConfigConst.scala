@@ -126,6 +126,8 @@ object ConfigConst {
 
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
+  val KEY_K8S_IMAGE_PULL_POLICY = "kubernetes.container.image.pull-policy"
+
   // ---table---
   val KEY_FLINK_TABLE_PLANNER = "flink.table.planner"
 

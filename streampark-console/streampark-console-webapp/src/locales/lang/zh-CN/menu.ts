@@ -14,7 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { withInstall } from '/@/utils';
-import strengthMeter from './src/StrengthMeter.vue';
-
-export const StrengthMeter = withInstall(strengthMeter);
+export default {
+  menu: {
+    system: '系统管理',
+    userManagement: '用户管理',
+    roleManagement: '角色管理',
+    menuManagement: '菜单管理',
+    tokenManagement: 'Token管理',
+    teamManagement: '团队管理',
+    memberManagement: '成员管理',
+    project: '项目',
+    application: '作业',
+    setting: '设置中心',
+    variable: '变量管理',
+  },
+};

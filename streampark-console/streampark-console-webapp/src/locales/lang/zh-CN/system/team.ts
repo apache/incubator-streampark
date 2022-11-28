@@ -16,6 +16,7 @@
  */
 export default {
   addTeam: '创建Team',
+  team: '团队',
   modifyTeam: '编辑Team',
   deleteTeam: '删除Team',
   deletePopConfirm: '确定要删除这个Team ?',
