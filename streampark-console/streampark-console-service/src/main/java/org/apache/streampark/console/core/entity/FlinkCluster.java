@@ -153,7 +153,7 @@ public class FlinkCluster implements Serializable {
             }
             String[] array = address.split(",");
             for (String url : array) {
-                if (!CommonUtils.checkUrlIsLegal(url)) {
+                if (!CommonUtils.isLegalUrl(url)) {
                     return false;
                 }
                 try {

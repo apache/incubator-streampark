@@ -638,7 +638,7 @@ public final class CommonUtils implements Serializable {
         }
     }
 
-    public static boolean checkUrlIsLegal(String url) {
+    public static boolean isLegalUrl(String url) {
         try {
             new URI(url);
             return true;
