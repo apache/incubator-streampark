@@ -237,6 +237,7 @@
             v-auth="'app:detail'"
             shape="circle"
             :href="item.address"
+            target="_blank"
             size="large"
             class="control-button"
           >
