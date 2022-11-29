@@ -65,31 +65,18 @@
           id: cluster.id,
         });
         const res = await fetchCheckCluster(params);
-        if (res === 'success') {
-          const resp = await fetchUpdateCluster(params);
-          if (resp.status) {
-            Swal.fire({
-              icon: 'success',
-              title: values.clusterName.concat(' update successful!'),
-              showConfirmButton: false,
-              timer: 2000,
-            });
-            go('/flink/setting?activeKey=cluster');
-          } else {
-            Swal.fire(resp.data.msg);
-          }
-        } else if (res === 'exists') {
-          Swal.fire(
-            'Failed',
-            'the cluster name: ' + values.clusterName + ' is already exists,please check',
-            'error',
-          );
+        const status = parseInt(res.status);
+        if (status === 0) {
+          fetchUpdateCluster(params);
+          Swal.fire({
+            icon: 'success',
+            title: values.clusterName.concat(' update successful!'),
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          go('/flink/setting?activeKey=cluster');
         } else {
-          Swal.fire(
-            'Failed',
-            'the address is invalid or connection failure, please check',
-            'error',
-          );
+          Swal.fire('Failed', res.msg, 'error');
         }
       }
     } catch (error) {
@@ -122,7 +109,6 @@
         flinkImage: cluster.flinkImage,
         serviceAccount: cluster.serviceAccount,
         k8sConf: cluster.k8sConf,
-        flameGraph: cluster.flameGraph,
         k8sNamespace: cluster.k8sNamespace,
         ...resetParams,
       });

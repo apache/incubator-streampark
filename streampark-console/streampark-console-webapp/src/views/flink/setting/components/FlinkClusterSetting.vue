@@ -16,7 +16,6 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
-  import { exceptionPropWidth } from '/@/utils';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'FlinkClusterSetting',
@@ -52,73 +51,28 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const clusters = ref<FlinkCluster[]>([]);
-  const optionClusters = {
-    starting: new Map(),
-    created: new Map(),
-    stoped: new Map(),
-  };
   function isSessionMode(mode: number): boolean {
     return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
   }
 
-  /* Get flink environmental data*/
-  async function getFlinkClusterSetting() {
-    const clusterList = await fetchFlinkCluster();
-    clusters.value = clusterList;
-    for (const key in clusterList) {
-      const cluster = clusterList[key];
-      if (cluster.clusterState === ClusterStateEnum.CREATED) {
-        optionClusters.created.set(cluster.id, new Date().getTime());
-      } else if (cluster.clusterState === ClusterStateEnum.STARTED) {
-        optionClusters.starting.set(cluster.id, new Date().getTime());
-      } else {
-        optionClusters.stoped.set(cluster.id, new Date().getTime());
-      }
-    }
-  }
-
   function handleIsStart(item) {
-    /**
-     The cluster was just created but not started
-     CREATED(0),
-     cluster started
-     STARTED(1),
-     cluster stopped
-     STOPED(2);
-    */
-    return optionClusters.starting.get(item.id);
+    return item.clusterState === ClusterStateEnum.STARTED;
   }
   /* Go to edit cluster */
   function handleEditCluster(item: FlinkCluster) {
     go(`/flink/setting/edit_cluster?clusterId=${item.id}`);
   }
   /* deploy */
-  async function handleDeployCluser(item: FlinkCluster) {
+  async function handleDeployCluster(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is starting', 0);
     try {
-      const { data } = await fetchClusterStart(item.id);
-      if (data?.data?.status) {
-        // optionClusters.starting.set(item.id, new Date().getTime());
-        handleMapUpdate('starting');
-        getFlinkClusterSetting();
-        Swal.fire({
-          icon: 'success',
-          title: 'The current cluster is started',
-          showConfirmButton: false,
-          timer: 2000,
-        });
-      } else {
-        Swal.fire({
-          title: 'Failed',
-          icon: 'error',
-          width: exceptionPropWidth(),
-          html: '<pre class="propsException">' + data?.data?.msg + '</pre>',
-          showCancelButton: true,
-          confirmButtonColor: '#55BDDDFF',
-          confirmButtonText: 'OK',
-          cancelButtonText: 'Close',
-        });
-      }
+      await fetchClusterStart(item.id);
+      await Swal.fire({
+        icon: 'success',
+        title: 'The current cluster is started',
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (error) {
       console.error(error);
     } finally {
@@ -127,36 +81,15 @@
   }
   /* delete */
   async function handleDelete(item: FlinkCluster) {
-    const { data } = await fetchClusterRemove(item.id);
-    if (data?.data?.status) {
-      // optionClusters.starting.delete(item.id);
-      handleMapUpdate('starting');
-      getFlinkClusterSetting();
-      createMessage.success('The current cluster is remove');
-    }
+    await fetchClusterRemove(item.id);
+    createMessage.success('The current cluster is remove');
   }
   /* shutdown */
   async function handleShutdownCluster(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is canceling', 0);
     try {
-      const { data } = await fetchClusterShutdown(item.id);
-      if (data?.data?.status) {
-        // optionClusters.starting.delete(item.id);
-        handleMapUpdate('starting');
-        getFlinkClusterSetting();
-        createMessage.success('The current cluster is shutdown');
-      } else {
-        Swal.fire({
-          title: 'Failed',
-          icon: 'error',
-          width: exceptionPropWidth(),
-          html: '<pre class="propsException">' + data.data.msg + '</pre>',
-          showCancelButton: true,
-          confirmButtonColor: '#55BDDDFF',
-          confirmButtonText: 'OK',
-          cancelButtonText: 'Close',
-        });
-      }
+      await fetchClusterShutdown(item.id);
+      createMessage.success('The current cluster is shutdown');
     } catch (error) {
       console.error(error);
     } finally {
@@ -164,13 +97,14 @@
     }
   }
 
-  function handleMapUpdate(type: string) {
-    const map = optionClusters[type];
-    optionClusters[type] = new Map(map);
+  async function getFlinkCluster() {
+    const clusterList = await fetchFlinkCluster();
+    clusters.value = clusterList;
   }
 
   onMounted(() => {
-    getFlinkClusterSetting();
+    getFlinkCluster();
+    setInterval(() => getFlinkCluster(), 1000 * 3);
   });
 </script>
 <template>
@@ -218,19 +152,8 @@
       <template #actions>
         <Tooltip :title="t('flink.setting.cluster.edit')">
           <a-button
-            v-if="handleIsStart(item) && item.executionMode == ExecModeEnum.YARN_SESSION"
             v-auth="'cluster:update'"
-            :disabled="true"
-            @click="handleEditCluster(item)"
-            shape="circle"
-            size="large"
-            class="control-button"
-          >
-            <EditOutlined />
-          </a-button>
-          <a-button
-            v-if="!handleIsStart(item) || item.executionMode == ExecModeEnum.REMOTE"
-            v-auth="'cluster:update'"
+            :disabled="handleIsStart(item)"
             @click="handleEditCluster(item)"
             shape="circle"
             size="large"
@@ -239,40 +162,10 @@
             <EditOutlined />
           </a-button>
         </Tooltip>
-        <template v-if="!handleIsStart(item)">
-          <Tooltip :title="t('flink.setting.cluster.start')">
-            <a-button
-              v-if="isSessionMode(item.executionMode)"
-              v-auth="'cluster:create'"
-              @click="handleDeployCluser(item)"
-              shape="circle"
-              size="large"
-              class="control-button"
-            >
-              <PlayCircleOutlined />
-            </a-button>
-            <a-button
-              v-else
-              :disabled="true"
-              v-auth="'cluster:create'"
-              shape="circle"
-              size="large"
-              style="margin-left: 3px"
-              class="control-button"
-            >
-              <PlayCircleOutlined />
-            </a-button>
-          </Tooltip>
-        </template>
-
-        <template v-else>
+        <template v-if="handleIsStart(item)">
           <Tooltip :title="t('flink.setting.cluster.stop')">
             <a-button
-              v-if="
-                [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(
-                  item.executionMode,
-                )
-              "
+              :disabled="item.executionMode === ExecModeEnum.REMOTE"
               v-auth="'cluster:create'"
               @click="handleShutdownCluster(item)"
               shape="circle"
@@ -282,38 +175,31 @@
             >
               <PauseCircleOutlined />
             </a-button>
+          </Tooltip>
+        </template>
+        <template v-else>
+          <Tooltip :title="t('flink.setting.cluster.start')">
             <a-button
-              v-else
-              :disabled="true"
+              :disabled="!isSessionMode(item.executionMode)"
               v-auth="'cluster:create'"
+              @click="handleDeployCluster(item)"
               shape="circle"
               size="large"
               class="control-button"
             >
-              <PauseCircleOutlined />
+              <PlayCircleOutlined />
             </a-button>
           </Tooltip>
         </template>
-
         <Tooltip :title="t('flink.setting.cluster.detail')">
           <a-button
-            v-if="!handleIsStart(item)"
-            v-auth="'app:detail'"
-            :disabled="true"
-            shape="circle"
-            size="large"
-            class="control-button"
-          >
-            <EyeOutlined />
-          </a-button>
-          <a-button
-            v-else
+            :disabled="!handleIsStart(item)"
             v-auth="'app:detail'"
             shape="circle"
-            size="large"
-            class="control-button"
             :href="item.address"
             target="_blank"
+            size="large"
+            class="control-button"
           >
             <EyeOutlined />
           </a-button>
@@ -325,7 +211,13 @@
           :ok-text="t('common.yes')"
           @confirm="handleDelete(item)"
         >
-          <a-button type="danger" shape="circle" size="large" class="control-button">
+          <a-button
+            :disabled="item.clusterState === ClusterStateEnum.STARTED"
+            type="danger"
+            shape="circle"
+            size="large"
+            class="control-button"
+          >
             <DeleteOutlined />
           </a-button>
         </Popconfirm>

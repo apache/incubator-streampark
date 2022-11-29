@@ -57,39 +57,22 @@ public class FlinkClusterController {
 
     @PostMapping("check")
     public RestResponse check(FlinkCluster cluster) {
-        String checkResult = flinkClusterService.check(cluster);
+        ResponseResult checkResult = flinkClusterService.check(cluster);
         return RestResponse.success(checkResult);
     }
 
     @PostMapping("create")
     @RequiresPermissions("cluster:create")
     public RestResponse create(FlinkCluster cluster) {
-        ResponseResult result = flinkClusterService.create(cluster);
-        return RestResponse.success(result);
+        Boolean success = flinkClusterService.create(cluster);
+        return RestResponse.success(success);
     }
 
     @PostMapping("update")
     @RequiresPermissions("cluster:update")
     public RestResponse update(FlinkCluster cluster) {
-        FlinkCluster flinkCluster = flinkClusterService.getById(cluster.getId());
-        flinkCluster.setClusterId(cluster.getClusterId());
-        flinkCluster.setVersionId(cluster.getVersionId());
-        flinkCluster.setClusterName(cluster.getClusterName());
-        flinkCluster.setAddress(cluster.getAddress());
-        flinkCluster.setExecutionMode(cluster.getExecutionMode());
-        flinkCluster.setDynamicProperties(cluster.getDynamicProperties());
-        flinkCluster.setFlameGraph(cluster.getFlameGraph());
-        flinkCluster.setFlinkImage(cluster.getFlinkImage());
-        flinkCluster.setOptions(cluster.getOptions());
-        flinkCluster.setYarnQueue(cluster.getYarnQueue());
-        flinkCluster.setK8sHadoopIntegration(cluster.getK8sHadoopIntegration());
-        flinkCluster.setK8sConf(cluster.getK8sConf());
-        flinkCluster.setK8sNamespace(cluster.getK8sNamespace());
-        flinkCluster.setK8sRestExposedType(cluster.getK8sRestExposedType());
-        flinkCluster.setResolveOrder(cluster.getResolveOrder());
-        flinkCluster.setServiceAccount(cluster.getServiceAccount());
-        flinkCluster.setDescription(cluster.getDescription());
-        return RestResponse.success(flinkClusterService.update(flinkCluster));
+        flinkClusterService.update(cluster);
+        return RestResponse.success();
     }
 
     @PostMapping("get")
@@ -99,23 +82,20 @@ public class FlinkClusterController {
     }
 
     @PostMapping("start")
-    public RestResponse start(FlinkCluster flinkCluster) {
-        FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
-        ResponseResult start = flinkClusterService.start(cluster);
-        return RestResponse.success(start);
+    public RestResponse start(FlinkCluster cluster) {
+        flinkClusterService.start(cluster);
+        return RestResponse.success();
     }
 
     @PostMapping("shutdown")
-    public RestResponse shutdown(FlinkCluster flinkCluster) {
-        FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
-        ResponseResult shutdown = flinkClusterService.shutdown(cluster);
-        return RestResponse.success(shutdown);
+    public RestResponse shutdown(FlinkCluster cluster) {
+        flinkClusterService.shutdown(cluster);
+        return RestResponse.success();
     }
 
     @PostMapping("delete")
-    public RestResponse delete(FlinkCluster flinkCluster) {
-        FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
-        ResponseResult delete = flinkClusterService.delete(cluster);
-        return RestResponse.success(delete);
+    public RestResponse delete(FlinkCluster cluster) {
+        flinkClusterService.delete(cluster);
+        return RestResponse.success();
     }
 }

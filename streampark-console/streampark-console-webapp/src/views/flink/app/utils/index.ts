@@ -271,7 +271,6 @@ export function handleSubmitParams(
     clusterId: values.clusterId || null,
     flinkClusterId: values.flinkClusterId || null,
     flinkImage: values.flinkImage || null,
-    yarnSessionClusterId: values.yarnSessionClusterId || null,
   });
   if (params.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
     Object.assign(params, {
@@ -290,8 +289,4 @@ export const filterOption = (input: string, options: Recordable) => {
 // k8s mode
 export function isK8sExecMode(mode: number): boolean {
   return [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(mode);
-}
-// session mode
-export function isSessionMode(mode: number): boolean {
-  return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
 }

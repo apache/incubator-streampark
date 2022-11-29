@@ -126,7 +126,6 @@ export interface AppListRecord {
   createTimeTo?: any;
   backUpDescription?: any;
   yarnQueue?: any;
-  yarnSessionClusterId?: any;
   teamIdList?: any;
   teamName: string;
   flinkRestUrl?: any;
@@ -178,5 +177,4 @@ export interface CreateParams {
   clusterId: string;
   flinkClusterId: string;
   flinkImage?: any;
-  yarnSessionClusterId?: any;
 }

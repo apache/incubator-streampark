@@ -221,14 +221,12 @@ export const useCreateAndEditSchema = (
         rules: [{ required: true, message: 'Flink Cluster is required' }],
       },
       {
-        field: 'yarnSessionClusterId',
-        label: t('flink.app.yarnSessionClusterId'),
+        field: 'flinkClusterId',
+        label: t('flink.app.flinkCluster'),
         component: 'Select',
-        componentProps: () => {
-          return {
-            placeholder: t('flink.app.addAppTips.yarnSessionClusterIdPlaceholder'),
-            options: getExecutionCluster(ExecModeEnum.YARN_SESSION, 'clusterId'),
-          };
+        componentProps: {
+          placeholder: t('flink.app.flinkCluster'),
+          options: getExecutionCluster(ExecModeEnum.YARN_SESSION, 'id'),
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         rules: [{ required: true, message: 'Flink Cluster is required' }],
