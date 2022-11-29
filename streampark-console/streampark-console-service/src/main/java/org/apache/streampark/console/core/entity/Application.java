@@ -226,6 +226,7 @@ public class Application implements Serializable {
     /**
      * the cluster id bound to the task in remote mode
      */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Long flinkClusterId;
 
     private String description;

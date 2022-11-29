@@ -741,9 +741,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean update(Application appParam) {
         try {
             Application application = getById(appParam.getId());
-
             application.setLaunch(LaunchState.NEED_LAUNCH.get());
-
             if (application.isUploadJob()) {
                 if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
                     application.setBuild(true);
@@ -806,8 +804,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setCpFailureAction(appParam.getCpFailureAction());
             application.setCpFailureRateInterval(appParam.getCpFailureRateInterval());
             application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
-            application.setFlinkClusterId(appParam.getFlinkClusterId());
             application.setTags(appParam.getTags());
+
+            if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum()) ||
+                ExecutionMode.YARN_PER_JOB.equals(application.getExecutionModeEnum()) ||
+                ExecutionMode.KUBERNETES_NATIVE_APPLICATION.equals(application.getExecutionModeEnum())) {
+                application.setFlinkClusterId(null);
+            }
 
             // Flink Sql job...
             if (application.isFlinkSqlJob()) {
