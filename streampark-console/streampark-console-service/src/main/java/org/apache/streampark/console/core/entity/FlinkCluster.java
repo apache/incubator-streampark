@@ -117,18 +117,18 @@ public class FlinkCluster implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public Map<String, Object> getOptionMap() {
-        if (StringUtils.isNotEmpty(this.options)) {
-            Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
-            if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
-                map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
-                if (StringUtils.isNotEmpty(this.yarnQueue)) {
-                    map.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.yarnQueue);
-                }
-            }
-            map.entrySet().removeIf(entry -> entry.getValue() == null);
-            return map;
+        if (StringUtils.isBlank(this.options)) {
+            return Collections.emptyMap();
         }
-        return Collections.emptyMap();
+        Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
+        if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
+            map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
+            if (StringUtils.isNotEmpty(this.yarnQueue)) {
+                map.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.yarnQueue);
+            }
+        }
+        map.entrySet().removeIf(entry -> entry.getValue() == null);
+        return map;
     }
 
     @JsonIgnore
@@ -152,10 +152,16 @@ public class FlinkCluster implements Serializable {
                 return false;
             }
             String[] array = address.split(",");
-            for (String url : array) {
+
+            //1) check url is Legal
+            for (String url: array) {
                 if (!CommonUtils.isLegalUrl(url)) {
                     return false;
                 }
+            }
+
+            // 2) check connection
+            for (String url : array) {
                 try {
                     String restUrl;
                     if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
