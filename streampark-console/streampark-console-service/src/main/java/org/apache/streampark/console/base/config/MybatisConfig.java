@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -79,7 +80,7 @@ public class MybatisConfig {
             properties.setTypeAliasesPackage("org.apache.streampark.console.*.entity");
             properties.setMapperLocations(new String[]{"classpath:mapper/*/*.xml"});
             MybatisConfiguration mybatisConfiguration = new MybatisConfiguration();
-            mybatisConfiguration.setJdbcTypeForNull(null);
+            mybatisConfiguration.setJdbcTypeForNull(JdbcType.NULL);
             properties.setConfiguration(mybatisConfiguration);
             GlobalConfig globalConfig = GlobalConfigUtils.getGlobalConfig(mybatisConfiguration);
             GlobalConfig.DbConfig dbConfig = globalConfig.getDbConfig();
