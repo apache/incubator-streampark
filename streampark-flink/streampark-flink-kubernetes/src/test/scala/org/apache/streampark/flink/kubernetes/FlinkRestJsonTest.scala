@@ -310,11 +310,13 @@ class FlinkRestJsonTest {
           if (a.getPath == s"/jobs/$jobId/exceptions") {
             Try(parse(a.getJson)) match {
               case Success(ok) =>
-                val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)
-                val file = new File(path)
                 val log = (ok \ "root-exception").extractOpt[String].orNull
-                Files.asCharSink(file, Charsets.UTF_8).write(log)
-                println(" error path: " + path)
+                if (log != null) {
+                  val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)
+                  val file = new File(path)
+                  Files.asCharSink(file, Charsets.UTF_8).write(log)
+                  println(" error path: " + path)
+                }
               case _ =>
             }
           } else if (a.getPath == "/jobs/overview") {
