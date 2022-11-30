@@ -817,6 +817,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 case KUBERNETES_NATIVE_SESSION:
                     application.setFlinkClusterId(appParam.getFlinkClusterId());
                     break;
+                default:
+                    break;
             }
 
             // Flink Sql job...
