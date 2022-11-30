@@ -806,10 +806,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
             application.setTags(appParam.getTags());
 
-            if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum()) ||
-                ExecutionMode.YARN_PER_JOB.equals(application.getExecutionModeEnum()) ||
-                ExecutionMode.KUBERNETES_NATIVE_APPLICATION.equals(application.getExecutionModeEnum())) {
-                application.setFlinkClusterId(null);
+            switch (appParam.getExecutionModeEnum()) {
+                case YARN_APPLICATION:
+                case YARN_PER_JOB:
+                case KUBERNETES_NATIVE_APPLICATION:
+                    application.setFlinkClusterId(null);
+                    break;
+                case REMOTE:
+                case YARN_SESSION:
+                case KUBERNETES_NATIVE_SESSION:
+                    application.setFlinkClusterId(appParam.getFlinkClusterId());
+                    break;
+                default:
+                    break;
             }
 
             // Flink Sql job...
