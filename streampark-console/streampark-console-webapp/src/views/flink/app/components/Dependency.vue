@@ -29,7 +29,7 @@
   import { getMonacoOptions } from '../data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  import { Select, Tabs, Alert, Tag, Space } from 'ant-design-vue';
+  import { Select, Tabs, Alert, Tag, Space, Form } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchUpload } from '/@/api/flink/app/app';
   import { fetchUploadJars } from '/@/api/flink/app/flinkHistory';
@@ -280,21 +280,27 @@
     </TabPane>
     <TabPane key="jar" tab="Upload Jar">
       <template v-if="isK8sExecMode(formModel?.executionMode)">
-        <Select
-          mode="multiple"
-          placeholder="Search History Uploads"
-          v-model:value="selectedHistoryUploadJars"
-          @select="addHistoryUploadJar"
-          @deselect="deleteHistoryUploadJar"
-          style="width: 100%"
-        >
-          <SelectOption v-for="item in filteredHistoryUploadJarsOptions" :key="item" :value="item">
-            <template #suffixIcon>
-              <Icon icon="ant-design:file-done-outlined" />
-            </template>
-            {{ item }}
-          </SelectOption>
-        </Select>
+        <Form.ItemRest>
+          <Select
+            mode="multiple"
+            placeholder="Search History Uploads"
+            v-model:value="selectedHistoryUploadJars"
+            @select="addHistoryUploadJar"
+            @deselect="deleteHistoryUploadJar"
+            style="width: 100%"
+          >
+            <SelectOption
+              v-for="item in filteredHistoryUploadJarsOptions"
+              :key="item"
+              :value="item"
+            >
+              <template #suffixIcon>
+                <Icon icon="ant-design:file-done-outlined" />
+              </template>
+              {{ item }}
+            </SelectOption>
+          </Select>
+        </Form.ItemRest>
       </template>
 
       <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
