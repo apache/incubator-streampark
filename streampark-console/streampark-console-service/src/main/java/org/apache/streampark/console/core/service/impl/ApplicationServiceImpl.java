@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import static org.apache.streampark.common.enums.StorageType.LFS;
 import static org.apache.streampark.console.core.task.K8sFlinkTrackMonitorWrapper.Bridge.toTrackId;
 import static org.apache.streampark.console.core.task.K8sFlinkTrackMonitorWrapper.isKubernetesApp;
 
@@ -29,6 +30,7 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
+import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
@@ -127,6 +129,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -152,6 +155,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
 
     private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
+
+    private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
+
+    private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 5,
@@ -550,33 +557,44 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public List<String> getRecentK8sNamespace(Integer defaultHistoryRecordLimit) {
-        return baseMapper.getRecentK8sNamespace(defaultHistoryRecordLimit);
+    public List<String> getRecentK8sNamespace() {
+        return baseMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
     }
 
     @Override
-    public List<String> getRecentK8sClusterId(Integer executionMode, Integer defaultHistoryRecordLimit) {
-        return baseMapper.getRecentK8sClusterId(executionMode, defaultHistoryRecordLimit);
+    public List<String> getRecentK8sClusterId(Integer executionMode) {
+        return baseMapper.getRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
     }
 
     @Override
-    public List<String> getRecentFlinkBaseImage(Integer defaultHistoryRecordLimit) {
-        return baseMapper.getRecentFlinkBaseImage(defaultHistoryRecordLimit);
+    public List<String> getRecentFlinkBaseImage() {
+        return baseMapper.getRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
     }
 
     @Override
-    public List<String> getRecentK8sPodTemplate(Integer defaultHistoryPodTmplRecordLimit) {
-        return baseMapper.getRecentK8sPodTemplate(defaultHistoryPodTmplRecordLimit);
+    public List<String> getRecentK8sPodTemplate() {
+        return baseMapper.getRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
     }
 
     @Override
-    public List<String> getRecentK8sJmPodTemplate(Integer defaultHistoryPodTmplRecordLimit) {
-        return baseMapper.getRecentK8sJmPodTemplate(defaultHistoryPodTmplRecordLimit);
+    public List<String> getRecentK8sJmPodTemplate() {
+        return baseMapper.getRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
     }
 
     @Override
-    public List<String> getRecentK8sTmPodTemplate(Integer defaultHistoryPodTmplRecordLimit) {
-        return baseMapper.getRecentK8sTmPodTemplate(defaultHistoryPodTmplRecordLimit);
+    public List<String> getRecentK8sTmPodTemplate() {
+        return baseMapper.getRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+    }
+
+    @Override
+    public List<String> historyUploadJars() {
+        return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
+            .filter(File::isFile)
+            .sorted(Comparator.comparingLong(File::lastModified).reversed())
+            .map(File::getName)
+            .filter(fn -> fn.endsWith(".jar"))
+            .limit(DEFAULT_HISTORY_RECORD_LIMIT)
+            .collect(Collectors.toList());
     }
 
     @Override
