@@ -550,6 +550,36 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public List<String> getRecentK8sNamespace(Integer defaultHistoryRecordLimit) {
+        return baseMapper.getRecentK8sNamespace(defaultHistoryRecordLimit);
+    }
+
+    @Override
+    public List<String> getRecentK8sClusterId(Integer executionMode, Integer defaultHistoryRecordLimit) {
+        return baseMapper.getRecentK8sClusterId(executionMode, defaultHistoryRecordLimit);
+    }
+
+    @Override
+    public List<String> getRecentFlinkBaseImage(Integer defaultHistoryRecordLimit) {
+        return baseMapper.getRecentFlinkBaseImage(defaultHistoryRecordLimit);
+    }
+
+    @Override
+    public List<String> getRecentK8sPodTemplate(Integer defaultHistoryPodTmplRecordLimit) {
+        return baseMapper.getRecentK8sPodTemplate(defaultHistoryPodTmplRecordLimit);
+    }
+
+    @Override
+    public List<String> getRecentK8sJmPodTemplate(Integer defaultHistoryPodTmplRecordLimit) {
+        return baseMapper.getRecentK8sJmPodTemplate(defaultHistoryPodTmplRecordLimit);
+    }
+
+    @Override
+    public List<String> getRecentK8sTmPodTemplate(Integer defaultHistoryPodTmplRecordLimit) {
+        return baseMapper.getRecentK8sTmPodTemplate(defaultHistoryPodTmplRecordLimit);
+    }
+
+    @Override
     public String getYarnName(Application appParam) {
         String[] args = new String[2];
         args[0] = "--name";

@@ -101,4 +101,16 @@ public interface ApplicationService extends IService<Application> {
     boolean existsRunningJobByClusterId(Long clusterId);
 
     boolean existsJobByClusterId(Long id);
+
+    List<String> getRecentK8sNamespace(Integer defaultHistoryRecordLimit);
+
+    List<String> getRecentK8sClusterId(Integer executionMode, Integer defaultHistoryRecordLimit);
+
+    List<String> getRecentFlinkBaseImage(Integer defaultHistoryRecordLimit);
+
+    List<String> getRecentK8sPodTemplate(Integer defaultHistoryPodTmplRecordLimit);
+
+    List<String> getRecentK8sJmPodTemplate(Integer defaultHistoryPodTmplRecordLimit);
+
+    List<String> getRecentK8sTmPodTemplate(Integer defaultHistoryPodTmplRecordLimit);
 }
