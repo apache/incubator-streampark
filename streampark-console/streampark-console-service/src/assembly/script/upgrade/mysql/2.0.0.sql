@@ -79,7 +79,9 @@ alter table `t_flink_project`
     add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
     add index `inx_team` (`team_id`) using btree;
 
-alter table `t_flink_cluster` add column `dynamic_properties` text comment 'allows specifying multiple generic configuration options' after `flink_image`;
+alter table `t_flink_cluster`
+    drop column `flame_graph`,
+    add column `dynamic_properties` text comment 'allows specifying multiple generic configuration options' after `flink_image`;
 
 -- change `update_time` to `modify_time`
 alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime not null default current_timestamp on update current_timestamp;

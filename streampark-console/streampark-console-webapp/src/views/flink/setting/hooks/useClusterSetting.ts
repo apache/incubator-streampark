@@ -34,7 +34,7 @@ import {
   fetchK8sNamespaces,
   fetchSessionClusterIds,
 } from '/@/api/flink/app/flinkHistory';
-import { handleFormValue, isSessionMode } from '../../app/utils';
+import { handleFormValue } from '../../app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { ClusterAddTypeEnum } from '/@/enums/appEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
@@ -89,6 +89,22 @@ export const useClusterSetting = () => {
       }
     }
   }
+
+  function isAddExistYarnSession(value: Recordable) {
+    return (
+      value.executionMode == ExecModeEnum.YARN_SESSION &&
+      value.addType == ClusterAddTypeEnum.ADD_EXISTING
+    );
+  }
+
+  // session mode
+  function isShowInSessionMode(value: Recordable): boolean {
+    if (value.executionMode == ExecModeEnum.YARN_SESSION) {
+      return value.addType == ClusterAddTypeEnum.ADD_NEW;
+    }
+    return value.executionMode == ExecModeEnum.KUBERNETES_SESSION;
+  }
+
   const getClusterSchema = computed((): FormSchema[] => {
     return [
       {
@@ -128,17 +144,9 @@ export const useClusterSetting = () => {
         rules: [{ required: true, message: 'Flink Version is required' }],
       },
       {
-        field: 'yarnQueue',
-        label: 'Yarn Queue',
-        component: 'Input',
-        componentProps: {
-          placeholder: 'Please enter yarn queue',
-        },
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
-      },
-      {
         field: 'addType',
         label: t('flink.setting.cluster.form.addType'),
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         component: 'Select',
         defaultValue: ClusterAddTypeEnum.ADD_EXISTING,
         componentProps: {
@@ -157,6 +165,17 @@ export const useClusterSetting = () => {
         },
       },
       {
+        field: 'yarnQueue',
+        label: 'Yarn Queue',
+        component: 'Input',
+        componentProps: {
+          placeholder: 'Please enter yarn queue',
+        },
+        ifShow: ({ values }) =>
+          values.executionMode == ExecModeEnum.YARN_SESSION &&
+          values.addType == ClusterAddTypeEnum.ADD_NEW,
+      },
+      {
         field: 'address',
         label: 'Address',
         component: 'Input',
@@ -168,19 +187,18 @@ export const useClusterSetting = () => {
                 : 'Please enter cluster address,  e.g: http://host:port',
           };
         },
-        ifShow: ({ values }) => values.addType == ClusterAddTypeEnum.ADD_EXISTING,
+        ifShow: ({ values }) =>
+          isAddExistYarnSession(values) || values.executionMode == ExecModeEnum.REMOTE,
         rules: [{ required: true, message: t('flink.setting.cluster.required.address') }],
       },
       {
         field: 'clusterId',
-        label: 'Yarn Session ClusterId',
+        label: 'Yarn Session Cluster',
         component: 'Input',
         componentProps: {
-          placeholder: 'Please enter Yarn Session clusterId',
+          placeholder: 'Please enter Yarn Session cluster',
         },
-        ifShow: ({ values }) =>
-          values.addType == ClusterAddTypeEnum.ADD_EXISTING &&
-          values.executionMode == ExecModeEnum.YARN_SESSION,
+        ifShow: ({ values }) => isAddExistYarnSession(values),
         rules: [{ required: true, message: t('flink.setting.cluster.required.clusterId') }],
       },
       {
@@ -254,15 +272,15 @@ export const useClusterSetting = () => {
       {
         field: 'resolveOrder',
         label: 'Resolve Order',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         componentProps: { placeholder: 'classloader.resolve-order', options: resolveOrder },
-        rules: [{ required: true, message: 'Resolve Order is required', type: 'number' }],
+        rules: [{ message: 'Resolve Order is required', type: 'number' }],
       },
       {
         field: 'slot',
         label: 'Task Slots',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'InputNumber',
         componentProps: {
           placeholder: 'Number of slots per TaskManager',
@@ -274,14 +292,14 @@ export const useClusterSetting = () => {
       {
         field: 'totalOptions',
         label: 'Total Memory Options',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         render: (renderCallbackParams) => renderTotalMemory(renderCallbackParams),
       },
       {
         field: 'totalItem',
         label: 'totalItem',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         renderColContent: ({ model, field }) =>
           renderOptionsItems(model, 'totalOptions', field, '.memory', true),
@@ -289,7 +307,7 @@ export const useClusterSetting = () => {
       {
         field: 'jmOptions',
         label: 'JM Memory Options',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         componentProps: {
           showSearch: true,
@@ -304,7 +322,7 @@ export const useClusterSetting = () => {
       {
         field: 'jmOptionsItem',
         label: 'jmOptionsItem',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         renderColContent: ({ model, field }) =>
           renderOptionsItems(model, 'jmOptions', field, 'jobmanager.memory.'),
@@ -312,7 +330,7 @@ export const useClusterSetting = () => {
       {
         field: 'tmOptions',
         label: 'TM Memory Options',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         componentProps: {
           showSearch: true,
@@ -327,7 +345,7 @@ export const useClusterSetting = () => {
       {
         field: 'tmOptionsItem',
         label: 'tmOptionsItem',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         renderColContent: ({ model, field }) =>
           renderOptionsItems(model, 'tmOptions', field, 'taskmanager.memory.'),
@@ -335,7 +353,7 @@ export const useClusterSetting = () => {
       {
         field: 'dynamicProperties',
         label: 'Dynamic Properties',
-        ifShow: ({ values }) => isSessionMode(values.executionMode),
+        ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Input',
         render: (renderCallbackParams) => renderDynamicProperties(renderCallbackParams),
       },
@@ -353,7 +371,6 @@ export const useClusterSetting = () => {
   function handleSubmitParams(values: Recordable) {
     const options = handleFormValue(values);
     const params = {
-      clusterId: values.clusterId || null,
       clusterName: values.clusterName,
       executionMode: values.executionMode,
       versionId: values.versionId,
@@ -366,17 +383,23 @@ export const useClusterSetting = () => {
         });
         return params;
       case ExecModeEnum.YARN_SESSION:
-        Object.assign(params, {
-          options: JSON.stringify(options),
-          yarnQueue: values.yarnQueue || 'default',
-          dynamicProperties: values.dynamicProperties,
-          resolveOrder: values.resolveOrder,
-          address: values.address,
-          flameGraph: values.flameGraph,
-        });
+        if (values.addType === ClusterAddTypeEnum.ADD_EXISTING) {
+          Object.assign(params, {
+            clusterId: values.clusterId,
+            address: values.address,
+          });
+        } else {
+          Object.assign(params, {
+            options: JSON.stringify(options),
+            yarnQueue: values.yarnQueue || 'default',
+            dynamicProperties: values.dynamicProperties,
+            resolveOrder: values.resolveOrder,
+          });
+        }
         return params;
       case ExecModeEnum.KUBERNETES_SESSION:
         Object.assign(params, {
+          clusterId: values.clusterId,
           options: JSON.stringify(options),
           dynamicProperties: values.dynamicProperties,
           resolveOrder: values.resolveOrder,
@@ -386,7 +409,6 @@ export const useClusterSetting = () => {
           k8sConf: values.k8sConf,
           flinkImage: values.flinkImage || null,
           address: values.address,
-          flameGraph: values.flameGraph,
         });
         return params;
       default:

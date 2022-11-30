@@ -24,7 +24,7 @@ import org.apache.ibatis.annotations.Param;
 
 public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
 
-    Boolean existsByClusterId(@Param("clusterId") String clusterId);
+    Boolean existsByClusterId(@Param("clusterId") String clusterId, @Param("id") Long id);
 
     Boolean existsByClusterName(@Param("clusterName") String clusterName, @Param("id") Long id);
 

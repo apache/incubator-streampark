@@ -226,6 +226,7 @@ public class Application implements Serializable {
     /**
      * the cluster id bound to the task in remote mode
      */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Long flinkClusterId;
 
     private String description;
@@ -296,7 +297,6 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
     private transient String yarnQueue;
-    private transient String yarnSessionClusterId;
 
     /**
      * Flink Web UI Url
@@ -482,7 +482,10 @@ public class Application implements Serializable {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public Map<String, Object> getOptionMap() {
-        Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
+        if (StringUtils.isBlank(this.options)) {
+            return Collections.emptyMap();
+        }
+        Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
         map.entrySet().removeIf(entry -> entry.getValue() == null);
         return map;
     }
@@ -664,10 +667,6 @@ public class Application implements Serializable {
         if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
             if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
-            }
-        } else if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
-            if (StringUtils.isNotEmpty(appParam.getYarnSessionClusterId())) {
-                hotParams.put(ConfigConst.KEY_YARN_APP_ID(), appParam.getYarnSessionClusterId());
             }
         }
         if (!hotParams.isEmpty()) {

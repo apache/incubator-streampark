@@ -88,5 +88,4 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     super.doCancel(cancelRequest, flinkConfig)
   }
 
-
 }

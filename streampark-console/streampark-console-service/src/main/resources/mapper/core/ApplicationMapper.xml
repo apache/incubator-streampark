@@ -32,6 +32,7 @@
         <result column="app_id" jdbcType="VARCHAR" property="appId"/>
         <result column="version_id" jdbcType="BIGINT" property="versionId"/>
         <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
+        <result column="flink_cluster_id" jdbcType="BIGINT" property="flinkClusterId"/>
         <result column="flink_image" jdbcType="VARCHAR" property="flinkImage"/>
         <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="app_type" jdbcType="INTEGER" property="appType"/>
@@ -95,6 +96,21 @@
         select count(1)
         from t_flink_app
         where job_name = #{jobName}
+        limit 1
+    </select>
+
+    <select id="existsJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+        select count(1)
+        from t_flink_app
+        where flink_cluster_id = #{clusterId}
+        limit 1
+    </select>
+
+    <select id="existsRunningJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+        select count(1)
+        from t_flink_app
+        where flink_cluster_id = #{clusterId}
+        and state = 5
         limit 1
     </select>
 

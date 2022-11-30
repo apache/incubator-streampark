@@ -31,7 +31,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 case class DeployRequest(flinkVersion: FlinkVersion,
                          clusterId: String,
                          executionMode: ExecutionMode,
-                         flameGraph: JavaMap[String, java.io.Serializable],
                          properties: JavaMap[String, Any],
                          @Nullable k8sDeployParam: KubernetesDeployParam) {
 

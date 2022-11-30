@@ -21,7 +21,7 @@ import org.apache.streampark.common.fs.LfsOperator
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
 import java.io.File
-import java.util.{Map => JavaMap, Optional => JOption}
+import java.util.{Collections, Map => JavaMap, Optional => JOption}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
@@ -117,7 +117,7 @@ object HadoopConfigUtils {
           .filter(f => HADOOP_CLIENT_CONF_FILES.contains(f.getName))
           .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
           .toMap.asJava)
-      .getOrElse(Maps.newHashMap[String, String])
+      .getOrElse(Collections.emptyMap[String, String]())
 
   /**
    * Read system hive config to Map
@@ -129,7 +129,7 @@ object HadoopConfigUtils {
           .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
           .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
           .toMap.asJava)
-      .getOrElse(Maps.newHashMap[String, String])
+      .getOrElse(Collections.emptyMap[String, String]())
 
   }
 

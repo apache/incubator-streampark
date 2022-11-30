@@ -311,7 +311,6 @@ create table "public"."t_flink_cluster" (
   "dynamic_properties" text collate "pg_catalog"."default",
   "k8s_rest_exposed_type" int2 default 2,
   "k8s_hadoop_integration" boolean default false,
-  "flame_graph" boolean default false,
   "k8s_conf" varchar(255) collate "pg_catalog"."default",
   "resolve_order" int4,
   "exception" text collate "pg_catalog"."default",
