@@ -130,7 +130,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
          |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
          |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
-         |    flameGraph       : ${deployRequest.flameGraph != null}
          |    properties       : ${deployRequest.properties.mkString(" ")}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
@@ -158,7 +157,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         client = clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
       }
       if (client.getWebInterfaceURL != null) {
-        DeployResponse(client.getWebInterfaceURL, client.getClusterId.toString)
+        DeployResponse(client.getWebInterfaceURL, client.getClusterId)
       } else {
         null
       }

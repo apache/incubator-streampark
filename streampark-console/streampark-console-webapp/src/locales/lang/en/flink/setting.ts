@@ -89,7 +89,7 @@ export default {
     },
     required: {
       address: 'cluster address is required',
-      clusterId: 'Yarn Session ClusterId is required',
+      clusterId: 'Yarn Session Cluster is required',
     },
   },
   env: {

@@ -461,7 +461,6 @@ create table `t_flink_cluster` (
   `dynamic_properties` text comment 'allows specifying multiple generic configuration options',
   `k8s_rest_exposed_type` tinyint default 2 comment 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)',
   `k8s_hadoop_integration` tinyint default 0,
-  `flame_graph` tinyint default 0 comment 'flameGraph enable，default disable',
   `k8s_conf` varchar(255) default null comment 'the path where the k8s configuration file is located',
   `resolve_order` int default null,
   `exception` text comment 'exception information',

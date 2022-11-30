@@ -88,7 +88,7 @@ export default {
     },
     required: {
       address: '必须填写集群地址',
-      clusterId: 'Yarn Session ClusterId 为必填项',
+      clusterId: 'Yarn Session Cluster 为必填项',
     },
   },
   env: {

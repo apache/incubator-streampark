@@ -34,14 +34,18 @@
   const logTime = ref<string>('');
   const getLogLoading = ref<boolean>(false);
   const app = reactive<Recordable>({});
+  let skipLineNum = 0;
+  let logContent = '';
 
   const [registerModal, { changeLoading, closeModal }] = useModalInner((data) => {
     data && onReceiveModalData(data);
   });
 
-  const { setContent, logRef, handleRevealLine } = useLog();
+  const { setContent, logRef, handleRevealLine, getLineCount } = useLog();
 
   function onReceiveModalData(data) {
+    skipLineNum = 0;
+    logContent = '';
     Object.assign(app, unref(data.app));
     changeLoading(true);
     refreshLog();
@@ -63,13 +67,24 @@
         namespace: app.k8sNamespace,
         jobName: app.jobName,
         jobId: app.jobId,
-        limit: 100000000,
-        skipLineNum: 0,
+        limit: 100,
+        skipLineNum,
       });
       const status = data.status || 'error';
       if (status === 'success') {
-        setContent(data.data);
-        handleRevealLine();
+        if (data.data) {
+          logContent += data.data;
+          setContent(logContent);
+          handleRevealLine();
+          setTimeout(() => {
+            const currentLineCount = getLineCount() - 1;
+            if (currentLineCount < skipLineNum + 100) {
+              skipLineNum = currentLineCount;
+            } else {
+              skipLineNum += 100;
+            }
+          }, 500);
+        }
         logTime.value = formatToDateTime(new Date());
       }
     } catch (error) {

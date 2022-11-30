@@ -17,19 +17,19 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.ThreadUtils;
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
+import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
-import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkTrackingTask;
 import org.apache.streampark.flink.submit.FlinkSubmitter;
 import org.apache.streampark.flink.submit.bean.DeployRequest;
@@ -49,10 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -80,66 +77,76 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     @Autowired
     private CommonService commonService;
 
+
     @Autowired
-    private SettingService settingService;
+    private ApplicationService applicationService;
 
     @Override
-    public String check(FlinkCluster cluster) {
-        if (null == cluster.getClusterName() || null == cluster.getExecutionMode()) {
-            return "error";
-        }
-        //1) Check if name is duplicate, if it already exists
+    public ResponseResult check(FlinkCluster cluster) {
+        ResponseResult result = new ResponseResult();
+        result.setStatus(0);
+
+        //1) Check name is already exists
         Boolean existsByClusterName = this.existsByClusterName(cluster.getClusterName(), cluster.getId());
         if (existsByClusterName) {
-            return "exists";
-        }
-
-        if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum())) {
-            //2) Check if the connection can be made to
-            return cluster.verifyConnection() ? "success" : "fail";
-        }
-        return "success";
-    }
-
-    @Override
-    public ResponseResult create(FlinkCluster flinkCluster) {
-        ResponseResult result = new ResponseResult();
-        if (StringUtils.isBlank(flinkCluster.getClusterName())) {
-            result.setMsg("clusterName can't empty!");
-            result.setStatus(0);
+            result.setMsg("clusterName is already exists,please check!");
+            result.setStatus(1);
             return result;
         }
-        String clusterId = flinkCluster.getClusterId();
-        if (StringUtils.isNoneBlank(clusterId)) {
-            Boolean existsByClusterId = this.existsByClusterId(clusterId);
+
+        //2) Check target-cluster is already exists
+        String clusterId = cluster.getClusterId();
+        if (StringUtils.isNotEmpty(clusterId)) {
+            Boolean existsByClusterId = this.existsByClusterId(clusterId, cluster.getId());
             if (existsByClusterId) {
-                result.setMsg("the clusterId" + clusterId + "is already exists,please check!");
-                result.setStatus(0);
+                result.setMsg("the clusterId " + clusterId + " is already exists,please check!");
+                result.setStatus(2);
                 return result;
             }
         }
-        flinkCluster.setUserId(commonService.getUserId());
-        flinkCluster.setCreateTime(new Date());
-        // remote mode directly set STARTED
-        if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
-            flinkCluster.setClusterState(ClusterState.STARTED.getValue());
-        } else {
-            flinkCluster.setClusterState(ClusterState.CREATED.getValue());
+
+        // 3) Check connection
+        if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum())) {
+            if (!cluster.verifyClusterConnection()) {
+                result.setMsg("the remote cluster connection failed, please check!");
+                result.setStatus(3);
+                return result;
+            }
+        } else if (ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum())) {
+            if (cluster.getId() == null && !StringUtils.isAllBlank(cluster.getAddress(), cluster.getClusterId())) {
+                if (!cluster.verifyClusterConnection()) {
+                    result.setMsg("the flink cluster connection failed, please check!");
+                    result.setStatus(4);
+                    return result;
+                }
+            }
         }
-        try {
-            save(flinkCluster);
-            result.setStatus(1);
-        } catch (Exception e) {
-            result.setStatus(0);
-            result.setMsg("create cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
-        }
+
         return result;
     }
 
     @Override
+    public Boolean create(FlinkCluster flinkCluster) {
+        flinkCluster.setUserId(commonService.getUserId());
+        flinkCluster.setCreateTime(new Date());
+        if (ExecutionMode.YARN_SESSION.equals(flinkCluster.getExecutionModeEnum())) {
+            if (StringUtils.isAllBlank(flinkCluster.getAddress(), flinkCluster.getClusterId())) {
+                flinkCluster.setClusterState(ClusterState.CREATED.getValue());
+            } else {
+                flinkCluster.setClusterState(ClusterState.STARTED.getValue());
+            }
+        } else if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
+            flinkCluster.setClusterState(ClusterState.STARTED.getValue());
+        } else {
+            flinkCluster.setClusterState(ClusterState.CREATED.getValue());
+        }
+        return save(flinkCluster);
+    }
+
+    @Override
     @Transactional(rollbackFor = {Exception.class})
-    public ResponseResult start(FlinkCluster flinkCluster) {
-        ResponseResult result = new ResponseResult();
+    public void start(FlinkCluster cluster) {
+        FlinkCluster flinkCluster = getById(cluster.getId());
         LambdaUpdateWrapper<FlinkCluster> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
         try {
@@ -158,67 +165,68 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                         flinkCluster.getK8sRestExposedTypeEnum());
                     break;
                 default:
-                    result.setMsg("the ExecutionModeEnum " + executionModeEnum.getName() + "can't start!");
-                    result.setStatus(0);
-                    return result;
+                    throw new ApiAlertException("the ExecutionModeEnum " + executionModeEnum.getName() + "can't start!");
             }
             FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
             DeployRequest deployRequest = new DeployRequest(
                 flinkEnv.getFlinkVersion(),
                 flinkCluster.getClusterId(),
                 executionModeEnum,
-                flinkCluster.getFlameGraph() ? getFlameGraph(flinkCluster) : null,
                 flinkCluster.getProperties(),
                 kubernetesDeployParam
             );
             log.info("deploy cluster request " + deployRequest);
             Future<DeployResponse> future = executorService.submit(() -> FlinkSubmitter.deploy(deployRequest));
             DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
-            if (null != deployResponse) {
-                if (deployResponse.message() == null) {
-                    updateWrapper.set(FlinkCluster::getClusterId, deployResponse.clusterId());
-                    updateWrapper.set(FlinkCluster::getAddress, deployResponse.address());
-                    updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STARTED.getValue());
-                    updateWrapper.set(FlinkCluster::getException, null);
-                    update(updateWrapper);
-                    result.setStatus(1);
-                    FlinkTrackingTask.removeFlinkCluster(flinkCluster);
-                } else {
-                    result.setStatus(0);
-                    result.setMsg("deploy cluster failed," + deployResponse.message());
-                }
+            if (deployResponse != null) {
+                updateWrapper.set(FlinkCluster::getAddress, deployResponse.address());
+                updateWrapper.set(FlinkCluster::getClusterId, deployResponse.clusterId());
+                updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STARTED.getValue());
+                updateWrapper.set(FlinkCluster::getException, null);
+                update(updateWrapper);
+                FlinkTrackingTask.removeFlinkCluster(flinkCluster);
             } else {
-                result.setStatus(0);
-                result.setMsg("deploy cluster failed, unknown reason，please check you params or StreamPark error log");
+                throw new ApiAlertException("deploy cluster failed, unknown reason，please check you params or StreamPark error log");
             }
-            return result;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STOPED.getValue());
             updateWrapper.set(FlinkCluster::getException, e.toString());
             update(updateWrapper);
-            result.setStatus(0);
-            result.setMsg("deploy cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
-            return result;
+            throw new ApiDetailException(e);
         }
     }
 
     @Override
-    public ResponseResult update(FlinkCluster flinkCluster) {
-        ResponseResult result = new ResponseResult();
+    public void update(FlinkCluster cluster) {
+        FlinkCluster flinkCluster = getById(cluster.getId());
+        flinkCluster.setClusterId(cluster.getClusterId());
+        flinkCluster.setVersionId(cluster.getVersionId());
+        flinkCluster.setClusterName(cluster.getClusterName());
+        flinkCluster.setAddress(cluster.getAddress());
+        flinkCluster.setExecutionMode(cluster.getExecutionMode());
+        flinkCluster.setDynamicProperties(cluster.getDynamicProperties());
+        flinkCluster.setFlinkImage(cluster.getFlinkImage());
+        flinkCluster.setOptions(cluster.getOptions());
+        flinkCluster.setYarnQueue(cluster.getYarnQueue());
+        flinkCluster.setK8sHadoopIntegration(cluster.getK8sHadoopIntegration());
+        flinkCluster.setK8sConf(cluster.getK8sConf());
+        flinkCluster.setK8sNamespace(cluster.getK8sNamespace());
+        flinkCluster.setK8sRestExposedType(cluster.getK8sRestExposedType());
+        flinkCluster.setResolveOrder(cluster.getResolveOrder());
+        flinkCluster.setServiceAccount(cluster.getServiceAccount());
+        flinkCluster.setDescription(cluster.getDescription());
         try {
             updateById(flinkCluster);
-            result.setStatus(1);
         } catch (Exception e) {
-            result.setStatus(0);
-            result.setMsg("update cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
+            throw new ApiDetailException("update cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
         }
-        return result;
     }
 
     @Override
-    public ResponseResult shutdown(FlinkCluster flinkCluster) {
-        ResponseResult result = new ResponseResult();
+    public void shutdown(FlinkCluster cluster) {
+        FlinkCluster flinkCluster = this.getById(cluster.getId());
+        //1) check mode
         ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
         String clusterId = flinkCluster.getClusterId();
         KubernetesDeployParam kubernetesDeployParam = null;
@@ -235,15 +243,35 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                     flinkCluster.getK8sRestExposedTypeEnum());
                 break;
             default:
-                result.setMsg("the ExecutionModeEnum " + executionModeEnum.getName() + "can't shutdown!");
-                result.setStatus(0);
-                return result;
+                throw new ApiAlertException("the ExecutionModeEnum " + executionModeEnum.getName() + "can't shutdown!");
         }
         if (StringUtils.isBlank(clusterId)) {
-            result.setMsg("the clusterId is Empty!");
-            result.setStatus(0);
-            return result;
+            throw new ApiAlertException("the clusterId can not be empty!");
         }
+
+        LambdaUpdateWrapper<FlinkCluster> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
+
+        //2) check cluster is active
+        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum) || ExecutionMode.REMOTE.equals(executionModeEnum)) {
+            if (ClusterState.STARTED.equals(ClusterState.of(flinkCluster.getClusterState()))) {
+                if (!flinkCluster.verifyClusterConnection()) {
+                    updateWrapper.set(FlinkCluster::getClusterState, ClusterState.LOST.getValue());
+                    update(updateWrapper);
+                    throw new ApiAlertException("current cluster is not active, please check");
+                }
+            } else {
+                throw new ApiAlertException("current cluster is not active, please check");
+            }
+        }
+
+        //3) check job if running on cluster
+        boolean existsRunningJob = applicationService.existsRunningJobByClusterId(flinkCluster.getId());
+        if (existsRunningJob) {
+            throw new ApiAlertException("some app is running on this cluster, the cluster cannot be shutdown");
+        }
+
+        //4) shutdown
         FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
         ShutDownRequest stopRequest = new ShutDownRequest(
             flinkEnv.getFlinkVersion(),
@@ -252,33 +280,27 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             kubernetesDeployParam,
             flinkCluster.getProperties()
         );
-        LambdaUpdateWrapper<FlinkCluster> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
+
         try {
             Future<ShutDownResponse> future = executorService.submit(() -> FlinkSubmitter.shutdown(stopRequest));
             ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
-            if (null != shutDownResponse) {
+            if (shutDownResponse != null) {
                 updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STOPED.getValue());
                 update(updateWrapper);
-                result.setStatus(1);
-                return result;
+            } else {
+                throw new ApiAlertException("get shutdown response failed");
             }
-            result.setStatus(1);
-            result.setMsg("clusterId is not exists!");
-            return result;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             updateWrapper.set(FlinkCluster::getException, e.toString());
             update(updateWrapper);
-            result.setStatus(0);
-            result.setMsg("shutdown cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
-            return result;
+            throw new ApiDetailException("shutdown cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
         }
     }
 
     @Override
-    public Boolean existsByClusterId(String clusterId) {
-        return this.baseMapper.existsByClusterId(clusterId);
+    public Boolean existsByClusterId(String clusterId, Long id) {
+        return this.baseMapper.existsByClusterId(clusterId, id);
     }
 
     @Override
@@ -287,35 +309,16 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     @Override
-    public ResponseResult delete(FlinkCluster flinkCluster) {
-        ResponseResult result = new ResponseResult();
-        if (StringUtils.isNoneBlank(flinkCluster.getClusterId())
-            && ClusterState.STARTED.equals(flinkCluster.getClusterStateEnum())
-            && !ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
-            result = shutdown(flinkCluster);
-            if (0 == result.getStatus()) {
-                return result;
-            }
+    public void delete(FlinkCluster cluster) {
+        Long id = cluster.getId();
+        FlinkCluster flinkCluster = getById(id);
+        if (flinkCluster == null) {
+            throw new ApiAlertException("flink cluster not exist, please check.");
         }
-        try {
-            removeById(flinkCluster.getId());
-            result.setStatus(1);
-        } catch (Exception e) {
-            result.setStatus(0);
-            result.setMsg("delete cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
+        if (applicationService.existsJobByClusterId(id)) {
+            throw new ApiAlertException("some app on this cluster, the cluster cannot be delete, please check.");
         }
-        return result;
+        removeById(id);
     }
 
-    private Map<String, Serializable> getFlameGraph(FlinkCluster flinkCluster) {
-        Map<String, Serializable> flameGraph = new HashMap<>(8);
-        flameGraph.put("reporter", "org.apache.streampark.plugin.profiling.reporter.HttpReporter");
-        flameGraph.put("type", ApplicationType.STREAMPARK_FLINK.getType());
-        flameGraph.put("id", flinkCluster.getId());
-        flameGraph.put("url", settingService.getStreamParkAddress().concat("/metrics/report"));
-        flameGraph.put("token", Utils.uuid());
-        flameGraph.put("sampleInterval", 1000 * 60 * 2);
-        flameGraph.put("metricInterval", 1000 * 60 * 2);
-        return flameGraph;
-    }
 }

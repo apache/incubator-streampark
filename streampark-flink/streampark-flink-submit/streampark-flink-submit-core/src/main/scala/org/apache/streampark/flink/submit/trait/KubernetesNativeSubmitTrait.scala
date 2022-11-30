@@ -95,10 +95,9 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(cancelRequest.jobId)
-      val actionResult = cancelJob(cancelRequest, jobID, client)
+      val actionResult = super.cancelJob(cancelRequest, jobID, client)
       IngressController.deleteIngress(cancelRequest.clusterId, cancelRequest.kubernetesNamespace)
       CancelResponse(actionResult)
-
     } catch {
       case e: Exception =>
         logger.error(s"[flink-submit] stop flink job failed, mode=${flinkConfig.get(DeploymentOptions.TARGET)}, cancelRequest=${cancelRequest}")
