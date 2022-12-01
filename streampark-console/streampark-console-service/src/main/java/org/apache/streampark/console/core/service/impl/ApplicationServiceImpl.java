@@ -717,7 +717,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         newApp.setJobName(jobName);
         newApp.setClusterId(ExecutionMode.isSessionMode(oldApp.getExecutionModeEnum()) ? oldApp.getClusterId() : jobName);
-        newApp.setArgs(oldApp.getArgs());
+        newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : oldApp.getArgs());
         newApp.setVersionId(oldApp.getVersionId());
 
         newApp.setFlinkClusterId(oldApp.getFlinkClusterId());
