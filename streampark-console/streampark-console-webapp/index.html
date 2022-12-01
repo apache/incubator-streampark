@@ -34,8 +34,8 @@
 <body>
   <script>
     (() => {
-      var htmlRoot = document.getElementById('htmlRoot');
-      var theme = window.localStorage.getItem('__APP__DARK__MODE__');
+      let htmlRoot = document.getElementById('htmlRoot');
+      let theme = window.localStorage.getItem('__APP__DARK__MODE__');
       if (htmlRoot && theme) {
         htmlRoot.setAttribute('data-theme', theme);
         theme = htmlRoot = null;
@@ -171,12 +171,13 @@
     </style>
     <div class="app-loading">
       <div class="app-loading-wrap">
-        <img src="/resource/img/logo.svg" class="app-loading-logo" alt="Logo" />
         <div class="app-loading-dots">
-          <span class="dot dot-spin"><i></i><i></i><i></i><i></i></span>
-        </div>
-        <div class="app-loading-title">
-          <%= title %>
+          <span class="dot dot-spin">
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+          </span>
         </div>
       </div>
     </div>
