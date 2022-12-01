@@ -143,7 +143,7 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
   def sink[T](stream: DataStream[T], mapper: RedisMapper[T], ttl: Int = Int.MaxValue): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
     require(mapper != null, () => s"redis mapper must not null")
-    require(ttl > 0, () => s"redis ttl must more 0")
+    require(ttl > 0, () => s"redis ttl must greater than 0")
     val sinkFun = (enableCheckpoint, cpMode) match {
       case (false, CheckpointingMode.EXACTLY_ONCE) => throw new IllegalArgumentException("redis sink EXACTLY_ONCE must enable checkpoint")
       case (true, CheckpointingMode.EXACTLY_ONCE) => new Redis2PCSinkFunction[T](config, mapper, ttl)
