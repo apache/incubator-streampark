@@ -36,6 +36,7 @@ import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FlinkUtils;
+import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -1566,7 +1567,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-            properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
+            try {
+                HadoopUtils.yarnClient();
+                properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
+            } catch (Exception e) {
+                // skip
+            }
         }
 
         if (application.getAllowNonRestored()) {

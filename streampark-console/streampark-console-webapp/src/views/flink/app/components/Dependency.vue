@@ -279,7 +279,7 @@
       </div>
     </TabPane>
     <TabPane key="jar" tab="Upload Jar">
-      <template v-if="isK8sExecMode(formModel?.executionMode)">
+      <template v-if="filteredHistoryUploadJarsOptions.length > 0">
         <Form.ItemRest>
           <Select
             mode="multiple"
