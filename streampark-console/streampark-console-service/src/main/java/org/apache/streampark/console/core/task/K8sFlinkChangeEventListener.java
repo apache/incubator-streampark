@@ -100,7 +100,7 @@ public class K8sFlinkChangeEventListener {
         applicationService.updateTracking(newApp);
 
         // email alerts when necessary
-        FlinkAppState state = FlinkAppState.of(app.getState());
+        FlinkAppState state = FlinkAppState.of(newApp.getState());
         if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)
             || FlinkAppState.RESTARTING.equals(state) || FlinkAppState.FINISHED.equals(state)) {
             IngressController.deleteIngress(app.getClusterId(), app.getK8sNamespace());
