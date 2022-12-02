@@ -462,7 +462,7 @@ create table "public"."t_flink_project" (
 )
 ;
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");
-create index "inx_team" on "public"."t_flink_project" using btree (
+create index "inx_team_pro" on "public"."t_flink_project" using btree (
   "team_id" "pg_catalog"."int8_ops" asc nulls last
 );
 
@@ -614,8 +614,8 @@ create table "public"."t_variable" (
   "variable_code" varchar(100) collate "pg_catalog"."default" not null,
   "variable_value" text collate "pg_catalog"."default" not null,
   "description" text collate "pg_catalog"."default" default null,
-  "creator_id" int8 collate "pg_catalog"."default" not null,
-  "team_id" int8 collate "pg_catalog"."default" not null,
+  "creator_id" int8  not null,
+  "team_id" int8  not null,
   "desensitization" boolean not null default false,
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
