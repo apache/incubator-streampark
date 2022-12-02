@@ -49,7 +49,9 @@
   const router = useRouter();
 
   const { Swal, createMessage } = useMessage();
-  const { copy } = useClipboard();
+  const { copy } = useClipboard({
+    legacy:true
+  });
   const { t } = useI18n();
 
   const yarn = ref('');
