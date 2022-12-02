@@ -253,7 +253,7 @@ export const useCreateAndEditSchema = (
           };
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
-        rules: [{ required: true, message: 'Kubernetes clusterId is required' }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder') }],
       },
       {
         field: 'clusterId',

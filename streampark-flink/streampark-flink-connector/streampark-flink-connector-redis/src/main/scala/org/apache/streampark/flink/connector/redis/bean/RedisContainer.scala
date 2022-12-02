@@ -40,7 +40,7 @@ class RedisContainer(container: BahirRedisContainer) {
     val key = mapper.getKeyFromData(input)
     val value = mapper.getValueFromData(input)
     mapper.getCommandDescription.getCommand match {
-      case  RPUSH => transaction match {
+      case RPUSH => transaction match {
         case Some(t) => t.rpush(key, value)
         case _ => this.container.rpush(key, value)
       }

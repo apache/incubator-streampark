@@ -64,7 +64,7 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     handle = k => {
       val value: String = properties
         .remove(k).toString
-      if (value == null && value.isEmpty) DEFAULT_CONNECT_TYPE else value
+      if (value == null || value.isEmpty) DEFAULT_CONNECT_TYPE else value
     }
   )
 
@@ -77,7 +77,7 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     handle = k => {
       val value: String = properties
         .remove(k).toString
-      if (value == null && value.isEmpty) 6379 else value.toInt
+      if (value == null || value.isEmpty) 6379 else value.toInt
     }
   )
 
