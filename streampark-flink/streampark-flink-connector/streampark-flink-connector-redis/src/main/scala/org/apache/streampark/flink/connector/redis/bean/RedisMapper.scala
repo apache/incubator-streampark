@@ -69,7 +69,7 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
     this.scalaValueFun = scalaValueFun
   }
 
-  //for scala
+  //for java
   def this(cmd: RedisCommand,
            additionalKey: String,
            javaKeyFun: TransformFunction[T, String],
