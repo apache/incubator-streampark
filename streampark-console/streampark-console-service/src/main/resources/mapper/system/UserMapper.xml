@@ -71,7 +71,8 @@
             select distinct(user_id) as user_id
             from t_flink_app
             where team_id = #{teamId}
-        ) t on  u.user_id = t.user_id
+        ) t
+        on u.user_id = t.user_id
     </select>
 
     <update id="clearLastTeamByUserId" parameterType="java.lang.Long">

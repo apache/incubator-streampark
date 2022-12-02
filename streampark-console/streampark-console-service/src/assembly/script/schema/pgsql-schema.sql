@@ -284,7 +284,7 @@ create index "inx_state" on "public"."t_flink_app" using btree (
 create index "inx_track" on "public"."t_flink_app" using btree (
   "tracking" "pg_catalog"."int2_ops" asc nulls last
 );
-create index "inx_team" on "public"."t_flink_app" using btree (
+create index "inx_team_app" on "public"."t_flink_app" using btree (
   "team_id" "pg_catalog"."int8_ops" asc nulls last
 );
 
@@ -330,7 +330,6 @@ comment on column "public"."t_flink_cluster"."service_account" is 'k8s service a
 comment on column "public"."t_flink_cluster"."flink_image" is 'flink image';
 comment on column "public"."t_flink_cluster"."dynamic_properties" is 'allows specifying multiple generic configuration options';
 comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)';
-comment on column "public"."t_flink_cluster"."flame_graph" is 'enable the flame graph';
 comment on column "public"."t_flink_cluster"."k8s_conf" is 'the path where the k 8 s configuration file is located';
 comment on column "public"."t_flink_cluster"."exception" is 'exception information';
 comment on column "public"."t_flink_cluster"."cluster_state" is 'cluster status (0: create not started, 1: started, 2: stopped)';
@@ -462,7 +461,7 @@ create table "public"."t_flink_project" (
 )
 ;
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");
-create index "inx_team_pro" on "public"."t_flink_project" using btree (
+create index "inx_team_project" on "public"."t_flink_project" using btree (
   "team_id" "pg_catalog"."int8_ops" asc nulls last
 );
 
