@@ -35,6 +35,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -137,14 +138,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updatePassword(String username, String password) {
-        User user = new User();
+    public void updatePassword(User userParam) {
+        User user = getById(userParam.getUserId());
+        if (user == null) {
+            throw new ApiAlertException("update password failed, user is null");
+        }
+
+        String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
+        if (!StringUtils.equals(user.getPassword(), saltPassword)) {
+            throw new ApiAlertException("update password failed, old password error");
+        }
+
         String salt = ShaHashUtils.getRandomSalt();
-        password = ShaHashUtils.encrypt(salt, password);
+        String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
         user.setSalt(salt);
         user.setPassword(password);
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
-            .eq(User::getUsername, username);
+            .eq(User::getUserId, user.getUserId());
         this.baseMapper.update(user, queryWrapper);
     }
 

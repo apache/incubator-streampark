@@ -46,12 +46,22 @@
         render: () => h(Alert, { type: 'info', message: userStore.getUserInfo?.username }),
       },
       {
-        field: 'password',
-        label: t('sys.login.password'),
+        field: 'oldPassword',
+        label: t('sys.login.oldPassword'),
         component: 'InputPassword',
         itemProps: { hasFeedback: true },
         rules: [
-          { required: true, message: t('sys.login.passwordPlaceholder'), trigger: 'blur' },
+          { required: true, message: t('sys.login.oldPasswordPlaceholder'), trigger: 'blur' },
+          { min: 8, message: t('system.user.form.passwordHelp'), trigger: 'blur' },
+        ],
+      },
+      {
+        field: 'password',
+        label: t('sys.login.newPassword'),
+        component: 'InputPassword',
+        itemProps: { hasFeedback: true },
+        rules: [
+          { required: true, message: t('sys.login.newPasswordPlaceholder'), trigger: 'blur' },
           { min: 8, message: t('system.user.form.passwordHelp'), trigger: 'blur' },
         ],
       },
@@ -84,7 +94,8 @@
       changeOkLoading(true);
       const formValue = await validate();
       await fetchUserPasswordUpdate({
-        username: userStore.getUserInfo?.username,
+        userId: userStore.getUserInfo?.userId,
+        oldPassword: formValue.oldPassword,
         password: formValue.password,
       });
 
@@ -92,7 +103,7 @@
         iconType: 'success',
         title: t('sys.modifyPassword.title'),
         content: t('sys.modifyPassword.success'),
-        okText: t('sys.logoutNow'),
+        okText: t('sys.modifyPassword.logout'),
         okType: 'danger',
         onOk: () => {
           userStore.logout(true);

@@ -137,11 +137,9 @@ public class UserController {
     }
 
     @PutMapping("password")
-    public RestResponse updatePassword(
-        @NotBlank(message = "{required}") String username,
-        @NotBlank(message = "{required}") String password)
+    public RestResponse updatePassword(User user)
         throws Exception {
-        userService.updatePassword(username, password);
+        userService.updatePassword(user);
         return RestResponse.success();
     }
 
