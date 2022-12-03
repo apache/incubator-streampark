@@ -67,7 +67,7 @@ export const useClusterSetting = () => {
   /* check */
   async function handleCheckExecMode(_rule: RuleObject, value: StoreValue) {
     if (value === null || value === undefined || value === '') {
-      return Promise.reject('Execution Mode is required');
+      return Promise.reject(t('flink.setting.cluster.required.executionMode'));
     } else {
       if (value === ExecModeEnum.YARN_SESSION) {
         try {
@@ -76,12 +76,12 @@ export const useClusterSetting = () => {
             return Promise.resolve();
           } else {
             return Promise.reject(
-              'Hadoop environment initialization failed, please check the environment settings',
+              t('flink.setting.cluster.operateMessage.hadoopEnvInitializationFailed'),
             );
           }
         } catch (error) {
           return Promise.reject(
-            'Hadoop environment initialization failed, please check the environment settings',
+            t('flink.setting.cluster.operateMessage.hadoopEnvInitializationFailed'),
           );
         }
       } else {
@@ -109,19 +109,19 @@ export const useClusterSetting = () => {
     return [
       {
         field: 'clusterName',
-        label: 'Cluster Name',
+        label: t('flink.setting.cluster.form.clusterName'),
         component: 'Input',
         componentProps: {
-          placeholder: 'Please enter cluster name',
+          placeholder: t('flink.setting.cluster.placeholder.clusterName'),
         },
         required: true,
       },
       {
         field: 'executionMode',
-        label: 'Execution Mode',
+        label: t('flink.setting.cluster.form.executionMode'),
         component: 'Select',
         componentProps: {
-          placeholder: 'Please enter cluster name',
+          placeholder: t('flink.setting.cluster.placeholder.executionMode'),
           options: [
             { label: 'remote (standalone)', value: ExecModeEnum.REMOTE },
             { label: 'yarn session', value: ExecModeEnum.YARN_SESSION },
@@ -134,14 +134,14 @@ export const useClusterSetting = () => {
       },
       {
         field: 'versionId',
-        label: 'Flink Version',
+        label: t('flink.setting.cluster.form.versionId'),
         component: 'Select',
         componentProps: {
-          placeholder: 'Flink Version',
+          placeholder: t('flink.setting.cluster.placeholder.versionId'),
           options: unref(flinkEnvs),
           fieldNames: { label: 'flinkName', value: 'id', options: 'options' },
         },
-        rules: [{ required: true, message: 'Flink Version is required' }],
+        rules: [{ required: true, message: t('flink.setting.cluster.required.versionId') }],
       },
       {
         field: 'addType',
@@ -166,10 +166,10 @@ export const useClusterSetting = () => {
       },
       {
         field: 'yarnQueue',
-        label: 'Yarn Queue',
+        label: t('flink.setting.cluster.form.yarnQueue'),
         component: 'Input',
         componentProps: {
-          placeholder: 'Please enter yarn queue',
+          placeholder: t('flink.setting.cluster.placeholder.yarnQueue'),
         },
         ifShow: ({ values }) =>
           values.executionMode == ExecModeEnum.YARN_SESSION &&
@@ -177,14 +177,14 @@ export const useClusterSetting = () => {
       },
       {
         field: 'address',
-        label: 'Address',
+        label: t('flink.setting.cluster.form.address'),
         component: 'Input',
         componentProps: ({ formModel }) => {
           return {
             placeholder:
               formModel.executionMode == ExecModeEnum.REMOTE
-                ? "Please enter cluster address, multiple addresses use ',' split e.g: http://host:port,http://host1:port2"
-                : 'Please enter cluster address,  e.g: http://host:port',
+                ? t('flink.setting.cluster.placeholder.addressRemoteMode')
+                : t('flink.setting.cluster.placeholder.addressNoRemoteMode'),
           };
         },
         ifShow: ({ values }) =>
@@ -193,17 +193,17 @@ export const useClusterSetting = () => {
       },
       {
         field: 'clusterId',
-        label: 'Yarn Session Cluster',
+        label: t('flink.setting.cluster.form.yarnSessionClusterId'),
         component: 'Input',
         componentProps: {
-          placeholder: 'Please enter Yarn Session cluster',
+          placeholder: t('flink.setting.cluster.placeholder.yarnSessionClusterId'),
         },
         ifShow: ({ values }) => isAddExistYarnSession(values),
         rules: [{ required: true, message: t('flink.setting.cluster.required.clusterId') }],
       },
       {
         field: 'k8sNamespace',
-        label: 'Kubernetes Namespace',
+        label: t('flink.setting.cluster.form.k8sNamespace'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
@@ -214,7 +214,7 @@ export const useClusterSetting = () => {
       },
       {
         field: 'clusterId',
-        label: 'Kubernetes ClusterId',
+        label: t('flink.setting.cluster.form.k8sClusterId'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         defaultValue: unref(flinkEnvs).filter((v) => v.isDefault)[0],
@@ -226,7 +226,7 @@ export const useClusterSetting = () => {
       },
       {
         field: 'serviceAccount',
-        label: 'Service Account',
+        label: t('flink.setting.cluster.form.serviceAccount'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
@@ -237,53 +237,52 @@ export const useClusterSetting = () => {
       },
       {
         field: 'k8sConf',
-        label: 'Kube Conf File',
+        label: t('flink.setting.cluster.form.k8sConf'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
-            placeholder: '~/.kube/config',
+            placeholder: t('flink.setting.cluster.placeholder.k8sConf'),
             options: historyRecord.k8sConf,
           }),
       },
       {
         field: 'flinkImage',
-        label: 'Flink Base Docker Image',
+        label: t('flink.setting.cluster.form.flinkImage'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
-            placeholder:
-              'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
+            placeholder: t('flink.setting.cluster.placeholder.flinkImage'),
             options: historyRecord.flinkImage,
           }),
-        rules: [{ required: true, message: 'Flink Base Docker Image is required' }],
+        rules: [{ required: true, message: t('flink.setting.cluster.required.flinkImage') }],
       },
       {
         field: 'k8sRestExposedType',
-        label: 'Rest-Service Exposed Type',
+        label: t('flink.setting.cluster.form.k8sRestExposedType'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Select',
         componentProps: {
-          placeholder: 'kubernetes.rest-service.exposed.type',
+          placeholder: t('flink.setting.cluster.placeholder.k8sRestExposedType'),
           options: k8sRestExposedType,
         },
       },
       {
         field: 'resolveOrder',
-        label: 'Resolve Order',
+        label: t('flink.setting.cluster.form.resolveOrder'),
         ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
-        componentProps: { placeholder: 'classloader.resolve-order', options: resolveOrder },
-        rules: [{ message: 'Resolve Order is required', type: 'number' }],
+        componentProps: { placeholder: t('flink.setting.cluster.placeholder.resolveOrder'), options: resolveOrder },
+        rules: [{ message: t('flink.setting.cluster.placeholder.resolveOrder'), type: 'number' }],
       },
       {
         field: 'slot',
-        label: 'Task Slots',
+        label: t('flink.setting.cluster.form.taskSlots'),
         ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'InputNumber',
         componentProps: {
-          placeholder: 'Number of slots per TaskManager',
+          placeholder: t('flink.setting.cluster.placeholder.taskSlots'),
           min: 1,
           step: 1,
           class: '!w-full',
@@ -306,7 +305,7 @@ export const useClusterSetting = () => {
       },
       {
         field: 'jmOptions',
-        label: 'JM Memory Options',
+        label: t('flink.setting.cluster.form.jmOptions'),
         ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         componentProps: {
@@ -314,7 +313,7 @@ export const useClusterSetting = () => {
           allowClear: true,
           mode: 'multiple',
           maxTagCount: 2,
-          placeholder: 'Please select the resource parameters to set',
+          placeholder: t('flink.setting.cluster.placeholder.jmOptions'),
           fieldNames: { label: 'name', value: 'key', options: 'options' },
           options: optionData.filter((x) => x.group === 'jobmanager-memory'),
         },
@@ -329,7 +328,7 @@ export const useClusterSetting = () => {
       },
       {
         field: 'tmOptions',
-        label: 'TM Memory Options',
+        label: t('flink.setting.cluster.form.tmOptions'),
         ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
         componentProps: {
@@ -337,7 +336,7 @@ export const useClusterSetting = () => {
           allowClear: true,
           mode: 'multiple',
           maxTagCount: 2,
-          placeholder: 'Please select the resource parameters to set',
+          placeholder: t('flink.setting.cluster.placeholder.tmOptions'),
           fieldNames: { label: 'name', value: 'key', options: 'options' },
           options: optionData.filter((x) => x.group === 'taskmanager-memory'),
         },
@@ -352,18 +351,18 @@ export const useClusterSetting = () => {
       },
       {
         field: 'dynamicProperties',
-        label: 'Dynamic Properties',
+        label: t('flink.setting.cluster.form.dynamicProperties'),
         ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Input',
         render: (renderCallbackParams) => renderDynamicProperties(renderCallbackParams),
       },
       {
         field: 'description',
-        label: 'Description',
+        label: t('flink.setting.cluster.form.clusterDescription'),
         component: 'InputTextArea',
         componentProps: {
           rows: 4,
-          placeholder: 'Please enter description for this application',
+          placeholder: t('flink.setting.cluster.placeholder.clusterDescription'),
         },
       },
     ];

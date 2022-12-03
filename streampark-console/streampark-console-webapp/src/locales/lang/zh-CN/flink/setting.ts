@@ -15,6 +15,46 @@
  * limitations under the License.
  */
 export default {
+  settingTab: {
+    systemSetting: '系统设置',
+    alertSetting: '告警设置',
+    flinkHome: 'Flink配置',
+    flinkCluster: 'Flink集群配置',
+  },
+  systemSettingItems: {
+    mavenSetting: {
+      name: 'Maven配置'
+    },
+    dockerSetting: {
+      name: 'Docker环境配置',
+    },
+    emailSetting: {
+      name: '邮箱配置',
+    },
+    consoleSetting: {
+      name: '控制台配置',
+    },
+    ingressSetting: {
+      name: 'k8s Ingress 配置',
+    },
+  },
+  flink: {
+    flinkName: 'Flink环境(别名)',
+    flinkNamePlaceholder: '请输入flink环境别名',
+    flinkHome: 'Flink安装路径',
+    flinkHomePlaceholder: '请输入Flink安装路径',
+    description: 'flink环境描述',
+    descriptionPlaceholder: 'flink环境描述',
+    operateMessage: {
+      flinkNameTips: 'flink环境别名,举例: flink-1.12',
+      flinkNameIsUnique: 'flink环境别名已存在',
+      flinkNameIsRequired: 'flink环境别名必填',
+      flinkHomeTips: 'flink所在服务器的绝对路径,举例: /usr/local/flink',
+      flinkHomeIsRequired: 'Flink安装路径必填',
+      createFlinkHomeSuccessful: ' 创建成功!',
+      updateFlinkHomeSuccessful: ' 更新成功!',
+    }
+  },
   alert: {
     alertSetting: '告警设置',
     alertName: '告警名称',
@@ -79,16 +119,65 @@ export default {
     edit: '编辑集群',
     delete: '确定要删除此集群 ?',
     form: {
+      clusterName: '集群名称',
+      executionMode: '执行模式',
+      versionId: 'Flink版本',
       addType: '添加类型',
       addExisting: '已有集群',
       addNew: '全新集群',
+      yarnQueue: 'Yarn队列',
+      address: '集群地址',
+      yarnSessionClusterId: 'Yarn Session模式集群ID',
+      k8sNamespace: 'k8s命名空间',
+      k8sClusterId: 'k8s集群ID',
+      serviceAccount: 'k8s命名空间绑定的服务账号',
+      k8sConf: 'k8s环境Kube配置文件',
+      flinkImage: 'Flink基础docker镜像',
+      k8sRestExposedType: 'K8S服务对外类型',
+      resolveOrder: '类加载顺序',
+      taskSlots: '任务槽数',
+      jmOptions: 'JM内存',
+      tmOptions: 'TM内存',
+      dynamicProperties: '动态参数',
+      clusterDescription: '集群描述',
     },
     placeholder: {
       addType: '请选择集群添加类型',
+      clusterName: '请输入集群名称',
+      executionMode: '请选择执行模式',
+      versionId: '请选择Flink版本',
+      yarnQueue: '请选择Yarn队列',
+      addressRemoteMode: '请输入集群地址，多个地址使用英文逗号分割，例如：http://host:port,http://host1:port2',
+      addressNoRemoteMode: '请输入集群地址，例如：http://host:port',
+      yarnSessionClusterId: '请输入Yarn Session模式集群ID',
+      k8sConf: '示例：~/.kube/config',
+      flinkImage: '请输入Flink基础docker镜像的标签，如：flink:1.13.0-scala_2.11-java8',
+      k8sRestExposedType: 'kubernetes.rest-service.exposed.type',
+      resolveOrder: 'classloader.resolve-order',
+      taskSlots: '每个TaskManager的插槽数',
+      totalOptions: '总内存',
+      jmOptions: '请选择要设置的jm资源参数',
+      tmOptions: '请选择要设置的tm资源参数',
+      clusterDescription: '请输入对该申请的描述',
     },
     required: {
       address: '必须填写集群地址',
+      executionMode: '执行模式必填',
       clusterId: 'Yarn Session Cluster 为必填项',
+      versionId: 'Flink 版本必选',
+      flinkImage: 'link基础docker镜像是必填的',
+      resolveOrder: '类加载顺序必选',
+    },
+    operateMessage: {
+      createFlinkSessionClusterSuccessful: ' 创建成功!',
+      createFlinkSessionClusterFailed: 'session集群创建失败, 请检查日志',
+      hadoopEnvInitializationFailed: 'Hadoop环境初始化失败，请检查环境设置',
+      flinkClusterIsStarting: '当前集群正在启动',
+      flinkClusterHasStartedSuccessful: '当前集群已成功启动',
+      updateFlinkClusterSuccessful: ' 更新成功!',
+    },
+    view: {
+      clusterId: '集群ID'
     },
   },
   env: {

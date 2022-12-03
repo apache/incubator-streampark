@@ -56,13 +56,13 @@
           if (resp) {
             Swal.fire({
               icon: 'success',
-              title: values.clusterName.concat(' create successful!'),
+              title: values.clusterName.concat(t('flink.setting.cluster.operateMessage.createFlinkSessionClusterSuccessful')),
               showConfirmButton: false,
               timer: 2000,
             });
             go('/flink/setting?activeKey=cluster');
           } else {
-            Swal.fire('Failed', 'create cluster failed, please check log', 'error');
+            Swal.fire('Failed', t('flink.setting.cluster.operateMessage.createFlinkSessionClusterFailed'), 'error');
           }
         } else {
           Swal.fire('Failed', res.msg, 'error');

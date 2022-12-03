@@ -48,32 +48,32 @@
     schemas: [
       {
         field: 'flinkName',
-        label: 'Flink Name',
+        label: t('flink.setting.flink.flinkName'),
         component: 'Input',
         componentProps: {
-          placeholder: 'Please enter flink name',
+          placeholder: t('flink.setting.flink.flinkNamePlaceholder'),
           allowClear: true,
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, 'the flink name, e.g: flink-1.12'),
-        rules: [{ required: true, message: 'flink name is required' }],
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.setting.flink.operateMessage.flinkNameTips')),
+        rules: [{ required: true, message: t('flink.setting.flink.operateMessage.flinkNameIsRequired') }],
       },
       {
         field: 'flinkHome',
-        label: 'Flink Home',
+        label: t('flink.setting.flink.flinkHome'),
         component: 'Input',
         componentProps: {
-          placeholder: 'Please enter flink home',
+          placeholder: t('flink.setting.flink.flinkHomePlaceholder'),
           allowClear: true,
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, 'The absolute path of the FLINK_HOME'),
-        rules: [{ required: true, message: 'flink home is required' }],
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.setting.flink.operateMessage.flinkHomeTips')),
+        rules: [{ required: true, message: t('flink.setting.flink.operateMessage.descriptionPlaceholder') }],
       },
       {
         field: 'description',
-        label: 'Description',
+        label:  t('flink.setting.flink.description'),
         component: 'InputTextArea',
         componentProps: {
-          placeholder: 'Please enter description',
+          placeholder: t('flink.setting.flink.descriptionPlaceholder'),
           allowClear: true,
         },
       },
@@ -107,7 +107,7 @@
           const { data } = await fetchFlinkCreate(formValue);
           if (data.data) {
             success = true;
-            message = formValue.flinkName.concat(' create successful!');
+            message = formValue.flinkName.concat(t('flink.setting.flink.operateMessage.createFlinkHomeSuccessful'));
           } else {
             message = data.message;
           }
@@ -118,7 +118,7 @@
             ...formValue,
           });
           if (data.data) {
-            message = formValue.flinkName.concat(' update successful!');
+            message = formValue.flinkName.concat(t('flink.setting.flink.operateMessage.updateFlinkHomeSuccessful'));
             success = true;
           } else {
             message = data.message;
@@ -144,7 +144,7 @@
             'error',
           );
         } else {
-          Swal.fire('Failed', 'flink name is already exists', 'error');
+          Swal.fire('Failed', t('flink.setting.flink.operateMessage.flinkNameIsUnique'), 'error');
         }
       }
     } catch (error: any) {
