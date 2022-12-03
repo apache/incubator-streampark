@@ -29,7 +29,7 @@
         </a-radio-group>
         <a-input-search
           @search="handleSearch"
-          placeholder="please enter a keyword search"
+          :placeholder="t('flink.project.searchPlaceholder')"
           class="search-input"
         />
       </template>

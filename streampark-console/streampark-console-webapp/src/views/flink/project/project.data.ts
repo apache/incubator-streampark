@@ -16,6 +16,8 @@
  */
 
 import { BuildStateEnum } from '/@/enums/flinkEnum';
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 
 interface Status {
   label?: string;
@@ -23,23 +25,23 @@ interface Status {
 }
 
 export const statusList: Status[] = [
-  { label: 'All', key: '' },
-  { label: 'Not Build', key: String(BuildStateEnum.NOT_BUDIL) },
-  { label: 'Building', key: String(BuildStateEnum.BUILDING) },
-  { label: 'Build Success', key: String(BuildStateEnum.SUCCESSFUL) },
-  { label: 'Build Failed', key: String(BuildStateEnum.FAILED) },
+  { label: t('flink.project.projectStatus.all'), key: '' },
+  { label: t('flink.project.projectStatus.notBuild'), key: String(BuildStateEnum.NOT_BUDIL) },
+  { label: t('flink.project.projectStatus.building'), key: String(BuildStateEnum.BUILDING) },
+  { label: t('flink.project.projectStatus.buildSuccess'), key: String(BuildStateEnum.SUCCESSFUL) },
+  { label: t('flink.project.projectStatus.buildFailed'), key: String(BuildStateEnum.FAILED) },
 ];
 
 export const buildStateMap = {
-  [String(BuildStateEnum.NOT_BUDIL)]: { color: '#C0C0C0', label: 'NOT BUILD' },
-  [String(BuildStateEnum.NEED_REBUILD)]: { color: '#FFA500', label: 'NEED REBUILD' },
+  [String(BuildStateEnum.NOT_BUDIL)]: { color: '#C0C0C0', label: t('flink.project.projectStatus.notBuild') },
+  [String(BuildStateEnum.NEED_REBUILD)]: { color: '#FFA500', label: t('flink.project.projectStatus.needRebuild') },
   [String(BuildStateEnum.BUILDING)]: {
     color: '#1AB58E',
-    label: 'BUILDING',
+    label: t('flink.project.projectStatus.building'),
     className: 'status-processing-building',
   },
-  [String(BuildStateEnum.SUCCESSFUL)]: { color: '#52c41a', label: 'SUCCESSFUL' },
-  [String(BuildStateEnum.FAILED)]: { color: '#f5222d', label: 'FAILED' },
+  [String(BuildStateEnum.SUCCESSFUL)]: { color: '#52c41a', label: t('flink.project.projectStatus.successful') },
+  [String(BuildStateEnum.FAILED)]: { color: '#f5222d', label: t('flink.project.projectStatus.failed') },
 };
 
 export enum ProjectType {
