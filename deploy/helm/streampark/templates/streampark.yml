@@ -58,8 +58,7 @@ spec:
               protocol: TCP
           securityContext:
             privileged: false
-{{/*          command: ["bash","bin/startup.sh"]*/}}
-          command: ["bash","-c","while true; do sleep 3600; done"]
+          command: ["bash","-c","bash bin/startup.sh"]
           volumeMounts:
             - name: volume-docker
               mountPath: /var/run/docker.sock
