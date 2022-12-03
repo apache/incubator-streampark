@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 export default {
-  projectStatus : {
+  projectStatus: {
     all: 'ALL',
     notBuild: 'Not Build',
     building: 'Building',
@@ -26,7 +26,7 @@ export default {
     failed: 'FAILED',
   },
   searchPlaceholder: 'please enter a keyword search',
-  form : {
+  form: {
     projectName: 'Project Name',
     projectNamePlaceholder: 'please input Project Name',
     projectType: 'Project Type',
@@ -42,7 +42,8 @@ export default {
     branches: 'Branches',
     branchesPlaceholder: 'Select a branch',
     pom: 'POM',
-    pomPlaceholder: 'By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xmlh',
+    pomPlaceholder:
+      'By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xmlh',
     buildArgs: 'Build Argument',
     buildArgsPlaceholder: 'Build Argument, e.g: -Pprod',
     description: 'description',
@@ -56,19 +57,21 @@ export default {
     projectTypeIsRequiredMessage: 'Project Type is required',
     cvsIsRequiredMessage: 'CVS is required',
     repositoryURLIsRequiredMessage: 'Repository URL is required',
-    pomSpecifiesModuleMessage: 'Specifies the module to compile pom.xml If it is not specified, it is found under the root path pom.xml',
+    pomSpecifiesModuleMessage:
+      'Specifies the module to compile pom.xml If it is not specified, it is found under the root path pom.xml',
     projectIsbuildingMessage: 'The current project is building',
     projectIsbuildFailedMessage: 'Build Fail',
     deleteProjectSuccessMessage: 'delete successful',
     deleteProjectFailedMessage: 'Delete Fail',
     deleteProjectFailedDetailMessage: 'Please check if any application belongs to this project',
     notAuthorizedMessage: 'not authorized ..>﹏<.. <br><br> userName and password is required',
-    authenticationErrorMessage: 'authentication error ..>﹏<.. <br><br> please check userName and password',
+    authenticationErrorMessage:
+      'authentication error ..>﹏<.. <br><br> please check userName and password',
     seeBuildLog: 'See Build log',
     buildProject: 'Build Project',
     buildProjectMessage: 'Are you sure build this project?',
     updateProject: 'Update Project',
     deleteProject: 'Delete Project',
     deleteProjectMessage: 'Are you sure delete this project ?',
-  }
+  },
 };

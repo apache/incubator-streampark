@@ -44,21 +44,21 @@
 
     <ul class="list-content">
       <li class="list-content_item">
-        <span>{{t('flink.project.form.cvs')}}</span>
+        <span>{{ t('flink.project.form.cvs') }}</span>
         <p><github-outlined /></p>
       </li>
       <li class="list-content_item">
-        <span>{{t('flink.project.form.branches')}}</span>
+        <span>{{ t('flink.project.form.branches') }}</span>
         <p>
           <a-tag color="blue">{{ item.branches }}</a-tag>
         </p>
       </li>
       <li class="list-content_item build_time">
-        <span>{{t('flink.project.form.lastBuild')}}</span>
+        <span>{{ t('flink.project.form.lastBuild') }}</span>
         <p>{{ item.lastBuild || '--' }}</p>
       </li>
       <li class="list-content_item build_state">
-        <span>{{t('flink.project.form.buildState')}}</span>
+        <span>{{ t('flink.project.form.buildState') }}</span>
         <p>
           <a-tag :color="buildState.color" :class="tagClass">{{ buildState.label }}</a-tag>
         </p>
@@ -186,7 +186,11 @@
         });
         emit('success', true);
       } else {
-        Swal.fire('Failed', t('flink.project.operationTips.deleteProjectFailedDetailMessage'), 'error');
+        Swal.fire(
+          'Failed',
+          t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
+          'error',
+        );
       }
     } catch (e) {
       createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));

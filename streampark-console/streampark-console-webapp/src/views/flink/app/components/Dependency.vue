@@ -18,7 +18,6 @@
   import { computed, defineComponent, onMounted, reactive, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { toPomString } from '../utils/Pom';
-  import { isK8sExecMode } from '../utils';
 
   export default defineComponent({
     name: 'Dependency',

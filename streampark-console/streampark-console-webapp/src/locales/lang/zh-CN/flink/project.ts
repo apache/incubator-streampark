@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 export default {
-  projectStatus : {
+  projectStatus: {
     all: '所有(状态)',
     notBuild: '未构建',
     building: '构建中',
@@ -26,13 +26,13 @@ export default {
     failed: '失败',
   },
   searchPlaceholder: '请输入关键词搜索',
-  form : {
+  form: {
     projectName: '项目名称',
     projectNamePlaceholder: '请输入项目名称',
     projectType: '项目类型',
     projectTypePlaceholder: '请选择项目类型',
-    cvs: '项目来源',
-    cvsPlaceholder: '项目来源',
+    cvs: 'CVS',
+    cvsPlaceholder: 'CVS类型: git/svn',
     repositoryURL: '仓库地址',
     repositoryURLPlaceholder: '请输入该项目的仓库地址',
     userName: '项目用户名',
@@ -70,5 +70,5 @@ export default {
     updateProject: '更新项目',
     deleteProject: '删除项目',
     deleteProjectMessage: '确定删除项目?',
-  }
+  },
 };

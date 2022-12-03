@@ -30,7 +30,7 @@ export const userDetail = (
   const { createMessage } = useMessage();
 
   const { copy } = useClipboard({
-    legacy:true
+    legacy: true,
   });
 
   function getConfAction(record: Recordable): ActionItem[] {

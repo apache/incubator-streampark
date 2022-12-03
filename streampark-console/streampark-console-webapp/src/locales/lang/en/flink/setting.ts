@@ -50,10 +50,10 @@ export default {
       flinkNameIsUnique: 'flink name is already exists',
       flinkNameIsRequired: 'flink name is required',
       flinkHomeTips: 'The absolute path of the FLINK_HOME',
-      flinkHomeIsRequired: 'flink name is required',
+      flinkHomeIsRequired: 'flink home is required',
       createFlinkHomeSuccessful: ' create successful!',
       updateFlinkHomeSuccessful: ' update successful!',
-    }
+    },
   },
   alert: {
     alertSetting: 'Alert Setting',
@@ -149,11 +149,13 @@ export default {
       executionMode: 'Please enter cluster name',
       versionId: 'please select Flink Version',
       yarnQueue: 'Please enter yarn queue',
-      addressRemoteMode: 'Please enter cluster address, multiple addresses use \',\' split e.g: http://host:port,http://host1:port2',
+      addressRemoteMode:
+        "Please enter cluster address, multiple addresses use ',' split e.g: http://host:port,http://host1:port2",
       addressNoRemoteMode: 'Please enter cluster address,  e.g: http://host:port',
       yarnSessionClusterId: 'Please enter Yarn Session cluster',
       k8sConf: '~/.kube/config',
-      flinkImage: 'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
+      flinkImage:
+        'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
       k8sRestExposedType: 'kubernetes.rest-service.exposed.type',
       resolveOrder: 'classloader.resolve-order',
       taskSlots: 'Number of slots per TaskManager',
@@ -172,13 +174,14 @@ export default {
     operateMessage: {
       createFlinkSessionClusterSuccessful: ' create successful!',
       createFlinkSessionClusterFailed: 'create cluster failed, please check log',
-      hadoopEnvInitializationFailed: 'Hadoop environment initialization failed, please check the environment settings',
+      hadoopEnvInitializationFailed:
+        'Hadoop environment initialization failed, please check the environment settings',
       flinkClusterIsStarting: 'The current cluster is starting',
       flinkClusterHasStartedSuccessful: 'The current cluster is started',
       updateFlinkClusterSuccessful: ' update successful!',
     },
     view: {
-      clusterId: 'ClusterId'
+      clusterId: 'ClusterId',
     },
   },
   env: {
