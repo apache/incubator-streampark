@@ -73,6 +73,12 @@ spec:
             items:
               - key: application.yml
                 path: application.yml
+              - key: application-h2.yml
+                path: application-h2.yml
+              - key: application-mysql.yml
+                path: application-mysql.yml
+              - key: application-pgsql.yml
+                path: application-pgsql.yml
               - key: logback-spring.xml
                 path: logback-spring.xml
               - key: kerberos.yml

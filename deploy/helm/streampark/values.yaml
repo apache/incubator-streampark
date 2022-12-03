@@ -50,7 +50,7 @@ spec:
   #     cpu: "500m"
 
 ingress:
-  enabled: true
+  enabled: false
   host: "streampark.apache.org"
   path: "/streampark"
   annotations: {}
