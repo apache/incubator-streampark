@@ -28,7 +28,9 @@
   import SettingList from './SettingList.vue';
   import { fetchSystemSettingUpdate } from '/@/api/flink/setting';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
+  const { t } = useI18n();
   const CollapsePane = Collapse.Panel;
   const { createMessage } = useMessage();
   const settings = ref<SystemSetting[]>([]);
@@ -40,31 +42,31 @@
     return [
       {
         key: 1,
-        title: 'Maven Setting',
+        title: t('flink.setting.systemSettingItems.mavenSetting.name'),
         isPassword: (item: SystemSetting) => item.settingKey === 'streampark.maven.auth.password',
         data: filterValue('streampark.maven'),
       },
       {
         key: 2,
-        title: 'Docker Setting',
+        title: t('flink.setting.systemSettingItems.dockerSetting.name'),
         isPassword: (item: SystemSetting) => item.settingKey === 'docker.register.password',
         data: filterValue('docker.register'),
       },
       {
         key: 3,
-        title: 'Sender Email Setting',
+        title: t('flink.setting.systemSettingItems.emailSetting.name'),
         isPassword: (item: SystemSetting) => item.settingKey === 'alert.email.password',
         data: filterValue('alert.email'),
       },
       {
         key: 4,
-        title: 'Console Setting',
+        title: t('flink.setting.systemSettingItems.consoleSetting.name'),
         isPassword: () => false,
         data: settings.value.filter((i) => i.settingKey.indexOf('streampark.console') > -1),
       },
       {
         key: 5,
-        title: 'Ingrsss Setting',
+        title: t('flink.setting.systemSettingItems.ingressSetting.name'),
         isPassword: () => false,
         data: filterValue('ingress.mode'),
       },

@@ -64,12 +64,12 @@
   }
   /* deploy */
   async function handleDeployCluster(item: FlinkCluster) {
-    const hide = createMessage.loading('The current cluster is starting', 0);
+    const hide = createMessage.loading(t('flink.setting.cluster.operateMessage.flinkClusterIsStarting'), 0);
     try {
       await fetchClusterStart(item.id);
       await Swal.fire({
         icon: 'success',
-        title: 'The current cluster is started',
+        title: t('flink.setting.cluster.operateMessage.flinkClusterHasStartedSuccessful'),
         showConfirmButton: false,
         timer: 2000,
       });
@@ -127,7 +127,7 @@
       </ListItemMeta>
       <div class="list-content" style="width: 15%">
         <div class="list-content-item" style="width: 60%">
-          <span>ExecutionMode</span>
+          <span>{{t('flink.setting.cluster.form.executionMode')}}</span>
           <p style="margin-top: 10px">
             {{ item.executionModeEnum.toLowerCase() }}
           </p>
@@ -135,7 +135,7 @@
       </div>
       <div class="list-content" style="width: 15%">
         <div class="list-content-item" style="width: 80%">
-          <span>ClusterId</span>
+          <span>{{t('flink.setting.cluster.view.clusterId')}}</span>
           <p style="margin-top: 10px">
             {{ item.clusterId }}
           </p>
@@ -143,7 +143,7 @@
       </div>
       <div class="list-content" style="width: 20%">
         <div class="list-content-item" style="width: 60%">
-          <span>Address</span>
+          <span>{{t('flink.setting.cluster.form.address')}}</span>
           <p style="margin-top: 10px">
             {{ item.address }}
           </p>
