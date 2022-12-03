@@ -1254,7 +1254,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
         ).whenComplete((t, e) -> {
-            IngressController.deleteIngress(application.getK8sNamespace(), application.getJobName());
+            if (isKubernetesApp(application)) {
+                IngressController.deleteIngress(application.getK8sNamespace(), application.getJobName());
+            }
             cancelFuture.cancel(true);
             cancelFutureMap.remove(application.getId());
         });
