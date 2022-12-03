@@ -54,8 +54,15 @@
           placeholder: t('flink.setting.flink.flinkNamePlaceholder'),
           allowClear: true,
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.setting.flink.operateMessage.flinkNameTips')),
-        rules: [{ required: true, message: t('flink.setting.flink.operateMessage.flinkNameIsRequired') }],
+        afterItem: () =>
+          h(
+            'span',
+            { class: 'conf-switch' },
+            t('flink.setting.flink.operateMessage.flinkNameTips'),
+          ),
+        rules: [
+          { required: true, message: t('flink.setting.flink.operateMessage.flinkNameIsRequired') },
+        ],
       },
       {
         field: 'flinkHome',
@@ -65,12 +72,19 @@
           placeholder: t('flink.setting.flink.flinkHomePlaceholder'),
           allowClear: true,
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.setting.flink.operateMessage.flinkHomeTips')),
-        rules: [{ required: true, message: t('flink.setting.flink.operateMessage.descriptionPlaceholder') }],
+        afterItem: () =>
+          h(
+            'span',
+            { class: 'conf-switch' },
+            t('flink.setting.flink.operateMessage.flinkHomeTips'),
+          ),
+        rules: [
+          { required: true, message: t('flink.setting.flink.operateMessage.flinkHomeIsRequired') },
+        ],
       },
       {
         field: 'description',
-        label:  t('flink.setting.flink.description'),
+        label: t('flink.setting.flink.description'),
         component: 'InputTextArea',
         componentProps: {
           placeholder: t('flink.setting.flink.descriptionPlaceholder'),
@@ -100,14 +114,16 @@
       });
       // Environment detection is successful
       if (resp.data) {
-        let message = '';
+        let message: string;
         let success = false;
         // create
         if (versionId.value == null) {
           const { data } = await fetchFlinkCreate(formValue);
           if (data.data) {
             success = true;
-            message = formValue.flinkName.concat(t('flink.setting.flink.operateMessage.createFlinkHomeSuccessful'));
+            message = formValue.flinkName.concat(
+              t('flink.setting.flink.operateMessage.createFlinkHomeSuccessful'),
+            );
           } else {
             message = data.message;
           }
@@ -118,7 +134,9 @@
             ...formValue,
           });
           if (data.data) {
-            message = formValue.flinkName.concat(t('flink.setting.flink.operateMessage.updateFlinkHomeSuccessful'));
+            message = formValue.flinkName.concat(
+              t('flink.setting.flink.operateMessage.updateFlinkHomeSuccessful'),
+            );
             success = true;
           } else {
             message = data.message;
@@ -160,7 +178,6 @@
           ),
         });
       } else {
-        console.error(error);
         createMessage.error('error');
       }
     } finally {

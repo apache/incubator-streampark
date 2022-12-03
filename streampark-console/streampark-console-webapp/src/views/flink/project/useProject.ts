@@ -61,7 +61,13 @@ export const useProject = () => {
           optionFilterProp: 'children',
           filterOption,
         },
-        rules: [{ required: true, type: 'number', message: t('flink.project.operationTips.projectTypeIsRequiredMessage') }],
+        rules: [
+          {
+            required: true,
+            type: 'number',
+            message: t('flink.project.operationTips.projectTypeIsRequiredMessage'),
+          },
+        ],
       },
       {
         field: 'repository',
@@ -77,7 +83,13 @@ export const useProject = () => {
           ],
           placeholder: t('flink.project.form.cvsPlaceholder'),
         },
-        rules: [{ required: true, type: 'number', message: t('flink.project.operationTips.cvsIsRequiredMessage') }],
+        rules: [
+          {
+            required: true,
+            type: 'number',
+            message: t('flink.project.operationTips.cvsIsRequiredMessage'),
+          },
+        ],
       },
       {
         field: 'url',
@@ -86,7 +98,12 @@ export const useProject = () => {
         componentProps: {
           placeholder: t('flink.project.form.repositoryURLPlaceholder'),
         },
-        rules: [{ required: true, message: t('flink.project.operationTips.repositoryURLIsRequiredMessage') }],
+        rules: [
+          {
+            required: true,
+            message: t('flink.project.operationTips.repositoryURLIsRequiredMessage'),
+          },
+        ],
       },
       {
         field: 'userName',

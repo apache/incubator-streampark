@@ -245,16 +245,15 @@ export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) 
       <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
-            Note
+            {t('flink.app.noteInfo.note')}
           </Tag>
-          It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, Allows
-          specifying multiple generic configuration options. The available options can be found
+          {t('flink.app.noteInfo.dynamicProperties')}
           <a
             href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html"
             target="_blank"
             class="pl-5px"
           >
-            here
+            Flink {t('flink.app.noteInfo.officialDoc')}
           </a>
         </span>
       </p>

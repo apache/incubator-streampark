@@ -273,7 +273,10 @@ export const useClusterSetting = () => {
         label: t('flink.setting.cluster.form.resolveOrder'),
         ifShow: ({ values }) => isShowInSessionMode(values),
         component: 'Select',
-        componentProps: { placeholder: t('flink.setting.cluster.placeholder.resolveOrder'), options: resolveOrder },
+        componentProps: {
+          placeholder: t('flink.setting.cluster.placeholder.resolveOrder'),
+          options: resolveOrder,
+        },
         rules: [{ message: t('flink.setting.cluster.placeholder.resolveOrder'), type: 'number' }],
       },
       {

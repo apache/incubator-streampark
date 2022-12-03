@@ -50,7 +50,7 @@
 
   const { Swal, createMessage } = useMessage();
   const { copy } = useClipboard({
-    legacy:true
+    legacy: true,
   });
   const { t } = useI18n();
 

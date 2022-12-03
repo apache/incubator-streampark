@@ -70,7 +70,9 @@
           fetchUpdateCluster(params);
           Swal.fire({
             icon: 'success',
-            title: values.clusterName.concat(t('flink.setting.cluster.operateMessage.updateFlinkClusterSuccessful')),
+            title: values.clusterName.concat(
+              t('flink.setting.cluster.operateMessage.updateFlinkClusterSuccessful'),
+            ),
             showConfirmButton: false,
             timer: 2000,
           });

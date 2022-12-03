@@ -33,15 +33,27 @@ export const statusList: Status[] = [
 ];
 
 export const buildStateMap = {
-  [String(BuildStateEnum.NOT_BUDIL)]: { color: '#C0C0C0', label: t('flink.project.projectStatus.notBuild') },
-  [String(BuildStateEnum.NEED_REBUILD)]: { color: '#FFA500', label: t('flink.project.projectStatus.needRebuild') },
+  [String(BuildStateEnum.NOT_BUDIL)]: {
+    color: '#C0C0C0',
+    label: t('flink.project.projectStatus.notBuild'),
+  },
+  [String(BuildStateEnum.NEED_REBUILD)]: {
+    color: '#FFA500',
+    label: t('flink.project.projectStatus.needRebuild'),
+  },
   [String(BuildStateEnum.BUILDING)]: {
     color: '#1AB58E',
     label: t('flink.project.projectStatus.building'),
     className: 'status-processing-building',
   },
-  [String(BuildStateEnum.SUCCESSFUL)]: { color: '#52c41a', label: t('flink.project.projectStatus.successful') },
-  [String(BuildStateEnum.FAILED)]: { color: '#f5222d', label: t('flink.project.projectStatus.failed') },
+  [String(BuildStateEnum.SUCCESSFUL)]: {
+    color: '#52c41a',
+    label: t('flink.project.projectStatus.successful'),
+  },
+  [String(BuildStateEnum.FAILED)]: {
+    color: '#f5222d',
+    label: t('flink.project.projectStatus.failed'),
+  },
 };
 
 export enum ProjectType {

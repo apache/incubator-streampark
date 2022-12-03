@@ -18,12 +18,12 @@ export default {
   settingTab: {
     systemSetting: '系统设置',
     alertSetting: '告警设置',
-    flinkHome: 'Flink配置',
-    flinkCluster: 'Flink集群配置',
+    flinkHome: 'Flink版本',
+    flinkCluster: 'Flink集群',
   },
   systemSettingItems: {
     mavenSetting: {
-      name: 'Maven配置'
+      name: 'Maven配置',
     },
     dockerSetting: {
       name: 'Docker环境配置',
@@ -39,21 +39,21 @@ export default {
     },
   },
   flink: {
-    flinkName: 'Flink环境(别名)',
-    flinkNamePlaceholder: '请输入flink环境别名',
-    flinkHome: 'Flink安装路径',
+    flinkName: 'Flink名称',
+    flinkNamePlaceholder: '请输入Flink别名',
+    flinkHome: '安装路径',
     flinkHomePlaceholder: '请输入Flink安装路径',
-    description: 'flink环境描述',
-    descriptionPlaceholder: 'flink环境描述',
+    description: '描述',
+    descriptionPlaceholder: 'Flink描述',
     operateMessage: {
-      flinkNameTips: 'flink环境别名,举例: flink-1.12',
-      flinkNameIsUnique: 'flink环境别名已存在',
-      flinkNameIsRequired: 'flink环境别名必填',
-      flinkHomeTips: 'flink所在服务器的绝对路径,举例: /usr/local/flink',
+      flinkNameTips: 'Flink别名,举例: Flink-1.12',
+      flinkNameIsUnique: 'Flink名称已存在',
+      flinkNameIsRequired: 'Flink名称必填',
+      flinkHomeTips: 'Flink所在服务器的绝对路径,举例: /usr/local/flink',
       flinkHomeIsRequired: 'Flink安装路径必填',
       createFlinkHomeSuccessful: ' 创建成功!',
       updateFlinkHomeSuccessful: ' 更新成功!',
-    }
+    },
   },
   alert: {
     alertSetting: '告警设置',
@@ -147,7 +147,8 @@ export default {
       executionMode: '请选择执行模式',
       versionId: '请选择Flink版本',
       yarnQueue: '请选择Yarn队列',
-      addressRemoteMode: '请输入集群地址，多个地址使用英文逗号分割，例如：http://host:port,http://host1:port2',
+      addressRemoteMode:
+        '请输入集群地址，多个地址使用英文逗号分割，例如：http://host:port,http://host1:port2',
       addressNoRemoteMode: '请输入集群地址，例如：http://host:port',
       yarnSessionClusterId: '请输入Yarn Session模式集群ID',
       k8sConf: '示例：~/.kube/config',
@@ -177,7 +178,7 @@ export default {
       updateFlinkClusterSuccessful: ' 更新成功!',
     },
     view: {
-      clusterId: '集群ID'
+      clusterId: '集群ID',
     },
   },
   env: {
