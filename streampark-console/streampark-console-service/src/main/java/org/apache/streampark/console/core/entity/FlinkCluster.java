@@ -165,7 +165,8 @@ public class FlinkCluster implements Serializable {
                 try {
                     String restUrl;
                     if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
-                        restUrl = url + "/overview";
+                        URI uri = new URI(url);
+                        restUrl = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort() + "/overview";
                     } else {
                         restUrl = url + "/proxy/" + this.clusterId + "/overview";
                     }

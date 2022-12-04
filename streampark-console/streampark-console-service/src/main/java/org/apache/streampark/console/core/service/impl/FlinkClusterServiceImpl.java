@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -44,6 +45,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.client.config.RequestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -108,15 +110,26 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         // 3) Check connection
         if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum())) {
             if (!cluster.verifyClusterConnection()) {
+                String[] array = cluster.getAddress().split(",");
+                for (String url : array) {
+                    try {
+                        HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(2000).build());
+                        result.setMsg("this remote cluster is invalid, address must be: $host:$port, please check!");
+                        result.setStatus(3);
+                        return result;
+                    } catch (Exception e) {
+                        //skip
+                    }
+                }
                 result.setMsg("the remote cluster connection failed, please check!");
-                result.setStatus(3);
+                result.setStatus(4);
                 return result;
             }
         } else if (ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum())) {
             if (cluster.getId() == null && !StringUtils.isAllBlank(cluster.getAddress(), cluster.getClusterId())) {
                 if (!cluster.verifyClusterConnection()) {
                     result.setMsg("the flink cluster connection failed, please check!");
-                    result.setStatus(4);
+                    result.setStatus(5);
                     return result;
                 }
             }

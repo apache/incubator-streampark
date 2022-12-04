@@ -85,6 +85,7 @@
   /* delete */
   async function handleDelete(item: FlinkCluster) {
     await fetchClusterRemove(item.id);
+    await getFlinkCluster();
     createMessage.success('The current cluster is remove');
   }
   /* shutdown */
@@ -214,13 +215,7 @@
           :ok-text="t('common.yes')"
           @confirm="handleDelete(item)"
         >
-          <a-button
-            :disabled="item.clusterState === ClusterStateEnum.STARTED"
-            type="danger"
-            shape="circle"
-            size="large"
-            class="control-button"
-          >
+          <a-button type="danger" shape="circle" size="large" class="control-button">
             <DeleteOutlined />
           </a-button>
         </Popconfirm>

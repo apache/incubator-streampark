@@ -174,6 +174,8 @@ export default {
     operateMessage: {
       createFlinkSessionClusterSuccessful: ' create successful!',
       createFlinkSessionClusterFailed: 'create cluster failed, please check log',
+      checkRemoteClusterFailed:
+        'This remote cluster is invalid, address must be: $host:$port and you can open address in the browser to make sure can visit flink web ui',
       hadoopEnvInitializationFailed:
         'Hadoop environment initialization failed, please check the environment settings',
       flinkClusterIsStarting: 'The current cluster is starting',

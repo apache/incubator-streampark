@@ -70,6 +70,12 @@
               'error',
             );
           }
+        } else if (status === 3) {
+          Swal.fire(
+            'Failed',
+            t('flink.setting.cluster.operateMessage.checkRemoteClusterFailed'),
+            'error',
+          );
         } else {
           Swal.fire('Failed', res.msg, 'error');
         }
