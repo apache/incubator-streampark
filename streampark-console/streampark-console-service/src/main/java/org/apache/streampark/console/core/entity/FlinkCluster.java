@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
@@ -31,6 +30,11 @@ import org.apache.streampark.console.core.enums.ClusterType;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.flink.submit.FlinkSubmitter;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
