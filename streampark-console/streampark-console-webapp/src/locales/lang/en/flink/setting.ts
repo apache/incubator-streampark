@@ -121,8 +121,7 @@ export default {
     delete: 'Are you sure delete this cluster ?',
     form: {
       clusterName: 'Cluster Name',
-      clusterType: 'Cluster Type',
-      external: 'external clusters',
+      address: 'Cluster URL',
       internal: 'internal cluster',
       executionMode: 'Execution Mode',
       versionId: 'Flink Version',
@@ -150,7 +149,7 @@ export default {
       executionMode: 'Please enter cluster name',
       versionId: 'please select Flink Version',
       yarnQueue: 'Please enter yarn queue',
-      addressRemoteMode: "Please enter jobManager URL",
+      addressRemoteMode: 'Please enter jobManager URL',
       addressNoRemoteMode: 'Please enter cluster address,  e.g: http://host:port',
       yarnSessionClusterId: 'Please enter Yarn Session cluster',
       k8sConf: '~/.kube/config',

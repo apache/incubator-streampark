@@ -37,7 +37,6 @@ import {
 import { handleFormValue } from '../../app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { ClusterTypeEnum } from '/@/enums/flinkEnum';
 
 export const useClusterSetting = () => {
   const { createMessage } = useMessage();
@@ -90,29 +89,12 @@ export const useClusterSetting = () => {
     }
   }
 
-  function isExternalYarnSession(value: Recordable) {
-    return (
-      value.executionMode == ExecModeEnum.YARN_SESSION &&
-      value.clusterType == ClusterTypeEnum.EXTERNAL
-    );
-  }
-
-  function isInternalYarnSession(value: Recordable) {
-    return (
-      value.executionMode == ExecModeEnum.YARN_SESSION &&
-      value.clusterType == ClusterTypeEnum.INTERNAL
-    );
-  }
-
   // session mode
   function isShowInSessionMode(value: Recordable): boolean {
-    if (value.executionMode == ExecModeEnum.YARN_SESSION) {
-      return value.clusterType == ClusterTypeEnum.INTERNAL;
-    }
-    if (value.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
-      return value.clusterType == ClusterTypeEnum.INTERNAL;
-    }
-    return false;
+    return (
+      value.executionMode == ExecModeEnum.YARN_SESSION ||
+      value.executionMode == ExecModeEnum.KUBERNETES_SESSION
+    );
   }
 
   const getClusterSchema = computed((): FormSchema[] => {
@@ -157,27 +139,6 @@ export const useClusterSetting = () => {
         rules: [{ required: true, message: t('flink.setting.cluster.required.versionId') }],
       },
       {
-        field: 'clusterType',
-        label: t('flink.setting.cluster.form.clusterType'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
-        component: 'Select',
-        defaultValue: ClusterTypeEnum.EXTERNAL,
-        componentProps: {
-          placeholder: t('flink.setting.cluster.placeholder.clusterType'),
-          allowClear: false,
-          options: [
-            {
-              label: t('flink.setting.cluster.form.external'),
-              value: ClusterTypeEnum.EXTERNAL,
-            },
-            {
-              label: t('flink.setting.cluster.form.internal'),
-              value: ClusterTypeEnum.INTERNAL,
-            },
-          ],
-        },
-      },
-      {
         field: 'address',
         label: 'JobManager URL',
         component: 'Input',
@@ -188,14 +149,13 @@ export const useClusterSetting = () => {
         rules: [{ required: true, message: t('flink.setting.cluster.required.address') }],
       },
       {
-        field: 'clusterId',
-        label: 'Yarn Cluster Id',
+        field: 'yarnQueue',
+        label: t('flink.setting.cluster.form.yarnQueue'),
         component: 'Input',
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         componentProps: {
-          placeholder: t('flink.setting.cluster.placeholder.yarnSessionClusterId'),
+          placeholder: t('flink.setting.cluster.placeholder.yarnQueue'),
         },
-        ifShow: ({ values }) => isExternalYarnSession(values),
-        rules: [{ required: true, message: t('flink.setting.cluster.required.clusterId') }],
       },
       {
         field: 'clusterId',
@@ -208,15 +168,6 @@ export const useClusterSetting = () => {
             placeholder: 'default',
             options: historyRecord.k8sSessionClusterId,
           }),
-      },
-      {
-        field: 'yarnQueue',
-        label: t('flink.setting.cluster.form.yarnQueue'),
-        component: 'Input',
-        componentProps: {
-          placeholder: t('flink.setting.cluster.placeholder.yarnQueue'),
-        },
-        ifShow: ({ values }) => isInternalYarnSession(values),
       },
       {
         field: 'k8sNamespace',
@@ -382,8 +333,8 @@ export const useClusterSetting = () => {
       executionMode: values.executionMode,
       versionId: values.versionId,
       description: values.description,
-      clusterType: values.clusterType || null,
     };
+
     switch (values.executionMode) {
       case ExecModeEnum.REMOTE:
         Object.assign(params, {
@@ -391,18 +342,12 @@ export const useClusterSetting = () => {
         });
         return params;
       case ExecModeEnum.YARN_SESSION:
-        if (values.clusterType === ClusterTypeEnum.EXTERNAL) {
-          Object.assign(params, {
-            clusterId: values.clusterId
-          });
-        } else {
-          Object.assign(params, {
-            options: JSON.stringify(options),
-            yarnQueue: values.yarnQueue || 'default',
-            dynamicProperties: values.dynamicProperties,
-            resolveOrder: values.resolveOrder,
-          });
-        }
+        Object.assign(params, {
+          options: JSON.stringify(options),
+          yarnQueue: values.yarnQueue || 'default',
+          dynamicProperties: values.dynamicProperties,
+          resolveOrder: values.resolveOrder,
+        });
       case ExecModeEnum.KUBERNETES_SESSION:
         Object.assign(params, {
           clusterId: values.clusterId,

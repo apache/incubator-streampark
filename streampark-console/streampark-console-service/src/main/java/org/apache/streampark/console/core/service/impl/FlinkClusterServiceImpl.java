@@ -21,12 +21,12 @@ import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
-import org.apache.streampark.console.core.enums.ClusterType;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
@@ -126,13 +126,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                 result.setStatus(4);
                 return result;
             }
-        } else if (ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum())) {
-            if (cluster.getId() == null && !StringUtils.isAllBlank(cluster.getAddress(), cluster.getClusterId())) {
-                if (!cluster.verifyClusterConnection()) {
-                    result.setMsg("the flink cluster connection failed, please check!");
-                    result.setStatus(5);
-                    return result;
-                }
+        } else if (ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum()) && cluster.getClusterId() != null) {
+            if (!cluster.verifyClusterConnection()) {
+                result.setMsg("the flink cluster connection failed, please check!");
+                result.setStatus(5);
+                return result;
             }
         }
 
@@ -144,14 +142,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flinkCluster.setUserId(commonService.getUserId());
         flinkCluster.setCreateTime(new Date());
         if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
-            flinkCluster.setClusterType(null);
             flinkCluster.setClusterState(ClusterState.STARTED.getValue());
         } else {
-            if (ClusterType.EXTERNAL.equals(flinkCluster.getClusterTypeEnum())) {
-                flinkCluster.setClusterState(ClusterState.STARTED.getValue());
-            } else {
-                flinkCluster.setClusterState(ClusterState.CREATED.getValue());
-            }
+            flinkCluster.setClusterState(ClusterState.CREATED.getValue());
         }
         return save(flinkCluster);
     }
@@ -192,7 +185,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             Future<DeployResponse> future = executorService.submit(() -> FlinkSubmitter.deploy(deployRequest));
             DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
             if (deployResponse != null) {
-                updateWrapper.set(FlinkCluster::getAddress, deployResponse.address());
+                if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
+                    String address = YarnUtils.getRMWebAppURL() + "/proxy/" + deployResponse.clusterId() + "/";
+                    updateWrapper.set(FlinkCluster::getAddress, address);
+                }
                 updateWrapper.set(FlinkCluster::getClusterId, deployResponse.clusterId());
                 updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STARTED.getValue());
                 updateWrapper.set(FlinkCluster::getException, null);
@@ -272,6 +268,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum) || ExecutionMode.REMOTE.equals(executionModeEnum)) {
             if (ClusterState.STARTED.equals(ClusterState.of(flinkCluster.getClusterState()))) {
                 if (!flinkCluster.verifyClusterConnection()) {
+                    updateWrapper.set(FlinkCluster::getAddress, null);
                     updateWrapper.set(FlinkCluster::getClusterState, ClusterState.LOST.getValue());
                     update(updateWrapper);
                     throw new ApiAlertException("current cluster is not active, please check");
@@ -301,6 +298,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             Future<ShutDownResponse> future = executorService.submit(() -> FlinkSubmitter.shutdown(stopRequest));
             ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
             if (shutDownResponse != null) {
+                updateWrapper.set(FlinkCluster::getAddress, null);
                 updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STOPED.getValue());
                 update(updateWrapper);
             } else {

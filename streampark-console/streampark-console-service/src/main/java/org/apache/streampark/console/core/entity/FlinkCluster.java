@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.ConfigConst;
-import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
@@ -26,7 +25,6 @@ import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.core.enums.ClusterType;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.flink.submit.FlinkSubmitter;
 
@@ -61,6 +59,7 @@ public class FlinkCluster implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String address;
 
     private String clusterId;
@@ -98,9 +97,6 @@ public class FlinkCluster implements Serializable {
 
     private Integer resolveOrder;
 
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private Integer clusterType;
-
     private String exception;
 
     private Integer clusterState;
@@ -115,14 +111,6 @@ public class FlinkCluster implements Serializable {
 
     public ExecutionMode getExecutionModeEnum() {
         return ExecutionMode.of(this.executionMode);
-    }
-
-    public ClusterType getClusterTypeEnum() {
-        return ClusterType.of(this.clusterType);
-    }
-
-    public ClusterState getClusterStateEnum() {
-        return ClusterState.of(this.clusterState);
     }
 
     @JsonIgnore

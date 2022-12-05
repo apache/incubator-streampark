@@ -120,9 +120,7 @@ export default {
     delete: '确定要删除此集群 ?',
     form: {
       clusterName: '集群名称',
-      clusterType: '集群类型',
-      external: '外部集群',
-      internal: '内部集群',
+      address: '集群URL',
       executionMode: '执行模式',
       versionId: 'Flink版本',
       addType: '添加类型',

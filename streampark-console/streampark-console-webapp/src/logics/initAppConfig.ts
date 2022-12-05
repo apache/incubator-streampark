@@ -57,7 +57,6 @@ export function initAppConfigStore() {
     if (themeColor && themeColor !== primaryColor) {
       changeTheme(themeColor);
     }
-
     grayMode && updateGrayMode(grayMode);
     colorWeak && updateColorWeak(colorWeak);
   } catch (error) {
@@ -76,7 +75,6 @@ export function initAppConfigStore() {
   }
   // init store
   localeStore.initLocale();
-
   setTimeout(() => {
     clearObsoleteStorage();
   }, 16);

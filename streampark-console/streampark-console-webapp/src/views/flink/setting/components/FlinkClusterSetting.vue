@@ -24,7 +24,7 @@
 <script lang="ts" setup name="FlinkClusterSetting">
   import { onMounted, ref } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { List, Popconfirm, Tag, Tooltip } from 'ant-design-vue';
+  import { List, Popconfirm, Tooltip } from 'ant-design-vue';
   import {
     PauseCircleOutlined,
     EyeOutlined,
@@ -43,7 +43,6 @@
   import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
   import { useGo } from '/@/hooks/web/usePage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { ClusterTypeEnum, ExecModeEnum } from '/@/enums/flinkEnum';
 
   const ListItem = List.Item;
   const ListItemMeta = ListItem.Meta;
@@ -55,16 +54,6 @@
 
   function handleIsStart(item) {
     return item.clusterState === ClusterStateEnum.STARTED;
-  }
-
-  function handleNoOperation(item) {
-    if (item.executionMode === ExecModeEnum.REMOTE) {
-      return true;
-    }
-    if (item.clusterType === ClusterTypeEnum.EXTERNAL) {
-      return true;
-    }
-    return false;
   }
 
   /* Go to edit cluster */
@@ -146,32 +135,18 @@
           </p>
         </div>
       </div>
-      <div class="list-content" style="width: 15%">
-        <div class="list-content-item" style="width: 80%">
-          <span>{{ t('flink.setting.cluster.view.clusterId') }}</span>
-          <p style="margin-top: 10px">
-            {{ item.clusterId }}
-          </p>
-        </div>
-      </div>
-      <div class="list-content" style="width: 20%" v-if="item.executionMode === ExecModeEnum.REMOTE">
-        <div class="list-content-item" style="width: 60%">
+      <div
+        class="list-content"
+        style="width: 40%"
+        v-if="
+          item.executionMode === ExecModeEnum.REMOTE ||
+          item.executionMode === ExecModeEnum.YARN_SESSION
+        "
+      >
+        <div class="list-content-item">
           <span>{{ t('flink.setting.cluster.form.address') }}</span>
           <p style="margin-top: 10px">
             {{ item.address }}
-          </p>
-        </div>
-      </div>
-      <div v-else class="list-content" style="width: 20%">
-        <div class="list-content-item" style="width: 60%">
-          <span>{{ t('flink.setting.cluster.form.clusterType')}}</span>
-          <p style="margin-top: 10px">
-            <Tag color="#fa8c16" v-if="item.clusterType === ClusterTypeEnum.EXTERNAL">
-              {{ t('flink.setting.cluster.form.external')}}
-            </Tag>
-            <Tag color="#3498DB" v-else>
-              {{ t('flink.setting.cluster.form.internal')}}
-            </Tag>
           </p>
         </div>
       </div>
@@ -191,7 +166,7 @@
         <template v-if="handleIsStart(item)">
           <Tooltip :title="t('flink.setting.cluster.stop')">
             <a-button
-              :disabled="handleNoOperation(item)"
+              :disabled="item.executionMode === ExecModeEnum.REMOTE"
               v-auth="'cluster:create'"
               @click="handleShutdownCluster(item)"
               shape="circle"
@@ -206,7 +181,7 @@
         <template v-else>
           <Tooltip :title="t('flink.setting.cluster.start')">
             <a-button
-              :disabled="handleNoOperation(item)"
+              :disabled="item.executionMode === ExecModeEnum.REMOTE"
               v-auth="'cluster:create'"
               @click="handleDeployCluster(item)"
               shape="circle"
