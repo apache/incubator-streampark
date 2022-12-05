@@ -299,6 +299,7 @@ create table "public"."t_flink_cluster" (
   "address" varchar(255) collate "pg_catalog"."default",
   "cluster_id" varchar(255) collate "pg_catalog"."default",
   "cluster_name" varchar(255) collate "pg_catalog"."default" not null,
+  `cluster_type` int2,
   "options" text collate "pg_catalog"."default",
   "yarn_queue" varchar(100) collate "pg_catalog"."default",
   "execution_mode" int2 not null default 1,
@@ -321,6 +322,7 @@ create table "public"."t_flink_cluster" (
 comment on column "public"."t_flink_cluster"."address" is 'url address of jobmanager';
 comment on column "public"."t_flink_cluster"."cluster_id" is 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)';
 comment on column "public"."t_flink_cluster"."cluster_name" is 'cluster name';
+comment on column "public"."t_flink_cluster"."cluster_type" is 'cluster type, 0:external, 1:internal';
 comment on column "public"."t_flink_cluster"."options" is 'parameter collection json form';
 comment on column "public"."t_flink_cluster"."yarn_queue" is 'the yarn queue where the task is located';
 comment on column "public"."t_flink_cluster"."execution_mode" is 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)';

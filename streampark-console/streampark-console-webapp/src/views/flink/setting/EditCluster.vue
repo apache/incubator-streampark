@@ -99,9 +99,10 @@
     nextTick(() => {
       setFieldsValue({
         clusterName: cluster.clusterName,
+        clusterType: cluster.clusterType,
+        clusterId: cluster.clusterId,
         executionMode: cluster.executionMode,
         address: cluster.address,
-        clusterId: cluster.clusterId,
         description: cluster.description,
         dynamicProperties: cluster.dynamicProperties,
         resolveOrder: cluster.resolveOrder,

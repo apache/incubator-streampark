@@ -81,6 +81,7 @@ alter table `t_flink_project`
 
 alter table `t_flink_cluster`
     drop column `flame_graph`,
+    add column `cluster_type` tinyint comment 'cluster type, 0:external, 1:internal' after `cluster_name`,
     add column `dynamic_properties` text comment 'allows specifying multiple generic configuration options' after `flink_image`;
 
 -- change `update_time` to `modify_time`

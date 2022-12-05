@@ -26,6 +26,7 @@ import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.enums.ClusterType;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
@@ -142,16 +143,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     public Boolean create(FlinkCluster flinkCluster) {
         flinkCluster.setUserId(commonService.getUserId());
         flinkCluster.setCreateTime(new Date());
-        if (ExecutionMode.YARN_SESSION.equals(flinkCluster.getExecutionModeEnum())) {
-            if (StringUtils.isAllBlank(flinkCluster.getAddress(), flinkCluster.getClusterId())) {
-                flinkCluster.setClusterState(ClusterState.CREATED.getValue());
-            } else {
-                flinkCluster.setClusterState(ClusterState.STARTED.getValue());
-            }
-        } else if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
+        if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
+            flinkCluster.setClusterType(null);
             flinkCluster.setClusterState(ClusterState.STARTED.getValue());
         } else {
-            flinkCluster.setClusterState(ClusterState.CREATED.getValue());
+            if (ClusterType.EXTERNAL.equals(flinkCluster.getClusterTypeEnum())) {
+                flinkCluster.setClusterState(ClusterState.STARTED.getValue());
+            } else {
+                flinkCluster.setClusterState(ClusterState.CREATED.getValue());
+            }
         }
         return save(flinkCluster);
     }
@@ -213,22 +213,25 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     @Override
     public void update(FlinkCluster cluster) {
         FlinkCluster flinkCluster = getById(cluster.getId());
-        flinkCluster.setClusterId(cluster.getClusterId());
-        flinkCluster.setVersionId(cluster.getVersionId());
         flinkCluster.setClusterName(cluster.getClusterName());
-        flinkCluster.setAddress(cluster.getAddress());
-        flinkCluster.setExecutionMode(cluster.getExecutionMode());
-        flinkCluster.setDynamicProperties(cluster.getDynamicProperties());
-        flinkCluster.setFlinkImage(cluster.getFlinkImage());
-        flinkCluster.setOptions(cluster.getOptions());
-        flinkCluster.setYarnQueue(cluster.getYarnQueue());
-        flinkCluster.setK8sHadoopIntegration(cluster.getK8sHadoopIntegration());
-        flinkCluster.setK8sConf(cluster.getK8sConf());
-        flinkCluster.setK8sNamespace(cluster.getK8sNamespace());
-        flinkCluster.setK8sRestExposedType(cluster.getK8sRestExposedType());
-        flinkCluster.setResolveOrder(cluster.getResolveOrder());
-        flinkCluster.setServiceAccount(cluster.getServiceAccount());
         flinkCluster.setDescription(cluster.getDescription());
+        if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
+            flinkCluster.setAddress(cluster.getAddress());
+        } else {
+            flinkCluster.setAddress(null);
+            flinkCluster.setClusterId(cluster.getClusterId());
+            flinkCluster.setVersionId(cluster.getVersionId());
+            flinkCluster.setDynamicProperties(cluster.getDynamicProperties());
+            flinkCluster.setOptions(cluster.getOptions());
+            flinkCluster.setResolveOrder(cluster.getResolveOrder());
+            flinkCluster.setK8sHadoopIntegration(cluster.getK8sHadoopIntegration());
+            flinkCluster.setK8sConf(cluster.getK8sConf());
+            flinkCluster.setK8sNamespace(cluster.getK8sNamespace());
+            flinkCluster.setK8sRestExposedType(cluster.getK8sRestExposedType());
+            flinkCluster.setServiceAccount(cluster.getServiceAccount());
+            flinkCluster.setFlinkImage(cluster.getFlinkImage());
+            flinkCluster.setYarnQueue(cluster.getYarnQueue());
+        }
         try {
             updateById(flinkCluster);
         } catch (Exception e) {

@@ -397,6 +397,7 @@ create table if not exists `t_flink_cluster` (
   `address` varchar(255) default null comment 'url address of jobmanager',
   `cluster_id` varchar(255) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
   `cluster_name` varchar(255) not null comment 'cluster name',
+  `cluster_type` tinyint not null comment 'cluster type, 0:external, 1:internal',
   `options` text comment 'json form of parameter collection ',
   `yarn_queue` varchar(100) default null comment 'the yarn queue where the task is located',
   `execution_mode` tinyint not null default 1 comment 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)',

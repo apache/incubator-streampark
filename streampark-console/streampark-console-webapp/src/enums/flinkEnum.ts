@@ -201,3 +201,8 @@ export enum AlertTypeEnum {
   /** lark */
   LARK = 16,
 }
+
+export enum ClusterTypeEnum {
+  EXTERNAL = 0,
+  INTERNAL = 1,
+}

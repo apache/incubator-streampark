@@ -24,6 +24,7 @@
         <result column="address" jdbcType="VARCHAR" property="address"/>
         <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
         <result column="cluster_name" jdbcType="VARCHAR" property="clusterName"/>
+        <result column="cluster_type" jdbcType="TINYINT" property="clusterType"/>
         <result column="options" jdbcType="LONGVARCHAR" property="options"/>
         <result column="yarn_queue" jdbcType="VARCHAR" property="yarnQueue"/>
         <result column="execution_mode" jdbcType="TINYINT" property="executionMode"/>

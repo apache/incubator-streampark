@@ -17,20 +17,20 @@
 
 package org.apache.streampark.console.core.entity;
 
+import com.baomidou.mybatisplus.annotation.*;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
+import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.console.core.enums.ClusterType;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.flink.submit.FlinkSubmitter;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -94,6 +94,9 @@ public class FlinkCluster implements Serializable {
 
     private Integer resolveOrder;
 
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private Integer clusterType;
+
     private String exception;
 
     private Integer clusterState;
@@ -108,6 +111,10 @@ public class FlinkCluster implements Serializable {
 
     public ExecutionMode getExecutionModeEnum() {
         return ExecutionMode.of(this.executionMode);
+    }
+
+    public ClusterType getClusterTypeEnum() {
+        return ClusterType.of(this.clusterType);
     }
 
     public ClusterState getClusterStateEnum() {
@@ -146,36 +153,38 @@ public class FlinkCluster implements Serializable {
     }
 
     public boolean verifyClusterConnection() {
-        if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum()) ||
-            ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+        if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
             if (address == null) {
                 return false;
             }
             String[] array = address.split(",");
-
             //1) check url is Legal
             for (String url: array) {
                 if (!CommonUtils.isLegalUrl(url)) {
                     return false;
                 }
             }
-
-            // 2) check connection
+            //2) check connection
             for (String url : array) {
                 try {
-                    String restUrl;
-                    if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
-                        URI uri = new URI(url);
-                        restUrl = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort() + "/overview";
-                    } else {
-                        restUrl = url + "/proxy/" + this.clusterId + "/overview";
-                    }
+                    URI uri = new URI(url);
+                    String restUrl = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort() + "/overview";
                     String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
                     JacksonUtils.read(result, Overview.class);
                     return true;
                 } catch (Exception ignored) {
                     //
                 }
+            }
+            return false;
+        } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+            try {
+                String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
+                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                JacksonUtils.read(result, Overview.class);
+                return true;
+            } catch (Exception ignored) {
+                //
             }
             return false;
         }
