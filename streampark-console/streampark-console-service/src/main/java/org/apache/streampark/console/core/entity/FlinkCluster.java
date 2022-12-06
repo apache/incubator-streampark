@@ -156,7 +156,8 @@ public class FlinkCluster implements Serializable {
             }
             //2) check connection
             try {
-                String result = HttpClientUtils.httpGetRequest(address, RequestConfig.custom().setConnectTimeout(2000).build());
+                String restUrl = address + "/overview";
+                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
                 JacksonUtils.read(result, Overview.class);
                 return true;
             } catch (Exception ignored) {

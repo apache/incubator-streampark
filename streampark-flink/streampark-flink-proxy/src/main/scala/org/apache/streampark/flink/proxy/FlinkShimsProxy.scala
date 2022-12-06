@@ -21,7 +21,7 @@ import org.apache.streampark.common.domain.FlinkVersion
 import org.apache.streampark.common.util.{ClassLoaderUtils, Logger, Utils}
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
 import java.net.URL
-import java.util.function.{Supplier, Function => JavaFunc}
+import java.util.function.{Function => JavaFunc}
 import java.util.regex.Pattern
 
 import org.apache.streampark.common.conf.ConfigConst
