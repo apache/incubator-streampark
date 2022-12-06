@@ -33,18 +33,4 @@ const propTypes = createTypes({
   object: undefined,
   integer: undefined,
 }) as PropTypes;
-
-propTypes.extend([
-  {
-    name: 'style',
-    getter: true,
-    type: [String, Object],
-    default: undefined,
-  },
-  {
-    name: 'VNodeChild',
-    getter: true,
-    type: undefined,
-  },
-]);
 export { propTypes };
