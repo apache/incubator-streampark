@@ -111,25 +111,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         // 3) Check connection
         if (ExecutionMode.REMOTE.equals(cluster.getExecutionModeEnum())) {
             if (!cluster.verifyClusterConnection()) {
-                String[] array = cluster.getAddress().split(",");
-                for (String url : array) {
-                    try {
-                        HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(2000).build());
-                        result.setMsg("this remote cluster is invalid, address must be: $host:$port, please check!");
-                        result.setStatus(3);
-                        return result;
-                    } catch (Exception e) {
-                        //skip
-                    }
-                }
                 result.setMsg("the remote cluster connection failed, please check!");
-                result.setStatus(4);
+                result.setStatus(3);
                 return result;
             }
         } else if (ExecutionMode.YARN_SESSION.equals(cluster.getExecutionModeEnum()) && cluster.getClusterId() != null) {
             if (!cluster.verifyClusterConnection()) {
                 result.setMsg("the flink cluster connection failed, please check!");
-                result.setStatus(5);
+                result.setStatus(4);
                 return result;
             }
         }

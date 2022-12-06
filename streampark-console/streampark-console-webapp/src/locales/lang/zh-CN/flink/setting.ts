@@ -171,8 +171,6 @@ export default {
     operateMessage: {
       createFlinkSessionClusterSuccessful: ' 创建成功!',
       createFlinkSessionClusterFailed: 'session集群创建失败, 请检查日志',
-      checkRemoteClusterFailed:
-        'remote 集群无效，请确保地址必须是：$host:$port 并且可以在浏览器中打开,可以访问flink web ui',
       hadoopEnvInitializationFailed: 'Hadoop环境初始化失败，请检查环境设置',
       flinkClusterIsStarting: '当前集群正在启动',
       flinkClusterHasStartedSuccessful: '当前集群已成功启动',
