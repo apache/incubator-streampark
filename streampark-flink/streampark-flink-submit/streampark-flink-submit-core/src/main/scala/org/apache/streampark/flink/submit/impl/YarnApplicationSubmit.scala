@@ -125,7 +125,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
           var jobManagerUrl: String = null
           clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
           applicationId = clusterClient.getClusterId
-          jobManagerUrl = clusterClient.getWebInterfaceURL;
+          jobManagerUrl = clusterClient.getWebInterfaceURL
           logInfo(
             s"""
                |-------------------------<<applicationId>>------------------------
@@ -133,7 +133,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
                |__________________________________________________________________
                |""".stripMargin)
 
-          SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl);
+          SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
         } finally {
           Utils.close(clusterDescriptor, clusterClient)
         }
