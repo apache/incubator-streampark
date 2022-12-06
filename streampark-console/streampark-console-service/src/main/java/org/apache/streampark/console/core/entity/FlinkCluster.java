@@ -44,7 +44,6 @@ import org.apache.flink.configuration.CoreOptions;
 import org.apache.http.client.config.RequestConfig;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
@@ -131,15 +130,12 @@ public class FlinkCluster implements Serializable {
     }
 
     @JsonIgnore
-    public URI getActiveAddress() {
-        String[] array = address.split(",");
-        for (String url : array) {
-            try {
-                HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setSocketTimeout(2000).build());
-                return new URI(url);
-            } catch (Exception ignored) {
-                //
-            }
+    public URI getRemoteURI() {
+        try {
+            HttpClientUtils.httpGetRequest(this.address, RequestConfig.custom().setSocketTimeout(2000).build());
+            return new URI(address);
+        } catch (Exception ignored) {
+            //
         }
         return null;
     }
@@ -149,24 +145,19 @@ public class FlinkCluster implements Serializable {
             if (address == null) {
                 return false;
             }
-            String[] array = address.split(",");
             //1) check url is Legal
-            for (String url: array) {
-                if (!CommonUtils.isLegalUrl(url)) {
-                    return false;
-                }
+            if (!CommonUtils.isLegalUrl(address)) {
+                return false;
             }
             //2) check connection
-            for (String url : array) {
-                try {
-                    URI uri = new URI(url);
-                    String restUrl = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort() + "/overview";
-                    String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-                    JacksonUtils.read(result, Overview.class);
-                    return true;
-                } catch (Exception ignored) {
-                    //
-                }
+            try {
+                URI uri = new URI(address);
+                String restUrl = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort() + "/overview";
+                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                JacksonUtils.read(result, Overview.class);
+                return true;
+            } catch (Exception ignored) {
+                //
             }
             return false;
         } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
@@ -184,9 +175,8 @@ public class FlinkCluster implements Serializable {
     }
 
     @JsonIgnore
-    public Map<String, String> getFlinkConfig() throws MalformedURLException, JsonProcessingException {
-        URI activeAddress = this.getActiveAddress();
-        String restUrl = activeAddress.toURL() + "/jobmanager/config";
+    public Map<String, String> getFlinkConfig() throws JsonProcessingException {
+        String restUrl = this.address + "/jobmanager/config";
         String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
         if (StringUtils.isEmpty(json)) {
             return Collections.emptyMap();
