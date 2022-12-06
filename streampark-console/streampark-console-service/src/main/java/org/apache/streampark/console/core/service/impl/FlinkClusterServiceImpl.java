@@ -316,6 +316,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         if (flinkCluster == null) {
             throw new ApiAlertException("flink cluster not exist, please check.");
         }
+
+        if (ExecutionMode.YARN_SESSION.equals(flinkCluster.getExecutionModeEnum()) ||
+            ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(flinkCluster.getExecutionModeEnum())) {
+            if (ClusterState.STARTED.equals(flinkCluster.getClusterStateEnum())) {
+                throw new ApiAlertException("flink cluster is running, cannot be delete, please check.");
+            }
+        }
+
         if (applicationService.existsJobByClusterId(id)) {
             throw new ApiAlertException("some app on this cluster, the cluster cannot be delete, please check.");
         }
