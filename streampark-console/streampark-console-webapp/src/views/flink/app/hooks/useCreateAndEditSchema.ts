@@ -248,13 +248,17 @@ export const useCreateAndEditSchema = (
         component: 'Input',
         componentProps: ({ formModel }) => {
           return {
-            placeholder: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder'),
+            placeholder: t('flink.app.addAppTips.kubernetesClusterIdRequire'),
             onChange: (e: ChangeEvent) => (formModel.jobName = e.target.value),
           };
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         rules: [
-          { required: true, message: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder') },
+          { 
+            required: true, 
+            message: t('flink.app.addAppTips.kubernetesClusterIdRequire'),
+            pattern:/^[a-z0-9]([a-z0-9_\.]+)?[a-z0-9]$/
+          },
         ],
       },
       {
