@@ -23,12 +23,15 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
+import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.flink.submit.FlinkSubmitter;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -42,7 +45,6 @@ import org.apache.flink.configuration.CoreOptions;
 import org.apache.http.client.config.RequestConfig;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
@@ -57,6 +59,7 @@ public class FlinkCluster implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String address;
 
     private String clusterId;
@@ -132,49 +135,43 @@ public class FlinkCluster implements Serializable {
     }
 
     @JsonIgnore
-    public URI getActiveAddress() {
-        String[] array = address.split(",");
-        for (String url : array) {
-            try {
-                HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setSocketTimeout(2000).build());
-                return new URI(url);
-            } catch (Exception ignored) {
-                //
-            }
+    public URI getRemoteURI() {
+        try {
+            HttpClientUtils.httpGetRequest(this.address, RequestConfig.custom().setSocketTimeout(2000).build());
+            return new URI(address);
+        } catch (Exception ignored) {
+            //
         }
         return null;
     }
 
     public boolean verifyClusterConnection() {
-        if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum()) ||
-            ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+        if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
             if (address == null) {
                 return false;
             }
-            String[] array = address.split(",");
-
             //1) check url is Legal
-            for (String url: array) {
-                if (!CommonUtils.isLegalUrl(url)) {
-                    return false;
-                }
+            if (!CommonUtils.isLegalUrl(address)) {
+                return false;
             }
-
-            // 2) check connection
-            for (String url : array) {
-                try {
-                    String restUrl;
-                    if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
-                        restUrl = url + "/overview";
-                    } else {
-                        restUrl = url + "/proxy/" + this.clusterId + "/overview";
-                    }
-                    String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-                    JacksonUtils.read(result, Overview.class);
-                    return true;
-                } catch (Exception ignored) {
-                    //
-                }
+            //2) check connection
+            try {
+                String restUrl = address + "/overview";
+                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                JacksonUtils.read(result, Overview.class);
+                return true;
+            } catch (Exception ignored) {
+                //
+            }
+            return false;
+        } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+            try {
+                String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
+                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                JacksonUtils.read(result, Overview.class);
+                return true;
+            } catch (Exception ignored) {
+                //
             }
             return false;
         }
@@ -182,9 +179,8 @@ public class FlinkCluster implements Serializable {
     }
 
     @JsonIgnore
-    public Map<String, String> getFlinkConfig() throws MalformedURLException, JsonProcessingException {
-        URI activeAddress = this.getActiveAddress();
-        String restUrl = activeAddress.toURL() + "/jobmanager/config";
+    public Map<String, String> getFlinkConfig() throws JsonProcessingException {
+        String restUrl = this.address + "/jobmanager/config";
         String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
         if (StringUtils.isEmpty(json)) {
             return Collections.emptyMap();

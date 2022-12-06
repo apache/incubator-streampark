@@ -36,7 +36,6 @@ import {
 } from '/@/api/flink/app/flinkHistory';
 import { handleFormValue } from '../../app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { ClusterAddTypeEnum } from '/@/enums/appEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 
 export const useClusterSetting = () => {
@@ -90,19 +89,12 @@ export const useClusterSetting = () => {
     }
   }
 
-  function isAddExistYarnSession(value: Recordable) {
-    return (
-      value.executionMode == ExecModeEnum.YARN_SESSION &&
-      value.addType == ClusterAddTypeEnum.ADD_EXISTING
-    );
-  }
-
   // session mode
   function isShowInSessionMode(value: Recordable): boolean {
-    if (value.executionMode == ExecModeEnum.YARN_SESSION) {
-      return value.addType == ClusterAddTypeEnum.ADD_NEW;
-    }
-    return value.executionMode == ExecModeEnum.KUBERNETES_SESSION;
+    return (
+      value.executionMode == ExecModeEnum.YARN_SESSION ||
+      value.executionMode == ExecModeEnum.KUBERNETES_SESSION
+    );
   }
 
   const getClusterSchema = computed((): FormSchema[] => {
@@ -123,7 +115,10 @@ export const useClusterSetting = () => {
         componentProps: {
           placeholder: t('flink.setting.cluster.placeholder.executionMode'),
           options: [
-            { label: 'remote (standalone)', value: ExecModeEnum.REMOTE },
+            {
+              label: 'remote',
+              value: ExecModeEnum.REMOTE,
+            },
             { label: 'yarn session', value: ExecModeEnum.YARN_SESSION },
             { label: 'kubernetes session', value: ExecModeEnum.KUBERNETES_SESSION },
           ],
@@ -144,73 +139,23 @@ export const useClusterSetting = () => {
         rules: [{ required: true, message: t('flink.setting.cluster.required.versionId') }],
       },
       {
-        field: 'addType',
-        label: t('flink.setting.cluster.form.addType'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
-        component: 'Select',
-        defaultValue: ClusterAddTypeEnum.ADD_EXISTING,
+        field: 'address',
+        label: 'JobManager URL',
+        component: 'Input',
         componentProps: {
-          placeholder: t('flink.setting.cluster.placeholder.addType'),
-          allowClear: false,
-          options: [
-            {
-              label: t('flink.setting.cluster.form.addExisting'),
-              value: ClusterAddTypeEnum.ADD_EXISTING,
-            },
-            {
-              label: t('flink.setting.cluster.form.addNew'),
-              value: ClusterAddTypeEnum.ADD_NEW,
-            },
-          ],
+          placeholder: t('flink.setting.cluster.placeholder.addressRemoteMode'),
         },
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
+        rules: [{ required: true, message: t('flink.setting.cluster.required.address') }],
       },
       {
         field: 'yarnQueue',
         label: t('flink.setting.cluster.form.yarnQueue'),
         component: 'Input',
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         componentProps: {
           placeholder: t('flink.setting.cluster.placeholder.yarnQueue'),
         },
-        ifShow: ({ values }) =>
-          values.executionMode == ExecModeEnum.YARN_SESSION &&
-          values.addType == ClusterAddTypeEnum.ADD_NEW,
-      },
-      {
-        field: 'address',
-        label: t('flink.setting.cluster.form.address'),
-        component: 'Input',
-        componentProps: ({ formModel }) => {
-          return {
-            placeholder:
-              formModel.executionMode == ExecModeEnum.REMOTE
-                ? t('flink.setting.cluster.placeholder.addressRemoteMode')
-                : t('flink.setting.cluster.placeholder.addressNoRemoteMode'),
-          };
-        },
-        ifShow: ({ values }) =>
-          isAddExistYarnSession(values) || values.executionMode == ExecModeEnum.REMOTE,
-        rules: [{ required: true, message: t('flink.setting.cluster.required.address') }],
-      },
-      {
-        field: 'clusterId',
-        label: t('flink.setting.cluster.form.yarnSessionClusterId'),
-        component: 'Input',
-        componentProps: {
-          placeholder: t('flink.setting.cluster.placeholder.yarnSessionClusterId'),
-        },
-        ifShow: ({ values }) => isAddExistYarnSession(values),
-        rules: [{ required: true, message: t('flink.setting.cluster.required.clusterId') }],
-      },
-      {
-        field: 'k8sNamespace',
-        label: t('flink.setting.cluster.form.k8sNamespace'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
-        component: 'Input',
-        render: ({ model, field }) =>
-          renderInputDropdown(model, field, {
-            placeholder: 'default',
-            options: historyRecord.k8sNamespace,
-          }),
       },
       {
         field: 'clusterId',
@@ -222,6 +167,17 @@ export const useClusterSetting = () => {
           renderInputDropdown(model, field, {
             placeholder: 'default',
             options: historyRecord.k8sSessionClusterId,
+          }),
+      },
+      {
+        field: 'k8sNamespace',
+        label: t('flink.setting.cluster.form.k8sNamespace'),
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
+        component: 'Input',
+        render: ({ model, field }) =>
+          renderInputDropdown(model, field, {
+            placeholder: 'default',
+            options: historyRecord.k8sNamespace,
           }),
       },
       {
@@ -378,6 +334,7 @@ export const useClusterSetting = () => {
       versionId: values.versionId,
       description: values.description,
     };
+
     switch (values.executionMode) {
       case ExecModeEnum.REMOTE:
         Object.assign(params, {
@@ -385,20 +342,12 @@ export const useClusterSetting = () => {
         });
         return params;
       case ExecModeEnum.YARN_SESSION:
-        if (values.addType === ClusterAddTypeEnum.ADD_EXISTING) {
-          Object.assign(params, {
-            clusterId: values.clusterId,
-            address: values.address,
-          });
-        } else {
-          Object.assign(params, {
-            options: JSON.stringify(options),
-            yarnQueue: values.yarnQueue || 'default',
-            dynamicProperties: values.dynamicProperties,
-            resolveOrder: values.resolveOrder,
-          });
-        }
-        return params;
+        Object.assign(params, {
+          options: JSON.stringify(options),
+          yarnQueue: values.yarnQueue || 'default',
+          dynamicProperties: values.dynamicProperties,
+          resolveOrder: values.resolveOrder,
+        });
       case ExecModeEnum.KUBERNETES_SESSION:
         Object.assign(params, {
           clusterId: values.clusterId,

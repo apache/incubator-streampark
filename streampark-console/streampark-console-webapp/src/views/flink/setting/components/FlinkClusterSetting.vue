@@ -51,13 +51,11 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const clusters = ref<FlinkCluster[]>([]);
-  function isSessionMode(mode: number): boolean {
-    return [ExecModeEnum.YARN_SESSION, ExecModeEnum.KUBERNETES_SESSION].includes(mode);
-  }
 
   function handleIsStart(item) {
     return item.clusterState === ClusterStateEnum.STARTED;
   }
+
   /* Go to edit cluster */
   function handleEditCluster(item: FlinkCluster) {
     go(`/flink/setting/edit_cluster?clusterId=${item.id}`);
@@ -85,6 +83,7 @@
   /* delete */
   async function handleDelete(item: FlinkCluster) {
     await fetchClusterRemove(item.id);
+    await getFlinkCluster();
     createMessage.success('The current cluster is remove');
   }
   /* shutdown */
@@ -136,16 +135,15 @@
           </p>
         </div>
       </div>
-      <div class="list-content" style="width: 15%">
-        <div class="list-content-item" style="width: 80%">
-          <span>{{ t('flink.setting.cluster.view.clusterId') }}</span>
-          <p style="margin-top: 10px">
-            {{ item.clusterId }}
-          </p>
-        </div>
-      </div>
-      <div class="list-content" style="width: 20%">
-        <div class="list-content-item" style="width: 60%">
+      <div
+        class="list-content"
+        style="width: 40%"
+        v-if="
+          item.executionMode === ExecModeEnum.REMOTE ||
+          item.executionMode === ExecModeEnum.YARN_SESSION
+        "
+      >
+        <div class="list-content-item">
           <span>{{ t('flink.setting.cluster.form.address') }}</span>
           <p style="margin-top: 10px">
             {{ item.address }}
@@ -183,7 +181,7 @@
         <template v-else>
           <Tooltip :title="t('flink.setting.cluster.start')">
             <a-button
-              :disabled="!isSessionMode(item.executionMode)"
+              :disabled="item.executionMode === ExecModeEnum.REMOTE"
               v-auth="'cluster:create'"
               @click="handleDeployCluster(item)"
               shape="circle"
@@ -214,13 +212,7 @@
           :ok-text="t('common.yes')"
           @confirm="handleDelete(item)"
         >
-          <a-button
-            :disabled="item.clusterState === ClusterStateEnum.STARTED"
-            type="danger"
-            shape="circle"
-            size="large"
-            class="control-button"
-          >
+          <a-button type="danger" shape="circle" size="large" class="control-button">
             <DeleteOutlined />
           </a-button>
         </Popconfirm>

@@ -66,8 +66,3 @@ export enum RouterTransitionEnum {
 export enum AuthUserName {
   ADMIN = 'admin',
 }
-
-export enum ClusterAddTypeEnum {
-  ADD_EXISTING = 0,
-  ADD_NEW = 1,
-}

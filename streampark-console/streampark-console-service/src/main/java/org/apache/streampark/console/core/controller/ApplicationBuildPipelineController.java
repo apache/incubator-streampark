@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
@@ -78,10 +79,15 @@ public class ApplicationBuildPipelineController {
     @RequiresPermissions("app:create")
     public RestResponse buildApplication(Long appId, boolean forceBuild) {
         try {
-            if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
-                return RestResponse.success(false);
-            }
             Application app = applicationService.getById(appId);
+            Boolean envOk = applicationService.checkEnv(app);
+            if (!envOk) {
+                throw new ApiAlertException("Check flink env failed, please check the flink version of this job");
+            }
+
+            if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
+                throw new ApiAlertException("The job is invalid, or the job cannot be built while it is running");
+            }
             // check if you need to go through the build process (if the jar and pom have changed,
             // you need to go through the build process, if other common parameters are modified,
             // you don't need to go through the build process)

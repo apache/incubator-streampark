@@ -113,6 +113,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
 
       client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString
+      val jobManagerUrl = client.getWebInterfaceURL
 
       logInfo(
         s"""
@@ -120,7 +121,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
            |Flink Job Started: jobId: $jobId , applicationId: ${yarnClusterId.toString}
            |__________________________________________________________________
            |""".stripMargin)
-      SubmitResponse(yarnClusterId.toString, flinkConfig.toMap, jobId)
+      SubmitResponse(yarnClusterId.toString, flinkConfig.toMap, jobId, jobManagerUrl)
     } catch {
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")

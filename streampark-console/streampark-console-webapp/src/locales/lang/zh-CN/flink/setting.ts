@@ -120,13 +120,13 @@ export default {
     delete: '确定要删除此集群 ?',
     form: {
       clusterName: '集群名称',
+      address: '集群URL',
       executionMode: '执行模式',
       versionId: 'Flink版本',
       addType: '添加类型',
       addExisting: '已有集群',
       addNew: '全新集群',
       yarnQueue: 'Yarn队列',
-      address: '集群地址',
       yarnSessionClusterId: 'Yarn Session模式集群ID',
       k8sNamespace: 'k8s命名空间',
       k8sClusterId: 'k8s集群ID',
@@ -147,8 +147,7 @@ export default {
       executionMode: '请选择执行模式',
       versionId: '请选择Flink版本',
       yarnQueue: '请选择Yarn队列',
-      addressRemoteMode:
-        '请输入集群地址，多个地址使用英文逗号分割，例如：http://host:port,http://host1:port2',
+      addressRemoteMode: '请输入Flink 集群JobManager URL访问地址',
       addressNoRemoteMode: '请输入集群地址，例如：http://host:port',
       yarnSessionClusterId: '请输入Yarn Session模式集群ID',
       k8sConf: '示例：~/.kube/config',
@@ -159,7 +158,7 @@ export default {
       totalOptions: '总内存',
       jmOptions: '请选择要设置的jm资源参数',
       tmOptions: '请选择要设置的tm资源参数',
-      clusterDescription: '请输入对该申请的描述',
+      clusterDescription: '集群描述信息, 如: 生产flink 1.16集群',
     },
     required: {
       address: '必须填写集群地址',

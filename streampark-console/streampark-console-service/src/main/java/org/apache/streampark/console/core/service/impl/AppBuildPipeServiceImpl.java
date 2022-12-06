@@ -163,7 +163,7 @@ public class AppBuildPipeServiceImpl
         // save snapshot of pipeline to db when status of pipeline was changed.
         pipeline.registerWatcher(new PipeWatcher() {
             @Override
-            public void onStart(PipeSnapshot snapshot) throws Exception {
+            public void onStart(PipeSnapshot snapshot) {
                 AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
                 saveEntity(buildPipeline);
 

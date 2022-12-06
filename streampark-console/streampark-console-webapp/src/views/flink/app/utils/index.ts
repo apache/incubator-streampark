@@ -17,7 +17,7 @@
 import { optionsKeyMapping } from '../data/option';
 import { fetchYarn } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
-import { fetchActiveURL } from '/@/api/flink/setting/flinkCluster';
+import { fetchRemoteURL } from '/@/api/flink/setting/flinkCluster';
 import {
   AppStateEnum,
   ExecModeEnum,
@@ -105,7 +105,7 @@ export function descriptionFilter(option) {
 export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
   const executionMode = app['executionMode'];
   if (executionMode == ExecModeEnum.REMOTE) {
-    const res = await fetchActiveURL(app.flinkClusterId);
+    const res = await fetchRemoteURL(app.flinkClusterId);
     window.open(res + '/#/job/' + app.jobId + '/overview');
   } else if (
     [ExecModeEnum.YARN_PER_JOB, ExecModeEnum.YARN_SESSION, ExecModeEnum.YARN_APPLICATION].includes(

@@ -1177,7 +1177,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String.format("The clusterId=%s cannot be find, maybe the clusterId is wrong or " +
                         "the cluster has been deleted. Please contact the Admin.",
                     application.getFlinkClusterId()));
-            URI activeAddress = cluster.getActiveAddress();
+            URI activeAddress = cluster.getRemoteURI();
             properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
             properties.put(RestOptions.PORT.key(), activeAddress.getPort());
         }
@@ -1550,7 +1550,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             AssertUtils.state(cluster != null,
                 String.format("The clusterId=%s cannot be find, maybe the clusterId is wrong or " +
                     "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
-            URI activeAddress = cluster.getActiveAddress();
+            URI activeAddress = cluster.getRemoteURI();
             properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
             properties.put(RestOptions.PORT.key(), activeAddress.getPort());
         } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
