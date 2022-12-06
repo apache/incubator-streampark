@@ -115,6 +115,9 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       // Suppress warning
       __INTLIFY_PROD_DEVTOOLS__: false,
       __APP_INFO__: JSON.stringify(__APP_INFO__),
+      __COLOR_PLUGIN_OUTPUT_FILE_NAME__: undefined,
+      __PROD__: true,
+      __COLOR_PLUGIN_OPTIONS__: {},
     },
 
     css: {
