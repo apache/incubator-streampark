@@ -66,12 +66,31 @@ public class GitUtils {
         return cloneCommand.call();
     }
 
+    public static List<String> getBranchList(Project project) throws GitAPIException {
+        LsRemoteCommand command = Git.lsRemoteRepository()
+            .setRemote(project.getUrl())
+            .setHeads(true);
+        setCredentials(command, project);
+        Collection<Ref> refList = command.call();
+        List<String> branchList = new ArrayList<>(4);
+        for (Ref ref : refList) {
+            String refName = ref.getName();
+            if (refName.startsWith(Constants.R_HEADS)) {
+                String branchName = refName.replace(Constants.R_HEADS, "");
+                branchList.add(branchName);
+            }
+        }
+        return branchList;
+    }
+
     private static void setCredentials(TransportCommand<?, ?> transportCommand, Project project) {
         GitProtocol gitProtocol = GitProtocol.of(project.getGitProtocol());
         switch (gitProtocol) {
             case HTTPS:
-                UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(project.getUserName(), project.getPassword());
-                transportCommand.setCredentialsProvider(credentialsProvider);
+                if (!StringUtils.isAllEmpty(project.getUserName(), project.getPassword())) {
+                    UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(project.getUserName(), project.getPassword());
+                    transportCommand.setCredentialsProvider(credentialsProvider);
+                }
                 break;
             case SSH:
                 transportCommand.setTransportConfigCallback(transport -> {
@@ -101,23 +120,6 @@ public class GitUtils {
             default:
                 throw new IllegalStateException("[StreamPark] git setCredentials: unsupported protocol type");
         }
-    }
-
-    public static List<String> getBranchList(Project project) throws GitAPIException {
-        LsRemoteCommand command = Git.lsRemoteRepository()
-            .setRemote(project.getUrl())
-            .setHeads(true);
-        setCredentials(command, project);
-        Collection<Ref> refList = command.call();
-        List<String> branchList = new ArrayList<>(4);
-        for (Ref ref : refList) {
-            String refName = ref.getName();
-            if (refName.startsWith(Constants.R_HEADS)) {
-                String branchName = refName.replace(Constants.R_HEADS, "");
-                branchList.add(branchName);
-            }
-        }
-        return branchList;
     }
 
 }

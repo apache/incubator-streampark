@@ -236,6 +236,7 @@ export const useProject = () => {
       const res = await gitCheck({
         url: values.url,
         branches: values.branches,
+        gitProtocol: values.gitProtocol,
         userName: values.userName || null,
         password: values.password || null,
         rsaPath: values.rsaPath || null,
