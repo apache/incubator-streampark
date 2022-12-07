@@ -55,13 +55,3 @@ export const buildStateMap = {
     label: t('flink.project.projectStatus.failed'),
   },
 };
-
-export enum ProjectType {
-  Flink = 1,
-  Spark = 2,
-}
-
-export enum GitProtocol {
-  https = 1,
-  ssh = 2,
-}

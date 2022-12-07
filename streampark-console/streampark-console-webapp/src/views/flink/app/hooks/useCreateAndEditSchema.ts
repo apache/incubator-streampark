@@ -254,10 +254,10 @@ export const useCreateAndEditSchema = (
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         rules: [
-          { 
-            required: true, 
+          {
+            required: true,
             message: t('flink.app.addAppTips.kubernetesClusterIdRequire'),
-            pattern:/^[a-z0-9]([a-z0-9_\.]+)?[a-z0-9]$/
+            pattern: /^[a-z0-9]([a-z0-9_\.]+)?[a-z0-9]$/,
           },
         ],
       },

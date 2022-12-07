@@ -24,6 +24,7 @@ import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 import { filterOption } from '../app/utils';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { GitProtocolEnum } from '/@/enums/projectEnum';
 
 const { t } = useI18n();
 export const useProject = () => {
@@ -77,9 +78,7 @@ export const useProject = () => {
           showSearch: true,
           optionFilterProp: 'children',
           filterOption,
-          options: [
-            { label: 'GitHub/GitLab', value: 1, disabled: false }
-          ],
+          options: [{ label: 'GitHub/GitLab', value: 1, disabled: false }],
           placeholder: t('flink.project.form.cvsPlaceholder'),
         },
         rules: [
@@ -99,8 +98,8 @@ export const useProject = () => {
           optionFilterProp: 'children',
           filterOption,
           options: [
-            { label: 'http/https', value: 1},
-            { label: 'ssh', value: 2},
+            { label: 'http/https', value: 1 },
+            { label: 'ssh', value: 2 },
           ],
           placeholder: t('flink.project.form.gitProtocolPlaceholder'),
         },
@@ -127,9 +126,19 @@ export const useProject = () => {
         ],
       },
       {
+        field: 'rsaPath',
+        label: t('flink.project.form.rsaPath'),
+        component: 'Input',
+        ifShow: ({ values }) => values.gitProtocol == GitProtocolEnum.SSH,
+        componentProps: {
+          placeholder: t('flink.project.form.rsaPathPlaceholder'),
+        },
+      },
+      {
         field: 'userName',
         label: t('flink.project.form.userName'),
         component: 'Input',
+        ifShow: ({ values }) => values.gitProtocol == GitProtocolEnum.HTTPS,
         componentProps: {
           placeholder: t('flink.project.form.userNamePlaceholder'),
         },
@@ -140,14 +149,6 @@ export const useProject = () => {
         component: 'InputPassword',
         componentProps: {
           placeholder: t('flink.project.form.passwordPlaceholder'),
-        },
-      },
-      {
-        field: 'rsaPath',
-        label: t('flink.project.form.rsaPath'),
-        component: 'Input',
-        componentProps: {
-          placeholder: t('flink.project.form.rsaPathPlaceholder'),
         },
       },
       {
