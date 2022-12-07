@@ -27,6 +27,7 @@ import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.FileUtils;
@@ -34,6 +35,7 @@ import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
+import org.apache.streampark.console.core.enums.GitProtocol;
 import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -104,7 +106,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 return response.message("Add project failed").data(false);
             }
         } else {
-            return response.message("A project with this name already exists, adding a task failed").data(false);
+            throw new ApiAlertException("project name already exists,add project failed");
         }
     }
 
@@ -119,11 +121,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             project.setName(projectParam.getName());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
+            project.setGitProtocol(projectParam.getGitProtocol());
+            project.setRsaPath(projectParam.getRsaPath());
             project.setUserName(projectParam.getUserName());
             project.setPassword(projectParam.getPassword());
             project.setPom(projectParam.getPom());
             project.setDescription(projectParam.getDescription());
             project.setBuildArgs(projectParam.getBuildArgs());
+            if (GitProtocol.SSH.equals(GitProtocol.of(project.getGitProtocol()))) {
+                project.setUserName(null);
+            } else {
+                project.setRsaPath(null);
+            }
             if (projectParam.getBuildState() != null) {
                 project.setBuildState(projectParam.getBuildState());
                 if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
@@ -196,7 +205,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 List<String> list = new ArrayList<>();
                 File[] files = appHome.listFiles();
                 if (CommonUtils.notEmpty(files)) {
-                    for (File file: files) {
+                    for (File file : files) {
                         list.add(file.getName());
                     }
                 }

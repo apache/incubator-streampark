@@ -56,7 +56,7 @@
         <lombok.version>1.18.24</lombok.version>
         <xml-apis.version>1.4.01</xml-apis.version>
         <ivy.version>2.5.0</ivy.version>
-        <eclipse.jgit.version>5.13.0.202109080827-r</eclipse.jgit.version>
+        <eclipse.jgit.version>5.13.1.202206130422-r</eclipse.jgit.version>
     </properties>
 
     <dependencyManagement>
@@ -328,7 +328,7 @@
 
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit</artifactId>
+            <artifactId>org.eclipse.jgit.ssh.jsch</artifactId>
             <version>${eclipse.jgit.version}</version>
         </dependency>
 
