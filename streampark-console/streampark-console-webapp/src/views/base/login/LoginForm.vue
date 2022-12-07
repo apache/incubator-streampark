@@ -17,7 +17,7 @@
 <template>
   <div class="enter-x mb-50px text-light-50">
     <div class="text-center enter-x">
-      <img class="logo w-160px mx-auto my-20px" src="/@/assets/images/logo.png" />
+      <img class="logo w-160px mx-auto my-20px" src="/@/assets/images/logo.svg" />
     </div>
   </div>
   <Form

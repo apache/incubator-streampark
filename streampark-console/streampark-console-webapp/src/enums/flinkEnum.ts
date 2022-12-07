@@ -130,8 +130,10 @@ export enum ClusterStateEnum {
   CREATED = 0,
   /** cluster started */
   STARTED = 1,
-  /** cluster stopped */
-  STOPED = 2,
+  /** cluster canceled */
+  CANCELED = 2,
+  /** cluster lost */
+  LOST = 3,
 }
 
 export enum AppTypeEnum {
@@ -175,7 +177,7 @@ export enum UseStrategyEnum {
 
 export enum SavePointEnum {
   CHECK_POINT = 1,
-  SAVE_POINT = 2
+  SAVE_POINT = 2,
 }
 
 export enum PipelineStepEnum {

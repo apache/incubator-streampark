@@ -34,7 +34,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,6 +45,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -122,14 +122,14 @@ public class AppBuildPipeline {
     @JsonIgnore
     public Map<Integer, PipelineStepStatus> getStepStatus() {
         if (StringUtils.isBlank(stepStatusJson)) {
-            return Maps.newHashMap();
+            return Collections.emptyMap();
         }
         try {
             return JacksonUtils.read(stepStatusJson, new TypeReference<HashMap<Integer, PipelineStepStatus>>() {
             });
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
-            return Maps.newHashMap();
+            return Collections.emptyMap();
         }
     }
 
@@ -148,14 +148,14 @@ public class AppBuildPipeline {
     @JsonIgnore
     public Map<Integer, Long> getStepStatusTimestamp() {
         if (StringUtils.isBlank(stepStatusTimestampJson)) {
-            return Maps.newHashMap();
+            return Collections.emptyMap();
         }
         try {
             return JacksonUtils.read(stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
             });
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusTimestampJson, e);
-            return Maps.newHashMap();
+            return Collections.emptyMap();
         }
     }
 

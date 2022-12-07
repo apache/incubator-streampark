@@ -749,7 +749,7 @@ public class FlinkTrackingTask {
             return jobsOverview;
         } else if (ExecutionMode.REMOTE.equals(execMode) || ExecutionMode.YARN_SESSION.equals(execMode)) {
             if (application.getJobId() != null) {
-                String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + flinkUrl;
+                String remoteUrl = flinkCluster.getAddress() + "/" + flinkUrl;
                 JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
                 if (jobsOverview != null) {
                     List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
@@ -776,7 +776,7 @@ public class FlinkTrackingTask {
             return yarnRestRequest(reqURL, CheckPoints.class);
         } else if (ExecutionMode.REMOTE.equals(execMode) || ExecutionMode.YARN_SESSION.equals(execMode)) {
             if (application.getJobId() != null) {
-                String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + String.format(flinkUrl, application.getJobId());
+                String remoteUrl = flinkCluster.getAddress() + "/" + String.format(flinkUrl, application.getJobId());
                 return httpRestRequest(remoteUrl, CheckPoints.class);
             }
         }

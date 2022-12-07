@@ -23,7 +23,9 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 import { filterOption } from '../app/utils';
+import { useI18n } from '/@/hooks/web/useI18n';
 
+const { t } = useI18n();
 export const useProject = () => {
   const route = useRoute();
   const { createMessage, createErrorSwal } = useMessage();
@@ -39,18 +41,18 @@ export const useProject = () => {
     return [
       {
         field: 'name',
-        label: 'Project Name',
+        label: t('flink.project.form.projectName'),
         component: 'Input',
         rules: [{ required: true, validator: checkProjectName, trigger: 'blur' }],
-        componentProps: { placeholder: 'the project name' },
+        componentProps: { placeholder: t('flink.project.form.projectNamePlaceholder') },
       },
       {
         field: 'type',
-        label: 'Project Type',
+        label: t('flink.project.form.projectType'),
         component: 'Select',
         defaultValue: 1,
         componentProps: {
-          placeholder: 'the project type',
+          placeholder: t('flink.project.form.projectTypePlaceholder'),
           options: [
             { label: 'apache flink', value: 1, disabled: false },
             { label: 'apache spark', value: 2, disabled: true },
@@ -59,11 +61,17 @@ export const useProject = () => {
           optionFilterProp: 'children',
           filterOption,
         },
-        rules: [{ required: true, type: 'number', message: 'Project Type is required' }],
+        rules: [
+          {
+            required: true,
+            type: 'number',
+            message: t('flink.project.operationTips.projectTypeIsRequiredMessage'),
+          },
+        ],
       },
       {
         field: 'repository',
-        label: 'CVS',
+        label: t('flink.project.form.cvs'),
         component: 'Select',
         componentProps: {
           showSearch: true,
@@ -73,45 +81,56 @@ export const useProject = () => {
             { label: 'GitHub/GitLab', value: 1, disabled: false },
             { label: 'Subversion', value: 2, disabled: true },
           ],
-          placeholder: 'CVS',
+          placeholder: t('flink.project.form.cvsPlaceholder'),
         },
-        rules: [{ required: true, type: 'number', message: 'CVS is required' }],
+        rules: [
+          {
+            required: true,
+            type: 'number',
+            message: t('flink.project.operationTips.cvsIsRequiredMessage'),
+          },
+        ],
       },
       {
         field: 'url',
-        label: 'Repository URL',
+        label: t('flink.project.form.repositoryURL'),
         component: 'Input',
         componentProps: {
-          placeholder: 'The Repository URL for this project',
+          placeholder: t('flink.project.form.repositoryURLPlaceholder'),
         },
-        rules: [{ required: true, message: 'Repository URL is required' }],
+        rules: [
+          {
+            required: true,
+            message: t('flink.project.operationTips.repositoryURLIsRequiredMessage'),
+          },
+        ],
       },
       {
         field: 'userName',
-        label: 'UserName',
+        label: t('flink.project.form.userName'),
         component: 'Input',
         componentProps: {
-          placeholder: 'UserName for this project',
+          placeholder: t('flink.project.form.userNamePlaceholder'),
         },
       },
       {
         field: 'password',
-        label: 'Password',
+        label: t('flink.project.form.password'),
         component: 'InputPassword',
         componentProps: {
-          placeholder: 'Password for this project',
+          placeholder: t('flink.project.form.passwordPlaceholder'),
         },
       },
       {
         field: 'branches',
-        label: 'Branches',
+        label: t('flink.project.form.branches'),
         component: 'Select',
         required: true,
         componentProps: ({ formModel }) => {
           return {
             showSearch: true,
             filterOption,
-            placeholder: 'Select a branch',
+            placeholder: t('flink.project.form.branchesPlaceholder'),
             options: unref(branchList),
             onDropdownVisibleChange: (open: boolean) => {
               console.log('open', open);
@@ -124,35 +143,33 @@ export const useProject = () => {
       },
       {
         field: 'pom',
-        label: 'POM',
+        label: t('flink.project.form.pom'),
         component: 'Input',
         componentProps: {
-          placeholder:
-            'By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xml"',
+          placeholder: t('flink.project.form.pomPlaceholder'),
         },
         rules: [
           {
-            message:
-              'Specifies the module to compile pom.xml If it is not specified, it is found under the root path pom.xml',
+            message: t('flink.project.operationTips.pomSpecifiesModuleMessage'),
           },
         ],
       },
       {
         field: 'buildArgs',
-        label: 'Build Argument',
+        label: t('flink.project.form.buildArgs'),
         component: 'InputTextArea',
         componentProps: {
           rows: 2,
-          placeholder: 'Build Argument, e.g: -Pprod',
+          placeholder: t('flink.project.form.buildArgsPlaceholder'),
         },
       },
       {
         field: 'description',
-        label: 'description',
+        label: t('flink.project.form.description'),
         component: 'InputTextArea',
         componentProps: {
           rows: 4,
-          placeholder: 'Description for this project',
+          placeholder: t('flink.project.form.descriptionPlaceholder'),
         },
       },
     ];
@@ -171,12 +188,12 @@ export const useProject = () => {
 
   async function checkProjectName(_rule: RuleObject, value: StoreValue) {
     if (!value) {
-      return Promise.reject('The Project Name is required');
+      return Promise.reject(t('flink.project.operationTips.projectNameIsRequiredMessage'));
     }
     if (Object.keys(projectResource).length == 0 || value !== projectResource.name) {
       const res = await isExist({ name: value });
       if (res) {
-        return Promise.reject(`The Project Name is already exists. Please check`);
+        return Promise.reject(t('flink.project.operationTips.projectNameIsUniqueMessage'));
       }
     } else {
       return Promise.resolve();
@@ -209,8 +226,8 @@ export const useProject = () => {
       } else {
         createErrorSwal(
           res === 1
-            ? 'not authorized ..>﹏<.. <br><br> userName and password is required'
-            : 'authentication error ..>﹏<.. <br><br> please check userName and password',
+            ? t('flink.project.operationTips.notAuthorizedMessage')
+            : t('flink.project.operationTips.authenticationErrorMessage'),
         );
       }
     } catch (error) {

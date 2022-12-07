@@ -72,7 +72,7 @@
             from t_flink_app
             where team_id = #{teamId}
         ) t
-        where u.user_id = t.user_id
+        on u.user_id = t.user_id
     </select>
 
     <update id="clearLastTeamByUserId" parameterType="java.lang.Long">

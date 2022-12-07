@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.util.AssertUtils;
+import  org.apache.streampark.common.util.AssertUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanMap;
@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -637,4 +638,12 @@ public final class CommonUtils implements Serializable {
         }
     }
 
+    public static boolean isLegalUrl(String url) {
+        try {
+            new URI(url);
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
 }

@@ -29,7 +29,9 @@ export const userDetail = (
 ) => {
   const { createMessage } = useMessage();
 
-  const { copy } = useClipboard();
+  const { copy } = useClipboard({
+    legacy: true,
+  });
 
   function getConfAction(record: Recordable): ActionItem[] {
     return [

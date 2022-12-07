@@ -36,7 +36,6 @@
         <result column="dynamic_properties" jdbcType="LONGVARCHAR" property="dynamicProperties"/>
         <result column="k8s_rest_exposed_type" jdbcType="TINYINT" property="k8sRestExposedType"/>
         <result column="k8s_hadoop_integration" jdbcType="BOOLEAN" property="k8sHadoopIntegration"/>
-        <result column="flame_graph" jdbcType="BOOLEAN" property="flameGraph"/>
         <result column="k8s_conf" jdbcType="VARCHAR" property="k8sConf"/>
         <result column="resolve_order" jdbcType="INTEGER" property="resolveOrder"/>
         <result column="exception" jdbcType="LONGVARCHAR" property="exception"/>
@@ -47,7 +46,12 @@
     <select id="existsByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.String">
         select count(1)
         from t_flink_cluster
-        where cluster_id=#{clusterId}
+        <where>
+            cluster_id=#{clusterId}
+            <if test="id != null">
+                and id &lt;&gt; #{id}
+            </if>
+        </where>
         limit 1
     </select>
 

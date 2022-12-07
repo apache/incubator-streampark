@@ -58,8 +58,7 @@ spec:
               protocol: TCP
           securityContext:
             privileged: false
-{{/*          command: ["bash","bin/startup.sh"]*/}}
-          command: ["bash","-c","while true; do sleep 3600; done"]
+          command: ["bash","-c","bash bin/startup.sh"]
           volumeMounts:
             - name: volume-docker
               mountPath: /var/run/docker.sock
@@ -73,6 +72,12 @@ spec:
             items:
               - key: application.yml
                 path: application.yml
+              - key: application-h2.yml
+                path: application-h2.yml
+              - key: application-mysql.yml
+                path: application-mysql.yml
+              - key: application-pgsql.yml
+                path: application-pgsql.yml
               - key: logback-spring.xml
                 path: logback-spring.xml
               - key: kerberos.yml

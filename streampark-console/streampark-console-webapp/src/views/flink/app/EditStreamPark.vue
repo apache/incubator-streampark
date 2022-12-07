@@ -48,7 +48,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
-  import { ClusterStateEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
+  import { JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const go = useGo();
@@ -77,7 +77,6 @@
     alerts,
     flinkEnvs,
     flinkSql,
-    flinkClusters,
     getEditStreamParkFormSchema,
     registerDifferentDrawer,
     suggestions,
@@ -124,7 +123,6 @@
         flinkClusterId: app.flinkClusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
-        yarnSessionClusterId: app.yarnSessionClusterId,
         ...resetParams,
       };
       console.log('resetParams', resetParams);
@@ -155,10 +153,10 @@
   async function handleAppUpdate(values) {
     try {
       submitLoading.value = true;
-      if (app.jobType == 1) {
+      if (app.jobType == JobTypeEnum.JAR) {
         handleSubmitCustomJob(values);
       } else {
-        if (app.jobType == 2) {
+        if (app.jobType == JobTypeEnum.SQL) {
           if (values.flinkSql == null || values.flinkSql.trim() === '') {
             createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
           } else {
@@ -194,17 +192,6 @@
         Object.assign(dependency, {
           jar: unref(uploadJars),
         });
-      }
-      if (values.yarnSessionClusterId) {
-        const cluster =
-          flinkClusters.value.filter(
-            (c) =>
-              c.clusterId === values.yarnSessionClusterId &&
-              c.clusterState === ClusterStateEnum.STARTED,
-          )[0] || null;
-        values.clusterId = cluster.id;
-        values.flinkClusterId = cluster.id;
-        values.yarnSessionClusterId = cluster.clusterId;
       }
       let config = values.configOverride;
       if (config != null && config.trim() !== '') {
@@ -244,18 +231,6 @@
         config = encryptByBase64(config);
       } else {
         config = null;
-      }
-      if (values.yarnSessionClusterId) {
-        const cluster =
-          flinkClusters.value.filter((c) => {
-            return (
-              c.clusterId === values.yarnSessionClusterId &&
-              c.clusterState === ClusterStateEnum.STARTED
-            );
-          })[0] || null;
-        values.clusterId = cluster.id;
-        values.flinkClusterId = cluster.id;
-        values.yarnSessionClusterId = cluster.clusterId;
       }
       const configId = values.strategy == UseStrategyEnum.USE_EXIST ? app.configId : null;
       const params = {

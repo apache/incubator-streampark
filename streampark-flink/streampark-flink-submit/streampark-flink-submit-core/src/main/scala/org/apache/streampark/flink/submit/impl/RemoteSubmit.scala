@@ -30,7 +30,6 @@ import java.io.File
 import java.lang.{Integer => JavaInt}
 import scala.util.{Failure, Success, Try}
 
-
 /**
  * Submit Job to Remote Cluster
  */
@@ -41,16 +40,6 @@ object RemoteSubmit extends FlinkSubmitTrait {
    * @param flinkConfig
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
-    flinkConfig
-      .safeSet(RestOptions.ADDRESS, submitRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet[JavaInt](RestOptions.PORT, submitRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
-
-    logInfo(
-      s"""
-         |------------------------------------------------------------------
-         |Effective submit configuration: $flinkConfig
-         |------------------------------------------------------------------
-         |""".stripMargin)
   }
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
@@ -62,8 +51,8 @@ object RemoteSubmit extends FlinkSubmitTrait {
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, cancelRequest.executionMode.getName)
-      .safeSet(RestOptions.ADDRESS, cancelRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet[JavaInt](RestOptions.PORT, cancelRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
+      .safeSet(RestOptions.ADDRESS, cancelRequest.properties.get(RestOptions.ADDRESS.key()).toString)
+      .safeSet[JavaInt](RestOptions.PORT, cancelRequest.properties.get(RestOptions.PORT.key()).toString.toInt)
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -76,7 +65,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
     try {
       client = standAloneDescriptor._2.retrieve(standAloneDescriptor._1).getClusterClient
       val jobID = JobID.fromHexString(cancelRequest.jobId)
-      val actionResult = cancelJob(cancelRequest, jobID, client)
+      val actionResult = super.cancelJob(cancelRequest, jobID, client)
       CancelResponse(actionResult)
     } catch {
       case e: Exception =>

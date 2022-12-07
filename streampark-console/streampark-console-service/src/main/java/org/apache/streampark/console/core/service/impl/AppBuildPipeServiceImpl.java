@@ -73,7 +73,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +83,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -163,7 +163,7 @@ public class AppBuildPipeServiceImpl
         // save snapshot of pipeline to db when status of pipeline was changed.
         pipeline.registerWatcher(new PipeWatcher() {
             @Override
-            public void onStart(PipeSnapshot snapshot) throws Exception {
+            public void onStart(PipeSnapshot snapshot) {
                 AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
                 saveEntity(buildPipeline);
 
@@ -442,19 +442,16 @@ public class AppBuildPipeServiceImpl
     @Override
     public Map<Long, PipelineStatus> listPipelineStatus(List<Long> appIds) {
         if (CollectionUtils.isEmpty(appIds)) {
-            return Maps.newHashMap();
+            return Collections.emptyMap();
         }
         LambdaQueryWrapper<AppBuildPipeline> queryWrapper = new LambdaQueryWrapper<AppBuildPipeline>()
-            .select(AppBuildPipeline::getAppId, AppBuildPipeline::getPipeStatusCode)
             .in(AppBuildPipeline::getAppId, appIds);
-        List<Map<String, Object>> rMaps = baseMapper.selectMaps(queryWrapper);
-        if (CollectionUtils.isEmpty(rMaps)) {
-            return Maps.newHashMap();
-        }
 
-        return rMaps.stream().collect(Collectors.toMap(
-            e -> (Long) e.get("app_id"),
-            e -> PipelineStatus.of((Integer) e.get("pipeStatusCode"))));
+        List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
+        if (CollectionUtils.isEmpty(appBuildPipelines)) {
+            return Collections.emptyMap();
+        }
+        return appBuildPipelines.stream().collect(Collectors.toMap(e -> e.getAppId(), e -> e.getPipelineStatus()));
     }
 
     @Override

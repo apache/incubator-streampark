@@ -20,8 +20,14 @@ package org.apache.streampark.console.base.config;
 import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLPrepareInterceptor;
 import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLQueryInterceptor;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
+import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -63,4 +69,25 @@ public class MybatisConfig {
         return new PostgreSQLPrepareInterceptor();
     }
 
+    /**
+     * mybatis plus setting
+     *
+     * @return MybatisPlusPropertiesCustomizer
+     */
+    @Bean
+    public MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer() {
+        return properties -> {
+            properties.setTypeAliasesPackage("org.apache.streampark.console.*.entity");
+            properties.setMapperLocations(new String[]{"classpath:mapper/*/*.xml"});
+            MybatisConfiguration mybatisConfiguration = new MybatisConfiguration();
+            mybatisConfiguration.setJdbcTypeForNull(JdbcType.NULL);
+            properties.setConfiguration(mybatisConfiguration);
+            GlobalConfig globalConfig = GlobalConfigUtils.getGlobalConfig(mybatisConfiguration);
+            GlobalConfig.DbConfig dbConfig = globalConfig.getDbConfig();
+            dbConfig.setIdType(IdType.AUTO);
+            // close mybatis-plus banner
+            globalConfig.setBanner(false);
+            properties.setGlobalConfig(globalConfig);
+        };
+    }
 }

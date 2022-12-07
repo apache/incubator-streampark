@@ -16,7 +16,6 @@
  */
 import { ref, watch, computed } from 'vue';
 import { useMonaco, isDark } from '/@/hooks/web/useMonaco';
-import { useThrottleFn } from '@vueuse/core';
 
 export const useLog = () => {
   const logRef = ref<HTMLElement>();
@@ -64,18 +63,16 @@ export const useLog = () => {
       if (!logRef.value) return;
       const editorHeight = logRef.value.clientHeight;
       editor = await getInstance();
-      editor?.onDidScrollChange(
-        useThrottleFn((e: any) => {
-          if (e.scrollTop > 0) {
-            if (editorHeight + e.scrollTop + 15 >= e.scrollHeight) {
-              autoScroll.value = true;
-            } else {
-              autoScroll.value = false;
-              console.log('close');
-            }
+      editor?.onDidScrollChange((e: any) => {
+        if (e.scrollTop > 0) {
+          if (editorHeight + e.scrollTop + 15 >= e.scrollHeight) {
+            autoScroll.value = true;
+          } else {
+            autoScroll.value = false;
+            console.log('close');
           }
-        }, 500),
-      );
+        }
+      });
     },
   );
   function setAutoScroll(scroll: boolean) {
@@ -130,8 +127,25 @@ export const useLog = () => {
   function handleRevealLine() {
     if (!autoScroll.value) return;
     if (editor) {
-      editor.revealLine(editor.getModel()?.getLineCount() || 0);
+      setTimeout(() => {
+        editor.revealLine(editor.getModel()?.getLineCount() + 1 || 0);
+      }, 500);
     }
   }
-  return { setAutoScroll, getInstance, getAutoScroll, setContent, logRef, handleRevealLine };
+  function getLineCount() {
+    if (editor) {
+      return editor.getModel()?.getLineCount() || 0;
+    } else {
+      return 0;
+    }
+  }
+  return {
+    setAutoScroll,
+    getInstance,
+    getAutoScroll,
+    setContent,
+    logRef,
+    handleRevealLine,
+    getLineCount,
+  };
 };

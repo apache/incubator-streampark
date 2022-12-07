@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.submit.impl
 
-import org.apache.streampark.common.conf.ConfigConst.KEY_YARN_APP_ID
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.submit.`trait`.YarnSubmitTrait
 import org.apache.streampark.flink.submit.bean._
@@ -49,8 +48,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
-      .safeSet(YarnConfigOptions.APPLICATION_ID, submitRequest.extraParameter.get(KEY_YARN_APP_ID).toString)
-
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -116,6 +113,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
 
       client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString
+      val jobManagerUrl = client.getWebInterfaceURL
 
       logInfo(
         s"""
@@ -123,7 +121,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
            |Flink Job Started: jobId: $jobId , applicationId: ${yarnClusterId.toString}
            |__________________________________________________________________
            |""".stripMargin)
-      SubmitResponse(yarnClusterId.toString, flinkConfig.toMap, jobId)
+      SubmitResponse(yarnClusterId.toString, flinkConfig.toMap, jobId, jobManagerUrl)
     } catch {
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
@@ -138,8 +136,9 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
-    flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.extraParameter.get(KEY_YARN_APP_ID).toString)
-    flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+    flinkConfig
+      .safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.clusterId)
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -154,7 +153,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       clusterDescriptor = yarnClusterDescriptor._2
       client = clusterDescriptor.retrieve(yarnClusterDescriptor._1).getClusterClient
       val jobID = JobID.fromHexString(cancelRequest.jobId)
-      val actionResult = cancelJob(cancelRequest, jobID, client)
+      val actionResult = super.cancelJob(cancelRequest, jobID, client)
       CancelResponse(actionResult)
     } catch {
       case e: Exception => logError(s"stop flink yarn session job fail")
@@ -173,18 +172,15 @@ object YarnSessionSubmit extends YarnSubmitTrait {
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
          |    clusterId        : ${deployRequest.clusterId}
-         |    resolveOrder     : ${deployRequest.resolveOrder.getName}
-         |    flameGraph       : ${deployRequest.flameGraph != null}
          |    properties       : ${deployRequest.properties.mkString(" ")}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     var clusterDescriptor: YarnClusterDescriptor = null
     var client: ClusterClient[ApplicationId] = null
     try {
-      val flinkConfig = extractConfiguration(deployRequest.flinkVersion.flinkHome,
-        deployRequest.properties,
-        deployRequest.extraParameter,
-        deployRequest.resolveOrder)
+      val flinkConfig = extractConfiguration(
+        deployRequest.flinkVersion.flinkHome,
+        deployRequest.properties)
       setConfig(deployRequest, flinkConfig)
       val yarnClusterDescriptor = getSessionClusterDeployDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
@@ -223,7 +219,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     var client: ClusterClient[ApplicationId] = null
     try {
       val flinkConfig = getFlinkDefaultConfiguration(shutDownRequest.flinkVersion.flinkHome)
-      shutDownRequest.extraParameter.foreach(m => m._2 match {
+      shutDownRequest.properties.foreach(m => m._2 match {
         case v if v != null => flinkConfig.setString(m._1, m._2.toString)
         case _ =>
       })
@@ -233,7 +229,8 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       clusterDescriptor = yarnClusterDescriptor._2
       if (FinalApplicationStatus.UNDEFINED.equals(clusterDescriptor.getYarnClient.getApplicationReport(ApplicationId.fromString(shutDownRequest.clusterId)).getFinalApplicationStatus)) {
         val clientProvider = clusterDescriptor.retrieve(yarnClusterDescriptor._1)
-        clientProvider.getClusterClient.shutDownCluster()
+        client = clientProvider.getClusterClient
+        client.shutDownCluster()
       }
       logInfo(s"the ${shutDownRequest.clusterId}'s final status is ${clusterDescriptor.getYarnClient.getApplicationReport(ConverterUtils.toApplicationId(shutDownRequest.clusterId)).getFinalApplicationStatus}")
       ShutDownResponse()

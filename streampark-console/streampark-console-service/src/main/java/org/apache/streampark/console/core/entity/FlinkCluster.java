@@ -21,10 +21,17 @@ import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
+import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
+import org.apache.streampark.common.util.YarnUtils;
+import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.console.core.metrics.flink.Overview;
+import org.apache.streampark.flink.submit.FlinkSubmitter;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -33,11 +40,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.configuration.CoreOptions;
 import org.apache.http.client.config.RequestConfig;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +59,7 @@ public class FlinkCluster implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String address;
 
     private String clusterId;
@@ -83,8 +93,6 @@ public class FlinkCluster implements Serializable {
 
     private Integer k8sRestExposedType;
 
-    private Boolean flameGraph;
-
     private String k8sConf;
 
     private Integer resolveOrder;
@@ -112,60 +120,89 @@ public class FlinkCluster implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public Map<String, Object> getOptionMap() {
-        Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
+        if (StringUtils.isBlank(this.options)) {
+            return Collections.emptyMap();
+        }
+        Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
         if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
             map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
-            map.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.yarnQueue);
+            if (StringUtils.isNotEmpty(this.yarnQueue)) {
+                map.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.yarnQueue);
+            }
         }
         map.entrySet().removeIf(entry -> entry.getValue() == null);
         return map;
     }
 
     @JsonIgnore
-    public URI getActiveAddress() {
-        String[] array = address.split(",");
-        for (String url : array) {
-            try {
-                HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setSocketTimeout(2000).build());
-                return new URI(url);
-            } catch (Exception ignored) {
-                //
-            }
+    public URI getRemoteURI() {
+        try {
+            HttpClientUtils.httpGetRequest(this.address, RequestConfig.custom().setSocketTimeout(2000).build());
+            return new URI(address);
+        } catch (Exception ignored) {
+            //
         }
         return null;
     }
 
-    public boolean verifyConnection() {
-        if (address == null) {
-            return false;
-        }
-        String[] array = address.split(",");
-        for (String url : array) {
-            try {
-                new URI(url);
-            } catch (Exception ignored) {
+    public boolean verifyClusterConnection() {
+        if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
+            if (address == null) {
                 return false;
             }
+            //1) check url is Legal
+            if (!CommonUtils.isLegalUrl(address)) {
+                return false;
+            }
+            //2) check connection
             try {
-                HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(2000).build());
+                String restUrl = address + "/overview";
+                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                JacksonUtils.read(result, Overview.class);
                 return true;
             } catch (Exception ignored) {
                 //
             }
+            return false;
+        } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+            try {
+                String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
+                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                JacksonUtils.read(result, Overview.class);
+                return true;
+            } catch (Exception ignored) {
+                //
+            }
+            return false;
         }
         return false;
     }
 
     @JsonIgnore
-    public Map<String, String> getFlinkConfig() throws MalformedURLException, JsonProcessingException {
-        URI activeAddress = this.getActiveAddress();
-        String restUrl = activeAddress.toURL() + "/jobmanager/config";
+    public Map<String, String> getFlinkConfig() throws JsonProcessingException {
+        String restUrl = this.address + "/jobmanager/config";
         String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+        if (StringUtils.isEmpty(json)) {
+            return Collections.emptyMap();
+        }
         List<Map<String, String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
         });
         Map<String, String> config = new HashMap<>(0);
         confList.forEach(k -> config.put(k.get("key"), k.get("value")));
         return config;
+    }
+
+    @JsonIgnore
+    public Map<String, Object> getProperties() {
+        Map<String, Object> map = new HashMap<>();
+        Map<String, String> dynamicProperties = FlinkSubmitter.extractDynamicPropertiesAsJava(this.getDynamicProperties());
+        map.putAll(this.getOptionMap());
+        map.putAll(dynamicProperties);
+        ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
+        if (resolveOrder != null) {
+            map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
+        }
+        return map;
     }
 
 }

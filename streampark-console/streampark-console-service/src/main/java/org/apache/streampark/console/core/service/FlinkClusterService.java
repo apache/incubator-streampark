@@ -24,19 +24,19 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface FlinkClusterService extends IService<FlinkCluster> {
 
-    String check(FlinkCluster flinkCluster);
+    ResponseResult check(FlinkCluster flinkCluster);
 
-    ResponseResult create(FlinkCluster flinkCluster);
+    Boolean create(FlinkCluster flinkCluster);
 
-    ResponseResult delete(FlinkCluster flinkCluster);
+    void delete(FlinkCluster flinkCluster);
 
-    ResponseResult update(FlinkCluster flinkCluster);
+    void update(FlinkCluster flinkCluster);
 
-    ResponseResult start(FlinkCluster flinkCluster);
+    void start(FlinkCluster flinkCluster);
 
-    ResponseResult shutdown(FlinkCluster flinkCluster);
+    void shutdown(FlinkCluster flinkCluster);
 
-    Boolean existsByClusterId(String clusterId);
+    Boolean existsByClusterId(String clusterId, Long id);
 
     Boolean existsByClusterName(String clusterName, Long id);
 }

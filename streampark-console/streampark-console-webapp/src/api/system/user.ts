@@ -146,7 +146,8 @@ export function fetchUserTypes() {
  * @param {String} password password
  */
 export function fetchUserPasswordUpdate(data: {
-  username: string;
+  userId: string | number;
+  oldPassword: string;
   password: string;
 }): Promise<boolean> {
   return defHttp.put({

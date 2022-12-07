@@ -85,6 +85,8 @@ public class User implements Serializable {
 
     private String avatar;
 
+    private transient String oldPassword;
+
     private transient String sortField;
 
     private transient String sortOrder;

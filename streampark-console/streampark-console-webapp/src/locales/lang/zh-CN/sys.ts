@@ -108,6 +108,8 @@ export default {
     // placeholder
     accountPlaceholder: '请输入账号',
     passwordPlaceholder: '请输入密码',
+    oldPasswordPlaceholder: '请输入当前密码',
+    newPasswordPlaceholder: '请输入新密码',
     confirmPasswordPlaceholder: '请输入确认密码',
     smsPlaceholder: '请输入验证码',
     mobilePlaceholder: '请输入手机号码',
@@ -116,6 +118,8 @@ export default {
 
     userName: '账号',
     password: '密码',
+    oldPassword: '当前密码',
+    newPassword: '新密码',
     confirmPassword: '确认密码',
     email: '邮箱',
     smsCode: '短信验证码',

@@ -32,7 +32,6 @@ services:
     networks:
       - streampark
 
-
   jobmanager:
     image: ${FLINK_BASE_IMAGE}
     ports:
@@ -45,7 +44,6 @@ services:
     privileged: true
     networks:
       - streampark
-
 
   taskmanager:
     image: ${FLINK_BASE_IMAGE}

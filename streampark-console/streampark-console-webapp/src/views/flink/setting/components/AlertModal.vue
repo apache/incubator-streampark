@@ -52,30 +52,37 @@
     schemas: [
       {
         field: 'alertName',
-        label: 'Alert Name',
+        label: t('flink.setting.alert.alertName'),
         component: 'Input',
-        componentProps: { allowClear: true, placeholder: 'Please enter alert name' },
+        componentProps: {
+          allowClear: true,
+          placeholder: t('flink.setting.alert.alertNamePlaceHolder'),
+        },
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, 'the alert name, e.g: StreamPark team alert'),
+          h('span', { class: 'conf-switch' }, t('flink.setting.alert.alertNameTips')),
         dynamicRules: () => {
           return [
             {
               validator: async (_, value) => {
                 if (value === null || value === undefined || value === '') {
-                  return Promise.reject('Alert Name is required');
+                  return Promise.reject(
+                    t('flink.setting.alert.alertNameErrorMessage.alertNameIsRequired'),
+                  );
                 } else {
                   if (!alertId.value) {
                     try {
                       const isExist = await fetchExistsAlert({ alertName: value });
                       if (isExist) {
                         return Promise.reject(
-                          'Alert Name must be unique. The alert name already exists',
+                          t('flink.setting.alert.alertNameErrorMessage.alertNameAlreadyExists'),
                         );
                       } else {
                         return Promise.resolve();
                       }
                     } catch (error) {
-                      return Promise.reject('error happened ,caused by: ' + error);
+                      return Promise.reject(
+                        t('flink.setting.alert.alertNameErrorMessage.alertConfigFailed') + error,
+                      );
                     }
                   }
                 }
@@ -195,7 +202,7 @@
   >
     <template #title>
       <SvgIcon name="alarm" size="25" />
-      Alert Setting
+      {{ t('flink.setting.alert.alertSetting') }}
     </template>
     <BasicForm @register="registerForm" class="!mt-15px">
       <template #type="{ model, field }">
@@ -222,19 +229,27 @@
         <template v-if="(alertType || []).includes('1')">
           <Divider>
             <SvgIcon name="mail" size="20" />
-            E-mail
+            {{ t('flink.setting.alert.email') }}
           </Divider>
           <FormItem
-            label="Alert Email"
+            :label="t('flink.setting.alert.alertEmail')"
             :rules="[
-              { required: true, message: 'email address is required', trigger: 'blur' },
-              { type: 'email', message: 'Incorrect format', trigger: 'blur' },
+              {
+                required: true,
+                message: t('flink.setting.alert.alertEmailAddressIsRequired'),
+                trigger: 'blur',
+              },
+              {
+                type: 'email',
+                message: t('flink.setting.alert.alertEmailFormatIsInvalid'),
+                trigger: 'blur',
+              },
             ]"
             name="alertEmail"
           >
             <Input
               v-model:value="model[field]"
-              placeholder="Please enter email,separate multiple emails with comma(,)"
+              :placeholder="t('flink.setting.alert.alertEmailPlaceholder')"
             />
           </FormItem>
         </template>
@@ -243,34 +258,38 @@
       <template #alertDingURL="{ model, field }" v-if="(alertType || []).includes('2')">
         <Divider>
           <SvgIcon name="dingtalk" size="20" />
-          Ding Talk
+          {{ t('flink.setting.alert.dingTalk') }}
         </Divider>
         <FormItem
-          label="DingTalk Url"
+          :label="t('flink.setting.alert.dingTalkUrl')"
           name="alertDingURL"
           :rules="[
             {
               pattern:
                 /^((https?):\/\/)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-z]{2,6}\/?/,
-              message: 'Incorrect format',
+              message: t('flink.setting.alert.dingTalkUrlFormatIsInvalid'),
               trigger: 'blur',
             },
           ]"
         >
-          <Input v-model:value="model[field]" placeholder="Please enter DingTask Url" allowClear />
+          <Input
+            v-model:value="model[field]"
+            :placeholder="t('flink.setting.alert.dingTalkPlaceholder')"
+            allowClear
+          />
         </FormItem>
       </template>
 
       <!-- WeChat -->
       <template #weToken="{ model, field, schema }" v-if="(alertType || []).includes('4')">
-        <Divider><SvgIcon name="wecom" size="20" /> WeChat </Divider>
+        <Divider><SvgIcon name="wecom" size="20" /> {{ t('flink.setting.alert.weChat') }} </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
           <InputTextArea v-model:value="model[field]" v-bind="schema.componentProps" />
         </FormItem>
       </template>
 
       <template #alertSms="{ model, field, schema }" v-if="(alertType || []).includes('8')">
-        <Divider><SvgIcon name="message" size="20" /> SMS </Divider>
+        <Divider><SvgIcon name="message" size="20" /> {{ t('flink.setting.alert.sms') }} </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
           <Input v-model:value="model[field]" v-bind="schema.componentProps" />
         </FormItem>
@@ -278,11 +297,11 @@
 
       <!-- lark -->
       <template #larkToken="{ model, field, schema }" v-if="(alertType || []).includes('16')">
-        <Divider><SvgIcon name="lark" size="20" /> Lark </Divider>
+        <Divider><SvgIcon name="lark" size="20" /> {{ t('flink.setting.alert.lark') }} </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
           <Input
             v-model:value="model[field]"
-            placeholder="Please enter the access token of LarkTalk"
+            :placeholder="t('flink.setting.alert.larkTokenPlaceholder')"
             allow-clear
           />
         </FormItem>

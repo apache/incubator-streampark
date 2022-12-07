@@ -327,6 +327,7 @@
   .@{prefix-cls} {
     .ant-form-item {
       margin-bottom: 30px;
+
       &-label label::after {
         margin: 0 6px 0 2px;
       }

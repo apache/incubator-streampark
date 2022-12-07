@@ -18,12 +18,12 @@
   <PageWrapper contentFullHeight>
     <div class="card-container">
       <Tabs type="card" class="setting" v-model:activeKey="activeKey">
-        <TabPane tab="System Setting" key="system">
+        <TabPane :tab="t('flink.setting.settingTab.systemSetting')" key="system">
           <Card :bordered="false" class="system-setting">
             <SystemSetting />
           </Card>
         </TabPane>
-        <TabPane tab="Alert Setting" key="alert">
+        <TabPane :tab="t('flink.setting.settingTab.alertSetting')" key="alert">
           <Card
             :bordered="false"
             class="system-setting !bg-transparent"
@@ -32,12 +32,12 @@
             <AlertSetting />
           </Card>
         </TabPane>
-        <TabPane tab="Flink Home" key="flink">
+        <TabPane :tab="t('flink.setting.settingTab.flinkHome')" key="flink">
           <Card :bordered="false" class="system-setting">
             <FlinkEnvSetting />
           </Card>
         </TabPane>
-        <TabPane tab="Flink Cluster" key="cluster">
+        <TabPane :tab="t('flink.setting.settingTab.flinkCluster')" key="cluster">
           <Card :bordered="false" class="system-setting">
             <FlinkClusterSetting />
           </Card>
@@ -55,7 +55,9 @@
   import FlinkEnvSetting from './components/FlinkEnvSetting.vue';
   import FlinkClusterSetting from './components/FlinkClusterSetting.vue';
   import { useRoute } from 'vue-router';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
+  const { t } = useI18n();
   const TabPane = Tabs.TabPane;
   const route = useRoute();
 

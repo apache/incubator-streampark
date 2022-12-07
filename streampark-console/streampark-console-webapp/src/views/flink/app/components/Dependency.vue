@@ -18,7 +18,6 @@
   import { computed, defineComponent, onMounted, reactive, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { toPomString } from '../utils/Pom';
-  import { isK8sExecMode } from '../utils';
 
   export default defineComponent({
     name: 'Dependency',
@@ -29,7 +28,7 @@
   import { getMonacoOptions } from '../data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  import { Select, Tabs, Alert, Tag, Space } from 'ant-design-vue';
+  import { Select, Tabs, Alert, Tag, Space, Form } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchUpload } from '/@/api/flink/app/app';
   import { fetchUploadJars } from '/@/api/flink/app/flinkHistory';
@@ -53,6 +52,7 @@
   const selectedHistoryUploadJars = ref<string[]>([]);
   const dependencyRecords = ref<DependencyType[]>([]);
   const uploadJars = ref<string[]>([]);
+  const historyUploadJars = ref<string[]>([]);
   const loading = ref(false);
 
   const emit = defineEmits(['update:value']);
@@ -208,11 +208,11 @@
   async function handleReloadHistoryUploads() {
     selectedHistoryUploadJars.value = [];
     const res = await fetchUploadJars();
-    uploadJars.value = res;
+    historyUploadJars.value = res;
   }
 
   const filteredHistoryUploadJarsOptions = computed(() => {
-    return uploadJars.value.filter((o) => !Reflect.has(dependency.jar, o));
+    return historyUploadJars.value.filter((o) => !Reflect.has(dependency.jar, o));
   });
   function handleRemoveJar(jar: string) {
     delete dependency.jar[jar];
@@ -242,6 +242,14 @@
       dependency.jar[fileName] = fileName;
     });
   }
+  function addHistoryUploadJar(item: string) {
+    dependency.jar[item] = item;
+    handleUpdateDependency();
+  }
+  function deleteHistoryUploadJar(item: string) {
+    delete dependency.jar[item];
+    handleUpdateDependency();
+  }
   onMounted(() => {
     handleReloadHistoryUploads();
   });
@@ -270,21 +278,28 @@
       </div>
     </TabPane>
     <TabPane key="jar" tab="Upload Jar">
-      <template v-if="isK8sExecMode(formModel?.executionMode)">
-        <Select
-          mode="multiple"
-          placeholder="Search History Uploads"
-          v-model:value="selectedHistoryUploadJars"
-          style="width: 100%"
-          :showArrow="true"
-        >
-          <SelectOption v-for="item in filteredHistoryUploadJarsOptions" :key="item" :value="item">
-            <template #suffixIcon>
-              <Icon icon="ant-design:file-done-outlined" />
-            </template>
-            {{ item }}
-          </SelectOption>
-        </Select>
+      <template v-if="filteredHistoryUploadJarsOptions.length > 0">
+        <Form.ItemRest>
+          <Select
+            mode="multiple"
+            placeholder="Search History Uploads"
+            v-model:value="selectedHistoryUploadJars"
+            @select="addHistoryUploadJar"
+            @deselect="deleteHistoryUploadJar"
+            style="width: 100%"
+          >
+            <SelectOption
+              v-for="item in filteredHistoryUploadJarsOptions"
+              :key="item"
+              :value="item"
+            >
+              <template #suffixIcon>
+                <Icon icon="ant-design:file-done-outlined" />
+              </template>
+              {{ item }}
+            </SelectOption>
+          </Select>
+        </Form.ItemRest>
       </template>
 
       <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
@@ -293,39 +308,39 @@
   <div class="dependency-box" v-if="dependencyRecords.length > 0 || uploadJars.length > 0">
     <Alert
       class="dependency-item"
-      v-for="(value, index) in dependencyRecords"
+      v-for="(dept, index) in dependencyRecords"
       :key="`dependency_${index}`"
       type="info"
-      @click="handleEditPom(value)"
+      @click="handleEditPom(dept)"
     >
       <template #message>
-        <Space @click="handleEditPom(value)" class="tag-dependency-pom">
+        <Space @click="handleEditPom(dept)" class="tag-dependency-pom">
           <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
-          {{ value.artifactId }}-{{ value.version }}.jar
+          {{ dept.artifactId }}-{{ dept.version }}.jar
           <Icon
             :size="12"
             icon="ant-design:close-outlined"
             class="icon-close cursor-pointer"
-            @click.stop="handleRemovePom(value)"
+            @click.stop="handleRemovePom(dept)"
           />
         </Space>
       </template>
     </Alert>
     <Alert
       class="dependency-item"
-      v-for="(value, index) in uploadJars"
-      :key="`upload_jars_${index}`"
+      v-for="jar in uploadJars"
+      :key="`upload_jars_${jar}`"
       type="info"
     >
       <template #message>
         <Space>
           <Tag class="tag-dependency" color="#108ee9">JAR</Tag>
-          {{ value }}
+          {{ jar }}
           <Icon
             icon="ant-design:close-outlined"
             class="icon-close cursor-pointer"
             :size="12"
-            @click="handleRemoveJar(value)"
+            @click="handleRemoveJar(jar)"
           />
         </Space>
       </template>

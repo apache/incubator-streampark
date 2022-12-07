@@ -94,11 +94,10 @@ public interface UserService extends IService<User> {
 
     /**
      * update password
-     *
-     * @param username user
-     * @param password password
+     * @param user
+     * @throws Exception
      */
-    void updatePassword(String username, String password) throws Exception;
+    void updatePassword(User user) throws Exception;
 
     /**
      * reset password

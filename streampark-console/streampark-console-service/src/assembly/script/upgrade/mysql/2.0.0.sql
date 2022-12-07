@@ -79,7 +79,9 @@ alter table `t_flink_project`
     add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
     add index `inx_team` (`team_id`) using btree;
 
-alter table `t_flink_cluster` add column `dynamic_properties` text comment 'allows specifying multiple generic configuration options' after `flink_image`;
+alter table `t_flink_cluster`
+    drop column `flame_graph`,
+    add column `dynamic_properties` text comment 'allows specifying multiple generic configuration options' after `flink_image`;
 
 -- change `update_time` to `modify_time`
 alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime not null default current_timestamp on update current_timestamp;
@@ -96,6 +98,7 @@ alter table `t_flink_savepoint` add column `chk_id` bigint after `app_id`;
 update `t_access_token` set `modify_time` = current_timestamp where `modify_time` is null;
 update `t_role` set `modify_time` = current_timestamp where `modify_time` is null;
 update `t_user` set `modify_time` = current_timestamp where `modify_time` is null;
+update `t_menu` set `modify_time` = current_timestamp where `modify_time` is null;
 
 alter table `t_app_backup` modify `create_time` datetime not null default current_timestamp;
 alter table `t_flink_app` modify `create_time` datetime not null default current_timestamp;
@@ -135,7 +138,7 @@ insert into `t_menu` values (100015, 100013, 'menu.application', '/flink/app', '
 insert into `t_menu` values (100016, 100015, 'add', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100017, 100014, 'add', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100018, 100015, 'detail app', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', 0, null, now(), now());
---insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', 1, 4, now(), now());
+-- insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', 1, 4, now(), now());
 insert into `t_menu` values (100020, 100015, 'edit flink', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100021, 100015, 'edit streampark', '/flink/app/edit_streampark', 'flink/app/EditStreamPark', 'app:update', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100022, 100014, 'build', null, null, 'project:build', null, '1', 1, null, now(), now());
@@ -225,7 +228,7 @@ insert into `t_role_menu` values (100060, 100002, 100014);
 insert into `t_role_menu` values (100061, 100002, 100016);
 insert into `t_role_menu` values (100062, 100002, 100017);
 insert into `t_role_menu` values (100063, 100002, 100018);
---insert into `t_role_menu` values (100064, 100002, 100019);
+-- insert into `t_role_menu` values (100064, 100002, 100019);
 insert into `t_role_menu` values (100065, 100002, 100020);
 insert into `t_role_menu` values (100066, 100002, 100021);
 insert into `t_role_menu` values (100067, 100002, 100022);
@@ -278,9 +281,12 @@ change column `TITLE` `setting_name` varchar(255) collate utf8mb4_general_ci def
 change column `DESCRIPTION` `description` varchar(255) collate utf8mb4_general_ci default null,
 change column `TYPE` `type` tinyint not null comment '1: input 2: boolean 3: number',
 add primary key (`setting_key`);
+
 insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker Register Image namespace', 'Docker命名空间', 1);
 insert into `t_setting` values (15, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
+insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress域名地址', 1);
 
+update t_setting set setting_key = replace(setting_key, 'streamx', 'streampark') where setting_key like 'streamx%';
 
 -- t_user
 alter table `t_user`
@@ -302,8 +308,6 @@ create table `t_variable` (
   primary key (`id`) using btree,
   unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress域名地址', 1);
 
 set foreign_key_checks = 1;
 

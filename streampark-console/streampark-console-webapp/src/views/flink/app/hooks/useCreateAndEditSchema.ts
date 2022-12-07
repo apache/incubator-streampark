@@ -221,14 +221,12 @@ export const useCreateAndEditSchema = (
         rules: [{ required: true, message: 'Flink Cluster is required' }],
       },
       {
-        field: 'yarnSessionClusterId',
-        label: t('flink.app.yarnSessionClusterId'),
+        field: 'flinkClusterId',
+        label: t('flink.app.flinkCluster'),
         component: 'Select',
-        componentProps: () => {
-          return {
-            placeholder: t('flink.app.addAppTips.yarnSessionClusterIdPlaceholder'),
-            options: getExecutionCluster(ExecModeEnum.YARN_SESSION, 'clusterId'),
-          };
+        componentProps: {
+          placeholder: t('flink.app.flinkCluster'),
+          options: getExecutionCluster(ExecModeEnum.YARN_SESSION, 'id'),
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         rules: [{ required: true, message: 'Flink Cluster is required' }],
@@ -250,12 +248,18 @@ export const useCreateAndEditSchema = (
         component: 'Input',
         componentProps: ({ formModel }) => {
           return {
-            placeholder: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder'),
+            placeholder: t('flink.app.addAppTips.kubernetesClusterIdRequire'),
             onChange: (e: ChangeEvent) => (formModel.jobName = e.target.value),
           };
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
-        rules: [{ required: true, message: 'Kubernetes clusterId is required' }],
+        rules: [
+          { 
+            required: true, 
+            message: t('flink.app.addAppTips.kubernetesClusterIdRequire'),
+            pattern:/^[a-z0-9]([a-z0-9_\.]+)?[a-z0-9]$/
+          },
+        ],
       },
       {
         field: 'clusterId',

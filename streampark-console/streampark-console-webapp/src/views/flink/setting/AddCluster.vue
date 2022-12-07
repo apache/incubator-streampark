@@ -50,31 +50,28 @@
       const params = handleSubmitParams(values);
       if (Object.keys(params).length > 0) {
         const res = await fetchCheckCluster(params);
-        if (res === 'success') {
+        const status = parseInt(res.status);
+        if (status === 0) {
           const resp = await fetchCreateCluster(params);
-          if (resp.status) {
+          if (resp) {
             Swal.fire({
               icon: 'success',
-              title: values.clusterName.concat(' create successful!'),
+              title: values.clusterName.concat(
+                t('flink.setting.cluster.operateMessage.createFlinkSessionClusterSuccessful'),
+              ),
               showConfirmButton: false,
               timer: 2000,
             });
             go('/flink/setting?activeKey=cluster');
           } else {
-            Swal.fire(resp.msg);
+            Swal.fire(
+              'Failed',
+              t('flink.setting.cluster.operateMessage.createFlinkSessionClusterFailed'),
+              'error',
+            );
           }
-        } else if (res === 'exists') {
-          Swal.fire(
-            'Failed',
-            'the cluster name: ' + values.clusterName + ' is already exists,please check',
-            'error',
-          );
         } else {
-          Swal.fire(
-            'Failed',
-            'the address is invalid or connection failure, please check',
-            'error',
-          );
+          Swal.fire('Failed', res.msg, 'error');
         }
       }
     } catch (error) {

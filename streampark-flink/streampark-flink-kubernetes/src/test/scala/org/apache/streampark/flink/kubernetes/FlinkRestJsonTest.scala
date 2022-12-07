@@ -16,8 +16,22 @@
  */
 package org.apache.streampark.flink.kubernetes
 
+import com.google.common.base.Charsets
+import com.google.common.io.Files
+import org.apache.commons.collections.CollectionUtils
+import org.apache.flink.core.fs.Path
+import org.apache.flink.runtime.history.FsJobArchivist
+import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.watcher.{Checkpoint, FlinkRestJmConfigItem, FlinkRestOverview, JobDetails}
+import org.json4s.DefaultFormats
 import org.junit.jupiter.api.Test
+import org.json4s.{JNothing, JNull}
+import org.json4s.JsonAST.JArray
+import org.json4s.jackson.JsonMethods.parse
+
+import java.io.File
+import scala.collection.JavaConversions._
+import scala.util.{Failure, Success, Try}
 
 // scalastyle:off println
 class FlinkRestJsonTest {
@@ -278,6 +292,56 @@ class FlinkRestJsonTest {
 
     val ingressMeta = IngressMeta.as(json)
     println(ingressMeta.get)
+  }
+
+  @Test def testHistoryArchives(): Unit = {
+
+    @transient
+    implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+
+    val state = Try {
+      val archivePath = new Path("src/test/resources/d933fa6c785f0db6dccc6cc05dd43bab.json")
+      val jobId = "d933fa6c785f0db6dccc6cc05dd43bab"
+      val archivedJson = FsJobArchivist.getArchivedJsons(archivePath)
+      var state: String = "FAILED"
+      if (CollectionUtils.isNotEmpty(archivedJson)) {
+        archivedJson.foreach { a =>
+          if (a.getPath == s"/jobs/$jobId/exceptions") {
+            Try(parse(a.getJson)) match {
+              case Success(ok) =>
+                val log = (ok \ "root-exception").extractOpt[String].orNull
+                if (log != null) {
+                  val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)
+                  val file = new File(path)
+                  Files.asCharSink(file, Charsets.UTF_8).write(log)
+                  println(" error path: " + path)
+                }
+              case _ =>
+            }
+          } else if (a.getPath == "/jobs/overview") {
+            Try(parse(a.getJson)) match {
+              case Success(ok) =>
+                ok \ "jobs" match {
+                  case JNothing | JNull =>
+                  case JArray(arr) =>
+                    arr.foreach(x => {
+                      val jid = (x \ "jid").extractOpt[String].orNull
+                      if (jid == jobId) {
+                        state = (x \ "state").extractOpt[String].orNull
+                      }
+                    })
+                  case _ =>
+                }
+              case Failure(_) =>
+            }
+          }
+        }
+      }
+      state
+    }.getOrElse("FAILED")
+
+    println(state)
   }
 
 }

@@ -55,7 +55,9 @@
 
   const { createMessage } = useMessage();
   const { t } = useI18n();
-  const { copy } = useClipboard();
+  const { copy } = useClipboard({
+    legacy: true,
+  });
   const route = useRoute();
   const props = defineProps({
     app: {

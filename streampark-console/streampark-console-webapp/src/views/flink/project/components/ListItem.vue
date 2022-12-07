@@ -24,7 +24,9 @@
       </template>
       <template #description>
         <a-popover arrow-point-at-center trigger="hover" :content="item.url">
-          <a-button class="desc-btn">{{ item.description }}</a-button>
+          <a-button class="desc-btn" target="_blank" :href="item.url">
+            {{ item.description }}
+          </a-button>
         </a-popover>
       </template>
       <template #avatar>
@@ -42,28 +44,28 @@
 
     <ul class="list-content">
       <li class="list-content_item">
-        <span>CVS</span>
+        <span>{{ t('flink.project.form.cvs') }}</span>
         <p><github-outlined /></p>
       </li>
       <li class="list-content_item">
-        <span>Branches</span>
+        <span>{{ t('flink.project.form.branches') }}</span>
         <p>
           <a-tag color="blue">{{ item.branches }}</a-tag>
         </p>
       </li>
       <li class="list-content_item build_time">
-        <span>Last Build</span>
+        <span>{{ t('flink.project.form.lastBuild') }}</span>
         <p>{{ item.lastBuild || '--' }}</p>
       </li>
       <li class="list-content_item build_state">
-        <span>Build State</span>
+        <span>{{ t('flink.project.form.buildState') }}</span>
         <p>
           <a-tag :color="buildState.color" :class="tagClass">{{ buildState.label }}</a-tag>
         </p>
       </li>
     </ul>
     <div class="operation">
-      <a-tooltip title="See Build log">
+      <a-tooltip :title="t('flink.project.operationTips.seeBuildLog')">
         <a-button
           shape="circle"
           @click="handleSeeLog"
@@ -75,11 +77,11 @@
       </a-tooltip>
 
       <template v-if="!isBuilding">
-        <a-tooltip title="Build Project">
+        <a-tooltip :title="t('flink.project.operationTips.buildProject')">
           <a-popconfirm
-            title="Are you sure build this project?"
-            cancel-text="No"
-            ok-text="Yes"
+            :title="t('flink.project.operationTips.buildProjectMessage')"
+            :cancel-text="t('common.cancelText')"
+            :ok-text="t('common.okText')"
             @confirm="handleBuild"
           >
             <a-button shape="circle" class="ml-8px" v-auth="'project:build'">
@@ -89,16 +91,16 @@
         </a-tooltip>
       </template>
 
-      <a-tooltip title="Update Project">
+      <a-tooltip :title="t('flink.project.operationTips.updateProject')">
         <a-button v-auth="'project:update'" @click="handleEdit" shape="circle" class="ml-8px">
           <EditOutlined />
         </a-button>
       </a-tooltip>
-      <a-tooltip title="Delete Project">
+      <a-tooltip :title="t('flink.project.operationTips.deleteProject')">
         <a-popconfirm
-          title="Are you sure delete this project ?"
-          cancel-text="No"
-          ok-text="Yes"
+          :title="t('flink.project.operationTips.deleteProjectMessage')"
+          :cancel-text="t('common.cancelText')"
+          :ok-text="t('common.okText')"
           @confirm="handleDelete"
         >
           <a-button type="danger" v-auth="'project:delete'" shape="circle" style="margin-left: 8px">
@@ -126,7 +128,9 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
   import { BuildStateEnum } from '/@/enums/flinkEnum';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
+  const { t } = useI18n();
   const emit = defineEmits(['viewLog', 'success']);
 
   const { Swal, createMessage } = useMessage();
@@ -157,12 +161,12 @@
       });
       Swal.fire({
         icon: 'success',
-        title: 'The current project is building',
+        title: t('flink.project.operationTips.projectIsbuildingMessage'),
         showConfirmButton: false,
         timer: 2000,
       });
     } catch (e) {
-      createMessage.error('Build Fail');
+      createMessage.error(t('flink.project.operationTips.projectIsbuildFailedMessage'));
     }
   }
 
@@ -176,16 +180,20 @@
       if (data.data) {
         Swal.fire({
           icon: 'success',
-          title: 'delete successful',
+          title: t('flink.project.operationTips.deleteProjectSuccessMessage'),
           showConfirmButton: false,
           timer: 2000,
         });
         emit('success', true);
       } else {
-        Swal.fire('Failed', 'Please check if any application belongs to this project', 'error');
+        Swal.fire(
+          'Failed',
+          t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
+          'error',
+        );
       }
     } catch (e) {
-      createMessage.error('Delete Fail');
+      createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));
     }
   }
 

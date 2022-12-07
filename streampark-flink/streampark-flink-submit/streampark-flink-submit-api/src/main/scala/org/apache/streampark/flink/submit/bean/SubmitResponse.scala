@@ -23,6 +23,4 @@ import javax.annotation.Nullable
 case class SubmitResponse(clusterId: String,
                           flinkConfig: JavaMap[String, String],
                           @Nullable jobId: String = "",
-                          @Nullable jobManagerUrl: String = "") {
-
-}
+                          @Nullable jobManagerUrl: String = "")

@@ -17,7 +17,7 @@
 export default {
   id: '作业ID',
   appName: '作业名称',
-  searchName: '名称',
+  searchName: '作业名称',
   tags: '作业标签',
   owner: '创建者',
   flinkVersion: 'Flink版本',
@@ -41,7 +41,6 @@ export default {
   podTemplate: 'Kubernetes Pod 模板',
   flinkCluster: 'Flink集群',
   yarnQueue: 'Yarn队列',
-  yarnSessionClusterId: 'Yarn session模式集群',
   mavenPom: 'maven pom',
   uploadJar: '上传依赖Jar文件',
   kubernetesNamespace: 'K8S命名空间',
@@ -207,13 +206,30 @@ export default {
     tmPlaceholder: '请选择要设置的资源参数',
     yarnQueuePlaceholder: '请输入yarn队列名称',
     descriptionPlaceholder: '请输入此应用程序的描述',
-    yarnSessionClusterIdPlaceholder: '请选择 Yarn Session 集群',
     kubernetesNamespacePlaceholder: '请输入K8S命名空间, 如: default',
     kubernetesClusterIdPlaceholder: '请选择K8S ClusterId',
+    kubernetesClusterIdRequire: "小写字母、数字、“-”或“.”，并且必须以字母数字字符开头和结尾",
     kubernetesClusterIdIsRequiredMessage: 'K8S ClusterId必填',
-    flinkImagePlaceholder: '请输入Flink基础docker镜像的标签，如：flink:1.13.0-scala_2.11-java8',
+    flinkImagePlaceholder: '请输入Flink基础docker镜像的标签,如:flink:1.13.0-scala_2.11-java8',
     flinkImageIsRequiredMessage: 'Flink基础docker镜像是必填的',
     k8sRestExposedTypePlaceholder: 'K8S服务对外类型',
     hadoopXmlConfigFileTips: '从系统环境参数自动复制配置文件',
+    dynamicPropertiesPlaceholder: '$key=$value,如果有多个参数，可以换行输入(-D <arg>)',
+  },
+
+  noteInfo: {
+    note: '提示',
+    minute: '分钟',
+    count: '次数',
+    officialDoc: '官网文档',
+    checkPointFailureOptions: 'CheckPoint失败策略',
+    checkpointFailureRateInterval: 'checkpoint失败间隔',
+    maxFailuresPerInterval: '最大失败次数',
+    checkPointFailureNote:
+      'checkpoint 失败处理策略, 例如: 在 5 分钟内 (checkpoint的失败间隔), 如果 checkpoint 失败次数超过 10 次 (checkpoint最大失败次数),会触发操作(发送告警或者重启作业)',
+    totalMemoryNote:
+      '不建议同时配置 "total process memory" 和 "total Flink memory"。 由于潜在的内存配置冲突，它可能会导致部署失败。 配置其他内存组件也需要谨慎，因为它会产生进一步的配置冲突，最简单的方法是设置"total process memory"',
+    dynamicProperties:
+      '动态Properties: 与flink run命令行模式下的 -D$property=$value 的作用相同，允许指定多个参数。 更多可以设置的参数请查阅',
   },
 };

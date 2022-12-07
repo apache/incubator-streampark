@@ -38,17 +38,17 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     boolean mapping(@Param("application") Application appParam);
 
-    List<String> getRecentK8sNamespace(@Param("limitSize") int limit);
+    List<String> getRecentK8sNamespace(@Param("limitSize") Integer limit);
 
-    List<String> getRecentK8sClusterId(@Param("executionMode") int executionMode, @Param("limitSize") int limit);
+    List<String> getRecentK8sClusterId(@Param("executionMode") Integer executionMode, @Param("limitSize") Integer limit);
 
-    List<String> getRecentFlinkBaseImage(@Param("limitSize") int limit);
+    List<String> getRecentFlinkBaseImage(@Param("limitSize") Integer limit);
 
-    List<String> getRecentK8sPodTemplate(@Param("limitSize") int limit);
+    List<String> getRecentK8sPodTemplate(@Param("limitSize") Integer limit);
 
-    List<String> getRecentK8sJmPodTemplate(@Param("limitSize") int limit);
+    List<String> getRecentK8sJmPodTemplate(@Param("limitSize") Integer limit);
 
-    List<String> getRecentK8sTmPodTemplate(@Param("limitSize") int limit);
+    List<String> getRecentK8sTmPodTemplate(@Param("limitSize") Integer limit);
 
     void resetOptionState();
 
@@ -57,4 +57,8 @@ public interface ApplicationMapper extends BaseMapper<Application> {
     Boolean existsByJobName(@Param("jobName") String jobName);
 
     List<Application> getByProjectId(@Param("projectId") Long id);
+
+    boolean existsRunningJobByClusterId(@Param("clusterId")Long clusterId);
+
+    boolean existsJobByClusterId(@Param("clusterId")Long clusterId);
 }

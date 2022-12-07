@@ -74,25 +74,25 @@ export const useFlinkSchema = (editModel?: string) => {
         field: 'flinkClusterId',
         label: t('flink.app.flinkCluster'),
         component: 'Select',
-        componentProps: {
-          placeholder: t('flink.app.flinkCluster'),
-          options: (getExecutionCluster(ExecModeEnum.REMOTE) || []).map((i) => ({
-            label: i.clusterName,
-            value: i.id,
-          })),
+        componentProps: () => {
+          const options = getExecutionCluster(ExecModeEnum.REMOTE);
+          return {
+            placeholder: t('flink.app.flinkCluster'),
+            options: options.map((i) => ({ label: i.clusterName, value: i.id })),
+          };
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
         rules: [{ required: true, message: 'Flink Cluster is required' }],
       },
       {
-        field: 'yarnSessionClusterId',
-        label: t('flink.app.yarnSessionClusterId'),
+        field: 'flinkClusterId',
+        label: t('flink.app.flinkCluster'),
         component: 'Select',
         componentProps: () => {
           const options = getExecutionCluster(ExecModeEnum.YARN_SESSION);
           return {
-            placeholder: t('flink.app.addAppTips.yarnSessionClusterIdPlaceholder'),
-            options: options.map((i) => ({ label: i.clusterName, value: i.clusterId })),
+            placeholder: t('flink.app.flinkCluster'),
+            options: options.map((i) => ({ label: i.clusterName, value: i.id })),
           };
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,

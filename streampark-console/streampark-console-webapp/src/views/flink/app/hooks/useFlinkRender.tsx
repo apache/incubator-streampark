@@ -40,7 +40,9 @@ import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
 import { CandidateTypeEnum } from '/@/enums/flinkEnum';
+import { useI18n } from '/@/hooks/web/useI18n';
 
+const { t } = useI18n();
 /* render input dropdown component */
 export const renderInputDropdown = (
   formModel: Recordable,
@@ -126,7 +128,7 @@ export const renderInputGroup = ({ model }) => {
   };
   return (
     <Form.Item
-      label="CheckPoint Failure Options"
+      label={t('flink.app.noteInfo.checkPointFailureOptions')}
       name="checkPointFailure"
       rules={[{ validator: () => handleCheckCheckpoint(model) }]}
     >
@@ -172,14 +174,9 @@ export const renderTotalMemory = ({ model, field }: RenderCallbackParams) => {
       <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
-            Note
+            {t('flink.app.noteInfo.note')}
           </Tag>
-          <span>Explicitly configuring both</span>
-          <span class="note-elem">total process memory</span> and
-          <span class="note-elem">total Flink memory</span> is not recommended. It may lead to
-          deployment failures due to potential memory configuration conflicts. Configuring other
-          memory components also requires caution as it can produce further configuration conflicts,
-          The easiest way is to set <span class="note-elem">total process memory</span>
+          <span>{t('flink.app.noteInfo.totalMemoryNote')}</span>
         </span>
       </p>
     </div>
@@ -248,16 +245,15 @@ export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) 
       <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
-            Note
+            {t('flink.app.noteInfo.note')}
           </Tag>
-          It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, Allows
-          specifying multiple generic configuration options. The available options can be found
+          {t('flink.app.noteInfo.dynamicProperties')}
           <a
             href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html"
             target="_blank"
             class="pl-5px"
           >
-            here
+            Flink {t('flink.app.noteInfo.officialDoc')}
           </a>
         </span>
       </p>

@@ -50,8 +50,7 @@ object LocalSubmit extends FlinkSubmitTrait {
       val jobGraph = packageProgramJobGraph._2
       client = createLocalCluster(flinkConfig)
       val jobId = client.submitJob(jobGraph).get().toString
-      val result = SubmitResponse(jobId, flinkConfig.toMap, jobId)
-      result
+      SubmitResponse(jobId, flinkConfig.toMap, jobId)
     } catch {
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")

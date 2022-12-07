@@ -298,6 +298,7 @@
       padding: 8px 0;
     }
   }
+
   .alert-card-list {
     .ant-list-empty-text {
       background-color: @component-background;

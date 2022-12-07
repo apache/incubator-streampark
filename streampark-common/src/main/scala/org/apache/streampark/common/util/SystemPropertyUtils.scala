@@ -119,4 +119,7 @@ object SystemPropertyUtils extends Logger {
       SystemPropertyUtils.set(key, appHome)
     }
   }
+
+  def getTmpdir() : String = get("java.io.tmpdir", "temp")
+
 }

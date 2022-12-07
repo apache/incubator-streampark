@@ -21,7 +21,7 @@ import { defHttp } from '/@/utils/http/axios';
 
 enum FLINK_API {
   LIST = '/flink/cluster/list',
-  ACTIVE_URL = '/flink/cluster/activeUrl',
+  REMOTE_URL = '/flink/cluster/remoteUrl',
   CREATE = '/flink/cluster/create',
   CHECK = '/flink/cluster/check',
   GET = '/flink/cluster/get',
@@ -67,9 +67,9 @@ export function fetchClusterShutdown(id: string): Promise<AxiosResponse<Result>>
  * flink cluster shutdown
  * @returns {Promise<string>}
  */
-export function fetchActiveURL(id: string): Promise<string> {
+export function fetchRemoteURL(id: string): Promise<string> {
   return defHttp.post<string>({
-    url: FLINK_API.ACTIVE_URL,
+    url: FLINK_API.REMOTE_URL,
     data: { id },
   });
 }
