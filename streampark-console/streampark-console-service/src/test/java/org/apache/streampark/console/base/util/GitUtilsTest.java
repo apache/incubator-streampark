@@ -19,7 +19,10 @@ package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitProtocol;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 public class GitUtilsTest {
 
@@ -28,10 +31,8 @@ public class GitUtilsTest {
         Project project = new Project();
         project.setUrl("https://github.com/streamxhub/streampark-quickstart.git");
         project.setGitProtocol(GitProtocol.HTTPS.getValue());
-        project.setBranches("dev");
-        project.setAppSource("/Users/benjobs/Desktop/test");
-        project.cleanCloned();
-        GitUtils.clone(project);
+        List<String> branchList = GitUtils.getBranchList(project);
+        System.out.println(branchList);
     }
 
 }
