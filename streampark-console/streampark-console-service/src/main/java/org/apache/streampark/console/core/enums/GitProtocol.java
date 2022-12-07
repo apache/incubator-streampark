@@ -21,7 +21,7 @@ import java.util.Arrays;
 
 public enum GitProtocol {
 
-    HTTP(1),
+    HTTPS(1),
     SSH(2);
 
     private final int value;

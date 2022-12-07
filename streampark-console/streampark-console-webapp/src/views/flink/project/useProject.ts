@@ -78,8 +78,7 @@ export const useProject = () => {
           optionFilterProp: 'children',
           filterOption,
           options: [
-            { label: 'GitHub/GitLab', value: 1, disabled: false },
-            { label: 'Subversion', value: 2, disabled: true },
+            { label: 'GitHub/GitLab', value: 1, disabled: false }
           ],
           placeholder: t('flink.project.form.cvsPlaceholder'),
         },
@@ -88,6 +87,28 @@ export const useProject = () => {
             required: true,
             type: 'number',
             message: t('flink.project.operationTips.cvsIsRequiredMessage'),
+          },
+        ],
+      },
+      {
+        field: 'gitProtocol',
+        label: t('flink.project.form.gitProtocol'),
+        component: 'Select',
+        componentProps: {
+          showSearch: true,
+          optionFilterProp: 'children',
+          filterOption,
+          options: [
+            { label: 'http/https', value: 1},
+            { label: 'ssh', value: 2},
+          ],
+          placeholder: t('flink.project.form.gitProtocolPlaceholder'),
+        },
+        rules: [
+          {
+            required: true,
+            type: 'number',
+            message: t('flink.project.operationTips.gitProtocolIsRequiredMessage'),
           },
         ],
       },
@@ -119,6 +140,14 @@ export const useProject = () => {
         component: 'InputPassword',
         componentProps: {
           placeholder: t('flink.project.form.passwordPlaceholder'),
+        },
+      },
+      {
+        field: 'rsaPath',
+        label: t('flink.project.form.rsaPath'),
+        component: 'Input',
+        componentProps: {
+          placeholder: t('flink.project.form.rsaPathPlaceholder'),
         },
       },
       {
@@ -209,6 +238,7 @@ export const useProject = () => {
         branches: values.branches,
         userName: values.userName || null,
         password: values.password || null,
+        rsaPath: values.rsaPath || null,
       });
       if (res === 0) {
         if (branchList.value.length === 0) {
@@ -242,12 +272,14 @@ export const useProject = () => {
     try {
       const url = values.url;
       if (url) {
+        const gitProtocol = values.gitProtocol;
         const userName = values.userName || null;
         const password = values.password || null;
+        const rsaPath = values.rsaPath || null;
         const userNull = userName === null || userName === undefined || userName === '';
         const passNull = password === null || password === undefined || password === '';
         if ((userNull && passNull) || (!userNull && !passNull)) {
-          const res = await fetchBranches({ url, userName, password });
+          const res = await fetchBranches({ gitProtocol, url, userName, password, rsaPath });
           if (res) branchList.value = res.map((i) => ({ label: i, value: i }));
         }
       }
@@ -266,9 +298,11 @@ export const useProject = () => {
         name: res.name,
         type: res.type,
         repository: res.repository,
+        gitProtocol: res.gitProtocol,
         url: res.url,
         userName: res.userName,
         password: res.password,
+        rsaPath: res.rsaPath || null,
         branches: res.branches,
         pom: res.pom,
         buildArgs: res.buildArgs,

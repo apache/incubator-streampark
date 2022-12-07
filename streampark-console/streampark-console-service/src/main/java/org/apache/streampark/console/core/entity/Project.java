@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -41,7 +42,6 @@ import org.eclipse.jgit.lib.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -156,9 +156,8 @@ public class Project implements Serializable {
         try {
             return GitUtils.getBranchList(this);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            throw new ApiDetailException(e);
         }
-        return Collections.emptyList();
     }
 
     public GitAuthorizedError gitCheck() {

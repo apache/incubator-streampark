@@ -69,7 +69,7 @@ public class GitUtils {
     private static void setCredentials(TransportCommand<?, ?> transportCommand, Project project) {
         GitProtocol gitProtocol = GitProtocol.of(project.getGitProtocol());
         switch (gitProtocol) {
-            case HTTP:
+            case HTTPS:
                 UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(project.getUserName(), project.getPassword());
                 transportCommand.setCredentialsProvider(credentialsProvider);
                 break;
