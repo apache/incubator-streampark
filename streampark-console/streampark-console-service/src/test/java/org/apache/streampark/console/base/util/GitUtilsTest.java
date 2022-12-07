@@ -15,26 +15,23 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.base.util;
 
-import java.util.Arrays;
+import org.apache.streampark.console.core.entity.Project;
+import org.apache.streampark.console.core.enums.GitProtocol;
+import org.junit.jupiter.api.Test;
 
-public enum GitProtocol {
+public class GitUtilsTest {
 
-    HTTPS(1),
-    SSH(2);
-
-    private final int value;
-
-    GitProtocol(int value) {
-        this.value = value;
+    @Test
+    public void testClone() throws Exception {
+        Project project = new Project();
+        project.setUrl("https://github.com/streamxhub/streampark-quickstart.git");
+        project.setGitProtocol(GitProtocol.HTTPS.getValue());
+        project.setBranches("dev");
+        project.setAppSource("/Users/benjobs/Desktop/test");
+        project.cleanCloned();
+        GitUtils.clone(project);
     }
 
-    public static GitProtocol of(Integer value) {
-        return Arrays.stream(values()).filter(x -> x.value == value).findFirst().orElse(null);
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
 }
