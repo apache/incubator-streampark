@@ -98,8 +98,8 @@ export const useProject = () => {
           optionFilterProp: 'children',
           filterOption,
           options: [
-            { label: 'http/https', value: 1 },
-            { label: 'ssh', value: 2 },
+            { label: 'http/https', value: GitProtocolEnum.HTTPS },
+            { label: 'ssh', value: GitProtocolEnum.SSH },
           ],
           placeholder: t('flink.project.form.gitProtocolPlaceholder'),
         },
