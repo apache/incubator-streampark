@@ -20,12 +20,16 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.CommonUtils;
+import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
 import org.apache.streampark.console.core.service.SettingService;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,17 +37,11 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.lib.Constants;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -67,9 +65,17 @@ public class Project implements Serializable {
 
     private Date lastBuild;
 
+    private Integer gitProtocol;
+
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String userName;
 
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String password;
+
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String rsaPath;
+
     /**
      * 1:git 2:svn
      */
@@ -135,14 +141,9 @@ public class Project implements Serializable {
     }
 
     @JsonIgnore
-    public CredentialsProvider getCredentialsProvider() {
-        return new UsernamePasswordCredentialsProvider(this.userName, this.password);
-    }
-
-    @JsonIgnore
     public File getGitRepository() {
         File home = getAppSource();
-        return new File(home, ".git");
+        return new File(home, Constants.DOT_GIT);
     }
 
     public void delete() throws IOException {
@@ -153,36 +154,15 @@ public class Project implements Serializable {
     @JsonIgnore
     public List<String> getAllBranches() {
         try {
-            Collection<Ref> refList;
-            if (CommonUtils.notEmpty(userName, password)) {
-                UsernamePasswordCredentialsProvider pro = new UsernamePasswordCredentialsProvider(userName, password);
-                refList = Git.lsRemoteRepository().setRemote(url).setCredentialsProvider(pro).call();
-            } else {
-                refList = Git.lsRemoteRepository().setRemote(url).call();
-            }
-            List<String> branchList = new ArrayList<>(4);
-            for (Ref ref : refList) {
-                String refName = ref.getName();
-                if (refName.startsWith("refs/heads/")) {
-                    String branchName = refName.replace("refs/heads/", "");
-                    branchList.add(branchName);
-                }
-            }
-            return branchList;
+            return GitUtils.getBranchList(this);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            throw new ApiDetailException(e);
         }
-        return Collections.emptyList();
     }
 
     public GitAuthorizedError gitCheck() {
         try {
-            if (CommonUtils.notEmpty(userName, password)) {
-                UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(userName, password);
-                Git.lsRemoteRepository().setRemote(url).setCredentialsProvider(credentialsProvider).call();
-            } else {
-                Git.lsRemoteRepository().setRemote(url).call();
-            }
+            GitUtils.getBranchList(this);
             return GitAuthorizedError.SUCCESS;
         } catch (Exception e) {
             String err = e.getMessage();

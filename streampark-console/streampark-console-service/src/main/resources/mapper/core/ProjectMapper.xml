@@ -24,11 +24,13 @@
         <id column="id" jdbcType="INTEGER" property="id"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="git_protocol" jdbcType="INTEGER" property="gitProtocol"/>
         <result column="url" jdbcType="VARCHAR" property="url"/>
         <result column="repository" jdbcType="INTEGER" property="repository"/>
         <result column="branches" jdbcType="VARCHAR" property="branches"/>
         <result column="user_name" jdbcType="VARCHAR" property="userName"/>
         <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="rsa_path" jdbcType="VARCHAR" property="rsaPath"/>
         <result column="pom" jdbcType="VARCHAR" property="pom"/>
         <result column="build_args" jdbcType="VARCHAR" property="buildArgs"/>
         <result column="type" jdbcType="INTEGER" property="type"/>

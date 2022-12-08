@@ -76,8 +76,13 @@ alter table `t_flink_log` add column `job_manager_url` varchar(255) default null
 alter table `t_flink_project`
     change column `date` `create_time` datetime default current_timestamp not null,
     add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
+    add column `git_protocol` tinyint not null default 1 after `id`,
+    add column `rsa_path` varchar(255) collate utf8mb4_general_ci default null after `password`,
     add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
     add index `inx_team` (`team_id`) using btree;
+
+update `t_flink_project` set git_protocol=1 where url like 'http%';
+update `t_flink_project` set git_protocol=2 where url like 'git@%';
 
 alter table `t_flink_cluster`
     drop column `flame_graph`,

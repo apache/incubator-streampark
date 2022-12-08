@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.util.CommonUtils;
+import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
@@ -28,7 +28,6 @@ import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;
 
@@ -78,7 +77,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         this.baseMapper.updateBuildTime(project.getId());
         this.deploy(project);
         List<Application> applications = this.applicationService.getByProjectId(project.getId());
-        // Update the deploy state
+        // Update the deployment state
         FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
             fileLogger.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
             app.setLaunch(LaunchState.NEED_LAUNCH.get());
@@ -102,22 +101,13 @@ public class ProjectBuildTask extends AbstractLogFileTask {
             project.cleanCloned();
             fileLogger.info("clone {}, {} starting...", project.getName(), project.getUrl());
             fileLogger.info(project.getLog4CloneStart());
-            CloneCommand cloneCommand = Git.cloneRepository()
-                .setURI(project.getUrl())
-                .setDirectory(project.getAppSource())
-                .setBranch(project.getBranches());
-
-            if (CommonUtils.notEmpty(project.getUserName(), project.getPassword())) {
-                cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
-            }
-            Git git = cloneCommand.call();
+            Git git = GitUtils.clone(project);
             StoredConfig config = git.getRepository().getConfig();
             config.setBoolean("http", project.getUrl(), "sslVerify", false);
             config.setBoolean("https", project.getUrl(), "sslVerify", false);
             config.save();
-
             File workTree = git.getRepository().getWorkTree();
-            gitWorkTree(project.getId(), workTree, "");
+            printWorkTree(workTree, "");
             String successMsg = String.format(
                 "[StreamPark] project [%s] git clone successful!\n",
                 project.getName()
@@ -137,7 +127,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         }
     }
 
-    private void gitWorkTree(Long id, File workTree, String space) {
+    private void printWorkTree(File workTree, String space) {
         File[] files = workTree.listFiles();
         for (File file : Objects.requireNonNull(files)) {
             if (!file.getName().startsWith(".git")) {
@@ -147,7 +137,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
                 fileLogger.info("{} / {}", space, file.getName());
             } else if (file.isDirectory()) {
                 fileLogger.info("{} / {}", space, file.getName());
-                gitWorkTree(id, file, space.concat("/").concat(file.getName()));
+                printWorkTree(file, space.concat("/").concat(file.getName()));
             }
         }
     }

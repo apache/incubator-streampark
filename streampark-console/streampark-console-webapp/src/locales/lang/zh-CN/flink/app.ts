@@ -208,7 +208,7 @@ export default {
     descriptionPlaceholder: '请输入此应用程序的描述',
     kubernetesNamespacePlaceholder: '请输入K8S命名空间, 如: default',
     kubernetesClusterIdPlaceholder: '请选择K8S ClusterId',
-    kubernetesClusterIdRequire: "小写字母、数字、“-”或“.”，并且必须以字母数字字符开头和结尾",
+    kubernetesClusterIdRequire: '小写字母、数字、“-”或“.”，并且必须以字母数字字符开头和结尾',
     kubernetesClusterIdIsRequiredMessage: 'K8S ClusterId必填',
     flinkImagePlaceholder: '请输入Flink基础docker镜像的标签,如:flink:1.13.0-scala_2.11-java8',
     flinkImageIsRequiredMessage: 'Flink基础docker镜像是必填的',

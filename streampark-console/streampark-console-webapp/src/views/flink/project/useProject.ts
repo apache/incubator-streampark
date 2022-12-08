@@ -24,6 +24,7 @@ import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 import { filterOption } from '../app/utils';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { GitProtocolEnum } from '/@/enums/projectEnum';
 
 const { t } = useI18n();
 export const useProject = () => {
@@ -77,10 +78,7 @@ export const useProject = () => {
           showSearch: true,
           optionFilterProp: 'children',
           filterOption,
-          options: [
-            { label: 'GitHub/GitLab', value: 1, disabled: false },
-            { label: 'Subversion', value: 2, disabled: true },
-          ],
+          options: [{ label: 'GitHub/GitLab', value: 1, disabled: false }],
           placeholder: t('flink.project.form.cvsPlaceholder'),
         },
         rules: [
@@ -88,6 +86,28 @@ export const useProject = () => {
             required: true,
             type: 'number',
             message: t('flink.project.operationTips.cvsIsRequiredMessage'),
+          },
+        ],
+      },
+      {
+        field: 'gitProtocol',
+        label: t('flink.project.form.gitProtocol'),
+        component: 'Select',
+        componentProps: {
+          showSearch: true,
+          optionFilterProp: 'children',
+          filterOption,
+          options: [
+            { label: 'http/https', value: GitProtocolEnum.HTTPS },
+            { label: 'ssh', value: GitProtocolEnum.SSH },
+          ],
+          placeholder: t('flink.project.form.gitProtocolPlaceholder'),
+        },
+        rules: [
+          {
+            required: true,
+            type: 'number',
+            message: t('flink.project.operationTips.gitProtocolIsRequiredMessage'),
           },
         ],
       },
@@ -106,9 +126,19 @@ export const useProject = () => {
         ],
       },
       {
+        field: 'rsaPath',
+        label: t('flink.project.form.rsaPath'),
+        component: 'Input',
+        ifShow: ({ values }) => values.gitProtocol == GitProtocolEnum.SSH,
+        componentProps: {
+          placeholder: t('flink.project.form.rsaPathPlaceholder'),
+        },
+      },
+      {
         field: 'userName',
         label: t('flink.project.form.userName'),
         component: 'Input',
+        ifShow: ({ values }) => values.gitProtocol == GitProtocolEnum.HTTPS,
         componentProps: {
           placeholder: t('flink.project.form.userNamePlaceholder'),
         },
@@ -207,8 +237,10 @@ export const useProject = () => {
       const res = await gitCheck({
         url: values.url,
         branches: values.branches,
+        gitProtocol: values.gitProtocol,
         userName: values.userName || null,
         password: values.password || null,
+        rsaPath: values.rsaPath || null,
       });
       if (res === 0) {
         if (branchList.value.length === 0) {
@@ -242,12 +274,14 @@ export const useProject = () => {
     try {
       const url = values.url;
       if (url) {
+        const gitProtocol = values.gitProtocol;
         const userName = values.userName || null;
         const password = values.password || null;
+        const rsaPath = values.rsaPath || null;
         const userNull = userName === null || userName === undefined || userName === '';
         const passNull = password === null || password === undefined || password === '';
         if ((userNull && passNull) || (!userNull && !passNull)) {
-          const res = await fetchBranches({ url, userName, password });
+          const res = await fetchBranches({ gitProtocol, url, userName, password, rsaPath });
           if (res) branchList.value = res.map((i) => ({ label: i, value: i }));
         }
       }
@@ -266,9 +300,11 @@ export const useProject = () => {
         name: res.name,
         type: res.type,
         repository: res.repository,
+        gitProtocol: res.gitProtocol,
         url: res.url,
         userName: res.userName,
         password: res.password,
+        rsaPath: res.rsaPath || null,
         branches: res.branches,
         pom: res.pom,
         buildArgs: res.buildArgs,

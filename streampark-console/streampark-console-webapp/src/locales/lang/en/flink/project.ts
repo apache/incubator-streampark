@@ -32,6 +32,10 @@ export default {
     projectType: 'Project Type',
     projectTypePlaceholder: 'please select project type',
     cvs: 'CVS',
+    rsaPath: 'RSAPath',
+    rsaPathPlaceholder: 'RSA private key path, e.g: ~/.ssh/id_rsa',
+    gitProtocol: 'Connect Type',
+    gitProtocolPlaceholder: 'Git connection type, http/ssh',
     cvsPlaceholder: 'CVS',
     repositoryURL: 'Repository URL',
     repositoryURLPlaceholder: 'The Repository URL for this project',
@@ -55,6 +59,7 @@ export default {
     projectNameIsRequiredMessage: 'Project Name is required',
     projectNameIsUniqueMessage: 'The Project Name is already exists. Please check',
     projectTypeIsRequiredMessage: 'Project Type is required',
+    gitProtocolIsRequiredMessage: 'Connect Type is required',
     cvsIsRequiredMessage: 'CVS is required',
     repositoryURLIsRequiredMessage: 'Repository URL is required',
     pomSpecifiesModuleMessage:

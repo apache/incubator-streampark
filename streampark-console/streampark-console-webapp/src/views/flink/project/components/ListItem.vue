@@ -121,7 +121,7 @@
     EditOutlined,
     ThunderboltOutlined,
   } from '@ant-design/icons-vue';
-  import { ProjectType, buildStateMap } from '../project.data';
+  import { buildStateMap } from '../project.data';
   import { computed } from 'vue';
   import { buildProject, deleteProject } from '/@/api/flink/project';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -129,6 +129,7 @@
   import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
   import { BuildStateEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { ProjectTypeEnum } from '/@/enums/projectEnum';
 
   const { t } = useI18n();
   const emit = defineEmits(['viewLog', 'success']);
@@ -147,8 +148,8 @@
   const svgName = computed(() => {
     return (
       {
-        [ProjectType.Flink]: 'flink',
-        [ProjectType.Spark]: 'spark',
+        [ProjectTypeEnum.FLINK]: 'flink',
+        [ProjectTypeEnum.SPARK]: 'spark',
       }[props.item.type] || ''
     );
   });
