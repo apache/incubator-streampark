@@ -201,7 +201,7 @@
         height: auto;
 
         &.logo-text {
-          width: 220px;
+          width: 200px;
           height: auto !important;
         }
       }
