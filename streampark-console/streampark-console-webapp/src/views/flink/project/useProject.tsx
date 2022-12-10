@@ -24,7 +24,7 @@ import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 import { filterOption } from '../app/utils';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { GitProtocolEnum } from '/@/enums/projectEnum';
+import { GitProtocolEnum, ProjectTypeEnum, CVSTypeEnum } from '/@/enums/projectEnum';
 import RepositoryGroup from './components/RepositoryGroup';
 import { Form } from 'ant-design-vue';
 
@@ -71,12 +71,12 @@ export const useProject = () => {
         field: 'type',
         label: t('flink.project.form.projectType'),
         component: 'Select',
-        defaultValue: 1,
+        defaultValue: ProjectTypeEnum.FLINK,
         componentProps: {
           placeholder: t('flink.project.form.projectTypePlaceholder'),
           options: [
-            { label: 'apache flink', value: 1, disabled: false },
-            { label: 'apache spark', value: 2, disabled: true },
+            { label: 'apache flink', value: ProjectTypeEnum.FLINK, disabled: false },
+            { label: 'apache spark', value: ProjectTypeEnum.SPARK, disabled: true },
           ],
           showSearch: true,
           optionFilterProp: 'children',
@@ -99,7 +99,7 @@ export const useProject = () => {
           showSearch: true,
           optionFilterProp: 'children',
           filterOption,
-          options: [{ label: 'GitHub/GitLab', value: 1, disabled: false }],
+          options: [{ label: 'GitHub/GitLab', value: CVSTypeEnum.GIT, disabled: false }],
           placeholder: t('flink.project.form.cvsPlaceholder'),
         },
         rules: [

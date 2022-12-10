@@ -24,3 +24,8 @@ export enum GitProtocolEnum {
   HTTPS = 1,
   SSH = 2,
 }
+
+export enum CVSTypeEnum {
+  GIT = 1,
+  SVN = 2,
+}
