@@ -50,7 +50,6 @@ export default defineComponent({
     ];
 
     return () => {
-      console.log(props.value);
       return (
         <div>
           <Input.Group compact class="!flex custom-input-group">
