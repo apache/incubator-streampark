@@ -1,4 +1,4 @@
-/*
+/*./components/RepositoryGroup
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -25,6 +25,8 @@ import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 import { filterOption } from '../app/utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { GitProtocolEnum } from '/@/enums/projectEnum';
+import RepositoryGroup from './components/RepositoryGroup';
+import { Form } from 'ant-design-vue';
 
 const { t } = useI18n();
 export const useProject = () => {
@@ -37,7 +39,26 @@ export const useProject = () => {
   const getLoading = computed(() => {
     return submitLoading.value;
   });
-
+  const handleCheckRepositoryUrl = (values: Recordable) => {
+    console.log(111, values);
+    if (!values.url) {
+      return Promise.reject(t('flink.project.form.repositoryURLRequired'));
+    }
+    switch (values.gitProtocol) {
+      case GitProtocolEnum.SSH:
+        if (/^git@(.*)/.test(values.url)) {
+          return Promise.resolve();
+        } else {
+          return Promise.reject(t('flink.project.form.gitChecked'));
+        }
+      default:
+        if (/^http(s)?:\/\//.test(values.url)) {
+          return Promise.resolve();
+        } else {
+          return Promise.reject(t('flink.project.form.httpChecked'));
+        }
+    }
+  };
   const projectFormSchema = computed((): FormSchema[] => {
     return [
       {
@@ -70,6 +91,7 @@ export const useProject = () => {
           },
         ],
       },
+
       {
         field: 'repository',
         label: t('flink.project.form.cvs'),
@@ -89,41 +111,30 @@ export const useProject = () => {
           },
         ],
       },
+      { field: 'gitProtocol', label: '', component: 'Input', show: false },
+      { field: 'url', label: '', component: 'Input', show: false },
       {
-        field: 'gitProtocol',
-        label: t('flink.project.form.gitProtocol'),
-        component: 'Select',
-        componentProps: {
-          showSearch: true,
-          optionFilterProp: 'children',
-          filterOption,
-          options: [
-            { label: 'http/https', value: GitProtocolEnum.HTTPS },
-            { label: 'ssh', value: GitProtocolEnum.SSH },
-          ],
-          placeholder: t('flink.project.form.gitProtocolPlaceholder'),
-        },
-        rules: [
-          {
-            required: true,
-            type: 'number',
-            message: t('flink.project.operationTips.gitProtocolIsRequiredMessage'),
-          },
-        ],
-      },
-      {
-        field: 'url',
+        field: 'repositoryUrl',
         label: t('flink.project.form.repositoryURL'),
         component: 'Input',
-        componentProps: {
-          placeholder: t('flink.project.form.repositoryURLPlaceholder'),
+        renderColContent: ({ model }) => {
+          return (
+            <Form.Item
+              label={t('flink.project.form.repositoryURL')}
+              name="repositoryUrl"
+              rules={[{ required: true, validator: () => handleCheckRepositoryUrl(model) }]}
+            >
+              <RepositoryGroup
+                value={{
+                  gitProtocol: Number(model.gitProtocol) || GitProtocolEnum.HTTPS,
+                  url: model.url || '',
+                }}
+                onUpdateProtocol={(value) => (model.gitProtocol = value)}
+                onUpdateUrl={(value) => (model.url = value)}
+              />
+            </Form.Item>
+          );
         },
-        rules: [
-          {
-            required: true,
-            message: t('flink.project.operationTips.repositoryURLIsRequiredMessage'),
-          },
-        ],
       },
       {
         field: 'rsaPath',
@@ -141,6 +152,7 @@ export const useProject = () => {
         ifShow: ({ values }) => values.gitProtocol == GitProtocolEnum.HTTPS,
         componentProps: {
           placeholder: t('flink.project.form.userNamePlaceholder'),
+          autocomplete: 'new-password',
         },
       },
       {
@@ -149,6 +161,7 @@ export const useProject = () => {
         component: 'InputPassword',
         componentProps: {
           placeholder: t('flink.project.form.passwordPlaceholder'),
+          autocomplete: 'new-password',
         },
       },
       {
@@ -300,7 +313,7 @@ export const useProject = () => {
         name: res.name,
         type: res.type,
         repository: res.repository,
-        gitProtocol: res.gitProtocol,
+        gitProtocol: res.gitProtocol || GitProtocolEnum.HTTPS,
         url: res.url,
         userName: res.userName,
         password: res.password,

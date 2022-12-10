@@ -198,10 +198,10 @@
 
       img {
         width: @logo-width;
-        height: @logo-width;
+        height: auto;
 
         &.logo-text {
-          width: 180px;
+          width: 220px;
           height: auto !important;
         }
       }
