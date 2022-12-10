@@ -42,7 +42,7 @@
           <Col :md="12" :span="24">
             <div
               :class="`${prefixCls}-form`"
-              class="relative w-auto m-auto max-w-420px bg-[rgba(0,0,0,0.5)] rounded-2px px-10 py-5 shadow-2xl shadow-blue-500 enter-x z-100"
+              class="relative w-auto m-auto max-w-420px bg-[rgba(0,0,0,0.65)] rounded-2px px-10 py-5 shadow-2xl shadow-blue-500 enter-x z-100"
             >
               <LoginForm />
             </div>
@@ -54,7 +54,7 @@
       <a href="https://incubator.apache.org/" target="_blank" class="w-200px m-auto inline-block">
         <img
           src="/@/assets/svg/apache-incubator.svg"
-          alt="Apache Incubator  logo"
+          alt="Apache Incubator logo"
           class="w-200px my-10px mx-auto"
         />
       </a>
