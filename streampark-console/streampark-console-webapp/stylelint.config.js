@@ -51,6 +51,7 @@ module.exports = {
         ],
       },
     ],
+    'import-notation': null,
     'no-empty-source': null,
     'string-quotes': null,
     'named-grid-areas-no-invalid': null,

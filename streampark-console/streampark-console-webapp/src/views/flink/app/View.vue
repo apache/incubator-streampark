@@ -187,8 +187,8 @@
     <BasicTable @register="registerTable" class="app_list !px-0 pt-20px" :formConfig="formConfig">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'jobName'">
-          <span class="app_type app_jar" v-if="record['jobType'] === 1"> JAR </span>
-          <span class="app_type app_sql" v-if="record['jobType'] === 2"> SQL </span>
+          <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
+          <span class="app_type app_sql" v-if="record['jobType'] === JobTypeEnum.SQL"> SQL </span>
 
           <span
             class="link"

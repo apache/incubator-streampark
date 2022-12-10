@@ -17,7 +17,7 @@
 <template>
   <div class="anticon" :class="getAppLogoClass" @click="goHome">
     <img src="/@/assets/images/logo.png" alt="logo" v-show="!showTitle" />
-    <div class="ml-2 truncate md:opacity-100" :class="getTitleClass" v-show="showTitle">
+    <div class="truncate md:opacity-100" :class="getTitleClass" v-show="showTitle">
       <!-- {{ title }} -->
       <img src="/@/assets/images/logo-text.png" class="logo-text" alt="logo" />
     </div>
