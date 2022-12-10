@@ -16,10 +16,10 @@
 -->
 <template>
   <div class="anticon" :class="getAppLogoClass" @click="goHome">
-    <img src="../../../assets/images/logo.svg" alt="logo" v-show="!showTitle" />
+    <img src="/@/assets/images/logo.png" alt="logo" v-show="!showTitle" />
     <div class="ml-2 truncate md:opacity-100" :class="getTitleClass" v-show="showTitle">
       <!-- {{ title }} -->
-      <img src="../../../assets/images/logo-text.svg" class="logo-text" alt="logo" />
+      <img src="/@/assets/images/logo-text.png" class="logo-text" alt="logo" />
     </div>
   </div>
 </template>
@@ -80,6 +80,7 @@
     padding-left: 7px;
     cursor: pointer;
     transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(192, 192, 192, 0.1);
 
     &.light {
       border-bottom: 1px solid @border-color-base;
