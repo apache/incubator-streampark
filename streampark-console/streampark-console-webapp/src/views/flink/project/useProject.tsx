@@ -40,7 +40,6 @@ export const useProject = () => {
     return submitLoading.value;
   });
   const handleCheckRepositoryUrl = (values: Recordable) => {
-    console.log(111, values);
     if (!values.url) {
       return Promise.reject(t('flink.project.form.repositoryURLRequired'));
     }
