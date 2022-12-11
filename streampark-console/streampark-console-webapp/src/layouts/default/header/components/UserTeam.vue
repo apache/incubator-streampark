@@ -55,7 +55,7 @@
       @change="handleSetTeamId"
       :value="userStore.teamId"
       placeholder="Team"
-      @optionsChange="handleOptionsChange"
+      @options-change="handleOptionsChange"
       size="small"
     />
   </div>

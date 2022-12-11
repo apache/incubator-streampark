@@ -5,6 +5,7 @@
     "name": "streampark",
     "url": "https://streampark.apache.org"
   },
+  "packageManager": "pnpm@7.3.0",
   "scripts": {
     "bootstrap": "pnpm install",
     "serve": "npm run dev",

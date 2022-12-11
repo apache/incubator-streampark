@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <Select
+  <ASelect
     @dropdown-visible-change="handleFetch"
     v-bind="$attrs"
     @change="handleChange"
@@ -34,7 +34,7 @@
         {{ t('component.form.apiSelectNotFound') }}
       </span>
     </template>
-  </Select>
+  </ASelect>
 </template>
 <script lang="ts">
   import { defineComponent, PropType, ref, watchEffect, computed, unref, watch } from 'vue';
@@ -52,7 +52,7 @@
   export default defineComponent({
     name: 'ApiSelect',
     components: {
-      Select,
+      ASelect: Select,
       LoadingOutlined,
     },
     inheritAttrs: false,
@@ -89,7 +89,7 @@
       const { t } = useI18n();
 
       // Embedded in the form, just use the hook binding to perform form verification
-      const [state] = useRuleFormItem(props, 'value', 'change', emitData);
+      const [state] = useRuleFormItem(props, 'value', 'change', emitData) as any;
 
       const getOptions = computed(() => {
         const { labelField, valueField, numberToString } = props;

@@ -75,6 +75,7 @@ module.exports = {
     'vue/attribute-hyphenation': 'off',
     'vue/require-default-prop': 'off',
     'vue/require-explicit-emits': 'off',
+    'vue/no-reserved-component-names': 'off',
     'vue/html-self-closing': [
       'error',
       {
