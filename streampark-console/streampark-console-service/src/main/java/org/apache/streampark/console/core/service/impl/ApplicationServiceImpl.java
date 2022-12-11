@@ -62,6 +62,7 @@ import org.apache.streampark.console.core.enums.AppExistsState;
 import org.apache.streampark.console.core.enums.CandidateType;
 import org.apache.streampark.console.core.enums.ChangedType;
 import org.apache.streampark.console.core.enums.CheckPointType;
+import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.enums.OptionState;
@@ -1357,7 +1358,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } else {
                 switch (application.getApplicationType()) {
                     case STREAMPARK_FLINK:
-                        appConf = String.format("%s://%s", applicationConfig.configType(), applicationConfig.getContent());
+                        ConfigFileType fileType = ConfigFileType.of(applicationConfig.getFormat());
+                        if (fileType != null && !fileType.equals(ConfigFileType.UNKNOWN)) {
+                            appConf = String.format("%s://%s", fileType.getTypeName(), applicationConfig.getContent());
+                        } else {
+                            throw new IllegalArgumentException("application' config type error,must be ( yaml| properties| hocon )");
+                        }
                         break;
                     case APACHE_FLINK:
                         appConf = String.format("json://{\"%s\":\"%s\"}", ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),

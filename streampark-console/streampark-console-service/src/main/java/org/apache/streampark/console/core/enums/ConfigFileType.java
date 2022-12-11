@@ -15,24 +15,41 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.util;
+package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.console.core.entity.Project;
-import org.apache.streampark.console.core.enums.GitProtocol;
+import java.io.Serializable;
+import java.util.Arrays;
 
-import org.junit.jupiter.api.Test;
+/**
+ * configFile Type enum
+ */
+public enum ConfigFileType implements Serializable {
 
-import java.util.List;
+    YAML(1, "yaml"),
 
-public class GitUtilsTest {
+    PROPERTIES(2, "prop"),
 
-    @Test
-    public void testClone() throws Exception {
-        Project project = new Project();
-        project.setUrl("https://github.com/streamxhub/streampark-quickstart.git");
-        project.setGitProtocol(GitProtocol.HTTPS.getValue());
-        List<String> branchList = GitUtils.getBranchList(project);
-        System.out.println(branchList);
+    HOCON(3, "conf"),
+
+    UNKNOWN(0, null);
+
+    private final int value;
+    private final String typeName;
+
+    ConfigFileType(int value, String name) {
+        this.value = value;
+        this.typeName = name;
     }
 
+    public int getValue() {
+        return value;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public static ConfigFileType of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
 }

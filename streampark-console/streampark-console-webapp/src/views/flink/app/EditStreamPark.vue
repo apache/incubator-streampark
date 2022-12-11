@@ -27,7 +27,7 @@
   import configOptions from './data/option';
   import { fetchMain, fetchUpload, fetchUpdate, fetchGet } from '/@/api/flink/app/app';
   import { useRoute } from 'vue-router';
-  import { handleSubmitParams } from './utils';
+  import { getAppConfType, handleSubmitParams } from './utils';
   import { fetchFlinkHistory } from '/@/api/flink/app/flinkSql';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
@@ -223,9 +223,7 @@
       const format =
         values.strategy == UseStrategyEnum.USE_EXIST
           ? app.format
-          : (values.config || '').endsWith('.properties')
-          ? 2
-          : 1;
+          : getAppConfType(values.config || '');
       let config = values.configOverride || app.config;
       if (config != null && config.trim() !== '') {
         config = encryptByBase64(config);
