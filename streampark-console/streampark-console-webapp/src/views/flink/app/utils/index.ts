@@ -20,6 +20,7 @@ import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchRemoteURL } from '/@/api/flink/setting/flinkCluster';
 import {
   AppStateEnum,
+  ConfigTypeEnum,
   ExecModeEnum,
   LaunchStateEnum,
   OptionStateEnum,
@@ -200,6 +201,22 @@ export function handleFormValue(values: Recordable) {
     }
   }
   return options;
+}
+
+export function getAppConfType(configFile: string): number {
+  const config = configFile || '';
+  if (config.endsWith('.yaml') || config.endsWith('.yml')) {
+    return ConfigTypeEnum.YAML;
+  } else if (config.endsWith('.properties')) {
+    return ConfigTypeEnum.PROPERTIES;
+  } else if (config.endsWith('.conf')) {
+    return ConfigTypeEnum.HOCON;
+  }
+  return 0;
+}
+
+export function checkAppConfType(confType: number): boolean {
+  return [ConfigTypeEnum.YAML, ConfigTypeEnum.PROPERTIES, ConfigTypeEnum.HOCON].includes(confType);
 }
 
 export function handleDependencyJsonToPom(json, pomMap, jarMap) {

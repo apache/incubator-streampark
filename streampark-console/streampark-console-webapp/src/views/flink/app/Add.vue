@@ -36,7 +36,7 @@
   import { fetchAppConf, fetchCreate, fetchMain, fetchUpload } from '/@/api/flink/app/app';
   import options from './data/option';
   import { useCreateSchema } from './hooks/useCreateSchema';
-  import { handleSubmitParams } from './utils';
+  import { getAppConfType, handleSubmitParams } from './utils';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { createLocalStorage } from '/@/utils/cache';
   import { buildUUID } from '/@/utils/uuid';
@@ -181,7 +181,7 @@
         //streampark flink
         if (values.appType == AppTypeEnum.STREAMPARK_FLINK) {
           const configVal = values['config'];
-          params['format'] = configVal.endsWith('.properties') ? 2 : 1;
+          params['format'] = getAppConfType(configVal);
           if (values.configOverride == null) {
             const res = await fetchAppConf({
               config: configVal,

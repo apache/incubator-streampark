@@ -21,9 +21,11 @@ import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
+import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.EffectiveType;
 import org.apache.streampark.console.core.mapper.ApplicationConfigMapper;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
@@ -71,7 +73,15 @@ public class ApplicationConfigServiceImpl
 
         ApplicationConfig applicationConfig = new ApplicationConfig();
         applicationConfig.setAppId(application.getId());
-        applicationConfig.setFormat(application.getFormat());
+
+        if (application.getFormat() != null) {
+            ConfigFileType fileType = ConfigFileType.of(application.getFormat());
+            if (fileType == null || ConfigFileType.UNKNOWN.equals(fileType)) {
+                throw new ApiAlertException("application' config error. must be (.properties|.yaml|.yml |.conf)");
+            }
+            applicationConfig.setFormat(fileType.getValue());
+        }
+
         applicationConfig.setContent(config);
         applicationConfig.setCreateTime(new Date());
         Integer version = this.baseMapper.getLastVersion(application.getId());
