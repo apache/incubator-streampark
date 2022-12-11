@@ -30,6 +30,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -86,10 +87,10 @@ public class ApplicationConfig {
                 case HOCON:
                     return PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
                 default:
-                    break;
+                    return Collections.emptyMap();
             }
         }
-        return null;
+        return Collections.emptyMap();
     }
 
 }

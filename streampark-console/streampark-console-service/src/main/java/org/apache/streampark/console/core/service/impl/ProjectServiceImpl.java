@@ -221,6 +221,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<String> jars(Project project) {
         List<String> list = new ArrayList<>(0);
+        if (project.getModule() == null) {
+            throw new ApiAlertException("project module can not be null, please check");
+        }
         File apps = new File(project.getDistHome(), project.getModule());
         for (File file : Objects.requireNonNull(apps.listFiles())) {
             if (file.getName().endsWith(".jar")) {

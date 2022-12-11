@@ -202,6 +202,8 @@ export default {
       'The application name is already exists in Kubernetes,cannot be repeated. Please check',
     appNameNotValid:
       'The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check',
+    flinkClusterIsRequiredMessage: 'Flink Cluster is required',
+    flinkSqlIsRequiredMessage: 'Flink SQL is required',
     tagsPlaceholder: 'Please enter tags,if more than one, separate them with commas(,)',
     parallelismPlaceholder: 'The parallelism with which to run the program',
     slotsOfPerTaskManagerPlaceholder: 'Number of slots per TaskManager',
