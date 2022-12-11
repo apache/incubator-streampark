@@ -115,7 +115,7 @@ export const useCreateAndEditSchema = (
             return values?.jobType == 'sql';
           }
         },
-        rules: [{ required: true, message: 'Flink SQL is required' }],
+        rules: [{ required: true, message: t('flink.app.addAppTips.flinkSqlIsRequiredMessage') }],
       },
       {
         field: 'dependency',
@@ -218,7 +218,9 @@ export const useCreateAndEditSchema = (
           options: getExecutionCluster(ExecModeEnum.REMOTE, 'id'),
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
-        rules: [{ required: true, message: 'Flink Cluster is required' }],
+        rules: [
+          { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
+        ],
       },
       {
         field: 'flinkClusterId',
@@ -229,7 +231,9 @@ export const useCreateAndEditSchema = (
           options: getExecutionCluster(ExecModeEnum.YARN_SESSION, 'id'),
         },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
-        rules: [{ required: true, message: 'Flink Cluster is required' }],
+        rules: [
+          { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
+        ],
       },
       {
         field: 'k8sNamespace',
