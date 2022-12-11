@@ -29,7 +29,7 @@ public class GitUtilsTest {
     @Test
     public void testClone() throws Exception {
         Project project = new Project();
-        project.setUrl("https://github.com/streamxhub/streampark-quickstart.git");
+        project.setUrl("https://github.com/apache/incubator-streampark-quickstart");
         project.setGitProtocol(GitProtocol.HTTPS.getValue());
         List<String> branchList = GitUtils.getBranchList(project);
         System.out.println(branchList);
