@@ -17,7 +17,7 @@
 import type { VNode, FunctionalComponent } from 'vue';
 
 import { h } from 'vue';
-import { isString } from '@vue/shared';
+import { isString } from '/@/utils/is';
 import { Icon } from '/@/components/Icon';
 
 export const TreeIcon: FunctionalComponent = ({ icon }: { icon: VNode | string }) => {

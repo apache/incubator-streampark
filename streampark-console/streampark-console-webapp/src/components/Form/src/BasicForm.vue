@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <Form
+  <AForm
     v-bind="getBindValue"
     :class="getFormClass"
     ref="formElRef"
@@ -50,7 +50,7 @@
       </FormAction>
       <slot name="formFooter"></slot>
     </Row>
-  </Form>
+  </AForm>
 </template>
 <script lang="ts">
   import type { FormActionType, FormProps, FormSchema } from './types/form';
@@ -82,7 +82,7 @@
 
   export default defineComponent({
     name: 'BasicForm',
-    components: { FormItem, Form, Row, FormAction },
+    components: { FormItem, AForm: Form, Row, FormAction },
     props: basicProps,
     emits: ['advanced-change', 'reset', 'submit', 'register', 'field-value-change'],
     setup(props, { emit, attrs }) {
