@@ -286,7 +286,13 @@ trait FlinkSubmitTrait extends Logger {
 
       // app properties
       if (MapUtils.isNotEmpty(submitRequest.properties)) {
-        submitRequest.properties.foreach(x => array += s"-D${x._1}=${x._2}")
+        submitRequest.properties.foreach(x => {
+          if (x._1.startsWith(CoreOptions.FLINK_JVM_OPTIONS.key())) {
+            array += s"-D${x._1}=" + "\"" + x._2 + "\""
+          } else {
+            array += s"-D${x._1}=${x._2}"
+          }
+        })
       }
       array.toArray
     }

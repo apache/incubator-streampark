@@ -33,7 +33,7 @@ object FlinkSubmitter extends Logger {
 
   private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
 
-  private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*\\\"(.*)\\\""
+  private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']"
 
   private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
 
@@ -116,7 +116,7 @@ object FlinkSubmitter extends Logger {
         val opts = matcher.group()
         val index = opts.indexOf("=")
         val key = opts.substring(2, index).trim
-        val value = opts.substring(index + 1).trim.replaceAll("(^\"|\"$)", "")
+        val value = opts.substring(index + 1).trim.replaceAll("(^[\"|']|[\"|']$)", "")
         map += key -> value
       }
       map.toMap
