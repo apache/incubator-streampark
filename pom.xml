@@ -92,6 +92,7 @@
         <scala.binary.flink.version>_${scala.binary.version}</scala.binary.flink.version>
 
         <flink.version>1.14.0</flink.version>
+        <flink.shaded.version>1.8.1</flink.shaded.version>
         <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
         <spark.version>3.2.0</spark.version>
         <scalikejdbc.version>4.0.0</scalikejdbc.version>
@@ -153,7 +154,7 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>force-shading</artifactId>
-                <version>1.8.1</version>
+                <version>${flink.shaded.version}</version>
             </dependency>
 
             <!--scala-->
@@ -849,37 +850,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${maven-shade-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>shade-streampark</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>shade</goal>
-                            </goals>
-                            <configuration>
-                                <artifactSet>
-                                    <includes>
-                                        <include>org.apache.flink:force-shading</include>
-                                    </includes>
-                                    <excludes>
-                                        <exclude>com.google.code.findbugs:jsr305</exclude>
-                                        <exclude>org.slf4j:*</exclude>
-                                        <exclude>log4j:*</exclude>
-                                    </excludes>
-                                </artifactSet>
-                                <filters>
-                                    <filter>
-                                        <artifact>*:*</artifact>
-                                        <excludes>
-                                            <exclude>META-INF/*.SF</exclude>
-                                            <exclude>META-INF/*.DSA</exclude>
-                                            <exclude>META-INF/*.RSA</exclude>
-                                        </excludes>
-                                    </filter>
-                                </filters>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <!--(end) shade -->
 
@@ -952,6 +922,33 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.apache.flink:force-shading</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

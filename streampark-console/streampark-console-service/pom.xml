@@ -555,7 +555,7 @@
                             <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
-                                <descriptor>src/assembly/assembly.xml</descriptor>
+                                <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>

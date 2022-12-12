@@ -168,13 +168,14 @@ selectMode() {
   done
 }
 
+
 mixedPackage() {
   scalaProfile="scala-2.11"
   if [ "$1" == 2 ]; then
     scalaProfile="scala-2.12"
   fi
   echo_g "build info: package mode @ mixed, $scalaProfile, now build starting..."
-  "$PRG_DIR/mvnw" clean package -DskipTests -P${scalaProfile} -Pwebapp
+  "$PRG_DIR/mvnw" clean install -DskipTests -P$scalaProfile -Pwebapp
 
   if [ $? -eq 0 ]; then
      printf '\n'
@@ -190,7 +191,7 @@ detachedPackage () {
 
   echo_g "build info: package mode @ detached, $scalaProfile, now build starting..."
 
-  "$PRG_DIR"/mvnw clean package -DskipTests -P${scalaProfile}
+  "$PRG_DIR"/mvnw clean install -DskipTests -P$scalaProfile
 
   if [ $? -eq 0 ]; then
     printf '\n'
@@ -198,8 +199,8 @@ detachedPackage () {
     Next, you need to build front-end by yourself. build cmd:
 
      1) cd $PRG_DIR/streampark-console/streampark-console-webapp
-     2) npm install # or yarn install
-     3) npm build   # or yarn build
+     2) pnpm install
+     3) pnpm build
 
     please visit: https://streampark.apache.org/docs/user-guide/deployment for more detail. \n"""
   fi
