@@ -169,36 +169,32 @@ selectMode() {
 }
 
 mixedPackage() {
-  scalaVer="2.11.12"
-  binaryVer="2.11"
+  scalaProfile="scala-2.11"
   if [ "$1" == 2 ]; then
-    scalaVer="2.12.8"
-    binaryVer="2.12"
+    scalaProfile="scala-2.12"
   fi
-  echo_g "build info: package mode @ mixed, scala version @ $binaryVer, now build starting..."
-  "$PRG_DIR/mvnw" clean package -DskipTests -Dscala.version=$scalaVer -Dscala.binary.version=$binaryVer -Pwebapp
+  echo_g "build info: package mode @ mixed, $scalaProfile, now build starting..."
+  "$PRG_DIR/mvnw" clean package -DskipTests -P${scalaProfile} -Pwebapp
 
   if [ $? -eq 0 ]; then
      printf '\n'
-     echo_g "StreamPark project build successful! build info: package mode @ mixed, scala version @ $binaryVer\n"
+     echo_g "StreamPark project build successful! build info: package mode @ mixed, $scalaProfile \n"
   fi
 }
 
 detachedPackage () {
-  scalaVer="2.11.12"
-  binaryVer="2.11"
+  scalaProfile="scala-2.11"
   if [ "$1" == 2 ]; then
-    scalaVer="2.12.8"
-    binaryVer="2.12"
+    scalaProfile="scala-2.12"
   fi
 
-  echo_g "build info: package mode @ detached, scala version @ $binaryVer, now build starting..."
+  echo_g "build info: package mode @ detached, $scalaProfile, now build starting..."
 
-  "$PRG_DIR"/mvnw clean package -DskipTests -Dscala.version=$scalaVer -Dscala.binary.version=$binaryVer
+  "$PRG_DIR"/mvnw clean package -DskipTests -P${scalaProfile}
 
   if [ $? -eq 0 ]; then
     printf '\n'
-    echo_g """StreamPark project build successful! build info: package mode @ detached, scala version @ $binaryVer
+    echo_g """StreamPark project build successful! build info: package mode @ detached, $scalaProfile
     Next, you need to build front-end by yourself. build cmd:
 
      1) cd $PRG_DIR/streampark-console/streampark-console-webapp

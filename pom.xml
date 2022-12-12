@@ -129,7 +129,7 @@
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
-        <maven-source-plugin.version> 2.2.1</maven-source-plugin.version>
+        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <checkstyle.fails.on.error>true</checkstyle.fails.on.error>
         <scalastyle.fails.on.error>true</scalastyle.fails.on.error>
@@ -149,6 +149,13 @@
     <dependencyManagement>
 
         <dependencies>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>force-shading</artifactId>
+                <version>1.8.1</version>
+            </dependency>
+
             <!--scala-->
             <dependency>
                 <groupId>org.scala-lang</groupId>
@@ -595,6 +602,11 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>force-shading</artifactId>
+        </dependency>
+
         <!--scala-->
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -839,19 +851,17 @@
                     <version>${maven-shade-plugin.version}</version>
                     <executions>
                         <execution>
-                            <id>shade-flink</id>
-                            <phase>none</phase>
-                        </execution>
-                        <execution>
+                            <id>shade-streampark</id>
                             <phase>package</phase>
                             <goals>
                                 <goal>shade</goal>
                             </goals>
                             <configuration>
-                                <createDependencyReducedPom>false</createDependencyReducedPom>
                                 <artifactSet>
+                                    <includes>
+                                        <include>org.apache.flink:force-shading</include>
+                                    </includes>
                                     <excludes>
-                                        <exclude>org.apache.flink:force-shading</exclude>
                                         <exclude>com.google.code.findbugs:jsr305</exclude>
                                         <exclude>org.slf4j:*</exclude>
                                         <exclude>log4j:*</exclude>
@@ -939,6 +949,10 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -977,24 +991,18 @@
 
         <profile>
             <id>scala-2.11</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.11</value>
-                </property>
-            </activation>
+            <properties>
+                <scala.version>2.11.12</scala.version>
+                <scala.binary.version>2.11</scala.binary.version>
+            </properties>
         </profile>
 
         <profile>
             <id>scala-2.12</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.12</value>
-                </property>
-            </activation>
+            <properties>
+                <scala.version>2.12.8</scala.version>
+                <scala.binary.version>2.12</scala.binary.version>
+            </properties>
             <modules>
                 <module>streampark-spark</module>
             </modules>
