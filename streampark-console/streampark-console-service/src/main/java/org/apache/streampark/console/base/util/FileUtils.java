@@ -36,14 +36,16 @@ public class FileUtils {
      */
     public static byte[] readEndOfFile(File file, long maxSize) throws IOException {
         long readSize = maxSize;
-        RandomAccessFile raFile = new RandomAccessFile(file, "r");
-        if (raFile.length() > maxSize) {
-            raFile.seek(raFile.length() - maxSize);
-        } else if (raFile.length() < maxSize) {
-            readSize = (int) raFile.length();
+        byte[] fileContent;
+        try (RandomAccessFile raFile = new RandomAccessFile(file, "r")) {
+            if (raFile.length() > maxSize) {
+                raFile.seek(raFile.length() - maxSize);
+            } else if (raFile.length() < maxSize) {
+                readSize = (int) raFile.length();
+            }
+            fileContent = new byte[(int) readSize];
+            raFile.read(fileContent);
         }
-        byte[] fileContent = new byte[(int) readSize];
-        raFile.read(fileContent);
         return fileContent;
     }
 
@@ -60,11 +62,13 @@ public class FileUtils {
             throw new IllegalArgumentException(
                 String.format("The startOffset %s is great than the file length %s", startOffset, file.length()));
         }
-        RandomAccessFile raFile = new RandomAccessFile(file, "r");
-        long readSize = Math.min(maxSize, file.length() - startOffset);
-        raFile.seek(startOffset);
-        byte[] fileContent = new byte[(int) readSize];
-        raFile.read(fileContent);
+        byte[] fileContent;
+        try (RandomAccessFile raFile = new RandomAccessFile(file, "r")) {
+            long readSize = Math.min(maxSize, file.length() - startOffset);
+            raFile.seek(startOffset);
+            fileContent = new byte[(int) readSize];
+            raFile.read(fileContent);
+        }
         return fileContent;
     }
 

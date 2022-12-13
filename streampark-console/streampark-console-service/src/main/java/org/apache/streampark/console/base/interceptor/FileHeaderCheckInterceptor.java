@@ -37,8 +37,8 @@ import java.util.Map;
 @Component
 public class FileHeaderCheckInterceptor implements HandlerInterceptor {
 
-    private static List<String> fileHeaders = new ArrayList<>();
-    private int headerLength = 8;
+    private static final List<String> fileHeaders = new ArrayList<>();
+    private static final int headerLength = 8;
 
     static {
         fileHeaders.add(FileType.JAR.getMagicNumber());

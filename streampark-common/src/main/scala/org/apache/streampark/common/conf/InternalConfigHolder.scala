@@ -187,7 +187,6 @@ object Converter {
 
   def convert[T](v: String, classType: Class[_]): T = {
     classType match {
-      case c if c == classOf[String] => v.asInstanceOf[T]
       case c if c == classOf[Int] => v.toInt.asInstanceOf[T]
       case c if c == classOf[Long] => v.toLong.asInstanceOf[T]
       case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
