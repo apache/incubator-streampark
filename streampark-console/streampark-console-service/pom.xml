@@ -688,7 +688,7 @@
                             <directory>src/main/resources/static</directory>
                         </fileset>
                         <fileset>
-                            <directory>${project.basedir}/../${frontend.project.name}/dist</directory>
+                            <directory>${project.build.directory}/../${frontend.project.name}/dist</directory>
                         </fileset>
                     </filesets>
                 </configuration>

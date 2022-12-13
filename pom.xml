@@ -17,7 +17,8 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache</groupId>
@@ -73,11 +74,7 @@
     </mailingLists>
 
     <modules>
-        <module>streampark-common</module>
-        <module>streampark-flink</module>
-        <module>streampark-plugin</module>
         <module>streampark-console</module>
-        <module>streampark-storage</module>
     </modules>
 
     <properties>
@@ -928,27 +925,26 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        <configuration>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
-                            <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.apache.flink:force-shading</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <shadedArtifactId>true</shadedArtifactId>
+                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                    <artifactSet>
+                        <includes>
+                            <!--
+                              This is a dummy dependency that is used to trigger the maven-shade plugin
+                              so that streampark's published POMs are flattened and do not contain variables.
+
+                              references:
+                              [SPARK-3812]: https://issues.apache.org/jira/browse/SPARK-3812
+                              [FLINK-3565]: https://issues.apache.org/jira/browse/FLINK-3565
+                            -->
+                            <include>org.apache.flink:force-shading</include>
+                        </includes>
+                    </artifactSet>
+                </configuration>
             </plugin>
 
             <plugin>
