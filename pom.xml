@@ -74,7 +74,11 @@
     </mailingLists>
 
     <modules>
+        <module>streampark-common</module>
+        <module>streampark-flink</module>
+        <module>streampark-plugin</module>
         <module>streampark-console</module>
+        <module>streampark-storage</module>
     </modules>
 
     <properties>
