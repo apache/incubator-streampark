@@ -39,7 +39,7 @@ public enum ResourceFrom implements Serializable {
     }
 
     public static ResourceFrom of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+        return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
     }
 
     public Integer getValue() {

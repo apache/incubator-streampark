@@ -37,11 +37,11 @@ import java.util.Map;
 @Component
 public class FileHeaderCheckInterceptor implements HandlerInterceptor {
 
-    private static List<String> fileHeaders = new ArrayList<>();
-    private int headerLength = 8;
+    private static final List<String> FILE_HEADERS = new ArrayList<>();
+    private static final int HEADER_LENGTH = 8;
 
     static {
-        fileHeaders.add(FileType.JAR.getMagicNumber());
+        FILE_HEADERS.add(FileType.JAR.getMagicNumber());
     }
 
     @Override
@@ -54,9 +54,9 @@ public class FileHeaderCheckInterceptor implements HandlerInterceptor {
                 String formKey = iterator.next();
                 MultipartFile multipartFile = multipartRequest.getFile(formKey);
                 byte[] file = multipartFile.getBytes();
-                if (file.length > headerLength) {
+                if (file.length > HEADER_LENGTH) {
                     StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < headerLength; i++) {
+                    for (int i = 0; i < HEADER_LENGTH; i++) {
                         int v = file[i] & 0xFF;
                         String hv = Integer.toHexString(v);
                         if (hv.length() < 2) {
@@ -66,7 +66,7 @@ public class FileHeaderCheckInterceptor implements HandlerInterceptor {
                     }
                     boolean isFound = false;
                     String fileHead = sb.toString().toUpperCase();
-                    for (String header : fileHeaders) {
+                    for (String header : FILE_HEADERS) {
                         if (fileHead.startsWith(header)) {
                             isFound = true;
                             break;

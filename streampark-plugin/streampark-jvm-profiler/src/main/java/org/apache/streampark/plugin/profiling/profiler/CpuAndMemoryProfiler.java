@@ -134,8 +134,8 @@ public class CpuAndMemoryProfiler extends ProfilerBase implements Profiler {
             for (GarbageCollectorMXBean gcMXBean : gcMXBeans) {
                 Map<String, Object> gcMap = new HashMap<>();
                 gcMap.put("name", gcMXBean.getName());
-                gcMap.put("collectionCount", new Long(gcMXBean.getCollectionCount()));
-                gcMap.put("collectionTime", new Long(gcMXBean.getCollectionTime()));
+                gcMap.put("collectionCount", Long.valueOf(gcMXBean.getCollectionCount()));
+                gcMap.put("collectionTime", Long.valueOf(gcMXBean.getCollectionTime()));
 
                 gcMetrics.add(gcMap);
             }
@@ -167,9 +167,9 @@ public class CpuAndMemoryProfiler extends ProfilerBase implements Profiler {
                 Map<String, Object> bufferPoolMap = new HashMap<>();
 
                 bufferPoolMap.put("name", pool.getName());
-                bufferPoolMap.put("count", new Long(pool.getCount()));
-                bufferPoolMap.put("memoryUsed", new Long(pool.getMemoryUsed()));
-                bufferPoolMap.put("totalCapacity", new Long(pool.getTotalCapacity()));
+                bufferPoolMap.put("count", Long.valueOf(pool.getCount()));
+                bufferPoolMap.put("memoryUsed", Long.valueOf(pool.getMemoryUsed()));
+                bufferPoolMap.put("totalCapacity", Long.valueOf(pool.getTotalCapacity()));
 
                 bufferPoolsMetrics.add(bufferPoolMap);
             }

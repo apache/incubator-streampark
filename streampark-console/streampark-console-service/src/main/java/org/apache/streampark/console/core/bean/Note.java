@@ -38,16 +38,19 @@ public class Note {
 
     public Content getContent() {
         if (this.content == null) {
-            Scanner scanner = new Scanner(this.text);
-            Properties properties = new Properties();
-            StringBuilder codeBuilder = new StringBuilder();
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                if (line.startsWith("%flink.")) {
-                    String[] dyProp = line.trim().split("=");
-                    properties.setProperty(dyProp[0].substring(1), dyProp[1]);
-                } else {
-                    codeBuilder.append(line).append("\n");
+            Properties properties;
+            StringBuilder codeBuilder;
+            try (Scanner scanner = new Scanner(this.text)) {
+                properties = new Properties();
+                codeBuilder = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    if (line.startsWith("%flink.")) {
+                        String[] dyProp = line.trim().split("=");
+                        properties.setProperty(dyProp[0].substring(1), dyProp[1]);
+                    } else {
+                        codeBuilder.append(line).append("\n");
+                    }
                 }
             }
             this.content = new Content(properties, codeBuilder.toString());

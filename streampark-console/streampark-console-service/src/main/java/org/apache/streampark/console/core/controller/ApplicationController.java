@@ -113,7 +113,7 @@ public class ApplicationController {
         Long id = applicationService.copy(app);
         Map<String, String> data = new HashMap<>();
         data.put("id", Long.toString(id));
-        return id.equals(0) ? RestResponse.success(false).data(data) : RestResponse.success(true).data(data);
+        return id.equals(0L) ? RestResponse.success(false).data(data) : RestResponse.success(true).data(data);
     }
 
     @PostMapping("update")
@@ -311,18 +311,16 @@ public class ApplicationController {
         final String scheme = uri.getScheme();
         final String pathPart = uri.getPath();
         RestResponse restResponse = RestResponse.success(true);
-        String error;
+        String error = null;
         if (scheme == null) {
             error = "The scheme (hdfs://, file://, etc) is null. Please specify the file system scheme explicitly in the URI.";
-            restResponse.data(false).message(error);
-        }
-        if (pathPart == null) {
+        } else if (pathPart == null) {
             error = "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-            restResponse.data(false).message(error);
-        }
-        if (pathPart.length() == 0 || pathPart.equals("/")) {
+        } else if (pathPart.length() == 0 || pathPart.equals("/")) {
             error = "Cannot use the root directory for checkpoints.";
-            restResponse.data(false).message(error);
+        }
+        if (error != null) {
+            restResponse = RestResponse.success(false).message(error);
         }
         return restResponse;
     }
