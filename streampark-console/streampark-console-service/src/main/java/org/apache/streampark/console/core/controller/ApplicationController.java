@@ -314,9 +314,9 @@ public class ApplicationController {
         String error = null;
         if (scheme == null) {
             error = "The scheme (hdfs://, file://, etc) is null. Please specify the file system scheme explicitly in the URI.";
-        }else if (pathPart == null) {
+        } else if (pathPart == null) {
             error = "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-        }else if (pathPart.length() == 0 || pathPart.equals("/")) {
+        } else if (pathPart.length() == 0 || pathPart.equals("/")) {
             error = "Cannot use the root directory for checkpoints.";
         }
         if (error != null) {
