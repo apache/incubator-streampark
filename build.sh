@@ -155,9 +155,11 @@ selectMode() {
   do
     case $scala in
       "mixed mode")
+        echo_g "mixed mode selected (mixed build project of front-end and back-ends)"
         return 1
         ;;
       "detached mode")
+        echo_g "detached mode selected (Only build the back-end project, the front-end build need by yourself)"
         return 2
         ;;
       *)
