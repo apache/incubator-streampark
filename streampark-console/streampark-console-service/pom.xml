@@ -477,13 +477,6 @@
 
         <profile>
             <id>scala-2.12</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.12</value>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -575,12 +568,6 @@
 
         <profile>
             <id>scala-2.11</id>
-            <activation>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.11</value>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -637,7 +624,7 @@
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
-                                <descriptor>src/assembly/assembly.xml</descriptor>
+                                <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
