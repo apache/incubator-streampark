@@ -175,7 +175,7 @@ mixedPackage() {
     scalaProfile="scala-2.12"
   fi
   echo_g "build info: package mode @ mixed, $scalaProfile, now build starting..."
-  "$PRG_DIR/mvnw" clean install -DskipTests -P$scalaProfile -Pwebapp
+  "$PRG_DIR/mvnw" clean package -DskipTests -P$scalaProfile -Pwebapp
 
   if [ $? -eq 0 ]; then
      printf '\n'
@@ -191,7 +191,7 @@ detachedPackage () {
 
   echo_g "build info: package mode @ detached, $scalaProfile, now build starting..."
 
-  "$PRG_DIR"/mvnw clean install -DskipTests -P$scalaProfile
+  "$PRG_DIR"/mvnw clean package -DskipTests -P$scalaProfile
 
   if [ $? -eq 0 ]; then
     printf '\n'
