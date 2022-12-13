@@ -15,7 +15,31 @@
  * limitations under the License.
  */
 import { CSSProperties, VNodeChild } from 'vue';
-import { createTypes, VueTypeValidableDef, VueTypesInterface } from 'vue-types';
+import VueTypes, {
+  toType,
+  toValidableType,
+  createTypes,
+  VueTypeValidableDef,
+  VueTypesInterface,
+} from 'vue-types';
+
+export default class ProjectTypes extends VueTypes {
+  // define a custom validator that accepts configuration parameters
+  static maxLength(max) {
+    return toType('maxLength', {
+      type: String,
+      validator: (max, v) => v.length <= max,
+    });
+  }
+
+  // a native-like validator that supports the `.validable` method
+  static get positive() {
+    return toValidableType('positive', {
+      type: Number,
+      validator: (v) => v > 0,
+    });
+  }
+}
 
 export type VueNode = VNodeChild | JSX.Element;
 
@@ -33,4 +57,18 @@ const propTypes = createTypes({
   object: undefined,
   integer: undefined,
 }) as PropTypes;
+
+propTypes.extend([
+  {
+    name: 'style',
+    getter: true,
+    type: [String, Object],
+    default: undefined,
+  },
+  {
+    name: 'VNodeChild',
+    getter: true,
+    type: undefined,
+  },
+]);
 export { propTypes };

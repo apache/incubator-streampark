@@ -18,7 +18,7 @@
   <PageWrapper contentFullHeight contentBackground contentClass="px-20px">
     <a-card class="header" :bordered="false">
       <template #extra>
-        <a-radio-group v-model:value="queryParams.buildState">
+        <a-radio-group v-model:value="buildState">
           <a-radio-button
             v-for="item in buttonList"
             @click="handleQuery(item.key)"
@@ -37,7 +37,7 @@
     <div class="operate pt-20px bg-white" v-auth="'project:create'">
       <a-button type="dashed" style="width: 100%" @click="onAdd">
         <Icon icon="ant-design:plus-outlined" />
-        {{ t('common.add') }}
+        {{ t("common.add") }}
       </a-button>
     </div>
     <a-card :bordered="false">
@@ -48,130 +48,167 @@
             v-for="item in projectDataSource"
             :item="item"
             @view-log="handleViewLog"
-            @success="queryData"
+            @success="handleListItemSuccess"
           />
         </a-list>
+        <div class="text-center mt-10px">
+          <a-pagination
+            class="w-full"
+            showLessItems
+            hideOnSinglePage
+            :pageSize="pageInfo.pageSize"
+            :total="pageInfo.total"
+            @change="handlePageChange"
+          />
+        </div>
       </a-spin>
     </a-card>
     <LogModal @register="registerLogModal" />
   </PageWrapper>
 </template>
 <script lang="ts">
-  import { defineComponent, onUnmounted, reactive, ref, unref, watch } from 'vue';
+import { defineComponent, onUnmounted, reactive, ref, unref, watch } from "vue";
 
-  import { PageWrapper } from '/@/components/Page';
-  import { statusList } from './project.data';
-  import { RadioGroup, Radio, Input, Card, List, Spin } from 'ant-design-vue';
-  import { getList } from '/@/api/flink/project';
-  import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
-  import ListItem from './components/ListItem.vue';
-  import Icon from '/@/components/Icon/src/Icon.vue';
-  import { useGo } from '/@/hooks/web/usePage';
-  import { useTimeoutFn } from '@vueuse/core';
-  import { useI18n } from '/@/hooks/web/useI18n';
-  import { useModal } from '/@/components/Modal';
-  import LogModal from './components/LogModal.vue';
-  import { useUserStoreWithOut } from '/@/store/modules/user';
+import { PageWrapper } from "/@/components/Page";
+import { statusList } from "./project.data";
+import { RadioGroup, Radio, Input, Card, List, Spin, Pagination } from "ant-design-vue";
+import { getList } from "/@/api/flink/project";
+import { ProjectRecord } from "/@/api/flink/project/model/projectModel";
+import ListItem from "./components/ListItem.vue";
+import Icon from "/@/components/Icon/src/Icon.vue";
+import { useGo } from "/@/hooks/web/usePage";
+import { useTimeoutFn } from "@vueuse/core";
+import { useI18n } from "/@/hooks/web/useI18n";
+import { useModal } from "/@/components/Modal";
+import LogModal from "./components/LogModal.vue";
+import { useUserStoreWithOut } from "/@/store/modules/user";
 
-  export default defineComponent({
-    name: 'ProjectView',
-    components: {
-      PageWrapper,
-      ARadioGroup: RadioGroup,
-      ARadioButton: Radio.Button,
-      AInputSearch: Input.Search,
-      ACard: Card,
-      AList: List,
-      ListItem,
-      ASpin: Spin,
-      Icon,
-      LogModal,
-    },
-    setup() {
-      const go = useGo();
-      const userStore = useUserStoreWithOut();
-      const { t } = useI18n();
-      const [registerLogModal, { openModal: openLogModal }] = useModal();
-      const buttonList = reactive(statusList);
-      const loading = ref(false);
+export default defineComponent({
+  name: "ProjectView",
+  components: {
+    PageWrapper,
+    ARadioGroup: RadioGroup,
+    ARadioButton: Radio.Button,
+    AInputSearch: Input.Search,
+    APagination: Pagination,
+    ACard: Card,
+    AList: List,
+    ListItem,
+    ASpin: Spin,
+    Icon,
+    LogModal,
+  },
+  setup() {
+    const go = useGo();
+    const userStore = useUserStoreWithOut();
+    const { t } = useI18n();
+    const [registerLogModal, { openModal: openLogModal }] = useModal();
+    const buttonList = reactive(statusList);
+    const loading = ref(false);
+    const buildState = ref("");
+    const pageInfo = reactive({
+      currentPage: 0,
+      pageSize: 10,
+      total: 0,
+    });
 
-      const queryParams = reactive({
-        buildState: '',
-      });
+    const queryParams = reactive({
+      buildState: "",
+      pageNum: pageInfo.currentPage,
+      pageSize: pageInfo.pageSize,
+    });
 
-      let projectDataSource = ref<Array<ProjectRecord>>([]);
+    let projectDataSource = ref<Array<ProjectRecord>>([]);
 
-      function onAdd() {
-        go(`/flink/project/add`);
-      }
+    function onAdd() {
+      go(`/flink/project/add`);
+    }
 
-      function handleSearch(value: string) {
-        Object.assign(queryParams, { name: value });
-        queryData();
-      }
-
-      function queryData(showLoading = true) {
-        if (showLoading) loading.value = true;
-        getList({ ...queryParams, teamId: userStore.getTeamId }).then((res) => {
-          loading.value = false;
-          projectDataSource.value = res.records;
-        });
-      }
-
-      const handleQuery = function (val) {
-        queryParams.buildState = val;
-        queryData();
-      };
-
-      const { start, stop } = useTimeoutFn(
-        () => {
-          if (!unref(loading)) queryData(false);
-          start();
-        },
-        2000,
-        { immediate: false },
-      );
-      /* View log */
-      function handleViewLog(value: Recordable) {
-        openLogModal(true, { project: value });
-      }
-      // teamid update
-      watch(
-        () => userStore.getTeamId,
-        (val) => {
-          if (val) queryData();
-        },
-      );
+    function handleSearch(value: string) {
+      Object.assign(queryParams, { name: value });
       queryData();
-      start();
+    }
 
-      onUnmounted(() => {
-        stop();
+    function queryData(showLoading = true) {
+      if (showLoading) loading.value = true;
+      console.log("pageInfo", pageInfo);
+      getList({
+        buildState: buildState.value,
+        pageNum: pageInfo.currentPage,
+        pageSize: pageInfo.pageSize,
+        teamId: userStore.getTeamId,
+      }).then((res) => {
+        loading.value = false;
+        pageInfo.total = Number(res.total);
+        projectDataSource.value = res.records;
       });
+    }
 
-      return {
-        t,
-        buttonList,
-        handleQuery,
-        queryParams,
-        projectDataSource,
-        loading,
-        onAdd,
-        handleSearch,
-        registerLogModal,
-        handleViewLog,
-        queryData,
-      };
-    },
-  });
+    const handleQuery = function (val) {
+      buildState.value = val;
+      queryData();
+    };
+
+    const { start, stop } = useTimeoutFn(
+      () => {
+        if (!unref(loading)) queryData(false);
+        start();
+      },
+      2000,
+      { immediate: false }
+    );
+    /* View log */
+    function handleViewLog(value: Recordable) {
+      openLogModal(true, { project: value });
+    }
+    // teamid update
+    watch(
+      () => userStore.getTeamId,
+      (val) => {
+        if (val) queryData();
+      }
+    );
+    queryData();
+    start();
+
+    onUnmounted(() => {
+      stop();
+    });
+    function handlePageChange(val: number) {
+      pageInfo.currentPage = val;
+      queryData();
+    }
+    function handleListItemSuccess() {
+      pageInfo.currentPage = 0;
+      queryData();
+    }
+    return {
+      t,
+      pageInfo,
+      buildState,
+      buttonList,
+      handleQuery,
+      queryParams,
+      projectDataSource,
+      loading,
+      onAdd,
+      handleSearch,
+      registerLogModal,
+      handleViewLog,
+      queryData,
+      handlePageChange,
+      handleListItemSuccess,
+    };
+  },
+});
 </script>
 <style lang="less" scoped>
-  .search-input {
-    width: 272px;
-    margin-left: 16px;
-  }
+.search-input {
+  width: 272px;
+  margin-left: 16px;
+}
 
-  .add-btn {
-    margin-left: 30px;
-  }
+.add-btn {
+  margin-left: 30px;
+}
 </style>
