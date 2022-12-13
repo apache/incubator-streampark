@@ -23,7 +23,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.streampark</groupId>
-        <artifactId>streampark-flink-connector_${scala.binary.version}</artifactId>
+        <artifactId>streampark-flink-connector</artifactId>
         <version>2.0.0</version>
     </parent>
 

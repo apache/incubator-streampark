@@ -199,6 +199,7 @@
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -208,31 +209,44 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.fasterxml.jackson.*:*</include>
+                                    <include>com.beachape:*</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson.code</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.code</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson.module</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson.databind</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.databind</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <artifactSet>
-                        <includes>
-                            <include>com.fasterxml.jackson.*:*</include>
-                            <include>com.beachape:*</include>
-                        </includes>
-                    </artifactSet>
-                    <relocations>
-                        <relocation>
-                            <pattern>com.fasterxml.jackson.code</pattern>
-                            <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.code</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.fasterxml.jackson.module</pattern>
-                            <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.fasterxml.jackson.databind</pattern>
-                            <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.databind</shadedPattern>
-                        </relocation>
-                    </relocations>
-                </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>

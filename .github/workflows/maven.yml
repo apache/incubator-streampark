@@ -69,19 +69,13 @@ jobs:
             markdown-link-check -c .dlc.json -q "$file"
           done
   build:
-    name: "maven-compile (scala-${{ matrix.scala-binary-version }}, java-${{ matrix.java }})"
+    name: "maven-compile ( ${{ matrix.scala }}, java-${{ matrix.java }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        scala-version: [ 2.11.12, 2.12.8 ]
-        scala-binary-version: [ 2.11, 2.12 ]
+        scala: [ scala-2.11, scala-2.12 ]
         java: [ 8 , 11 ]
-        exclude:
-          - scala-version: 2.11.12
-            scala-binary-version: 2.12
-          - scala-version: 2.12.8
-            scala-binary-version: 2.11
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -92,7 +86,7 @@ jobs:
           distribution: "adopt"
           cache: "maven"
       - name: Build with Maven
-        run: ./mvnw -B clean package -Dscala.version=${{ matrix.scala-version }} -Dscala.binary.version=${{ matrix.scala-binary-version }} -DskipTests
+        run: ./mvnw -B clean package -P${{ matrix.scala }} -DskipTests
       - name: Test with Maven
-        run: ./mvnw -B test -Dscala.version=${{ matrix.scala-version }} -Dscala.binary.version=${{ matrix.scala-binary-version }} -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am
+        run: ./mvnw -B test -P${{ matrix.scala }} -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am
 
