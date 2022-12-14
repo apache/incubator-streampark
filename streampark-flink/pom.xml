@@ -36,10 +36,6 @@
         <module>streampark-flink-connector</module>
         <module>streampark-flink-sqlclient</module>
         <module>streampark-flink-udf</module>
-        <module>streampark-flink-submit</module>
-        <module>streampark-flink-proxy</module>
-        <module>streampark-flink-packer</module>
-        <module>streampark-flink-kubernetes</module>
     </modules>
 
     <dependencies>
@@ -74,5 +70,20 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+        include streampark-console(streaming application operation platform) submodules
+        -->
+        <profile>
+            <id>console</id>
+            <modules>
+                <module>streampark-flink-submit</module>
+                <module>streampark-flink-proxy</module>
+                <module>streampark-flink-packer</module>
+                <module>streampark-flink-kubernetes</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
