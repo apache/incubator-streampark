@@ -20,7 +20,7 @@
         <format>tar.gz</format>
     </formats>
     <includeBaseDirectory>true</includeBaseDirectory>
-    <baseDirectory>${project.build.finalName}_${scala.binary.version}-bin</baseDirectory>
+    <baseDirectory>apache-streampark_${scala.binary.version}-${project.version}-bin</baseDirectory>
 
     <dependencySets>
         <dependencySet>
