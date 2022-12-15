@@ -539,26 +539,29 @@
                     </plugin>
 
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>3.1.1</version>
-                        <configuration>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
                         <executions>
                             <execution>
-                                <id>make-assembly</id>
+                                <id>dist</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
+                                <configuration>
+                                    <tarLongFileMode>gnu</tarLongFileMode>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <skipAssembly>false</skipAssembly>
+                                    <attach>false</attach>
+                                    <finalName>apache-streampark_${scala.binary.version}-${project.version}-incubating-bin</finalName>
+                                    <descriptors>
+                                        <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>
@@ -616,21 +619,26 @@
                     </plugin>
 
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>3.1.1</version>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
                         <executions>
                             <execution>
-                                <id>make-assembly</id>
+                                <id>dist</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
+                                <configuration>
+                                    <tarLongFileMode>gnu</tarLongFileMode>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <skipAssembly>false</skipAssembly>
+                                    <attach>false</attach>
+                                    <finalName>apache-streampark_${scala.binary.version}-${project.version}-incubating-bin</finalName>
+                                    <descriptors>
+                                        <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
