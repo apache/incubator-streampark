@@ -58,7 +58,7 @@ jobs:
 
       - name: Mixed front-end and back-end packaging
         run: |
-          ./mvnw clean install -DskipTests -Pscala-2.12 -Pwebapp
+          ./mvnw clean install -DskipTests -Pscala-2.12,console,webapp
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2

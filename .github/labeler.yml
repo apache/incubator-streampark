@@ -25,7 +25,6 @@ INFRA:
 BUILD:
   - ".husky/**/*"
   - ".mvn/**/*"
-  - "script/update_version.py"
   - "tools/checkstyle/*"
   - "build.sh"
   - "mvnw"
