@@ -18,9 +18,8 @@
 FROM alpine:3.16 as deps-stage
 COPY . /
 WORKDIR /
-RUN tar zxvf streampark-console/streampark-console-service/target/streampark-console-service-*.tar.gz \
-&& mv streampark-console-service-* streampark
-
+RUN tar zxvf streampark-console/streampark-console-service/target/apache-streampark_*-*-bin.tar.gz \
+&& mv apache-streampark_*-*-bin streampark
 
 FROM docker:dind
 WORKDIR /streampark

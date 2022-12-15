@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.core.enums.ConfigFileType;
@@ -33,6 +34,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @TableName("t_flink_config")
@@ -78,17 +80,42 @@ public class ApplicationConfig {
 
     public Map<String, String> readConfig() {
         ConfigFileType fileType = ConfigFileType.of(this.format);
+        Map<String, String> configs = null;
         if (fileType != null) {
             switch (fileType) {
                 case YAML:
-                    return PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
+                    configs = PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
+                    break;
                 case PROPERTIES:
-                    return PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
+                    configs = PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
+                    break;
                 case HOCON:
-                    return PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
+                    configs = PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
+                    break;
                 default:
-                    return Collections.emptyMap();
+                    configs = Collections.emptyMap();
+                    break;
             }
+        }
+
+        if (configs != null && !configs.isEmpty()) {
+            return configs.entrySet().stream().collect(
+                Collectors.toMap(entry -> {
+                    String key = entry.getKey();
+                    if (key.startsWith(ConfigConst.KEY_FLINK_OPTION_PREFIX())) {
+                        key = key.substring(ConfigConst.KEY_FLINK_OPTION_PREFIX().length());
+                    } else if (key.startsWith(ConfigConst.KEY_FLINK_PROPERTY_PREFIX())) {
+                        key = key.substring(ConfigConst.KEY_FLINK_PROPERTY_PREFIX().length());
+                    } else if (key.startsWith(ConfigConst.KEY_FLINK_TABLE_PREFIX())) {
+                        key = key.substring(ConfigConst.KEY_FLINK_TABLE_PREFIX().length());
+                    } else if (key.startsWith(ConfigConst.KEY_APP_PREFIX())) {
+                        key = key.substring(ConfigConst.KEY_APP_PREFIX().length());
+                    } else if (key.startsWith(ConfigConst.KEY_SQL_PREFIX())) {
+                        key = key.substring(ConfigConst.KEY_SQL_PREFIX().length());
+                    }
+                    return key;
+                }, Map.Entry::getValue)
+            );
         }
         return Collections.emptyMap();
     }
