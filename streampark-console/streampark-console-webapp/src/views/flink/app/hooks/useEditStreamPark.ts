@@ -128,7 +128,7 @@ export const useEditStreamParkSchema = (
       ...getFlinkClusterSchemas.value,
       {
         field: 'flinkSqlHistory',
-        label: 'History Version',
+        label: t('flink.app.historyVersion'),
         component: 'Select',
         render: ({ model }) =>
           renderSqlHistory(

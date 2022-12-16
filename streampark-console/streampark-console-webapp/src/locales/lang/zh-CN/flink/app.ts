@@ -28,6 +28,7 @@ export default {
   jobType: '作业类型',
   developmentMode: '作业模式',
   executionMode: '执行模式',
+  historyVersion: '历史版本',
   dependency: '作业依赖',
   appConf: '作业配置',
   resolveOrder: '类加载顺序',

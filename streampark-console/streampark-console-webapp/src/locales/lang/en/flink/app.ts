@@ -28,6 +28,7 @@ export default {
   jobType: 'Job Type',
   developmentMode: 'Development Mode',
   executionMode: 'Execution Mode',
+  historyVersion: 'History Version',
   dependency: 'Dependency',
   appConf: 'Application Conf',
   resolveOrder: 'resolveOrder',
