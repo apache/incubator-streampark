@@ -24,6 +24,9 @@ on:
     branches: [ "dev" ]
   schedule:
     - cron: '20 16 * * 5'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
