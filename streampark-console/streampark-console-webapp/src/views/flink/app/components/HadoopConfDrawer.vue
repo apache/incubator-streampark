@@ -60,7 +60,7 @@
         <Empty v-if="isHadoopEmpty" />
         <template v-else>
           <Tabs tabPosition="left">
-            <TabPane v-for="(content, fname) in hadoopConfContent.hadoop" :key="fname" :tab="fname">
+            <TabPane v-for="(content, item) in hadoopConfContent.hadoop" :key="item" :tab="item">
               <pre class="my-20px" style="font-size: 12px">{{ content }}</pre>
             </TabPane>
           </Tabs>
@@ -70,7 +70,7 @@
         <Empty v-if="isHiveEmpty" />
         <template v-else>
           <Tabs tabPosition="left">
-            <TabPane v-for="(content, fname) in hadoopConfContent.hive" :key="fname" :tab="fname">
+            <TabPane v-for="(content, item) in hadoopConfContent.hive" :key="item" :tab="item">
               <pre class="my-20px" style="font-size: 12px">{{ content }}</pre>
             </TabPane>
           </Tabs>

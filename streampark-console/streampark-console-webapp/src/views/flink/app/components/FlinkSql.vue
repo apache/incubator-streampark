@@ -85,7 +85,7 @@
         if (success) {
           vertifyRes.verified = true;
           vertifyRes.errorMsg = '';
-          syntaxError();
+          await syntaxError();
           return true;
         } else {
           vertifyRes.errorStart = parseInt(data.start);
@@ -101,7 +101,7 @@
               vertifyRes.errorMsg = data.message;
               break;
           }
-          syntaxError();
+          await syntaxError();
           return false;
         }
       } catch (error) {

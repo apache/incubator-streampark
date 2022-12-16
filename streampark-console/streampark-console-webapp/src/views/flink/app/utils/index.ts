@@ -212,11 +212,7 @@ export function getAppConfType(configFile: string): number {
   } else if (config.endsWith('.conf')) {
     return ConfigTypeEnum.HOCON;
   }
-  return 0;
-}
-
-export function checkAppConfType(confType: number): boolean {
-  return [ConfigTypeEnum.YAML, ConfigTypeEnum.PROPERTIES, ConfigTypeEnum.HOCON].includes(confType);
+  return ConfigTypeEnum.UNKNOWN;
 }
 
 export function handleDependencyJsonToPom(json, pomMap, jarMap) {

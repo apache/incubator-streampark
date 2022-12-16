@@ -110,7 +110,13 @@ export const useProject = () => {
           },
         ],
       },
-      { field: 'gitProtocol', label: '', component: 'Input', show: false, defaultValue: GitProtocolEnum.HTTPS },
+      {
+        field: 'gitProtocol',
+        label: '',
+        component: 'Input',
+        show: false,
+        defaultValue: GitProtocolEnum.HTTPS,
+      },
       { field: 'url', label: '', component: 'Input', show: false },
       {
         field: 'repositoryUrl',
@@ -261,8 +267,8 @@ export const useProject = () => {
         if (!branchList.value.find((v) => v.value == values.branches)) {
           createErrorSwal(
             'branch [' +
-            values.branches +
-            '] does not exist<br>or authentication error,please check',
+              values.branches +
+              '] does not exist<br>or authentication error,please check',
           );
         } else {
           await FetchAction(values);

@@ -125,7 +125,6 @@
         k8sNamespace: app.k8sNamespace,
         ...resetParams,
       };
-      console.log('resetParams', resetParams);
       if (!executionMode) {
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }
@@ -142,7 +141,7 @@
       uploadJar.value = data.file.name;
       const res = await fetchMain({ jar: path });
       uploadLoading.value = false;
-      setFieldsValue({ jar: uploadJar.value, mainClass: res });
+      await setFieldsValue({jar: uploadJar.value, mainClass: res});
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;
@@ -154,7 +153,7 @@
     try {
       submitLoading.value = true;
       if (app.jobType == JobTypeEnum.JAR) {
-        handleSubmitCustomJob(values);
+        await handleSubmitCustomJob(values);
       } else {
         if (app.jobType == JobTypeEnum.SQL) {
           if (values.flinkSql == null || values.flinkSql.trim() === '') {
@@ -238,7 +237,7 @@
         config,
       };
       handleSubmitParams(params, values, k8sTemplate);
-      handleUpdateApp(params);
+      await handleUpdateApp(params);
     } catch (error) {
       console.error('error', error);
       submitLoading.value = false;
@@ -291,7 +290,7 @@
         [item.key]: item.defaultValue,
       });
     });
-    setFieldsValue({
+    await setFieldsValue({
       jobType: res.jobType,
       executionMode: res.executionMode,
       flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
@@ -305,7 +304,7 @@
       project: app.projectId,
       ...defaultFormValue,
     });
-    nextTick(() => {
+    await nextTick(() => {
       unref(flinkSql)?.setContent(decodeByBase64(res.flinkSql));
 
       setTimeout(() => {
@@ -357,7 +356,7 @@
       <template #args="{ model }">
         <ProgramArgs
           ref="programArgRef"
-          v-if="model.args != null && model.args != undefined"
+          v-if="model.args != null"
           v-model:value="model.args"
           :suggestions="suggestions"
           @preview="(value) => openReviewDrawer(true, { value, suggestions })"

@@ -147,7 +147,7 @@
       return;
     }
     handleUpdateDependency();
-    setContent(defaultValue);
+    await setContent(defaultValue);
   }
 
   function alertInvalidDependency(scalaVersion, invalidArtifact) {

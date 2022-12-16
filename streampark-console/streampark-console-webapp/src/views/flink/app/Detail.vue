@@ -153,9 +153,9 @@
           ExecModeEnum.YARN_APPLICATION,
         ].includes(res.executionMode)
       ) {
-        handleYarn();
+        await handleYarn();
       }
-      handleDetailTabs();
+      await handleDetailTabs();
     }
     Object.assign(app, res);
   }
@@ -180,8 +180,7 @@
 
   /* Get yarn data */
   async function handleYarn() {
-    const res = await fetchYarn();
-    yarn.value = res;
+    yarn.value = await fetchYarn();
   }
 
   /* copyCurl */
@@ -208,7 +207,7 @@
         baseUrl: baseUrl(),
         path: urlPath,
       });
-      copy(res);
+      await copy(res);
       createMessage.success(t('flink.app.detail.detailTab.copySuccess'));
     }
   }

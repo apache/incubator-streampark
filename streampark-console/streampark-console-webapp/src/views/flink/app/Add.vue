@@ -103,8 +103,7 @@
     if (v) {
       Object.assign(defaultValue, { versionId: v.id });
     }
-
-    setFieldsValue(defaultValue);
+    await setFieldsValue(defaultValue);
   }
 
   /* Open the sqlConf drawer */
@@ -122,7 +121,7 @@
       }
     } else {
       openConfDrawer(false);
-      setFieldsValue({ isSetConfig: false, configOverride: null });
+      await setFieldsValue({ isSetConfig: false, configOverride: null });
     }
   }
 
@@ -137,7 +136,7 @@
         jar: path,
       });
       uploadLoading.value = false;
-      setFieldsValue({ mainClass: res });
+      await setFieldsValue({ mainClass: res });
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;
@@ -180,13 +179,12 @@
         params['resourceFrom'] = ResourceFromEnum.CICD;
         //streampark flink
         if (values.appType == AppTypeEnum.STREAMPARK_FLINK) {
-          const configVal = values['config'];
+          const configVal = values.config;
           params['format'] = getAppConfType(configVal);
           if (values.configOverride == null) {
-            const res = await fetchAppConf({
+            params['config'] = await fetchAppConf({
               config: configVal,
             });
-            params['config'] = res;
           } else {
             params['config'] = decodeByBase64(values.configOverride);
           }
@@ -194,7 +192,7 @@
           params['jar'] = values.jar || null;
           params['mainClass'] = values.mainClass || null;
         }
-        handleCreateApp(params);
+        await handleCreateApp(params);
       } else {
         // from upload
         Object.assign(params, {
@@ -203,7 +201,7 @@
           jar: unref(uploadJar),
           mainClass: values.mainClass,
         });
-        handleCreateApp(params);
+        await handleCreateApp(params);
       }
     }
   }
@@ -227,7 +225,7 @@
     }
 
     let config = values.configOverride;
-    if (config != null && config !== undefined && config.trim() != '') {
+    if (config != null && config.trim() != '') {
       config = encryptByBase64(config);
     } else {
       config = null;
@@ -246,7 +244,7 @@
           : JSON.stringify(dependency),
     };
     handleSubmitParams(params, values, k8sTemplate);
-    handleCreateApp(params);
+    await handleCreateApp(params);
   }
   /* Submit to create */
   async function handleAppCreate(formValue: Recordable) {
@@ -264,9 +262,9 @@
         }
       }
       if (formValue.jobType === 'customcode') {
-        handleSubmitCustomJob(formValue);
+        await handleSubmitCustomJob(formValue);
       } else {
-        handleSubmitSQL(formValue);
+        await handleSubmitSQL(formValue);
       }
     } catch (error) {
       submitLoading.value = false;
@@ -277,7 +275,7 @@
     const param = {};
     for (const k in params) {
       const v = params[k];
-      if (v != null && v !== undefined) {
+      if (v != null) {
         param[k] = v;
       }
     }
@@ -294,7 +292,7 @@
   }
 
   onMounted(async () => {
-    handleInitForm();
+    await handleInitForm();
   });
 </script>
 
