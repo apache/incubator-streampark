@@ -141,7 +141,7 @@
       uploadJar.value = data.file.name;
       const res = await fetchMain({ jar: path });
       uploadLoading.value = false;
-      await setFieldsValue({jar: uploadJar.value, mainClass: res});
+      await setFieldsValue({ jar: uploadJar.value, mainClass: res });
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;

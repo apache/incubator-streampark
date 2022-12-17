@@ -260,8 +260,8 @@ export const useFlinkApplication = (openStartModal: Fn) => {
         }
         //2) check name
         const params = { jobName: copyAppName };
-        const resp = await fetchCheckName(params)
-        const code = parseInt(resp)
+        const resp = await fetchCheckName(params);
+        const code = parseInt(resp);
         if (code === 0) {
           try {
             const { data } = await fetchCopy({
