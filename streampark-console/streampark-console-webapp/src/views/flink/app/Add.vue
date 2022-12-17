@@ -292,7 +292,7 @@
   }
 
   onMounted(async () => {
-    await handleInitForm();
+    handleInitForm();
   });
 </script>
 
