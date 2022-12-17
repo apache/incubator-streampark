@@ -167,7 +167,6 @@
           } else {
             Object.assign(variableInfo, data.record);
           }
-
           variableId.value = data.record.id;
           setFieldsValue(variableInfo);
         }

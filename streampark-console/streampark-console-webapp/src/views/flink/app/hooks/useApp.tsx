@@ -17,7 +17,7 @@
 import { Alert, Form, Input, Tag } from 'ant-design-vue';
 import { h, onMounted, reactive, ref, unref, VNode } from 'vue';
 import { handleAppBuildStatueText } from '../utils';
-import { fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app/app';
+import { fetchCheckName, fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app/app';
 import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
 import { fetchLatest, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
@@ -252,34 +252,52 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       okText: 'Apply',
       cancelText: 'Close',
       onOk: async () => {
-        if (!copyAppName) {
+        //1) check empty
+        if (copyAppName == null) {
           validateStatus.value = 'error';
           help = 'Sorry, Application Name cannot be empty';
-          console.log(validateStatus);
-          return Promise.reject('error');
+          return Promise.reject('copy application error');
         }
-        try {
-          const { data } = await fetchCopy({
-            id: item.id,
-            jobName: copyAppName,
-          });
-          const status = data.status || 'error';
-          if (status === 'success') {
-            Swal.fire({
-              icon: 'success',
-              title: 'copy successful',
-              timer: 1500,
+        //2) check name
+        const params = { jobName: copyAppName };
+        const resp = await fetchCheckName(params);
+        const code = parseInt(resp);
+        if (code === 0) {
+          try {
+            const { data } = await fetchCopy({
+              id: item.id,
+              jobName: copyAppName,
             });
+            const status = data.status || 'error';
+            if (status === 'success') {
+              Swal.fire({
+                icon: 'success',
+                title: 'copy successful',
+                timer: 1500,
+              });
+            }
+          } catch (error: any) {
+            if (error?.response?.data?.message) {
+              createMessage.error(
+                error.response.data.message
+                  .replaceAll(/\[StreamPark\]/g, '')
+                  .replaceAll(/\[StreamPark\]/g, '') || 'copy failed',
+              );
+            }
+            return Promise.reject('copy application error');
           }
-        } catch (error: any) {
-          if (error?.response?.data?.message) {
-            createMessage.error(
-              error.response.data.message
-                .replaceAll(/\[StreamPark\]/g, '')
-                .replaceAll(/\[StreamPark\]/g, '') || 'copy failed',
-            );
+        } else {
+          validateStatus.value = 'error';
+          if (code === 1) {
+            help = t('flink.app.addAppTips.appNameNotUniqueMessage');
+          } else if (code === 2) {
+            help = t('flink.app.addAppTips.appNameExistsInYarnMessage');
+          } else if (code === 3) {
+            help = t('flink.app.addAppTips.appNameExistsInK8sMessage');
+          } else {
+            help = t('flink.app.addAppTips.appNameNotValid');
           }
-          return Promise.reject();
+          return Promise.reject('copy application error');
         }
       },
     });

@@ -125,7 +125,6 @@
         k8sNamespace: app.k8sNamespace,
         ...resetParams,
       };
-      console.log('resetParams', resetParams);
       if (!executionMode) {
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }
@@ -291,6 +290,7 @@
         [item.key]: item.defaultValue,
       });
     });
+
     setFieldsValue({
       jobType: res.jobType,
       executionMode: res.executionMode,

@@ -159,6 +159,8 @@ export enum ConfigTypeEnum {
   PROPERTIES = 2,
   /** HOCON config type */
   HOCON = 3,
+  /** unknown */
+  UNKNOWN = 0,
 }
 
 export enum CandidateTypeEnum {

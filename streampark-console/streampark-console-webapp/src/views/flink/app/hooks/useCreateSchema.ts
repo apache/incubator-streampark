@@ -18,7 +18,7 @@ import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
 import { executionModes } from '../data';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
-import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { AppTypeEnum, ConfigTypeEnum, ExecModeEnum } from '/@/enums/flinkEnum';
 
 import Icon, { SvgIcon } from '/@/components/Icon';
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
@@ -27,9 +27,8 @@ import { modules, fetchListConf, fetchListJars } from '/@/api/flink/project';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { renderResourceFrom } from './useFlinkRender';
-import { checkAppConfType, filterOption, getAppConfType } from '../utils';
+import { filterOption, getAppConfType } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { AppTypeEnum } from '/@/enums/flinkEnum';
 const { t } = useI18n();
 
 const getJobTypeOptions = () => {
@@ -76,7 +75,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
   function handleCheckConfig(_rule: RuleObject, value: StoreValue) {
     if (value) {
       const confType = getAppConfType(value);
-      if (!checkAppConfType(confType)) {
+      if (confType === ConfigTypeEnum.UNKNOWN) {
         return Promise.reject('The configuration file must be (.properties|.yaml|.yml |.conf)');
       } else {
         return Promise.resolve();

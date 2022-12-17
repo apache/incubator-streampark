@@ -710,7 +710,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public Long copy(Application appParam) {
         boolean existsByJobName = this.existsByJobName(appParam.getJobName());
         if (existsByJobName) {
-            throw new IllegalArgumentException("[StreamPark] Application names cannot be repeated");
+            throw new ApiAlertException("[StreamPark] Application names cannot be repeated");
         }
 
         Application oldApp = getById(appParam.getId());

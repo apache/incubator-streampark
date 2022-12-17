@@ -103,8 +103,7 @@
     if (v) {
       Object.assign(defaultValue, { versionId: v.id });
     }
-
-    setFieldsValue(defaultValue);
+    await setFieldsValue(defaultValue);
   }
 
   /* Open the sqlConf drawer */
@@ -180,13 +179,12 @@
         params['resourceFrom'] = ResourceFromEnum.CICD;
         //streampark flink
         if (values.appType == AppTypeEnum.STREAMPARK_FLINK) {
-          const configVal = values['config'];
+          const configVal = values.config;
           params['format'] = getAppConfType(configVal);
           if (values.configOverride == null) {
-            const res = await fetchAppConf({
+            params['config'] = await fetchAppConf({
               config: configVal,
             });
-            params['config'] = res;
           } else {
             params['config'] = decodeByBase64(values.configOverride);
           }

@@ -105,11 +105,7 @@ export default defineComponent({
 
             <Button
               disabled={
-                unref(model).strategy == UseStrategyEnum.USE_EXIST
-                  ? false
-                  : unref(model).config
-                  ? false
-                  : true
+                unref(model).strategy == UseStrategyEnum.USE_EXIST ? false : !unref(model).config
               }
               type="primary"
               class="ml-10px w-50px"

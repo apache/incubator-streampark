@@ -180,8 +180,7 @@
 
   /* Get yarn data */
   async function handleYarn() {
-    const res = await fetchYarn();
-    yarn.value = res;
+    yarn.value = await fetchYarn();
   }
 
   /* copyCurl */
