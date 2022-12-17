@@ -1,1 +1,0 @@
-http://www.eclipse.org/legal/epl-2.0, https://www.gnu.org/software/classpath/license.html

@@ -176,12 +176,16 @@ mixedPackage() {
   if [ "$1" == 2 ]; then
     scalaProfile="scala-2.12"
   fi
+
   echo_g "build info: package mode @ mixed, $scalaProfile, now build starting..."
-  "$PRG_DIR/mvnw" clean package -DskipTests -P$scalaProfile -Pconsole,webapp
+
+  "$PRG_DIR/mvnw" clean package -DskipTests -P$scalaProfile,console,webapp,dist
 
   if [ $? -eq 0 ]; then
      printf '\n'
-     echo_g "StreamPark project build successful! build info: package mode @ mixed, $scalaProfile \n"
+     echo_g """StreamPark project build successful!
+     info: package mode @ mixed, $scalaProfile
+     dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
   fi
 }
 
@@ -193,14 +197,17 @@ detachedPackage () {
 
   echo_g "build info: package mode @ detached, $scalaProfile, now build starting..."
 
-  "$PRG_DIR"/mvnw clean package -DskipTests -P$scalaProfile -Pconsole
+  "$PRG_DIR"/mvnw clean package -DskipTests -P$scalaProfile,console,dist
 
   if [ $? -eq 0 ]; then
     printf '\n'
-    echo_g """StreamPark project build successful! build info: package mode @ detached, $scalaProfile
-    Next, you need to build front-end by yourself. build cmd:
+    echo_g """StreamPark project build successful!
+    info: package mode @ detached, $scalaProfile
+    dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist
 
-     1) cd $PRG_DIR/streampark-console/streampark-console-webapp
+    Next, you need to build front-end by yourself.
+
+     1) cd $(cd "$PRG_DIR" &>/dev/null && pwd)/streampark-console/streampark-console-webapp
      2) pnpm install
      3) pnpm build
 

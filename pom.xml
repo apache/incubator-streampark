@@ -975,6 +975,13 @@
     </build>
 
     <profiles>
+
+        <profile>
+            <id>dist</id>
+            <modules>
+                <module>streampark-dist</module>
+            </modules>
+        </profile>
         <!--
         include streampark-console(streaming application operation platform) modules
         -->

@@ -1,4 +1,0 @@
-License: {Name: Public Domain, per Creative Commons CC0, URL: http://creativecommons.org/publicdomain/zero/1.0/, Distribution: , Comments: 
-                * This code was Written by Gil Tene of Azul Systems, and released to the
-                * public domain, as explained at http://creativecommons.org/publicdomain/zero/1.0/
-            , }

@@ -23,7 +23,6 @@ import static org.apache.streampark.console.core.task.K8sFlinkTrackMonitorWrappe
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.domain.FlinkMemorySize;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
@@ -115,6 +114,7 @@ import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1486,11 +1486,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (submitResponse.flinkConfig() != null) {
                     String jmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_JM_PROCESS_MEMORY());
                     if (jmMemory != null) {
-                        application.setJmMemory(FlinkMemorySize.parse(jmMemory).getMebiBytes());
+                        application.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
                     }
                     String tmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TM_PROCESS_MEMORY());
                     if (tmMemory != null) {
-                        application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
+                        application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
                     }
                 }
                 application.setAppId(submitResponse.clusterId());

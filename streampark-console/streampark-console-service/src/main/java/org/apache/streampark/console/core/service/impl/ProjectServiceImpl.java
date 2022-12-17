@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.domain.FlinkMemorySize;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -48,6 +47,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.configuration.MemorySize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -331,7 +331,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             startOffset = 0L;
         }
         try {
-            long maxSize = FlinkMemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
+            long maxSize = MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
             if (startOffset == null) {
                 fileContent = FileUtils.readEndOfFile(logFile, maxSize);
             } else {
