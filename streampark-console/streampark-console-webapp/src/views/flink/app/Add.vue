@@ -136,7 +136,7 @@
         jar: path,
       });
       uploadLoading.value = false;
-      await setFieldsValue({ mainClass: res });
+      setFieldsValue({ mainClass: res });
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;
@@ -192,7 +192,7 @@
           params['jar'] = values.jar || null;
           params['mainClass'] = values.mainClass || null;
         }
-        await handleCreateApp(params);
+        handleCreateApp(params);
       } else {
         // from upload
         Object.assign(params, {
@@ -201,7 +201,7 @@
           jar: unref(uploadJar),
           mainClass: values.mainClass,
         });
-        await handleCreateApp(params);
+        handleCreateApp(params);
       }
     }
   }
@@ -244,7 +244,7 @@
           : JSON.stringify(dependency),
     };
     handleSubmitParams(params, values, k8sTemplate);
-    await handleCreateApp(params);
+    handleCreateApp(params);
   }
   /* Submit to create */
   async function handleAppCreate(formValue: Recordable) {
@@ -262,9 +262,9 @@
         }
       }
       if (formValue.jobType === 'customcode') {
-        await handleSubmitCustomJob(formValue);
+        handleSubmitCustomJob(formValue);
       } else {
-        await handleSubmitSQL(formValue);
+        handleSubmitSQL(formValue);
       }
     } catch (error) {
       submitLoading.value = false;

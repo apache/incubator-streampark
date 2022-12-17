@@ -147,7 +147,7 @@
     });
     if (data.status === 'success') {
       createMessage.success(t('flink.variable.deleteVariable') + t('flink.variable.success'));
-      await reload();
+      reload();
     } else {
       createMessage.error(t('flink.variable.deleteVariable') + t('flink.variable.fail'));
     }

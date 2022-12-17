@@ -77,7 +77,7 @@
         router.go(-1);
         createMessage.success('update successfully');
       } else {
-        await createErrorSwal('Project update failed ..>﹏<.. <br><br>' + data['message']);
+        createErrorSwal('Project update failed ..>﹏<.. <br><br>' + data['message']);
       }
     } catch (error: any) {
       if (error?.data?.message) {

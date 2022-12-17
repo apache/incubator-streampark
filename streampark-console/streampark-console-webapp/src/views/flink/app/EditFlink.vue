@@ -111,7 +111,7 @@
       if (!executionMode) {
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }
-      await setFieldsValue(defaultParams);
+      setFieldsValue(defaultParams);
       app.args && programArgRef.value?.setContent(app.args);
       setTimeout(() => {
         unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', app.k8sPodTemplate);
@@ -131,7 +131,7 @@
         jar: path,
       });
       uploadLoading.value = false;
-      await setFieldsValue({ mainClass: res, jar: unref(uploadJar) });
+      setFieldsValue({ mainClass: res, jar: unref(uploadJar) });
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;
@@ -171,7 +171,7 @@
       return;
     }
     const value = await handleGetApplication();
-    await setFieldsValue(value);
+    setFieldsValue(value);
     if (app.resourceFrom == ResourceFromEnum.CICD) {
       jars.value = await fetchListJars({
         id: app.projectId,

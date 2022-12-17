@@ -167,9 +167,8 @@
           } else {
             Object.assign(variableInfo, data.record);
           }
-
           variableId.value = data.record.id;
-          await setFieldsValue(variableInfo);
+          setFieldsValue(variableInfo);
         }
       } catch (error) {
         changeLoading(false);

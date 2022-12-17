@@ -153,9 +153,9 @@
           ExecModeEnum.YARN_APPLICATION,
         ].includes(res.executionMode)
       ) {
-        await handleYarn();
+        handleYarn();
       }
-      await handleDetailTabs();
+      handleDetailTabs();
     }
     Object.assign(app, res);
   }
@@ -207,7 +207,7 @@
         baseUrl: baseUrl(),
         path: urlPath,
       });
-      await copy(res);
+      copy(res);
       createMessage.success(t('flink.app.detail.detailTab.copySuccess'));
     }
   }

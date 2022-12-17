@@ -141,7 +141,7 @@
       uploadJar.value = data.file.name;
       const res = await fetchMain({ jar: path });
       uploadLoading.value = false;
-      await setFieldsValue({ jar: uploadJar.value, mainClass: res });
+      setFieldsValue({ jar: uploadJar.value, mainClass: res });
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;
@@ -153,7 +153,7 @@
     try {
       submitLoading.value = true;
       if (app.jobType == JobTypeEnum.JAR) {
-        await handleSubmitCustomJob(values);
+        handleSubmitCustomJob(values);
       } else {
         if (app.jobType == JobTypeEnum.SQL) {
           if (values.flinkSql == null || values.flinkSql.trim() === '') {
@@ -237,7 +237,7 @@
         config,
       };
       handleSubmitParams(params, values, k8sTemplate);
-      await handleUpdateApp(params);
+      handleUpdateApp(params);
     } catch (error) {
       console.error('error', error);
       submitLoading.value = false;
@@ -290,7 +290,8 @@
         [item.key]: item.defaultValue,
       });
     });
-    await setFieldsValue({
+
+    setFieldsValue({
       jobType: res.jobType,
       executionMode: res.executionMode,
       flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
