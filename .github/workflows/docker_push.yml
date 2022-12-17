@@ -55,13 +55,13 @@ jobs:
 
       - name: init
         run: |
-          sed -i -e 's/eval $NOHUP/eval/' streampark-console/streampark-console-service/src/assembly/bin/streampark.sh
-          sed -i -e 's/StreamParkConsoleBootstrap \\/StreamParkConsoleBootstrap/' streampark-console/streampark-console-service/src/assembly/bin/streampark.sh
-          sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' streampark-console/streampark-console-service/src/assembly/bin/streampark.sh
+          sed -i -e 's/eval $NOHUP/eval/' streampark-dist/src/main/assembly/bin/streampark.sh
+          sed -i -e 's/StreamParkConsoleBootstrap \\/StreamParkConsoleBootstrap/' streampark-dist/src/main/assembly/bin/streampark.sh
+          sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' streampark-dist/src/main/assembly/bin/streampark.sh
 
-      - name: Mixed front-end and back-end packaging
+      - name: Build project release package
         run: |
-          ./mvnw clean install -DskipTests -Pscala-2.12,console,webapp
+          ./mvnw clean install -DskipTests -Pscala-2.12,dist,console,webapp
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2

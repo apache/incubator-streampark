@@ -214,11 +214,9 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind/2.13.4 Apache-2.0
     https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.8.10 Apache-2.0
     https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.8.11 Apache-2.0
-    https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-csv/2.12.6 Apache-2.0
     https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-smile/2.8.10 Apache-2.0
     https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-smile/2.8.11 Apache-2.0
     https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.13.3 Apache-2.0
-    https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.12.6 Apache-2.0
     https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-parameter-names/2.13.3 Apache-2.0
     https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-scala_2.12/2.13.4 Apache-2.0
     https://mvnrepository.com/artifact/com.fasterxml.woodstox/woodstox-core/5.3.0 Apache-2.0
@@ -247,7 +245,6 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/com.twitter/chill-java/0.7.6 Apache-2.0
     https://mvnrepository.com/artifact/com.twitter/chill_2.12/0.7.6 Apache-2.0
     https://mvnrepository.com/artifact/com.typesafe.netty/netty-reactive-streams/2.0.4 Apache-2.0
-    https://mvnrepository.com/artifact/com.typesafe.scala-logging/scala-logging_2.12/3.9.4 Apache-2.0
     https://mvnrepository.com/artifact/com.ververica/frocksdbjni/6.20.3-ververica-1.0 Apache-2.0
     https://mvnrepository.com/artifact/com.zaxxer/HikariCP/3.4.5 Apache-2.0
     https://mvnrepository.com/artifact/com.zaxxer/HikariCP-java7/2.4.12 Apache-2.0
@@ -256,15 +253,14 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/commons-codec/commons-codec/1.9 Apache-2.0
     https://mvnrepository.com/artifact/commons-codec/commons-codec/1.11 Apache-2.0
     https://mvnrepository.com/artifact/commons-codec/commons-codec/1.4 Apache-2.0
-    https://mvnrepository.com/artifact/commons-codec/commons-codec/1.15 Apache-2.0
     https://mvnrepository.com/artifact/commons-codec/commons-codec/1.10 Apache-2.0
+    https://mvnrepository.com/artifact/commons-codec/commons-codec/1.15 Apache-2.0
     https://mvnrepository.com/artifact/commons-collections/commons-collections/3.2.2 Apache-2.0
     https://mvnrepository.com/artifact/commons-configuration/commons-configuration/1.6 Apache-2.0
     https://mvnrepository.com/artifact/commons-daemon/commons-daemon/1.0.13 Apache-2.0
     https://mvnrepository.com/artifact/commons-digester/commons-digester/1.8 Apache-2.0
     https://mvnrepository.com/artifact/commons-io/commons-io/2.4 Apache-2.0
     https://mvnrepository.com/artifact/commons-io/commons-io/2.8.0 Apache-2.0
-    https://mvnrepository.com/artifact/commons-io/commons-io/2.11.0 Apache-2.0
     https://mvnrepository.com/artifact/commons-io/commons-io/2.5 Apache-2.0
     https://mvnrepository.com/artifact/commons-io/commons-io/2.6 Apache-2.0
     https://mvnrepository.com/artifact/commons-lang/commons-lang/2.6 Apache-2.0
@@ -277,10 +273,8 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/io.netty/netty-all/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-buffer/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-buffer/4.1.79.Final Apache-2.0
-    https://mvnrepository.com/artifact/io.netty/netty-buffer/4.1.63.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-codec/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-codec/4.1.79.Final Apache-2.0
-    https://mvnrepository.com/artifact/io.netty/netty-codec/4.1.63.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-codec-dns/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-codec-haproxy/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-codec-http/4.1.60.Final Apache-2.0
@@ -297,32 +291,26 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/io.netty/netty-common/4.1.65.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-common/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-common/4.1.79.Final Apache-2.0
-    https://mvnrepository.com/artifact/io.netty/netty-common/4.1.63.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.79.Final Apache-2.0
-    https://mvnrepository.com/artifact/io.netty/netty-handler/4.1.63.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-handler-proxy/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-handler-proxy/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-resolver/4.1.65.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-resolver/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-resolver/4.1.79.Final Apache-2.0
-    https://mvnrepository.com/artifact/io.netty/netty-resolver/4.1.63.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-resolver-dns/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-resolver-dns-classes-macos/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-resolver-dns-native-macos/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport/4.1.79.Final Apache-2.0
-    https://mvnrepository.com/artifact/io.netty/netty-transport/4.1.63.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-classes-epoll/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-classes-kqueue/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-native-epoll/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-native-epoll/4.1.79.Final Apache-2.0
-    https://mvnrepository.com/artifact/io.netty/netty-transport-native-epoll/4.1.63.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-native-kqueue/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-native-kqueue/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-native-unix-common/4.1.60.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-native-unix-common/4.1.79.Final Apache-2.0
-    https://mvnrepository.com/artifact/io.netty/netty-transport-native-unix-common/4.1.63.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-rxtx/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-sctp/4.1.79.Final Apache-2.0
     https://mvnrepository.com/artifact/io.netty/netty-transport-udt/4.1.79.Final Apache-2.0
@@ -354,7 +342,6 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.apache.avro/avro/1.7.7 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.calcite.avatica/avatica-core/1.17.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.commons/commons-compress/1.21 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2/2.9.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.commons/commons-email/1.5 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.commons/commons-lang3/3.8.1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.commons/commons-pool2/2.6.2 Apache-2.0
@@ -368,8 +355,6 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.apache.directory.server/apacheds-i18n/2.0.0-M15 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.directory.server/apacheds-kerberos-codec/2.0.0-M15 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-annotations/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-annotations/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-annotations/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-clients_2.12/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-connector-base/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-connector-elasticsearch-base_2.12/1.14.0 Apache-2.0
@@ -380,73 +365,38 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.apache.flink/flink-connector-jdbc_2.12/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka_2.12/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-core/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-core/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-core/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-file-sink-common/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-file-sink-common/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-file-sink-common/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-hadoop-fs/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-hadoop-fs/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-hadoop-fs/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-java/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-java/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-java/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-kubernetes_2.12/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-metrics-core/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-metrics-core/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-metrics-core/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-optimizer/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-queryable-state-client-java/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-queryable-state-client-java/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-queryable-state-client-java/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-rpc-akka-loader/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-rpc-akka-loader/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-rpc-akka-loader/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-rpc-core/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-rpc-core/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-rpc-core/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-runtime/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-runtime/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-runtime/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-scala_2.12/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-asm-7/7.1-14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-asm-9/9.2-15.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-force-shading/14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-force-shading/15.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-guava/30.1.1-jre-14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-guava/30.1.1-jre-15.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-jackson/2.12.4-14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-jackson/2.12.4-15.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-netty/4.1.65.Final-14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-netty/4.1.70.Final-15.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-zookeeper-3/3.4.14-14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-zookeeper-3/3.5.9-15.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-statebackend-rocksdb_2.12/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-streaming-java/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-streaming-java/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-streaming-java_2.12/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-bridge-base/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-bridge-base/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java-bridge_2.12/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala-bridge_2.12/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala-bridge_2.12/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala-bridge_2.12/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala_2.12/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-code-splitter/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-common/1.14.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-table-common/1.15.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.flink/flink-table-common/1.16.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-planner_2.12/1.14.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-runtime_2.12/1.14.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.flink/force-shading/1.8.1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.geronimo.specs/geronimo-jcache_1.0_spec/1.0-alpha-1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-annotations/2.10.2 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-auth/2.10.2 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-client/2.10.2 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-client-api/3.3.1 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-client-runtime/3.3.1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common/2.10.2 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-hdfs/2.10.2 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-hdfs-client/2.10.2 Apache-2.0
@@ -466,7 +416,6 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.apache.hbase/hbase-protocol/1.3.5 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.htrace/htrace-core/3.1.0-incubating Apache-2.0
     https://mvnrepository.com/artifact/org.apache.htrace/htrace-core4/4.1.0-incubating Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.htrace/htrace-core4/4.2.0-incubating Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5/5.1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5/5.1.3 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5-fluent/5.1 Apache-2.0
@@ -476,20 +425,14 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.apache.httpcomponents.core5/httpcore5-h2/5.1.1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents.core5/httpcore5-h2/5.1.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents/httpasyncclient/4.1.2 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.httpcomponents/httpasyncclient/4.1.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient/4.5.13 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore/4.4.13 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore/4.4.12 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore/4.4.15 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore-nio/4.4.5 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore-nio/4.4.12 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime/4.5.13 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients/2.8.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients/3.2.1 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka-metadata/3.2.1 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka-raft/3.2.1 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka-server-common/3.2.1 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka-storage/3.2.1 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka-storage-api/3.2.1 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka_2.12/3.2.1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api/2.17.1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core/2.17.1 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin/3.2.4 Apache-2.0
@@ -518,27 +461,10 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.apache.shiro/shiro-lang/1.10.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.shiro/shiro-spring/1.10.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.shiro/shiro-web/1.10.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.spark/spark-streaming-kafka-0-10_2.12/3.2.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.spark/spark-tags_2.12/3.2.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.spark/spark-token-provider-kafka-0-10_2.12/3.2.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-common_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-connector-base_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-core_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-kubernetes_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-packer_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-proxy_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-shims-base_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-sqlclient_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-flink-submit-api_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-jvm-profiler/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-spark-connector-base_2.12/2.0.0 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.streampark/streampark-spark-core_2.12/2.0.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-el/9.0.65 Apache-2.0
-    https://mvnrepository.com/artifact/org.apache.yetus/audience-annotations/0.5.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper/3.4.6 Apache-2.0
     https://mvnrepository.com/artifact/org.asynchttpclient/async-http-client/2.12.3 Apache-2.0
     https://mvnrepository.com/artifact/org.asynchttpclient/async-http-client-netty-utils/2.12.3 Apache-2.0
-    https://mvnrepository.com/artifact/org.bitbucket.b_c/jose4j/0.7.9 Apache-2.0
     https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-core-asl/1.9.13 Apache-2.0
     https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl/1.9.13 Apache-2.0
     https://mvnrepository.com/artifact/org.codehaus.jettison/jettison/1.1 Apache-2.0
@@ -594,7 +520,6 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.objenesis/objenesis/2.1 Apache-2.0
     https://mvnrepository.com/artifact/org.objenesis/objenesis/3.2 Apache-2.0
     https://mvnrepository.com/artifact/org.quartz-scheduler/quartz/2.3.2 Apache-2.0
-    https://mvnrepository.com/artifact/org.scala-lang.modules/scala-collection-compat_2.12/2.6.0 Apache-2.0
     https://mvnrepository.com/artifact/org.scala-lang/scala-compiler/2.12.8 Apache-2.0
     https://mvnrepository.com/artifact/org.scala-lang/scala-library/2.12.8 Apache-2.0
     https://mvnrepository.com/artifact/org.scala-lang/scala-reflect/2.12.8 Apache-2.0
@@ -609,7 +534,6 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.sonatype.sisu/sisu-guice/2.1.7 Apache-2.0
     https://mvnrepository.com/artifact/org.sonatype.sisu/sisu-inject-bean/1.4.2 Apache-2.0
     https://mvnrepository.com/artifact/org.sonatype.sisu/sisu-inject-plexus/1.4.2 Apache-2.0
-    https://mvnrepository.com/artifact/org.spark-project.spark/unused/1.0.0 Apache-2.0
     https://mvnrepository.com/artifact/org.springframework.boot/spring-boot/2.7.3 Apache-2.0
     https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-actuator/2.7.3 Apache-2.0
     https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-actuator-autoconfigure/2.7.3 Apache-2.0
@@ -632,7 +556,6 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.xerial.snappy/snappy-java/1.1.8.3 Apache-2.0
     https://mvnrepository.com/artifact/org.xerial.snappy/snappy-java/1.1.7.3 Apache-2.0
     https://mvnrepository.com/artifact/org.xerial.snappy/snappy-java/1.0.5 Apache-2.0
-    https://mvnrepository.com/artifact/org.xerial.snappy/snappy-java/1.1.8.4 Apache-2.0
     https://mvnrepository.com/artifact/org.yaml/snakeyaml/1.32 Apache-2.0
     https://mvnrepository.com/artifact/p6spy/p6spy/3.9.1 Apache-2.0
     https://mvnrepository.com/artifact/ru.yandex.clickhouse/clickhouse-jdbc/0.3.2 Apache-2.0
@@ -646,7 +569,6 @@ The following components are provided under the Apache-2.0 and BSD-2-Clause and 
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/org.apache.commons/commons-math3/3.5 Apache-2.0 and BSD-2-Clause and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.apache.commons/commons-math3/3.6.1 Apache-2.0 and BSD-2-Clause and BSD-3-Clause
     https://mvnrepository.com/artifact/org.apache.commons/commons-math3/3.1.1 Apache-2.0 and BSD-2-Clause and BSD-3-Clause
 
 ========================================================================
@@ -795,7 +717,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/com.sun.mail/javax.mail/1.5.6 CDDL-1.0 and GPL-2.0
     https://mvnrepository.com/artifact/javax.mail/mail/1.4.7 CDDL-1.0 and GPL-2.0
     https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api/2.2.2 CDDL-1.0 and GPL-2.0
-    https://mvnrepository.com/artifact/org.glassfish/javax.el/3.0.1-b12 CDDL-1.0 and GPL-2.0
 
 ========================================================================
 CDDL-1.1 and GPL-2.0 licenses
@@ -865,7 +786,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc/6.2.1.jre7 MIT
     https://mvnrepository.com/artifact/io.github.classgraph/classgraph/4.8.83 MIT
     https://mvnrepository.com/artifact/net.sf.jopt-simple/jopt-simple/5.0.2 MIT
-    https://mvnrepository.com/artifact/net.sf.jopt-simple/jopt-simple/5.0.4 MIT
     https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on/1.64 MIT
     https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on/1.64 MIT
     https://mvnrepository.com/artifact/org.checkerframework/checker-qual/3.7.0 MIT
@@ -940,17 +860,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/org.mortbay.jetty/jetty/6.1.26 http://www.apache.org/licenses/LICENSE-2.0, http://www.eclipse.org/org/documents/epl-v10.php
     https://mvnrepository.com/artifact/org.mortbay.jetty/jetty-util/6.1.26 http://www.apache.org/licenses/LICENSE-2.0, http://www.eclipse.org/org/documents/epl-v10.php
-
-========================================================================
-http://www.apache.org/licenses/LICENSE-2.0.html licenses
-========================================================================
-The following components are provided under the http://www.apache.org/licenses/LICENSE-2.0.html License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.scalikejdbc/scalikejdbc-core_2.12/4.0.0 http://www.apache.org/licenses/LICENSE-2.0.html
-    https://mvnrepository.com/artifact/org.scalikejdbc/scalikejdbc-interpolation-macro_2.12/4.0.0 http://www.apache.org/licenses/LICENSE-2.0.html
-    https://mvnrepository.com/artifact/org.scalikejdbc/scalikejdbc-interpolation_2.12/4.0.0 http://www.apache.org/licenses/LICENSE-2.0.html
-    https://mvnrepository.com/artifact/org.scalikejdbc/scalikejdbc_2.12/4.0.0 http://www.apache.org/licenses/LICENSE-2.0.html
 
 ========================================================================
 http://www.eclipse.org/legal/epl-2.0, https://www.gnu.org/software/classpath/license.html licenses
@@ -1040,7 +949,6 @@ The following components are provided under the https://opensource.org/licenses/
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/com.github.luben/zstd-jni/1.4.4-7 https://opensource.org/licenses/BSD-2-Clause;description=BSD 2-Clause License
-    https://mvnrepository.com/artifact/com.github.luben/zstd-jni/1.5.2-1 https://opensource.org/licenses/BSD-2-Clause;description=BSD 2-Clause License
 
 ========================================================================
 https://raw.github.com/hunterhacker/jdom/master/LICENSE.txt licenses
@@ -1049,14 +957,6 @@ The following components are provided under the https://raw.github.com/hunterhac
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/org.jdom/jdom2/2.0.6 https://raw.github.com/hunterhacker/jdom/master/LICENSE.txt
-
-========================================================================
-https://raw.github.com/tatsuhiro-t/argparse4j/master/LICENSE.txt licenses
-========================================================================
-The following components are provided under the https://raw.github.com/tatsuhiro-t/argparse4j/master/LICENSE.txt License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/net.sourceforge.argparse4j/argparse4j/0.7.0 https://raw.github.com/tatsuhiro-t/argparse4j/master/LICENSE.txt
 
 ========================================================================
 https://raw.githubusercontent.com/auth0/java-jwt/master/LICENSE licenses
@@ -1076,30 +976,12 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.codehaus.janino/janino/3.0.11 https://raw.githubusercontent.com/janino-compiler/janino/master/LICENSE
 
 ========================================================================
-https://raw.githubusercontent.com/unicode-org/icu/master/icu4c/LICENSE licenses
-========================================================================
-The following components are provided under the https://raw.githubusercontent.com/unicode-org/icu/master/icu4c/LICENSE License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.ibm.icu/icu4j/67.1 https://raw.githubusercontent.com/unicode-org/icu/master/icu4c/LICENSE
-
-========================================================================
-https://www.apache.org/licenses/LICENSE-2.0.html licenses
-========================================================================
-The following components are provided under the https://www.apache.org/licenses/LICENSE-2.0.html License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/io.dropwizard.metrics/metrics-core/4.1.12.1 https://www.apache.org/licenses/LICENSE-2.0.html
-
-========================================================================
 https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0 licenses
 ========================================================================
 The following components are provided under the https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0 License. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/com.typesafe/config/1.4.2 https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0
-    https://mvnrepository.com/artifact/org.scala-lang.modules/scala-java8-compat_2.12/1.0.2 https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0
-    https://mvnrepository.com/artifact/org.scala-lang.modules/scala-parser-combinators_2.12/2.1.0 https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0
     https://mvnrepository.com/artifact/org.scala-lang.modules/scala-xml_2.12/1.3.0 https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0
 
 ========================================================================
