@@ -304,7 +304,7 @@
       project: app.projectId,
       ...defaultFormValue,
     });
-    await nextTick(() => {
+    nextTick(() => {
       unref(flinkSql)?.setContent(decodeByBase64(res.flinkSql));
 
       setTimeout(() => {
@@ -356,7 +356,7 @@
       <template #args="{ model }">
         <ProgramArgs
           ref="programArgRef"
-          v-if="model.args != null"
+          v-if="model.args != null && model.args != undefined"
           v-model:value="model.args"
           :suggestions="suggestions"
           @preview="(value) => openReviewDrawer(true, { value, suggestions })"

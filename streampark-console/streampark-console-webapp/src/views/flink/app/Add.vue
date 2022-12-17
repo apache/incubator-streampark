@@ -121,7 +121,7 @@
       }
     } else {
       openConfDrawer(false);
-      await setFieldsValue({ isSetConfig: false, configOverride: null });
+      setFieldsValue({ isSetConfig: false, configOverride: null });
     }
   }
 
@@ -225,7 +225,7 @@
     }
 
     let config = values.configOverride;
-    if (config != null && config.trim() != '') {
+    if (config != null && config !== undefined && config.trim() != '') {
       config = encryptByBase64(config);
     } else {
       config = null;
@@ -275,7 +275,7 @@
     const param = {};
     for (const k in params) {
       const v = params[k];
-      if (v != null) {
+      if (v != null && v !== undefined) {
         param[k] = v;
       }
     }

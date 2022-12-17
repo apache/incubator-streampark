@@ -150,7 +150,7 @@
     async (data: Recordable) => {
       try {
         variableId.value = null;
-        await resetFields();
+        resetFields();
         setValidateStatus('');
         setHelp('');
         setDrawerProps({ confirmLoading: false });
