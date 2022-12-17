@@ -223,7 +223,7 @@ export const useCreateAndEditSchema = (
         ],
       },
       {
-        field: 'flinkClusterId',
+        field: 'yarnSessionClusterId',
         label: t('flink.app.flinkCluster'),
         component: 'Select',
         componentProps: {

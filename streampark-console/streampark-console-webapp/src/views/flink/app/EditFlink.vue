@@ -38,7 +38,7 @@
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { ResourceFromEnum } from '/@/enums/flinkEnum';
+  import { ExecModeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const { t } = useI18n();
@@ -100,7 +100,9 @@
         versionId: app.versionId || null,
         k8sRestExposedType: app.k8sRestExposedType,
         clusterId: app.clusterId,
-        flinkClusterId: app.flinkClusterId,
+        [app.executionMode == ExecModeEnum.YARN_SESSION
+          ? 'yarnSessionClusterId'
+          : 'flinkClusterId']: app.flinkClusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
         alertId: selectAlertId,
@@ -139,7 +141,7 @@
   }
 
   /* Handling update parameters */
-  function handleAppUpdate(values) {
+  function handleAppUpdate(values: Recordable) {
     submitLoading.value = true;
     try {
       const params = {

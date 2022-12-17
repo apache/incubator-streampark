@@ -87,7 +87,7 @@ export const useFlinkSchema = (editModel?: string) => {
         ],
       },
       {
-        field: 'flinkClusterId',
+        field: 'yarnSessionClusterId',
         label: t('flink.app.flinkCluster'),
         component: 'Select',
         componentProps: () => {

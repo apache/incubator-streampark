@@ -46,7 +46,13 @@
   import UseSysHadoopConf from './components/UseSysHadoopConf.vue';
   import { CreateParams } from '/@/api/flink/app/app.type';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
-  import { AppTypeEnum, ClusterStateEnum, JobTypeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
+  import {
+    AppTypeEnum,
+    ClusterStateEnum,
+    ExecModeEnum,
+    JobTypeEnum,
+    ResourceFromEnum,
+  } from '/@/enums/flinkEnum';
 
   const FlinkSqlEditor = createAsyncComponent(() => import('./components/FlinkSql.vue'), {
     loading: true,
@@ -151,10 +157,14 @@
   }
 
   function handleCluster(values: Recordable) {
+    let flinkClusterId =
+      values.executionMode == ExecModeEnum.YARN_SESSION
+        ? values.yarnSessionClusterId
+        : values.flinkClusterId;
     const cluster =
       unref(flinkClusters).filter((c) => {
-        if (values.flinkClusterId) {
-          return c.id == values.flinkClusterId && c.clusterState === ClusterStateEnum.STARTED;
+        if (flinkClusterId) {
+          return c.id == flinkClusterId && c.clusterState === ClusterStateEnum.STARTED;
         }
       })[0] || null;
     if (cluster) {

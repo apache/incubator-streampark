@@ -48,7 +48,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
-  import { JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
+  import { ExecModeEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const go = useGo();
@@ -120,7 +120,9 @@
           cpFailureAction: app.cpFailureAction,
         },
         clusterId: app.clusterId,
-        flinkClusterId: app.flinkClusterId,
+        [app.executionMode == ExecModeEnum.YARN_SESSION
+          ? 'yarnSessionClusterId'
+          : 'flinkClusterId']: app.flinkClusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
         ...resetParams,

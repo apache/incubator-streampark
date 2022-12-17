@@ -282,7 +282,10 @@ export function handleSubmitParams(
     description: values.description,
     k8sNamespace: values.k8sNamespace || null,
     clusterId: values.clusterId || null,
-    flinkClusterId: values.flinkClusterId || null,
+    flinkClusterId:
+      (values.executionMode == ExecModeEnum.YARN_SESSION
+        ? values.yarnSessionClusterId
+        : values.flinkClusterId) || null,
     flinkImage: values.flinkImage || null,
   });
   if (params.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
