@@ -197,7 +197,7 @@ export default {
     appNameExistsInYarnMessage: '应用程序名称已经在YARN集群中存在，不能重复。请检查',
     appNameExistsInK8sMessage: '该应用程序名称已经在K8S集群中存在，不能重复。请检查',
     appNameNotValid:
-      '应用程序名称无效。字符必须是(中文|英文|"-"|"_")，不能出现两个连续的空格，请检查',
+      '应用程序名称无效。字符必须是(中文 或 英文 或 "-" 或 "_")，不能出现两个连续的空格，请检查',
     flinkClusterIsRequiredMessage: 'Flink集群必填',
     flinkSqlIsRequiredMessage: 'Flink SQL必填',
     tagsPlaceholder: '请输入标签，如果超过一个，用逗号（，）分隔',
