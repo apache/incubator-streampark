@@ -7,7 +7,6 @@
 out/
 target/
 *.log*
-bin/
 tmp/
 *.iml
 *.tmp
