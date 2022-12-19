@@ -149,6 +149,7 @@ export const useEditStreamParkSchema = (
         ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.projectName,
       },
       { field: 'project', label: 'ProjectId', component: 'Input', show: false },
+
       {
         field: 'module',
         label: 'Application',
@@ -157,6 +158,8 @@ export const useEditStreamParkSchema = (
         ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.module,
       },
       { field: 'configId', label: 'configId', component: 'Input', show: false },
+      { field: 'config', label: '', component: 'Input', show: false },
+      { field: 'strategy', label: '', component: 'Input', show: false },
       {
         field: 'appConf',
         label: 'Application conf',

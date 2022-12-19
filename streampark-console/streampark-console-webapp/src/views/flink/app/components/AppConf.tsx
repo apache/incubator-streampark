@@ -43,7 +43,15 @@ export default defineComponent({
   emit: ['openMergely'],
   setup(props, { emit }) {
     const { model } = toRefs(props);
-    if (!model.value.strategy) model.value.strategy = '1';
+
+    if (!model.value.strategy) {
+      model.value.strategy = UseStrategyEnum.USE_EXIST;
+    }
+
+    async function handleChangeStrategy(strategy: number) {
+      model.value.strategy = strategy;
+    }
+
     async function handleChangeConfig(v: string) {
       const res = await fetchGetVer({ id: v });
       model.value.configId = res.id;
@@ -51,14 +59,15 @@ export default defineComponent({
     }
 
     async function handleChangeNewConfig(confFile: string) {
-      const res = await fetchName({
+      const appName = await fetchName({
         config: confFile,
       });
-      const resp = await fetchAppConf({
+      const appConf = await fetchAppConf({
         config: confFile,
       });
-      model.value.jobName = res;
-      model.value.configOverride = decodeByBase64(resp);
+      model.value.config = confFile;
+      model.value.jobName = appName;
+      model.value.configOverride = decodeByBase64(appConf);
     }
     return () => {
       return (
@@ -68,7 +77,7 @@ export default defineComponent({
               class="mr-10px"
               style="width: 25%"
               value={unref(model).strategy}
-              onChange={(value: any) => (model.value.strategy = value)}
+              onChange={(value: any) => handleChangeStrategy(value)}
             >
               <Select.Option value={UseStrategyEnum.USE_EXIST}>use existing</Select.Option>
               <Select.Option value={UseStrategyEnum.RESELECT}>reselect</Select.Option>
