@@ -21,9 +21,10 @@ import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientConfig, HackDockerClient}
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
+import org.apache.streampark.common.util.Utils
 
+import java.net.URI
 import java.time.Duration
-
 
 object DockerRetriever {
 
@@ -51,8 +52,19 @@ object DockerRetriever {
    * get new DockerClient instance
    */
   def newDockerClient(): DockerClient = {
+    setDockerHost()
     HackDockerClient.getInstance(dockerClientConf, dockerHttpClientBuilder.build())
   }
 
+  /**
+   * set docker-host for kata
+   */
+  def setDockerHost(): Unit = {
+    val dockerhost: String = InternalConfigHolder.get(CommonConfig.DOCKER_HOST)
+    if (Utils.notEmpty(dockerhost)) {
+      val dockerHostUri: URI = new URI(dockerhost)
+      dockerHttpClientBuilder.dockerHost(dockerHostUri)
+    }
+  }
 
 }

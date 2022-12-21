@@ -93,6 +93,7 @@ streampark:
       max-connections: 10000
       connection-timeout-sec: 10000
       response-timeout-sec: 12000
+      docker-host: ""
 
   # flink-k8s tracking configuration
   flink-k8s:
