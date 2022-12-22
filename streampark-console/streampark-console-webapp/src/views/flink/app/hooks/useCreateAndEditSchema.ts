@@ -261,7 +261,7 @@ export const useCreateAndEditSchema = (
           {
             required: true,
             message: t('flink.app.addAppTips.kubernetesClusterIdRequire'),
-            pattern: /^[a-z0-9]([a-z0-9_\.]+)?[a-z0-9]$/,
+            pattern: /^(?=.{1,45}$)[a-z]([-a-z0-9]*[a-z0-9])$/,
           },
         ],
       },
