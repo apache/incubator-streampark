@@ -47,6 +47,12 @@ object CommonConfig {
     classType = classOf[String],
     description = "yarn http auth type. ex: sample, kerberos")
 
+  val DOCKER_HOST: InternalOption = InternalOption(
+    key = "streampark.docker.http-client.docker-host",
+    defaultValue = "",
+    classType = classOf[String],
+    description = "docker host for DockerHttpClient")
+
   val DOCKER_MAX_CONNECTIONS: InternalOption = InternalOption(
     key = "streampark.docker.http-client.max-connections",
     defaultValue = 100,
