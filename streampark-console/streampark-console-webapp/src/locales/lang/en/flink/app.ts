@@ -217,7 +217,7 @@ export default {
     kubernetesNamespacePlaceholder: 'Please enter kubernetes Namespace, e.g: default',
     kubernetesClusterIdPlaceholder: 'Please enter Kubernetes clusterId',
     kubernetesClusterIdRequire:
-      "lower case alphanumeric characters, '-', and must start and end with an alphanumeric character",
+      "lower case alphanumeric characters, '-', and must start and end with an alphanumeric character,and no more than 45 characters",
     kubernetesClusterIdIsRequiredMessage: 'Kubernetes clusterId is required',
     flinkImagePlaceholder:
       'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
