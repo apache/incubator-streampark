@@ -18,7 +18,7 @@
   <PageWrapper contentFullHeight contentBackground contentClass="px-20px">
     <a-card class="header" :bordered="false">
       <template #extra>
-        <a-radio-group v-model:value="buildState">
+        <a-radio-group v-model:value="queryParams.buildState">
           <a-radio-button
             v-for="item in buttonList"
             @click="handleQuery(item.key)"
@@ -28,6 +28,7 @@
           >
         </a-radio-group>
         <a-input-search
+          v-model:value="searchValue"
           @search="handleSearch"
           :placeholder="t('flink.project.searchPlaceholder')"
           class="search-input"
@@ -106,16 +107,15 @@
       const buttonList = reactive(statusList);
       const loading = ref(false);
       const buildState = ref('');
+      const searchValue = ref('');
       const pageInfo = reactive({
-        currentPage: 0,
+        currentPage: 1,
         pageSize: 10,
         total: 0,
       });
 
-      const queryParams = reactive({
+      const queryParams = reactive<{ buildState: string; name?: string }>({
         buildState: '',
-        pageNum: pageInfo.currentPage,
-        pageSize: pageInfo.pageSize,
       });
 
       let projectDataSource = ref<Array<ProjectRecord>>([]);
@@ -125,15 +125,16 @@
       }
 
       function handleSearch(value: string) {
-        Object.assign(queryParams, { name: value });
+        queryParams.name = value;
+        pageInfo.currentPage = 1;
+        queryParams.name = searchValue.value;
         queryData();
       }
 
       function queryData(showLoading = true) {
         if (showLoading) loading.value = true;
-        console.log('pageInfo', pageInfo);
         getList({
-          buildState: buildState.value,
+          ...queryParams,
           pageNum: pageInfo.currentPage,
           pageSize: pageInfo.pageSize,
           teamId: userStore.getTeamId,
@@ -144,8 +145,10 @@
         });
       }
 
-      const handleQuery = function (val) {
-        buildState.value = val;
+      const handleQuery = function (val: string | undefined) {
+        pageInfo.currentPage = 1;
+        queryParams.buildState = val!;
+        queryParams.name = searchValue.value;
         queryData();
       };
 
@@ -176,14 +179,16 @@
       });
       function handlePageChange(val: number) {
         pageInfo.currentPage = val;
+        queryParams.name = searchValue.value;
         queryData();
       }
       function handleListItemSuccess() {
-        pageInfo.currentPage = 0;
+        pageInfo.currentPage = 1;
         queryData();
       }
       return {
         t,
+        searchValue,
         pageInfo,
         buildState,
         buttonList,
