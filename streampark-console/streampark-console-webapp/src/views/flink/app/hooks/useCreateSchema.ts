@@ -184,11 +184,14 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           fieldNames: { label: 'name', value: 'id', options: 'options' },
           options: unref(projectList),
           onChange: (value: string) => {
-            modules({
-              id: value,
-            }).then((res) => {
-              moduleList.value = res.map((i: string) => ({ label: i, value: i }));
-            });
+            // When a valid value is entered, the module api needs to be sent
+            if (value) {
+              modules({
+                id: value,
+              }).then((res) => {
+                moduleList.value = res.map((i: string) => ({ label: i, value: i }));
+              });
+            }
           },
         },
         ifShow: ({ values }) => values?.jobType != 'sql' && values.resourceFrom != 'upload',

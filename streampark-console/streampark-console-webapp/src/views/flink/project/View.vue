@@ -28,6 +28,7 @@
           >
         </a-radio-group>
         <a-input-search
+          v-model:value="searchValue"
           @search="handleSearch"
           :placeholder="t('flink.project.searchPlaceholder')"
           class="search-input"
@@ -106,6 +107,7 @@
       const buttonList = reactive(statusList);
       const loading = ref(false);
       const buildState = ref('');
+      const searchValue = ref('');
       const pageInfo = reactive({
         currentPage: 1,
         pageSize: 10,
@@ -125,6 +127,7 @@
       function handleSearch(value: string) {
         queryParams.name = value;
         pageInfo.currentPage = 1;
+        queryParams.name = searchValue.value;
         queryData();
       }
 
@@ -145,6 +148,7 @@
       const handleQuery = function (val: string | undefined) {
         pageInfo.currentPage = 1;
         queryParams.buildState = val!;
+        queryParams.name = searchValue.value;
         queryData();
       };
 
@@ -175,6 +179,7 @@
       });
       function handlePageChange(val: number) {
         pageInfo.currentPage = val;
+        queryParams.name = searchValue.value;
         queryData();
       }
       function handleListItemSuccess() {
@@ -183,6 +188,7 @@
       }
       return {
         t,
+        searchValue,
         pageInfo,
         buildState,
         buttonList,
