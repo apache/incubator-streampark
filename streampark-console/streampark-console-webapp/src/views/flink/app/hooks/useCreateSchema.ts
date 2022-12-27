@@ -177,7 +177,9 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         componentProps: {
           showSearch: true,
           optionFilterProp: 'children',
-          filterOption,
+          filterOption: (input: string, options: Recordable) => {
+            return options.name.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+          },
           placeholder: t('flink.app.addAppTips.projectPlaceholder'),
           fieldNames: { label: 'name', value: 'id', options: 'options' },
           options: unref(projectList),
