@@ -35,7 +35,6 @@ drop table if exists "public"."t_flink_effective";
 drop table if exists "public"."t_flink_config";
 drop table if exists "public"."t_flink_cluster";
 drop table if exists "public"."t_flink_app";
-drop table if exists "public"."t_flame_graph";
 drop table if exists "public"."t_app_build_pipe";
 drop table if exists "public"."t_app_backup";
 drop table if exists "public"."t_alert_config";
@@ -61,7 +60,6 @@ drop sequence if exists "public"."streampark_t_flink_effective_id_seq";
 drop sequence if exists "public"."streampark_t_flink_config_id_seq";
 drop sequence if exists "public"."streampark_t_flink_cluster_id_seq";
 drop sequence if exists "public"."streampark_t_flink_app_id_seq";
-drop sequence if exists "public"."streampark_t_flame_graph_id_seq";
 drop sequence if exists "public"."streampark_t_app_backup_id_seq";
 drop sequence if exists "public"."streampark_t_alert_config_id_seq";
 drop sequence if exists "public"."streampark_t_access_token_id_seq";
@@ -182,29 +180,6 @@ create table "public"."t_app_build_pipe" (
 ;
 alter table "public"."t_app_build_pipe" add constraint "t_app_build_pipe_pkey" primary key ("app_id");
 
-
--- ----------------------------
--- table structure for t_flame_graph
--- ----------------------------
-create sequence "public"."streampark_t_flame_graph_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
-
-create table "public"."t_flame_graph" (
-  "id" int8 not null default nextval('streampark_t_flame_graph_id_seq'::regclass),
-  "app_id" int8,
-  "profiler" varchar(255) collate "pg_catalog"."default",
-  "timeline" timestamp(6),
-  "content" text collate "pg_catalog"."default"
-)
-;
-alter table "public"."t_flame_graph" add constraint "t_flame_graph_pkey" primary key ("id");
-create index "inx_appid" on "public"."t_flame_graph" using btree (
-  "app_id" "pg_catalog"."int8_ops" asc nulls last
-);
-create index "inx_time" on "public"."t_flame_graph" using btree (
-  "timeline" "pg_catalog"."timestamp_ops" asc nulls last
-);
-
 -- ----------------------------
 -- table structure for t_flink_app
 -- ----------------------------
@@ -247,7 +222,6 @@ create table "public"."t_flink_app" (
   "description" varchar(255) collate "pg_catalog"."default",
   "resolve_order" int2,
   "k8s_rest_exposed_type" int2,
-  "flame_graph" boolean default false,
   "jm_memory" int4,
   "tm_memory" int4,
   "total_task" int4,

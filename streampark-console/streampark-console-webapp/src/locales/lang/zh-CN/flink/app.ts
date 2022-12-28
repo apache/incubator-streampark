@@ -147,7 +147,6 @@ export default {
     force: '强制停止作业',
     copy: '复制作业',
     remapping: '重新映射作业',
-    flameGraph: '查看火焰图',
     deleteTip: '你确定要删除这个作业?',
   },
   dashboard: {

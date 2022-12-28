@@ -45,7 +45,6 @@ WEB UI:
 BACKEND:
   - "streampark-console/streampark-console-service/**/*"
   - "streampark-common/**/*"
-  - "streampark-plugin/**/*"
 
 FLINK:
   - "streampark-flink/**/*"

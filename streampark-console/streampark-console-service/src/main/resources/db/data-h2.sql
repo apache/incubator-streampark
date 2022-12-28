@@ -25,7 +25,7 @@ insert into `t_team` values (100001, 'test', 'The test team', now(), now());
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
-insert into `t_flink_app` values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, '0', 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, 0, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test');
+insert into `t_flink_app` values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, '0', 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test');
 
 -- ----------------------------
 -- Records of t_flink_effective
@@ -76,7 +76,6 @@ insert into `t_menu` values (100029, 100015, 'savepoint delete', null, null, 'sa
 insert into `t_menu` values (100030, 100015, 'backup rollback', null, null, 'backup:rollback', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100031, 100015, 'backup delete', null, null, 'backup:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100032, 100015, 'conf delete', null, null, 'conf:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100033, 100015, 'flame Graph', null, null, 'app:flameGraph', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100034, 100013, 'menu.setting', '/flink/setting', 'flink/setting/View', null, 'setting', '0', 1, 5, now(), now());
 insert into `t_menu` values (100035, 100034, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100036, 100014, 'edit', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', 0, null, now(), now());
@@ -188,18 +187,17 @@ insert into `t_setting` values (1, 'streampark.maven.settings', null, 'Maven Set
 insert into `t_setting` values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven private server address', 1);
 insert into `t_setting` values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven private server authentication username', 1);
 insert into `t_setting` values (4, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven private server authentication password', 1);
-insert into `t_setting` values (5, 'streampark.console.webapp.address', null, 'StreamPark Webapp address', 'StreamPark Console Web Application HTTP URL', 1);
-insert into `t_setting` values (6, 'alert.email.host', null, 'Alert Email Smtp Host', 'Alert Mailbox Smtp Host', 1);
-insert into `t_setting` values (7, 'alert.email.port', null, 'Alert Email Smtp Port', 'Smtp Port of the alarm mailbox', 1);
-insert into `t_setting` values (8, 'alert.email.from', null, 'Alert  Email From', 'Email to send alerts', 1);
-insert into `t_setting` values (9, 'alert.email.userName', null, 'Alert  Email User', 'Authentication username used to send alert emails', 1);
-insert into `t_setting` values (10, 'alert.email.password', null, 'Alert Email Password', 'Authentication password used to send alarm email', 1);
-insert into `t_setting` values (11, 'alert.email.ssl', 'false', 'Alert Email Is SSL', 'Whether to enable SSL in the mailbox that sends the alert', 2);
-insert into `t_setting` values (12, 'docker.register.address', null, 'Docker Register Address', 'Docker container service address', 1);
-insert into `t_setting` values (13, 'docker.register.user', null, 'Docker Register User', 'Docker container service authentication username', 1);
-insert into `t_setting` values (14, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
-insert into `t_setting` values (15, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker namespace', 1);
-insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress domain address', 1);
+insert into `t_setting` values (5, 'alert.email.host', null, 'Alert Email Smtp Host', 'Alert Mailbox Smtp Host', 1);
+insert into `t_setting` values (6, 'alert.email.port', null, 'Alert Email Smtp Port', 'Smtp Port of the alarm mailbox', 1);
+insert into `t_setting` values (7, 'alert.email.from', null, 'Alert  Email From', 'Email to send alerts', 1);
+insert into `t_setting` values (8, 'alert.email.userName', null, 'Alert  Email User', 'Authentication username used to send alert emails', 1);
+insert into `t_setting` values (9, 'alert.email.password', null, 'Alert Email Password', 'Authentication password used to send alarm email', 1);
+insert into `t_setting` values (10, 'alert.email.ssl', 'false', 'Alert Email Is SSL', 'Whether to enable SSL in the mailbox that sends the alert', 2);
+insert into `t_setting` values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker container service address', 1);
+insert into `t_setting` values (12, 'docker.register.user', null, 'Docker Register User', 'Docker container service authentication username', 1);
+insert into `t_setting` values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
+insert into `t_setting` values (14, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker namespace', 1);
+insert into `t_setting` values (15, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress domain address', 1);
 
 -- ----------------------------
 -- Records of t_user

@@ -29,16 +29,9 @@
             <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>lib</outputDirectory>
             <excludes>
-                <exclude>org.apache.streampark:streampark-jvm-profiler</exclude>
                 <exclude>org.apache.streampark:streampark-flink-sqlclient_${scala.binary.version}</exclude>
                 <exclude>javax.servlet:servlet-api</exclude>
             </excludes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>plugins</outputDirectory>
-            <includes>
-                <include>org.apache.streampark:streampark-jvm-profiler</include>
-            </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>client</outputDirectory>
