@@ -23,7 +23,6 @@ import static org.apache.streampark.console.core.task.K8sFlinkTrackMonitorWrappe
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
@@ -1465,7 +1464,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appConf,
             application.getApplicationType(),
             getSavePointed(appParam),
-            appParam.getFlameGraph() ? getFlameGraph(application) : null,
             getProperties(application),
             applicationArgs,
             buildResult,
@@ -1502,7 +1500,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.setJobManagerUrl(submitResponse.jobManagerUrl());
                     applicationLog.setJobManagerUrl(submitResponse.jobManagerUrl());
                 }
-                application.setFlameGraph(appParam.getFlameGraph());
                 applicationLog.setYarnAppId(submitResponse.clusterId());
                 application.setStartTime(new Date());
                 application.setEndTime(null);
@@ -1681,15 +1678,4 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return null;
     }
 
-    private Map<String, Serializable> getFlameGraph(Application application) {
-        Map<String, Serializable> flameGraph = new HashMap<>(8);
-        flameGraph.put("reporter", "org.apache.streampark.plugin.profiling.reporter.HttpReporter");
-        flameGraph.put("type", ApplicationType.STREAMPARK_FLINK.getType());
-        flameGraph.put("id", application.getId());
-        flameGraph.put("url", settingService.getStreamParkAddress().concat("/metrics/report"));
-        flameGraph.put("token", Utils.uuid());
-        flameGraph.put("sampleInterval", 1000 * 60 * 2);
-        flameGraph.put("metricInterval", 1000 * 60 * 2);
-        return flameGraph;
-    }
 }

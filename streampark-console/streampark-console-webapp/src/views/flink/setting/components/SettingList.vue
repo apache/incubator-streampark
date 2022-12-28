@@ -43,7 +43,6 @@
     'alert.email.userName': 'user',
     'alert.email.password': 'keys',
     'alert.email.ssl': 'ssl',
-    'streampark.console.webapp.address': 'http',
     'ingress.mode.default': 'settings',
   };
 

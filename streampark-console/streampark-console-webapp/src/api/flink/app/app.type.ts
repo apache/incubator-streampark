@@ -71,7 +71,6 @@ export interface AppListRecord {
   executionMode: number;
   dynamicProperties?: string;
   appType: number;
-  flameGraph: boolean;
   tracking: number;
   jar?: string;
   jarCheckSum?: string;

@@ -157,43 +157,98 @@ insert into `t_menu` values (100029, 100015, 'savepoint delete', null, null, 'sa
 insert into `t_menu` values (100030, 100015, 'backup rollback', null, null, 'backup:rollback', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100031, 100015, 'backup delete', null, null, 'backup:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100032, 100015, 'conf delete', null, null, 'conf:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100033, 100015, 'flame Graph', null, null, 'app:flameGraph', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100034, 100013, 'menu.setting', '/flink/setting', 'flink/setting/View', null, 'setting', '0', 1, 5, now(), now());
-insert into `t_menu` values (100035, 100034, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100036, 100014, 'edit', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', 0, null, now(), now());
-insert into `t_menu` values (100037, 100015, 'delete', null, null, 'app:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100038, 100000, 'menu.tokenManagement', '/system/token', 'system/token/Token', null, 'lock', '0', 1, 1, now(), now());
-insert into `t_menu` values (100039, 100038, 'add', null, null, 'token:add', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100040, 100038, 'delete', null, null, 'token:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100041, 100034, 'add cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
-insert into `t_menu` values (100042, 100034, 'edit cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
-insert into `t_menu` values (100043, 100015, 'copy', null, null, 'app:copy', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100044, 100000, 'menu.teamManagement', '/system/team', 'system/team/Team', null, 'team', '0', 1, 2, now(), now());
-insert into `t_menu` values (100045, 100044, 'add', null, null, 'team:add', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100046, 100044, 'update', null, null, 'team:update', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100047, 100044, 'delete', null, null, 'team:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100048, 100000, 'menu.memberManagement', '/system/member', 'system/member/Member', null, 'usergroup-add', '0', 1, 2, now(), now());
-insert into `t_menu` values (100049, 100048, 'add', null, null, 'member:add', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:update', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100054, 100013, 'menu.variable', '/flink/variable', 'flink/variable/View', null, 'code', '0', 1, 3, now(), now());
-insert into `t_menu` values (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (100058, 100054, 'depend apps', '/flink/variable/depend_apps', 'flink/variable/DependApps', 'variable:depend_apps', '', '0', 0, NULL, now(), now());
-insert into `t_menu` values (100059, 100054, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (100060, 100001, 'view', null, null, 'user:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100061, 100038, 'view', null, null, 'token:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100062, 100002, 'view', null, null, 'role:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100063, 100044, 'view', null, null, 'team:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100064, 100048, 'view', null, null, 'member:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100066, 100014, 'view', null, null, 'project:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100067, 100015, 'view', null, null, 'app:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100068, 100054, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
-insert into `t_menu` values (100069, 100034, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100070, 100054, 'depend view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
+insert into `t_menu` values (100033, 100013, 'menu.setting', '/flink/setting', 'flink/setting/View', null, 'setting', '0', 1, 5, now(), now());
+insert into `t_menu` values (100034, 100033, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100035, 100014, 'edit', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', 0, null, now(), now());
+insert into `t_menu` values (100036, 100015, 'delete', null, null, 'app:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100037, 100000, 'menu.tokenManagement', '/system/token', 'system/token/Token', null, 'lock', '0', 1, 1, now(), now());
+insert into `t_menu` values (100038, 100037, 'add', null, null, 'token:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100039, 100037, 'delete', null, null, 'token:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100040, 100033, 'add cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100041, 100033, 'edit cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100042, 100015, 'copy', null, null, 'app:copy', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100043, 100000, 'menu.teamManagement', '/system/team', 'system/team/Team', null, 'team', '0', 1, 2, now(), now());
+insert into `t_menu` values (100044, 100043, 'add', null, null, 'team:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100045, 100043, 'update', null, null, 'team:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100046, 100043, 'delete', null, null, 'team:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100047, 100000, 'menu.memberManagement', '/system/member', 'system/member/Member', null, 'usergroup-add', '0', 1, 2, now(), now());
+insert into `t_menu` values (100048, 100047, 'add', null, null, 'member:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100049, 100047, 'update', null, null, 'member:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100050, 100047, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100051, 100047, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100052, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100053, 100013, 'menu.variable', '/flink/variable', 'flink/variable/View', null, 'code', '0', 1, 3, now(), now());
+insert into `t_menu` values (100054, 100053, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (100055, 100053, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (100056, 100053, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (100057, 100053, 'depend apps', '/flink/variable/depend_apps', 'flink/variable/DependApps', 'variable:depend_apps', '', '0', 0, NULL, now(), now());
+insert into `t_menu` values (100058, 100053, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (100059, 100001, 'view', null, null, 'user:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100060, 100037, 'view', null, null, 'token:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100061, 100002, 'view', null, null, 'role:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100062, 100043, 'view', null, null, 'team:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100063, 100047, 'view', null, null, 'member:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100065, 100014, 'view', null, null, 'project:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100066, 100015, 'view', null, null, 'app:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100067, 100053, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
+insert into `t_menu` values (100068, 100033, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100069, 100053, 'depend view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
+
+-- reset t_role_menu
+delete from t_role_menu;
+insert into `t_role_menu` values (100001, 100001, 100014);
+insert into `t_role_menu` values (100002, 100001, 100016);
+insert into `t_role_menu` values (100003, 100001, 100017);
+insert into `t_role_menu` values (100004, 100001, 100018);
+insert into `t_role_menu` values (100005, 100001, 100020);
+insert into `t_role_menu` values (100006, 100001, 100021);
+insert into `t_role_menu` values (100007, 100001, 100022);
+insert into `t_role_menu` values (100008, 100001, 100025);
+insert into `t_role_menu` values (100009, 100001, 100026);
+insert into `t_role_menu` values (100010, 100001, 100027);
+insert into `t_role_menu` values (100011, 100001, 100028);
+insert into `t_role_menu` values (100012, 100001, 100029);
+insert into `t_role_menu` values (100013, 100001, 100030);
+insert into `t_role_menu` values (100014, 100001, 100031);
+insert into `t_role_menu` values (100015, 100001, 100032);
+insert into `t_role_menu` values (100016, 100001, 100013);
+insert into `t_role_menu` values (100017, 100001, 100015);
+insert into `t_role_menu` values (100018, 100002, 100014);
+insert into `t_role_menu` values (100019, 100002, 100016);
+insert into `t_role_menu` values (100020, 100002, 100017);
+insert into `t_role_menu` values (100021, 100002, 100018);
+insert into `t_role_menu` values (100022, 100002, 100020);
+insert into `t_role_menu` values (100023, 100002, 100021);
+insert into `t_role_menu` values (100024, 100002, 100022);
+insert into `t_role_menu` values (100025, 100002, 100025);
+insert into `t_role_menu` values (100026, 100002, 100026);
+insert into `t_role_menu` values (100027, 100002, 100027);
+insert into `t_role_menu` values (100028, 100002, 100028);
+insert into `t_role_menu` values (100029, 100002, 100029);
+insert into `t_role_menu` values (100030, 100002, 100030);
+insert into `t_role_menu` values (100031, 100002, 100031);
+insert into `t_role_menu` values (100032, 100002, 100032);
+insert into `t_role_menu` values (100033, 100002, 100013);
+insert into `t_role_menu` values (100034, 100002, 100015);
+insert into `t_role_menu` values (100035, 100002, 100000);
+insert into `t_role_menu` values (100036, 100002, 100036);
+insert into `t_role_menu` values (100037, 100002, 100047);
+insert into `t_role_menu` values (100038, 100002, 100048);
+insert into `t_role_menu` values (100039, 100002, 100049);
+insert into `t_role_menu` values (100040, 100002, 100050);
+insert into `t_role_menu` values (100041, 100002, 100051);
+insert into `t_role_menu` values (100042, 100002, 100052);
+insert into `t_role_menu` values (100043, 100002, 100053);
+insert into `t_role_menu` values (100044, 100002, 100054);
+insert into `t_role_menu` values (100045, 100002, 100055);
+insert into `t_role_menu` values (100046, 100002, 100056);
+insert into `t_role_menu` values (100047, 100001, 100065);
+insert into `t_role_menu` values (100048, 100002, 100065);
+insert into `t_role_menu` values (100049, 100001, 100066);
+insert into `t_role_menu` values (100050, 100002, 100066);
+insert into `t_role_menu` values (100051, 100002, 100063);
+insert into `t_role_menu` values (100052, 100002, 100059);
+insert into `t_role_menu` values (100053, 100002, 100067);
 
 -- Add team related sql
 create table `t_team` (
@@ -222,44 +277,11 @@ add column `last_team_id` bigint default null comment 'last team id' after `user
 update `t_user` set `user_type` = 1
 where `user_id` in (select user_id from `t_user_role` where role_id = 100000);
 
-delete from t_role_menu where role_id = 100000;
 delete from t_role where role_id = 100000;
 delete from `t_user_role` where role_id = 100000;
 
 -- Add team admin
 insert into `t_role` values (100002, 'team admin', 'Team Admin has all permissions inside the team.', now(), now(), null);
-
-insert into `t_role_menu` values (100060, 100002, 100014);
-insert into `t_role_menu` values (100061, 100002, 100016);
-insert into `t_role_menu` values (100062, 100002, 100017);
-insert into `t_role_menu` values (100063, 100002, 100018);
--- insert into `t_role_menu` values (100064, 100002, 100019);
-insert into `t_role_menu` values (100065, 100002, 100020);
-insert into `t_role_menu` values (100066, 100002, 100021);
-insert into `t_role_menu` values (100067, 100002, 100022);
-insert into `t_role_menu` values (100068, 100002, 100025);
-insert into `t_role_menu` values (100069, 100002, 100026);
-insert into `t_role_menu` values (100070, 100002, 100027);
-insert into `t_role_menu` values (100071, 100002, 100028);
-insert into `t_role_menu` values (100072, 100002, 100029);
-insert into `t_role_menu` values (100073, 100002, 100030);
-insert into `t_role_menu` values (100074, 100002, 100031);
-insert into `t_role_menu` values (100075, 100002, 100032);
-insert into `t_role_menu` values (100076, 100002, 100033);
-insert into `t_role_menu` values (100077, 100002, 100013);
-insert into `t_role_menu` values (100079, 100002, 100015);
-insert into `t_role_menu` values (100080, 100002, 100000);
-insert into `t_role_menu` values (100081, 100002, 100037);
-insert into `t_role_menu` values (100082, 100002, 100048);
-insert into `t_role_menu` values (100083, 100002, 100049);
-insert into `t_role_menu` values (100084, 100002, 100050);
-insert into `t_role_menu` values (100085, 100002, 100051);
-insert into `t_role_menu` values (100086, 100002, 100052);
-insert into `t_role_menu` values (100087, 100002, 100053);
-insert into `t_role_menu` values (100088, 100002, 100054);
-insert into `t_role_menu` values (100089, 100002, 100055);
-insert into `t_role_menu` values (100090, 100002, 100056);
-insert into `t_role_menu` values (100091, 100002, 100057);
 
 -- alter t_role_user to t_member and update the schema
 alter table `t_user_role` rename `t_member`;
@@ -293,6 +315,8 @@ insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically
 
 update t_setting set setting_key = replace(setting_key, 'streamx', 'streampark') where setting_key like 'streamx%';
 
+delete from `t_setting` where setting_key like '%console.webapp.address';
+
 -- t_user
 alter table `t_user`
     drop index `un_username`,
@@ -313,6 +337,9 @@ create table `t_variable` (
   primary key (`id`) using btree,
   unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+
+drop table if exists `t_flame_graph`;
 
 set foreign_key_checks = 1;
 

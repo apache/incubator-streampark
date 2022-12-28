@@ -37,23 +37,6 @@ create table `t_app_backup` (
   primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
-
--- ----------------------------
--- table structure for t_flame_graph
--- ----------------------------
-drop table if exists `t_flame_graph`;
-create table `t_flame_graph` (
-  `id` bigint not null auto_increment,
-  `app_id` bigint default null,
-  `profiler` varchar(255) collate utf8mb4_general_ci default null,
-  `timeline` datetime default null,
-  `content` text collate utf8mb4_general_ci,
-  primary key (`id`) using btree,
-  key `inx_time` (`timeline`),
-  key `inx_appid` (`app_id`)
-) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-
 -- ----------------------------
 -- Table structure for t_flink_app
 -- ----------------------------
@@ -94,7 +77,6 @@ create table `t_flink_app` (
   `description` varchar(255) collate utf8mb4_general_ci default null,
   `resolve_order` tinyint default null,
   `k8s_rest_exposed_type` tinyint default null,
-  `flame_graph` tinyint default 0,
   `jm_memory` int default null,
   `tm_memory` int default null,
   `total_task` int default null,

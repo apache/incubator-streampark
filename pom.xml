@@ -970,7 +970,6 @@
         <profile>
             <id>console</id>
             <modules>
-                <module>streampark-plugin</module>
                 <module>streampark-storage</module>
                 <module>streampark-console</module>
             </modules>

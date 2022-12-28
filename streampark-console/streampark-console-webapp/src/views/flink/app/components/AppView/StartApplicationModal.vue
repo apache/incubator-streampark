@@ -54,18 +54,6 @@
     labelWidth: 120,
     schemas: [
       {
-        field: 'flameGraph',
-        label: 'flame Graph',
-        component: 'Switch',
-        componentProps: {
-          checkedChildren: 'ON',
-          unCheckedChildren: 'OFF',
-        },
-        defaultValue: false,
-        afterItem: () => h('span', { class: 'conf-switch' }, 'flame Graph support'),
-        ifShow: () => isK8sExecMode(receiveData.executionMode),
-      },
-      {
         field: 'startSavePointed',
         label: 'from savepoint',
         component: 'Switch',
@@ -130,7 +118,6 @@
         id: receiveData.application.id,
         savePointed,
         savePoint: savePointPath,
-        flameGraph: formValue.flameGraph || false,
         allowNonRestored: formValue.allowNonRestoredState || false,
       });
       if (data.data) {

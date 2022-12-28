@@ -149,7 +149,6 @@ export default {
     force: 'Forced Stop Application',
     copy: 'Copy Application',
     remapping: 'Remapping Application',
-    flameGraph: 'View FlameGraph',
     deleteTip: 'Are you sure delete this job ?',
   },
   dashboard: {

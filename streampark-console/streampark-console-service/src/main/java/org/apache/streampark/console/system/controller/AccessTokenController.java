@@ -123,7 +123,6 @@ public class AccessTokenController {
         if ("/flink/app/start".equalsIgnoreCase(path)) {
             resultCURL = curlBuilder
                 .addFormData("allowNonRestored", "false")
-                .addFormData("flameGraph", "false")
                 .addFormData("savePoint", "")
                 .addFormData("savePointed", "false")
                 .addFormData("id", appId)

@@ -60,12 +60,6 @@
       },
       {
         key: 4,
-        title: t('flink.setting.systemSettingItems.consoleSetting.name'),
-        isPassword: () => false,
-        data: settings.value.filter((i) => i.settingKey.indexOf('streampark.console') > -1),
-      },
-      {
-        key: 5,
         title: t('flink.setting.systemSettingItems.ingressSetting.name'),
         isPassword: () => false,
         data: filterValue('ingress.mode'),
