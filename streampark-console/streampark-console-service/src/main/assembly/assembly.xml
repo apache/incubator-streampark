@@ -116,5 +116,9 @@
             <directory>${project.build.directory}/../../../dist-material/release-docs</directory>
             <outputDirectory/>
         </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/../../streampark-console-webapp/dist-material/release-docs</directory>
+            <outputDirectory/>
+        </fileSet>
     </fileSets>
 </assembly>

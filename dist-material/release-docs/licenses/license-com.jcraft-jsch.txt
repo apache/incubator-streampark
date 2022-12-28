@@ -1,1 +1,0 @@
-License: {Name: Revised BSD, URL: http://www.jcraft.com/jsch/LICENSE.txt, Distribution: , Comments: , }
