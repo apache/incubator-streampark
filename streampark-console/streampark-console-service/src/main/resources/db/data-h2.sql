@@ -187,18 +187,17 @@ insert into `t_setting` values (1, 'streampark.maven.settings', null, 'Maven Set
 insert into `t_setting` values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven private server address', 1);
 insert into `t_setting` values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven private server authentication username', 1);
 insert into `t_setting` values (4, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven private server authentication password', 1);
-insert into `t_setting` values (5, 'streampark.console.webapp.address', null, 'StreamPark Webapp address', 'StreamPark Console Web Application HTTP URL', 1);
-insert into `t_setting` values (6, 'alert.email.host', null, 'Alert Email Smtp Host', 'Alert Mailbox Smtp Host', 1);
-insert into `t_setting` values (7, 'alert.email.port', null, 'Alert Email Smtp Port', 'Smtp Port of the alarm mailbox', 1);
-insert into `t_setting` values (8, 'alert.email.from', null, 'Alert  Email From', 'Email to send alerts', 1);
-insert into `t_setting` values (9, 'alert.email.userName', null, 'Alert  Email User', 'Authentication username used to send alert emails', 1);
-insert into `t_setting` values (10, 'alert.email.password', null, 'Alert Email Password', 'Authentication password used to send alarm email', 1);
-insert into `t_setting` values (11, 'alert.email.ssl', 'false', 'Alert Email Is SSL', 'Whether to enable SSL in the mailbox that sends the alert', 2);
-insert into `t_setting` values (12, 'docker.register.address', null, 'Docker Register Address', 'Docker container service address', 1);
-insert into `t_setting` values (13, 'docker.register.user', null, 'Docker Register User', 'Docker container service authentication username', 1);
-insert into `t_setting` values (14, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
-insert into `t_setting` values (15, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker namespace', 1);
-insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress domain address', 1);
+insert into `t_setting` values (5, 'alert.email.host', null, 'Alert Email Smtp Host', 'Alert Mailbox Smtp Host', 1);
+insert into `t_setting` values (6, 'alert.email.port', null, 'Alert Email Smtp Port', 'Smtp Port of the alarm mailbox', 1);
+insert into `t_setting` values (7, 'alert.email.from', null, 'Alert  Email From', 'Email to send alerts', 1);
+insert into `t_setting` values (8, 'alert.email.userName', null, 'Alert  Email User', 'Authentication username used to send alert emails', 1);
+insert into `t_setting` values (9, 'alert.email.password', null, 'Alert Email Password', 'Authentication password used to send alarm email', 1);
+insert into `t_setting` values (10, 'alert.email.ssl', 'false', 'Alert Email Is SSL', 'Whether to enable SSL in the mailbox that sends the alert', 2);
+insert into `t_setting` values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker container service address', 1);
+insert into `t_setting` values (12, 'docker.register.user', null, 'Docker Register User', 'Docker container service authentication username', 1);
+insert into `t_setting` values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
+insert into `t_setting` values (14, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker namespace', 1);
+insert into `t_setting` values (15, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress domain address', 1);
 
 -- ----------------------------
 -- Records of t_user

@@ -315,6 +315,8 @@ insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically
 
 update t_setting set setting_key = replace(setting_key, 'streamx', 'streampark') where setting_key like 'streamx%';
 
+delete from `t_setting` where setting_key like '%console.webapp.address';
+
 -- t_user
 alter table `t_user`
     drop index `un_username`,
