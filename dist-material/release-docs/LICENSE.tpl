@@ -1,9 +1,9 @@
 {{ .LicenseContent }}
 
 =======================================================================
-StreamPark Subcomponents:
+Apache StreamPark Subcomponents:
 
-The StreamPark project contains subcomponents with separate copyright
+The Apache StreamPark project contains subcomponents with separate copyright
 notices and license terms. Your use of the source code for the these
 subcomponents is subject to the terms and conditions of the following
 licenses.

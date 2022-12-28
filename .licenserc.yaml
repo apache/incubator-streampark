@@ -66,45 +66,85 @@ dependency:
   files:
     - pom.xml
   licenses:
-    - name: org.slf4j:slf4j-api
-      version: 1.7.30,1.7.32
+    - name: asm:asm
+      license: BSD-2.0
+    - name: com.carrotsearch:hppc
       license: Apache-2.0
-    - name: com.squareup.okhttp3:okhttp
-      version: 3.14.9,3.12.2
-      license: Apache-2.0
-    - name: com.google.guava:listenablefuture
-      version: 9999.0-empty-to-avoid-conflict-with-guava
-      license: Apache-2.0
-    - name: io.swagger:swagger-annotations
-      version: 1.6.6
-      license: Apache-2.0
-    - name: com.squareup.okio:okio
-      version: 1.15.0,1.17.2
-      license: Apache-2.0
-    - name: com.squareup.retrofit2:retrofit
-      version: 2.3.0,2.5.0
-      license: Apache-2.0
-    - name: com.squareup.retrofit2:converter-jackson
-      version: 2.3.0,2.5.0
-      license: Apache-2.0
-    - name: com.fasterxml.jackson.module:jackson-module-kotlin
-      version: 2.13.1
+    - name: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml
       license: Apache-2.0
     - name: com.fasterxml.jackson.datatype:jackson-datatype-jsr310
-      version: 2.13.2
       license: Apache-2.0
-    - name: com.graphql-java:graphql-java-extended-scalars
-      version: 17.0
-      license: MIT
-    - name: com.github.luben:zstd-jni
-      version: 1.4.3-1
-      license: BSD-2-Clause
-    - name: com.h2database:h2
-      version: 2.1.212
-      license: MPL-2.0
-    - name: org.antlr:antlr4-runtime
-      version: 4.9.2
-      license: BSD-3-Clause
-    - name: com.google.flatbuffers:flatbuffers-java
-      version: 1.12.0
+    - name: com.github.docker-java:docker-java-api
       license: Apache-2.0
+    - name: com.github.docker-java:docker-java-core
+      license: Apache-2.0
+    - name: com.github.docker-java:docker-java-transport
+      license: Apache-2.0
+    - name: com.github.docker-java:docker-java-transport-httpclient5
+      license: Apache-2.0
+    - name: com.github.xiaoymin:knife4j-annotations
+      license: Apache-2.0
+    - name: com.github.xiaoymin:knife4j-core
+      license: Apache-2.0
+    - name: com.github.xiaoymin:knife4j-spring
+      license: Apache-2.0
+    - name: com.github.xiaoymin:knife4j-spring-boot-autoconfigure
+      license: Apache-2.0
+    - name: com.github.xiaoymin:knife4j-spring-ui
+      license: Apache-2.0
+    - name: io.swagger.core.v3:swagger-annotations
+      license: Apache-2.0
+    - name: io.swagger.core.v3:swagger-models
+      license: Apache-2.0
+    - name: io.swagger:swagger-annotations
+      license: Apache-2.0
+    - name: io.swagger:swagger-models
+      license: Apache-2.0
+    - name: com.google.code.gson:gson
+      license: Apache-2.0
+    - name: com.google.guava:listenablefuture
+      license: Apache-2.0
+    - name: com.squareup.moshi:moshi
+      license: Apache-2.0
+    - name: com.squareup.okhttp3:logging-interceptor
+      license: Apache-2.0
+    - name: com.squareup.okhttp3:okhttp
+      license: Apache-2.0
+    - name: com.squareup.okhttp:okhttp
+      license: Apache-2.0
+    - name: com.squareup.okio:okio
+      license: Apache-2.0
+    - name: com.squareup.retrofit2:converter-moshi
+      license: Apache-2.0
+    - name: com.squareup.retrofit2:retrofit
+      license: Apache-2.0
+    - name: com.yammer.metrics:metrics-core
+      license: Apache-2.0
+    - name: net.bytebuddy:byte-buddy
+      license: Apache-2.0
+    - name: org.apache.httpcomponents:httpcore
+      license: Apache-2.0
+    - name: org.codehaus.plexus:plexus-component-annotations
+      license: Apache-2.0
+    - name: org.codehaus.plexus:plexus-interpolation
+      license: Apache-2.0
+    - name: org.sonatype.plexus:plexus-cipher
+      license: Apache-2.0
+    - name: org.sonatype.plexus:plexus-sec-dispatcher
+      license: Apache-2.0
+    - name: com.sun.jersey.contribs:jersey-guice
+      license: CDDL 1.1,GPL2 w/ CPE
+    - name: com.thoughtworks.paranamer:paranamer
+      license: BSD
+    - name: javax.servlet.jsp:jsp-api
+      license: CDDL + GPLv2
+    - name: javax.servlet:servlet-api
+      license: CDDL + GPLv2
+    - name: org.eclipse.jgit:org.eclipse.jgit
+      license: New BSD License
+    - name: org.eclipse.jgit:org.eclipse.jgit.ssh.jsch
+      license: New BSD License
+    - name: org.jacoco:org.jacoco.agent
+      license: Eclipse Public License 2.0
+    - name: org.slf4j:slf4j-api
+      license: MIT License
