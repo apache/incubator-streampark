@@ -21,7 +21,6 @@ import { useFlinkAppStore } from '/@/store/modules/flinkApplication';
 import { useFlinkApplication } from './useApp';
 import { fetchAppRecord, fetchAppRemove } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
-import { fetchFlamegraph } from '/@/api/flink/app/metrics';
 import { ActionItem, FormProps } from '/@/components/Table';
 import { useMessage } from '/@/hooks/web/useMessage';
 import {
@@ -178,13 +177,6 @@ export const useAppTableAction = (
         onClick: handleMapping.bind(null, record),
       },
       {
-        label: t('flink.app.operation.flameGraph'),
-        ifShow: record.flameGraph,
-        auth: 'app:flameGraph',
-        icon: 'ant-design:fire-outlined',
-        onClick: handleFlameGraph.bind(null, record),
-      },
-      {
         popConfirm: {
           title: t('flink.app.operation.deleteTip'),
           confirm: handleDelete.bind(null, record),
@@ -206,26 +198,6 @@ export const useAppTableAction = (
         color: 'error',
       },
     ];
-  }
-
-  async function handleFlameGraph(app: AppListRecord) {
-    const hide = createMessage.loading('flameGraph generating...', 0);
-    try {
-      const { data } = await fetchFlamegraph({
-        appId: app.id,
-        width: document.documentElement.offsetWidth || document.body.offsetWidth,
-      });
-      if (data) {
-        const blob = new Blob([data], { type: 'image/svg+xml' });
-        const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob);
-        window.open(imageUrl);
-      }
-    } catch (error) {
-      console.error(error);
-      createMessage.error('flameGraph generate failed');
-    } finally {
-      hide();
-    }
   }
 
   /* Click to delete */

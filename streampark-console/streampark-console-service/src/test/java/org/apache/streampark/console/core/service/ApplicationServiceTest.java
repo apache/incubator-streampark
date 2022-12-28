@@ -64,7 +64,6 @@ class ApplicationServiceTest {
         app.setResolveOrder(0);
         app.setExecutionMode(4);
         app.setAppType(2);
-        app.setFlameGraph(false);
         app.setTracking(0);
         app.setJar("SocketWindowWordCount.jar");
         app.setJarCheckSum(1553115525L);
@@ -86,7 +85,6 @@ class ApplicationServiceTest {
     void start() throws Exception {
         Application application = new Application();
         application.setId(1304056220683497473L);
-        application.setFlameGraph(false);
         application.setRestart(false);
         application.setSavePointed(false);
         application.setAllowNonRestored(false);

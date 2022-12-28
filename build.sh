@@ -208,8 +208,7 @@ detachedPackage () {
     Next, you need to build front-end by yourself.
 
      1) cd $(cd "$PRG_DIR" &>/dev/null && pwd)/streampark-console/streampark-console-webapp
-     2) pnpm install
-     3) pnpm build
+     2) pnpm install && pnpm build
 
     please visit: https://streampark.apache.org/docs/user-guide/deployment for more detail. \n"""
   fi

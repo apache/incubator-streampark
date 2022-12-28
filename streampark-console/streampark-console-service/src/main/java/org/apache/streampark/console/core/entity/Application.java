@@ -168,7 +168,6 @@ public class Application implements Serializable {
     private Integer executionMode;
     private String dynamicProperties;
     private Integer appType;
-    private Boolean flameGraph;
 
     /**
      * determine if tracking status

@@ -25,7 +25,7 @@ insert into `t_team` values (100001, 'test', 'The test team', now(), now());
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
-insert into `t_flink_app` values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, '0', 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, 0, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test');
+insert into `t_flink_app` values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, '0', 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, 0, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test');
 
 -- ----------------------------
 -- Records of t_flink_effective
@@ -76,7 +76,6 @@ insert into `t_menu` values (100029, 100015, 'savepoint delete', null, null, 'sa
 insert into `t_menu` values (100030, 100015, 'backup rollback', null, null, 'backup:rollback', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100031, 100015, 'backup delete', null, null, 'backup:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100032, 100015, 'conf delete', null, null, 'conf:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100033, 100015, 'flame Graph', null, null, 'app:flameGraph', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100034, 100013, 'menu.setting', '/flink/setting', 'flink/setting/View', null, 'setting', '0', 1, 5, now(), now());
 insert into `t_menu` values (100035, 100034, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100036, 100014, 'edit', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', 0, null, now(), now());

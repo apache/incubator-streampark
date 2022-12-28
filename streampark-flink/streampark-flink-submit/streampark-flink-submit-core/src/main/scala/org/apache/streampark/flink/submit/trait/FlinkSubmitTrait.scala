@@ -69,7 +69,6 @@ trait FlinkSubmitTrait extends Logger {
          |    flinkExposedType : ${submitRequest.k8sSubmitParam.flinkRestExposedType}
          |    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
          |    applicationType  : ${submitRequest.applicationType.getName}
-         |    flameGraph       : ${submitRequest.flameGraph != null}
          |    savePoint        : ${submitRequest.savePoint}
          |    properties       : ${submitRequest.properties.mkString(" ")}
          |    args             : ${submitRequest.args}
@@ -187,16 +186,6 @@ trait FlinkSubmitTrait extends Logger {
 
   //----------Public Method end ------------------
 
-  private[submit] lazy val jvmProfilerJar: String = {
-    val pluginsPath = SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME).concat("/plugins")
-    val pluginsDir = new File(pluginsPath)
-    pluginsDir.list().filter(_.matches("streampark-jvm-profiler-.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamPark] can no found streampark-jvm-profiler jar in $pluginsPath")
-      case array if array.length == 1 => array.head
-      case more => throw new IllegalArgumentException(s"[StreamPark] found multiple streampark-jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
-    }
-  }
-
   private[submit] def validateAndGetActiveCommandLine(customCommandLines: JavaList[CustomCommandLine], commandLine: CommandLine): CustomCommandLine = {
     val line = checkNotNull(commandLine)
     logInfo(s"Custom commandline: $customCommandLines")
@@ -275,14 +264,6 @@ trait FlinkSubmitTrait extends Logger {
           case _ =>
         }
       })
-
-      //-jvm profile only on yarn support
-      if (Utils.notEmpty(submitRequest.flameGraph) && ExecutionMode.isYarnMode(submitRequest.executionMode)) {
-        val buffer = new StringBuffer()
-        submitRequest.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
-        val param = buffer.toString.dropRight(1)
-        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
-      }
 
       // app properties
       if (MapUtils.isNotEmpty(submitRequest.properties)) {
