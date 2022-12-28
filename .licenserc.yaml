@@ -133,13 +133,13 @@ dependency:
     - name: org.sonatype.plexus:plexus-sec-dispatcher
       license: Apache-2.0
     - name: com.sun.jersey.contribs:jersey-guice
-      license: CDDL 1.1,GPL2 w/ CPE
+      license: CDDL 1.1
     - name: com.thoughtworks.paranamer:paranamer
       license: BSD
     - name: javax.servlet.jsp:jsp-api
-      license: CDDL + GPLv2
+      license: CDDL
     - name: javax.servlet:servlet-api
-      license: CDDL + GPLv2
+      license: CDDL
     - name: org.eclipse.jgit:org.eclipse.jgit
       license: New BSD License
     - name: org.eclipse.jgit:org.eclipse.jgit.ssh.jsch
