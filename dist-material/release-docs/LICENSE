@@ -185,21 +185,15 @@ licenses.
 
 
 ========================================================================
- licenses
-========================================================================
-The following components are provided under the  License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.aliyun.oss/aliyun-sdk-oss/3.15.0 
-    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core/4.5.10 
-    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-kms/2.11.0 
-    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-ram/3.1.0 
-
-========================================================================
 Apache-2.0 licenses
 ========================================================================
 The following components are provided under the Apache-2.0 License. See project link for details.
 The text of each license is the standard Apache 2.0 license.
+
+    https://mvnrepository.com/artifact/com.aliyun.oss/aliyun-sdk-oss/3.15.0 Apache-2.0
+    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core/4.5.10 Apache-2.0
+    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-kms/2.11.0 Apache-2.0
+    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-ram/3.1.0 Apache-2.0
     https://mvnrepository.com/artifact/com.baomidou/mybatis-plus/3.5.2 Apache-2.0
     https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-annotation/3.5.2 Apache-2.0
     https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter/3.5.2 Apache-2.0
@@ -596,106 +590,72 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/ru.yandex.clickhouse/clickhouse-jdbc/0.3.2 Apache-2.0
     https://mvnrepository.com/artifact/stax/stax-api/1.0.1 Apache-2.0
     https://mvnrepository.com/artifact/xerces/xercesImpl/2.12.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.commons/commons-math3/3.5 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.commons/commons-math3/3.1.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-aop/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-beans/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-context/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-context-support/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-core/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-expression/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-jcl/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-jdbc/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-messaging/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-tx/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-web/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-webmvc/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.springframework/spring-websocket/5.3.22 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.ivy/ivy/2.4.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.ivy/ivy/2.5.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-backward-codecs/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-backward-codecs/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-core/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-core/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-grouping/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-grouping/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-highlighter/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-highlighter/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-join/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-join/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-memory/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-memory/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-misc/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-misc/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-queries/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-queries/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-sandbox/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-sandbox/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial-extras/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial-extras/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial3d/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial3d/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-suggest/7.3.1 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.lucene/lucene-suggest/8.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients/2.5.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-jaxrs/1.9.13 Apache-2.0
+    https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-xc/1.9.13 Apache-2.0
+    https://mvnrepository.com/artifact/xml-apis/xml-apis/1.4.01 Apache-2.0
+    https://mvnrepository.com/artifact/javax.activation/javax.activation-api/1.2.0 Apache-2.0
+    https://mvnrepository.com/artifact/net.java.dev.jna/jna/5.8.0 Apache-2.0
+    https://mvnrepository.com/artifact/com.github.jsqlparser/jsqlparser/4.4 Apache-2.0
+    https://mvnrepository.com/artifact/com.typesafe/config/1.4.2 Apache-2.0
+    https://mvnrepository.com/artifact/org.scala-lang.modules/scala-xml_2.12/1.3.0 Apache-2.0
+    https://mvnrepository.com/artifact/org.mortbay.jetty/jetty/6.1.26 Apache-2.0
+    https://mvnrepository.com/artifact/org.mortbay.jetty/jetty-util/6.1.26 Apache-2.0
+    https://mvnrepository.com/artifact/io.undertow/undertow-core/2.2.19.Final Apache-2.0
+    https://mvnrepository.com/artifact/io.undertow/undertow-servlet/2.2.19.Final Apache-2.0
+    https://mvnrepository.com/artifact/io.undertow/undertow-websockets-jsr/2.2.19.Final Apache-2.0
+    https://mvnrepository.com/artifact/org.jboss.xnio/xnio-api/3.8.7.Final Apache-2.0
+    https://mvnrepository.com/artifact/org.jboss.xnio/xnio-nio/3.8.7.Final Apache-2.0
+    https://mvnrepository.com/artifact/org.wildfly.client/wildfly-client-config/1.0.1.Final Apache-2.0
+    https://mvnrepository.com/artifact/org.wildfly.common/wildfly-common/1.5.4.Final Apache-2.0
 
-========================================================================
-Apache-2.0 and BSD-2-Clause and BSD-3-Clause licenses
-========================================================================
-The following components are provided under the Apache-2.0 and BSD-2-Clause and BSD-3-Clause License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.apache.commons/commons-math3/3.5 Apache-2.0 and BSD-2-Clause and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.apache.commons/commons-math3/3.1.1 Apache-2.0 and BSD-2-Clause and BSD-3-Clause
-
-========================================================================
-Apache-2.0 and BSD-3-Clause licenses
-========================================================================
-The following components are provided under the Apache-2.0 and BSD-3-Clause License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.springframework/spring-aop/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-beans/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-context/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-context-support/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-core/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-expression/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-jcl/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-jdbc/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-messaging/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-tx/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-web/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-webmvc/5.3.22 Apache-2.0 and BSD-3-Clause
-    https://mvnrepository.com/artifact/org.springframework/spring-websocket/5.3.22 Apache-2.0 and BSD-3-Clause
-
-========================================================================
-Apache-2.0 and BSD-3-Clause and MIT licenses
-========================================================================
-The following components are provided under the Apache-2.0 and BSD-3-Clause and MIT License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.apache.ivy/ivy/2.4.0 Apache-2.0 and BSD-3-Clause and MIT
-    https://mvnrepository.com/artifact/org.apache.ivy/ivy/2.5.0 Apache-2.0 and BSD-3-Clause and MIT
-
-========================================================================
-Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause licenses
-========================================================================
-The following components are provided under the Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-backward-codecs/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-backward-codecs/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-core/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-core/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-grouping/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-grouping/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-highlighter/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-highlighter/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-join/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-join/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-memory/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-memory/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-misc/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-misc/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-queries/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-queries/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-sandbox/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-sandbox/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial-extras/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial-extras/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial3d/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-spatial3d/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-suggest/7.3.1 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-    https://mvnrepository.com/artifact/org.apache.lucene/lucene-suggest/8.3.0 Apache-2.0 and BSD-3-Clause and MIT and ICU and BSD-2-Clause
-
-========================================================================
-Apache-2.0 and CDDL-1.1 and BSD-3-Clause and BSD-2-Clause licenses
-========================================================================
-The following components are provided under the Apache-2.0 and CDDL-1.1 and BSD-3-Clause and BSD-2-Clause License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients/2.5.0 Apache-2.0 and CDDL-1.1 and BSD-3-Clause and BSD-2-Clause
-
-========================================================================
-Apache-2.0 and http://www.fsf.org/licensing/licenses/lgpl.txt licenses
-========================================================================
-The following components are provided under the Apache-2.0 and http://www.fsf.org/licensing/licenses/lgpl.txt License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-jaxrs/1.9.13 Apache-2.0 and http://www.fsf.org/licensing/licenses/lgpl.txt
-    https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-xc/1.9.13 Apache-2.0 and http://www.fsf.org/licensing/licenses/lgpl.txt
-
-========================================================================
-Apache-2.0 and http://www.saxproject.org/copying.html and http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/java-binding.zip licenses
-========================================================================
-The following components are provided under the Apache-2.0 and http://www.saxproject.org/copying.html and http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/java-binding.zip License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/xml-apis/xml-apis/1.4.01 Apache-2.0 and http://www.saxproject.org/copying.html and http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/java-binding.zip
 
 ========================================================================
 BSD licenses
@@ -704,23 +664,24 @@ The following components are provided under the BSD License. See project link fo
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/com.thoughtworks.paranamer/paranamer/2.8 BSD
-    https://mvnrepository.com/artifact/com.thoughtworks.paranamer/paranamer/2.3 BSD
+    https://mvnrepository.com/artifact/com.jcraft/jsch/0.1.55 BSD
+    https://mvnrepository.com/artifact/com.jcraft/jzlib/1.1.1 BSD
 
 ========================================================================
 BSD-2-Clause licenses
 ========================================================================
 The following components are provided under the BSD-2-Clause License. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.postgresql/postgresql/42.5.0 BSD-2-Clause
-
-========================================================================
-BSD-2.0 licenses
-========================================================================
-The following components are provided under the BSD-2.0 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
     https://mvnrepository.com/artifact/asm/asm/3.1 BSD-2.0
+    https://mvnrepository.com/artifact/org.postgresql/postgresql/42.5.0 BSD-2.0
+    https://mvnrepository.com/artifact/org.hdrhistogram/HdrHistogram/2.1.12 BSD-2.0
+    https://mvnrepository.com/artifact/com.github.luben/zstd-jni/1.4.4-7 BSD-2.0
+    https://mvnrepository.com/artifact/com.esotericsoftware.kryo/kryo/2.24.0 BSD-2.0
+    https://mvnrepository.com/artifact/com.esotericsoftware.minlog/minlog/1.2 BSD-2.0
+    https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java/2.5.0 BSD-2.0
+    https://mvnrepository.com/artifact/org.codehaus.woodstox/stax2-api/4.2.1 BSD-2.0
+    https://mvnrepository.com/artifact/xmlenc/xmlenc/0.52 BSD-2.0
+
 
 ========================================================================
 BSD-3-Clause licenses
@@ -734,6 +695,17 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.ow2.asm/asm/5.0.4 BSD-3-Clause
     https://mvnrepository.com/artifact/org.owasp.encoder/encoder/1.2.3 BSD-3-Clause
 
+
+========================================================================
+New BSD License licenses
+========================================================================
+The following components are provided under the New BSD License License. See project link for details.
+The text of each license is also included in licenses/LICENSE-[project].txt.
+
+    https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit/5.13.1.202206130422-r New BSD License
+    https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.ssh.jsch/5.13.1.202206130422-r New BSD License
+
+
 ========================================================================
 CC0-1.0 licenses
 ========================================================================
@@ -744,67 +716,46 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.latencyutils/LatencyUtils/2.0.3 CC0-1.0
     https://mvnrepository.com/artifact/org.reactivestreams/reactive-streams/1.0.3 CC0-1.0
 
+
 ========================================================================
-CC0-1.0 and BSD-2-Clause licenses
+CDDL
 ========================================================================
-The following components are provided under the CC0-1.0 and BSD-2-Clause License. See project link for details.
+The following components are provided under the CDDL. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
-    https://mvnrepository.com/artifact/org.hdrhistogram/HdrHistogram/2.1.12 CC0-1.0 and BSD-2-Clause
+    https://mvnrepository.com/artifact/javax.servlet.jsp/jsp-api/2.1 CDDL
+    https://mvnrepository.com/artifact/javax.servlet/servlet-api/2.5 CDDL
+    https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-impl/2.2.3-1 CDDL
+    https://mvnrepository.com/artifact/com.sun.jersey/jersey-client/1.9 CDDL
+    https://mvnrepository.com/artifact/com.sun.jersey/jersey-core/1.9 CDDL
+    https://mvnrepository.com/artifact/com.sun.jersey/jersey-json/1.9 CDDL
+    https://mvnrepository.com/artifact/com.sun.jersey/jersey-server/1.9 CDDL
+
 
 ========================================================================
-CDDL + GPLv2 licenses
-========================================================================
-The following components are provided under the CDDL + GPLv2 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/javax.servlet.jsp/jsp-api/2.1 CDDL + GPLv2
-    https://mvnrepository.com/artifact/javax.servlet/servlet-api/2.5 CDDL + GPLv2
-
-========================================================================
-CDDL 1.1,GPL2 w/ CPE licenses
-========================================================================
-The following components are provided under the CDDL 1.1,GPL2 w/ CPE License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.sun.jersey.contribs/jersey-guice/1.9 CDDL 1.1,GPL2 w/ CPE
-
-========================================================================
-CDDL-1.0 licenses
+CDDL-1.0
 ========================================================================
 The following components are provided under the CDDL-1.0 License. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/javax.activation/activation/1.1 CDDL-1.0
+    https://mvnrepository.com/artifact/com.sun.mail/javax.mail/1.5.6 CDDL-1.0
+    https://mvnrepository.com/artifact/javax.mail/mail/1.4.7 CDDL-1.0
+    https://mvnrepository.com/artifact/javax.xml.stream/stax-api/1.0-2 CDDL-1.0
+
 
 ========================================================================
-CDDL-1.0 and GPL-2.0 licenses
+CDDL 1.1
 ========================================================================
-The following components are provided under the CDDL-1.0 and GPL-2.0 License. See project link for details.
+The following components are provided under the CDDL 1.1,GPL2 w/ CPE License. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
-    https://mvnrepository.com/artifact/com.sun.mail/javax.mail/1.5.6 CDDL-1.0 and GPL-2.0
-    https://mvnrepository.com/artifact/javax.mail/mail/1.4.7 CDDL-1.0 and GPL-2.0
-    https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api/2.2.2 CDDL-1.0 and GPL-2.0
+    https://mvnrepository.com/artifact/com.sun.jersey.contribs/jersey-guice/1.9 CDDL 1.1
+    https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api/2.3.1 CDDL-1.1
+
 
 ========================================================================
-CDDL-1.1 and GPL-2.0 licenses
-========================================================================
-The following components are provided under the CDDL-1.1 and GPL-2.0 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api/2.3.1 CDDL-1.1 and GPL-2.0
-
-========================================================================
-CDDL-1.1 and GPL-2.0 and Apache-2.0 licenses
-========================================================================
-The following components are provided under the CDDL-1.1 and GPL-2.0 and Apache-2.0 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/javax.activation/javax.activation-api/1.2.0 CDDL-1.1 and GPL-2.0 and Apache-2.0
-
-========================================================================
-EPL-1.0 licenses
+EPL-1.0
 ========================================================================
 The following components are provided under the EPL-1.0 License. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
@@ -817,40 +768,24 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.eclipse.aether/aether-transport-file/1.1.0 EPL-1.0
     https://mvnrepository.com/artifact/org.eclipse.aether/aether-transport-http/1.1.0 EPL-1.0
     https://mvnrepository.com/artifact/org.eclipse.aether/aether-util/1.1.0 EPL-1.0
+    https://mvnrepository.com/artifact/ch.qos.logback/logback-classic/1.2.11 EPL-1.0
+    https://mvnrepository.com/artifact/ch.qos.logback/logback-core/1.2.11 EPL-1.0
+    https://mvnrepository.com/artifact/com.h2database/h2/1.4.200 EPL-1.0
+    https://mvnrepository.com/artifact/com.h2database/h2/2.1.214 EPL-1.0
+
 
 ========================================================================
-EPL-1.0 and LGPL-2.1 licenses
-========================================================================
-The following components are provided under the EPL-1.0 and LGPL-2.1 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/ch.qos.logback/logback-classic/1.2.11 EPL-1.0 and LGPL-2.1
-    https://mvnrepository.com/artifact/ch.qos.logback/logback-core/1.2.11 EPL-1.0 and LGPL-2.1
-
-========================================================================
-EPL-2.0 and GPL-2.0 licenses
+EPL-2.0
 ========================================================================
 The following components are provided under the EPL-2.0 and GPL-2.0 License. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
-    https://mvnrepository.com/artifact/jakarta.annotation/jakarta.annotation-api/1.3.5 EPL-2.0 and GPL-2.0
-    https://mvnrepository.com/artifact/jakarta.websocket/jakarta.websocket-api/1.1.2 EPL-2.0 and GPL-2.0
+    https://mvnrepository.com/artifact/jakarta.annotation/jakarta.annotation-api/1.3.5 EPL-2.0
+    https://mvnrepository.com/artifact/jakarta.websocket/jakarta.websocket-api/1.1.2 EPL-2.0
+    https://mvnrepository.com/artifact/org.jacoco/org.jacoco.agent/0.8.5 EPL-2.0
+    https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api/4.0.4 EPL-2.0
+    https://mvnrepository.com/artifact/org.aspectj/aspectjweaver/1.9.7 EPL-2.0
 
-========================================================================
-Eclipse Public License 2.0 licenses
-========================================================================
-The following components are provided under the Eclipse Public License 2.0 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.jacoco/org.jacoco.agent/0.8.5 Eclipse Public License 2.0
-
-========================================================================
-LGPL-2.1 and Apache-2.0 licenses
-========================================================================
-The following components are provided under the LGPL-2.1 and Apache-2.0 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.github.jsqlparser/jsqlparser/4.4 LGPL-2.1 and Apache-2.0
 
 ========================================================================
 MIT licenses
@@ -870,40 +805,20 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.influxdb/influxdb-java/2.17 MIT
     https://mvnrepository.com/artifact/org.jruby.jcodings/jcodings/1.0.8 MIT
     https://mvnrepository.com/artifact/org.jruby.joni/joni/2.1.2 MIT
+    https://mvnrepository.com/artifact/org.slf4j/slf4j-api/1.7.30 MIT
+    https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.24 MIT
+    https://mvnrepository.com/artifact/com.auth0/java-jwt/4.0.0 MIT
+
 
 ========================================================================
-MIT License licenses
+MPL-1.1
 ========================================================================
-The following components are provided under the MIT License License. See project link for details.
+The following components are provided under the MPL-1.1. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
-    https://mvnrepository.com/artifact/org.slf4j/slf4j-api/1.7.30 MIT License
+    https://mvnrepository.com/artifact/org.javassist/javassist/3.24.0-GA MPL-1.1
+    https://mvnrepository.com/artifact/org.javassist/javassist/3.21.0-GA MPL-1.1
 
-========================================================================
-MIT and BSD-3-Clause licenses
-========================================================================
-The following components are provided under the MIT and BSD-3-Clause License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.24 MIT and BSD-3-Clause
-
-========================================================================
-MPL-1.1 and LGPL-2.1 licenses
-========================================================================
-The following components are provided under the MPL-1.1 and LGPL-2.1 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.javassist/javassist/3.24.0-GA MPL-1.1 and LGPL-2.1
-    https://mvnrepository.com/artifact/org.javassist/javassist/3.21.0-GA MPL-1.1 and LGPL-2.1
-
-========================================================================
-New BSD License licenses
-========================================================================
-The following components are provided under the New BSD License License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit/5.13.1.202206130422-r New BSD License
-    https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.ssh.jsch/5.13.1.202206130422-r New BSD License
 
 ========================================================================
 Public Domain licenses
@@ -912,100 +827,6 @@ The following components are provided under the Public Domain License. See proje
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/aopalliance/aopalliance/1.0 Public Domain
-
-========================================================================
-http://github.com/xetorthio/jedis/raw/master/LICENSE.txt licenses
-========================================================================
-The following components are provided under the http://github.com/xetorthio/jedis/raw/master/LICENSE.txt License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/redis.clients/jedis/3.3.0 http://github.com/xetorthio/jedis/raw/master/LICENSE.txt
-
-========================================================================
-http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html licenses
-========================================================================
-The following components are provided under the http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.sun.jersey/jersey-client/1.9 http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
-    https://mvnrepository.com/artifact/com.sun.jersey/jersey-core/1.9 http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
-    https://mvnrepository.com/artifact/com.sun.jersey/jersey-json/1.9 http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
-    https://mvnrepository.com/artifact/com.sun.jersey/jersey-server/1.9 http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
-
-========================================================================
-http://repository.jboss.org/licenses/apache-2.0.txt licenses
-========================================================================
-The following components are provided under the http://repository.jboss.org/licenses/apache-2.0.txt License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/io.undertow/undertow-core/2.2.19.Final http://repository.jboss.org/licenses/apache-2.0.txt
-    https://mvnrepository.com/artifact/io.undertow/undertow-servlet/2.2.19.Final http://repository.jboss.org/licenses/apache-2.0.txt
-    https://mvnrepository.com/artifact/io.undertow/undertow-websockets-jsr/2.2.19.Final http://repository.jboss.org/licenses/apache-2.0.txt
-    https://mvnrepository.com/artifact/org.jboss.xnio/xnio-api/3.8.7.Final http://repository.jboss.org/licenses/apache-2.0.txt
-    https://mvnrepository.com/artifact/org.jboss.xnio/xnio-nio/3.8.7.Final http://repository.jboss.org/licenses/apache-2.0.txt
-    https://mvnrepository.com/artifact/org.wildfly.client/wildfly-client-config/1.0.1.Final http://repository.jboss.org/licenses/apache-2.0.txt
-    https://mvnrepository.com/artifact/org.wildfly.common/wildfly-common/1.5.4.Final http://repository.jboss.org/licenses/apache-2.0.txt
-
-========================================================================
-http://www.apache.org/licenses/LICENSE-2.0, http://www.eclipse.org/org/documents/epl-v10.php licenses
-========================================================================
-The following components are provided under the http://www.apache.org/licenses/LICENSE-2.0, http://www.eclipse.org/org/documents/epl-v10.php License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.mortbay.jetty/jetty/6.1.26 http://www.apache.org/licenses/LICENSE-2.0, http://www.eclipse.org/org/documents/epl-v10.php
-    https://mvnrepository.com/artifact/org.mortbay.jetty/jetty-util/6.1.26 http://www.apache.org/licenses/LICENSE-2.0, http://www.eclipse.org/org/documents/epl-v10.php
-
-========================================================================
-http://www.eclipse.org/legal/epl-2.0, https://www.gnu.org/software/classpath/license.html licenses
-========================================================================
-The following components are provided under the http://www.eclipse.org/legal/epl-2.0, https://www.gnu.org/software/classpath/license.html License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api/4.0.4 http://www.eclipse.org/legal/epl-2.0, https://www.gnu.org/software/classpath/license.html
-
-========================================================================
-http://www.gnu.org/licenses/gpl.txt and http://www.sun.com/cddl/cddl.html licenses
-========================================================================
-The following components are provided under the http://www.gnu.org/licenses/gpl.txt and http://www.sun.com/cddl/cddl.html License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/javax.xml.stream/stax-api/1.0-2 http://www.gnu.org/licenses/gpl.txt and http://www.sun.com/cddl/cddl.html
-
-========================================================================
-http://www.gnu.org/licenses/licenses.html and Apache-2.0 licenses
-========================================================================
-The following components are provided under the http://www.gnu.org/licenses/licenses.html and Apache-2.0 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/net.java.dev.jna/jna/5.8.0 http://www.gnu.org/licenses/licenses.html and Apache-2.0
-
-========================================================================
-http://www.jcraft.com/jsch/LICENSE.txt licenses
-========================================================================
-The following components are provided under the http://www.jcraft.com/jsch/LICENSE.txt License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.jcraft/jsch/0.1.55 http://www.jcraft.com/jsch/LICENSE.txt
-
-========================================================================
-http://www.jcraft.com/jzlib/LICENSE.txt licenses
-========================================================================
-The following components are provided under the http://www.jcraft.com/jzlib/LICENSE.txt License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.jcraft/jzlib/1.1.1 http://www.jcraft.com/jzlib/LICENSE.txt
-
-========================================================================
-http://www.opensource.org/licenses/bsd-license.php licenses
-========================================================================
-The following components are provided under the http://www.opensource.org/licenses/bsd-license.php License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.esotericsoftware.kryo/kryo/2.24.0 http://www.opensource.org/licenses/bsd-license.php
-    https://mvnrepository.com/artifact/com.esotericsoftware.minlog/minlog/1.2 http://www.opensource.org/licenses/bsd-license.php
-    https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java/2.5.0 http://www.opensource.org/licenses/bsd-license.php
-    https://mvnrepository.com/artifact/org.codehaus.woodstox/stax2-api/4.2.1 http://www.opensource.org/licenses/bsd-license.php
-    https://mvnrepository.com/artifact/xmlenc/xmlenc/0.52 http://www.opensource.org/licenses/bsd-license.php
 
 ========================================================================
 https://asm.ow2.io/LICENSE.txt licenses
@@ -1019,30 +840,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.ow2.asm/asm-tree/8.0 https://asm.ow2.io/LICENSE.txt
     https://mvnrepository.com/artifact/org.ow2.asm/asm-util/8.0 https://asm.ow2.io/LICENSE.txt
 
-========================================================================
-https://glassfish.java.net/public/CDDL+GPL_1_1.html and https://glassfish.java.net/public/CDDL+GPL_1_1.html licenses
-========================================================================
-The following components are provided under the https://glassfish.java.net/public/CDDL+GPL_1_1.html and https://glassfish.java.net/public/CDDL+GPL_1_1.html License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-impl/2.2.3-1 https://glassfish.java.net/public/CDDL+GPL_1_1.html and https://glassfish.java.net/public/CDDL+GPL_1_1.html
-
-========================================================================
-https://h2database.com/html/license.html licenses
-========================================================================
-The following components are provided under the https://h2database.com/html/license.html License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.h2database/h2/1.4.200 https://h2database.com/html/license.html
-    https://mvnrepository.com/artifact/com.h2database/h2/2.1.214 https://h2database.com/html/license.html
-
-========================================================================
-https://opensource.org/licenses/BSD-2-Clause;description=BSD 2-Clause License licenses
-========================================================================
-The following components are provided under the https://opensource.org/licenses/BSD-2-Clause;description=BSD 2-Clause License License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.github.luben/zstd-jni/1.4.4-7 https://opensource.org/licenses/BSD-2-Clause;description=BSD 2-Clause License
 
 ========================================================================
 https://raw.github.com/hunterhacker/jdom/master/LICENSE.txt licenses
@@ -1053,14 +850,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.jdom/jdom2/2.0.6 https://raw.github.com/hunterhacker/jdom/master/LICENSE.txt
 
 ========================================================================
-https://raw.githubusercontent.com/auth0/java-jwt/master/LICENSE licenses
-========================================================================
-The following components are provided under the https://raw.githubusercontent.com/auth0/java-jwt/master/LICENSE License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.auth0/java-jwt/4.0.0 https://raw.githubusercontent.com/auth0/java-jwt/master/LICENSE
-
-========================================================================
 https://raw.githubusercontent.com/janino-compiler/janino/master/LICENSE licenses
 ========================================================================
 The following components are provided under the https://raw.githubusercontent.com/janino-compiler/janino/master/LICENSE License. See project link for details.
@@ -1068,21 +857,4 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/org.codehaus.janino/commons-compiler/3.0.11 https://raw.githubusercontent.com/janino-compiler/janino/master/LICENSE
     https://mvnrepository.com/artifact/org.codehaus.janino/janino/3.0.11 https://raw.githubusercontent.com/janino-compiler/janino/master/LICENSE
-
-========================================================================
-https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0 licenses
-========================================================================
-The following components are provided under the https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0 License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/com.typesafe/config/1.4.2 https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0
-    https://mvnrepository.com/artifact/org.scala-lang.modules/scala-xml_2.12/1.3.0 https://www.apache.org/licenses/LICENSE-2.0;description=Apache-2.0
-
-========================================================================
-https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt licenses
-========================================================================
-The following components are provided under the https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt License. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://mvnrepository.com/artifact/org.aspectj/aspectjweaver/1.9.7 https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt
 
