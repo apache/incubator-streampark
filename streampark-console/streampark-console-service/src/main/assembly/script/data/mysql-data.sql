@@ -180,6 +180,13 @@ insert into `t_role_menu` values (100050, 100002, 100066);
 insert into `t_role_menu` values (100051, 100002, 100063);
 insert into `t_role_menu` values (100052, 100002, 100059);
 insert into `t_role_menu` values (100053, 100002, 100067);
+insert into `t_role_menu` values (100054, 100001, 100053);
+insert into `t_role_menu` values (100055, 100001, 100057);
+insert into `t_role_menu` values (100056, 100001, 100067);
+insert into `t_role_menu` values (100057, 100001, 100069);
+insert into `t_role_menu` values (100058, 100002, 100057);
+insert into `t_role_menu` values (100059, 100002, 100058);
+insert into `t_role_menu` values (100060, 100002, 100069);
 
 -- ----------------------------
 -- Records of t_setting
