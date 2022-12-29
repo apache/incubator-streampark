@@ -45,6 +45,12 @@
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
             <version>${aliyun.oss.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jdom</groupId>
+                    <artifactId>jdom2</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
