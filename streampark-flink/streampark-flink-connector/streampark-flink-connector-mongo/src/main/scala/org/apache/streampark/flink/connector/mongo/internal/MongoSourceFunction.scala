@@ -17,13 +17,14 @@
 
 package org.apache.streampark.flink.connector.mongo.internal
 
+import java.lang
+import java.util.Properties
+
+import scala.collection.JavaConversions._
+import scala.util.{Success, Try}
+
 import com.mongodb.MongoClient
 import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{FlinkUtils, Logger, MongoConfig}
-import org.apache.streampark.flink.connector.function.RunningFunction
-import org.apache.streampark.flink.connector.mongo.function.{MongoQueryFunction, MongoResultFunction}
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
@@ -33,12 +34,14 @@ import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.bson.Document
 
-import java.lang
-import java.util.Properties
-import scala.collection.JavaConversions._
-import scala.util.{Success, Try}
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{FlinkUtils, Logger, MongoConfig}
+import org.apache.streampark.flink.connector.function.RunningFunction
+import org.apache.streampark.flink.connector.mongo.function.{MongoQueryFunction, MongoResultFunction}
 
-class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties(), collection: String) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
+class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties(), collection: String) extends RichSourceFunction[R]
+    with CheckpointedFunction with CheckpointListener with Logger {
 
   @volatile private[this] var running = true
   private[this] var scalaRunningFunc: Unit => Boolean = _
@@ -57,12 +60,13 @@ class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties
   private val OFFSETS_STATE_NAME: String = "mongo-source-query-states"
   private[this] var last: R = _
 
-  //for Scala
-  def this(collectionName: String,
-           prop: Properties,
-           scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document],
-           scalaResultFunc: MongoCursor[Document] => List[R],
-           runningFunc: Unit => Boolean) = {
+  // for Scala
+  def this(
+      collectionName: String,
+      prop: Properties,
+      scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document],
+      scalaResultFunc: MongoCursor[Document] => List[R],
+      runningFunc: Unit => Boolean) = {
 
     this(ApiType.scala, prop, collectionName)
     this.scalaQueryFunc = scalaQueryFunc
@@ -70,17 +74,14 @@ class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties
     this.scalaRunningFunc = if (runningFunc == null) _ => true else runningFunc
   }
 
-  //for JAVA
-  def this(collectionName: String,
-           prop: Properties,
-           queryFunc: MongoQueryFunction[R],
-           resultFunc: MongoResultFunction[R],
-           runningFunc: RunningFunction) {
+  // for JAVA
+  def this(collectionName: String, prop: Properties, queryFunc: MongoQueryFunction[R], resultFunc: MongoResultFunction[R], runningFunc: RunningFunction) {
 
     this(ApiType.java, prop, collectionName)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
-    this.javaRunningFunc = if (runningFunc != null) runningFunc else new RunningFunction {
+    this.javaRunningFunc = if (runningFunc != null) runningFunc
+    else new RunningFunction {
       override def running(): lang.Boolean = true
     }
   }

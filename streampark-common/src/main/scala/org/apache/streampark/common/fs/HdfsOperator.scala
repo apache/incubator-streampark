@@ -59,5 +59,3 @@ object HdfsOperator extends FsOperator with Logger {
   }
 
 }
-
-

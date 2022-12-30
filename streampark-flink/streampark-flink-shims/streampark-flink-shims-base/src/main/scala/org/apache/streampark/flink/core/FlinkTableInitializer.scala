@@ -16,31 +16,31 @@
  */
 package org.apache.streampark.flink.core
 
+import java.io.File
+
+import scala.collection.{mutable, Map}
+import scala.collection.JavaConversions._
+import scala.util.{Failure, Success, Try}
+
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{Configuration, PipelineOptions}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableConfig, TableEnvironment}
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+
 import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.enums.{ApiType, PlannerType, TableMode}
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.enums.TableMode.TableMode
-import org.apache.streampark.common.enums.{ApiType, PlannerType, TableMode}
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
-import org.apache.streampark.flink.core.conf.FlinkConfiguration
 import org.apache.streampark.flink.core.EnhancerImplicit._
-
-import java.io.File
-import scala.collection.JavaConversions._
-import scala.collection.{Map, mutable}
-import scala.util.{Failure, Success, Try}
+import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
 private[flink] object FlinkTableInitializer {
 
   private[this] var flinkInitializer: FlinkTableInitializer = _
 
-  def initialize(args: Array[String],
-                 config: (TableConfig, ParameterTool) => Unit):
-  (ParameterTool, TableEnvironment) = {
+  def initialize(args: Array[String], config: (TableConfig, ParameterTool) => Unit): (ParameterTool, TableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -66,10 +66,10 @@ private[flink] object FlinkTableInitializer {
     (flinkInitializer.configuration.parameter, flinkInitializer.tableEnvironment)
   }
 
-  def initialize(args: Array[String],
-                 configStream: (StreamExecutionEnvironment, ParameterTool) => Unit,
-                 configTable: (TableConfig, ParameterTool) => Unit):
-  (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+  def initialize(
+      args: Array[String],
+      configStream: (StreamExecutionEnvironment, ParameterTool) => Unit,
+      configTable: (TableConfig, ParameterTool) => Unit): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -83,8 +83,7 @@ private[flink] object FlinkTableInitializer {
     (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
   }
 
-  def initialize(args: StreamTableEnvConfig):
-  (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+  def initialize(args: StreamTableEnvConfig): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -99,7 +98,6 @@ private[flink] object FlinkTableInitializer {
   }
 
 }
-
 
 private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType) extends FlinkStreamingInitializer(args, apiType) {
 

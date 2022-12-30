@@ -31,12 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("flink/notebook")
 public class NoteBookController {
 
-    @PostMapping("submit")
-    public void submit(Note note) {
-    }
+  @PostMapping("submit")
+  public void submit(Note note) {}
 
-    @PostMapping("submit2")
-    public void submit2(Note note) {
-    }
-
+  @PostMapping("submit2")
+  public void submit2(Note note) {}
 }

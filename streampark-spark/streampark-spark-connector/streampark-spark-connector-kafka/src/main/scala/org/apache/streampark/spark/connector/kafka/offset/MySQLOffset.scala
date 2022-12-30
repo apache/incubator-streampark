@@ -41,14 +41,13 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   private lazy val user = storeParams("mysql.user")
   private lazy val password = storeParams("mysql.password")
 
-
   /**
-    * get stored offset
-    *
-    * @param groupId
-    * @param topics
-    * @return
-    */
+   * get stored offset
+   *
+   * @param groupId
+   * @param topics
+   * @return
+   */
   override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     require(topics.nonEmpty)
     ConnectionPool.singleton(jdbcURL, user, password)
@@ -84,11 +83,11 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   /**
-    * update offset
-    *
-    * @param groupId
-    * @param offsetInfos
-    */
+   * update offset
+   *
+   * @param groupId
+   * @param offsetInfos
+   */
   override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
     DB.localTx { implicit session =>
       offsetInfos.foreach { case (tp, offset) =>
@@ -103,11 +102,11 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   /**
-    * delete offset
-    *
-    * @param groupId
-    * @param topics
-    */
+   * delete offset
+   *
+   * @param groupId
+   * @param topics
+   */
   override def delete(groupId: String, topics: Set[String]): Unit = {
     DB.autoCommit { implicit session =>
       topics.foreach(topic => {

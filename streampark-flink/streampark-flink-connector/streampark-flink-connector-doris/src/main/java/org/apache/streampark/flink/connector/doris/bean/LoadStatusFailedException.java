@@ -22,27 +22,27 @@ import java.util.Map;
 
 public class LoadStatusFailedException extends IOException {
 
-    static final long serialVersionUID = 1L;
-    private final Map<String, Object> response;
-    private boolean reCreateLabel;
+  static final long serialVersionUID = 1L;
+  private final Map<String, Object> response;
+  private boolean reCreateLabel;
 
-    public LoadStatusFailedException(String message, Map<String, Object> response) {
-        super(message);
-        this.response = response;
-    }
+  public LoadStatusFailedException(String message, Map<String, Object> response) {
+    super(message);
+    this.response = response;
+  }
 
-    public LoadStatusFailedException(String message, Map<String, Object> response, boolean reCreateLabel) {
-        super(message);
-        this.response = response;
-        this.reCreateLabel = reCreateLabel;
-    }
+  public LoadStatusFailedException(
+      String message, Map<String, Object> response, boolean reCreateLabel) {
+    super(message);
+    this.response = response;
+    this.reCreateLabel = reCreateLabel;
+  }
 
-    public Map<String, Object> getFailedResponse() {
-        return response;
-    }
+  public Map<String, Object> getFailedResponse() {
+    return response;
+  }
 
-    public boolean needReCreateLabel() {
-        return reCreateLabel;
-    }
-
+  public boolean needReCreateLabel() {
+    return reCreateLabel;
+  }
 }

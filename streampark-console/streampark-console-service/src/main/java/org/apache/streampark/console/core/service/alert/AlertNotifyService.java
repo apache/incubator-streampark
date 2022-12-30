@@ -23,6 +23,5 @@ import org.apache.streampark.console.core.bean.AlertTemplate;
 
 public interface AlertNotifyService {
 
-    boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException;
-
+  boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException;
 }

@@ -19,6 +19,7 @@ package org.apache.streampark.common.util
 import java.io.File
 import java.net.{URL, URLClassLoader}
 import java.util.function.Supplier
+
 import scala.util.Try
 
 object ClassLoaderUtils extends Logger {
@@ -115,7 +116,8 @@ object ClassLoaderUtils extends Logger {
     }
   }
 
-  @throws[Exception] private[this] def addURL(file: File): Unit = {
+  @throws[Exception]
+  private[this] def addURL(file: File): Unit = {
     val classLoader = ClassLoader.getSystemClassLoader
     classLoader match {
       case c if c.isInstanceOf[URLClassLoader] =>

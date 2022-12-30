@@ -17,13 +17,14 @@
 
 package org.apache.streampark.common.fs
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.common.util.Utils.{isAnyBank, notEmpty}
+import java.io.{File, FileInputStream}
+
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang3.StringUtils
 
-import java.io.{File, FileInputStream}
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.Utils.{isAnyBank, notEmpty}
 
 /**
  * Local File System (aka LFS) Operator
@@ -93,7 +94,8 @@ object LfsOperator extends FsOperator with Logger {
 
     require(srcFile.getCanonicalPath != dstFile.getCanonicalPath)
 
-    val shouldCopy = if (overwrite) true; else {
+    val shouldCopy = if (overwrite) true;
+    else {
       if (!dstFile.exists()) true else dstFile.getName != srcFile.getName
     }
 
@@ -102,7 +104,6 @@ object LfsOperator extends FsOperator with Logger {
       if (delSrc) FileUtils.forceDelete(srcFile)
     }
   }
-
 
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
     if (isAnyBank(srcPath, dstPath)) return
@@ -148,8 +149,4 @@ object LfsOperator extends FsOperator with Logger {
     }
   }
 
-
 }
-
-
-

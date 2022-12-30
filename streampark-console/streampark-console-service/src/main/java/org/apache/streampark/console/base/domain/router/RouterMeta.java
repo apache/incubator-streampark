@@ -23,22 +23,19 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- * Vue Router Meta
- *
- */
+/** Vue Router Meta */
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouterMeta implements Serializable {
 
-    private static final long serialVersionUID = 5499925008927195914L;
+  private static final long serialVersionUID = 5499925008927195914L;
 
-    private Boolean closeable;
+  private Boolean closeable;
 
-    private Boolean hidden;
+  private Boolean hidden;
 
-    private Boolean keepAlive;
+  private Boolean keepAlive;
 
-    private String icon;
+  private String icon;
 }

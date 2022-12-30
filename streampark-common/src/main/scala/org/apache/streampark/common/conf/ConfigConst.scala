@@ -22,13 +22,11 @@ object ConfigConst {
 
   /**
    * common const
-   *
    */
 
   val DEFAULT_DATAMASK_STRING = "********"
 
   /**
-   *
    * about parameter...
    */
 
@@ -83,7 +81,7 @@ object ConfigConst {
 
   val KEY_JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf"
 
-  //spark
+  // spark
 
   val KEY_SPARK_USER_ARGS = "spark.user.args"
 
@@ -156,7 +154,6 @@ object ConfigConst {
   val KEY_KAFKA_START_FROM_OFFSET = "offset"
 
   val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
-
 
   val KEY_ALIAS = "alias"
 
@@ -234,6 +231,3 @@ object ConfigConst {
   }
 
 }
-
-
-

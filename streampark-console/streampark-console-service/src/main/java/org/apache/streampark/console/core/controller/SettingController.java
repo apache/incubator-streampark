@@ -39,44 +39,43 @@ import java.util.List;
 @RequestMapping("flink/setting")
 public class SettingController {
 
-    @Autowired
-    private SettingService settingService;
+  @Autowired private SettingService settingService;
 
-    @PostMapping("all")
-    @RequiresPermissions("setting:view")
-    public RestResponse all() {
-        LambdaQueryWrapper<Setting> query = new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
-        List<Setting> setting = settingService.list(query);
-        return RestResponse.success(setting);
+  @PostMapping("all")
+  @RequiresPermissions("setting:view")
+  public RestResponse all() {
+    LambdaQueryWrapper<Setting> query =
+        new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
+    List<Setting> setting = settingService.list(query);
+    return RestResponse.success(setting);
+  }
+
+  @PostMapping("get")
+  public RestResponse get(String key) {
+    Setting setting = settingService.get(key);
+    return RestResponse.success(setting);
+  }
+
+  @PostMapping("weburl")
+  public RestResponse webUrl() {
+    String url = settingService.getStreamParkAddress();
+    return RestResponse.success(url == null ? null : url.trim());
+  }
+
+  @PostMapping("update")
+  @RequiresPermissions("setting:update")
+  public RestResponse update(Setting setting) {
+    boolean updated = settingService.update(setting);
+    return RestResponse.success(updated);
+  }
+
+  @PostMapping("checkHadoop")
+  public RestResponse checkHadoop() {
+    try {
+      HadoopUtils.hdfs().getStatus();
+      return RestResponse.success(true);
+    } catch (Exception e) {
+      return RestResponse.success(false).message(e.getMessage());
     }
-
-    @PostMapping("get")
-    public RestResponse get(String key) {
-        Setting setting = settingService.get(key);
-        return RestResponse.success(setting);
-    }
-
-    @PostMapping("weburl")
-    public RestResponse webUrl() {
-        String url = settingService.getStreamParkAddress();
-        return RestResponse.success(url == null ? null : url.trim());
-    }
-
-    @PostMapping("update")
-    @RequiresPermissions("setting:update")
-    public RestResponse update(Setting setting) {
-        boolean updated = settingService.update(setting);
-        return RestResponse.success(updated);
-    }
-
-    @PostMapping("checkHadoop")
-    public RestResponse checkHadoop() {
-        try {
-            HadoopUtils.hdfs().getStatus();
-            return RestResponse.success(true);
-        } catch (Exception e) {
-            return RestResponse.success(false).message(e.getMessage());
-        }
-    }
-
+  }
 }

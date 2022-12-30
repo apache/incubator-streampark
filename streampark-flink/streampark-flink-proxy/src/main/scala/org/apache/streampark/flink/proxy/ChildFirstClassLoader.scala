@@ -22,6 +22,7 @@ import java.net.{URL, URLClassLoader}
 import java.util
 import java.util.function.Consumer
 import java.util.regex.Pattern
+
 import scala.util.Try
 
 /**
@@ -30,21 +31,21 @@ import scala.util.Try
  *
  * <p>{@link # getResourceAsStream ( String )} uses {@link # getResource ( String )} internally so we don't
  * override that.
- *
  */
 
-class ChildFirstClassLoader(urls: Array[URL],
-                            parent: ClassLoader,
-                            flinkResourcePattern: Pattern,
-                            classLoadingExceptionHandler: Consumer[Throwable]
-                           ) extends URLClassLoader(urls, parent) {
+class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern, classLoadingExceptionHandler: Consumer[Throwable])
+    extends URLClassLoader(urls, parent) {
 
   ClassLoader.registerAsParallelCapable()
 
   def this(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern) {
-    this(urls, parent, flinkResourcePattern, new Consumer[Throwable] {
-      override def accept(t: Throwable): Unit = {}
-    })
+    this(
+      urls,
+      parent,
+      flinkResourcePattern,
+      new Consumer[Throwable] {
+        override def accept(t: Throwable): Unit = {}
+      })
   }
 
   private val FLINK_PATTERN = Pattern.compile("flink-(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
@@ -61,13 +62,14 @@ class ChildFirstClassLoader(urls: Array[URL],
     "ch.qos.logback",
     "org.xml",
     "org.w3c",
-    "org.apache.hadoop"
-  )
+    "org.apache.hadoop")
 
-  @throws[ClassNotFoundException] override def loadClass(name: String, resolve: Boolean): Class[_] = {
+  @throws[ClassNotFoundException]
+  override def loadClass(name: String, resolve: Boolean): Class[_] = {
     try this.synchronized {
-      return this.loadClassWithoutExceptionHandling(name, resolve)
-    } catch {
+        return this.loadClassWithoutExceptionHandling(name, resolve)
+      }
+    catch {
       case e: Throwable =>
         classLoadingExceptionHandler.accept(e)
         throw e
@@ -116,7 +118,8 @@ class ChildFirstClassLoader(urls: Array[URL],
     result
   }
 
-  @throws[IOException] override def getResources(name: String): util.Enumeration[URL] = {
+  @throws[IOException]
+  override def getResources(name: String): util.Enumeration[URL] = {
     // first get resources from URLClassloader
     val result = addResources(new util.ArrayList[URL], findResources(name))
     val parent = getParent
@@ -133,7 +136,8 @@ class ChildFirstClassLoader(urls: Array[URL],
     }
   }
 
-  @throws[ClassNotFoundException] private def loadClassWithoutExceptionHandling(name: String, resolve: Boolean): Class[_] = {
+  @throws[ClassNotFoundException]
+  private def loadClassWithoutExceptionHandling(name: String, resolve: Boolean): Class[_] = {
     // First, check if the class has already been loaded
     super.findLoadedClass(name) match {
       case null =>

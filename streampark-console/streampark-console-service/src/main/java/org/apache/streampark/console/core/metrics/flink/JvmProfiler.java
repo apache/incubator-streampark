@@ -32,20 +32,20 @@ import java.util.Map;
 @Data
 public class JvmProfiler implements Serializable {
 
-    private transient ObjectMapper mapper = new ObjectMapper();
+  private transient ObjectMapper mapper = new ObjectMapper();
 
-    private String metric;
-    private Long id;
-    private String token;
-    private String type;
-    private String profiler;
+  private String metric;
+  private Long id;
+  private String token;
+  private String type;
+  private String profiler;
 
-    @JsonIgnore
-    public Map getMetricsAsMap() throws IOException {
-        if (CommonUtils.notEmpty(metric)) {
-            String content = DeflaterUtils.unzipString(metric);
-            return mapper.readValue(content, Map.class);
-        }
-        return Collections.EMPTY_MAP;
+  @JsonIgnore
+  public Map getMetricsAsMap() throws IOException {
+    if (CommonUtils.notEmpty(metric)) {
+      String content = DeflaterUtils.unzipString(metric);
+      return mapper.readValue(content, Map.class);
     }
+    return Collections.EMPTY_MAP;
+  }
 }

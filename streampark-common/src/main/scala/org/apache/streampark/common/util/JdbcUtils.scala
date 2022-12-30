@@ -16,24 +16,25 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.ConfigConst._
-import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-
 import java.sql.{Connection, ResultSet, Statement}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
+
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+
+import org.apache.streampark.common.conf.ConfigConst._
 
 /**
  *  Based on the hikari connection pool implementation. Support multiple data sources,
  *  note that all modifications and additions are automatically committed transactions.
  */
 object JdbcUtils {
-
 
   private val lockMap: mutable.Map[String, ReentrantLock] = new ConcurrentHashMap[String, ReentrantLock]
 
@@ -43,7 +44,8 @@ object JdbcUtils {
    * Wrap all the fields of a query row of data into a List[Map]
    */
   def select(sql: String, func: ResultSet => Unit = null)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
-    if (Try(sql.isEmpty).getOrElse(false)) List.empty else {
+    if (Try(sql.isEmpty).getOrElse(false)) List.empty
+    else {
       val conn = getConnection(jdbcConfig)
       var stmt: Statement = null
       var result: ResultSet = null
@@ -67,7 +69,8 @@ object JdbcUtils {
         }
         if (array.isEmpty) List.empty else array.toList
       } catch {
-        case ex: Exception => ex.printStackTrace()
+        case ex: Exception =>
+          ex.printStackTrace()
           List.empty
       } finally {
         close(result, stmt, conn)
@@ -101,7 +104,8 @@ object JdbcUtils {
             } else 0
           }).sum + prepStat.executeBatch().sum
         } catch {
-          case ex: Exception => ex.printStackTrace()
+          case ex: Exception =>
+            ex.printStackTrace()
             0
         } finally {
           conn.commit()
@@ -124,7 +128,8 @@ object JdbcUtils {
       statement = conn.createStatement
       statement.executeUpdate(sql)
     } catch {
-      case ex: Exception => ex.printStackTrace()
+      case ex: Exception =>
+        ex.printStackTrace()
         -1
     } finally {
       close(statement, conn)
@@ -143,7 +148,8 @@ object JdbcUtils {
       stmt = createStatement(conn)
       result = stmt.executeQuery(sql)
       val count = result.getMetaData.getColumnCount
-      if (!result.next()) Map.empty else {
+      if (!result.next()) Map.empty
+      else {
         var map = Map[String, Any]()
         for (x <- 1 to count) {
           val key = result.getMetaData.getColumnLabel(x)
@@ -153,7 +159,8 @@ object JdbcUtils {
         map
       }
     } catch {
-      case ex: Exception => ex.printStackTrace()
+      case ex: Exception =>
+        ex.printStackTrace()
         Map.empty
     } finally {
       close(result, stmt, conn)
@@ -177,7 +184,8 @@ object JdbcUtils {
       stmt = conn.createStatement
       stmt.execute(sql)
     } catch {
-      case ex: Exception => ex.printStackTrace()
+      case ex: Exception =>
+        ex.printStackTrace()
         false
     } finally {
       close(stmt, conn)
@@ -220,7 +228,8 @@ object JdbcUtils {
                       case _ =>
                     }
                   case null =>
-                    throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
+                    throw new IllegalArgumentException(
+                      s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
                 }
             }
           })

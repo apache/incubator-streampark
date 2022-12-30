@@ -17,15 +17,15 @@
 
 package org.apache.streampark.flink.packer.docker
 
-import org.apache.streampark.common.fs.LfsOperator
-import org.apache.commons.io.FileUtils
-
 import java.io.File
 import java.nio.file.{Path, Paths}
 
+import org.apache.commons.io.FileUtils
+
+import org.apache.streampark.common.fs.LfsOperator
+
 /**
  * Flink image dockerfile template.
- *
  */
 trait FlinkDockerfileTemplateTrait {
 
@@ -124,6 +124,5 @@ trait FlinkDockerfileTemplateTrait {
     FileUtils.write(output, offerDockerfileContent, "UTF-8")
     output
   }
-
 
 }

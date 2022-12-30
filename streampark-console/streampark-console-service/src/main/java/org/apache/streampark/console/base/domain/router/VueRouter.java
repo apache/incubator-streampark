@@ -25,40 +25,34 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Build Vue Router
- */
+/** Build Vue Router */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VueRouter<T> implements Serializable {
 
-    private static final long serialVersionUID = -3327478146308500708L;
+  private static final long serialVersionUID = -3327478146308500708L;
 
-    @JsonIgnore
-    private String id;
+  @JsonIgnore private String id;
 
-    @JsonIgnore
-    private String parentId;
+  @JsonIgnore private String parentId;
 
-    private String path;
+  private String path;
 
-    private String name;
+  private String name;
 
-    private String component;
+  private String component;
 
-    private String redirect;
+  private String redirect;
 
-    private RouterMeta meta;
+  private RouterMeta meta;
 
-    private List<VueRouter<T>> children;
+  private List<VueRouter<T>> children;
 
-    @JsonIgnore
-    private boolean hasParent = false;
+  @JsonIgnore private boolean hasParent = false;
 
-    @JsonIgnore
-    private boolean hasChildren = false;
+  @JsonIgnore private boolean hasChildren = false;
 
-    public void initChildren() {
-        this.children = new ArrayList<>();
-    }
+  public void initChildren() {
+    this.children = new ArrayList<>();
+  }
 }

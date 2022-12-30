@@ -16,21 +16,22 @@
  */
 package org.apache.streampark.flink.core
 
+import scala.util.{Failure, Try}
+
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
 import org.apache.calcite.sql.parser.SqlParser.Config
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.configuration.ExecutionOptions
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance
+import org.apache.flink.table.api.{SqlDialect, TableConfig}
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.config.TableConfigOptions
-import org.apache.flink.table.api.{SqlDialect, TableConfig}
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
+
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.{ExceptionUtils, Logger}
 import org.apache.streampark.flink.core.SqlCommand._
-
-import scala.util.{Failure, Try}
 
 object FlinkSqlValidator extends Logger {
 
@@ -59,8 +60,7 @@ object FlinkSqlValidator extends Logger {
 
     Map(
       SqlDialect.DEFAULT.name() -> getConfig(SqlDialect.DEFAULT),
-      SqlDialect.HIVE.name() -> getConfig(SqlDialect.HIVE)
-    )
+      SqlDialect.HIVE.name() -> getConfig(SqlDialect.HIVE))
   }
 
   def verifySql(sql: String): FlinkSqlValidationResult = {
@@ -109,8 +109,7 @@ object FlinkSqlValidator extends Logger {
                   errorLine = errorLine,
                   errorColumn = column.toInt,
                   sql = call.originSql,
-                  exception = causedBy.replaceAll(s"at\\sline\\s$line", s"at line $errorLine")
-                )
+                  exception = causedBy.replaceAll(s"at\\sline\\s$line", s"at line $errorLine"))
               } else {
                 return FlinkSqlValidationResult(
                   success = false,
@@ -118,8 +117,7 @@ object FlinkSqlValidator extends Logger {
                   lineStart = call.lineStart,
                   lineEnd = call.lineEnd,
                   sql = call.originSql,
-                  exception = causedBy
-                )
+                  exception = causedBy)
               }
             case _ =>
           }
@@ -134,8 +132,7 @@ object FlinkSqlValidator extends Logger {
         failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
         lineStart = sqlCommands.head.lineStart,
         lineEnd = sqlCommands.last.lineEnd,
-        exception = "No 'INSERT' statement to trigger the execution of the Flink job."
-      )
+        exception = "No 'INSERT' statement to trigger the execution of the Flink job.")
     }
   }
 

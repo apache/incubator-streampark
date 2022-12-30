@@ -31,12 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class TutorialServiceImpl extends ServiceImpl<TutorialMapper, Tutorial> implements TutorialService {
+public class TutorialServiceImpl extends ServiceImpl<TutorialMapper, Tutorial>
+    implements TutorialService {
 
-    @Override
-    public Tutorial getByName(String name) {
-        LambdaQueryWrapper<Tutorial> queryWrapper = new LambdaQueryWrapper<Tutorial>()
-            .eq(Tutorial::getName, name);
-        return this.getOne(queryWrapper);
-    }
+  @Override
+  public Tutorial getByName(String name) {
+    LambdaQueryWrapper<Tutorial> queryWrapper =
+        new LambdaQueryWrapper<Tutorial>().eq(Tutorial::getName, name);
+    return this.getOne(queryWrapper);
+  }
 }

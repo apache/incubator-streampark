@@ -17,5 +17,4 @@
 
 package org.apache.streampark.storage;
 
-public abstract class StorageServiceConfig {
-}
+public abstract class StorageServiceConfig {}

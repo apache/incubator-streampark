@@ -17,11 +17,11 @@
 
 package org.apache.streampark.flink.connector.kafka.sink
 
-import org.apache.streampark.common.conf.ConfigConst
-import org.apache.streampark.common.util.{ConfigUtils, Utils}
-import org.apache.streampark.flink.connector.kafka.bean.KafkaEqualityPartitioner
-import org.apache.streampark.flink.connector.sink.Sink
-import org.apache.streampark.flink.core.scala.StreamingContext
+import java.util.{Optional, Properties}
+
+import scala.annotation.meta.param
+import scala.util.Try
+
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
@@ -30,23 +30,27 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.{DEFAULT_K
 import org.apache.flink.streaming.connectors.kafka.internals.KeyedSerializationSchemaWrapper
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
 
-import java.util.{Optional, Properties}
-import scala.annotation.meta.param
-import scala.util.Try
+import org.apache.streampark.common.conf.ConfigConst
+import org.apache.streampark.common.util.{ConfigUtils, Utils}
+import org.apache.streampark.flink.connector.kafka.bean.KafkaEqualityPartitioner
+import org.apache.streampark.flink.connector.sink.Sink
+import org.apache.streampark.flink.core.scala.StreamingContext
 
 object KafkaSink {
-  def apply(@(transient@param)
-            property: Properties = new Properties(),
-            parallelism: Int = 0,
-            name: String = null,
-            uid: String = null)(implicit ctx: StreamingContext): KafkaSink = new KafkaSink(ctx, property, parallelism, name, uid)
+  def apply(
+      @(transient @param)
+      property: Properties = new Properties(),
+      parallelism: Int = 0,
+      name: String = null,
+      uid: String = null)(implicit ctx: StreamingContext): KafkaSink = new KafkaSink(ctx, property, parallelism, name, uid)
 }
 
-class KafkaSink(@(transient@param) val ctx: StreamingContext,
-                property: Properties = new Properties(),
-                parallelism: Int = 0,
-                name: String = null,
-                uid: String = null) extends Sink {
+class KafkaSink(
+    @(transient @param) val ctx: StreamingContext,
+    property: Properties = new Properties(),
+    parallelism: Int = 0,
+    name: String = null,
+    uid: String = null) extends Sink {
 
   /**
    * for scala
@@ -63,16 +67,18 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T],
-              alias: String = "",
-              topic: String = "",
-              serializer: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
-              partitioner: FlinkKafkaPartitioner[T] = new KafkaEqualityPartitioner[T](ctx.getParallelism)): DataStreamSink[T] = {
+  def sink[T](
+      stream: DataStream[T],
+      alias: String = "",
+      topic: String = "",
+      serializer: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
+      partitioner: FlinkKafkaPartitioner[T] = new KafkaEqualityPartitioner[T](ctx.getParallelism)): DataStreamSink[T] = {
 
     val producer = {
       val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic, alias)
       Utils.copyProperties(property, prop)
       val topicId = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
+
       /**
        * kafkaProducersPoolSize will be used under EXACTLY_ONCE semantics
        */
@@ -103,5 +109,3 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
   }
 
 }
-
-

@@ -21,28 +21,24 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public enum CheckPointType implements Serializable {
-    /**
-     * CHECKPOINT
-     */
-    CHECKPOINT(1),
-    /**
-     * SAVEPOINT
-     */
-    SAVEPOINT(2),
+  /** CHECKPOINT */
+  CHECKPOINT(1),
+  /** SAVEPOINT */
+  SAVEPOINT(2),
 
-    SYNC_SAVEPOINT(3);
+  SYNC_SAVEPOINT(3);
 
-    private final int value;
+  private final int value;
 
-    public int get() {
-        return this.value;
-    }
+  public int get() {
+    return this.value;
+  }
 
-    CheckPointType(int value) {
-        this.value = value;
-    }
+  CheckPointType(int value) {
+    this.value = value;
+  }
 
-    public static CheckPointType of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-    }
+  public static CheckPointType of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+  }
 }

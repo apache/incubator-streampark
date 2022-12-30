@@ -23,9 +23,9 @@ import lombok.Data;
 
 @Data
 public class OssConfig extends StorageServiceConfig {
-    private String accessKeyId;
-    private String accessKeySecret;
-    private String endpoint;
-    private String bucket;
-    private String baseUri;
+  private String accessKeyId;
+  private String accessKeySecret;
+  private String endpoint;
+  private String bucket;
+  private String baseUri;
 }

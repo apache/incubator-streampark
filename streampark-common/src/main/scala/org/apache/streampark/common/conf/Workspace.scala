@@ -16,11 +16,10 @@
  */
 package org.apache.streampark.common.conf
 
-import org.apache.streampark.common.enums.StorageType
-import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
-
 import java.net.URI
 
+import org.apache.streampark.common.enums.StorageType
+import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
 
 object Workspace {
 
@@ -29,7 +28,6 @@ object Workspace {
   lazy val local: Workspace = Workspace.of(StorageType.LFS)
 
   lazy val remote: Workspace = Workspace.of(StorageType.HDFS)
-
 
   private[this] lazy val localWorkspace = local.WORKSPACE
 
@@ -131,4 +129,3 @@ case class Workspace(storageType: StorageType) {
   lazy val APP_JARS = s"$WORKSPACE/jars"
 
 }
-

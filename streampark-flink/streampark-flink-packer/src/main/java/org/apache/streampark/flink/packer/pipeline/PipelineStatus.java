@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
+ *
+ *
  * <pre>
  * Status of building pipeline instance.
  * state machine:
@@ -30,39 +32,37 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * │                      └─► failure  │
  * └───────────────────────────────────┘
  * </pre>
- *
  */
 @SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
 public enum PipelineStatus {
+  unknown(0),
+  pending(1),
+  running(2),
+  success(3),
+  failure(4);
 
-    unknown(0),
-    pending(1),
-    running(2),
-    success(3),
-    failure(4);
+  private final Integer code;
 
-    private final Integer code;
+  PipelineStatus(Integer code) {
+    this.code = code;
+  }
 
-    PipelineStatus(Integer code) {
-        this.code = code;
+  @JsonCreator
+  public static PipelineStatus of(Integer code) {
+    for (PipelineStatus status : PipelineStatus.values()) {
+      if (status.getCode().equals(code)) {
+        return status;
+      }
     }
+    return unknown;
+  }
 
-    @JsonCreator
-    public static PipelineStatus of(Integer code) {
-        for (PipelineStatus status : PipelineStatus.values()) {
-            if (status.getCode().equals(code)) {
-                return status;
-            }
-        }
-        return unknown;
-    }
+  @JsonValue
+  public Integer getCode() {
+    return code;
+  }
 
-    @JsonValue
-    public Integer getCode() {
-        return code;
-    }
-
-    public boolean isUnknown() {
-        return this == unknown;
-    }
+  public boolean isUnknown() {
+    return this == unknown;
+  }
 }

@@ -16,25 +16,27 @@
  */
 package org.apache.streampark.spark.connector.sink
 
-import org.apache.streampark.common.util.Logger
+import java.util.Properties
+
+import scala.annotation.meta.getter
+import scala.collection.Map
+import scala.util.Try
+
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 import org.apache.spark.streaming.dstream.DStream
 
-import java.util.Properties
-import scala.annotation.meta.getter
-import scala.collection.Map
-import scala.util.Try
+import org.apache.streampark.common.util.Logger
 
 /**
  * Base output trait
  */
 trait Sink[T] extends Serializable with Logger {
 
-  @(transient@getter)
+  @(transient @getter)
   val sc: SparkContext
-  @(transient@getter)
+  @(transient @getter)
   lazy val sparkConf = sc.getConf
 
   val prefix: String

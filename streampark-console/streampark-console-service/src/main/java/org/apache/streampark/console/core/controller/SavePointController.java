@@ -40,30 +40,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("flink/savepoint")
 public class SavePointController {
 
-    @Autowired
-    private ApplicationService applicationService;
+  @Autowired private ApplicationService applicationService;
 
-    @Autowired
-    private SavePointService savePointService;
+  @Autowired private SavePointService savePointService;
 
-    @PostMapping("latest")
-    public RestResponse latest(Long appId) {
-        SavePoint savePoint = savePointService.getLatest(appId);
-        return RestResponse.success(savePoint);
-    }
+  @PostMapping("latest")
+  public RestResponse latest(Long appId) {
+    SavePoint savePoint = savePointService.getLatest(appId);
+    return RestResponse.success(savePoint);
+  }
 
-    @PostMapping("history")
-    public RestResponse history(SavePoint savePoint, RestRequest request) {
-        IPage<SavePoint> page = savePointService.page(savePoint, request);
-        return RestResponse.success(page);
-    }
+  @PostMapping("history")
+  public RestResponse history(SavePoint savePoint, RestRequest request) {
+    IPage<SavePoint> page = savePointService.page(savePoint, request);
+    return RestResponse.success(page);
+  }
 
-    @PostMapping("delete")
-    @RequiresPermissions("savepoint:delete")
-    public RestResponse delete(Long id) throws InternalException {
-        SavePoint savePoint = savePointService.getById(id);
-        Application application = applicationService.getById(savePoint.getAppId());
-        Boolean deleted = savePointService.delete(id, application);
-        return RestResponse.success(deleted);
-    }
+  @PostMapping("delete")
+  @RequiresPermissions("savepoint:delete")
+  public RestResponse delete(Long id) throws InternalException {
+    SavePoint savePoint = savePointService.getById(id);
+    Application application = applicationService.getById(savePoint.getAppId());
+    Boolean deleted = savePointService.delete(id, application);
+    return RestResponse.success(deleted);
+  }
 }

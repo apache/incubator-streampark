@@ -17,26 +17,27 @@
 
 package org.apache.streampark.flink.connector.clickhouse.conf
 
-import org.apache.streampark.common.conf.ConfigOption
-import org.apache.streampark.common.util.ConfigUtils
+import java.util.Properties
+
+import scala.collection.JavaConverters._
+
 import org.asynchttpclient.config.AsyncHttpClientConfigDefaults
 
-import java.util.Properties
-import scala.collection.JavaConverters._
+import org.apache.streampark.common.conf.ConfigOption
+import org.apache.streampark.common.util.ConfigUtils
 
 object ClickHouseSinkConfigOption {
 
   val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
 
   /**
-   *
    * @param properties
    * @return
    */
-  def apply(prefixStr: String = CLICKHOUSE_SINK_PREFIX, properties: Properties = new Properties): ClickHouseSinkConfigOption = new ClickHouseSinkConfigOption(prefixStr, properties)
+  def apply(prefixStr: String = CLICKHOUSE_SINK_PREFIX, properties: Properties = new Properties): ClickHouseSinkConfigOption =
+    new ClickHouseSinkConfigOption(prefixStr, properties)
 
 }
-
 
 class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) extends Serializable {
 
@@ -56,83 +57,70 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
         .filter(_.nonEmpty)
         .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
         .toList
-    }
-  )
+    })
 
   val user: ConfigOption[String] = ConfigOption(
     key = "user",
     required = true,
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val password: ConfigOption[String] = ConfigOption(
     key = "password",
     required = false,
     defaultValue = "",
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val database: ConfigOption[String] = ConfigOption(
     key = "database",
     required = true,
     defaultValue = "default",
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val requestTimeout: ConfigOption[Int] = ConfigOption(
     key = "requestTimeout",
     required = false,
     defaultValue = AsyncHttpClientConfigDefaults.defaultRequestTimeout,
-    classType = classOf[Int]
-  )
-
+    classType = classOf[Int])
 
   val connectTimeout: ConfigOption[Int] = ConfigOption(
     key = "connectTimeout",
     required = false,
     defaultValue = AsyncHttpClientConfigDefaults.defaultConnectTimeout(),
-    classType = classOf[Long]
-  )
+    classType = classOf[Long])
 
   val maxRequestRetry: ConfigOption[Int] = ConfigOption(
     key = "maxRequestRetry",
     required = false,
     defaultValue = AsyncHttpClientConfigDefaults.defaultMaxRequestRetry(),
-    classType = classOf[Long]
-  )
+    classType = classOf[Long])
 
   val maxConnections: ConfigOption[Int] = ConfigOption(
     key = "maxConnections",
     required = false,
     defaultValue = AsyncHttpClientConfigDefaults.defaultMaxConnections(),
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val failoverTable: ConfigOption[String] = ConfigOption(
     key = "failover.table",
     required = false,
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val jdbcUrl: ConfigOption[String] = ConfigOption(
     key = "jdbcUrl",
     required = false,
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val driverClassName: ConfigOption[String] = ConfigOption(
     key = "driverClassName",
     required = false,
     defaultValue = null,
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val batchSize: ConfigOption[Int] = ConfigOption(
     key = "batchSize",
     required = false,
     defaultValue = 1,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val flushInterval: ConfigOption[Long] = ConfigOption(
     key = "flushInterval",
@@ -141,8 +129,7 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     classType = classOf[Long],
     handle = k => {
       properties.remove(k).toString.toLong
-    }
-  )
+    })
 
   def getInternalConfig(): Properties = {
     ConfigUtils.getConf(prop.asScala.asJava, prefix)("")

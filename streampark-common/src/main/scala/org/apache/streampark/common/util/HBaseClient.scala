@@ -16,15 +16,16 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.security.UserGroupInformation
-
 import java.util.Properties
+
 import scala.collection.JavaConversions._
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
+import org.apache.hadoop.security.UserGroupInformation
+
+import org.apache.streampark.common.conf.ConfigConst._
 
 class HBaseClient(func: () => Connection) extends Serializable {
   lazy val connection: Connection = func()

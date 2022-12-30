@@ -17,11 +17,12 @@
 
 package org.apache.streampark.spark.core
 
-import org.apache.streampark.common.conf.ConfigConst._
+import scala.annotation.meta.getter
+
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-import scala.annotation.meta.getter
+import org.apache.streampark.common.conf.ConfigConst._
 
 /**
  * <b><code>SparkBatch</code></b>
@@ -31,7 +32,7 @@ import scala.annotation.meta.getter
  */
 trait SparkStreaming extends Spark {
 
-  @(transient@getter)
+  @(transient @getter)
   protected lazy val context: StreamingContext = {
 
     /**
@@ -78,4 +79,3 @@ trait SparkStreaming extends Spark {
   override def destroy(): Unit = {}
 
 }
-

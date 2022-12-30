@@ -16,14 +16,14 @@
  */
 package org.apache.streampark.common.util
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder
-
 import java.util.concurrent.{ExecutorService, ThreadFactory, TimeUnit}
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 
 object ThreadUtils {
 
-  def threadFactory(threadName: String, isDaemon: Boolean): ThreadFactory = new ThreadFactoryBuilder().setNameFormat(threadName + "-%d").setDaemon(isDaemon).build
+  def threadFactory(threadName: String, isDaemon: Boolean): ThreadFactory =
+    new ThreadFactoryBuilder().setNameFormat(threadName + "-%d").setDaemon(isDaemon).build
 
   def threadFactory(threadName: String): ThreadFactory = threadFactory(threadName, isDaemon = true)
 

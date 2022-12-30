@@ -24,25 +24,24 @@ import java.util.concurrent.TimeUnit;
 
 class RefreshCacheTest {
 
-    Cache<String, String> caffeine = null;
+  Cache<String, String> caffeine = null;
 
-    @Test
-    void cache() throws Exception {
-        if (caffeine == null) {
-            caffeine = Caffeine.newBuilder()
-                .refreshAfterWrite(50, TimeUnit.MILLISECONDS)
-                .build(this::refresh);
-        }
-        caffeine.put("config", "hadoop");
-        int count = 4;
-        while (count > 0) {
-            System.out.println(caffeine.getIfPresent("config"));
-            Thread.sleep(100L);
-            --count;
-        }
+  @Test
+  void cache() throws Exception {
+    if (caffeine == null) {
+      caffeine =
+          Caffeine.newBuilder().refreshAfterWrite(50, TimeUnit.MILLISECONDS).build(this::refresh);
     }
+    caffeine.put("config", "hadoop");
+    int count = 4;
+    while (count > 0) {
+      System.out.println(caffeine.getIfPresent("config"));
+      Thread.sleep(100L);
+      --count;
+    }
+  }
 
-    public String refresh(String value) {
-        return UUID.randomUUID() + "@" + value;
-    }
+  public String refresh(String value) {
+    return UUID.randomUUID() + "@" + value;
+  }
 }

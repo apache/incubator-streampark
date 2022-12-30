@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 /**
  * Result of a BuildPipeline instance.
- *
  */
 sealed trait BuildResult {
 
@@ -38,13 +37,10 @@ sealed trait FlinkBuildResult extends BuildResult {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class ErrorResult(pass: Boolean = false) extends BuildResult {
-}
-
+case class ErrorResult(pass: Boolean = false) extends BuildResult {}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class SimpleBuildResponse(workspacePath: String = null,
-                               pass: Boolean = true) extends FlinkBuildResult {
+case class SimpleBuildResponse(workspacePath: String = null, pass: Boolean = true) extends FlinkBuildResult {
   override def toString: String =
     s"""
        |{
@@ -54,11 +50,8 @@ case class SimpleBuildResponse(workspacePath: String = null,
        |""".stripMargin
 }
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class ShadedBuildResponse(workspacePath: String,
-                               shadedJarPath: String,
-                               pass: Boolean = true) extends FlinkBuildResult {
+case class ShadedBuildResponse(workspacePath: String, shadedJarPath: String, pass: Boolean = true) extends FlinkBuildResult {
   override def toString: String =
     s"""
        |{
@@ -71,11 +64,12 @@ case class ShadedBuildResponse(workspacePath: String,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class DockerImageBuildResponse(workspacePath: String,
-                                    flinkImageTag: String,
-                                    podTemplatePaths: Map[String, String],
-                                    dockerInnerMainJarPath: String,
-                                    pass: Boolean = true) extends FlinkBuildResult {
+case class DockerImageBuildResponse(
+    workspacePath: String,
+    flinkImageTag: String,
+    podTemplatePaths: Map[String, String],
+    dockerInnerMainJarPath: String,
+    pass: Boolean = true) extends FlinkBuildResult {
   override def toString: String =
     s"""
        |{
@@ -87,8 +81,3 @@ case class DockerImageBuildResponse(workspacePath: String,
        |}
        |""".stripMargin
 }
-
-
-
-
-

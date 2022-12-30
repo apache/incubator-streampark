@@ -19,7 +19,6 @@ package org.apache.streampark.common.util
 
 import java.util
 
-
 object AssertUtils {
 
   /**

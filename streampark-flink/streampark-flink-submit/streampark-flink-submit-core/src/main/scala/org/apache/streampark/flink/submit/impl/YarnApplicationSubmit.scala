@@ -17,12 +17,12 @@
 
 package org.apache.streampark.flink.submit.impl
 
-import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.enums.DevelopmentMode
-import org.apache.streampark.common.util.{HdfsUtils, Utils}
-import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
-import org.apache.streampark.flink.submit.`trait`.YarnSubmitTrait
-import org.apache.streampark.flink.submit.bean._
+import java.util.Collections
+import java.util.concurrent.Callable
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
+
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
@@ -33,10 +33,12 @@ import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
-import java.util.Collections
-import java.util.concurrent.Callable
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
+import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.util.{HdfsUtils, Utils}
+import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
+import org.apache.streampark.flink.submit.`trait`.YarnSubmitTrait
+import org.apache.streampark.flink.submit.bean._
 
 /**
  * yarn application mode submit
@@ -53,7 +55,8 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       logDebug(s"kerberos Security is Enabled...")
       val useTicketCache = flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
       if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-        throw new RuntimeException(s"Hadoop security with Kerberos is enabled but the login user ${currentUser} does not have Kerberos credentials or delegation tokens!")
+        throw new RuntimeException(
+          s"Hadoop security with Kerberos is enabled but the login user ${currentUser} does not have Kerberos credentials or delegation tokens!")
       }
     }
     val providedLibs = {
@@ -61,8 +64,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
         submitRequest.hdfsWorkspace.flinkLib,
         submitRequest.hdfsWorkspace.flinkPlugins,
         submitRequest.hdfsWorkspace.appJars,
-        submitRequest.hdfsWorkspace.appPlugins
-      )
+        submitRequest.hdfsWorkspace.appPlugins)
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
           val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
@@ -84,15 +86,15 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
     }
 
     flinkConfig
-      //yarn.provided.lib.dirs
+      // yarn.provided.lib.dirs
       .safeSet(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
-      //flinkDistJar
+      // flinkDistJar
       .safeSet(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
-      //pipeline.jars
+      // pipeline.jars
       .safeSet(PipelineOptions.JARS, Collections.singletonList(submitRequest.buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath))
-      //yarn application name
+      // yarn application name
       .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
-      //yarn application Type
+      // yarn application Type
       .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
 
     logInfo(

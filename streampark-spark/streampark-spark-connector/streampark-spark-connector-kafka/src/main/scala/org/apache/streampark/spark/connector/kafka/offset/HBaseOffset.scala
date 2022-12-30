@@ -17,17 +17,19 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
-import org.apache.streampark.common.util.HBaseClient
+import java.util
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable
+
+import org.apache.hadoop.hbase.{CellUtil, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.hadoop.hbase.client.{Delete, Put, Scan, Table}
 import org.apache.hadoop.hbase.filter._
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase.{CellUtil, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
 
-import java.util
-import scala.collection.JavaConversions._
-import scala.collection.mutable
+import org.apache.streampark.common.util.HBaseClient
 
 /**
  * HBase Offset Manager
@@ -96,7 +98,8 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
         val topicPartition = new TopicPartition(topic, partition)
         val finalOffset = earliestOffsets.get(topicPartition) match {
           case Some(left) if left > offset =>
-            logWarn(s"storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
+            logWarn(
+              s"storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
             left
           case _ => offset
         }
@@ -116,11 +119,11 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   /**
-    * update offset
-    *
-    * @param groupId
-    * @param offsetInfos
-    */
+   * update offset
+   *
+   * @param groupId
+   * @param offsetInfos
+   */
   override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
     val puts = offsetInfos.map {
       case (tp, offset) =>
@@ -135,11 +138,11 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   /**
-    * delete offset
-    *
-    * @param groupId
-    * @param topics
-    */
+   * delete offset
+   *
+   * @param groupId
+   * @param topics
+   */
   override def delete(groupId: String, topics: Set[String]): Unit = {
 
     val filterList = new FilterList(FilterList.Operator.MUST_PASS_ONE)

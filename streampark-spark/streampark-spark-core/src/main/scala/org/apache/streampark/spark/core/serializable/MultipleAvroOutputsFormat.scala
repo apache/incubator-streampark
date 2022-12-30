@@ -26,11 +26,9 @@ import org.apache.hadoop.mapreduce.TaskInputOutputContext
 object MultipleAvroOutputsFormat {
   // This seems to be an unfortunate limitation of type inference of lambda defaults within constructor params.
   // If it would work I would just inline this function
-  def amoMaker[T](io: TaskInputOutputContext[_, _, AvroKey[T], NullWritable]):
-  MultipleOutputer[AvroKey[T], NullWritable] = new AvroMultipleOutputs(io)
+  def amoMaker[T](io: TaskInputOutputContext[_, _, AvroKey[T], NullWritable]): MultipleOutputer[AvroKey[T], NullWritable] = new AvroMultipleOutputs(io)
 }
 
 class MultipleAvroOutputsFormat[T <: GenericContainer] extends MultipleOutputsFormat(
-  new AvroKeyOutputFormat[T],
-  (io: TaskInputOutputContext[_, _, AvroKey[T], NullWritable]) => MultipleAvroOutputsFormat.amoMaker(io)) {
-}
+      new AvroKeyOutputFormat[T],
+      (io: TaskInputOutputContext[_, _, AvroKey[T], NullWritable]) => MultipleAvroOutputsFormat.amoMaker(io)) {}

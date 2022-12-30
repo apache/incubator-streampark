@@ -30,30 +30,29 @@ import java.util.Map;
 
 public interface ProjectService extends IService<Project> {
 
-    RestResponse create(Project project);
+  RestResponse create(Project project);
 
-    boolean update(Project projectParam);
+  boolean update(Project projectParam);
 
-    boolean delete(Long id);
+  boolean delete(Long id);
 
-    IPage<Project> page(Project project, RestRequest restRequest);
+  IPage<Project> page(Project project, RestRequest restRequest);
 
-    Boolean existsByTeamId(Long teamId);
+  Boolean existsByTeamId(Long teamId);
 
-    void build(Long id) throws Exception;
+  void build(Long id) throws Exception;
 
-    RestResponse getBuildLog(Long id, Long startOffset);
+  RestResponse getBuildLog(Long id, Long startOffset);
 
-    List<String> modules(Long id);
+  List<String> modules(Long id);
 
-    List<String> jars(Project project);
+  List<String> jars(Project project);
 
-    List<Map<String, Object>> listConf(Project project);
+  List<Map<String, Object>> listConf(Project project);
 
-    String getAppConfPath(Long id, String module);
+  String getAppConfPath(Long id, String module);
 
-    List<Application> getApplications(Project project);
+  List<Application> getApplications(Project project);
 
-    boolean checkExists(Project project);
-
+  boolean checkExists(Project project);
 }

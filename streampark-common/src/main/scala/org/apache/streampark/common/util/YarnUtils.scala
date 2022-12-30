@@ -16,12 +16,21 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
+import java.net.InetAddress
+import java.security.PrivilegedExceptionAction
+import java.util
+import java.util.{HashMap => JavaHashMap, List => JavaList}
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
+import scala.util.control.Breaks.{break, breakable}
+
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.fs.CommonConfigurationKeys
 import org.apache.hadoop.net.NetUtils
-import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.api.records._
+import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.conf.{HAUtil, YarnConfiguration}
 import org.apache.hadoop.yarn.util.{ConverterUtils, RMHAUtils}
 import org.apache.http.client.config.RequestConfig
@@ -29,14 +38,7 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.impl.client.HttpClients
 
-import java.net.InetAddress
-import java.security.PrivilegedExceptionAction
-import java.util
-import java.util.{HashMap => JavaHashMap, List => JavaList}
-import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
-import scala.util.control.Breaks.{break, breakable}
-import scala.util.{Failure, Success, Try}
+import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
 
 object YarnUtils extends Logger {
 
@@ -56,18 +58,19 @@ object YarnUtils extends Logger {
   }
 
   /**
-   *
    * @param appName
    * @return
    */
   def getAppId(appName: String): JavaList[ApplicationId] = {
     val appStates = util.EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
-    val appIds = try {
-      HadoopUtils.yarnClient.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)
-    } catch {
-      case e: Exception => e.printStackTrace()
-        ArrayBuffer.empty[ApplicationId]
-    }
+    val appIds =
+      try {
+        HadoopUtils.yarnClient.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)
+      } catch {
+        case e: Exception =>
+          e.printStackTrace()
+          ArrayBuffer.empty[ApplicationId]
+      }
     appIds.toList
   }
 
@@ -79,13 +82,15 @@ object YarnUtils extends Logger {
    */
   def getState(appId: String): YarnApplicationState = {
     val applicationId = ConverterUtils.toApplicationId(appId)
-    val state = try {
-      val applicationReport = HadoopUtils.yarnClient.getApplicationReport(applicationId)
-      applicationReport.getYarnApplicationState
-    } catch {
-      case e: Exception => e.printStackTrace()
-        null
-    }
+    val state =
+      try {
+        val applicationReport = HadoopUtils.yarnClient.getApplicationReport(applicationId)
+        applicationReport.getYarnApplicationState
+      } catch {
+        case e: Exception =>
+          e.printStackTrace()
+          null
+      }
     state
   }
 
@@ -129,7 +134,8 @@ object YarnUtils extends Logger {
         rmHttpURL = Option(conf.get("yarn.web-proxy.address", null)) match {
           case Some(proxy) => s"$protocol$proxy"
           case _ =>
-            val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
+            val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix
+            else {
               val yarnConf = new YarnConfiguration(conf)
               val activeRMId = {
                 Option(RMHAUtils.findActiveRMHAId(yarnConf)) match {
@@ -154,8 +160,7 @@ object YarnUtils extends Logger {
                     var rmId: String = null
                     val rpcTimeoutForChecks = yarnConf.getInt(
                       CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
-                      CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT
-                    )
+                      CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT)
                     breakable(idUrlMap.foreach(x => {
                       // test yarn url
                       val activeUrl = httpTestYarnRMUrl(x._1, rpcTimeoutForChecks)
@@ -171,7 +176,9 @@ object YarnUtils extends Logger {
               logInfo(s"current activeRMHAId: $activeRMId")
               val appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId)
               val hostnameActiveRMKey = HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId)
-              if (null == HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) && null != HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf)) {
+              if (null == HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) && null != HAUtil.getConfValueForRMInstance(
+                  hostnameActiveRMKey,
+                  yarnConf)) {
                 logInfo(s"Find rm web address by : $hostnameActiveRMKey")
                 hostnameActiveRMKey
               } else {
@@ -224,7 +231,6 @@ object YarnUtils extends Logger {
   def getYarnAppTrackingUrl(applicationId: ApplicationId): String = HadoopUtils.yarnClient.getApplicationReport(applicationId).getTrackingUrl
 
   /**
-   *
    * @param url url
    * @return
    */
@@ -255,7 +261,8 @@ object YarnUtils extends Logger {
       }
     }
 
-    if (url.startsWith("http://") || url.startsWith("https://")) request(url) else {
+    if (url.startsWith("http://") || url.startsWith("https://")) request(url)
+    else {
       request(s"${getRMWebAppURL()}/$url")
     }
   }

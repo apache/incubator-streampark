@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.connector.redis.conf
 
-
 import java.util.Properties
 
 class RedisConfig(parameters: Properties) extends Serializable {
@@ -30,9 +29,11 @@ class RedisConfig(parameters: Properties) extends Serializable {
 
   val port: Int = sinkOption.port.get()
 
-  val sentinels: Set[String] = if (connectType.equals(sinkOption.DEFAULT_CONNECT_TYPE)) Set() else {
+  val sentinels: Set[String] = if (connectType.equals(sinkOption.DEFAULT_CONNECT_TYPE)) Set()
+  else {
     host.split(sinkOption.SIGN_COMMA).map(x => {
-      if (x.contains(sinkOption.SIGN_COLON)) x; else {
+      if (x.contains(sinkOption.SIGN_COLON)) x;
+      else {
         throw new IllegalArgumentException(s"redis sentinel host invalid {$x} must match host:port ")
       }
     }).toSet

@@ -17,20 +17,22 @@
 
 package org.apache.streampark.flink.connector.redis.internal
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.redis.bean.{RedisContainer, RedisMapper}
+import java.io.IOException
+
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
-import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase
 import org.apache.flink.streaming.connectors.redis.{RedisSink => BahirRedisSink}
+import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase
 
-import java.io.IOException
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.redis.bean.{RedisContainer, RedisMapper}
 
 class RedisSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[T], ttl: Int) extends BahirRedisSink[T](jedisConfig, mapper) with Logger {
 
   private[this] var redisContainer: RedisContainer = _
 
-  @throws[Exception] override def open(parameters: Configuration): Unit = {
+  @throws[Exception]
+  override def open(parameters: Configuration): Unit = {
     redisContainer = RedisContainer.getContainer(jedisConfig)
   }
 
@@ -40,6 +42,7 @@ class RedisSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMappe
     redisContainer.expire(key, ttl)
   }
 
-  @throws[IOException] override def close(): Unit = if (redisContainer != null) redisContainer.close()
+  @throws[IOException]
+  override def close(): Unit = if (redisContainer != null) redisContainer.close()
 
 }

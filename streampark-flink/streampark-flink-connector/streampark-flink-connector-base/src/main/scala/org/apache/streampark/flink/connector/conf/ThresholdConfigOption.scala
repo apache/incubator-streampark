@@ -17,11 +17,11 @@
 
 package org.apache.streampark.flink.connector.conf
 
+import java.util.Properties
+
 import org.apache.streampark.common.conf.ConfigOption
 import org.apache.streampark.flink.connector.conf
 import org.apache.streampark.flink.connector.conf.FailoverStorageType.FailoverStorageType
-
-import java.util.Properties
 
 object ThresholdConfigOption {
   def apply(prefixStr: String, properties: Properties = new Properties): ThresholdConfigOption = new ThresholdConfigOption(prefixStr, properties)
@@ -37,43 +37,37 @@ class ThresholdConfigOption(prefixStr: String, properties: Properties) {
     key = "threshold.bufferSize",
     required = false,
     defaultValue = 1000,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val queueCapacity: ConfigOption[Int] = ConfigOption(
     key = "threshold.queueCapacity",
     required = false,
     defaultValue = 10000,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val delayTime: ConfigOption[Long] = ConfigOption(
     key = "threshold.delayTime",
     required = false,
     defaultValue = 1000L,
-    classType = classOf[Long]
-  )
+    classType = classOf[Long])
 
   val timeout: ConfigOption[Int] = ConfigOption(
     key = "threshold.requestTimeout",
     required = false,
     defaultValue = 2000,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val numWriters: ConfigOption[Int] = ConfigOption(
     key = "threshold.numWriters",
     required = false,
     defaultValue = Runtime.getRuntime.availableProcessors(),
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val maxRetries: ConfigOption[Int] = ConfigOption(
     key = "threshold.retries",
     required = false,
     defaultValue = 3,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val storageType: ConfigOption[conf.FailoverStorageType.Value] = ConfigOption(
     key = "failover.storage",
@@ -82,17 +76,12 @@ class ThresholdConfigOption(prefixStr: String, properties: Properties) {
     defaultValue = FailoverStorageType.NONE,
     handle = k => {
       FailoverStorageType.get(properties.getProperty(k))
-    }
-  )
-
+    })
 
   val failoverTable: ConfigOption[String] = ConfigOption(
     key = "failover.table",
     required = false,
     defaultValue = "",
-    classType = classOf[String]
-  )
-
+    classType = classOf[String])
 
 }
-

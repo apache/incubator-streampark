@@ -23,18 +23,17 @@ import com.github.dockerjava.core.command.PushImageResultCallback;
 
 public class HackPushImageResultCallback extends PushImageResultCallback {
 
-    private final PushImageCallbackListener listener;
+  private final PushImageCallbackListener listener;
 
-    public HackPushImageResultCallback(PushImageCallbackListener listener) {
-        this.listener = listener;
+  public HackPushImageResultCallback(PushImageCallbackListener listener) {
+    this.listener = listener;
+  }
+
+  @Override
+  public void onNext(PushResponseItem item) {
+    super.onNext(item);
+    if (item.getStatus() != null && item.getId() != null) {
+      listener.watchPushProcess(item);
     }
-
-    @Override
-    public void onNext(PushResponseItem item) {
-        super.onNext(item);
-        if (item.getStatus() != null && item.getId() != null) {
-            listener.watchPushProcess(item);
-        }
-    }
-
+  }
 }

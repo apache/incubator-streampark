@@ -32,68 +32,76 @@ import java.util.TimeZone;
 
 @Data
 public class AlertTemplate implements Serializable {
-    private String title;
-    private String subject;
-    private String jobName;
-    private String status;
-    private Integer type;
-    private String startTime;
-    private String endTime;
-    private String duration;
-    private String link;
-    private String cpFailureRateInterval;
-    private Integer cpMaxFailureInterval;
-    private Boolean restart;
-    private Integer restartIndex;
-    private Integer totalRestart;
-    private boolean atAll = false;
+  private String title;
+  private String subject;
+  private String jobName;
+  private String status;
+  private Integer type;
+  private String startTime;
+  private String endTime;
+  private String duration;
+  private String link;
+  private String cpFailureRateInterval;
+  private Integer cpMaxFailureInterval;
+  private Boolean restart;
+  private Integer restartIndex;
+  private Integer totalRestart;
+  private boolean atAll = false;
 
-    private static AlertTemplate of(Application application) {
-        long duration;
-        if (application.getEndTime() == null) {
-            duration = System.currentTimeMillis() - application.getStartTime().getTime();
-        } else {
-            duration = application.getEndTime().getTime() - application.getStartTime().getTime();
-        }
-        AlertTemplate template = new AlertTemplate();
-        template.setJobName(application.getJobName());
+  private static AlertTemplate of(Application application) {
+    long duration;
+    if (application.getEndTime() == null) {
+      duration = System.currentTimeMillis() - application.getStartTime().getTime();
+    } else {
+      duration = application.getEndTime().getTime() - application.getStartTime().getTime();
+    }
+    AlertTemplate template = new AlertTemplate();
+    template.setJobName(application.getJobName());
 
-        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-            String format = "%s/proxy/%s/";
-            String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
-            template.setLink(url);
-        } else {
-            template.setLink(null);
-        }
-
-        template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        template.setDuration(DateUtils.toDuration(duration));
-        boolean needRestart = application.isNeedRestartOnFailed() && application.getRestartCount() > 0;
-        template.setRestart(needRestart);
-        if (needRestart) {
-            template.setRestartIndex(application.getRestartCount());
-            template.setTotalRestart(application.getRestartSize());
-        }
-        return template;
+    if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+      String format = "%s/proxy/%s/";
+      String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
+      template.setLink(url);
+    } else {
+      template.setLink(null);
     }
 
-    public static AlertTemplate of(Application application, FlinkAppState appState) {
-        AlertTemplate template = of(application);
-        template.setType(1);
-        template.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
-        template.setSubject(String.format("StreamPark Alert: %s %s", template.getJobName(), appState));
-        template.setStatus(appState.name());
-        return template;
+    template.setStartTime(
+        DateUtils.format(
+            application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+    template.setEndTime(
+        DateUtils.format(
+            application.getEndTime() == null ? new Date() : application.getEndTime(),
+            DateUtils.fullFormat(),
+            TimeZone.getDefault()));
+    template.setDuration(DateUtils.toDuration(duration));
+    boolean needRestart = application.isNeedRestartOnFailed() && application.getRestartCount() > 0;
+    template.setRestart(needRestart);
+    if (needRestart) {
+      template.setRestartIndex(application.getRestartCount());
+      template.setTotalRestart(application.getRestartSize());
     }
+    return template;
+  }
 
-    public static AlertTemplate of(Application application, CheckPointStatus checkPointStatus) {
-        AlertTemplate template = of(application);
-        template.setType(2);
-        template.setCpFailureRateInterval(DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
-        template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
-        template.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
-        template.setSubject(String.format("StreamPark Alert: %s, checkPoint is Failed", template.getJobName()));
-        return template;
-    }
+  public static AlertTemplate of(Application application, FlinkAppState appState) {
+    AlertTemplate template = of(application);
+    template.setType(1);
+    template.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
+    template.setSubject(String.format("StreamPark Alert: %s %s", template.getJobName(), appState));
+    template.setStatus(appState.name());
+    return template;
+  }
+
+  public static AlertTemplate of(Application application, CheckPointStatus checkPointStatus) {
+    AlertTemplate template = of(application);
+    template.setType(2);
+    template.setCpFailureRateInterval(
+        DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
+    template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
+    template.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
+    template.setSubject(
+        String.format("StreamPark Alert: %s, checkPoint is Failed", template.getJobName()));
+    return template;
+  }
 }

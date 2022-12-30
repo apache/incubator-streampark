@@ -20,36 +20,33 @@ package org.apache.streampark.console.core.enums;
 import java.io.Serializable;
 import java.util.Arrays;
 
-/**
- * configFile Type enum
- */
+/** configFile Type enum */
 public enum ConfigFileType implements Serializable {
+  YAML(1, "yaml"),
 
-    YAML(1, "yaml"),
+  PROPERTIES(2, "prop"),
 
-    PROPERTIES(2, "prop"),
+  HOCON(3, "conf"),
 
-    HOCON(3, "conf"),
+  UNKNOWN(0, null);
 
-    UNKNOWN(0, null);
+  private final int value;
+  private final String typeName;
 
-    private final int value;
-    private final String typeName;
+  ConfigFileType(int value, String name) {
+    this.value = value;
+    this.typeName = name;
+  }
 
-    ConfigFileType(int value, String name) {
-        this.value = value;
-        this.typeName = name;
-    }
+  public int getValue() {
+    return value;
+  }
 
-    public int getValue() {
-        return value;
-    }
+  public String getTypeName() {
+    return typeName;
+  }
 
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public static ConfigFileType of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-    }
+  public static ConfigFileType of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+  }
 }

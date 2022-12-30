@@ -35,32 +35,32 @@ import java.lang.reflect.Method;
 @Aspect
 public class StreamParkConsoleAspect {
 
-    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.RefreshCache)")
-    public void refreshCache() {
-    }
+  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.RefreshCache)")
+  public void refreshCache() {}
 
-    @Around("refreshCache()")
-    public Object refreshCache(ProceedingJoinPoint joinPoint) throws Throwable {
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        log.debug("refreshCache aspect, method:{}", methodSignature.getName());
-        Object[] args = joinPoint.getArgs();
-        Object param = args[0];
-        Long appId;
-        if (param instanceof Application) {
-            appId = ((Application) param).getId();
-        } else {
-            Method method = param.getClass().getDeclaredMethod("getAppId");
-            method.setAccessible(true);
-            appId = (Long) method.invoke(param, null);
-        }
-        return FlinkTrackingTask.refreshTracking(appId, () -> {
-            try {
-                return joinPoint.proceed();
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-            return null;
+  @Around("refreshCache()")
+  public Object refreshCache(ProceedingJoinPoint joinPoint) throws Throwable {
+    MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+    log.debug("refreshCache aspect, method:{}", methodSignature.getName());
+    Object[] args = joinPoint.getArgs();
+    Object param = args[0];
+    Long appId;
+    if (param instanceof Application) {
+      appId = ((Application) param).getId();
+    } else {
+      Method method = param.getClass().getDeclaredMethod("getAppId");
+      method.setAccessible(true);
+      appId = (Long) method.invoke(param, null);
+    }
+    return FlinkTrackingTask.refreshTracking(
+        appId,
+        () -> {
+          try {
+            return joinPoint.proceed();
+          } catch (Throwable throwable) {
+            throwable.printStackTrace();
+          }
+          return null;
         });
-    }
-
+  }
 }

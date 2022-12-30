@@ -26,11 +26,11 @@ import org.apache.ibatis.annotations.Param;
 
 public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
 
-    Integer getLastVersion(@Param("appId") Long appId);
+  Integer getLastVersion(@Param("appId") Long appId);
 
-    ApplicationConfig getEffective(@Param("appId") Long appId);
+  ApplicationConfig getEffective(@Param("appId") Long appId);
 
-    ApplicationConfig getLatest(@Param("appId") Long appId);
+  ApplicationConfig getLatest(@Param("appId") Long appId);
 
-    IPage<ApplicationConfig> pageByAppId(Page<ApplicationConfig> page, @Param("appId") Long appId);
+  IPage<ApplicationConfig> pageByAppId(Page<ApplicationConfig> page, @Param("appId") Long appId);
 }

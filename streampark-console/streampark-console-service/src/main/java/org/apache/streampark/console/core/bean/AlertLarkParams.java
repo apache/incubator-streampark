@@ -31,16 +31,19 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertLarkParams implements Serializable {
 
-    @ApiModelProperty(name = "token", value = "lark token")
-    @NotBlank(message = "The access token of Lark must be not empty")
-    private String token;
+  @ApiModelProperty(name = "token", value = "lark token")
+  @NotBlank(message = "The access token of Lark must be not empty")
+  private String token;
 
-    @ApiModelProperty(name = "isAtAll", value = "is @all", example = "false")
-    private Boolean isAtAll = false;
+  @ApiModelProperty(name = "isAtAll", value = "is @all", example = "false")
+  private Boolean isAtAll = false;
 
-    @ApiModelProperty(name = "secretEnable", value = "is lark robot secret enabled", example = "false")
-    private Boolean secretEnable = false;
+  @ApiModelProperty(
+      name = "secretEnable",
+      value = "is lark robot secret enabled",
+      example = "false")
+  private Boolean secretEnable = false;
 
-    @ApiModelProperty(name = "secretToken", value = "lark robot webhook secret token")
-    private String secretToken;
+  @ApiModelProperty(name = "secretToken", value = "lark robot webhook secret token")
+  private String secretToken;
 }

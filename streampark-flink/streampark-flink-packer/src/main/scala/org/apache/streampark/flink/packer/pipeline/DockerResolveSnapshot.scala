@@ -17,15 +17,16 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import org.apache.streampark.common.util.Utils
-
 import java.util.{List => JavaList}
+
 import scala.collection.JavaConverters._
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+import org.apache.streampark.common.util.Utils
 
 /**
  * Snapshot for docker resolved progress
- *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class DockerResolvedSnapshot(pull: DockerPullSnapshot, build: DockerBuildSnapshot, push: DockerPushSnapshot)
@@ -63,9 +64,3 @@ object DockerPushSnapshot {
   def of(detail: Seq[DockerLayerProgress], error: String, emitTime: Long): DockerPushSnapshot =
     DockerPushSnapshot(detail, error, emitTime, Utils.calPercent(detail.map(_.current).sum, detail.map(_.total).sum))
 }
-
-
-
-
-
-

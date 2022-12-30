@@ -33,75 +33,74 @@ import java.util.Date;
 @TableName("t_flink_sql")
 public class FlinkSql {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
-    private Long appId;
-    @TableField("`sql`")
-    private String sql;
-    private String dependency;
-    private Integer version = 1;
+  @TableId(type = IdType.AUTO)
+  private Long id;
 
-    /**
-     * candidate number:
-     * 0: none candidate <br>
-     * 1: newly added record becomes a candidate <br>
-     * 2: specific history becomes a candidate <br>
-     */
-    private Integer candidate;
+  private Long appId;
 
-    private Date createTime;
-    private transient boolean effective = false;
-    /**
-     * sql diff
-     */
-    private transient boolean sqlDifference = false;
-    /**
-     * dependency diff
-     */
-    private transient boolean dependencyDifference = false;
+  @TableField("`sql`")
+  private String sql;
 
-    public FlinkSql() {
+  private String dependency;
+  private Integer version = 1;
+
+  /**
+   * candidate number: 0: none candidate <br>
+   * 1: newly added record becomes a candidate <br>
+   * 2: specific history becomes a candidate <br>
+   */
+  private Integer candidate;
+
+  private Date createTime;
+  private transient boolean effective = false;
+  /** sql diff */
+  private transient boolean sqlDifference = false;
+  /** dependency diff */
+  private transient boolean dependencyDifference = false;
+
+  public FlinkSql() {}
+
+  public FlinkSql(Application application) {
+    this.appId = application.getId();
+    this.sql = application.getFlinkSql();
+    this.dependency = application.getDependency();
+    this.createTime = new Date();
+  }
+
+  public void decode() {
+    this.setSql(DeflaterUtils.unzipString(this.sql));
+  }
+
+  public void setToApplication(Application application) {
+    String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
+    application.setFlinkSql(encode);
+    application.setDependency(this.dependency);
+    application.setSqlId(this.id);
+  }
+
+  public ChangedType checkChange(FlinkSql target) {
+    // 1) determine if sql statement has changed
+    boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
+    // 2) determine if dependency has changed
+    Application.Dependency thisDependency =
+        Application.Dependency.toDependency(this.getDependency());
+    Application.Dependency targetDependency =
+        Application.Dependency.toDependency(target.getDependency());
+
+    boolean depDifference = !thisDependency.eq(targetDependency);
+    if (sqlDifference && depDifference) {
+      return ChangedType.ALL;
     }
-
-    public FlinkSql(Application application) {
-        this.appId = application.getId();
-        this.sql = application.getFlinkSql();
-        this.dependency = application.getDependency();
-        this.createTime = new Date();
+    if (sqlDifference) {
+      return ChangedType.SQL;
     }
-
-    public void decode() {
-        this.setSql(DeflaterUtils.unzipString(this.sql));
+    if (depDifference) {
+      return ChangedType.DEPENDENCY;
     }
+    return ChangedType.NONE;
+  }
 
-    public void setToApplication(Application application) {
-        String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
-        application.setFlinkSql(encode);
-        application.setDependency(this.dependency);
-        application.setSqlId(this.id);
-    }
-
-    public ChangedType checkChange(FlinkSql target) {
-        // 1) determine if sql statement has changed
-        boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
-        // 2) determine if dependency has changed
-        Application.Dependency thisDependency = Application.Dependency.toDependency(this.getDependency());
-        Application.Dependency targetDependency = Application.Dependency.toDependency(target.getDependency());
-
-        boolean depDifference = !thisDependency.eq(targetDependency);
-        if (sqlDifference && depDifference) {
-            return ChangedType.ALL;
-        }
-        if (sqlDifference) {
-            return ChangedType.SQL;
-        }
-        if (depDifference) {
-            return ChangedType.DEPENDENCY;
-        }
-        return ChangedType.NONE;
-    }
-
-    public void base64Encode() {
-        this.sql = Base64.getEncoder().encodeToString(DeflaterUtils.unzipString(this.sql).getBytes());
-    }
+  public void base64Encode() {
+    this.sql = Base64.getEncoder().encodeToString(DeflaterUtils.unzipString(this.sql).getBytes());
+  }
 }

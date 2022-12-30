@@ -17,15 +17,16 @@
 
 package org.apache.streampark.flink.connector.http.internal
 
+import java.util.concurrent._
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
+
+import org.asynchttpclient.{AsyncHttpClient, Dsl}
+
 import org.apache.streampark.common.util.{Logger, ThreadUtils}
 import org.apache.streampark.flink.connector.conf.ThresholdConf
 import org.apache.streampark.flink.connector.failover.{SinkRequest, SinkWriter}
-import org.asynchttpclient.{AsyncHttpClient, Dsl}
-
-import java.util.concurrent._
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConversions._
-
 
 case class HttpSinkWriter(thresholdConf: ThresholdConf, header: Map[String, String]) extends SinkWriter with Logger {
   private val callbackServiceFactory = ThreadUtils.threadFactory("HttpSink-writer-callback-executor")
@@ -37,8 +38,7 @@ case class HttpSinkWriter(thresholdConf: ThresholdConf, header: Map[String, Stri
     60L,
     TimeUnit.SECONDS,
     new LinkedBlockingQueue[Runnable],
-    callbackServiceFactory
-  )
+    callbackServiceFactory)
 
   var tasks: ListBuffer[HttpWriterTask] = ListBuffer[HttpWriterTask]()
   var recordQueue: BlockingQueue[SinkRequest] = new LinkedBlockingQueue[SinkRequest](thresholdConf.queueCapacity)
@@ -52,14 +52,15 @@ case class HttpSinkWriter(thresholdConf: ThresholdConf, header: Map[String, Stri
     service.submit(task)
   }
 
-  def write(request: SinkRequest): Unit = try {
-    recordQueue.put(request)
-  } catch {
-    case e: InterruptedException =>
-      logError(s"Interrupted error while putting data to queue,error:$e")
-      Thread.currentThread.interrupt()
-      throw new RuntimeException(e)
-  }
+  def write(request: SinkRequest): Unit =
+    try {
+      recordQueue.put(request)
+    } catch {
+      case e: InterruptedException =>
+        logError(s"Interrupted error while putting data to queue,error:$e")
+        Thread.currentThread.interrupt()
+        throw new RuntimeException(e)
+    }
 
   override def close(): Unit = {
     logInfo("Closing HttpSink-writer...")

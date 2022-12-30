@@ -32,13 +32,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class StartedUpRunner implements ApplicationRunner {
 
-    @Autowired
-    private ConfigurableApplicationContext context;
+  @Autowired private ConfigurableApplicationContext context;
 
-    @Override
-    public void run(ApplicationArguments args) {
-        if (context.isActive()) {
-            ConfigConst.printLogo("streampark-console start successful");
-        }
+  @Override
+  public void run(ApplicationArguments args) {
+    if (context.isActive()) {
+      ConfigConst.printLogo("streampark-console start successful");
     }
+  }
 }

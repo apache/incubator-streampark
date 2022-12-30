@@ -27,52 +27,52 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public interface SettingService extends IService<Setting> {
 
-    Map<String, Setting> SETTINGS = new ConcurrentHashMap<>();
+  Map<String, Setting> SETTINGS = new ConcurrentHashMap<>();
 
-    String KEY_MAVEN_SETTINGS = "streampark.maven.settings";
-    String KEY_MAVEN_REPOSITORY = "streampark.maven.central.repository";
-    String KEY_MAVEN_AUTH_USER = "streampark.maven.auth.user";
-    String KEY_MAVEN_AUTH_PASSWORD = "streampark.maven.auth.password";
-    String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
+  String KEY_MAVEN_SETTINGS = "streampark.maven.settings";
+  String KEY_MAVEN_REPOSITORY = "streampark.maven.central.repository";
+  String KEY_MAVEN_AUTH_USER = "streampark.maven.auth.user";
+  String KEY_MAVEN_AUTH_PASSWORD = "streampark.maven.auth.password";
+  String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
 
-    String KEY_ALERT_EMAIL_HOST = "alert.email.host";
-    String KEY_ALERT_EMAIL_PORT = "alert.email.port";
-    String KEY_ALERT_EMAIL_FROM = "alert.email.from";
-    String KEY_ALERT_EMAIL_USERNAME = "alert.email.userName";
-    String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
-    String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
+  String KEY_ALERT_EMAIL_HOST = "alert.email.host";
+  String KEY_ALERT_EMAIL_PORT = "alert.email.port";
+  String KEY_ALERT_EMAIL_FROM = "alert.email.from";
+  String KEY_ALERT_EMAIL_USERNAME = "alert.email.userName";
+  String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
+  String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
 
-    String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
-    String KEY_DOCKER_REGISTER_USER = "docker.register.user";
-    String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
+  String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
+  String KEY_DOCKER_REGISTER_USER = "docker.register.user";
+  String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
 
-    String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
+  String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
 
-    String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
+  String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
 
-    Setting get(String key);
+  Setting get(String key);
 
-    boolean update(Setting setting);
+  boolean update(Setting setting);
 
-    String getStreamParkAddress();
+  String getStreamParkAddress();
 
-    String getMavenSettings();
+  String getMavenSettings();
 
-    String getMavenRepository();
+  String getMavenRepository();
 
-    String getMavenAuthUser();
+  String getMavenAuthUser();
 
-    String getMavenAuthPassword();
+  String getMavenAuthPassword();
 
-    SenderEmail getSenderEmail();
+  SenderEmail getSenderEmail();
 
-    String getDockerRegisterAddress();
+  String getDockerRegisterAddress();
 
-    String getDockerRegisterUser();
+  String getDockerRegisterUser();
 
-    String getDockerRegisterPassword();
+  String getDockerRegisterPassword();
 
-    String getDockerRegisterNamespace();
+  String getDockerRegisterNamespace();
 
-    String getIngressModeDefault();
+  String getIngressModeDefault();
 }

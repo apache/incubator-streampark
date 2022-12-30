@@ -24,7 +24,7 @@ import org.apache.ibatis.annotations.Param;
 
 public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
 
-    FlinkEnv getByAppId(@Param("appId") Long appId);
+  FlinkEnv getByAppId(@Param("appId") Long appId);
 
-    void setDefault(@Param("id") Long id);
+  void setDefault(@Param("id") Long id);
 }

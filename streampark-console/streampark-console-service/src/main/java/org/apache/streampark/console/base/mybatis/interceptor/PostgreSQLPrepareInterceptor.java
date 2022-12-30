@@ -29,30 +29,29 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.Properties;
 
-/**
- * the mybatis interceptor for update/insert/delete.
- */
+/** the mybatis interceptor for update/insert/delete. */
 @Intercepts({
-    @Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})
+  @Signature(
+      type = StatementHandler.class,
+      method = "prepare",
+      args = {Connection.class, Integer.class})
 })
 public class PostgreSQLPrepareInterceptor implements Interceptor {
-    @Override
-    public Object intercept(final Invocation invocation) throws Throwable {
-        StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
-        BoundSql boundSql = statementHandler.getBoundSql();
-        Field field = boundSql.getClass().getDeclaredField("sql");
-        field.setAccessible(true);
-        field.set(boundSql, boundSql.getSql().replace("`", "\"").toLowerCase());
-        return invocation.proceed();
-    }
+  @Override
+  public Object intercept(final Invocation invocation) throws Throwable {
+    StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
+    BoundSql boundSql = statementHandler.getBoundSql();
+    Field field = boundSql.getClass().getDeclaredField("sql");
+    field.setAccessible(true);
+    field.set(boundSql, boundSql.getSql().replace("`", "\"").toLowerCase());
+    return invocation.proceed();
+  }
 
-    @Override
-    public Object plugin(final Object target) {
-        return Plugin.wrap(target, this);
-    }
+  @Override
+  public Object plugin(final Object target) {
+    return Plugin.wrap(target, this);
+  }
 
-    @Override
-    public void setProperties(final Properties properties) {
-
-    }
+  @Override
+  public void setProperties(final Properties properties) {}
 }

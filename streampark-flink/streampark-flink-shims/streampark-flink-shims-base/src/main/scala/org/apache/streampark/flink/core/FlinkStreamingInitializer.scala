@@ -16,27 +16,27 @@
  */
 package org.apache.streampark.flink.core
 
+import java.io.File
+
+import collection.{mutable, Map}
+import collection.JavaConversions._
+import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironment => JavaStreamEnv}
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.table.api.TableConfig
+
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util._
-import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironment => JavaStreamEnv}
-import org.apache.flink.table.api.TableConfig
 import org.apache.streampark.flink.core.conf.FlinkConfiguration
-
-import java.io.File
-import collection.JavaConversions._
-import collection.{Map, mutable}
 
 private[flink] object FlinkStreamingInitializer {
 
   private[this] var flinkInitializer: FlinkStreamingInitializer = _
 
-  def initialize(args: Array[String],
-                 config: (StreamExecutionEnvironment, ParameterTool) => Unit): (ParameterTool, StreamExecutionEnvironment) = {
+  def initialize(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit): (ParameterTool, StreamExecutionEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -62,7 +62,6 @@ private[flink] object FlinkStreamingInitializer {
     (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment)
   }
 }
-
 
 private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: ApiType) extends Logger {
 
@@ -131,9 +130,10 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   def extractConfigByPrefix(configMap: Map[String, String], prefix: String): Map[String, String] = {
     val map = mutable.Map[String, String]()
-    configMap.foreach(x => if (x._1.startsWith(prefix)) {
-      map += x._1.drop(prefix.length) -> x._2
-    })
+    configMap.foreach(x =>
+      if (x._1.startsWith(prefix)) {
+        map += x._1.drop(prefix.length) -> x._2
+      })
     map
   }
 

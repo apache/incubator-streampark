@@ -17,20 +17,21 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
-import org.apache.streampark.common.util.{RedisEndpoint, RedisUtils}
+import scala.collection.JavaConversions._
+import scala.util.Try
+
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
 import redis.clients.jedis.Protocol
 
-import scala.collection.JavaConversions._
-import scala.util.Try
+import org.apache.streampark.common.util.{RedisEndpoint, RedisUtils}
 
 /**
  * Redis Offset Manager
  */
 private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
 
-  private[this] implicit def endpoint(implicit params: Map[String, String]): RedisEndpoint = {
+  implicit private[this] def endpoint(implicit params: Map[String, String]): RedisEndpoint = {
     val host = params.getOrElse("redis.hosts", Protocol.DEFAULT_HOST)
     val port = params.getOrElse("redis.port", Protocol.DEFAULT_PORT.toString).toInt
     val auth = Try(params("redis.auth")) getOrElse null
@@ -77,6 +78,5 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
     RedisUtils.doRedis(redis => topics.foreach(x => redis.del(key(groupId, x))))
     logInfo(s"storeType:Redis,deleteOffsets [ $groupId,${topics.mkString(",")} ]")
   }
-
 
 }

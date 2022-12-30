@@ -16,23 +16,24 @@
  */
 package org.apache.streampark.spark.connector.source
 
-import org.apache.streampark.common.util.Logger
+import scala.annotation.meta.getter
+import scala.reflect.ClassTag
+import scala.util.Try
+
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 
-import scala.annotation.meta.getter
-import scala.reflect.ClassTag
-import scala.util.Try
+import org.apache.streampark.common.util.Logger
 
 /**
  * Base source trait
  */
 trait Source extends Logger with Serializable {
 
-  @(transient@getter)
+  @(transient @getter)
   val ssc: StreamingContext
-  @(transient@getter)
+  @(transient @getter)
   lazy val sparkConf: SparkConf = ssc.sparkContext.getConf
 
   val prefix: String
@@ -42,7 +43,6 @@ trait Source extends Logger with Serializable {
       Some(k.substring(prefix.length) -> v)
     case _ => None
   } toMap
-
 
   type SourceType
 

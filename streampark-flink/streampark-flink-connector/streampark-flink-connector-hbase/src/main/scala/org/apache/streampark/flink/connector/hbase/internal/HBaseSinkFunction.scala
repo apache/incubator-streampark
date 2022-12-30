@@ -17,22 +17,24 @@
 
 package org.apache.streampark.flink.connector.hbase.internal
 
-import org.apache.streampark.common.conf.ConfigConst.{DEFAULT_HBASE_COMMIT_BATCH, DEFAULT_HBASE_WRITE_SIZE, KEY_HBASE_COMMIT_BATCH, KEY_HBASE_WRITE_SIZE}
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{HBaseClient, Logger}
-import org.apache.streampark.flink.connector.function.TransformFunction
+import java.lang.{Iterable => JIter}
+import java.util.Properties
+import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
+
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
 
-import java.lang.{Iterable => JIter}
-import java.util.Properties
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
-import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
-import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
+import org.apache.streampark.common.conf.ConfigConst.{DEFAULT_HBASE_COMMIT_BATCH, DEFAULT_HBASE_WRITE_SIZE, KEY_HBASE_COMMIT_BATCH, KEY_HBASE_WRITE_SIZE}
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{HBaseClient, Logger}
+import org.apache.streampark.flink.connector.function.TransformFunction
 
 class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, prop: Properties) extends RichSinkFunction[T] with Logger {
 
@@ -52,24 +54,19 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
   private[this] var scalaTransformFunc: T => JIter[Mutation] = _
   private[this] var javaTransformFunc: TransformFunction[T, JIter[Mutation]] = _
 
-  //for Scala
-  def this(tabName: String,
-           properties: Properties,
-           scalaTransformFunc: T => JIter[Mutation]) = {
+  // for Scala
+  def this(tabName: String, properties: Properties, scalaTransformFunc: T => JIter[Mutation]) = {
 
     this(ApiType.scala, tabName, properties)
     this.scalaTransformFunc = scalaTransformFunc
   }
 
-  //for JAVA
-  def this(tabName: String,
-           properties: Properties,
-           javaTransformFunc: TransformFunction[T, JIter[Mutation]]) = {
+  // for JAVA
+  def this(tabName: String, properties: Properties, javaTransformFunc: TransformFunction[T, JIter[Mutation]]) = {
 
     this(ApiType.java, tabName, properties)
     this.javaTransformFunc = javaTransformFunc
   }
-
 
   @transient private var service: ScheduledExecutorService = _
 
@@ -104,14 +101,17 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
     offset.incrementAndGet() % commitBatch match {
       case 0 => execBatch()
       case _ => if (!scheduled.get()) {
-        scheduled.set(true)
-        service.schedule(new Runnable {
-          override def run(): Unit = {
-            scheduled.set(false)
-            execBatch()
-          }
-        }, 10, TimeUnit.SECONDS)
-      }
+          scheduled.set(true)
+          service.schedule(
+            new Runnable {
+              override def run(): Unit = {
+                scheduled.set(false)
+                execBatch()
+              }
+            },
+            10,
+            TimeUnit.SECONDS)
+        }
     }
 
   }
@@ -130,11 +130,11 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
   private[this] def execBatch(): Unit = {
     if (offset.get() > 0) {
       val start = System.currentTimeMillis()
-      //put ...
+      // put ...
       mutator.mutate(putArray)
       mutator.flush()
       putArray.clear()
-      //mutation...
+      // mutation...
       if (mutations.nonEmpty) {
         table.batch(mutations, new Array[AnyRef](mutations.length))
         logInfo(s"HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")

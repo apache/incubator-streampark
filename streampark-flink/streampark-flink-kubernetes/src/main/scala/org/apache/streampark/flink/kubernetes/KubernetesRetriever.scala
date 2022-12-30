@@ -17,10 +17,12 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.util.{Logger, Utils}
-import org.apache.streampark.common.util.Utils.tryWithResource
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
-import org.apache.streampark.flink.kubernetes.model.ClusterKey
+import java.time.Duration
+import javax.annotation.Nullable
+
+import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
+
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
@@ -29,10 +31,10 @@ import org.apache.flink.configuration.{Configuration, DeploymentOptions, RestOpt
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-import java.time.Duration
-import javax.annotation.Nullable
-import scala.collection.JavaConverters._
-import scala.util.{Failure, Success, Try}
+import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.common.util.Utils.tryWithResource
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 object KubernetesRetriever extends Logger {
 
@@ -42,7 +44,6 @@ object KubernetesRetriever extends Logger {
   val FLINK_REST_AWAIT_TIMEOUT_SEC = 10L
   // see org.apache.flink.configuration.RestOptions.RETRY_MAX_ATTEMPTS
   val FLINK_REST_RETRY_MAX_ATTEMPTS = 2
-
 
   /**
    * get new KubernetesClient
@@ -64,9 +65,7 @@ object KubernetesRetriever extends Logger {
   /**
    * get new flink cluster client of kubernetes mode
    */
-  def newFinkClusterClient(clusterId: String,
-                           @Nullable namespace: String,
-                           executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
+  def newFinkClusterClient(clusterId: String, @Nullable namespace: String, executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
     // build flink config
     val flinkConfig = new Configuration()
     flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString)
@@ -115,7 +114,6 @@ object KubernetesRetriever extends Logger {
     } { _ => false }
   }
 
-
   /**
    * retrieve flink jobManager rest url
    */
@@ -124,9 +122,7 @@ object KubernetesRetriever extends Logger {
       KubernetesRetriever.newFinkClusterClient(
         clusterKey.clusterId,
         clusterKey.namespace,
-        clusterKey.executeMode
-      ).getOrElse(return None)
-    ) { client =>
+        clusterKey.executeMode).getOrElse(return None)) { client =>
       val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
       logger.info(s"retrieve flink jobManager rest url: $url")
       client.close()

@@ -16,14 +16,15 @@
  */
 package org.apache.streampark.flink.packer
 
+import java.time.Duration
+
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
-import org.apache.streampark.flink.packer.docker.DockerRetriever.dockerClientConf
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import java.time.Duration
+import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
+import org.apache.streampark.flink.packer.docker.DockerRetriever.dockerClientConf
 
 class DockerClientTest extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 

@@ -28,27 +28,27 @@ import java.util.List;
 
 public interface FlinkSqlService extends IService<FlinkSql> {
 
-    void create(FlinkSql flinkSql);
+  void create(FlinkSql flinkSql);
 
-    void setCandidate(CandidateType candidateType, Long appId, Long sqlId);
+  void setCandidate(CandidateType candidateType, Long appId, Long sqlId);
 
-    FlinkSql getEffective(Long appId, boolean decode);
+  FlinkSql getEffective(Long appId, boolean decode);
 
-    FlinkSql getLatestFlinkSql(Long appId, boolean decode);
+  FlinkSql getLatestFlinkSql(Long appId, boolean decode);
 
-    List<FlinkSql> history(Application application);
+  List<FlinkSql> history(Application application);
 
-    FlinkSql getCandidate(Long appId, CandidateType type);
+  FlinkSql getCandidate(Long appId, CandidateType type);
 
-    void toEffective(Long appId, Long sqlId);
+  void toEffective(Long appId, Long sqlId);
 
-    void cleanCandidate(Long id);
+  void cleanCandidate(Long id);
 
-    void removeApp(Long appId);
+  void removeApp(Long appId);
 
-    void rollback(Application application);
+  void rollback(Application application);
 
-    FlinkSqlValidationResult verifySql(String sql, Long versionId);
+  FlinkSqlValidationResult verifySql(String sql, Long versionId);
 
-    List<FlinkSql> getByTeamId(Long teamId);
+  List<FlinkSql> getByTeamId(Long teamId);
 }

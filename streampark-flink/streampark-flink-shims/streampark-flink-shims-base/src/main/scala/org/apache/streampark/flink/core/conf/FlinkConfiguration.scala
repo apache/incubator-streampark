@@ -19,6 +19,4 @@ package org.apache.streampark.flink.core.conf
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.Configuration
 
-case class FlinkConfiguration(parameter: ParameterTool,
-                              envConfig: Configuration,
-                              tableConfig: Configuration)
+case class FlinkConfiguration(parameter: ParameterTool, envConfig: Configuration, tableConfig: Configuration)

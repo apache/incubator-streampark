@@ -35,46 +35,42 @@ import java.util.Date;
 @TableName("t_variable")
 public class Variable implements Serializable {
 
-    private static final long serialVersionUID = -7720746591258904369L;
+  private static final long serialVersionUID = -7720746591258904369L;
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+  @TableId(type = IdType.AUTO)
+  private Long id;
 
-    @NotBlank(message = "{required}")
-    private String variableCode;
+  @NotBlank(message = "{required}")
+  private String variableCode;
 
-    @NotBlank(message = "{required}")
-    private String variableValue;
+  @NotBlank(message = "{required}")
+  private String variableValue;
 
-    @Size(max = 100, message = "{noMoreThan}")
-    private String description;
+  @Size(max = 100, message = "{noMoreThan}")
+  private String description;
 
-    /**
-     * user id of creator
-     */
-    private Long creatorId;
+  /** user id of creator */
+  private Long creatorId;
 
-    /**
-     * user name of creator
-     */
-    private transient String creatorName;
+  /** user name of creator */
+  private transient String creatorName;
 
-    @NotNull(message = "{required}")
-    private Long teamId;
+  @NotNull(message = "{required}")
+  private Long teamId;
 
-    private Boolean desensitization;
+  private Boolean desensitization;
 
-    private transient Date createTime;
+  private transient Date createTime;
 
-    private transient Date modifyTime;
+  private transient Date modifyTime;
 
-    private transient String sortField;
+  private transient String sortField;
 
-    private transient String sortOrder;
+  private transient String sortOrder;
 
-    public void dataMasking() {
-        if (desensitization) {
-            this.setVariableValue(ConfigConst.DEFAULT_DATAMASK_STRING());
-        }
+  public void dataMasking() {
+    if (desensitization) {
+      this.setVariableValue(ConfigConst.DEFAULT_DATAMASK_STRING());
     }
+  }
 }

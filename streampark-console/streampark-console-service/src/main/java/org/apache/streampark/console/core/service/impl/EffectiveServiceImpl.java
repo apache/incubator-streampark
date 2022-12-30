@@ -38,48 +38,51 @@ import java.util.Date;
 public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective>
     implements EffectiveService {
 
-    @Override
-    public void delete(Long appId, EffectiveType effectiveType) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
+  @Override
+  public void delete(Long appId, EffectiveType effectiveType) {
+    LambdaQueryWrapper<Effective> queryWrapper =
+        new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
             .eq(Effective::getTargetType, effectiveType.getType());
-        baseMapper.delete(queryWrapper);
-    }
+    baseMapper.delete(queryWrapper);
+  }
 
-    @Override
-    public Effective get(Long appId, EffectiveType effectiveType) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
+  @Override
+  public Effective get(Long appId, EffectiveType effectiveType) {
+    LambdaQueryWrapper<Effective> queryWrapper =
+        new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
             .eq(Effective::getTargetType, effectiveType.getType());
-        return this.getOne(queryWrapper);
-    }
+    return this.getOne(queryWrapper);
+  }
 
-    @Override
-    public void saveOrUpdate(Long appId, EffectiveType type, Long id) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
+  @Override
+  public void saveOrUpdate(Long appId, EffectiveType type, Long id) {
+    LambdaQueryWrapper<Effective> queryWrapper =
+        new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
             .eq(Effective::getTargetType, type.getType());
-        long count = count(queryWrapper);
-        if (count == 0) {
-            Effective effective = new Effective();
-            effective.setAppId(appId);
-            effective.setTargetType(type.getType());
-            effective.setTargetId(id);
-            effective.setCreateTime(new Date());
-            save(effective);
-        } else {
-            update(new LambdaUpdateWrapper<Effective>()
-                .eq(Effective::getAppId, appId)
-                .eq(Effective::getTargetType, type.getType())
-                .set(Effective::getTargetId, id)
-            );
-        }
+    long count = count(queryWrapper);
+    if (count == 0) {
+      Effective effective = new Effective();
+      effective.setAppId(appId);
+      effective.setTargetType(type.getType());
+      effective.setTargetId(id);
+      effective.setCreateTime(new Date());
+      save(effective);
+    } else {
+      update(
+          new LambdaUpdateWrapper<Effective>()
+              .eq(Effective::getAppId, appId)
+              .eq(Effective::getTargetType, type.getType())
+              .set(Effective::getTargetId, id));
     }
+  }
 
-    @Override
-    public void removeApp(Long appId) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
-            .eq(Effective::getAppId, appId);
-        this.remove(queryWrapper);
-    }
+  @Override
+  public void removeApp(Long appId) {
+    LambdaQueryWrapper<Effective> queryWrapper =
+        new LambdaQueryWrapper<Effective>().eq(Effective::getAppId, appId);
+    this.remove(queryWrapper);
+  }
 }

@@ -45,46 +45,44 @@ import java.util.List;
 @RequestMapping("member")
 public class MemberController {
 
-    @Autowired
-    private MemberService memberService;
+  @Autowired private MemberService memberService;
 
-    @PostMapping("list")
-    public RestResponse memberList(RestRequest restRequest, Member member) {
-        IPage<Member> userList = memberService.findUsers(member, restRequest);
-        return RestResponse.success(userList);
-    }
+  @PostMapping("list")
+  public RestResponse memberList(RestRequest restRequest, Member member) {
+    IPage<Member> userList = memberService.findUsers(member, restRequest);
+    return RestResponse.success(userList);
+  }
 
-    @PostMapping("teams")
-    public RestResponse listTeams(Long userId) {
-        List<Team> teamList = memberService.findUserTeams(userId);
-        return RestResponse.success(teamList);
-    }
+  @PostMapping("teams")
+  public RestResponse listTeams(Long userId) {
+    List<Team> teamList = memberService.findUserTeams(userId);
+    return RestResponse.success(teamList);
+  }
 
-    @PostMapping("check/user")
-    public RestResponse check(@NotBlank(message = "{required}")Long teamId, String userName) {
-        Member result = this.memberService.findByUserName(teamId, userName);
-        return RestResponse.success(result == null);
-    }
+  @PostMapping("check/user")
+  public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
+    Member result = this.memberService.findByUserName(teamId, userName);
+    return RestResponse.success(result == null);
+  }
 
-    @PostMapping("post")
-    @RequiresPermissions("member:add")
-    public RestResponse create(@Valid Member member) {
-        this.memberService.createMember(member);
-        return RestResponse.success();
-    }
+  @PostMapping("post")
+  @RequiresPermissions("member:add")
+  public RestResponse create(@Valid Member member) {
+    this.memberService.createMember(member);
+    return RestResponse.success();
+  }
 
-    @DeleteMapping("delete")
-    @RequiresPermissions("member:delete")
-    public RestResponse delete(Member member) {
-        this.memberService.deleteMember(member);
-        return RestResponse.success();
-    }
+  @DeleteMapping("delete")
+  @RequiresPermissions("member:delete")
+  public RestResponse delete(Member member) {
+    this.memberService.deleteMember(member);
+    return RestResponse.success();
+  }
 
-    @PutMapping("update")
-    @RequiresPermissions("member:update")
-    public RestResponse update(Member member) {
-        this.memberService.updateMember(member);
-        return RestResponse.success();
-    }
-
+  @PutMapping("update")
+  @RequiresPermissions("member:update")
+  public RestResponse update(Member member) {
+    this.memberService.updateMember(member);
+    return RestResponse.success();
+  }
 }

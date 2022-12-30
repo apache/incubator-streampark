@@ -20,12 +20,14 @@ import java.io._
 import java.lang.{Iterable => JavaIterable}
 import java.util.Scanner
 import java.util.function.Consumer
+
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 object CommandUtils extends Logger {
 
-  @throws[Exception] def execute(command: String): (Int, String) = {
+  @throws[Exception]
+  def execute(command: String): (Int, String) = {
     Try {
       val buffer = new StringBuffer()
       val process: Process = Runtime.getRuntime.exec(command)
@@ -49,7 +51,7 @@ object CommandUtils extends Logger {
       require(commands != null && commands.nonEmpty, "[StreamPark] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
 
-      //1) init
+      // 1) init
       lazy val process = {
         val interpreters = if (Utils.isWindows) List("cmd", "/k") else List("/bin/bash")
         val builder = new ProcessBuilder(interpreters).redirectErrorStream(true)
@@ -71,7 +73,7 @@ object CommandUtils extends Logger {
         out.close()
       }
 
-      //3) out
+      // 3) out
       def output(): Unit = {
         val scanner = new Scanner(process.getInputStream)
         while (scanner.hasNextLine) {

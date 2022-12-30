@@ -26,11 +26,8 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "streampark.shiro")
 public class ShiroProperties {
 
-    private String anonUrl;
+  private String anonUrl;
 
-    /**
-     * token default effective time: 1d
-     */
-    private Long jwtTimeOut = 86400L;
-
+  /** token default effective time: 1d */
+  private Long jwtTimeOut = 86400L;
 }

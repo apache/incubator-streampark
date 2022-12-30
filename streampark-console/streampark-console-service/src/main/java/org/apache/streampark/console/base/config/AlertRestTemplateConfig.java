@@ -23,13 +23,13 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AlertRestTemplateConfig {
-    /**
-     * Create a RestTemplate client for the alarm notification service
-     *
-     * @return RestTemplate
-     */
-    @Bean(name = "alertRestTemplate")
-    public RestTemplate alertRestTemplate() {
-        return new RestTemplate();
-    }
+  /**
+   * Create a RestTemplate client for the alarm notification service
+   *
+   * @return RestTemplate
+   */
+  @Bean(name = "alertRestTemplate")
+  public RestTemplate alertRestTemplate() {
+    return new RestTemplate();
+  }
 }

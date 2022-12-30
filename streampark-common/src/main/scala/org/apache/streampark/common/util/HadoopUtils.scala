@@ -17,8 +17,16 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder}
+import java.io.{File, IOException}
+import java.security.PrivilegedAction
+import java.util
+import java.util.{Timer, TimerTask}
+import java.util.concurrent._
+import javax.security.auth.kerberos.KerberosTicket
+
+import scala.collection.JavaConversions._
+import scala.util.{Failure, Success, Try}
+
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
@@ -29,17 +37,9 @@ import org.apache.hadoop.service.Service.STATE
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.conf.YarnConfiguration
-import java.io.{File, IOException}
-import java.security.PrivilegedAction
-import java.util
-import java.util.concurrent._
-import java.util.{Timer, TimerTask}
 
-import javax.security.auth.kerberos.KerberosTicket
-
-import scala.collection.JavaConversions._
-import scala.util.{Failure, Success, Try}
-
+import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder}
+import org.apache.streampark.common.conf.ConfigConst._
 
 object HadoopUtils extends Logger {
 
@@ -128,8 +128,8 @@ object HadoopUtils extends Logger {
       val conf = new Configuration()
       if (CollectionUtils.isNotEmpty(files)) {
         files.foreach(x => conf.addResource(new Path(x.getAbsolutePath)))
-        //HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
-        //detail: https://issues.apache.org/jira/browse/HDFS-12920
+        // HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
+        // detail: https://issues.apache.org/jira/browse/HDFS-12920
         val rewriteNames = List(
           "dfs.blockreport.initialDelay",
           "dfs.datanode.directoryscan.interval",
@@ -141,8 +141,7 @@ object HadoopUtils extends Logger {
           "dfs.client.datanode-restart.timeout",
           "dfs.ha.log-roll.period",
           "dfs.ha.tail-edits.period",
-          "dfs.datanode.bp-ready.timeout"
-        )
+          "dfs.datanode.bp-ready.timeout")
         rewriteNames.foreach(n => {
           Option(conf.get(n)) match {
             case Some(v) if v.matches("\\d+s$") => conf.set(n, v.dropRight(1))
@@ -165,7 +164,7 @@ object HadoopUtils extends Logger {
    */
   def hadoopConf: Configuration = Option(reusableConf).getOrElse {
     reusableConf = getConfigurationFromHadoopConfDir(hadoopConfDir)
-    //add hadoopConfDir to classpath...you know why???
+    // add hadoopConfDir to classpath...you know why???
     ClassLoaderUtils.loadResource(hadoopConfDir)
 
     if (StringUtils.isBlank(reusableConf.get("hadoop.tmp.dir"))) {
@@ -207,13 +206,11 @@ object HadoopUtils extends Logger {
     val keytab = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
     require(
       principal.nonEmpty && keytab.nonEmpty,
-      s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty"
-    )
+      s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty")
 
     val krb5 = kerberosConf.getOrElse(
       KEY_SECURITY_KERBEROS_KRB5_CONF,
-      kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, "")
-    ).trim
+      kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, "")).trim
 
     if (krb5.nonEmpty) {
       System.setProperty("java.security.krb5.conf", krb5)
@@ -249,12 +246,15 @@ object HadoopUtils extends Logger {
           if (kerberosEnable) {
             // reLogin...
             val timer = new Timer()
-            timer.schedule(new TimerTask {
-              override def run(): Unit = {
-                closeHadoop()
-                logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
-              }
-            }, tgtRefreshTime, tgtRefreshTime)
+            timer.schedule(
+              new TimerTask {
+                override def run(): Unit = {
+                  closeHadoop()
+                  logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
+                }
+              },
+              tgtRefreshTime,
+              tgtRefreshTime)
           }
           fs
         case Failure(e) =>
@@ -280,7 +280,8 @@ object HadoopUtils extends Logger {
     ApplicationId.newInstance(timestampAndId(1).toLong, timestampAndId.last.toInt)
   }
 
-  @throws[IOException] def downloadJar(jarOnHdfs: String): String = {
+  @throws[IOException]
+  def downloadJar(jarOnHdfs: String): String = {
     val tmpDir = FileUtils.createTempDir()
     val fs = FileSystem.get(new Configuration)
     val sourcePath = fs.makeQualified(new Path(jarOnHdfs))

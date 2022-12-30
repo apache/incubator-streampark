@@ -20,7 +20,4 @@ package org.apache.streampark.flink.submit.bean
 import java.util.{Map => JavaMap}
 import javax.annotation.Nullable
 
-case class SubmitResponse(clusterId: String,
-                          flinkConfig: JavaMap[String, String],
-                          @Nullable jobId: String = "",
-                          @Nullable jobManagerUrl: String = "")
+case class SubmitResponse(clusterId: String, flinkConfig: JavaMap[String, String], @Nullable jobId: String = "", @Nullable jobManagerUrl: String = "")

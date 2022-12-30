@@ -39,18 +39,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper, ApplicationLog>
     implements ApplicationLogService {
 
-    @Override
-    public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {
-        Page<ApplicationLog> page = new MybatisPager<ApplicationLog>().getPage(request, "option_time", Constant.ORDER_DESC);
-        LambdaQueryWrapper<ApplicationLog> queryWrapper = new LambdaQueryWrapper<ApplicationLog>()
+  @Override
+  public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {
+    Page<ApplicationLog> page =
+        new MybatisPager<ApplicationLog>().getPage(request, "option_time", Constant.ORDER_DESC);
+    LambdaQueryWrapper<ApplicationLog> queryWrapper =
+        new LambdaQueryWrapper<ApplicationLog>()
             .eq(ApplicationLog::getAppId, applicationLog.getAppId());
-        return this.page(page, queryWrapper);
-    }
+    return this.page(page, queryWrapper);
+  }
 
-    @Override
-    public void removeApp(Long appId) {
-        LambdaQueryWrapper<ApplicationLog> queryWrapper = new LambdaQueryWrapper<ApplicationLog>()
-            .eq(ApplicationLog::getAppId, appId);
-        this.remove(queryWrapper);
-    }
+  @Override
+  public void removeApp(Long appId) {
+    LambdaQueryWrapper<ApplicationLog> queryWrapper =
+        new LambdaQueryWrapper<ApplicationLog>().eq(ApplicationLog::getAppId, appId);
+    this.remove(queryWrapper);
+  }
 }

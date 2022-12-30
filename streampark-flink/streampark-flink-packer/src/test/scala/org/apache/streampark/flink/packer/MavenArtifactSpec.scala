@@ -16,21 +16,21 @@
  */
 package org.apache.streampark.flink.packer
 
-import org.apache.streampark.flink.packer.MavenArtifactSpec.illegalArtifactCoordsCases
-import org.apache.streampark.flink.packer.maven.Artifact
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import org.apache.streampark.flink.packer.MavenArtifactSpec.illegalArtifactCoordsCases
+import org.apache.streampark.flink.packer.maven.Artifact
+
 object MavenArtifactSpec {
 
-  lazy private[packer] val illegalArtifactCoordsCases = Array(
+  private[packer] lazy val illegalArtifactCoordsCases = Array(
     ":::",
     "org.apache.flink:flink-table:",
     ":flink-table:1.13.0",
     "org.apache.flink::1.13.0",
     "org.apache.flink:flink-table:",
-    "org.apache.flink:"
-  )
+    "org.apache.flink:")
 }
 
 class MavenArtifactSpec extends AnyWordSpec with Matchers {

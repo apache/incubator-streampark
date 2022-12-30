@@ -21,6 +21,4 @@ import org.apache.streampark.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface SettingMapper extends BaseMapper<Setting> {
-
-}
+public interface SettingMapper extends BaseMapper<Setting> {}

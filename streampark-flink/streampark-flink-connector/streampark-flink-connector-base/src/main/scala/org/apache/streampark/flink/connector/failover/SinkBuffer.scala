@@ -17,16 +17,15 @@
 
 package org.apache.streampark.flink.connector.failover
 
-import org.apache.streampark.common.util.Logger
-
 import java.util
 import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
+
 import scala.collection.JavaConversions._
 
-case class SinkBuffer(writer: SinkWriter,
-                      flushInterval: Long,
-                      bufferSize: Int) extends AutoCloseable with Logger {
+import org.apache.streampark.common.util.Logger
+
+case class SinkBuffer(writer: SinkWriter, flushInterval: Long, bufferSize: Int) extends AutoCloseable with Logger {
 
   private var timestamp = 0L
 
@@ -57,7 +56,8 @@ case class SinkBuffer(writer: SinkWriter,
   private[this] def flush: Boolean = {
     if (localValues.nonEmpty) {
       localValues.size >= bufferSize || {
-        if (timestamp == 0) false else {
+        if (timestamp == 0) false
+        else {
           val current = System.currentTimeMillis
           current - timestamp > flushInterval
         }

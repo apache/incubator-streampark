@@ -21,6 +21,4 @@ import org.apache.streampark.console.core.entity.Effective;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface EffectiveMapper extends BaseMapper<Effective> {
-
-}
+public interface EffectiveMapper extends BaseMapper<Effective> {}

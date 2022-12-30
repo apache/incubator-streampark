@@ -17,10 +17,6 @@
 
 package org.apache.streampark.flink.connector.elasticsearch5.internal
 
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.function.TransformFunction
 import org.apache.flink.api.common.functions.RuntimeContext
 import org.apache.flink.streaming.connectors.elasticsearch.{ElasticsearchSinkFunction, RequestIndexer}
 import org.elasticsearch.action.ActionRequest
@@ -28,20 +24,23 @@ import org.elasticsearch.action.delete.DeleteRequest
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest
 
-
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.function.TransformFunction
 
 class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchSinkFunction[T] with Logger {
 
   private[this] var scalaFunc: T => ActionRequest = _
   private[this] var javaFunc: TransformFunction[T, ActionRequest] = _
 
-  //for Scala
+  // for Scala
   def this(scalaFunc: T => ActionRequest) = {
     this(ApiType.scala)
     this.scalaFunc = scalaFunc
   }
 
-  //for JAVA
+  // for JAVA
   def this(javaFunc: TransformFunction[T, ActionRequest]) = {
     this(ApiType.java)
     this.javaFunc = javaFunc

@@ -17,10 +17,10 @@
 
 package org.apache.streampark.flink.core
 
+import java.util.concurrent.CompletableFuture
+
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.program.ClusterClient
-
-import java.util.concurrent.CompletableFuture
 
 abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
 
@@ -31,4 +31,3 @@ abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
   def stopWithSavepoint(jobID: JobID, b: Boolean, s: String): CompletableFuture[String] = clusterClient.stopWithSavepoint(jobID, b, s)
 
 }
-

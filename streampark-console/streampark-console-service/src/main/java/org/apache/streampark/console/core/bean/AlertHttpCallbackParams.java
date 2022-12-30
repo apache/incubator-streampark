@@ -31,16 +31,16 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertHttpCallbackParams implements Serializable {
 
-    @ApiModelProperty(name = "url", value = "callback url")
-    @NotBlank(message = "The url of callback must be not empty")
-    private String url;
+  @ApiModelProperty(name = "url", value = "callback url")
+  @NotBlank(message = "The url of callback must be not empty")
+  private String url;
 
-    @ApiModelProperty(name = "method", value = "http method")
-    private String method = "POST";
+  @ApiModelProperty(name = "method", value = "http method")
+  private String method = "POST";
 
-    @ApiModelProperty(name = "contentType", value = "content type", example = "application/json")
-    private String contentType;
+  @ApiModelProperty(name = "contentType", value = "content type", example = "application/json")
+  private String contentType;
 
-    @ApiModelProperty(name = "requestTemplate", value = "use freemarker template replace the params")
-    private String requestTemplate;
+  @ApiModelProperty(name = "requestTemplate", value = "use freemarker template replace the params")
+  private String requestTemplate;
 }

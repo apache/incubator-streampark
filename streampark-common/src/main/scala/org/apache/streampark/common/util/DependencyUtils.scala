@@ -17,6 +17,11 @@
 
 package org.apache.streampark.common.util
 
+import java.io.{File, IOException}
+import java.text.ParseException
+import java.util.UUID
+import java.util.function.Consumer
+
 import org.apache.ivy.Ivy
 import org.apache.ivy.core.LogOptions
 import org.apache.ivy.core.module.descriptor._
@@ -30,39 +35,32 @@ import org.apache.ivy.plugins.repository.file.FileRepository
 import org.apache.ivy.plugins.resolver.{ChainResolver, FileSystemResolver, IBiblioResolver}
 import org.apache.ivy.util.{DefaultMessageLogger, Message}
 
-import java.io.{File, IOException}
-import java.text.ParseException
-import java.util.UUID
-import java.util.function.Consumer
-
 object DependencyUtils {
 
-  @throws[Exception] def resolveMavenDependencies(
-                                                   packagesExclusions: String,
-                                                   packages: String,
-                                                   repositories: String,
-                                                   ivyRepoPath: String,
-                                                   ivySettingsPath: String,
-                                                   outCallback: Consumer[String]): List[String] = {
+  @throws[Exception]
+  def resolveMavenDependencies(
+      packagesExclusions: String,
+      packages: String,
+      repositories: String,
+      ivyRepoPath: String,
+      ivySettingsPath: String,
+      outCallback: Consumer[String]): List[String] = {
     val exclusions: Seq[String] = if (Utils.isEmpty(packagesExclusions)) Nil else packagesExclusions.split(",")
 
     // Create the IvySettings, either load from file or build defaults
     val ivySettings = ivySettingsPath match {
       case null => buildIvySettings(
-        Option(repositories),
-        Option(ivyRepoPath),
-        outCallback
-      )
+          Option(repositories),
+          Option(ivyRepoPath),
+          outCallback)
       case path => loadIvySettings(
-        path,
-        Option(repositories),
-        Option(ivyRepoPath),
-        outCallback
-      )
+          path,
+          Option(repositories),
+          Option(ivyRepoPath),
+          outCallback)
     }
     resolveMavenCoordinates(packages, ivySettings, exclusions, outCallback)
   }
-
 
   /**
    * Represents a Maven Coordinate
@@ -87,20 +85,16 @@ object DependencyUtils {
       val splits = p.replace("/", ":").split(":")
       require(
         splits.length == 3,
-        s"[StreamPark] DependencyUtils.extractMavenCoordinates: Provided Maven Coordinates must be in the form 'groupId:artifactId:version'. The coordinate provided is: $p"
-      )
+        s"[StreamPark] DependencyUtils.extractMavenCoordinates: Provided Maven Coordinates must be in the form 'groupId:artifactId:version'. The coordinate provided is: $p")
       require(
         splits(0) != null && splits(0).trim.nonEmpty,
-        s"[StreamPark] DependencyUtils.extractMavenCoordinates: The groupId cannot be null or be whitespace. The groupId provided is: ${splits(0)}"
-      )
+        s"[StreamPark] DependencyUtils.extractMavenCoordinates: The groupId cannot be null or be whitespace. The groupId provided is: ${splits(0)}")
       require(
         splits(1) != null && splits(1).trim.nonEmpty,
-        s"[StreamPark] DependencyUtils.extractMavenCoordinates: The artifactId cannot be null or be whitespace. The artifactId provided is: ${splits(1)}"
-      )
+        s"[StreamPark] DependencyUtils.extractMavenCoordinates: The artifactId cannot be null or be whitespace. The artifactId provided is: ${splits(1)}")
       require(
         splits(2) != null && splits(2).trim.nonEmpty,
-        s"[StreamPark] DependencyUtils.extractMavenCoordinates: The version cannot be null or be whitespace. The version provided is: ${splits(2)}"
-      )
+        s"[StreamPark] DependencyUtils.extractMavenCoordinates: The version cannot be null or be whitespace. The version provided is: ${splits(2)}")
       MavenCoordinate(splits(0), splits(1), splits(2))
     }
   }
@@ -138,8 +132,7 @@ object DependencyUtils {
       "[module]",
       "[revision]",
       "ivys",
-      "ivy.xml"
-    ).mkString(File.separator)
+      "ivy.xml").mkString(File.separator)
     localIvy.addIvyPattern(ivyPattern)
     val artifactPattern = Seq(
       localIvyRoot.getAbsolutePath,
@@ -147,8 +140,7 @@ object DependencyUtils {
       "[module]",
       "[revision]",
       "[type]s",
-      "[artifact](-[classifier]).[ext]"
-    ).mkString(File.separator)
+      "[artifact](-[classifier]).[ext]").mkString(File.separator)
 
     localIvy.addArtifactPattern(artifactPattern)
     localIvy.setName("local-ivy-cache")
@@ -171,8 +163,7 @@ object DependencyUtils {
    * @param cacheDirectory directory where jars are cached
    * @return a comma-delimited list of paths for the dependencies
    */
-  def resolveDependencyPaths(artifacts: Array[AnyRef],
-                             cacheDirectory: File): List[String] = {
+  def resolveDependencyPaths(artifacts: Array[AnyRef], cacheDirectory: File): List[String] = {
     artifacts.map { artifactInfo =>
       val artifact = artifactInfo.asInstanceOf[Artifact].getModuleRevisionId
       s"${cacheDirectory.getAbsolutePath}${File.separator}${artifact.getOrganisation}_${artifact.getName}-${artifact.getRevision}.jar"
@@ -180,10 +171,7 @@ object DependencyUtils {
   }
 
   /** Adds the given maven coordinates to Ivy's module descriptor. */
-  def addDependenciesToIvy(md: DefaultModuleDescriptor,
-                           artifacts: Seq[MavenCoordinate],
-                           ivyConfName: String,
-                           outCallback: Consumer[String]): Unit = {
+  def addDependenciesToIvy(md: DefaultModuleDescriptor, artifacts: Seq[MavenCoordinate], ivyConfName: String, outCallback: Consumer[String]): Unit = {
     artifacts.foreach { mvn =>
       val ri = ModuleRevisionId.newInstance(mvn.groupId, mvn.artifactId, mvn.version)
       val dd = new DefaultDependencyDescriptor(ri, false, false)
@@ -195,9 +183,9 @@ object DependencyUtils {
 
   /** Add exclusion rules for dependencies already included in the flink-dist */
   def addExclusionRules(
-                         ivySettings: IvySettings,
-                         ivyConfName: String,
-                         md: DefaultModuleDescriptor): Unit = {
+      ivySettings: IvySettings,
+      ivyConfName: String,
+      md: DefaultModuleDescriptor): Unit = {
     // Add scala exclusion rule
     md.addExcludeRule(createExclusion("*:scala-library:*", ivySettings, ivyConfName))
   }
@@ -231,11 +219,10 @@ object DependencyUtils {
    * @return An IvySettings object
    */
   def loadIvySettings(
-                       settingsFile: String,
-                       remoteRepos: Option[String],
-                       ivyPath: Option[String],
-                       outCallback: Consumer[String]
-                     ): IvySettings = {
+      settingsFile: String,
+      remoteRepos: Option[String],
+      ivyPath: Option[String],
+      outCallback: Consumer[String]): IvySettings = {
     val file = new File(settingsFile)
     require(file.exists(), s"[StreamPark] DependencyUtils.loadIvySettings: Ivy settings file $file does not exist")
     require(file.isFile, s"[StreamPark] DependencyUtils.loadIvySettings: Ivy settings file $file is not a normal file")
@@ -243,7 +230,7 @@ object DependencyUtils {
     try {
       ivySettings.load(file)
     } catch {
-      case e@(_: IOException | _: ParseException) =>
+      case e @ (_: IOException | _: ParseException) =>
         throw new RuntimeException(s"DependencyUtils.loadIvySettings: Failed when loading Ivy settings from $settingsFile", e)
     }
     processIvyPathArg(ivySettings, ivyPath)
@@ -288,18 +275,16 @@ object DependencyUtils {
     ModuleRevisionId.newInstance(
       "org.apache.streampark",
       s"dependency-parent-${UUID.randomUUID.toString}",
-      "1.0")
-  )
+      "1.0"))
 
   private def clearIvyResolutionFiles(
-                                       mdId: ModuleRevisionId,
-                                       ivySettings: IvySettings,
-                                       ivyConfName: String): Unit = {
+      mdId: ModuleRevisionId,
+      ivySettings: IvySettings,
+      ivyConfName: String): Unit = {
     val currentResolutionFiles = Seq(
       s"${mdId.getOrganisation}-${mdId.getName}-$ivyConfName.xml",
       s"resolved-${mdId.getOrganisation}-${mdId.getName}-${mdId.getRevision}.xml",
-      s"resolved-${mdId.getOrganisation}-${mdId.getName}-${mdId.getRevision}.properties"
-    )
+      s"resolved-${mdId.getOrganisation}-${mdId.getName}-${mdId.getRevision}.properties")
     currentResolutionFiles.foreach { filename =>
       new File(ivySettings.getDefaultCache, filename).delete()
     }
@@ -314,14 +299,15 @@ object DependencyUtils {
    * @return The comma-delimited path to the jars of the given maven artifacts including their
    *         transitive dependencies
    */
-  @throws[Exception] def resolveMavenCoordinates(
-                                                  coordinates: String,
-                                                  ivySettings: IvySettings,
-                                                  exclusions: Seq[String] = Nil,
-                                                  outCallback: Consumer[String],
-                                                  isTest: Boolean = false
-                                                ): List[String] = {
-    if (Utils.isEmpty(coordinates)) List.empty[String] else {
+  @throws[Exception]
+  def resolveMavenCoordinates(
+      coordinates: String,
+      ivySettings: IvySettings,
+      exclusions: Seq[String] = Nil,
+      outCallback: Consumer[String],
+      isTest: Boolean = false): List[String] = {
+    if (Utils.isEmpty(coordinates)) List.empty[String]
+    else {
       try {
         setDefaultLogger(outCallback)
         // To prevent ivy from logging to system out
@@ -368,8 +354,7 @@ object DependencyUtils {
         ivy.retrieve(
           rr.getModuleDescriptor.getModuleRevisionId,
           s"${packagesDirectory.getAbsolutePath}${File.separator}[organization]_[artifact]-[revision](-[classifier]).[ext]",
-          retrieveOptions.setConfs(Array(ivyConfName))
-        )
+          retrieveOptions.setConfs(Array(ivyConfName)))
         val paths = resolveDependencyPaths(rr.getArtifacts.toArray, packagesDirectory)
         val mdId = md.getModuleRevisionId
         clearIvyResolutionFiles(mdId, ivySettings, ivyConfName)
@@ -381,9 +366,9 @@ object DependencyUtils {
   }
 
   private def createExclusion(
-                               coords: String,
-                               ivySettings: IvySettings,
-                               ivyConfName: String): ExcludeRule = {
+      coords: String,
+      ivySettings: IvySettings,
+      ivyConfName: String): ExcludeRule = {
     val c = extractMavenCoordinates(coords).head
     val id = new ArtifactId(new ModuleId(c.groupId, c.artifactId), "*", "*", "*")
     val rule = new DefaultExcludeRule(id, ivySettings.getMatcher("glob"), null)
@@ -414,6 +399,5 @@ object DependencyUtils {
       override def error(msg: String): Unit = outCallback.accept(msg)
     })
   }
-
 
 }

@@ -28,19 +28,19 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
 
-    Boolean delete(Long id) throws InternalException;
+  Boolean delete(Long id) throws InternalException;
 
-    void backup(Application application, FlinkSql flinkSql);
+  void backup(Application application, FlinkSql flinkSql);
 
-    IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request);
+  IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request);
 
-    void rollback(ApplicationBackUp backUp);
+  void rollback(ApplicationBackUp backUp);
 
-    void revoke(Application application);
+  void revoke(Application application);
 
-    void removeApp(Application application);
+  void removeApp(Application application);
 
-    void rollbackFlinkSql(Application application, FlinkSql sql);
+  void rollbackFlinkSql(Application application, FlinkSql sql);
 
-    boolean isFlinkSqlBacked(Long appId, Long sqlId);
+  boolean isFlinkSqlBacked(Long appId, Long sqlId);
 }

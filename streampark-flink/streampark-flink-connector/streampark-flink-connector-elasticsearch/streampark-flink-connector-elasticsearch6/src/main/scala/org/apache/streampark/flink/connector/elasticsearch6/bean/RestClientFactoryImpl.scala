@@ -17,8 +17,6 @@
 
 package org.apache.streampark.flink.connector.elasticsearch6.bean
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.elasticsearch6.conf.ES6Config
 import org.apache.flink.streaming.connectors.elasticsearch6.RestClientFactory
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.CredentialsProvider
@@ -28,17 +26,19 @@ import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.message.BasicHeader
 import org.elasticsearch.client.RestClientBuilder
 
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.elasticsearch6.conf.ES6Config
+
 class RestClientFactoryImpl(val config: ES6Config) extends RestClientFactory with Logger {
   override def configureRestClientBuilder(restClientBuilder: RestClientBuilder): Unit = {
-    //httpClientConfigCallback and requestConfigCallback........
+    // httpClientConfigCallback and requestConfigCallback........
     def configCallback(): RestClientBuilder = {
       val userName = config.userName
       val password = config.password
-      //userName,password must be all set,or all not set..
+      // userName,password must be all set,or all not set..
       require(
         (userName != null && password != null) || (userName == null && password == null),
-        "[StreamPark] elasticsearch auth info error,userName,password must be all set,or all not set."
-      )
+        "[StreamPark] elasticsearch auth info error,userName,password must be all set,or all not set.")
       val credentialsProvider = (userName, password) match {
         case (null, null) => null
         case _ =>
@@ -53,7 +53,7 @@ class RestClientFactoryImpl(val config: ES6Config) extends RestClientFactory wit
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
             logInfo("elasticsearch auth by userName,password...")
           }
-          //other config....
+          // other config....
           httpClientBuilder
         }
       }

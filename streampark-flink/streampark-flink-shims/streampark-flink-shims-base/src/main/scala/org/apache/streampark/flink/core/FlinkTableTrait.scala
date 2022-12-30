@@ -16,8 +16,9 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.flink.core.EnhancerImplicit._
+import java.lang
+import java.util.Optional
+
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api._
@@ -27,12 +28,10 @@ import org.apache.flink.table.functions._
 import org.apache.flink.table.module.Module
 import org.apache.flink.table.types.AbstractDataType
 
+import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.flink.core.EnhancerImplicit._
 
-import java.lang
-import java.util.Optional
-
-abstract class FlinkTableTrait(val parameter: ParameterTool,
-                               private val tableEnv: TableEnvironment) extends TableEnvironment {
+abstract class FlinkTableTrait(val parameter: ParameterTool, private val tableEnv: TableEnvironment) extends TableEnvironment {
 
   def start(): JobExecutionResult = {
     val appName = parameter.getAppName(required = true)
@@ -64,19 +63,23 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
 
   override def unloadModule(moduleName: String): Unit = tableEnv.unloadModule(moduleName)
 
-  override def createTemporarySystemFunction(name: String, functionClass: Class[_ <: UserDefinedFunction]): Unit = tableEnv.createTemporarySystemFunction(name, functionClass)
+  override def createTemporarySystemFunction(name: String, functionClass: Class[_ <: UserDefinedFunction]): Unit =
+    tableEnv.createTemporarySystemFunction(name, functionClass)
 
-  override def createTemporarySystemFunction(name: String, functionInstance: UserDefinedFunction): Unit = tableEnv.createTemporarySystemFunction(name, functionInstance)
+  override def createTemporarySystemFunction(name: String, functionInstance: UserDefinedFunction): Unit =
+    tableEnv.createTemporarySystemFunction(name, functionInstance)
 
   override def dropTemporarySystemFunction(name: String): Boolean = tableEnv.dropTemporarySystemFunction(name)
 
   override def createFunction(path: String, functionClass: Class[_ <: UserDefinedFunction]): Unit = tableEnv.createFunction(path, functionClass)
 
-  override def createFunction(path: String, functionClass: Class[_ <: UserDefinedFunction], ignoreIfExists: Boolean): Unit = tableEnv.createFunction(path, functionClass)
+  override def createFunction(path: String, functionClass: Class[_ <: UserDefinedFunction], ignoreIfExists: Boolean): Unit =
+    tableEnv.createFunction(path, functionClass)
 
   override def dropFunction(path: String): Boolean = tableEnv.dropFunction(path)
 
-  override def createTemporaryFunction(path: String, functionClass: Class[_ <: UserDefinedFunction]): Unit = tableEnv.createTemporaryFunction(path, functionClass)
+  override def createTemporaryFunction(path: String, functionClass: Class[_ <: UserDefinedFunction]): Unit =
+    tableEnv.createTemporaryFunction(path, functionClass)
 
   override def createTemporaryFunction(path: String, functionInstance: UserDefinedFunction): Unit = tableEnv.createTemporaryFunction(path, functionInstance)
 
@@ -134,4 +137,3 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
 
   @deprecated override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
 }
-

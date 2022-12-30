@@ -35,81 +35,77 @@ import java.util.Date;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> implements FlinkEnvService {
+public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
+    implements FlinkEnvService {
 
-    /**
-     * two places will be checked:
-     * 1) name cannot be repeated
-     * 2) flink version need to be parsed
-     */
-    @Override
-    public boolean exists(FlinkEnv version) {
-        //1) check name
-        LambdaQueryWrapper<FlinkEnv> queryWrapper = new LambdaQueryWrapper<FlinkEnv>()
-            .eq(FlinkEnv::getFlinkName, version.getFlinkName());
-        if (version.getId() != null) {
-            queryWrapper.ne(FlinkEnv::getId, version.getId());
-        }
-        return this.count(queryWrapper) == 0;
+  /** two places will be checked: 1) name cannot be repeated 2) flink version need to be parsed */
+  @Override
+  public boolean exists(FlinkEnv version) {
+    // 1) check name
+    LambdaQueryWrapper<FlinkEnv> queryWrapper =
+        new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
+    if (version.getId() != null) {
+      queryWrapper.ne(FlinkEnv::getId, version.getId());
     }
+    return this.count(queryWrapper) == 0;
+  }
 
-    @Override
-    public boolean create(FlinkEnv version) throws Exception {
-        long count = this.baseMapper.selectCount(null);
-        version.setIsDefault(count == 0);
-        version.setCreateTime(new Date());
-        version.doSetFlinkConf();
-        version.doSetVersion();
-        return save(version);
-    }
+  @Override
+  public boolean create(FlinkEnv version) throws Exception {
+    long count = this.baseMapper.selectCount(null);
+    version.setIsDefault(count == 0);
+    version.setCreateTime(new Date());
+    version.doSetFlinkConf();
+    version.doSetVersion();
+    return save(version);
+  }
 
-    @Override
-    public void update(FlinkEnv version) throws IOException {
-        FlinkEnv flinkEnv = super.getById(version.getId());
-        if (flinkEnv == null) {
-            throw new RuntimeException("flink home message lost, please check database status!");
-        }
-        flinkEnv.setDescription(version.getDescription());
-        flinkEnv.setFlinkName(version.getFlinkName());
-        if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
-            flinkEnv.setFlinkHome(version.getFlinkHome());
-            flinkEnv.doSetFlinkConf();
-            flinkEnv.doSetVersion();
-        }
-        updateById(flinkEnv);
-        FlinkTrackingTask.getFlinkEnvMap().put(flinkEnv.getId(), flinkEnv);
+  @Override
+  public void update(FlinkEnv version) throws IOException {
+    FlinkEnv flinkEnv = super.getById(version.getId());
+    if (flinkEnv == null) {
+      throw new RuntimeException("flink home message lost, please check database status!");
     }
+    flinkEnv.setDescription(version.getDescription());
+    flinkEnv.setFlinkName(version.getFlinkName());
+    if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
+      flinkEnv.setFlinkHome(version.getFlinkHome());
+      flinkEnv.doSetFlinkConf();
+      flinkEnv.doSetVersion();
+    }
+    updateById(flinkEnv);
+    FlinkTrackingTask.getFlinkEnvMap().put(flinkEnv.getId(), flinkEnv);
+  }
 
-    @Override
-    public void setDefault(Long id) {
-        this.baseMapper.setDefault(id);
-    }
+  @Override
+  public void setDefault(Long id) {
+    this.baseMapper.setDefault(id);
+  }
 
-    @Override
-    public FlinkEnv getByAppId(Long appId) {
-        return this.baseMapper.getByAppId(appId);
-    }
+  @Override
+  public FlinkEnv getByAppId(Long appId) {
+    return this.baseMapper.getByAppId(appId);
+  }
 
-    @Override
-    public FlinkEnv getDefault() {
-        return this.baseMapper.selectOne(
-            new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getIsDefault, true)
-        );
-    }
+  @Override
+  public FlinkEnv getDefault() {
+    return this.baseMapper.selectOne(
+        new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getIsDefault, true));
+  }
 
-    @Override
-    public FlinkEnv getByIdOrDefault(Long id) {
-        FlinkEnv flinkEnv = getById(id);
-        if (flinkEnv == null) {
-            return getDefault();
-        }
-        return flinkEnv;
+  @Override
+  public FlinkEnv getByIdOrDefault(Long id) {
+    FlinkEnv flinkEnv = getById(id);
+    if (flinkEnv == null) {
+      return getDefault();
     }
+    return flinkEnv;
+  }
 
-    @Override
-    public void syncConf(Long id) throws IOException {
-        FlinkEnv flinkEnv = getById(id);
-        flinkEnv.doSetFlinkConf();
-        updateById(flinkEnv);
-    }
+  @Override
+  public void syncConf(Long id) throws IOException {
+    FlinkEnv flinkEnv = getById(id);
+    flinkEnv.doSetFlinkConf();
+    updateById(flinkEnv);
+  }
 }

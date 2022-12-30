@@ -17,21 +17,20 @@
 
 package org.apache.streampark.spark.core.serializable
 
+import java.io.IOException
+
 import org.apache.hadoop.io.{DataInputBuffer, NullWritable}
 import org.apache.hadoop.mapred.RawKeyValueIterator
+import org.apache.hadoop.mapreduce.{Job, _}
 import org.apache.hadoop.mapreduce.counters.GenericCounter
 import org.apache.hadoop.mapreduce.lib.output.{LazyOutputFormat, MultipleOutputs}
 import org.apache.hadoop.mapreduce.task.ReduceContextImpl
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl.DummyReporter
-import org.apache.hadoop.mapreduce.{Job, _}
 import org.apache.hadoop.util.Progress
-
-import java.io.IOException
 
 object MultipleOutputsFormat {
   // Type inference fails with this inlined in constructor parameters
-  private def defaultMultipleOutputsMaker[K, V](io: TaskInputOutputContext[_, _, K, V])
-  : MultipleOutputer[K, V] = new MultipleOutputs[K, V](io)
+  private def defaultMultipleOutputsMaker[K, V](io: TaskInputOutputContext[_, _, K, V]): MultipleOutputer[K, V] = new MultipleOutputs[K, V](io)
 }
 
 /**
@@ -44,10 +43,12 @@ object MultipleOutputsFormat {
  * @tparam K Basic OutputFormat's key type
  * @tparam V Basic OutputFormat's value type
  */
-abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
-                                           multipleOutputsMaker: TaskInputOutputContext[_, _, K, V] => MultipleOutputer[K, V] =
-                                           (r: TaskInputOutputContext[_, _, K, V]) => MultipleOutputsFormat.defaultMultipleOutputsMaker[K, V](r))
-  extends OutputFormat[(String, K), V] {
+abstract class MultipleOutputsFormat[K, V](
+    outputFormat: OutputFormat[K, V],
+    multipleOutputsMaker: TaskInputOutputContext[_, _, K, V] => MultipleOutputer[K, V] =
+      (r: TaskInputOutputContext[_, _, K, V]) => MultipleOutputsFormat.defaultMultipleOutputsMaker[K, V](r))
+    extends OutputFormat[(String, K), V] {
+
   /**
    * Check for validity of the output-specification for the job.
    *
@@ -86,10 +87,18 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
       val job: Job = Job.getInstance(context.getConfiguration)
       LazyOutputFormat.setOutputFormatClass(job, outputFormat.getClass)
       // of Spark's saveAs*Hadoop* methods
-      val ioContext = new ReduceContextImpl(job.getConfiguration, context.getTaskAttemptID,
-        new DummyIterator, new GenericCounter, new GenericCounter,
-        new DummyRecordWriter, new DummyOutputCommitter, new DummyReporter, null,
-        classOf[NullWritable], classOf[NullWritable])
+      val ioContext = new ReduceContextImpl(
+        job.getConfiguration,
+        context.getTaskAttemptID,
+        new DummyIterator,
+        new GenericCounter,
+        new GenericCounter,
+        new DummyRecordWriter,
+        new DummyOutputCommitter,
+        new DummyReporter,
+        null,
+        classOf[NullWritable],
+        classOf[NullWritable])
 
       val multipleOutputs: MultipleOutputer[K, V] = multipleOutputsMaker(ioContext)
 
@@ -109,7 +118,6 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
 
       override def close(context: TaskAttemptContext): Unit = multipleOutputs.close()
     }
-
 
   private class DummyOutputCommitter extends OutputCommitter {
     override def setupJob(jobContext: JobContext): Unit = ()

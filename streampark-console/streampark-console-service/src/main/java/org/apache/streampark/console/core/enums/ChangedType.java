@@ -21,66 +21,57 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public enum ChangedType implements Serializable {
-    /**
-     * none changed
-     */
-    NONE(0),
+  /** none changed */
+  NONE(0),
 
-    /**
-     * dependency has changed
-     */
-    DEPENDENCY(1),
+  /** dependency has changed */
+  DEPENDENCY(1),
 
-    /**
-     * sql has changed
-     */
-    SQL(2),
+  /** sql has changed */
+  SQL(2),
 
-    /**
-     * both
-     */
-    ALL(3);
+  /** both */
+  ALL(3);
 
+  private final int value;
 
-    private final int value;
+  ChangedType(int value) {
+    this.value = value;
+  }
 
-    ChangedType(int value) {
-        this.value = value;
+  public int get() {
+    return this.value;
+  }
+
+  public static ChangedType of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+  }
+
+  public boolean noChanged() {
+    return this.equals(NONE);
+  }
+
+  public boolean hasChanged() {
+    return !noChanged();
+  }
+
+  public boolean isDependencyChanged() {
+    return this.equals(ALL) || this.equals(DEPENDENCY);
+  }
+
+  @Override
+  public String toString() {
+    switch (this) {
+      case NONE:
+        return "[NONE], nothing to changed";
+      case DEPENDENCY:
+        return "[DEPENDENCY], Dependency is changed";
+      case SQL:
+        return "[SQL], Flink Sql is changed";
+      case ALL:
+        return "[ALL], Dependency and Flink Sql all changed";
+      default:
+        return null;
     }
-
-    public int get() {
-        return this.value;
-    }
-
-    public static ChangedType of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-    }
-
-    public boolean noChanged() {
-        return this.equals(NONE);
-    }
-
-    public boolean hasChanged() {
-        return !noChanged();
-    }
-
-    public boolean isDependencyChanged() {
-        return this.equals(ALL) || this.equals(DEPENDENCY);
-    }
-
-    @Override
-    public String toString() {
-        switch (this) {
-            case NONE:
-                return "[NONE], nothing to changed";
-            case DEPENDENCY:
-                return "[DEPENDENCY], Dependency is changed";
-            case SQL:
-                return "[SQL], Flink Sql is changed";
-            case ALL:
-                return "[ALL], Dependency and Flink Sql all changed";
-            default:
-                return null;
-        }
-    }
+  }
 }

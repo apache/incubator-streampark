@@ -17,17 +17,19 @@
 
 package org.apache.streampark.spark.connector.kafka.source
 
-import org.apache.streampark.spark.connector.kafka.offset.KafkaClient
-import org.apache.streampark.spark.connector.source.Source
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.spark.streaming.dstream.DStream
-import org.apache.spark.streaming.kafka010.{HasOffsetRanges, OffsetRange}
-import org.apache.spark.streaming.{StreamingContext, Time}
-
 import java.util.concurrent.ConcurrentHashMap
+
 import scala.language.postfixOps
 import scala.reflect.ClassTag
 import scala.util.Try
+
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.spark.streaming.{StreamingContext, Time}
+import org.apache.spark.streaming.dstream.DStream
+import org.apache.spark.streaming.kafka010.{HasOffsetRanges, OffsetRange}
+
+import org.apache.streampark.spark.connector.kafka.offset.KafkaClient
+import org.apache.streampark.spark.connector.source.Source
 
 /**
  * Wrapped Kafka Direct Api
@@ -35,9 +37,8 @@ import scala.util.Try
  * @param ssc StreamingContext
  * @param overrideParams specific kafka params
  */
-class KafkaSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext,
-                                            overrideParams: Map[String, String] = Map.empty[String, String]
-                                           ) extends Source {
+class KafkaSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String])
+    extends Source {
 
   override val prefix: String = "spark.source.kafka.consume."
 
@@ -45,8 +46,8 @@ class KafkaSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext
   lazy val repartition: Int = sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
 
   // kafka consume topic
-  private lazy val topicSet: Set[String] = overrideParams.getOrElse("consume.topics",
-    sparkConf.get("spark.source.kafka.consume.topics")).split(",").map(_.trim).toSet
+  private lazy val topicSet: Set[String] =
+    overrideParams.getOrElse("consume.topics", sparkConf.get("spark.source.kafka.consume.topics")).split(",").map(_.trim).toSet
 
   // assemble kafka params
   private lazy val kafkaParams: Map[String, String] = {

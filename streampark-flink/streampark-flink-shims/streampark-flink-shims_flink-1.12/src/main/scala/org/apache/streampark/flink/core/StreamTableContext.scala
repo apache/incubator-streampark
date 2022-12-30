@@ -31,9 +31,8 @@ import org.apache.flink.table.sources.TableSource
  * @param streamEnv streamEnv
  * @param tableEnv tableEnv
  */
-class StreamTableContext(override val parameter: ParameterTool,
-                         private val streamEnv: StreamExecutionEnvironment,
-                         private val tableEnv: StreamTableEnvironment) extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
+class StreamTableContext(override val parameter: ParameterTool, private val streamEnv: StreamExecutionEnvironment, private val tableEnv: StreamTableEnvironment)
+    extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
 
   /**
    * for scala
@@ -45,7 +44,6 @@ class StreamTableContext(override val parameter: ParameterTool,
    */
   def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-
   @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
   def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
@@ -56,7 +54,8 @@ class StreamTableContext(override val parameter: ParameterTool,
 
   @deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
 
-  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
+  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
+    tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
   @deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
 

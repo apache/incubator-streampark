@@ -29,27 +29,27 @@ import java.util.Date;
 @TableName("t_log")
 public class SysLog implements Serializable {
 
-    private static final long serialVersionUID = -8878596941954995444L;
+  private static final long serialVersionUID = -8878596941954995444L;
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+  @TableId(type = IdType.AUTO)
+  private Long id;
 
-    private String username;
+  private String username;
 
-    private String operation;
+  private String operation;
 
-    private Long time;
+  private Long time;
 
-    private String method;
+  private String method;
 
-    private String params;
+  private String params;
 
-    private String ip;
+  private String ip;
 
-    private Date createTime;
+  private Date createTime;
 
-    private transient String createTimeFrom;
-    private transient String createTimeTo;
+  private transient String createTimeFrom;
+  private transient String createTimeTo;
 
-    private String location;
+  private String location;
 }

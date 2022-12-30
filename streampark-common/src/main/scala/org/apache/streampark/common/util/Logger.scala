@@ -16,8 +16,8 @@
  */
 package org.apache.streampark.common.util
 
+import org.slf4j.{Logger => SlfLogger, LoggerFactory}
 import org.slf4j.impl.StaticLoggerBinder
-import org.slf4j.{LoggerFactory, Logger => SlfLogger}
 
 trait Logger {
 
@@ -96,4 +96,3 @@ private object Logger {
   @volatile private var initialized = false
   val initLock = new Object()
 }
-

@@ -17,20 +17,21 @@
 
 package org.apache.streampark.flink.connector.elasticsearch6.conf
 
-import org.apache.streampark.common.conf.ConfigOption
-import org.apache.streampark.common.util.ConfigUtils
+import java.net.InetSocketAddress
+import java.util.{Map => JavaMap, Properties}
+
+import scala.collection.JavaConverters._
+
 import org.apache.http.HttpHost
 
-import java.net.InetSocketAddress
-import java.util.{Properties, Map => JavaMap}
-import scala.collection.JavaConverters._
+import org.apache.streampark.common.conf.ConfigOption
+import org.apache.streampark.common.util.ConfigUtils
 
 object ESSinkConfigOption {
 
   val ES_SINK_PREFIX = "es.sink"
 
   /**
-   *
    * @param properties
    * @return
    */
@@ -50,124 +51,108 @@ class ESSinkConfigOption(prefixStr: String, properties: Properties) extends Seri
     key = "es.disableFlushOnCheckpoint",
     required = false,
     classType = classOf[Boolean],
-    defaultValue = false
-  )
+    defaultValue = false)
 
   val host: ConfigOption[Array[HttpHost]] = ConfigOption(
     key = "host",
     required = true,
     classType = classOf[Array[InetSocketAddress]],
-    handle = key => properties.getProperty(key).split(SIGN_COMMA).map(x => {
-      x.split(SIGN_COLON) match {
-        case Array(host, port) => new HttpHost(host, port.toInt)
-      }
-    })
-  )
+    handle = key =>
+      properties.getProperty(key).split(SIGN_COMMA).map(x => {
+        x.split(SIGN_COLON) match {
+          case Array(host, port) => new HttpHost(host, port.toInt)
+        }
+      }))
 
   val userName: ConfigOption[String] = ConfigOption(
     key = "es.auth.user",
     required = false,
     classType = classOf[String],
-    defaultValue = null
-  )
+    defaultValue = null)
 
   val password: ConfigOption[String] = ConfigOption(
     key = "es.auth.password",
     required = false,
     classType = classOf[String],
-    defaultValue = null
-  )
+    defaultValue = null)
 
   val connectRequestTimeout: ConfigOption[Int] = ConfigOption(
     key = "es.connect.request.timeout",
     required = false,
     classType = classOf[Int],
-    defaultValue = -1
-  )
+    defaultValue = -1)
 
   val connectTimeout: ConfigOption[Int] = ConfigOption(
     key = "es.connect.timeout",
     required = false,
     classType = classOf[Int],
-    defaultValue = -1
-  )
+    defaultValue = -1)
 
   val maxRetry: ConfigOption[Int] = ConfigOption(
     key = "es.rest.max.retry.timeout",
     required = false,
     classType = classOf[Int],
-    defaultValue = 10000
-  )
+    defaultValue = 10000)
 
   val contentType: ConfigOption[String] = ConfigOption(
     key = "es.rest.content.type",
     required = false,
     classType = classOf[String],
-    defaultValue = "application/json"
-  )
+    defaultValue = "application/json")
 
   val pathPrefix: ConfigOption[String] = ConfigOption(
     key = "es.rest.path.prefix",
     required = false,
     classType = classOf[String],
-    defaultValue = null
-  )
+    defaultValue = null)
 
   val staleConnectionCheckEnabled: ConfigOption[Boolean] = ConfigOption(
     key = "es.connect.check.enable",
     required = false,
     classType = classOf[Boolean],
-    defaultValue = false
-  )
+    defaultValue = false)
 
   val redirectsEnabled: ConfigOption[Boolean] = ConfigOption(
     key = "es.redirects.enable",
     required = false,
     classType = classOf[Boolean],
-    defaultValue = false
-  )
+    defaultValue = false)
 
   val maxRedirects: ConfigOption[Int] = ConfigOption(
     key = "es.max.redirects",
     required = false,
     classType = classOf[Int],
-    defaultValue = 50
-  )
+    defaultValue = 50)
 
   val relativeRedirectsAllowed: ConfigOption[Boolean] = ConfigOption(
     key = "es.relative.redirects.allowed",
     required = false,
     classType = classOf[Boolean],
-    defaultValue = true
-  )
+    defaultValue = true)
 
   val authenticationEnabled: ConfigOption[Boolean] = ConfigOption(
     key = "es.authentication.enable",
     required = false,
     classType = classOf[Boolean],
-    defaultValue = true
-  )
+    defaultValue = true)
 
   val socketTimeout: ConfigOption[Int] = ConfigOption(
     key = "es.socket.timeout",
     required = false,
     classType = classOf[Int],
-    defaultValue = -1
-  )
+    defaultValue = -1)
 
   val contentCompressionEnabled: ConfigOption[Boolean] = ConfigOption(
     key = "es.content.compression.enable",
     required = false,
     classType = classOf[Boolean],
-    defaultValue = true
-  )
+    defaultValue = true)
 
   val normalizeUri: ConfigOption[Boolean] = ConfigOption(
     key = "es.normalize.uri",
     required = false,
     classType = classOf[Boolean],
-    defaultValue = true
-  )
+    defaultValue = true)
 
   def getInternalConfig(): JavaMap[String, String] = {
     ConfigUtils.getConf(prop.asScala.asJava, prefix)(alias = "").asScala.asJava

@@ -17,14 +17,15 @@
 
 package org.apache.streampark.spark.connector.kafka.writer
 
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.dstream.DStream
-
 import java.util.Properties
+
 import scala.collection.mutable
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
+
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.dstream.DStream
 
 /**
  * Import this object in this form:
@@ -42,11 +43,12 @@ private[kafka] object KafkaWriter {
   private val producers = new mutable.HashMap[Properties, Any]()
 
   def getProducer[K, V](config: Properties): KafkaProducer[K, V] = {
-    producers.getOrElse(config, {
-      val producer = new KafkaProducer[K, V](config)
-      producers(config) = producer
-      producer
-    }).asInstanceOf[KafkaProducer[K, V]]
+    producers.getOrElse(
+      config, {
+        val producer = new KafkaProducer[K, V](config)
+        producers(config) = producer
+        producer
+      }).asInstanceOf[KafkaProducer[K, V]]
   }
 
   /**
@@ -105,7 +107,6 @@ private[kafka] object KafkaWriter {
  * }
  *
  * }}}
- *
  */
 abstract class KafkaWriter[T: ClassTag]() extends Serializable {
 
@@ -122,7 +123,6 @@ abstract class KafkaWriter[T: ClassTag]() extends Serializable {
    *                       [[ProducerRecord]]s.
    * @tparam K The type of the key
    * @tparam V The type of the value
-   *
    */
   def writeToKafka[K, V](producerConfig: Properties, serializerFunc: T => ProducerRecord[K, V]): Unit
 }

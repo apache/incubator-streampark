@@ -16,16 +16,17 @@
  */
 package org.apache.streampark.flink.packer
 
-import org.apache.streampark.flink.packer.maven.{Artifact, DependencyInfo, MavenTool}
+import java.io.File
+import java.util.jar.JarFile
+
+import scala.language.postfixOps
+
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import java.io.File
-import java.util.jar.JarFile
-import scala.language.postfixOps
-
+import org.apache.streampark.flink.packer.maven.{Artifact, DependencyInfo, MavenTool}
 
 class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
@@ -70,8 +71,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
           null,
           DependencyInfo(
             Set(Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
-            Set(path("jars/commons-dbutils-1.7.jar"))
-          ),
+            Set(path("jars/commons-dbutils-1.7.jar"))),
           fatJarPath)
         fatJar.exists() mustBe true
         assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-dbutils-1.7.jar")), "org/apache/commons/dbutils/DbUtils.class"))
@@ -94,8 +94,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       "with mutiply artifact" in {
         val jars = MavenTool.resolveArtifacts(Set(
           Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0"),
-          Artifact.of("org.apache.flink:flink-connector-base:1.13.0")
-        ))
+          Artifact.of("org.apache.flink:flink-connector-base:1.13.0")))
         val expectJars = Array(
           "flink-core-1.13.0.jar",
           "force-shading-1.13.0.jar",
@@ -112,6 +111,4 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
     }
   }
 
-
 }
-

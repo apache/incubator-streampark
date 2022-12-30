@@ -17,7 +17,11 @@
 
 package org.apache.streampark.flink.submit.tool
 
-import org.apache.streampark.common.util.Logger
+import java.io.File
+import java.nio.charset.StandardCharsets
+
+import scala.util.{Failure, Success, Try}
+
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration.{Configuration, CoreOptions}
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
@@ -26,15 +30,12 @@ import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.apache.hc.core5.util.Timeout
-import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 
-import java.io.File
-import java.nio.charset.StandardCharsets
-import scala.util.{Failure, Success, Try}
-
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 
 object FlinkSessionSubmitHelper extends Logger {
 
@@ -49,7 +50,8 @@ object FlinkSessionSubmitHelper extends Logger {
    * @param flinkConfig flink configuration
    * @return jobID of submitted flink job
    */
-  @throws[Exception] def submitViaRestApi(jmRestUrl: String, flinkJobJar: File, flinkConfig: Configuration): String = {
+  @throws[Exception]
+  def submitViaRestApi(jmRestUrl: String, flinkJobJar: File, flinkConfig: Configuration): String = {
     // upload flink-job jar
     val uploadResult = Request.post(s"$jmRestUrl/jars/upload")
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
@@ -57,8 +59,7 @@ object FlinkSessionSubmitHelper extends Logger {
       .body(MultipartEntityBuilder
         .create()
         .addBinaryBody("jarfile", flinkJobJar, ContentType.create("application/java-archive"), flinkJobJar.getName)
-        .build()
-      ).execute
+        .build()).execute
       .returnContent()
       .asString(StandardCharsets.UTF_8)
 
@@ -66,8 +67,7 @@ object FlinkSessionSubmitHelper extends Logger {
       case Success(ok) =>
         JarUploadResponse(
           (ok \ "filename").extractOpt[String].orNull,
-          (ok \ "status").extractOpt[String].orNull
-        )
+          (ok \ "status").extractOpt[String].orNull)
       case Failure(_) => null
     }
 
@@ -90,12 +90,10 @@ object FlinkSessionSubmitHelper extends Logger {
 
 }
 
-
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[submit] case class JarUploadResponse(filename: String,
-                                             status: String) {
+private[submit] case class JarUploadResponse(filename: String, status: String) {
 
   def isSuccessful: Boolean = "success".equalsIgnoreCase(status)
 
@@ -105,22 +103,14 @@ private[submit] case class JarUploadResponse(filename: String,
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[submit] case class JarRunRequest(entryClass: String,
-                                         programArgs: String,
-                                         parallelism: String,
-                                         savepointPath: String,
-                                         allowNonRestoredState: Boolean) {
+private[submit] case class JarRunRequest(entryClass: String, programArgs: String, parallelism: String, savepointPath: String, allowNonRestoredState: Boolean) {
   def this(flinkConf: Configuration) {
     this(
       entryClass = flinkConf.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS),
       programArgs = Option(flinkConf.get(ApplicationConfiguration.APPLICATION_ARGS)).map(String.join(" ", _)).orNull,
       parallelism = String.valueOf(flinkConf.get(CoreOptions.DEFAULT_PARALLELISM)),
       savepointPath = flinkConf.get(SavepointConfigOptions.SAVEPOINT_PATH),
-      allowNonRestoredState = flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE)
-    )
+      allowNonRestoredState = flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE))
   }
 
 }
-
-
-

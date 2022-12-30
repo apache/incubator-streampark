@@ -28,25 +28,25 @@ import java.util.List;
 
 public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
-    void create(Application application, Boolean latest);
+  void create(Application application, Boolean latest);
 
-    void update(Application application, Boolean latest);
+  void update(Application application, Boolean latest);
 
-    void setLatestOrEffective(Boolean latest, Long configId, Long appId);
+  void setLatestOrEffective(Boolean latest, Long configId, Long appId);
 
-    void toEffective(Long appId, Long configId);
+  void toEffective(Long appId, Long configId);
 
-    ApplicationConfig getLatest(Long appId);
+  ApplicationConfig getLatest(Long appId);
 
-    ApplicationConfig getEffective(Long appId);
+  ApplicationConfig getEffective(Long appId);
 
-    ApplicationConfig get(Long id);
+  ApplicationConfig get(Long id);
 
-    IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request);
+  IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request);
 
-    List<ApplicationConfig> history(Application application);
+  List<ApplicationConfig> history(Application application);
 
-    String readTemplate();
+  String readTemplate();
 
-    void removeApp(Long appId);
+  void removeApp(Long appId);
 }

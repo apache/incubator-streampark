@@ -16,14 +16,15 @@
  */
 package org.apache.streampark.common.domain
 
-import org.apache.streampark.common.util.{CommandUtils, Logger}
-
 import java.io.File
 import java.net.{URL => NetURL}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.function.Consumer
 import java.util.regex.Pattern
+
 import scala.collection.JavaConversions._
+
+import org.apache.streampark.common.util.{CommandUtils, Logger}
 
 /**
  * @param flinkHome actual flink home that must be a readable local path
@@ -42,7 +43,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
       matcher.group(1);
     } else {
       // flink 1.15 + on support scala 2.12
-       "2.12"
+      "2.12"
     }
   }
 
@@ -63,16 +64,19 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
     val cmd = List(s"java -classpath ${flinkDistJar.getAbsolutePath} org.apache.flink.client.cli.CliFrontend --version")
     val success = new AtomicBoolean(false)
     val buffer = new StringBuilder
-    CommandUtils.execute(flinkLib.getAbsolutePath, cmd, new Consumer[String]() {
-      override def accept(out: String): Unit = {
-        buffer.append(out).append("\n")
-        val matcher = FLINK_VERSION_PATTERN.matcher(out)
-        if (matcher.find) {
-          success.set(true)
-          flinkVersion.set(matcher.group(1))
+    CommandUtils.execute(
+      flinkLib.getAbsolutePath,
+      cmd,
+      new Consumer[String]() {
+        override def accept(out: String): Unit = {
+          buffer.append(out).append("\n")
+          val matcher = FLINK_VERSION_PATTERN.matcher(out)
+          if (matcher.find) {
+            success.set(true)
+            flinkVersion.set(matcher.group(1))
+          }
         }
-      }
-    })
+      })
     logInfo(buffer.toString())
     if (!success.get()) {
       throw new IllegalStateException(s"[StreamPark] parse flink version failed. $buffer")

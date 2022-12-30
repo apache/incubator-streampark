@@ -24,11 +24,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface EffectiveService extends IService<Effective> {
 
-    void delete(Long appId, EffectiveType config);
+  void delete(Long appId, EffectiveType config);
 
-    Effective get(Long appId, EffectiveType config);
+  Effective get(Long appId, EffectiveType config);
 
-    void saveOrUpdate(Long appId, EffectiveType type, Long id);
+  void saveOrUpdate(Long appId, EffectiveType type, Long id);
 
-    void removeApp(Long appId);
+  void removeApp(Long appId);
 }

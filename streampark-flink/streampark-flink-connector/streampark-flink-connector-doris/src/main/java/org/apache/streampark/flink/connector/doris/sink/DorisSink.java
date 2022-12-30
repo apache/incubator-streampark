@@ -25,29 +25,31 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink;
 
 public class DorisSink<T> {
 
-    private final StreamingContext context;
-    public DorisSink(StreamingContext context) {
-        this.context = context;
-    }
+  private final StreamingContext context;
 
-    /**
-     * java stream
-     * @param source
-     * @return
-     */
-    public DataStreamSink<T> sink(DataStream<T> source) {
-        DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context);
-        return source.addSink(sinkFunction);
-    }
+  public DorisSink(StreamingContext context) {
+    this.context = context;
+  }
 
-    /**
-     * scala stream
-     * @param source
-     * @return
-     */
-    public DataStreamSink<T> sink(org.apache.flink.streaming.api.scala.DataStream<T> source) {
-        DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context);
-        return source.addSink(sinkFunction);
-    }
+  /**
+   * java stream
+   *
+   * @param source
+   * @return
+   */
+  public DataStreamSink<T> sink(DataStream<T> source) {
+    DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context);
+    return source.addSink(sinkFunction);
+  }
 
+  /**
+   * scala stream
+   *
+   * @param source
+   * @return
+   */
+  public DataStreamSink<T> sink(org.apache.flink.streaming.api.scala.DataStream<T> source) {
+    DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context);
+    return source.addSink(sinkFunction);
+  }
 }

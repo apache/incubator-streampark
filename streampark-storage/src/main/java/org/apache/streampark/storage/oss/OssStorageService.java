@@ -33,56 +33,63 @@ import java.io.File;
 @Slf4j
 public class OssStorageService implements StorageService {
 
-    final OssConfig ossConfig;
-    final OSS ossClient;
+  final OssConfig ossConfig;
+  final OSS ossClient;
 
-    public OssStorageService(OssConfig config) {
-        this.ossConfig = config;
-        this.ossClient = new OSSClientBuilder()
-            .build(ossConfig.getEndpoint(), ossConfig.getAccessKeyId(), ossConfig.getAccessKeySecret());
+  public OssStorageService(OssConfig config) {
+    this.ossConfig = config;
+    this.ossClient =
+        new OSSClientBuilder()
+            .build(
+                ossConfig.getEndpoint(),
+                ossConfig.getAccessKeyId(),
+                ossConfig.getAccessKeySecret());
+  }
+
+  @Override
+  public void getData(String objectPath, String localFilePath) throws Exception {
+    String bucket = ossConfig.getBucket();
+
+    if (!ossClient.doesObjectExist(bucket, objectPath)) {
+      throw new RuntimeException(String.format("File '%s' not exist", objectPath));
     }
 
-    @Override
-    public void getData(String objectPath, String localFilePath) throws Exception {
-        String bucket = ossConfig.getBucket();
-
-        if (!ossClient.doesObjectExist(bucket, objectPath)) {
-            throw new RuntimeException(String.format("File '%s' not exist", objectPath));
-        }
-
-        try {
-            ossClient.getObject(new GetObjectRequest(bucket, objectPath), new File(localFilePath));
-        } catch (Exception e) {
-            log.error("GetData failed. ObjectPath: {}, local path: {}.", objectPath, localFilePath, e);
-            throw handleOssException(e);
-        }
+    try {
+      ossClient.getObject(new GetObjectRequest(bucket, objectPath), new File(localFilePath));
+    } catch (Exception e) {
+      log.error("GetData failed. ObjectPath: {}, local path: {}.", objectPath, localFilePath, e);
+      throw handleOssException(e);
     }
+  }
 
-    @Override
-    public void putData(String objectPath, String localFilePath) throws Exception {
-        try {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(ossConfig.getBucket(), objectPath, new File(localFilePath));
-            ossClient.putObject(putObjectRequest);
-        } catch (Exception e) {
-            log.error("PutData failed. ObjectPath: {}, local path: {}.", objectPath, localFilePath, e);
-            throw handleOssException(e);
-        }
+  @Override
+  public void putData(String objectPath, String localFilePath) throws Exception {
+    try {
+      PutObjectRequest putObjectRequest =
+          new PutObjectRequest(ossConfig.getBucket(), objectPath, new File(localFilePath));
+      ossClient.putObject(putObjectRequest);
+    } catch (Exception e) {
+      log.error("PutData failed. ObjectPath: {}, local path: {}.", objectPath, localFilePath, e);
+      throw handleOssException(e);
     }
+  }
 
-    @VisibleForTesting
-    static RuntimeException handleOssException(Exception e) {
-        if (e instanceof OSSException) {
-            OSSException oe = (OSSException) e;
-            String errMsg = String.format("Caught an OSSException. Error Message: %s." +
-                    " Error Code: %s. Request ID: %s", oe.getErrorMessage(), oe.getErrorCode(),
-                oe.getRequestId());
-            return new RuntimeException(errMsg, oe);
-        } else if (e instanceof ClientException) {
-            ClientException ce = (ClientException) e;
-            String errMsg = String.format("Caught an ClientException. Error Message: %s.", ce.getMessage());
-            return new RuntimeException(errMsg, ce);
-        } else {
-            return new RuntimeException(e);
-        }
+  @VisibleForTesting
+  static RuntimeException handleOssException(Exception e) {
+    if (e instanceof OSSException) {
+      OSSException oe = (OSSException) e;
+      String errMsg =
+          String.format(
+              "Caught an OSSException. Error Message: %s." + " Error Code: %s. Request ID: %s",
+              oe.getErrorMessage(), oe.getErrorCode(), oe.getRequestId());
+      return new RuntimeException(errMsg, oe);
+    } else if (e instanceof ClientException) {
+      ClientException ce = (ClientException) e;
+      String errMsg =
+          String.format("Caught an ClientException. Error Message: %s.", ce.getMessage());
+      return new RuntimeException(errMsg, ce);
+    } else {
+      return new RuntimeException(e);
     }
+  }
 }

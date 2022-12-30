@@ -17,17 +17,15 @@
 
 package org.apache.streampark.flink.connector.redis.bean
 
+import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper => BahirRedisMapper}
+
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.flink.connector.function.TransformFunction
-import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper => BahirRedisMapper}
 
 object RedisMapper {
 
-  def map[T](cmd: RedisCommand,
-             additionalKey: String,
-             scalaKeyFun: T => String,
-             scalaValueFun: T => String): RedisMapper[T] = {
+  def map[T](cmd: RedisCommand, additionalKey: String, scalaKeyFun: T => String, scalaValueFun: T => String): RedisMapper[T] = {
     require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
     require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
     require(scalaKeyFun != null, () => s"redis scalaKeyFun  insert failoverTable must not null")
@@ -35,10 +33,7 @@ object RedisMapper {
     new RedisMapper[T](cmd, additionalKey, scalaKeyFun, scalaValueFun)
   }
 
-  def map[T](cmd: RedisCommand,
-             additionalKey: String,
-             javaKeyFun: TransformFunction[T, String],
-             javaValueFun: TransformFunction[T, String]): RedisMapper[T] = {
+  def map[T](cmd: RedisCommand, additionalKey: String, javaKeyFun: TransformFunction[T, String], javaValueFun: TransformFunction[T, String]): RedisMapper[T] = {
     require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
     require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
     require(javaKeyFun != null, () => s"redis javaKeyFun  insert failoverTable must not null")
@@ -54,31 +49,24 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
   private[this] var javaKeyFun: TransformFunction[T, String] = _
   private[this] var javaValueFun: TransformFunction[T, String] = _
 
-  //for scala
+  // for scala
   def this() = {
     this(ApiType.scala, null, "")
   }
 
-  //for scala
-  def this(cmd: RedisCommand,
-           additionalKey: String,
-           scalaKeyFun: T => String,
-           scalaValueFun: T => String) = {
+  // for scala
+  def this(cmd: RedisCommand, additionalKey: String, scalaKeyFun: T => String, scalaValueFun: T => String) = {
     this(ApiType.scala, cmd, additionalKey)
     this.scalaKeyFun = scalaKeyFun
     this.scalaValueFun = scalaValueFun
   }
 
-  //for java
-  def this(cmd: RedisCommand,
-           additionalKey: String,
-           javaKeyFun: TransformFunction[T, String],
-           javaValueFun: TransformFunction[T, String]) = {
+  // for java
+  def this(cmd: RedisCommand, additionalKey: String, javaKeyFun: TransformFunction[T, String], javaValueFun: TransformFunction[T, String]) = {
     this(ApiType.java, cmd, additionalKey)
     this.javaKeyFun = javaKeyFun
     this.javaValueFun = javaValueFun
   }
-
 
   override def getCommandDescription: RedisCommandDescription = new RedisCommandDescription(cmd, additionalKey)
 

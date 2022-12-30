@@ -22,11 +22,10 @@ import lombok.Data;
 @Data
 public class SenderEmail {
 
-    private String smtpHost;
-    private Integer smtpPort;
-    private String from;
-    private String userName;
-    private String password;
-    private boolean ssl;
-
+  private String smtpHost;
+  private Integer smtpPort;
+  private String from;
+  private String userName;
+  private String password;
+  private boolean ssl;
 }

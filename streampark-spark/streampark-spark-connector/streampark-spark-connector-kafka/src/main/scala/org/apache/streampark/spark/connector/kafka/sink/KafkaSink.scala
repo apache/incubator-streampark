@@ -17,19 +17,20 @@
 
 package org.apache.streampark.spark.connector.kafka.sink
 
-import org.apache.streampark.spark.connector.kafka.writer.KafkaWriter.createKafkaOutputWriter
-import org.apache.streampark.spark.connector.sink.Sink
+import java.util.UUID
+
+import scala.reflect.ClassTag
+
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 
-import java.util.UUID
-import scala.reflect.ClassTag
+import org.apache.streampark.spark.connector.kafka.writer.KafkaWriter.createKafkaOutputWriter
+import org.apache.streampark.spark.connector.sink.Sink
 
-class KafkaSink[T: ClassTag](@transient override val sc: SparkContext,
-                             initParams: Map[String, String] = Map.empty[String, String])
-  extends Sink[T] {
+class KafkaSink[T: ClassTag](@transient override val sc: SparkContext, initParams: Map[String, String] = Map.empty[String, String])
+    extends Sink[T] {
 
   override val prefix: String = "spark.sink.kafka."
 

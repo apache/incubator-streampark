@@ -17,27 +17,28 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
+import java.io.File
+import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
+
 import com.github.dockerjava.api.command.PushImageCmd
 import com.github.dockerjava.core.command.{HackBuildImageCmd, HackPullImageCmd, HackPushImageCmd}
 import com.google.common.collect.Sets
+import org.apache.commons.lang3.StringUtils
+
 import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.common.util.ThreadUtils
 import org.apache.streampark.flink.kubernetes.{IngressController, PodTemplateTool}
 import org.apache.streampark.flink.packer.docker._
 import org.apache.streampark.flink.packer.maven.MavenTool
-import org.apache.streampark.flink.packer.pipeline.BuildPipeline.executor
 import org.apache.streampark.flink.packer.pipeline._
-import org.apache.commons.lang3.StringUtils
-
-import java.io.File
-import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
+import org.apache.streampark.flink.packer.pipeline.BuildPipeline.executor
 
 /**
  * Building pipeline for flink kubernetes-native application mode
- *
  */
 class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest) extends BuildPipeline {
 
@@ -54,17 +55,18 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     dockerProcessWatcher = watcher
   }
 
-  @throws[Throwable] override protected def buildProcess(): DockerImageBuildResponse = {
+  @throws[Throwable]
+  override protected def buildProcess(): DockerImageBuildResponse = {
 
     // Step-1: init build workspace of flink job
     // the sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
     val buildWorkspace =
-    execStep(1) {
-      val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
-      LfsOperator.mkCleanDirs(buildWorkspace)
-      logInfo(s"recreate building workspace: $buildWorkspace")
-      buildWorkspace
-    }.getOrElse(throw getError.exception)
+      execStep(1) {
+        val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
+        LfsOperator.mkCleanDirs(buildWorkspace)
+        logInfo(s"recreate building workspace: $buildWorkspace")
+        buildWorkspace
+      }.getOrElse(throw getError.exception)
 
     // Step-2: export k8s pod template files
     val podTemplatePaths = request.flinkPodTemplate match {
@@ -82,19 +84,19 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     // Step-3: build shaded flink job jar and handle extra jars
     // the output shaded jar file name like: streampark-flinkjob_myjob-test.jar
     val (shadedJar, extJarLibs) =
-    execStep(3) {
-      val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
-      val (shadedJar, extJarLibs) = request.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
-          val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
-          shadedJar -> request.dependencyInfo.extJarLibs
-        case DevelopmentMode.CUSTOMCODE =>
-          val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
-          shadedJar -> Set[String]()
-      }
-      logInfo(s"output shaded flink job jar: ${shadedJar.getAbsolutePath}")
-      shadedJar -> extJarLibs
-    }.getOrElse(throw getError.exception)
+      execStep(3) {
+        val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
+        val (shadedJar, extJarLibs) = request.developmentMode match {
+          case DevelopmentMode.FLINKSQL =>
+            val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
+            shadedJar -> request.dependencyInfo.extJarLibs
+          case DevelopmentMode.CUSTOMCODE =>
+            val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
+            shadedJar -> Set[String]()
+        }
+        logInfo(s"output shaded flink job jar: ${shadedJar.getAbsolutePath}")
+        shadedJar -> extJarLibs
+      }.getOrElse(throw getError.exception)
 
     // Step-4: generate and Export flink image dockerfiles
     val (dockerfile, dockerFileTemplate) =
@@ -205,7 +207,6 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     DockerImageBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath)
   }
 
-
   /**
    * compile image tag with namespace and remote address.
    */
@@ -228,8 +229,7 @@ object FlinkK8sApplicationBuildPipeline {
     TimeUnit.SECONDS,
     new LinkedBlockingQueue[Runnable](2048),
     ThreadUtils.threadFactory("streampark-docker-progress-watcher-executor"),
-    new ThreadPoolExecutor.DiscardOldestPolicy
-  )
+    new ThreadPoolExecutor.DiscardOldestPolicy)
 
   implicit val executor: ExecutionContext = ExecutionContext.fromExecutorService(execPool)
 

@@ -16,22 +16,24 @@
  */
 package org.apache.streampark.flink.kubernetes
 
+import java.io.File
+
+import scala.collection.JavaConversions._
+import scala.util.{Failure, Success, Try}
+
 import com.google.common.base.Charsets
 import com.google.common.io.Files
 import org.apache.commons.collections.CollectionUtils
 import org.apache.flink.core.fs.Path
 import org.apache.flink.runtime.history.FsJobArchivist
-import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
-import org.apache.streampark.flink.kubernetes.watcher.{Checkpoint, FlinkRestJmConfigItem, FlinkRestOverview, JobDetails}
-import org.json4s.DefaultFormats
-import org.junit.jupiter.api.Test
 import org.json4s.{JNothing, JNull}
+import org.json4s.DefaultFormats
 import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
+import org.junit.jupiter.api.Test
 
-import java.io.File
-import scala.collection.JavaConversions._
-import scala.util.{Failure, Success, Try}
+import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
+import org.apache.streampark.flink.kubernetes.watcher.{Checkpoint, FlinkRestJmConfigItem, FlinkRestOverview, JobDetails}
 
 // scalastyle:off println
 class FlinkRestJsonTest {
@@ -55,7 +57,6 @@ class FlinkRestJsonTest {
     val overview = FlinkRestOverview.as(json).get
     println(overview.slotsAvailable)
   }
-
 
   @Test def flinkRestJmConfigItem(): Unit = {
     val json =
@@ -298,7 +299,6 @@ class FlinkRestJsonTest {
 
     @transient
     implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
-
 
     val state = Try {
       val archivePath = new Path("src/test/resources/d933fa6c785f0db6dccc6cc05dd43bab.json")

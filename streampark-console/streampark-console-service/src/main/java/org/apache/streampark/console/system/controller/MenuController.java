@@ -46,47 +46,45 @@ import java.util.Map;
 @RequestMapping("/menu")
 public class MenuController {
 
-    @Autowired
-    private MenuService menuService;
+  @Autowired private MenuService menuService;
 
-    @Autowired
-    private CommonService commonService;
+  @Autowired private CommonService commonService;
 
-    @PostMapping("router")
-    public RestResponse getUserRouters(Long teamId) {
-        // TODO The teamId is required, get routers should be called after choose teamId.
-        ArrayList<VueRouter<Menu>> routers = this.menuService.getUserRouters(commonService.getUserId(), teamId);
-        return RestResponse.success(routers);
-    }
+  @PostMapping("router")
+  public RestResponse getUserRouters(Long teamId) {
+    // TODO The teamId is required, get routers should be called after choose teamId.
+    ArrayList<VueRouter<Menu>> routers =
+        this.menuService.getUserRouters(commonService.getUserId(), teamId);
+    return RestResponse.success(routers);
+  }
 
-    @PostMapping("list")
-    @RequiresPermissions("menu:view")
-    public RestResponse menuList(Menu menu) {
-        Map<String, Object> maps = this.menuService.findMenus(menu);
-        return RestResponse.success(maps);
-    }
+  @PostMapping("list")
+  @RequiresPermissions("menu:view")
+  public RestResponse menuList(Menu menu) {
+    Map<String, Object> maps = this.menuService.findMenus(menu);
+    return RestResponse.success(maps);
+  }
 
-    @PostMapping("post")
-    @RequiresPermissions("menu:add")
-    public RestResponse addMenu(@Valid Menu menu) {
-        this.menuService.createMenu(menu);
-        return RestResponse.success();
-    }
+  @PostMapping("post")
+  @RequiresPermissions("menu:add")
+  public RestResponse addMenu(@Valid Menu menu) {
+    this.menuService.createMenu(menu);
+    return RestResponse.success();
+  }
 
-    @DeleteMapping("delete")
-    @RequiresPermissions("menu:delete")
-    public RestResponse deleteMenus(@NotBlank(message = "{required}") String menuIds)
-        throws Exception {
-        String[] ids = menuIds.split(StringPool.COMMA);
-        this.menuService.deleteMenus(ids);
-        return RestResponse.success();
-    }
+  @DeleteMapping("delete")
+  @RequiresPermissions("menu:delete")
+  public RestResponse deleteMenus(@NotBlank(message = "{required}") String menuIds)
+      throws Exception {
+    String[] ids = menuIds.split(StringPool.COMMA);
+    this.menuService.deleteMenus(ids);
+    return RestResponse.success();
+  }
 
-    @PutMapping("update")
-    @RequiresPermissions("menu:update")
-    public RestResponse updateMenu(@Valid Menu menu) throws Exception {
-        this.menuService.updateMenu(menu);
-        return RestResponse.success();
-    }
-
+  @PutMapping("update")
+  @RequiresPermissions("menu:update")
+  public RestResponse updateMenu(@Valid Menu menu) throws Exception {
+    this.menuService.updateMenu(menu);
+    return RestResponse.success();
+  }
 }

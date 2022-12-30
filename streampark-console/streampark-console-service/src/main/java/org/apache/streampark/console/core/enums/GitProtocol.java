@@ -20,21 +20,20 @@ package org.apache.streampark.console.core.enums;
 import java.util.Arrays;
 
 public enum GitProtocol {
+  HTTPS(1),
+  SSH(2);
 
-    HTTPS(1),
-    SSH(2);
+  private final int value;
 
-    private final int value;
+  GitProtocol(int value) {
+    this.value = value;
+  }
 
-    GitProtocol(int value) {
-        this.value = value;
-    }
+  public static GitProtocol of(Integer value) {
+    return Arrays.stream(values()).filter(x -> x.value == value).findFirst().orElse(null);
+  }
 
-    public static GitProtocol of(Integer value) {
-        return Arrays.stream(values()).filter(x -> x.value == value).findFirst().orElse(null);
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
+  public Integer getValue() {
+    return this.value;
+  }
 }

@@ -29,39 +29,37 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-/**
- * log service
- */
+/** log service */
 @Service
 @Slf4j
 public class LoggerServiceImpl implements LoggerService {
 
-    @Autowired
-    private LogClientService logClient;
+  @Autowired private LogClientService logClient;
 
-    /**
-     * view log
-     *
-     * @param skipLineNum skip line number
-     * @param limit       limit
-     * @return log string data
-     */
-    @Override
-    public CompletionStage<String> queryLog(String nameSpace, String jobName, String jobId, int skipLineNum, int limit) {
-        return CompletableFuture.supplyAsync(() -> jobDeploymentsWatch(nameSpace, jobName, jobId)
-        ).exceptionally(e -> {
-            try {
+  /**
+   * view log
+   *
+   * @param skipLineNum skip line number
+   * @param limit limit
+   * @return log string data
+   */
+  @Override
+  public CompletionStage<String> queryLog(
+      String nameSpace, String jobName, String jobId, int skipLineNum, int limit) {
+    return CompletableFuture.supplyAsync(() -> jobDeploymentsWatch(nameSpace, jobName, jobId))
+        .exceptionally(
+            e -> {
+              try {
                 return String.format("%s/%s_err.log", WebUtils.getAppTempDir(), jobId);
-            } catch (Exception ex) {
+              } catch (Exception ex) {
                 log.error("Generate log path exception:{}", ex.getMessage());
                 return null;
-            }
-        }).thenApply(path -> logClient.rollViewLog(String.valueOf(path), skipLineNum, limit));
-    }
+              }
+            })
+        .thenApply(path -> logClient.rollViewLog(String.valueOf(path), skipLineNum, limit));
+  }
 
-    private String jobDeploymentsWatch(String nameSpace, String jobName, String jobId) {
-        return KubernetesDeploymentHelper.watchDeploymentLog(nameSpace, jobName, jobId);
-    }
+  private String jobDeploymentsWatch(String nameSpace, String jobName, String jobId) {
+    return KubernetesDeploymentHelper.watchDeploymentLog(nameSpace, jobName, jobId);
+  }
 }
-
-

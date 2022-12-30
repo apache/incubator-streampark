@@ -34,73 +34,72 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
 
-/**
- * org.apache.streampark.console.core.service.ApplicationServiceTest
- */
+/** org.apache.streampark.console.core.service.ApplicationServiceTest */
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    classes = StreamParkConsoleBootstrap.class,
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApplicationServiceTest {
 
-    @Autowired
-    private ApplicationService applicationService;
+  @Autowired private ApplicationService applicationService;
 
-    @Test
-    void revokeTest() {
-        Date now = new Date();
-        Application app = new Application();
-        app.setId(100001L);
-        app.setJobType(1);
-        app.setUserId(100000L);
-        app.setJobName("socket-test");
-        app.setVersionId(1L);
-        app.setK8sNamespace("default");
-        app.setState(0);
-        app.setLaunch(2);
-        app.setBuild(true);
-        app.setRestartSize(0);
-        app.setOptionState(0);
-        app.setArgs("--hostname hadoop001 --port 8111");
-        app.setOptions("{\"taskmanager.numberOfTaskSlots\":1,\"parallelism.default\":1}");
-        app.setResolveOrder(0);
-        app.setExecutionMode(4);
-        app.setAppType(2);
-        app.setTracking(0);
-        app.setJar("SocketWindowWordCount.jar");
-        app.setJarCheckSum(1553115525L);
-        app.setMainClass("org.apache.flink.streaming.examples.socket.SocketWindowWordCount");
-        app.setCreateTime(now);
-        app.setModifyTime(now);
-        app.setResourceFrom(2);
-        app.setK8sHadoopIntegration(false);
-        app.setBackUp(false);
-        app.setRestart(false);
-        app.setSavePointed(false);
-        app.setDrain(false);
-        app.setAllowNonRestored(false);
+  @Test
+  void revokeTest() {
+    Date now = new Date();
+    Application app = new Application();
+    app.setId(100001L);
+    app.setJobType(1);
+    app.setUserId(100000L);
+    app.setJobName("socket-test");
+    app.setVersionId(1L);
+    app.setK8sNamespace("default");
+    app.setState(0);
+    app.setLaunch(2);
+    app.setBuild(true);
+    app.setRestartSize(0);
+    app.setOptionState(0);
+    app.setArgs("--hostname hadoop001 --port 8111");
+    app.setOptions("{\"taskmanager.numberOfTaskSlots\":1,\"parallelism.default\":1}");
+    app.setResolveOrder(0);
+    app.setExecutionMode(4);
+    app.setAppType(2);
+    app.setTracking(0);
+    app.setJar("SocketWindowWordCount.jar");
+    app.setJarCheckSum(1553115525L);
+    app.setMainClass("org.apache.flink.streaming.examples.socket.SocketWindowWordCount");
+    app.setCreateTime(now);
+    app.setModifyTime(now);
+    app.setResourceFrom(2);
+    app.setK8sHadoopIntegration(false);
+    app.setBackUp(false);
+    app.setRestart(false);
+    app.setSavePointed(false);
+    app.setDrain(false);
+    app.setAllowNonRestored(false);
 
-        Assertions.assertDoesNotThrow(() -> applicationService.updateLaunch(app));
-    }
+    Assertions.assertDoesNotThrow(() -> applicationService.updateLaunch(app));
+  }
 
-    @Test
-    void start() throws Exception {
-        Application application = new Application();
-        application.setId(1304056220683497473L);
-        application.setRestart(false);
-        application.setSavePointed(false);
-        application.setAllowNonRestored(false);
+  @Test
+  void start() throws Exception {
+    Application application = new Application();
+    application.setId(1304056220683497473L);
+    application.setRestart(false);
+    application.setSavePointed(false);
+    application.setAllowNonRestored(false);
 
-        applicationService.start(application, false);
-    }
+    applicationService.start(application, false);
+  }
 
-    @Test
-    void uploadTest() throws Exception {
-        File file = new File(""); // specify the file path
-        MultipartFile mulFile = new MockMultipartFile(
+  @Test
+  void uploadTest() throws Exception {
+    File file = new File(""); // specify the file path
+    MultipartFile mulFile =
+        new MockMultipartFile(
             "", // fileName (eg: streampark.jar)
             "", // originalFilename (eg: path + fileName = /tmp/file/streampark.jar)
             ContentType.APPLICATION_OCTET_STREAM.toString(),
-            new FileInputStream(file)
-        );
-        applicationService.upload(mulFile);
-    }
+            new FileInputStream(file));
+    applicationService.upload(mulFile);
+  }
 }

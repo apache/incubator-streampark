@@ -16,11 +16,13 @@
  */
 package org.apache.streampark.common.util
 
-import com.mongodb._
-import org.apache.streampark.common.conf.ConfigConst._
-
 import java.util.Properties
+
 import scala.collection.JavaConversions._
+
+import com.mongodb._
+
+import org.apache.streampark.common.conf.ConfigConst._
 
 object MongoConfig {
 
@@ -138,8 +140,7 @@ object MongoConfig {
         val mongoCredential = MongoCredential.createScramSha1Credential(
           mongoParam(username),
           db,
-          mongoParam(password).toCharArray
-        )
+          mongoParam(password).toCharArray)
         new MongoClient(serverAddresses.toList, List(mongoCredential), mongoClientOptions)
       } else {
         new MongoClient(serverAddresses.toList, mongoClientOptions)

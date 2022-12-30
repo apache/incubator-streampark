@@ -17,15 +17,17 @@
 
 package org.apache.streampark.flink.connector.clickhouse.internal
 
+import java.util.concurrent._
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
+
+import org.asynchttpclient.{AsyncHttpClient, DefaultAsyncHttpClientConfig, Dsl}
+
 import org.apache.streampark.common.util.{Logger, ThreadUtils}
 import org.apache.streampark.flink.connector.clickhouse.conf.ClickHouseHttpConfig
 import org.apache.streampark.flink.connector.clickhouse.internal
 import org.apache.streampark.flink.connector.failover.{SinkRequest, SinkWriter}
-import org.asynchttpclient.{AsyncHttpClient, DefaultAsyncHttpClientConfig, Dsl}
-
-import java.util.concurrent._
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConversions._
 
 case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseHttpConfig) extends SinkWriter with Logger {
   private val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
@@ -37,8 +39,7 @@ case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseHttpConfig) extends 
     60L,
     TimeUnit.SECONDS,
     new LinkedBlockingQueue[Runnable],
-    callbackServiceFactory
-  )
+    callbackServiceFactory)
 
   var tasks: ListBuffer[ClickHouseWriterTask] = ListBuffer[ClickHouseWriterTask]()
   var recordQueue: BlockingQueue[SinkRequest] = new LinkedBlockingQueue[SinkRequest](clickHouseConfig.queueCapacity)
@@ -48,8 +49,7 @@ case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseHttpConfig) extends 
       .setConnectTimeout(clickHouseConfig.sinkOption.connectTimeout.get())
       .setMaxRequestRetry(clickHouseConfig.sinkOption.maxRequestRetry.get())
       .setMaxConnections(clickHouseConfig.sinkOption.maxConnections.get())
-      .build()
-  )
+      .build())
   var service: ExecutorService = Executors.newFixedThreadPool(clickHouseConfig.numWriters, threadFactory)
 
   for (i <- 0 until clickHouseConfig.numWriters) {

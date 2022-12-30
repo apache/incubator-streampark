@@ -17,23 +17,25 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.common.util.Utils._
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
+
+import scala.collection.JavaConverters._
+import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
+
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
-import org.json4s.jackson.JsonMethods.parse
 import org.json4s.{DefaultFormats, JArray}
+import org.json4s.jackson.JsonMethods.parse
 
-import java.io.File
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import scala.util.{Failure, Success, Try}
-import scala.collection.JavaConverters._
-import scala.language.postfixOps
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.Utils._
 
 object IngressController extends Logger {
 
@@ -43,13 +45,11 @@ object IngressController extends Logger {
         val annotMap = Map[String, String](
           "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
           "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
-          "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;")
-        )
+          "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;"))
         val labelsMap = Map[String, String](
           "app" -> clusterId,
           "type" -> "flink-native-kubernetes",
-          "component" -> "ingress"
-        )
+          "component" -> "ingress")
         val ingress = new IngressBuilder()
           .withNewMetadata()
           .withName(clusterId)
@@ -153,7 +153,8 @@ object IngressController extends Logger {
   def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {
     val workspaceDir = new File(buildWorkspace)
     if (!workspaceDir.exists) workspaceDir.mkdir
-    if (ingressTemplates.isEmpty) null; else {
+    if (ingressTemplates.isEmpty) null;
+    else {
       val outputPath = buildWorkspace + "/ingress.yaml"
       val outputFile = new File(outputPath)
       FileUtils.write(outputFile, ingressTemplates, "UTF-8")
@@ -163,16 +164,15 @@ object IngressController extends Logger {
 
 }
 
-
 case class IngressMeta(
-                        addresses: List[String],
-                        port: Integer,
-                        protocol: String,
-                        serviceName: String,
-                        ingressName: String,
-                        hostname: String,
-                        path: String,
-                        allNodes: Boolean)
+    addresses: List[String],
+    port: Integer,
+    protocol: String,
+    serviceName: String,
+    ingressName: String,
+    hostname: String,
+    path: String,
+    allNodes: Boolean)
 
 object IngressMeta {
 
@@ -192,8 +192,7 @@ object IngressMeta {
                 ingressName = (x \ "ingressName").extractOpt[String].getOrElse(null),
                 hostname = (x \ "hostname").extractOpt[String].getOrElse(null),
                 path = (x \ "path").extractOpt[String].getOrElse(null),
-                allNodes = (x \ "allNodes").extractOpt[Boolean].getOrElse(false)
-              )
+                allNodes = (x \ "allNodes").extractOpt[Boolean].getOrElse(false))
             })
             Some(list)
           case _ => None

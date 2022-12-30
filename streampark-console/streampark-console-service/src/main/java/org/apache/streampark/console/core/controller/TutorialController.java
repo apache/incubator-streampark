@@ -36,12 +36,11 @@ import java.io.IOException;
 @RequestMapping("tutorial")
 public class TutorialController {
 
-    @Autowired
-    private TutorialService tutorialService;
+  @Autowired private TutorialService tutorialService;
 
-    @PostMapping("get")
-    public RestResponse get(String name) throws IOException {
-        Tutorial tutorial = tutorialService.getByName(name);
-        return RestResponse.success(tutorial);
-    }
+  @PostMapping("get")
+  public RestResponse get(String name) throws IOException {
+    Tutorial tutorial = tutorialService.getByName(name);
+    return RestResponse.success(tutorial);
+  }
 }

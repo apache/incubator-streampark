@@ -40,20 +40,16 @@ case class MetricWatcherConfig(requestTimeoutSec: Long, requestIntervalSec: Long
  * @param requestIntervalSec            interval seconds between two single tracking task
  * @param silentStateJobKeepTrackingSec retained tracking time for SILENT state flink tasks
  */
-case class JobStatusWatcherConfig(requestTimeoutSec: Long,
-                                  requestIntervalSec: Long,
-                                  silentStateJobKeepTrackingSec: Int)
+case class JobStatusWatcherConfig(requestTimeoutSec: Long, requestIntervalSec: Long, silentStateJobKeepTrackingSec: Int)
 
 object FlinkTrackConfig {
   def defaultConf: FlinkTrackConfig = FlinkTrackConfig(
     JobStatusWatcherConfig.defaultConf,
-    MetricWatcherConfig.defaultConf
-  )
+    MetricWatcherConfig.defaultConf)
 
   def debugConf: FlinkTrackConfig = FlinkTrackConfig(
     JobStatusWatcherConfig.debugConf,
-    MetricWatcherConfig.debugConf
-  )
+    MetricWatcherConfig.debugConf)
 
   /**
    * create from ConfigHub
@@ -62,13 +58,10 @@ object FlinkTrackConfig {
     JobStatusWatcherConfig(
       InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackTaskTimeoutSec),
       InternalConfigHolder.get(K8sFlinkConfig.jobStatueTrackTaskIntervalSec),
-      InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)
-    ),
+      InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)),
     MetricWatcherConfig(
       InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskTimeoutSec),
-      InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec)
-    )
-  )
+      InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec)))
 
 }
 
@@ -93,5 +86,3 @@ object MetricWatcherConfig {
     requestTimeoutSec = 120,
     requestIntervalSec = 2)
 }
-
-

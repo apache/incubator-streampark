@@ -33,61 +33,59 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * for MyBatis Configure management.
- */
+/** for MyBatis Configure management. */
 @Configuration
 @MapperScan(value = {"org.apache.streampark.console.*.mapper"})
 public class MybatisConfig {
 
-    @Bean
-    public MybatisPlusInterceptor mybatisPlusInterceptor() {
-        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
-        return interceptor;
-    }
+  @Bean
+  public MybatisPlusInterceptor mybatisPlusInterceptor() {
+    MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+    interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
+    return interceptor;
+  }
 
-    /**
-     * Add the plugin to the MyBatis plugin interceptor chain.
-     *
-     * @return {@linkplain PostgreSQLQueryInterceptor}
-     */
-    @Bean
-    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "pgsql")
-    public PostgreSQLQueryInterceptor postgreSQLQueryInterceptor() {
-        return new PostgreSQLQueryInterceptor();
-    }
+  /**
+   * Add the plugin to the MyBatis plugin interceptor chain.
+   *
+   * @return {@linkplain PostgreSQLQueryInterceptor}
+   */
+  @Bean
+  @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "pgsql")
+  public PostgreSQLQueryInterceptor postgreSQLQueryInterceptor() {
+    return new PostgreSQLQueryInterceptor();
+  }
 
-    /**
-     * Add the plugin to the MyBatis plugin interceptor chain.
-     *
-     * @return {@linkplain PostgreSQLPrepareInterceptor}
-     */
-    @Bean
-    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "pgsql")
-    public PostgreSQLPrepareInterceptor postgreSQLPrepareInterceptor() {
-        return new PostgreSQLPrepareInterceptor();
-    }
+  /**
+   * Add the plugin to the MyBatis plugin interceptor chain.
+   *
+   * @return {@linkplain PostgreSQLPrepareInterceptor}
+   */
+  @Bean
+  @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "pgsql")
+  public PostgreSQLPrepareInterceptor postgreSQLPrepareInterceptor() {
+    return new PostgreSQLPrepareInterceptor();
+  }
 
-    /**
-     * mybatis plus setting
-     *
-     * @return MybatisPlusPropertiesCustomizer
-     */
-    @Bean
-    public MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer() {
-        return properties -> {
-            properties.setTypeAliasesPackage("org.apache.streampark.console.*.entity");
-            properties.setMapperLocations(new String[]{"classpath:mapper/*/*.xml"});
-            MybatisConfiguration mybatisConfiguration = new MybatisConfiguration();
-            mybatisConfiguration.setJdbcTypeForNull(JdbcType.NULL);
-            properties.setConfiguration(mybatisConfiguration);
-            GlobalConfig globalConfig = GlobalConfigUtils.getGlobalConfig(mybatisConfiguration);
-            GlobalConfig.DbConfig dbConfig = globalConfig.getDbConfig();
-            dbConfig.setIdType(IdType.AUTO);
-            // close mybatis-plus banner
-            globalConfig.setBanner(false);
-            properties.setGlobalConfig(globalConfig);
-        };
-    }
+  /**
+   * mybatis plus setting
+   *
+   * @return MybatisPlusPropertiesCustomizer
+   */
+  @Bean
+  public MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer() {
+    return properties -> {
+      properties.setTypeAliasesPackage("org.apache.streampark.console.*.entity");
+      properties.setMapperLocations(new String[] {"classpath:mapper/*/*.xml"});
+      MybatisConfiguration mybatisConfiguration = new MybatisConfiguration();
+      mybatisConfiguration.setJdbcTypeForNull(JdbcType.NULL);
+      properties.setConfiguration(mybatisConfiguration);
+      GlobalConfig globalConfig = GlobalConfigUtils.getGlobalConfig(mybatisConfiguration);
+      GlobalConfig.DbConfig dbConfig = globalConfig.getDbConfig();
+      dbConfig.setIdType(IdType.AUTO);
+      // close mybatis-plus banner
+      globalConfig.setBanner(false);
+      properties.setGlobalConfig(globalConfig);
+    };
+  }
 }

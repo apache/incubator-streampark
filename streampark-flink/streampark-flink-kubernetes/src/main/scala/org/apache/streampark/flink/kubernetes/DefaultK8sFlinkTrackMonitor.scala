@@ -17,18 +17,18 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import javax.annotation.Nullable
+
 import com.google.common.eventbus.Subscribe
+
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.{BuildInEvent, FlinkJobStateEvent, FlinkJobStatusChangeEvent}
 import org.apache.streampark.flink.kubernetes.model._
 import org.apache.streampark.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
-import javax.annotation.Nullable
-
 /**
  * Default K8sFlinkTrackMonitor implementation.
- *
  */
 class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf) extends K8sFlinkTrackMonitor {
 
@@ -88,7 +88,8 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
   override def getAllTrackingIds: Set[TrackId] = trackController.collectAllTrackIds()
 
   override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
-    if (!trackId.isLegal) false; else {
+    if (!trackId.isLegal) false;
+    else {
       val nonLost = (state: FlinkJobState.Value) => state != FlinkJobState.LOST || state != FlinkJobState.SILENT
       trackId.executeMode match {
         case SESSION =>
@@ -154,4 +155,3 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
 
   }
 }
-

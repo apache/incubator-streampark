@@ -21,6 +21,4 @@ import org.apache.streampark.console.core.entity.SavePoint;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface SavePointMapper extends BaseMapper<SavePoint> {
-
-}
+public interface SavePointMapper extends BaseMapper<SavePoint> {}

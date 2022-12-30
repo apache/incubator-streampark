@@ -17,14 +17,15 @@
 
 package org.apache.streampark.flink.packer.docker
 
+import java.net.URI
+import java.time.Duration
+
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientConfig, HackDockerClient}
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
+
 import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
 import org.apache.streampark.common.util.Utils
-
-import java.net.URI
-import java.time.Duration
 
 object DockerRetriever {
 

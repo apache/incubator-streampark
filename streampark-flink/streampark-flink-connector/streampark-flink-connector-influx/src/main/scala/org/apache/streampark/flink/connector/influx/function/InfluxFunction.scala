@@ -17,20 +17,21 @@
 
 package org.apache.streampark.flink.connector.influx.function
 
-import org.apache.streampark.common.conf.ConfigConst.{KEY_JDBC_PASSWORD, KEY_JDBC_URL, KEY_JDBC_USER}
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.influx.bean.InfluxEntity
+import java.util.{Map => JavaMap, Properties}
+import java.util.concurrent.TimeUnit
+
+import scala.collection.JavaConversions._
+
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.apache.flink.streaming.api.functions.sink.SinkFunction.Context
-import org.influxdb.dto.Point
 import org.influxdb.{InfluxDB, InfluxDBFactory}
+import org.influxdb.dto.Point
 
-import java.util.concurrent.TimeUnit
-import java.util.{Properties, Map => JavaMap}
-import scala.collection.JavaConversions._;
-
+import org.apache.streampark.common.conf.ConfigConst.{KEY_JDBC_PASSWORD, KEY_JDBC_URL, KEY_JDBC_USER}
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.influx.bean.InfluxEntity;
 
 class InfluxFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) extends RichSinkFunction[T] with Logger {
 

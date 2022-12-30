@@ -43,40 +43,48 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, AlertConfig> implements AlertConfigService {
+public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, AlertConfig>
+    implements AlertConfigService {
 
-    @Autowired
-    private ApplicationService applicationService;
+  @Autowired private ApplicationService applicationService;
 
-    @Override
-    public IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request) {
-        // build query conditions
-        LambdaQueryWrapper<AlertConfig> wrapper = new LambdaQueryWrapper();
-        wrapper.eq(params.getUserId() != null, AlertConfig::getUserId, params.getUserId());
+  @Override
+  public IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request) {
+    // build query conditions
+    LambdaQueryWrapper<AlertConfig> wrapper = new LambdaQueryWrapper();
+    wrapper.eq(params.getUserId() != null, AlertConfig::getUserId, params.getUserId());
 
-        Page<AlertConfig> page = new MybatisPager<AlertConfig>().getDefaultPage(request);
-        IPage<AlertConfig> resultPage = getBaseMapper().selectPage(page, wrapper);
+    Page<AlertConfig> page = new MybatisPager<AlertConfig>().getDefaultPage(request);
+    IPage<AlertConfig> resultPage = getBaseMapper().selectPage(page, wrapper);
 
-        Page<AlertConfigWithParams> result = new Page<>();
-        if (CollectionUtils.isNotEmpty(resultPage.getRecords())) {
-            result.setRecords(resultPage.getRecords().stream().map(AlertConfigWithParams::of).collect(Collectors.toList()));
-        }
-
-        return result;
+    Page<AlertConfigWithParams> result = new Page<>();
+    if (CollectionUtils.isNotEmpty(resultPage.getRecords())) {
+      result.setRecords(
+          resultPage.getRecords().stream()
+              .map(AlertConfigWithParams::of)
+              .collect(Collectors.toList()));
     }
 
-    @Override
-    public boolean exist(AlertConfig alertConfig) {
-        AlertConfig confByName = this.baseMapper.getAlertConfByName(alertConfig);
-        return confByName != null;
-    }
+    return result;
+  }
 
-    @Override
-    public boolean deleteById(Long id) throws AlertException {
-        long count = applicationService.count(new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
-        if (count > 0) {
-            throw new AlertException(String.format("AlertId:%d, this is bound by application. Please clear the configuration first", id));
-        }
-        return removeById(id);
+  @Override
+  public boolean exist(AlertConfig alertConfig) {
+    AlertConfig confByName = this.baseMapper.getAlertConfByName(alertConfig);
+    return confByName != null;
+  }
+
+  @Override
+  public boolean deleteById(Long id) throws AlertException {
+    long count =
+        applicationService.count(
+            new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
+    if (count > 0) {
+      throw new AlertException(
+          String.format(
+              "AlertId:%d, this is bound by application. Please clear the configuration first",
+              id));
     }
+    return removeById(id);
+  }
 }

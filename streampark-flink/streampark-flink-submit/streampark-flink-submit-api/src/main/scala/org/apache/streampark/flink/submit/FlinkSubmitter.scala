@@ -17,17 +17,19 @@
 
 package org.apache.streampark.flink.submit
 
+import java.util
+import java.util.{Map => JavaMap}
+import java.util.regex.Pattern
+import javax.annotation.Nonnull
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+
+import org.apache.commons.lang3.StringUtils
+
 import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.flink.proxy.FlinkShimsProxy
 import org.apache.streampark.flink.submit.bean._
-import org.apache.commons.lang3.StringUtils
-
-import java.util
-import java.util.regex.Pattern
-import java.util.{Map => JavaMap}
-import javax.annotation.Nonnull
-import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 object FlinkSubmitter extends Logger {
 
@@ -48,67 +50,78 @@ object FlinkSubmitter extends Logger {
   private[this] val SHUTDOWN_REQUEST_CLASS_NAME = "org.apache.streampark.flink.submit.bean.ShutDownRequest"
 
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
-    FlinkShimsProxy.proxy(submitRequest.flinkVersion, (classLoader: ClassLoader) => {
-      val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
-      val requestClass = classLoader.loadClass(SUBMIT_REQUEST_CLASS_NAME)
-      val method = submitClass.getDeclaredMethod("submit", requestClass)
-      method.setAccessible(true)
-      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
-      FlinkShimsProxy.getObject[SubmitResponse](this.getClass.getClassLoader, obj)
-    })
+    FlinkShimsProxy.proxy(
+      submitRequest.flinkVersion,
+      (classLoader: ClassLoader) => {
+        val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
+        val requestClass = classLoader.loadClass(SUBMIT_REQUEST_CLASS_NAME)
+        val method = submitClass.getDeclaredMethod("submit", requestClass)
+        method.setAccessible(true)
+        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
+        FlinkShimsProxy.getObject[SubmitResponse](this.getClass.getClassLoader, obj)
+      })
   }
 
   def cancel(stopRequest: CancelRequest): CancelResponse = {
-    FlinkShimsProxy.proxy(stopRequest.flinkVersion, (classLoader: ClassLoader) => {
-      val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
-      val requestClass = classLoader.loadClass(CANCEL_REQUEST_CLASS_NAME)
-      val method = submitClass.getDeclaredMethod("cancel", requestClass)
-      method.setAccessible(true)
-      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
-      if (obj == null) null; else {
-        FlinkShimsProxy.getObject[CancelResponse](this.getClass.getClassLoader, obj)
-      }
-    })
+    FlinkShimsProxy.proxy(
+      stopRequest.flinkVersion,
+      (classLoader: ClassLoader) => {
+        val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
+        val requestClass = classLoader.loadClass(CANCEL_REQUEST_CLASS_NAME)
+        val method = submitClass.getDeclaredMethod("cancel", requestClass)
+        method.setAccessible(true)
+        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
+        if (obj == null) null;
+        else {
+          FlinkShimsProxy.getObject[CancelResponse](this.getClass.getClassLoader, obj)
+        }
+      })
   }
 
   def deploy(deployRequest: DeployRequest): DeployResponse = {
-    FlinkShimsProxy.proxy(deployRequest.flinkVersion, (classLoader: ClassLoader) => {
-      val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
-      val requestClass = classLoader.loadClass(DEPLOY_REQUEST_CLASS_NAME)
-      val method = submitClass.getDeclaredMethod("deploy", requestClass)
-      method.setAccessible(true)
-      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, deployRequest))
-      FlinkShimsProxy.getObject[DeployResponse](this.getClass.getClassLoader, obj)
-    })
+    FlinkShimsProxy.proxy(
+      deployRequest.flinkVersion,
+      (classLoader: ClassLoader) => {
+        val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
+        val requestClass = classLoader.loadClass(DEPLOY_REQUEST_CLASS_NAME)
+        val method = submitClass.getDeclaredMethod("deploy", requestClass)
+        method.setAccessible(true)
+        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, deployRequest))
+        FlinkShimsProxy.getObject[DeployResponse](this.getClass.getClassLoader, obj)
+      })
   }
 
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
-    FlinkShimsProxy.proxy(shutDownRequest.flinkVersion, (classLoader: ClassLoader) => {
-      val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
-      val requestClass = classLoader.loadClass(SHUTDOWN_REQUEST_CLASS_NAME)
-      val method = submitClass.getDeclaredMethod("shutdown", requestClass)
-      method.setAccessible(true)
-      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, shutDownRequest))
-      FlinkShimsProxy.getObject[ShutDownResponse](this.getClass.getClassLoader, obj)
-    })
+    FlinkShimsProxy.proxy(
+      shutDownRequest.flinkVersion,
+      (classLoader: ClassLoader) => {
+        val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
+        val requestClass = classLoader.loadClass(SHUTDOWN_REQUEST_CLASS_NAME)
+        val method = submitClass.getDeclaredMethod("shutdown", requestClass)
+        method.setAccessible(true)
+        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, shutDownRequest))
+        FlinkShimsProxy.getObject[ShutDownResponse](this.getClass.getClassLoader, obj)
+      })
   }
 
   /**
    * extract flink configuration from application.properties
    */
   @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
-    if (StringUtils.isEmpty(properties)) Map.empty[String, String] else {
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String]
+    else {
       val map = mutable.Map[String, String]()
       val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
       simple.split("\\s?-D") match {
-        case d if Utils.notEmpty(d) => d.foreach(x => {
-          if (x.nonEmpty) {
-            val p = PROPERTY_PATTERN.matcher(x.trim)
-            if (p.matches) {
-              map += p.group(1).trim -> p.group(2).trim
+        case d if Utils.notEmpty(d) =>
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              val p = PROPERTY_PATTERN.matcher(x.trim)
+              if (p.matches) {
+                map += p.group(1).trim -> p.group(2).trim
+              }
             }
-          }
-        })
+          })
         case _ =>
       }
       val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)
@@ -123,7 +136,7 @@ object FlinkSubmitter extends Logger {
     }
   }
 
-  @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] = new util.HashMap[String, String](extractDynamicProperties(properties).asJava)
-
+  @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] =
+    new util.HashMap[String, String](extractDynamicProperties(properties).asJava)
 
 }

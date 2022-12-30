@@ -21,11 +21,11 @@ import org.apache.avro.mapreduce.AvroMultipleOutputs
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs
 
 /**
-  * Multiple dir output
-  *
-  * @tparam K key
-  * @tparam V value
-  */
+ * Multiple dir output
+ *
+ * @tparam K key
+ * @tparam V value
+ */
 trait MultipleOutputer[K, V] {
   def write(key: K, value: V, path: String): Unit
 
@@ -35,12 +35,12 @@ trait MultipleOutputer[K, V] {
 object MultipleOutputer {
 
   /**
-    * Avro multi files output
-    *
-    * @param mo
-    * @tparam K
-    * @tparam V
-    */
+   * Avro multi files output
+   *
+   * @param mo
+   * @tparam K
+   * @tparam V
+   */
   implicit class AvroMultipleOutputer[K, V](mo: AvroMultipleOutputs) extends MultipleOutputer[K, V] {
     def write(key: K, value: V, path: String): Unit = mo.write(key, value, path)
 
@@ -48,12 +48,12 @@ object MultipleOutputer {
   }
 
   /**
-    * Unformatted multipath output
-    *
-    * @param mo
-    * @tparam K
-    * @tparam V
-    */
+   * Unformatted multipath output
+   *
+   * @param mo
+   * @tparam K
+   * @tparam V
+   */
   implicit class PlainMultipleOutputer[K, V](mo: MultipleOutputs[K, V]) extends MultipleOutputer[K, V] {
     def write(key: K, value: V, path: String): Unit = mo.write(key, value, path)
 

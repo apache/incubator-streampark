@@ -17,36 +17,39 @@
 
 package org.apache.streampark.flink.connector.http.sink
 
+import java.util.Properties
+
+import scala.annotation.meta.param
+import scala.collection.JavaConversions._
+
+import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream, DataStreamSink}
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.http.client.methods._
+
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.connector.http.function.HttpSinkFunction
 import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
-import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.http.client.methods._
-
-import java.util.Properties
-import scala.annotation.meta.param
-import scala.collection.JavaConversions._
-
 
 object HttpSink {
 
-  def apply(@(transient@param)
-            header: Map[String, String] = Map.empty[String, String],
-            property: Properties = new Properties(),
-            parallelism: Int = 0,
-            name: String = null,
-            uid: String = null)(implicit ctx: StreamingContext): HttpSink = new HttpSink(ctx, property, header, parallelism, name, uid)
+  def apply(
+      @(transient @param)
+      header: Map[String, String] = Map.empty[String, String],
+      property: Properties = new Properties(),
+      parallelism: Int = 0,
+      name: String = null,
+      uid: String = null)(implicit ctx: StreamingContext): HttpSink = new HttpSink(ctx, property, header, parallelism, name, uid)
 
 }
 
-class HttpSink(@(transient@param) ctx: StreamingContext,
-               property: Properties = new Properties(),
-               header: Map[String, String] = Map.empty[String, String],
-               parallelism: Int = 0,
-               name: String = null,
-               uid: String = null) extends Sink {
+class HttpSink(
+    @(transient @param) ctx: StreamingContext,
+    property: Properties = new Properties(),
+    header: Map[String, String] = Map.empty[String, String],
+    parallelism: Int = 0,
+    name: String = null,
+    uid: String = null) extends Sink {
 
   // for java
   def this(ctx: StreamingContext) {

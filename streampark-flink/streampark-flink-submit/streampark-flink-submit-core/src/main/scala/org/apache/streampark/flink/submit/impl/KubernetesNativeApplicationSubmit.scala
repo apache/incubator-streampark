@@ -18,17 +18,18 @@
 package org.apache.streampark.flink.submit.impl
 
 import com.google.common.collect.Lists
-import org.apache.streampark.common.enums.ExecutionMode
-import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
-import org.apache.streampark.flink.submit.`trait`.KubernetesNativeSubmitTrait
-import org.apache.streampark.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, DeploymentOptionsInternal, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+
+import org.apache.streampark.common.enums.ExecutionMode
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
+import org.apache.streampark.flink.submit.`trait`.KubernetesNativeSubmitTrait
+import org.apache.streampark.flink.submit.bean._
 
 /**
  * kubernetes native application mode submit
@@ -41,8 +42,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // require parameters
     require(
       StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
-      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
-    )
+      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}")
 
     // check the last building result
     submitRequest.checkBuildResult()

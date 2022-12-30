@@ -21,18 +21,14 @@ import com.github.dockerjava.api.command.HackPullImageResultCallback;
 import com.github.dockerjava.api.listener.PullImageCallbackListener;
 import com.github.dockerjava.api.model.AuthConfig;
 
-/**
- * Listenable PullImageCmdImpl
- *
- */
+/** Listenable PullImageCmdImpl */
 public class HackPullImageCmd extends PullImageCmdImpl {
 
-    public HackPullImageCmd(Exec exec, AuthConfig authConfig, String repository) {
-        super(exec, authConfig, repository);
-    }
+  public HackPullImageCmd(Exec exec, AuthConfig authConfig, String repository) {
+    super(exec, authConfig, repository);
+  }
 
-    public HackPullImageResultCallback start(PullImageCallbackListener listener) {
-        return exec(new HackPullImageResultCallback(listener));
-    }
-
+  public HackPullImageResultCallback start(PullImageCallbackListener listener) {
+    return exec(new HackPullImageResultCallback(listener));
+  }
 }

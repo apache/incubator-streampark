@@ -27,24 +27,23 @@ import java.util.List;
 
 class GitTest {
 
-    private final Project project = new Project();
+  private final Project project = new Project();
 
-    @BeforeEach
-    void before() {
-        project.setUrl("https://github.com/apache/incubator-streampark.git");
-        project.setGitProtocol(GitProtocol.HTTPS.getValue());
-    }
+  @BeforeEach
+  void before() {
+    project.setUrl("https://github.com/apache/incubator-streampark.git");
+    project.setGitProtocol(GitProtocol.HTTPS.getValue());
+  }
 
-    @Test
-    void getBranchs() {
-        List<String> branches = project.getAllBranches();
-        branches.forEach(System.out::println);
-    }
+  @Test
+  void getBranchs() {
+    List<String> branches = project.getAllBranches();
+    branches.forEach(System.out::println);
+  }
 
-    @Test
-    void auth() {
-        GitAuthorizedError error = project.gitCheck();
-        System.out.println(error);
-    }
-
+  @Test
+  void auth() {
+    GitAuthorizedError error = project.gitCheck();
+    System.out.println(error);
+  }
 }

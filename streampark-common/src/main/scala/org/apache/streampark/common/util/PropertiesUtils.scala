@@ -16,19 +16,18 @@
  */
 package org.apache.streampark.common.util
 
-import com.typesafe.config.ConfigFactory
-import org.yaml.snakeyaml.Yaml
-
 import java.io._
+import java.util.{HashMap => JavaMap, LinkedHashMap => JavaLinkedMap, Properties, Scanner}
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.{Properties, Scanner, HashMap => JavaMap, LinkedHashMap => JavaLinkedMap}
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{Map => MutableMap}
 
+import com.typesafe.config.ConfigFactory
+import org.yaml.snakeyaml.Yaml
 
 object PropertiesUtils extends Logger {
-
 
   def readFile(filename: String): String = {
     val file = new File(filename)
@@ -79,7 +78,8 @@ object PropertiesUtils extends Logger {
 
   def fromHoconText(conf: String): Map[String, String] = {
     require(conf != null, s"[StreamPark] fromHoconText: Hocon content must not be null")
-    try parseHoconByReader(new StringReader(conf)) catch {
+    try parseHoconByReader(new StringReader(conf))
+    catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading Hocon ", e)
     }
   }
@@ -189,7 +189,6 @@ object PropertiesUtils extends Logger {
   def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesFile(inputStream).asJava)
 
   /**
-   *
    * @param file
    * @return
    */

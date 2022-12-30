@@ -17,13 +17,14 @@
 
 package org.apache.streampark.spark.core
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.util.{PropertiesUtils, SystemPropertyUtils}
+import scala.annotation.meta.getter
+import scala.collection.mutable.ArrayBuffer
+
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 
-import scala.annotation.meta.getter
-import scala.collection.mutable.ArrayBuffer
+import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.util.{PropertiesUtils, SystemPropertyUtils}
 
 /**
  * <b><code>Spark</code></b>
@@ -33,20 +34,19 @@ import scala.collection.mutable.ArrayBuffer
  */
 trait Spark {
 
-  @(transient@getter)
-  protected final lazy val sparkConf: SparkConf = new SparkConf()
-  @(transient@getter)
-  protected final val sparkListeners = new ArrayBuffer[String]()
+  @(transient @getter)
+  final protected lazy val sparkConf: SparkConf = new SparkConf()
+  @(transient @getter)
+  final protected val sparkListeners = new ArrayBuffer[String]()
 
-  @(transient@getter)
-  protected final var sparkSession: SparkSession = _
+  @(transient @getter)
+  final protected var sparkSession: SparkSession = _
 
   // Directory of checkpoint
-  protected final var checkpoint: String = ""
+  final protected var checkpoint: String = ""
 
   // If recovery from checkpoint fails, recreate
-  protected final var createOnError: Boolean = true
-
+  final protected var createOnError: Boolean = true
 
   /**
    * Entrance
@@ -107,9 +107,9 @@ trait Spark {
     val (appMain, appName) = sparkConf.get(KEY_SPARK_MAIN_CLASS, null) match {
       case null | "" => (null, null)
       case other => sparkConf.get(KEY_SPARK_APP_NAME, null) match {
-        case null | "" => (other, other)
-        case name => (other, name)
-      }
+          case null | "" => (other, other)
+          case name => (other, name)
+        }
     }
 
     if (appMain == null) {

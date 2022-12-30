@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-
 import javax.annotation.Nullable
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 /**
  * Error details of building pipeline.
@@ -28,9 +28,7 @@ import javax.annotation.Nullable
  * @param exception exception stack
  */
 @JsonIgnoreProperties(ignoreUnknown = true, value = Array("exception"))
-case class PipeError(summary: String,
-                     @Nullable exception: Throwable,
-                     @Nullable exceptionStack: String) {
+case class PipeError(summary: String, @Nullable exception: Throwable, @Nullable exceptionStack: String) {
 
   def nonEmpty: Boolean = Option(summary).exists(_.nonEmpty) || exception != null
 
@@ -44,5 +42,3 @@ object PipeError {
   def of(summary: String, @Nullable exception: Throwable): PipeError =
     PipeError(summary, exception, if (exception == null) "" else exception.getStackTrace.mkString("\n"))
 }
-
-

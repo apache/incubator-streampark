@@ -16,18 +16,17 @@
  */
 package org.apache.streampark.common.util
 
+import java.net.{InetAddress, InetSocketAddress, ServerSocket}
+
 import org.apache.flink.api.common.Plan
 import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils, ProgramInvocationException}
 import org.apache.flink.configuration.{Configuration, JobManagerOptions}
+import org.apache.flink.optimizer.{DataStatistics, Optimizer}
 import org.apache.flink.optimizer.costs.DefaultCostEstimator
 import org.apache.flink.optimizer.plan.OptimizedPlan
 import org.apache.flink.optimizer.plandump.PlanJSONDumpGenerator
-import org.apache.flink.optimizer.{DataStatistics, Optimizer}
-
-import java.net.{InetAddress, InetSocketAddress, ServerSocket}
 
 object FlinkClientUtils {
-
 
   /**
    * getExecutionPlan
@@ -36,7 +35,8 @@ object FlinkClientUtils {
    * @throws
    * @return
    */
-  @throws[ProgramInvocationException] def getExecutionPlan(packagedProgram: PackagedProgram): String = {
+  @throws[ProgramInvocationException]
+  def getExecutionPlan(packagedProgram: PackagedProgram): String = {
     require(packagedProgram != null, "[StreamPark] FlinkClientUtils.getExecutionPlan: packagedProgram must not be null")
     val address: InetAddress = InetAddress.getLocalHost
     val jmAddress = new InetSocketAddress(address, new ServerSocket(0).getLocalPort)

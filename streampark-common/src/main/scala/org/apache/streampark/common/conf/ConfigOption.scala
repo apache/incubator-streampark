@@ -17,11 +17,10 @@
 package org.apache.streampark.common.conf
 
 import java.util.Properties
+
 import scala.util.{Failure, Success, Try}
 
-
 /**
- *
  * @param key          key of configuration that consistent with the spring config.
  * @param defaultValue default value of configuration that <b>should not be null</b>.
  * @param classType    the class type of value. <b>please use java class type</b>.
@@ -29,13 +28,10 @@ import scala.util.{Failure, Success, Try}
  * @param description  description of configuration.
  * @param handle       Processing function of special parameters
  */
-case class ConfigOption[T](key: String,
-                           defaultValue: T = null,
-                           required: Boolean,
-                           classType: Class[_],
-                           description: String = "",
-                           handle: String => T = null
-                          )(implicit prefix: String = "", prop: Properties) {
+case class ConfigOption[T](key: String, defaultValue: T = null, required: Boolean, classType: Class[_], description: String = "", handle: String => T = null)(
+    implicit
+    prefix: String = "",
+    prop: Properties) {
 
   private[this] lazy val fullKey = if (prefix != null && !prefix.isEmpty) s"$prefix.$key" else key
 

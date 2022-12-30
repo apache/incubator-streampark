@@ -17,8 +17,6 @@
 
 package org.apache.streampark.flink.connector.redis.internal
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.redis.bean.{RedisContainer, RedisMapper, RedisTransaction}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
@@ -26,9 +24,13 @@ import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseComm
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase
 import redis.clients.jedis.exceptions.JedisException
 
-class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[T], ttl: Int)
-  extends TwoPhaseCommitSinkFunction[T, RedisTransaction[T], Void](new KryoSerializer[RedisTransaction[T]](classOf[RedisTransaction[T]], new ExecutionConfig), VoidSerializer.INSTANCE) with Logger {
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.redis.bean.{RedisContainer, RedisMapper, RedisTransaction}
 
+class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[T], ttl: Int)
+    extends TwoPhaseCommitSinkFunction[T, RedisTransaction[T], Void](
+      new KryoSerializer[RedisTransaction[T]](classOf[RedisTransaction[T]], new ExecutionConfig),
+      VoidSerializer.INSTANCE) with Logger {
 
   override def beginTransaction(): RedisTransaction[T] = {
     logInfo("Redis2PCSink beginTransaction.")

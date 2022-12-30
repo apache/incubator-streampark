@@ -42,9 +42,7 @@ private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
    * @param groupId
    * @param offsetInfos
    */
-  override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
-
-  }
+  override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {}
 
   /**
    * delete offset
@@ -52,7 +50,5 @@ private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
    * @param groupId
    * @param topics
    */
-  override def delete(groupId: String, topics: Set[String]): Unit = {
-
-  }
+  override def delete(groupId: String, topics: Set[String]): Unit = {}
 }

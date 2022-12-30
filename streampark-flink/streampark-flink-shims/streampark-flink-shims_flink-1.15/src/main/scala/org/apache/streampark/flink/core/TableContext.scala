@@ -17,14 +17,14 @@
 
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.printLogo
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{CompiledPlan, PlanReference, Table, TableDescriptor, TableEnvironment}
 import org.apache.flink.table.module.ModuleEntry
 
-class TableContext(override val parameter: ParameterTool,
-                   private val tableEnv: TableEnvironment) extends FlinkTableTrait(parameter, tableEnv) {
+import org.apache.streampark.common.conf.ConfigConst.printLogo
+
+class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment) extends FlinkTableTrait(parameter, tableEnv) {
 
   def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
 

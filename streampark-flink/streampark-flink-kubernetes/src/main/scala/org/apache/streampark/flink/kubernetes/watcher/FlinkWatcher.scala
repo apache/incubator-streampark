@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.kubernetes.watcher
 
 import java.util.concurrent.atomic.AtomicBoolean
+
 import scala.language.implicitConversions
 
 trait FlinkWatcher extends AutoCloseable {
@@ -73,7 +74,7 @@ trait FlinkWatcher extends AutoCloseable {
   /**
    * Runnable streamline syntax
    */
-  protected implicit def funcToRunnable(fun: () => Unit): Runnable = new Runnable() {
+  implicit protected def funcToRunnable(fun: () => Unit): Runnable = new Runnable() {
     def run(): Unit = fun()
   }
 

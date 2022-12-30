@@ -21,31 +21,25 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public enum CheckPointStatus implements Serializable {
-    /**
-     * IN_PROGRESS
-     */
-    IN_PROGRESS(1),
-    /**
-     * COMPLETED
-     */
-    COMPLETED(2),
+  /** IN_PROGRESS */
+  IN_PROGRESS(1),
+  /** COMPLETED */
+  COMPLETED(2),
 
-    /**
-     * FAILED
-     */
-    FAILED(3);
+  /** FAILED */
+  FAILED(3);
 
-    private final int value;
+  private final int value;
 
-    public int get() {
-        return this.value;
-    }
+  public int get() {
+    return this.value;
+  }
 
-    CheckPointStatus(int value) {
-        this.value = value;
-    }
+  CheckPointStatus(int value) {
+    this.value = value;
+  }
 
-    public static CheckPointStatus of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-    }
+  public static CheckPointStatus of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+  }
 }

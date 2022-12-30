@@ -17,19 +17,22 @@
 
 package org.apache.streampark.flink.submit.`trait`
 
-import org.apache.streampark.common.util.ExceptionUtils
-import org.apache.streampark.flink.submit.bean._
+import java.lang.{Boolean => JavaBool}
+import java.lang.reflect.Method
+
+import scala.util.Try
+
 import org.apache.flink.client.deployment.{ClusterDescriptor, ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClientProvider
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.jobgraph.JobGraph
 import org.apache.flink.util.FlinkException
-import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
+import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.yarn.api.records.ApplicationId
-import java.lang.reflect.Method
-import java.lang.{Boolean => JavaBool}
-import scala.util.Try
+
+import org.apache.streampark.common.util.ExceptionUtils
+import org.apache.streampark.flink.submit.bean._
 
 /**
  * yarn application mode submit
@@ -43,7 +46,8 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       val clusterClientFactory = new YarnClusterClientFactory
       val applicationId = clusterClientFactory.getClusterId(flinkConf)
       if (applicationId == null) {
-        throw new FlinkException("[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+        throw new FlinkException(
+          "[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
       }
       val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
       clusterDescriptor.retrieve(applicationId).getClusterClient
@@ -52,11 +56,12 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       val savepointDir = super.cancelJob(cancelRequest, jobID, clusterClient)
       CancelResponse(savepointDir)
     }.recover {
-      case e => throw new FlinkException(s"[StreamPark] Triggering a savepoint for the job ${cancelRequest.jobId} failed. detail: ${ExceptionUtils.stringifyException(e)}");
+      case e => throw new FlinkException(
+          s"[StreamPark] Triggering a savepoint for the job ${cancelRequest.jobId} failed. detail: ${ExceptionUtils.stringifyException(e)}");
     }.get
   }
 
-  lazy private val deployInternalMethod: Method = {
+  private lazy val deployInternalMethod: Method = {
     val paramClass = Array(
       classOf[ClusterSpecification],
       classOf[String],
@@ -69,21 +74,20 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     deployInternal
   }
 
-
-  private[submit] def deployInternal(clusterDescriptor: YarnClusterDescriptor,
-                                     clusterSpecification: ClusterSpecification,
-                                     applicationName: String,
-                                     yarnClusterEntrypoint: String,
-                                     jobGraph: JobGraph,
-                                     detached: JavaBool): ClusterClientProvider[ApplicationId] = {
+  private[submit] def deployInternal(
+      clusterDescriptor: YarnClusterDescriptor,
+      clusterSpecification: ClusterSpecification,
+      applicationName: String,
+      yarnClusterEntrypoint: String,
+      jobGraph: JobGraph,
+      detached: JavaBool): ClusterClientProvider[ApplicationId] = {
     deployInternalMethod.invoke(
       clusterDescriptor,
       clusterSpecification,
       applicationName,
       yarnClusterEntrypoint,
       jobGraph,
-      detached
-    ).asInstanceOf[ClusterClientProvider[ApplicationId]]
+      detached).asInstanceOf[ClusterClientProvider[ApplicationId]]
   }
 
   private[submit] def getSessionClusterDescriptor[T <: ClusterDescriptor[ApplicationId]](flinkConfig: Configuration): (ApplicationId, T) = {

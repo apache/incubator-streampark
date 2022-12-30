@@ -17,13 +17,12 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-import org.apache.streampark.common.util.Utils
-
 import scala.util.Try
+
+import org.apache.streampark.common.util.Utils
 
 /**
  * Pod template for flink k8s cluster
- *
  */
 case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "", tmPodTemplate: String = "") {
 
@@ -39,8 +38,8 @@ case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "",
     obj match {
       case that: K8sPodTemplates =>
         Try(podTemplate.trim).getOrElse("") == Try(that.podTemplate.trim).getOrElse("") &&
-          Try(jmPodTemplate.trim).getOrElse("") == Try(that.jmPodTemplate.trim).getOrElse("") &&
-          Try(tmPodTemplate.trim).getOrElse("") == Try(that.tmPodTemplate.trim).getOrElse("")
+        Try(jmPodTemplate.trim).getOrElse("") == Try(that.jmPodTemplate.trim).getOrElse("") &&
+        Try(tmPodTemplate.trim).getOrElse("") == Try(that.tmPodTemplate.trim).getOrElse("")
       case _ => false
     }
   }

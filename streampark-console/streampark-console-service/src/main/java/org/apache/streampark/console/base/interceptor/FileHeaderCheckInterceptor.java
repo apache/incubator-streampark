@@ -37,57 +37,65 @@ import java.util.Map;
 @Component
 public class FileHeaderCheckInterceptor implements HandlerInterceptor {
 
-    private static final List<String> FILE_HEADERS = new ArrayList<>();
-    private static final int HEADER_LENGTH = 8;
+  private static final List<String> FILE_HEADERS = new ArrayList<>();
+  private static final int HEADER_LENGTH = 8;
 
-    static {
-        FILE_HEADERS.add(FileType.JAR.getMagicNumber());
-    }
+  static {
+    FILE_HEADERS.add(FileType.JAR.getMagicNumber());
+  }
 
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (request != null && request instanceof MultipartHttpServletRequest) {
-            MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-            Map<String, MultipartFile> files = multipartRequest.getFileMap();
-            Iterator<String> iterator = files.keySet().iterator();
-            while (iterator.hasNext()) {
-                String formKey = iterator.next();
-                MultipartFile multipartFile = multipartRequest.getFile(formKey);
-                byte[] file = multipartFile.getBytes();
-                if (file.length > HEADER_LENGTH) {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < HEADER_LENGTH; i++) {
-                        int v = file[i] & 0xFF;
-                        String hv = Integer.toHexString(v);
-                        if (hv.length() < 2) {
-                            sb.append(0);
-                        }
-                        sb.append(hv);
-                    }
-                    boolean isFound = false;
-                    String fileHead = sb.toString().toUpperCase();
-                    for (String header : FILE_HEADERS) {
-                        if (fileHead.startsWith(header)) {
-                            isFound = true;
-                            break;
-                        }
-                    }
-                    if (!isFound) {
-                        throw new IllegalFileTypeException("Illegal file type, please check");
-                    }
-                }
+  @Override
+  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+      throws Exception {
+    if (request != null && request instanceof MultipartHttpServletRequest) {
+      MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+      Map<String, MultipartFile> files = multipartRequest.getFileMap();
+      Iterator<String> iterator = files.keySet().iterator();
+      while (iterator.hasNext()) {
+        String formKey = iterator.next();
+        MultipartFile multipartFile = multipartRequest.getFile(formKey);
+        byte[] file = multipartFile.getBytes();
+        if (file.length > HEADER_LENGTH) {
+          StringBuilder sb = new StringBuilder();
+          for (int i = 0; i < HEADER_LENGTH; i++) {
+            int v = file[i] & 0xFF;
+            String hv = Integer.toHexString(v);
+            if (hv.length() < 2) {
+              sb.append(0);
             }
+            sb.append(hv);
+          }
+          boolean isFound = false;
+          String fileHead = sb.toString().toUpperCase();
+          for (String header : FILE_HEADERS) {
+            if (fileHead.startsWith(header)) {
+              isFound = true;
+              break;
+            }
+          }
+          if (!isFound) {
+            throw new IllegalFileTypeException("Illegal file type, please check");
+          }
         }
-        return true;
+      }
     }
+    return true;
+  }
 
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
-    }
+  @Override
+  public void postHandle(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Object handler,
+      ModelAndView modelAndView)
+      throws Exception {
+    HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
+  }
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
-    }
+  @Override
+  public void afterCompletion(
+      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+      throws Exception {
+    HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+  }
 }

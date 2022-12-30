@@ -20,12 +20,8 @@ package org.apache.streampark.console.core.enums;
 import java.io.Serializable;
 
 public enum StopFrom implements Serializable {
-    /**
-     * None
-     */
-    NONE,
-    /**
-     * StreamPark
-     */
-    STREAMPARK
+  /** None */
+  NONE,
+  /** StreamPark */
+  STREAMPARK
 }

@@ -21,8 +21,8 @@ import java.time.{Duration, LocalDateTime}
 import java.time.format.DateTimeFormatter
 import java.util._
 import java.util.concurrent.TimeUnit
-import scala.util._
 
+import scala.util._
 
 object DateUtils {
 
@@ -71,7 +71,8 @@ object DateUtils {
   }
 
   def format(date: Date = new Date(), fmt: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): String = {
-    if (date == null) null else {
+    if (date == null) null
+    else {
       val simpleDateFormat = new SimpleDateFormat(fmt)
       simpleDateFormat.setTimeZone(timeZone)
       simpleDateFormat.format(date)
@@ -196,7 +197,8 @@ object DateUtils {
     format.format(date)
   }
 
-  @throws[ParseException] def formatCSTTime(date: String, format: String): String = {
+  @throws[ParseException]
+  def formatCSTTime(date: String, format: String): String = {
     val sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US)
     val d = sdf.parse(date)
     DateUtils.getDateFormat(d, format)

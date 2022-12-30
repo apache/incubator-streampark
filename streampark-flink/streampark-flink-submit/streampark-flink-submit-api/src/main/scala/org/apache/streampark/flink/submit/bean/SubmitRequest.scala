@@ -17,46 +17,47 @@
 
 package org.apache.streampark.flink.submit.bean
 
+import java.io.File
+import java.util.{Map => JavaMap}
+import javax.annotation.Nullable
+
+import scala.collection.JavaConversions._
+import scala.util.Try
+
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.commons.io.FileUtils
+import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
+
 import org.apache.streampark.common.conf.{ConfigConst, Workspace}
+import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.domain.FlinkVersion
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util.{DeflaterUtils, FlinkUtils, HdfsUtils, PropertiesUtils}
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
-import org.apache.commons.io.FileUtils
-import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
-
-import java.io.File
-import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
-import scala.collection.JavaConversions._
-import scala.util.Try
 
 /**
  * @param clusterId            flink cluster id in k8s cluster.
  * @param kubernetesNamespace  k8s namespace.
  * @param flinkRestExposedType flink rest-service exposed type on k8s cluster.
  */
-case class KubernetesSubmitParam(clusterId: String,
-                                 kubernetesNamespace: String,
-                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
+case class KubernetesSubmitParam(clusterId: String, kubernetesNamespace: String, @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
 
-case class SubmitRequest(flinkVersion: FlinkVersion,
-                         flinkYaml: String,
-                         developmentMode: DevelopmentMode,
-                         executionMode: ExecutionMode,
-                         id: Long,
-                         jobId: String,
-                         appName: String,
-                         appConf: String,
-                         applicationType: ApplicationType,
-                         savePoint: String,
-                         properties: JavaMap[String, Any],
-                         args: String,
-                         @Nullable buildResult: BuildResult,
-                         @Nullable k8sSubmitParam: KubernetesSubmitParam,
-                         @Nullable extraParameter: JavaMap[String, Any]) {
+case class SubmitRequest(
+    flinkVersion: FlinkVersion,
+    flinkYaml: String,
+    developmentMode: DevelopmentMode,
+    executionMode: ExecutionMode,
+    id: Long,
+    jobId: String,
+    appName: String,
+    appConf: String,
+    applicationType: ApplicationType,
+    savePoint: String,
+    properties: JavaMap[String, Any],
+    args: String,
+    @Nullable buildResult: BuildResult,
+    @Nullable k8sSubmitParam: KubernetesSubmitParam,
+    @Nullable extraParameter: JavaMap[String, Any]) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_PROPERTY_PREFIX)
 
@@ -98,9 +99,9 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
     }
   }
 
-
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
-    if (this.appConf == null) Map.empty[String, String] else {
+    if (this.appConf == null) Map.empty[String, String]
+    else {
       lazy val content = DeflaterUtils.unzipString(this.appConf.trim.drop(7))
       val map = this.appConf match {
         case x if x.trim.startsWith("yaml://") => PropertiesUtils.fromYamlText(content)
@@ -123,18 +124,20 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
           new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap.filter(_._2 != null)
         case _ => throw new IllegalArgumentException("[StreamPark] appConf format error.")
       }
-      if (this.appConf.trim.startsWith("json://")) map else {
+      if (this.appConf.trim.startsWith("json://")) map
+      else {
         prefix match {
           case "" | null => map
           case other => map
-            .filter(_._1.startsWith(other)).filter(_._2.nonEmpty)
-            .map(x => x._1.drop(other.length) -> x._2)
+              .filter(_._1.startsWith(other)).filter(_._2.nonEmpty)
+              .map(x => x._1.drop(other.length) -> x._2)
         }
       }
     }
   }
 
   private[submit] lazy val hdfsWorkspace = {
+
     /**
      * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
      */
@@ -154,11 +157,11 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
       flinkPlugins = s"$flinkHdfsHome/plugins",
       flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome),
       appJars = workspace.APP_JARS,
-      appPlugins = workspace.APP_PLUGINS
-    )
+      appPlugins = workspace.APP_PLUGINS)
   }
 
-  @throws[Exception] def checkBuildResult(): Unit = {
+  @throws[Exception]
+  def checkBuildResult(): Unit = {
     executionMode match {
       case ExecutionMode.KUBERNETES_NATIVE_SESSION | ExecutionMode.KUBERNETES_NATIVE_APPLICATION =>
         if (buildResult == null) {
@@ -184,7 +187,6 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 }
 
 /**
- *
  * @param flinkName
  * @param flinkHome
  * @param flinkDistJar
@@ -194,10 +196,11 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
  * @param appPlugins
  * #TODO: className provisional
  */
-case class HdfsWorkspace(flinkName: String,
-                         flinkHome: String,
-                         flinkDistJar: String,
-                         flinkLib: String,
-                         flinkPlugins: String,
-                         appJars: String,
-                         appPlugins: String)
+case class HdfsWorkspace(
+    flinkName: String,
+    flinkHome: String,
+    flinkDistJar: String,
+    flinkLib: String,
+    flinkPlugins: String,
+    appJars: String,
+    appPlugins: String)

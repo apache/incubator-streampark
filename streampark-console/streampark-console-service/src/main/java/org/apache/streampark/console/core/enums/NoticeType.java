@@ -21,27 +21,22 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public enum NoticeType implements Serializable {
-    /**
-     * exception
-     */
-    EXCEPTION(1),
-    /**
-     * message
-     */
-    MESSAGE(2);
+  /** exception */
+  EXCEPTION(1),
+  /** message */
+  MESSAGE(2);
 
-    private final int value;
+  private final int value;
 
-    public int get() {
-        return this.value;
-    }
+  public int get() {
+    return this.value;
+  }
 
-    NoticeType(int value) {
-        this.value = value;
-    }
+  NoticeType(int value) {
+    this.value = value;
+  }
 
-    public static NoticeType of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-    }
-
+  public static NoticeType of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+  }
 }
