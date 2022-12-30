@@ -74,7 +74,7 @@ object YarnPerJobTestCase extends Logger {
 
   lazy val flinkDefaultConfiguration: Configuration = {
     require(FLINK_HOME != null)
-    // 获取flink的配置
+    // get flink config
     GlobalConfiguration.loadConfiguration(s"$FLINK_HOME/conf")
   }
 
