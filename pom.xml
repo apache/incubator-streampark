@@ -131,9 +131,9 @@
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
+        <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <scalastyle.fails.on.error>true</scalastyle.fails.on.error>
-        <scalastyle-maven-plugin.version>1.0.0</scalastyle-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
         <httpclient.version>4.5.13</httpclient.version>
@@ -715,7 +715,7 @@
                 <plugin>
                     <groupId>org.scalastyle</groupId>
                     <artifactId>scalastyle-maven-plugin</artifactId>
-                    <version>${maven.plugin.scalastyle.version}</version>
+                    <version>${maven-scalastyle-plugin.version}</version>
                     <configuration>
                         <verbose>false</verbose>
                         <failOnViolation>${scalastyle.fails.on.error}</failOnViolation>
@@ -943,8 +943,8 @@
             </plugin>
 
             <plugin>
-                <groupId>org.scalatest</groupId>
-                <artifactId>scalatest-maven-plugin</artifactId>
+                <groupId>org.scalastyle</groupId>
+                <artifactId>scalastyle-maven-plugin</artifactId>
             </plugin>
 
             <plugin>
