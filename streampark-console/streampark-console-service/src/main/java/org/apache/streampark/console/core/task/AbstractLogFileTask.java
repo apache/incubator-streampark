@@ -33,85 +33,83 @@ import java.nio.file.Paths;
 @Slf4j
 public abstract class AbstractLogFileTask implements Runnable {
 
-    private final Path logPath;
+  private final Path logPath;
 
-    /**
-     * Whether old log files need to be overwritten?
-     * If true, the log file will be clean before write.
-     * If false, the log will be appended to new log file.
-     */
-    private final boolean isOverwrite;
+  /**
+   * Whether old log files need to be overwritten? If true, the log file will be clean before write.
+   * If false, the log will be appended to new log file.
+   */
+  private final boolean isOverwrite;
 
-    protected Logger fileLogger;
+  protected Logger fileLogger;
 
-    private FileAppender<ILoggingEvent> fileAppender;
+  private FileAppender<ILoggingEvent> fileAppender;
 
-    private PatternLayoutEncoder ple;
+  private PatternLayoutEncoder ple;
 
-    public AbstractLogFileTask(String logPath, boolean isOverwrite) {
-        this.logPath = Paths.get(logPath);
-        this.isOverwrite = isOverwrite;
+  public AbstractLogFileTask(String logPath, boolean isOverwrite) {
+    this.logPath = Paths.get(logPath);
+    this.isOverwrite = isOverwrite;
+  }
+
+  @Override
+  public void run() {
+    try {
+      Path logDir = logPath.getParent();
+      if (!Files.isDirectory(logDir)) {
+        log.info("Created log dir {}", logDir);
+        Files.createDirectories(logDir);
+      }
+      if (isOverwrite) {
+        Files.deleteIfExists(logPath);
+      }
+      this.fileLogger = createFileLogger();
+      doRun();
+    } catch (Throwable t) {
+      log.warn("Failed to run task.", t);
+      if (fileLogger != null) {
+        fileLogger.error("Failed to run task.", t);
+      }
+      processException(t);
+    } finally {
+      doFinally();
+      if (ple != null) {
+        ple.stop();
+      }
+      if (fileAppender != null) {
+        fileAppender.stop();
+      }
+      if (fileLogger != null) {
+        fileLogger.detachAppender(fileAppender);
+      }
     }
+  }
 
-    @Override
-    public void run() {
-        try {
-            Path logDir = logPath.getParent();
-            if (!Files.isDirectory(logDir)) {
-                log.info("Created log dir {}", logDir);
-                Files.createDirectories(logDir);
-            }
-            if (isOverwrite) {
-                Files.deleteIfExists(logPath);
-            }
-            this.fileLogger = createFileLogger();
-            doRun();
-        } catch (Throwable t) {
-            log.warn("Failed to run task.", t);
-            if (fileLogger != null) {
-                fileLogger.error("Failed to run task.", t);
-            }
-            processException(t);
-        } finally {
-            doFinally();
-            if (ple != null) {
-                ple.stop();
-            }
-            if (fileAppender != null) {
-                fileAppender.stop();
-            }
-            if (fileLogger != null) {
-                fileLogger.detachAppender(fileAppender);
-            }
-        }
-    }
+  private Logger createFileLogger() {
+    LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-    private Logger createFileLogger() {
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+    ple = new PatternLayoutEncoder();
+    ple.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS,Asia/Singapore} %-5p - %m%n");
+    ple.setContext(lc);
+    ple.start();
 
-        ple = new PatternLayoutEncoder();
-        ple.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS,Asia/Singapore} %-5p - %m%n");
-        ple.setContext(lc);
-        ple.start();
+    this.fileAppender = new FileAppender<>();
+    fileAppender.setFile(logPath.toString());
+    fileAppender.setEncoder(ple);
+    fileAppender.setContext(lc);
+    fileAppender.start();
 
-        this.fileAppender = new FileAppender<>();
-        fileAppender.setFile(logPath.toString());
-        fileAppender.setEncoder(ple);
-        fileAppender.setContext(lc);
-        fileAppender.start();
+    ch.qos.logback.classic.Logger logger =
+        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Thread.currentThread().getName());
+    logger.addAppender(fileAppender);
+    logger.setLevel(Level.INFO);
+    logger.setAdditive(false);
+    return logger;
+  }
 
-        ch.qos.logback.classic.Logger logger =
-            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Thread.currentThread().getName());
-        logger.addAppender(fileAppender);
-        logger.setLevel(Level.INFO);
-        logger.setAdditive(false);
-        return logger;
-    }
+  protected abstract void doRun() throws Throwable;
 
-    protected abstract void doRun() throws Throwable;
+  protected abstract void processException(Throwable t);
 
-    protected abstract void processException(Throwable t);
-
-    protected abstract void doFinally();
-
+  protected abstract void doFinally();
 }

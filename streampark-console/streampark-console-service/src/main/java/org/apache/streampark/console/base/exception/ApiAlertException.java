@@ -20,6 +20,8 @@ package org.apache.streampark.console.base.exception;
 import org.apache.streampark.console.base.domain.ResponseCode;
 
 /**
+ *
+ *
  * <pre>
  * An exception message that needs to be notified to front-end,
  * usually a <strong>simple</strong>, clear</strong> message, e.g:
@@ -30,16 +32,15 @@ import org.apache.streampark.console.base.domain.ResponseCode;
  */
 public class ApiAlertException extends AbstractApiException {
 
-    public ApiAlertException(String message) {
-        super(message, ResponseCode.CODE_FAIL_ALERT);
-    }
+  public ApiAlertException(String message) {
+    super(message, ResponseCode.CODE_FAIL_ALERT);
+  }
 
-    public ApiAlertException(Throwable cause) {
-        super(cause, ResponseCode.CODE_FAIL_ALERT);
-    }
+  public ApiAlertException(Throwable cause) {
+    super(cause, ResponseCode.CODE_FAIL_ALERT);
+  }
 
-    public ApiAlertException(String message, Throwable cause) {
-        super(message, cause, ResponseCode.CODE_FAIL_ALERT);
-    }
-
+  public ApiAlertException(String message, Throwable cause) {
+    super(message, cause, ResponseCode.CODE_FAIL_ALERT);
+  }
 }

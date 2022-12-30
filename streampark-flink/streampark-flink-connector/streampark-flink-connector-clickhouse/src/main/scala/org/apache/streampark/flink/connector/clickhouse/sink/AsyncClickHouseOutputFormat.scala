@@ -17,14 +17,15 @@
 
 package org.apache.streampark.flink.connector.clickhouse.sink
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.clickhouse.internal.AsyncClickHouseSinkFunction
-import org.apache.streampark.flink.connector.function.TransformFunction
+import java.util.Properties
+
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 
-import java.util.Properties
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.clickhouse.internal.AsyncClickHouseSinkFunction
+import org.apache.streampark.flink.connector.function.TransformFunction
 
 class AsyncClickHouseOutputFormat[T: TypeInformation](prop: Properties) extends RichOutputFormat[T] with Logger {
 
@@ -32,19 +33,17 @@ class AsyncClickHouseOutputFormat[T: TypeInformation](prop: Properties) extends 
 
   var configuration: Configuration = _
 
-
-  //for Scala
+  // for Scala
   def this(properties: Properties, scalaSqlFunc: T => String) = {
     this(properties)
     sinkFunction = new AsyncClickHouseSinkFunction[T](properties, scalaSqlFunc)
   }
 
-  //for JAVA
+  // for JAVA
   def this(properties: Properties, javaSqlFunc: TransformFunction[T, String]) = {
     this(properties)
     sinkFunction = new AsyncClickHouseSinkFunction[T](properties, javaSqlFunc)
   }
-
 
   override def configure(configuration: Configuration): Unit = this.configuration = configuration
 

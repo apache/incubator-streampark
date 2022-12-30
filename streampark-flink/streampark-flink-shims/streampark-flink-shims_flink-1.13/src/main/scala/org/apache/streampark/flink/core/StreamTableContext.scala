@@ -19,8 +19,8 @@ package org.apache.streampark.flink.core
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.graph.StreamGraph
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{Schema, StatementSet, Table}
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.connector.ChangelogMode
 import org.apache.flink.table.descriptors.{ConnectorDescriptor, StreamTableDescriptor}
 import org.apache.flink.table.module.ModuleEntry
@@ -35,9 +35,8 @@ import org.apache.flink.types.Row
  * @param streamEnv streamEnv
  * @param tableEnv tableEnv
  */
-class StreamTableContext(override val parameter: ParameterTool,
-                         private val streamEnv: StreamExecutionEnvironment,
-                         private val tableEnv: StreamTableEnvironment) extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
+class StreamTableContext(override val parameter: ParameterTool, private val streamEnv: StreamExecutionEnvironment, private val tableEnv: StreamTableEnvironment)
+    extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
 
   /**
    * for scala
@@ -49,14 +48,14 @@ class StreamTableContext(override val parameter: ParameterTool,
    */
   def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-
   override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table = tableEnv.fromDataStream[T](dataStream, schema)
 
   override def fromChangelogStream(dataStream: DataStream[Row]): Table = tableEnv.fromChangelogStream(dataStream)
 
   override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema): Table = tableEnv.fromChangelogStream(dataStream, schema)
 
-  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema, changelogMode: ChangelogMode): Table = tableEnv.fromChangelogStream(dataStream, schema, changelogMode)
+  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema, changelogMode: ChangelogMode): Table =
+    tableEnv.fromChangelogStream(dataStream, schema, changelogMode)
 
   override def createTemporaryView[T](path: String, dataStream: DataStream[T], schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
 

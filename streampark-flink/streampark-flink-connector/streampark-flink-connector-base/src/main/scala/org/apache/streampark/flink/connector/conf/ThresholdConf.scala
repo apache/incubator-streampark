@@ -17,12 +17,13 @@
 
 package org.apache.streampark.flink.connector.conf
 
-import org.apache.streampark.common.util.ConfigUtils
-import org.apache.streampark.flink.connector.conf.FailoverStorageType.{FailoverStorageType, Console, NONE, Kafka, MySQL}
-
 import java.util.Properties
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+
+import org.apache.streampark.common.util.ConfigUtils
+import org.apache.streampark.flink.connector.conf.FailoverStorageType.{Console, FailoverStorageType, Kafka, MySQL, NONE}
 
 case class ThresholdConf(prefixStr: String, parameters: Properties) {
 

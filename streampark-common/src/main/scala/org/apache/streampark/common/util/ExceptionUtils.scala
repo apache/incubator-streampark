@@ -16,20 +16,20 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.commons.lang3.ArrayUtils
-
 import java.io.{IOException, PrintWriter, StringWriter}
 import java.util
+import java.util.{Optional, StringTokenizer}
 import java.util.concurrent.{CompletionException, ExecutionException}
 import java.util.function.Predicate
-import java.util.{Optional, StringTokenizer}
 import javax.annotation.Nullable
 
+import org.apache.commons.lang3.ArrayUtils
 
 /**
  * A collection of utility functions for dealing with exceptions and exception workflows.
  */
 object ExceptionUtils {
+
   /** The stringified representation of a null exception reference. */
   val STRINGIFIED_NULL_EXCEPTION = "(null)"
 
@@ -96,7 +96,10 @@ object ExceptionUtils {
    * @return the enriched exception or the original if no additional information could be added;
    *         {@code null} if the argument was {@code null}
    */
-  @Nullable def tryEnrichOutOfMemoryError(@Nullable exception: Throwable, jvmMetaspaceOomNewErrorMessage: String, jvmDirectOomNewErrorMessage: String): Throwable = {
+  @Nullable def tryEnrichOutOfMemoryError(
+      @Nullable exception: Throwable,
+      jvmMetaspaceOomNewErrorMessage: String,
+      jvmDirectOomNewErrorMessage: String): Throwable = {
     val isOom = exception.isInstanceOf[OutOfMemoryError]
     if (!isOom) return exception
     val oom = exception.asInstanceOf[OutOfMemoryError]
@@ -316,7 +319,8 @@ object ExceptionUtils {
    * @return Optional throwable of the requested type if available, otherwise empty
    */
   def findThrowable[T <: Throwable](throwable: Throwable, searchType: Class[T]): Optional[T] = {
-    if (throwable == null || searchType == null) Optional.empty[T] else {
+    if (throwable == null || searchType == null) Optional.empty[T]
+    else {
       var t = throwable
       var r: Optional[T] = null
       while (t != null && r == null) {
@@ -328,7 +332,6 @@ object ExceptionUtils {
     }
   }
 
-
   /**
    * Checks whether a throwable chain contains an exception matching a predicate and returns it.
    *
@@ -337,7 +340,8 @@ object ExceptionUtils {
    * @return Optional throwable of the requested type if available, otherwise empty
    */
   def findThrowable(throwable: Throwable, predicate: Predicate[Throwable]): Optional[Throwable] = {
-    if (throwable == null || predicate == null) Optional.empty[Throwable] else {
+    if (throwable == null || predicate == null) Optional.empty[Throwable]
+    else {
       var t = throwable
       var r: Optional[Throwable] = null
       while (t != null && r == null) {
@@ -357,14 +361,14 @@ object ExceptionUtils {
    * @return Optional throwable containing the search message if available, otherwise empty
    */
   def findThrowableWithMessage(throwable: Throwable, searchMessage: String): Optional[Throwable] = {
-    if (throwable == null || searchMessage == null) Optional.empty[Throwable] else {
+    if (throwable == null || searchMessage == null) Optional.empty[Throwable]
+    else {
       var t = throwable
       var r: Optional[Throwable] = null
       while (t != null && r == null) {
         if (t.getMessage != null && t.getMessage.contains(searchMessage)) {
           r = Optional.of(t)
-        }
-        else t = t.getCause
+        } else t = t.getCause
       }
       r
     }
@@ -415,7 +419,6 @@ object ExceptionUtils {
   }
 
   /**
-   *
    * @param stackTrace
    * @return
    */
@@ -430,4 +433,3 @@ object ExceptionUtils {
   }
 
 }
-

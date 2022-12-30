@@ -17,14 +17,16 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
-import org.apache.streampark.common.util.Logger
-import org.apache.kafka.common.TopicPartition
-import org.apache.spark.SparkConf
-
 import java.util.Properties
+
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.util.Try
+
+import org.apache.kafka.common.TopicPartition
+import org.apache.spark.SparkConf
+
+import org.apache.streampark.common.util.Logger
 
 /**
  * Offset Manager
@@ -35,7 +37,7 @@ trait Offset extends Logger with Serializable {
 
   lazy val storeType: String = storeParams.getOrElse("type", "none")
 
-  lazy implicit val storeParams: Map[String, String] = sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
+  implicit lazy val storeParams: Map[String, String] = sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
 
   implicit def toProperty(map: Map[String, String]): Properties = {
     require(map != null)
@@ -85,9 +87,8 @@ trait Offset extends Logger with Serializable {
    */
   def key(groupId: String, topic: String): String = s"$groupId#$topic"
 
-
-  private final val LatestTime = -1L
-  private final val EarliestTime = -2L
+  final private val LatestTime = -1L
+  final private val EarliestTime = -2L
 
   /**
    * get earliest offset
@@ -104,7 +105,6 @@ trait Offset extends Logger with Serializable {
    * @return
    */
   def getLatestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, LatestTime)
-
 
   /**
    * get specific timestamp offset

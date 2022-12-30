@@ -38,91 +38,85 @@ import java.util.Map;
 @TableName("t_flink_env")
 public class FlinkEnv implements Serializable {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+  @TableId(type = IdType.AUTO)
+  private Long id;
 
-    private String flinkName;
+  private String flinkName;
 
-    private String flinkHome;
+  private String flinkHome;
 
-    private String flinkConf;
+  private String flinkConf;
 
-    private String description;
+  private String description;
 
-    private String scalaVersion;
+  private String scalaVersion;
 
-    private String version;
+  private String version;
 
-    /**
-     * is default
-     */
-    private Boolean isDefault;
+  /** is default */
+  private Boolean isDefault;
 
-    private Date createTime;
+  private Date createTime;
 
-    private transient FlinkVersion flinkVersion;
+  private transient FlinkVersion flinkVersion;
 
-    private transient String streamParkScalaVersion = scala.util.Properties.versionNumberString();
+  private transient String streamParkScalaVersion = scala.util.Properties.versionNumberString();
 
-    public void doSetFlinkConf() throws ApiDetailException {
-        try {
-            File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
-            String flinkConf = FileUtils.readFileToString(yaml);
-            this.flinkConf = DeflaterUtils.zipString(flinkConf);
-        } catch (Exception e) {
-            throw new ApiDetailException(e);
-        }
+  public void doSetFlinkConf() throws ApiDetailException {
+    try {
+      File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
+      String flinkConf = FileUtils.readFileToString(yaml);
+      this.flinkConf = DeflaterUtils.zipString(flinkConf);
+    } catch (Exception e) {
+      throw new ApiDetailException(e);
     }
+  }
 
-    public void doSetVersion() {
-        this.setVersion(this.getFlinkVersion().version());
-        this.setScalaVersion(this.getFlinkVersion().scalaVersion());
-        if (!streamParkScalaVersion.startsWith(this.getFlinkVersion().scalaVersion())) {
-            throw new UnsupportedOperationException(
-                String.format(
-                    "The current Scala version of StreamPark is %s, but the scala version of Flink to be added is %s, which does not match, Please check",
-                    streamParkScalaVersion,
-                    this.getFlinkVersion().scalaVersion()
-                )
-            );
-        }
+  public void doSetVersion() {
+    this.setVersion(this.getFlinkVersion().version());
+    this.setScalaVersion(this.getFlinkVersion().scalaVersion());
+    if (!streamParkScalaVersion.startsWith(this.getFlinkVersion().scalaVersion())) {
+      throw new UnsupportedOperationException(
+          String.format(
+              "The current Scala version of StreamPark is %s, but the scala version of Flink to be added is %s, which does not match, Please check",
+              streamParkScalaVersion, this.getFlinkVersion().scalaVersion()));
     }
+  }
 
-    public Map<String, String> convertFlinkYamlAsMap() {
-        String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
-        return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+  public Map<String, String> convertFlinkYamlAsMap() {
+    String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
+    return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+  }
+
+  @JsonIgnore
+  public FlinkVersion getFlinkVersion() {
+    if (this.flinkVersion == null) {
+      this.flinkVersion = new FlinkVersion(this.flinkHome);
     }
+    return this.flinkVersion;
+  }
 
-    @JsonIgnore
-    public FlinkVersion getFlinkVersion() {
-        if (this.flinkVersion == null) {
-            this.flinkVersion = new FlinkVersion(this.flinkHome);
-        }
-        return this.flinkVersion;
-    }
+  public void unzipFlinkConf() {
+    this.flinkConf = DeflaterUtils.unzipString(this.flinkConf);
+  }
 
-    public void unzipFlinkConf() {
-        this.flinkConf = DeflaterUtils.unzipString(this.flinkConf);
-    }
+  @JsonIgnore
+  public String getLargeVersion() {
+    return this.version.substring(0, this.version.lastIndexOf("."));
+  }
 
-    @JsonIgnore
-    public String getLargeVersion() {
-        return this.version.substring(0, this.version.lastIndexOf("."));
-    }
+  @JsonIgnore
+  public String getVersionOfFirst() {
+    return this.version.split("\\.")[0];
+  }
 
-    @JsonIgnore
-    public String getVersionOfFirst() {
-        return this.version.split("\\.")[0];
-    }
+  @JsonIgnore
+  public String getVersionOfMiddle() {
+    return this.version.split("\\.")[1];
+  }
 
-    @JsonIgnore
-    public String getVersionOfMiddle() {
-        return this.version.split("\\.")[1];
-    }
-
-    @JsonIgnore
-    public String getVersionOfLast() {
-        return this.version.split("\\.")[2];
-    }
-
+  @JsonIgnore
+  public String getVersionOfLast() {
+    return this.version.split("\\.")[2];
+  }
 }

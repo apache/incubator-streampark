@@ -18,6 +18,4 @@ package org.apache.streampark.flink.core
 
 import org.apache.flink.client.program.ClusterClient
 
-class FlinkClusterClient[T](clusterClient: ClusterClient[T]) extends FlinkClientTrait[T](clusterClient) {
-
-}
+class FlinkClusterClient[T](clusterClient: ClusterClient[T]) extends FlinkClientTrait[T](clusterClient) {}

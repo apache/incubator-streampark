@@ -17,24 +17,26 @@
 
 package org.apache.streampark.flink.connector.http.internal
 
-import org.apache.streampark.common.util.{JsonUtils, Logger}
-import org.apache.streampark.flink.connector.conf.ThresholdConf
-import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
+import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
+
+import scala.collection.JavaConversions._
+import scala.util.Try
+
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.http.client.methods._
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}
 
-import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
-import scala.util.Try
-import scala.collection.JavaConversions._
+import org.apache.streampark.common.util.{JsonUtils, Logger}
+import org.apache.streampark.flink.connector.conf.ThresholdConf
+import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
 
-
-case class HttpWriterTask(id: Int,
-                          thresholdConf: ThresholdConf,
-                          asyncHttpClient: AsyncHttpClient,
-                          header: Map[String, String],
-                          queue: BlockingQueue[SinkRequest],
-                          callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
+case class HttpWriterTask(
+    id: Int,
+    thresholdConf: ThresholdConf,
+    asyncHttpClient: AsyncHttpClient,
+    header: Map[String, String],
+    queue: BlockingQueue[SinkRequest],
+    callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
 
   @volatile var isWorking = false
 
@@ -87,30 +89,31 @@ case class HttpWriterTask(id: Int,
     builder.setRequestTimeout(thresholdConf.timeout).build()
   }
 
-  override def run(): Unit = try {
-    isWorking = true
-    logInfo(s"Start writer task, id = $id")
-    while (isWorking || queue.nonEmpty) {
-      val req = queue.poll(100, TimeUnit.MILLISECONDS)
-      if (req != null) {
-        val url = req.records.head
-        val sinkRequest = SinkRequest(List(url), req.attemptCounter)
-        val request = buildRequest(url)
-        val whenResponse = asyncHttpClient.executeRequest(request)
-        val callback = respCallback(whenResponse, sinkRequest)
-        whenResponse.addListener(callback, callbackService)
-        if (req.attemptCounter > 0) {
-          logInfo(s"get retry url from queue,attemptCounter:${req.attemptCounter}")
+  override def run(): Unit =
+    try {
+      isWorking = true
+      logInfo(s"Start writer task, id = $id")
+      while (isWorking || queue.nonEmpty) {
+        val req = queue.poll(100, TimeUnit.MILLISECONDS)
+        if (req != null) {
+          val url = req.records.head
+          val sinkRequest = SinkRequest(List(url), req.attemptCounter)
+          val request = buildRequest(url)
+          val whenResponse = asyncHttpClient.executeRequest(request)
+          val callback = respCallback(whenResponse, sinkRequest)
+          whenResponse.addListener(callback, callbackService)
+          if (req.attemptCounter > 0) {
+            logInfo(s"get retry url from queue,attemptCounter:${req.attemptCounter}")
+          }
         }
       }
+    } catch {
+      case e: Exception =>
+        logError("Error while inserting data", e)
+        throw new RuntimeException(e)
+    } finally {
+      logInfo(s"Task id = $id is finished")
     }
-  } catch {
-    case e: Exception =>
-      logError("Error while inserting data", e)
-      throw new RuntimeException(e)
-  } finally {
-    logInfo(s"Task id = $id is finished")
-  }
 
   def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable = new Runnable {
     override def run(): Unit = {
@@ -132,19 +135,19 @@ case class HttpWriterTask(id: Int,
    * @param response
    * @param sinkRequest
    */
-  def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = try {
-    if (sinkRequest.attemptCounter >= thresholdConf.maxRetries) {
-      failoverWriter.write(sinkRequest.copy(records = sinkRequest.records.map(_.replaceFirst("^[A-Z]+///", ""))))
-      logWarn(s"""Failed to send data to Http, Http response = $response. Ready to flush data to ${thresholdConf.storageType}""")
-    } else {
-      sinkRequest.incrementCounter()
-      logWarn(s"Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${thresholdConf.maxRetries}, response = $response")
-      queue.put(sinkRequest)
+  def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit =
+    try {
+      if (sinkRequest.attemptCounter >= thresholdConf.maxRetries) {
+        failoverWriter.write(sinkRequest.copy(records = sinkRequest.records.map(_.replaceFirst("^[A-Z]+///", ""))))
+        logWarn(s"""Failed to send data to Http, Http response = $response. Ready to flush data to ${thresholdConf.storageType}""")
+      } else {
+        sinkRequest.incrementCounter()
+        logWarn(s"Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${thresholdConf.maxRetries}, response = $response")
+        queue.put(sinkRequest)
+      }
+    } catch {
+      case e: Exception => new RuntimeException(s"[StreamPark] handleFailedResponse,error:$e")
     }
-  } catch {
-    case e: Exception => new RuntimeException(s"[StreamPark] handleFailedResponse,error:$e")
-  }
-
 
   override def close(): Unit = {
     isWorking = false

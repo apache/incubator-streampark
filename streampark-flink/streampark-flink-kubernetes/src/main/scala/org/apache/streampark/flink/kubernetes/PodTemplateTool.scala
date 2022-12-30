@@ -17,12 +17,14 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
+import java.io.File
+
+import scala.collection.mutable
+
 import org.apache.commons.io.FileUtils
 import org.apache.flink.configuration.Configuration
 
-import java.io.File
-import scala.collection.mutable
+import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 
 object PodTemplateTool {
 
@@ -31,7 +33,6 @@ object PodTemplateTool {
   val KUBERNETES_JM_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file.jobmanager", "jm-pod-template.yaml")
 
   val KUBERNETES_TM_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file.taskmanager", "tm-pod-template.yaml")
-
 
   /**
    * Prepare kubernetes pod template file to buildWorkspace direactory.

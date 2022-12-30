@@ -17,6 +17,8 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
+import scala.collection.mutable.ArrayBuffer
+
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.domain.FlinkVersion
 import org.apache.streampark.common.enums.{DevelopmentMode, ExecutionMode}
@@ -24,11 +26,8 @@ import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 import org.apache.streampark.flink.packer.docker.DockerConf
 import org.apache.streampark.flink.packer.maven.DependencyInfo
 
-import scala.collection.mutable.ArrayBuffer
-
 /**
  * Params of a BuildPipeline instance.
- *
  */
 sealed trait BuildParam {
   def appName: String
@@ -56,8 +55,7 @@ sealed trait FlinkBuildParam extends BuildParam {
     val providedLibs = ArrayBuffer(
       localWorkspace.APP_JARS,
       localWorkspace.APP_PLUGINS,
-      customFlinkUserJar
-    )
+      customFlinkUserJar)
     if (developmentMode == DevelopmentMode.FLINKSQL) {
       providedLibs += {
         val version = flinkVersion.version.split("\\.").map(_.trim.toInt)
@@ -88,50 +86,50 @@ sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
   def k8sNamespace: String
 }
 
-case class FlinkK8sSessionBuildRequest(appName: String,
-                                       workspace: String,
-                                       mainClass: String,
-                                       customFlinkUserJar: String,
-                                       executionMode: ExecutionMode,
-                                       developmentMode: DevelopmentMode,
-                                       flinkVersion: FlinkVersion,
-                                       dependencyInfo: DependencyInfo,
-                                       clusterId: String,
-                                       k8sNamespace: String
-                                      ) extends FlinkK8sBuildParam
+case class FlinkK8sSessionBuildRequest(
+    appName: String,
+    workspace: String,
+    mainClass: String,
+    customFlinkUserJar: String,
+    executionMode: ExecutionMode,
+    developmentMode: DevelopmentMode,
+    flinkVersion: FlinkVersion,
+    dependencyInfo: DependencyInfo,
+    clusterId: String,
+    k8sNamespace: String) extends FlinkK8sBuildParam
 
-case class FlinkK8sApplicationBuildRequest(appName: String,
-                                           workspace: String,
-                                           mainClass: String,
-                                           customFlinkUserJar: String,
-                                           executionMode: ExecutionMode,
-                                           developmentMode: DevelopmentMode,
-                                           flinkVersion: FlinkVersion,
-                                           dependencyInfo: DependencyInfo,
-                                           clusterId: String,
-                                           k8sNamespace: String,
-                                           flinkBaseImage: String,
-                                           flinkPodTemplate: K8sPodTemplates,
-                                           integrateWithHadoop: Boolean = false,
-                                           dockerConfig: DockerConf,
-                                           ingressTemplate: String
-                                          ) extends FlinkK8sBuildParam
+case class FlinkK8sApplicationBuildRequest(
+    appName: String,
+    workspace: String,
+    mainClass: String,
+    customFlinkUserJar: String,
+    executionMode: ExecutionMode,
+    developmentMode: DevelopmentMode,
+    flinkVersion: FlinkVersion,
+    dependencyInfo: DependencyInfo,
+    clusterId: String,
+    k8sNamespace: String,
+    flinkBaseImage: String,
+    flinkPodTemplate: K8sPodTemplates,
+    integrateWithHadoop: Boolean = false,
+    dockerConfig: DockerConf,
+    ingressTemplate: String) extends FlinkK8sBuildParam
 
-case class FlinkRemotePerJobBuildRequest(appName: String,
-                                         workspace: String,
-                                         mainClass: String,
-                                         customFlinkUserJar: String,
-                                         skipBuild: Boolean,
-                                         executionMode: ExecutionMode,
-                                         developmentMode: DevelopmentMode,
-                                         flinkVersion: FlinkVersion,
-                                         dependencyInfo: DependencyInfo
-                                  ) extends FlinkBuildParam
+case class FlinkRemotePerJobBuildRequest(
+    appName: String,
+    workspace: String,
+    mainClass: String,
+    customFlinkUserJar: String,
+    skipBuild: Boolean,
+    executionMode: ExecutionMode,
+    developmentMode: DevelopmentMode,
+    flinkVersion: FlinkVersion,
+    dependencyInfo: DependencyInfo) extends FlinkBuildParam
 
-
-case class FlinkYarnApplicationBuildRequest(appName: String,
-                                            mainClass: String,
-                                            localWorkspace: String,
-                                            yarnProvidedPath: String,
-                                            developmentMode: DevelopmentMode,
-                                            dependencyInfo: DependencyInfo) extends BuildParam
+case class FlinkYarnApplicationBuildRequest(
+    appName: String,
+    mainClass: String,
+    localWorkspace: String,
+    yarnProvidedPath: String,
+    developmentMode: DevelopmentMode,
+    dependencyInfo: DependencyInfo) extends BuildParam

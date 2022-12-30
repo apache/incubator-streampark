@@ -31,37 +31,36 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public final class MybatisPager<T> {
 
-    public Page<T> getDefaultPage(RestRequest request) {
-        return getPage(request, Constant.DEFAULT_SORT_FIELD, Constant.ORDER_DESC);
-    }
+  public Page<T> getDefaultPage(RestRequest request) {
+    return getPage(request, Constant.DEFAULT_SORT_FIELD, Constant.ORDER_DESC);
+  }
 
-    public Page<T> getPage(RestRequest request, String defaultSort, String defaultOrder) {
-        Page<T> page = new Page<>();
-        page.setCurrent(request.getPageNum());
-        page.setSize(request.getPageSize());
+  public Page<T> getPage(RestRequest request, String defaultSort, String defaultOrder) {
+    Page<T> page = new Page<>();
+    page.setCurrent(request.getPageNum());
+    page.setSize(request.getPageSize());
 
-        List<OrderItem> orderItems = new ArrayList<>(0);
-        if (StringUtils.isNotBlank(request.getSortField())
-            && StringUtils.isNotBlank(request.getSortOrder())) {
-            String sortField = WebUtils.camelToUnderscore(request.getSortField());
-            if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
-                orderItems.add(OrderItem.desc(sortField));
-            } else {
-                orderItems.add(OrderItem.asc(sortField));
-            }
+    List<OrderItem> orderItems = new ArrayList<>(0);
+    if (StringUtils.isNotBlank(request.getSortField())
+        && StringUtils.isNotBlank(request.getSortOrder())) {
+      String sortField = WebUtils.camelToUnderscore(request.getSortField());
+      if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
+        orderItems.add(OrderItem.desc(sortField));
+      } else {
+        orderItems.add(OrderItem.asc(sortField));
+      }
+    } else {
+      if (StringUtils.isNotBlank(defaultSort)) {
+        if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
+          orderItems.add(OrderItem.desc(defaultSort));
         } else {
-            if (StringUtils.isNotBlank(defaultSort)) {
-                if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
-                    orderItems.add(OrderItem.desc(defaultSort));
-                } else {
-                    orderItems.add(OrderItem.asc(defaultSort));
-                }
-            }
+          orderItems.add(OrderItem.asc(defaultSort));
         }
-        if (!orderItems.isEmpty()) {
-            page.setOrders(orderItems);
-        }
-        return page;
+      }
     }
-
+    if (!orderItems.isEmpty()) {
+      page.setOrders(orderItems);
+    }
+    return page;
+  }
 }

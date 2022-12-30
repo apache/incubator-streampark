@@ -18,14 +18,14 @@
 package org.apache.streampark.flink.packer.maven
 
 import java.util.{List => JavaList}
+
 import scala.collection.JavaConversions._
 
 /**
  * @param mavenArts  collection of maven artifacts
  * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
  */
-case class DependencyInfo(mavenArts: Set[Artifact] = Set(),
-                          extJarLibs: Set[String] = Set()) {
+case class DependencyInfo(mavenArts: Set[Artifact] = Set(), extJarLibs: Set[String] = Set()) {
 
   def this(mavenArts: JavaList[Artifact], extJarLibs: JavaList[String]) {
     this(mavenArts.toSet, extJarLibs.toSet)
@@ -39,6 +39,3 @@ case class DependencyInfo(mavenArts: Set[Artifact] = Set(),
 object DependencyInfo {
   def empty: DependencyInfo = new DependencyInfo()
 }
-
-
-

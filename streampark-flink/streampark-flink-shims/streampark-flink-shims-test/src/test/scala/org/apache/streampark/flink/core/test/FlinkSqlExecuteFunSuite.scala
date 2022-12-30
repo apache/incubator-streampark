@@ -16,12 +16,13 @@
  */
 package org.apache.streampark.flink.core.test
 
+import scala.collection.mutable.ArrayBuffer
+
+import org.scalatest.funsuite.AnyFunSuite
+
 import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
 import org.apache.streampark.common.util.DeflaterUtils
 import org.apache.streampark.flink.core.{FlinkSqlExecutor, FlinkTableInitializer, StreamTableContext}
-import org.scalatest.funsuite.AnyFunSuite
-
-import scala.collection.mutable.ArrayBuffer
 
 // scalastyle:off println
 class FlinkSqlExecuteFunSuite extends AnyFunSuite {

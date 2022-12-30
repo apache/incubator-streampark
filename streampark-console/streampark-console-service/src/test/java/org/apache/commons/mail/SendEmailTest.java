@@ -37,105 +37,110 @@ import java.util.TimeZone;
 
 class SendEmailTest {
 
-    private Template template;
+  private Template template;
 
-    private SenderEmail senderEmail;
+  private SenderEmail senderEmail;
 
-    @BeforeEach
-    void initConfig() throws Exception {
-        this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
-        senderEmail = new SenderEmail();
-        senderEmail.setFrom("****@domain.com");
-        senderEmail.setUserName("******");
-        senderEmail.setPassword("******");
-        senderEmail.setSmtpPort(465);
-        senderEmail.setSsl(true);
-        senderEmail.setSmtpHost("smtp.exmail.qq.com");
+  @BeforeEach
+  void initConfig() throws Exception {
+    this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
+    senderEmail = new SenderEmail();
+    senderEmail.setFrom("****@domain.com");
+    senderEmail.setUserName("******");
+    senderEmail.setPassword("******");
+    senderEmail.setSmtpPort(465);
+    senderEmail.setSsl(true);
+    senderEmail.setSmtpHost("smtp.exmail.qq.com");
+  }
+
+  @Test
+  void alert() {
+    Application application = new Application();
+    application.setStartTime(new Date());
+    application.setJobName("Test My Job");
+    application.setAppId("1234567890");
+    application.setAlertId(1);
+
+    application.setRestartCount(5);
+    application.setRestartSize(100);
+
+    application.setCpFailureAction(1);
+    application.setCpFailureRateInterval(30);
+    application.setCpMaxFailureInterval(5);
+
+    FlinkAppState appState = FlinkAppState.FAILED;
+
+    try {
+      AlertTemplate mail = getAlertBaseInfo(application);
+      mail.setType(1);
+      mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
+      mail.setStatus(appState.name());
+
+      StringWriter writer = new StringWriter();
+      Map<String, AlertTemplate> out = new HashMap<String, AlertTemplate>();
+      out.put("mail", mail);
+
+      template.process(out, writer);
+      String html = writer.toString();
+      System.out.println(html);
+      writer.close();
+
+      String subject =
+          String.format("StreamPark Alert: %s %s", application.getJobName(), appState.name());
+      sendEmail(subject, html, "****@domain.com");
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+  }
 
-    @Test
-    void alert() {
-        Application application = new Application();
-        application.setStartTime(new Date());
-        application.setJobName("Test My Job");
-        application.setAppId("1234567890");
-        application.setAlertId(1);
-
-        application.setRestartCount(5);
-        application.setRestartSize(100);
-
-        application.setCpFailureAction(1);
-        application.setCpFailureRateInterval(30);
-        application.setCpMaxFailureInterval(5);
-
-        FlinkAppState appState = FlinkAppState.FAILED;
-
-        try {
-            AlertTemplate mail = getAlertBaseInfo(application);
-            mail.setType(1);
-            mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
-            mail.setStatus(appState.name());
-
-            StringWriter writer = new StringWriter();
-            Map<String, AlertTemplate> out = new HashMap<String, AlertTemplate>();
-            out.put("mail", mail);
-
-            template.process(out, writer);
-            String html = writer.toString();
-            System.out.println(html);
-            writer.close();
-
-            String subject = String.format("StreamPark Alert: %s %s", application.getJobName(), appState.name());
-            sendEmail(subject, html, "****@domain.com");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+  private AlertTemplate getAlertBaseInfo(Application application) {
+    long duration;
+    if (application.getEndTime() == null) {
+      duration = System.currentTimeMillis() - application.getStartTime().getTime();
+    } else {
+      duration = application.getEndTime().getTime() - application.getStartTime().getTime();
     }
+    String format = "%s/proxy/%s/";
+    String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
 
-    private AlertTemplate getAlertBaseInfo(Application application) {
-        long duration;
-        if (application.getEndTime() == null) {
-            duration = System.currentTimeMillis() - application.getStartTime().getTime();
-        } else {
-            duration = application.getEndTime().getTime() - application.getStartTime().getTime();
-        }
-        String format = "%s/proxy/%s/";
-        String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
+    AlertTemplate template = new AlertTemplate();
+    template.setJobName(application.getJobName());
+    template.setStartTime(
+        DateUtils.format(
+            application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+    template.setDuration(DateUtils.toDuration(duration));
+    template.setLink(url);
+    template.setEndTime(
+        DateUtils.format(
+            application.getEndTime() == null ? new Date() : application.getEndTime(),
+            DateUtils.fullFormat(),
+            TimeZone.getDefault()));
+    template.setRestart(application.isNeedRestartOnFailed());
+    template.setRestartIndex(application.getRestartCount());
+    template.setTotalRestart(application.getRestartSize());
+    template.setCpFailureRateInterval(
+        DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
+    template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
 
-        AlertTemplate template = new AlertTemplate();
-        template.setJobName(application.getJobName());
-        template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        template.setDuration(DateUtils.toDuration(duration));
-        template.setLink(url);
-        template.setEndTime(
-            DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(),
-                TimeZone.getDefault()));
-        template.setRestart(application.isNeedRestartOnFailed());
-        template.setRestartIndex(application.getRestartCount());
-        template.setTotalRestart(application.getRestartSize());
-        template.setCpFailureRateInterval(DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
-        template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
+    return template;
+  }
 
-        return template;
+  private void sendEmail(String subject, String html, String... mails) throws EmailException {
+    HtmlEmail htmlEmail = new HtmlEmail();
+    htmlEmail.setCharset("UTF-8");
+    htmlEmail.setHostName(this.senderEmail.getSmtpHost());
+    htmlEmail.setAuthentication(this.senderEmail.getUserName(), this.senderEmail.getPassword());
+    htmlEmail.setFrom(this.senderEmail.getFrom());
+
+    if (this.senderEmail.isSsl()) {
+      htmlEmail.setSSLOnConnect(true);
+      htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+    } else {
+      htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
     }
-
-    private void sendEmail(String subject, String html, String... mails) throws EmailException {
-        HtmlEmail htmlEmail = new HtmlEmail();
-        htmlEmail.setCharset("UTF-8");
-        htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-        htmlEmail.setAuthentication(this.senderEmail.getUserName(), this.senderEmail.getPassword());
-        htmlEmail.setFrom(this.senderEmail.getFrom());
-
-        if (this.senderEmail.isSsl()) {
-            htmlEmail.setSSLOnConnect(true);
-            htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
-        } else {
-            htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
-        }
-        htmlEmail.setSubject(subject);
-        htmlEmail.setHtmlMsg(html);
-        htmlEmail.addTo(mails);
-        htmlEmail.send();
-    }
-
+    htmlEmail.setSubject(subject);
+    htmlEmail.setHtmlMsg(html);
+    htmlEmail.addTo(mails);
+    htmlEmail.send();
+  }
 }

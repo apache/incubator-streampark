@@ -32,38 +32,30 @@ import java.util.Optional;
 
 public interface AppBuildPipeService extends IService<AppBuildPipeline> {
 
-    /**
-     * Build application.
-     * This is an async call method.
-     */
-    boolean buildApplication(@Nonnull Application app) throws Exception;
+  /** Build application. This is an async call method. */
+  boolean buildApplication(@Nonnull Application app) throws Exception;
 
-    /**
-     * Get current build pipeline instance of specified application
-     *
-     * @param appId application id
-     * @return ApplicationBuildPipeline instance
-     */
-    Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId);
+  /**
+   * Get current build pipeline instance of specified application
+   *
+   * @param appId application id
+   * @return ApplicationBuildPipeline instance
+   */
+  Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId);
 
-    /**
-     * Get Docker resolved snapshot of specified application.
-     */
-    DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId);
+  /** Get Docker resolved snapshot of specified application. */
+  DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId);
 
-    /**
-     * Whether the application can currently start a new building progress
-     */
-    boolean allowToBuildNow(@Nonnull Long appId);
+  /** Whether the application can currently start a new building progress */
+  boolean allowToBuildNow(@Nonnull Long appId);
 
-    /**
-     * list pipeline status on application id list
-     */
-    Map<Long, PipelineStatus> listPipelineStatus(List<Long> appIds);
+  /** list pipeline status on application id list */
+  Map<Long, PipelineStatus> listPipelineStatus(List<Long> appIds);
 
-    /**
-     * delete appBuildPipeline By application
-     * @param appId
-     */
-    void removeApp(Long appId);
+  /**
+   * delete appBuildPipeline By application
+   *
+   * @param appId
+   */
+  void removeApp(Long appId);
 }

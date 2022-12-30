@@ -19,6 +19,7 @@ package org.apache.streampark.common.util
 import java.io._
 import java.net.URL
 import java.util
+
 import scala.collection.JavaConversions._
 
 object FileUtils extends org.apache.commons.io.FileUtils {
@@ -42,7 +43,6 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     maps.put("38425053000100000000", "psd")
     maps.put("44656C69766572792D646174653A", "eml")
     maps.put("D0CF11E0A1B11AE10000", "doc")
-
 
     maps.put("D0CF11E0A1B11AE10000", "vsd")
     maps.put("5374616E64617264204A", "mdb")
@@ -131,7 +131,8 @@ object FileUtils extends org.apache.commons.io.FileUtils {
         return tempDir
       }
     }
-    throw new IllegalStateException(s"[StreamPark] Failed to create directory within $TEMP_DIR_ATTEMPTS  attempts (tried $baseName 0 to $baseName ${TEMP_DIR_ATTEMPTS - 1})")
+    throw new IllegalStateException(
+      s"[StreamPark] Failed to create directory within $TEMP_DIR_ATTEMPTS  attempts (tried $baseName 0 to $baseName ${TEMP_DIR_ATTEMPTS - 1})")
   }
 
   def exists(path: String): Unit = {
@@ -178,7 +179,8 @@ object FileUtils extends org.apache.commons.io.FileUtils {
       case (a, b) =>
         val first = new BufferedInputStream(new FileInputStream(a))
         val second = new BufferedInputStream(new FileInputStream(b))
-        if (first.available() != second.available()) false; else {
+        if (first.available() != second.available()) false;
+        else {
           while (true) {
             val firRead = first.read()
             val secRead = second.read()

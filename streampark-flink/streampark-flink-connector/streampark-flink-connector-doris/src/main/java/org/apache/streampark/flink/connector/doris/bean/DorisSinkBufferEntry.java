@@ -21,110 +21,110 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-/**
- * doris sink buffer
- */
+/** doris sink buffer */
 public class DorisSinkBufferEntry implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    public ArrayList<byte[]> getBuffer() {
-        return buffer;
-    }
+  public ArrayList<byte[]> getBuffer() {
+    return buffer;
+  }
 
-    private ArrayList<byte[]> buffer = new ArrayList<>();
-    private int batchCount = 0;
-    private long batchSize = 0;
-    private String label;
-    private String database;
-    private String table;
-    private String labelPrefix;
+  private ArrayList<byte[]> buffer = new ArrayList<>();
+  private int batchCount = 0;
+  private long batchSize = 0;
+  private String label;
+  private String database;
+  private String table;
+  private String labelPrefix;
 
-    public DorisSinkBufferEntry(String database, String table, String labelPrefix) {
-        this.database = database;
-        this.table = table;
-        this.labelPrefix = labelPrefix;
-        label = createLabel();
-    }
+  public DorisSinkBufferEntry(String database, String table, String labelPrefix) {
+    this.database = database;
+    this.table = table;
+    this.labelPrefix = labelPrefix;
+    label = createLabel();
+  }
 
-    public void setBuffer(ArrayList<byte[]> buffer) {
-        this.buffer = buffer;
-    }
+  public void setBuffer(ArrayList<byte[]> buffer) {
+    this.buffer = buffer;
+  }
 
-    public int getBatchCount() {
-        return batchCount;
-    }
+  public int getBatchCount() {
+    return batchCount;
+  }
 
-    public void setBatchCount(int batchCount) {
-        this.batchCount = batchCount;
-    }
+  public void setBatchCount(int batchCount) {
+    this.batchCount = batchCount;
+  }
 
-    public long getBatchSize() {
-        return batchSize;
-    }
+  public long getBatchSize() {
+    return batchSize;
+  }
 
-    public void setBatchSize(long batchSize) {
-        this.batchSize = batchSize;
-    }
+  public void setBatchSize(long batchSize) {
+    this.batchSize = batchSize;
+  }
 
-    public String getLabel() {
-        return label;
-    }
+  public String getLabel() {
+    return label;
+  }
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
+  public void setLabel(String label) {
+    this.label = label;
+  }
 
-    public String getDatabase() {
-        return database;
-    }
+  public String getDatabase() {
+    return database;
+  }
 
-    public void setDatabase(String database) {
-        this.database = database;
-    }
+  public void setDatabase(String database) {
+    this.database = database;
+  }
 
-    public String getTable() {
-        return table;
-    }
+  public String getTable() {
+    return table;
+  }
 
-    public void setTable(String table) {
-        this.table = table;
-    }
+  public void setTable(String table) {
+    this.table = table;
+  }
 
-    public String getLabelPrefix() {
-        return labelPrefix;
-    }
+  public String getLabelPrefix() {
+    return labelPrefix;
+  }
 
-    public void setLabelPrefix(String labelPrefix) {
-        this.labelPrefix = labelPrefix;
-    }
+  public void setLabelPrefix(String labelPrefix) {
+    this.labelPrefix = labelPrefix;
+  }
 
-    public void addToBuffer(byte[] bytes) {
-        incBatchCount();
-        incBatchSize(bytes.length);
-        buffer.add(bytes);
-    }
+  public void addToBuffer(byte[] bytes) {
+    incBatchCount();
+    incBatchSize(bytes.length);
+    buffer.add(bytes);
+  }
 
-    private void incBatchSize(long batchSize) {
-        this.batchSize += batchSize;
-    }
+  private void incBatchSize(long batchSize) {
+    this.batchSize += batchSize;
+  }
 
-    private void incBatchCount() {
-        this.batchCount += 1;
-    }
+  private void incBatchCount() {
+    this.batchCount += 1;
+  }
 
-    public synchronized void clear() {
-        buffer.clear();
-        batchCount = 0;
-        batchSize = 0;
-        label = createLabel();
-    }
+  public synchronized void clear() {
+    buffer.clear();
+    batchCount = 0;
+    batchSize = 0;
+    label = createLabel();
+  }
 
-    public String reGenerateLabel() {
-        return label = createLabel();
-    }
+  public String reGenerateLabel() {
+    return label = createLabel();
+  }
 
-    public String createLabel() {
-        return String.format("%s_%s_%s", labelPrefix, System.currentTimeMillis(), UUID.randomUUID().toString().replaceAll("-", ""));
-    }
+  public String createLabel() {
+    return String.format(
+        "%s_%s_%s",
+        labelPrefix, System.currentTimeMillis(), UUID.randomUUID().toString().replaceAll("-", ""));
+  }
 }

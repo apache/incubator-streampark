@@ -17,6 +17,4 @@
 
 package org.apache.streampark.flink.kubernetes.event
 
-trait BuildInEvent {
-
-}
+trait BuildInEvent {}

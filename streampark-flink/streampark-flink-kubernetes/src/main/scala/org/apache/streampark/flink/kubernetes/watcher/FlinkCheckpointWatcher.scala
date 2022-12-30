@@ -17,31 +17,33 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
-import org.apache.streampark.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
-import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkTrackController, KubernetesRetriever, MetricWatcherConfig}
-import org.apache.hc.client5.http.fluent.Request
-import org.apache.hc.core5.util.Timeout
-import org.json4s.JsonAST.JNothing
-import org.json4s.jackson.JsonMethods.parse
-import org.json4s.{DefaultFormats, JNull}
-
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.concurrent.ThreadSafe
-import scala.concurrent.duration.DurationLong
+
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
+import scala.concurrent.duration.DurationLong
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.util.Timeout
+import org.json4s.{DefaultFormats, JNull}
+import org.json4s.JsonAST.JNothing
+import org.json4s.jackson.JsonMethods.parse
+
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkTrackController, KubernetesRetriever, MetricWatcherConfig}
+import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
+import org.apache.streampark.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
+
 @ThreadSafe
-class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)
-                            (implicit val trackController: FlinkTrackController,
-                             implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
+class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)(
+    implicit val trackController: FlinkTrackController,
+    implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
   private val trackTaskExecPool = Executors.newWorkStealingPool()
-  private implicit val trackTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trackTaskExecPool)
+  implicit private val trackTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trackTaskExecPool)
 
   private val timerExec = Executors.newSingleThreadScheduledExecutor()
   private var timerSchedule: ScheduledFuture[_] = _
@@ -76,7 +78,8 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    */
   override def doWatch(): Unit = {
     // get all legal tracking cluster key
-    val trackIds: Set[TrackId] = Try(trackController.collectTracks()).filter(_.nonEmpty).getOrElse(return)
+    val trackIds: Set[TrackId] = Try(trackController.collectTracks()).filter(_.nonEmpty).getOrElse(return
+    )
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[CheckpointCV]]] =
       trackIds.map(id => {
@@ -91,17 +94,16 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
     // blocking until all future are completed or timeout is reached
     Try(Await.ready(Future.sequence(futures), conf.requestTimeoutSec seconds))
       .failed.map { _ =>
-      logError(s"[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout," +
-        s" limitSeconds=${conf.requestTimeoutSec}," +
-        s" trackingClusterKeys=${trackIds.mkString(",")}")
-    }
+        logError(s"[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout," +
+          s" limitSeconds=${conf.requestTimeoutSec}," +
+          s" trackingClusterKeys=${trackIds.mkString(",")}")
+      }
   }
 
   /**
    * Collect flink-job checkpoint from kubernetes-native cluster.
    * Returns None when the flink-cluster-client request fails (or
    * in case of the relevant flink rest api require failure).
-   *
    */
   def collect(trackId: TrackId): Option[CheckpointCV] = {
     if (trackId.jobId != null) {
@@ -112,12 +114,10 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
           Request.get(s"$flinkJmRestUrl/jobs/${trackId.jobId}/checkpoints")
             .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
             .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-            .execute.returnContent.asString(StandardCharsets.UTF_8)
-        ) match {
+            .execute.returnContent.asString(StandardCharsets.UTF_8)) match {
           case Some(c) => c
           case _ => return None
-        }
-      ).getOrElse(return None)
+        }).getOrElse(return None)
 
       val checkpointCV = CheckpointCV(
         id = checkpoint.id,
@@ -125,21 +125,14 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
         isSavepoint = checkpoint.isSavepoint,
         checkpointType = checkpoint.checkpointType,
         status = checkpoint.status,
-        triggerTimestamp = checkpoint.triggerTimestamp
-      )
+        triggerTimestamp = checkpoint.triggerTimestamp)
       Some(checkpointCV)
     } else None
   }
 
 }
 
-private[kubernetes] case class Checkpoint(id: Long,
-                                          status: String,
-                                          externalPath: String,
-                                          isSavepoint: Boolean,
-                                          checkpointType: String,
-                                          triggerTimestamp: Long)
-
+private[kubernetes] case class Checkpoint(id: Long, status: String, externalPath: String, isSavepoint: Boolean, checkpointType: String, triggerTimestamp: Long)
 
 object Checkpoint {
 
@@ -159,8 +152,7 @@ object Checkpoint {
               externalPath = (completed \ "external_path").extractOpt[String].getOrElse(null),
               isSavepoint = (completed \ "is_savepoint").extractOpt[Boolean].getOrElse(false),
               checkpointType = (completed \ "checkpoint_type").extractOpt[String].getOrElse(null),
-              triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L)
-            )
+              triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L))
             Some(cp)
         }
       case Failure(_) => None

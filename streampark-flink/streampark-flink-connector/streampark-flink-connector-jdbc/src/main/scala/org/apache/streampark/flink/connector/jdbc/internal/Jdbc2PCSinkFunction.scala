@@ -17,18 +17,19 @@
 
 package org.apache.streampark.flink.connector.jdbc.internal
 
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{JdbcUtils, Logger}
-import org.apache.streampark.flink.connector.function.TransformFunction
-import org.apache.streampark.flink.connector.jdbc.bean.Transaction
+import java.sql.{Connection, SQLException, Statement}
+import java.util.{Optional, Properties}
+
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
 
-import java.sql.{Connection, SQLException, Statement}
-import java.util.{Optional, Properties}
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{JdbcUtils, Logger}
+import org.apache.streampark.flink.connector.function.TransformFunction
+import org.apache.streampark.flink.connector.jdbc.bean.Transaction
 
 /**
  * (flink checkpoint + db transactionId) Simulates commit read. Use of flink's checkpoint mechanism, and only submit data that has been confirmed
@@ -38,7 +39,9 @@ import java.util.{Optional, Properties}
  * @tparam T
  */
 class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
-  extends TwoPhaseCommitSinkFunction[T, Transaction, Void](new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig), VoidSerializer.INSTANCE)
+    extends TwoPhaseCommitSinkFunction[T, Transaction, Void](
+      new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig),
+      VoidSerializer.INSTANCE)
     with Logger {
 
   private[this] val buffer: collection.mutable.Map[String, Transaction] = collection.mutable.Map.empty[String, Transaction]
@@ -88,7 +91,6 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
       buffer += transaction.transactionId -> transaction
     }
   }
-
 
   /**
    * When the data checkpoint is completed or the recovery is finished, this method will be called,

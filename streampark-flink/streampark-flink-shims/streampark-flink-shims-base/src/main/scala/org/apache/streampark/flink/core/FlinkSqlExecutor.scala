@@ -16,17 +16,19 @@
  */
 package org.apache.streampark.flink.core
 
+import java.util
+import java.util.concurrent.locks.ReentrantReadWriteLock
+
+import scala.collection.mutable
+import scala.util.Try
+
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.table.api.TableEnvironment
+
 import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.core.SqlCommand._
-
-import java.util
-import java.util.concurrent.locks.ReentrantReadWriteLock
-import scala.collection.mutable
-import scala.util.Try
 
 object FlinkSqlExecutor extends Logger {
 
@@ -108,15 +110,16 @@ object FlinkSqlExecutor extends Logger {
         case SELECT =>
           logError("StreamPark dose not support 'SELECT' statement now!")
           throw new RuntimeException("StreamPark dose not support 'select' statement now!")
-        case _ => try {
-          lock.lock()
-          val result = context.executeSql(x.originSql)
-          logInfo(s"$command:$args")
-        } finally {
-          if (lock.isHeldByCurrentThread) {
-            lock.unlock()
+        case _ =>
+          try {
+            lock.lock()
+            val result = context.executeSql(x.originSql)
+            logInfo(s"$command:$args")
+          } finally {
+            if (lock.isHeldByCurrentThread) {
+              lock.unlock()
+            }
           }
-        }
       }
     })
 
@@ -136,6 +139,5 @@ object FlinkSqlExecutor extends Logger {
 
     logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
   }
-
 
 }

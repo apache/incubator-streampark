@@ -17,18 +17,18 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
-import org.apache.streampark.common.util.{Logger, ThreadUtils}
-import org.apache.streampark.flink.packer.pipeline.BuildPipeline.executor
-
 import java.util.concurrent.{Callable, LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 import scala.util.{Failure, Success, Try}
 
+import org.apache.streampark.common.util.{Logger, ThreadUtils}
+import org.apache.streampark.flink.packer.pipeline.BuildPipeline.executor
+
 /**
  * Behavior that BuildPipeline subclasses must inherit to implement.
- *
  */
 trait BuildPipelineProcess {
 
@@ -42,7 +42,8 @@ trait BuildPipelineProcess {
    * the effective steps progress should be implemented in
    * multiple BuildPipeline.execStep() functions.
    */
-  @throws[Throwable] protected def buildProcess(): BuildResult
+  @throws[Throwable]
+  protected def buildProcess(): BuildResult
 
   /**
    * the build params of build process
@@ -50,10 +51,8 @@ trait BuildPipelineProcess {
   protected def offerBuildParam: BuildParam
 }
 
-
 /**
  * Callable methods exposed by BuildPipeline to the outside.
- *
  */
 trait BuildPipelineExpose {
 
@@ -91,10 +90,8 @@ trait BuildPipelineExpose {
   def as[T <: BuildPipeline](implicit clz: Class[T]): T = this.asInstanceOf[T]
 }
 
-
 /**
  * Building pipeline trait.
- *
  */
 trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with Logger {
 
@@ -204,8 +201,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     allSteps,
     getStepsStatus,
     getError,
-    System.currentTimeMillis
-  )
+    System.currentTimeMillis)
 
 }
 
@@ -218,8 +214,7 @@ object BuildPipeline {
     TimeUnit.SECONDS,
     new LinkedBlockingQueue[Runnable](2048),
     ThreadUtils.threadFactory("streampark-pipeline-watcher-executor"),
-    new ThreadPoolExecutor.AbortPolicy
-  )
+    new ThreadPoolExecutor.AbortPolicy)
 
   implicit val executor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(execPool)
 

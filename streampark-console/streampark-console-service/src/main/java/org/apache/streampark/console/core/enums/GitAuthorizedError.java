@@ -21,44 +21,34 @@ import java.io.Serializable;
 
 public enum GitAuthorizedError implements Serializable {
 
-    /**
-     * success
-     */
-    SUCCESS(0),
+  /** success */
+  SUCCESS(0),
 
-    /**
-     * need required, user password is null
-     */
-    REQUIRED(1),
+  /** need required, user password is null */
+  REQUIRED(1),
 
-    /**
-     * user password error
-     */
-    ERROR(2),
+  /** user password error */
+  ERROR(2),
 
+  /** 其他未知错误 */
+  UNKNOW(3);
 
-    /**
-     * 其他未知错误
-     */
-    UNKNOW(3);
+  private final int value;
 
-    private final int value;
+  GitAuthorizedError(int value) {
+    this.value = value;
+  }
 
-    GitAuthorizedError(int value) {
-        this.value = value;
+  public static GitAuthorizedError of(Integer state) {
+    for (GitAuthorizedError error : values()) {
+      if (error.value == state) {
+        return error;
+      }
     }
+    return null;
+  }
 
-    public static GitAuthorizedError of(Integer state) {
-        for (GitAuthorizedError error : values()) {
-            if (error.value == state) {
-                return error;
-            }
-        }
-        return null;
-    }
-
-    public int getType() {
-        return value;
-    }
-
+  public int getType() {
+    return value;
+  }
 }

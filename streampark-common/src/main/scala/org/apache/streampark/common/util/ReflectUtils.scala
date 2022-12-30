@@ -17,11 +17,12 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.commons.lang3.StringUtils
-
 import java.lang.reflect.{Field, Modifier}
 import java.util.Objects
+
 import scala.util.{Failure, Success, Try}
+
+import org.apache.commons.lang3.StringUtils
 
 object ReflectUtils extends Logger {
 
@@ -33,10 +34,10 @@ object ReflectUtils extends Logger {
    * @return the field
    * @throws SecurityException the security exception
    */
-  @throws[SecurityException] def getField(beanClass: Class[_], name: String): Field = {
+  @throws[SecurityException]
+  def getField(beanClass: Class[_], name: String): Field = {
     Try(beanClass.getDeclaredFields.filter(f => Objects.equals(name, f.getName)).head).getOrElse(null)
   }
-
 
   def getFieldValue(obj: Any, fieldName: String): Any = {
     val field = getField(obj.getClass, fieldName)
@@ -44,7 +45,8 @@ object ReflectUtils extends Logger {
   }
 
   def getFieldValue(obj: Any, field: Field): Any = {
-    if (Objects.isNull(obj) || Objects.isNull(field)) null else {
+    if (Objects.isNull(obj) || Objects.isNull(field)) null
+    else {
       field.setAccessible(true)
       field.get(obj) match {
         case Success(v) => v
@@ -84,8 +86,8 @@ object ReflectUtils extends Logger {
 
   private def makeAccessible(field: Field): Unit = {
     if ((!Modifier.isPublic(field.getModifiers)
-      || !Modifier.isPublic(field.getDeclaringClass.getModifiers)
-      || Modifier.isFinal(field.getModifiers)) && !field.isAccessible) {
+        || !Modifier.isPublic(field.getDeclaringClass.getModifiers)
+        || Modifier.isFinal(field.getModifiers)) && !field.isAccessible) {
       field.setAccessible(true)
     }
   }

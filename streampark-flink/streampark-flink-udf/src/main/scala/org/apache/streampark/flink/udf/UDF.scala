@@ -17,10 +17,10 @@
 
 package org.apache.streampark.flink.udf
 
-import org.apache.flink.table.functions.ScalarFunction
-
 import java.text.SimpleDateFormat
 import java.util.Date
+
+import org.apache.flink.table.functions.ScalarFunction
 
 class HashCode(val factor: Int = 12) extends ScalarFunction {
   def eval(s: String): Int = s match {

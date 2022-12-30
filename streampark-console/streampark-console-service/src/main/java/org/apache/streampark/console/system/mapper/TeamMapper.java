@@ -28,8 +28,7 @@ import java.util.List;
 
 public interface TeamMapper extends BaseMapper<Team> {
 
-    IPage<Team> findTeam(Page<Team> page, @Param("team") Team team);
+  IPage<Team> findTeam(Page<Team> page, @Param("team") Team team);
 
-    List<Team> findUserTeams(Long userId);
-
+  List<Team> findUserTeams(Long userId);
 }

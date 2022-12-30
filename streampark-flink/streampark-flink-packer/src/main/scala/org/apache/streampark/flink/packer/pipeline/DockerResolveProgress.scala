@@ -17,20 +17,20 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
-import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
-import org.apache.streampark.common.util.Utils
-
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
+
+import org.apache.streampark.common.util.Utils
+
 /**
  * cache storage for docker resolved progress
- *
  */
 class DockerResolveProgress(val pull: DockerPullProgress, val build: DockerBuildProgress, val push: DockerPushProgress)
 
 class DockerPullProgress(val layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
-  //noinspection DuplicatedCode
+  // noinspection DuplicatedCode
   def update(pullRsp: PullResponseItem): Unit = {
     if (pullRsp == null || pullRsp.getId == null || pullRsp.getStatus == null) {
       return
@@ -66,7 +66,7 @@ class DockerBuildProgress(val steps: ArrayBuffer[String], var lastTime: Long) {
 }
 
 class DockerPushProgress(val layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
-  //noinspection DuplicatedCode
+  // noinspection DuplicatedCode
   def update(pushRsp: PushResponseItem): Unit = {
     if (pushRsp == null || pushRsp.getId == null || pushRsp.getStatus == null) {
       return

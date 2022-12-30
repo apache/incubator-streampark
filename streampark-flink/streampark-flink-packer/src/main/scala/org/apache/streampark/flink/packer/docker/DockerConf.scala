@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.packer.docker
 
-import com.github.dockerjava.api.model.AuthConfig
-
 import javax.annotation.Nullable
+
+import com.github.dockerjava.api.model.AuthConfig
 
 /**
  * Authentication Configuration of Remote Docker Register
@@ -29,10 +29,7 @@ import javax.annotation.Nullable
  * @param registerUsername login username of docker image regoster.
  * @param registerPassword login password of docker image regoster.
  */
-case class DockerConf(@Nullable registerAddress: String,
-                      imageNamespace: String,
-                      registerUsername: String,
-                      registerPassword: String) {
+case class DockerConf(@Nullable registerAddress: String, imageNamespace: String, registerUsername: String, registerPassword: String) {
 
   /**
    * covert to com.github.docker.java.api.model.AuthConfig
@@ -46,10 +43,6 @@ case class DockerConf(@Nullable registerAddress: String,
 
 object DockerConf {
 
-  def of(@Nullable registerAddress: String,
-         imageNameSpace: String,
-         registerUsername: String,
-         registerPassword: String): DockerConf =
+  def of(@Nullable registerAddress: String, imageNameSpace: String, registerUsername: String, registerPassword: String): DockerConf =
     DockerConf(registerAddress, imageNameSpace, registerUsername, registerPassword)
 }
-

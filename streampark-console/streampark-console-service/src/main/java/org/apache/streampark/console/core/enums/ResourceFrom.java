@@ -22,27 +22,23 @@ import java.util.Arrays;
 
 public enum ResourceFrom implements Serializable {
 
-    /**
-     * cicd(build from cvs)
-     */
-    CICD(1),
+  /** cicd(build from cvs) */
+  CICD(1),
 
-    /**
-     * upload local jar
-     */
-    UPLOAD(2);
+  /** upload local jar */
+  UPLOAD(2);
 
-    private final Integer value;
+  private final Integer value;
 
-    ResourceFrom(Integer value) {
-        this.value = value;
-    }
+  ResourceFrom(Integer value) {
+    this.value = value;
+  }
 
-    public static ResourceFrom of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
-    }
+  public static ResourceFrom of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
+  }
 
-    public Integer getValue() {
-        return value;
-    }
+  public Integer getValue() {
+    return value;
+  }
 }

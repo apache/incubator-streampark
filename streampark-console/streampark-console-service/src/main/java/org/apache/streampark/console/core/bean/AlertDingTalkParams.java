@@ -31,22 +31,25 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertDingTalkParams implements Serializable {
 
-    @ApiModelProperty(name = "token", value = "token")
-    @NotBlank(message = "The access token of DingTalk must be not empty")
-    private String token;
+  @ApiModelProperty(name = "token", value = "token")
+  @NotBlank(message = "The access token of DingTalk must be not empty")
+  private String token;
 
-    @ApiModelProperty(name = "contacts", value = "phone, multiple use ',' delimiter")
-    private String contacts;
+  @ApiModelProperty(name = "contacts", value = "phone, multiple use ',' delimiter")
+  private String contacts;
 
-    @ApiModelProperty(name = "alertDingUrl", value = "ding url")
-    private String alertDingURL;
+  @ApiModelProperty(name = "alertDingUrl", value = "ding url")
+  private String alertDingURL;
 
-    @ApiModelProperty(name = "isAtAll", value = "is @all", example = "false")
-    private Boolean isAtAll = false;
+  @ApiModelProperty(name = "isAtAll", value = "is @all", example = "false")
+  private Boolean isAtAll = false;
 
-    @ApiModelProperty(name = "secretEnable", value = "is ding robot secret enabled", example = "false")
-    private Boolean secretEnable = false;
+  @ApiModelProperty(
+      name = "secretEnable",
+      value = "is ding robot secret enabled",
+      example = "false")
+  private Boolean secretEnable = false;
 
-    @ApiModelProperty(name = "secretToken", value = "ding robot webhook secret token")
-    private String secretToken;
+  @ApiModelProperty(name = "secretToken", value = "ding robot webhook secret token")
+  private String secretToken;
 }

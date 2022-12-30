@@ -60,68 +60,83 @@ import java.util.List;
 @ConditionalOnWebApplication
 public class SwaggerConfig implements WebMvcConfigurer {
 
-    @Value("${swagger.enable:false}")
-    private Boolean swaggerEnabled;
+  @Value("${swagger.enable:false}")
+  private Boolean swaggerEnabled;
 
-    @Bean
-    public Docket createRestApi() {
-        return new Docket(DocumentationType.OAS_30)
-            .enable(swaggerEnabled)
-            .apiInfo(apiInfo())
-            .securitySchemes(Collections.singletonList(
-                HttpAuthenticationScheme.JWT_BEARER_BUILDER.name("BearerToken").build()
-            ))
-            .securityContexts(Collections.singletonList(
+  @Bean
+  public Docket createRestApi() {
+    return new Docket(DocumentationType.OAS_30)
+        .enable(swaggerEnabled)
+        .apiInfo(apiInfo())
+        .securitySchemes(
+            Collections.singletonList(
+                HttpAuthenticationScheme.JWT_BEARER_BUILDER.name("BearerToken").build()))
+        .securityContexts(
+            Collections.singletonList(
                 new SecurityContextBuilder()
-                    .securityReferences(Collections.singletonList(
-                        SecurityReference.builder()
-                            .scopes(new AuthorizationScope[0])
-                            .reference("BearerToken")
-                            .build()))
+                    .securityReferences(
+                        Collections.singletonList(
+                            SecurityReference.builder()
+                                .scopes(new AuthorizationScope[0])
+                                .reference("BearerToken")
+                                .build()))
                     .operationSelector(s -> true)
-                    .build()
-            ))
-            .select()
-            .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
-            .paths(PathSelectors.any())
-            .build();
-    }
+                    .build()))
+        .select()
+        .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
+        .paths(PathSelectors.any())
+        .build();
+  }
 
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-            .title("Apache StreamPark Api Docs")
-            .description("Apache StreamPark Api Docs")
-            .contact(new Contact("Apache StreamPark", "https://streampark.apache.org/", "dev@streampark.apache.org"))
-            .version("2.0.0")
-            .license("Apache-2.0 license")
-            .build();
-    }
+  private ApiInfo apiInfo() {
+    return new ApiInfoBuilder()
+        .title("Apache StreamPark Api Docs")
+        .description("Apache StreamPark Api Docs")
+        .contact(
+            new Contact(
+                "Apache StreamPark", "https://streampark.apache.org/", "dev@streampark.apache.org"))
+        .version("2.0.0")
+        .license("Apache-2.0 license")
+        .build();
+  }
 
-    /**
-     * Streampark used `ant_path_matcher` as default matching-strategy in the springboot 2.6+ version,
-     * but actuator endpoint used `PathPattern` based URL matching.
-     * So rewrite webEndpointServletHandlerMapping @Bean for resolve springfox and actuator conflicts.
-     */
-    @Bean
-    public WebMvcEndpointHandlerMapping webEndpointServletHandlerMapping(
-        WebEndpointsSupplier webEndpointsSupplier, ServletEndpointsSupplier servletEndpointsSupplier,
-        ControllerEndpointsSupplier controllerEndpointsSupplier, EndpointMediaTypes endpointMediaTypes,
-        CorsEndpointProperties corsProperties, WebEndpointProperties webEndpointProperties, Environment environment) {
-        List<ExposableEndpoint<?>> allEndpoints = new ArrayList<>();
-        Collection<ExposableWebEndpoint> webEndpoints = webEndpointsSupplier.getEndpoints();
-        allEndpoints.addAll(webEndpoints);
-        allEndpoints.addAll(servletEndpointsSupplier.getEndpoints());
-        allEndpoints.addAll(controllerEndpointsSupplier.getEndpoints());
-        String basePath = webEndpointProperties.getBasePath();
-        EndpointMapping endpointMapping = new EndpointMapping(basePath);
-        boolean shouldRegisterLinksMapping = this.shouldRegisterLinksMapping(webEndpointProperties, environment, basePath);
-        return new WebMvcEndpointHandlerMapping(endpointMapping, webEndpoints, endpointMediaTypes,
-            corsProperties.toCorsConfiguration(), new EndpointLinksResolver(allEndpoints, basePath),
-            shouldRegisterLinksMapping, null);
-    }
+  /**
+   * Streampark used `ant_path_matcher` as default matching-strategy in the springboot 2.6+ version,
+   * but actuator endpoint used `PathPattern` based URL matching. So rewrite
+   * webEndpointServletHandlerMapping @Bean for resolve springfox and actuator conflicts.
+   */
+  @Bean
+  public WebMvcEndpointHandlerMapping webEndpointServletHandlerMapping(
+      WebEndpointsSupplier webEndpointsSupplier,
+      ServletEndpointsSupplier servletEndpointsSupplier,
+      ControllerEndpointsSupplier controllerEndpointsSupplier,
+      EndpointMediaTypes endpointMediaTypes,
+      CorsEndpointProperties corsProperties,
+      WebEndpointProperties webEndpointProperties,
+      Environment environment) {
+    List<ExposableEndpoint<?>> allEndpoints = new ArrayList<>();
+    Collection<ExposableWebEndpoint> webEndpoints = webEndpointsSupplier.getEndpoints();
+    allEndpoints.addAll(webEndpoints);
+    allEndpoints.addAll(servletEndpointsSupplier.getEndpoints());
+    allEndpoints.addAll(controllerEndpointsSupplier.getEndpoints());
+    String basePath = webEndpointProperties.getBasePath();
+    EndpointMapping endpointMapping = new EndpointMapping(basePath);
+    boolean shouldRegisterLinksMapping =
+        this.shouldRegisterLinksMapping(webEndpointProperties, environment, basePath);
+    return new WebMvcEndpointHandlerMapping(
+        endpointMapping,
+        webEndpoints,
+        endpointMediaTypes,
+        corsProperties.toCorsConfiguration(),
+        new EndpointLinksResolver(allEndpoints, basePath),
+        shouldRegisterLinksMapping,
+        null);
+  }
 
-    private boolean shouldRegisterLinksMapping(WebEndpointProperties webEndpointProperties, Environment environment, String basePath) {
-        return webEndpointProperties.getDiscovery().isEnabled() && (StringUtils.hasText(basePath) || ManagementPortType.get(environment).equals(ManagementPortType.DIFFERENT));
-    }
-
+  private boolean shouldRegisterLinksMapping(
+      WebEndpointProperties webEndpointProperties, Environment environment, String basePath) {
+    return webEndpointProperties.getDiscovery().isEnabled()
+        && (StringUtils.hasText(basePath)
+            || ManagementPortType.get(environment).equals(ManagementPortType.DIFFERENT));
+  }
 }

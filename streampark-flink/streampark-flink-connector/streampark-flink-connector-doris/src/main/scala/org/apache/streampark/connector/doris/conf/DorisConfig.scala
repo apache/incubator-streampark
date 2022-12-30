@@ -16,10 +16,11 @@
  */
 package org.apache.streampark.connector.doris.conf
 
-import org.apache.streampark.common.conf.ConfigConst
-
 import java.util.Properties
+
 import scala.collection.JavaConversions._
+
+import org.apache.streampark.common.conf.ConfigConst
 
 object DorisConfig {
 
@@ -73,14 +74,12 @@ class DorisConfig(parameters: Properties) {
     loadUrl.size
   }
 
-
   var currentHostId: Long = 0
 
   def getHostUrl: String = {
     currentHostId += 1
     loadUrl.get((currentHostId % loadUrl.size).toInt)
   }
-
 
   override def toString: String = {
     s"""

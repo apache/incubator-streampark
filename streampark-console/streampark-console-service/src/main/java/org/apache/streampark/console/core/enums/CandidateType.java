@@ -22,32 +22,26 @@ import java.util.Arrays;
 
 public enum CandidateType implements Serializable {
 
-    /**
-     * non candidate
-     */
-    NONE(0),
+  /** non candidate */
+  NONE(0),
 
-    /**
-     * newly added record becomes a candidate
-     */
-    NEW(1),
+  /** newly added record becomes a candidate */
+  NEW(1),
 
-    /**
-     * specific history becomes a candidate
-     */
-    HISTORY(2);
+  /** specific history becomes a candidate */
+  HISTORY(2);
 
-    private final int value;
+  private final int value;
 
-    CandidateType(int value) {
-        this.value = value;
-    }
+  CandidateType(int value) {
+    this.value = value;
+  }
 
-    public int get() {
-        return this.value;
-    }
+  public int get() {
+    return this.value;
+  }
 
-    public static CandidateType of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-    }
+  public static CandidateType of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+  }
 }

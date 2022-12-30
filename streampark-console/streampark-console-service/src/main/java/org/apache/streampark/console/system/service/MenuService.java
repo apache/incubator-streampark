@@ -28,29 +28,29 @@ import java.util.Map;
 
 public interface MenuService extends IService<Menu> {
 
-    /**
-     * Get the permissions of current userId.
-     *
-     * @param userId the user Id
-     * @param teamId team id. If it's null, will find permissions from all teams.
-     * @return permissions
-     */
-    List<String> findUserPermissions(Long userId, Long teamId);
+  /**
+   * Get the permissions of current userId.
+   *
+   * @param userId the user Id
+   * @param teamId team id. If it's null, will find permissions from all teams.
+   * @return permissions
+   */
+  List<String> findUserPermissions(Long userId, Long teamId);
 
-    List<Menu> findUserMenus(Long userId, Long teamId);
+  List<Menu> findUserMenus(Long userId, Long teamId);
 
-    Map<String, Object> findMenus(Menu menu);
+  Map<String, Object> findMenus(Menu menu);
 
-    void createMenu(Menu menu);
+  void createMenu(Menu menu);
 
-    void updateMenu(Menu menu) throws Exception;
+  void updateMenu(Menu menu) throws Exception;
 
-    /**
-     * Recursively delete menu buttons
-     *
-     * @param menuIds menuIds
-     */
-    void deleteMenus(String[] menuIds) throws Exception;
+  /**
+   * Recursively delete menu buttons
+   *
+   * @param menuIds menuIds
+   */
+  void deleteMenus(String[] menuIds) throws Exception;
 
-    ArrayList<VueRouter<Menu>> getUserRouters(Long userId, Long teamId);
+  ArrayList<VueRouter<Menu>> getUserRouters(Long userId, Long teamId);
 }

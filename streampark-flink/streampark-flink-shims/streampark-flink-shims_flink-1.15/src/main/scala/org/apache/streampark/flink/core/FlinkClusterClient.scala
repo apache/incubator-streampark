@@ -16,11 +16,11 @@
  */
 package org.apache.streampark.flink.core
 
+import java.util.concurrent.CompletableFuture
+
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.core.execution.SavepointFormatType
-
-import java.util.concurrent.CompletableFuture
 
 class FlinkClusterClient[T](clusterClient: ClusterClient[T]) extends FlinkClientTrait[T](clusterClient) {
 

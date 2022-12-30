@@ -16,21 +16,21 @@
  */
 package org.apache.streampark.common.util
 
-import com.google.common.collect.Maps
-import org.apache.streampark.common.fs.LfsOperator
-import org.apache.commons.io.{FileUtils => ApacheFileUtils}
-
 import java.io.File
 import java.util.{Collections, Map => JavaMap, Optional => JOption}
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
+import com.google.common.collect.Maps
+import org.apache.commons.io.{FileUtils => ApacheFileUtils}
+
+import org.apache.streampark.common.fs.LfsOperator
 
 /**
  * Hadoop client configuration tools mainly for flink use.
- *
  */
 object HadoopConfigUtils {
 
@@ -123,15 +123,13 @@ object HadoopConfigUtils {
    * Read system hive config to Map
    */
   def readSystemHiveConf: JavaMap[String, String] = {
-    getSystemHiveConfDir.map(
-      confDir =>
-        LfsOperator.listDir(confDir)
-          .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
-          .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
-          .toMap.asJava)
+    getSystemHiveConfDir.map(confDir =>
+      LfsOperator.listDir(confDir)
+        .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
+        .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+        .toMap.asJava)
       .getOrElse(Collections.emptyMap[String, String]())
 
   }
-
 
 }

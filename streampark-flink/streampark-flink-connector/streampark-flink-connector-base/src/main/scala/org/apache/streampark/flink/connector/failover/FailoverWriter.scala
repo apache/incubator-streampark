@@ -17,14 +17,16 @@
 
 package org.apache.streampark.flink.connector.failover
 
+import java.util._
+import java.util.concurrent.locks.ReentrantLock
+
+import scala.collection.JavaConversions._
+
+import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
+
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.util._
 import org.apache.streampark.flink.connector.conf.FailoverStorageType._
-import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
-
-import java.util._
-import java.util.concurrent.locks.ReentrantLock
-import scala.collection.JavaConversions._
 
 class FailoverWriter(failoverStorage: FailoverStorageType, properties: Properties) extends AutoCloseable with Logger {
 
@@ -34,7 +36,6 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
   }
 
   private var kafkaProducer: KafkaProducer[String, String] = _
-
 
   def write(request: SinkRequest): Unit = {
     this.synchronized {
@@ -74,11 +75,13 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                |}
                |""".stripMargin
           val record = new ProducerRecord[String, String](topic, sendData)
-          kafkaProducer.send(record, new Callback() {
-            override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
-              logInfo(s"Failover successful!! storageType:Kafka,table: $table,size:${request.size}")
-            }
-          }).get()
+          kafkaProducer.send(
+            record,
+            new Callback() {
+              override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
+                logInfo(s"Failover successful!! storageType:Kafka,table: $table,size:${request.size}")
+              }
+            }).get()
         case MySQL =>
           if (!Lock.initialized) {
             try {
@@ -91,8 +94,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                 if (!mysqlTable.next()) {
                   JdbcUtils.execute(
                     mysqlConnect,
-                    s"create table $table (`values` text, `timestamp` bigint)"
-                  )
+                    s"create table $table (`values` text, `timestamp` bigint)")
                   logWarn(s"Failover storageType:MySQL,table: $table is not exist,auto created...")
                 }
               }
@@ -126,4 +128,3 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
   }
 
 }
-

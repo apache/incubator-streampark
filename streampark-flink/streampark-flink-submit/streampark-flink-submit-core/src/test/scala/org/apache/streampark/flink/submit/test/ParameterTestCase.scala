@@ -16,28 +16,27 @@
  */
 package org.apache.streampark.flink.submit.test
 
+import scala.collection.mutable.ArrayBuffer
+
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.streampark.flink.submit.FlinkSubmitter
 import org.junit.jupiter.api.{Assertions, Test}
 
-import scala.collection.mutable.ArrayBuffer
+import org.apache.streampark.flink.submit.FlinkSubmitter
 
 class ParameterTestCase {
 
   @Test def readArgs(): Unit = {
     val arg = Array(
       "--flink.deployment.option.parallelism",
-      "10"
-    )
+      "10")
     val args = Array(
       "--flink.home",
       "hdfs://nameservice1/streampark/flink/flink-1.11.1",
       "--app.name",
       "testApp123",
       "--flink.deployment.option.parallelism",
-      "5"
-    )
+      "5")
     val param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(args))
 
     Assertions.assertEquals("hdfs://nameservice1/streampark/flink/flink-1.11.1", param.get("flink.home"))

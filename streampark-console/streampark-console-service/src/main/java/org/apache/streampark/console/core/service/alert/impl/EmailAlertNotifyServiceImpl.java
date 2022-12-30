@@ -44,55 +44,57 @@ import java.util.Optional;
 @Lazy
 public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
-    private Template template;
+  private Template template;
 
-    @Autowired
-    private SettingService settingService;
+  @Autowired private SettingService settingService;
 
-    @PostConstruct
-    public void loadTemplateFile() throws Exception {
-        String template = "alert-email.ftl";
-        this.template = FreemarkerUtils.loadTemplateFile(template);
-    }
+  @PostConstruct
+  public void loadTemplateFile() throws Exception {
+    String template = "alert-email.ftl";
+    this.template = FreemarkerUtils.loadTemplateFile(template);
+  }
 
-    @Override
-    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException {
-        SenderEmail senderEmail = Optional.ofNullable(settingService.getSenderEmail())
+  @Override
+  public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template)
+      throws AlertException {
+    SenderEmail senderEmail =
+        Optional.ofNullable(settingService.getSenderEmail())
             .orElseThrow(() -> new AlertException("Please configure first mail sender"));
-        String contacts = alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
-        if (!StringUtils.hasLength(contacts)) {
-            throw new AlertException("Please configure a valid contacts");
-        }
-        String[] emails = contacts.split(",");
-        return sendEmail(senderEmail, template, emails);
+    String contacts =
+        alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
+    if (!StringUtils.hasLength(contacts)) {
+      throw new AlertException("Please configure a valid contacts");
     }
+    String[] emails = contacts.split(",");
+    return sendEmail(senderEmail, template, emails);
+  }
 
-    private boolean sendEmail(SenderEmail senderEmail, AlertTemplate mail, String... mails) throws AlertException {
-        log.info(mail.getSubject());
-        try {
-            Map<String, AlertTemplate> out = new HashMap<>(16);
-            out.put("mail", mail);
-            String html = FreemarkerUtils.format(template, out);
+  private boolean sendEmail(SenderEmail senderEmail, AlertTemplate mail, String... mails)
+      throws AlertException {
+    log.info(mail.getSubject());
+    try {
+      Map<String, AlertTemplate> out = new HashMap<>(16);
+      out.put("mail", mail);
+      String html = FreemarkerUtils.format(template, out);
 
-            HtmlEmail htmlEmail = new HtmlEmail();
-            htmlEmail.setCharset("UTF-8");
-            htmlEmail.setHostName(senderEmail.getSmtpHost());
-            htmlEmail.setAuthentication(senderEmail.getUserName(), senderEmail.getPassword());
-            htmlEmail.setFrom(senderEmail.getFrom());
-            if (senderEmail.isSsl()) {
-                htmlEmail.setSSLOnConnect(true);
-                htmlEmail.setSslSmtpPort(senderEmail.getSmtpPort().toString());
-            } else {
-                htmlEmail.setSmtpPort(senderEmail.getSmtpPort());
-            }
-            htmlEmail.setSubject(mail.getSubject());
-            htmlEmail.setHtmlMsg(html);
-            htmlEmail.addTo(mails);
-            htmlEmail.send();
-            return true;
-        } catch (Exception e) {
-            throw new AlertException("Failed send email alert", e);
-        }
+      HtmlEmail htmlEmail = new HtmlEmail();
+      htmlEmail.setCharset("UTF-8");
+      htmlEmail.setHostName(senderEmail.getSmtpHost());
+      htmlEmail.setAuthentication(senderEmail.getUserName(), senderEmail.getPassword());
+      htmlEmail.setFrom(senderEmail.getFrom());
+      if (senderEmail.isSsl()) {
+        htmlEmail.setSSLOnConnect(true);
+        htmlEmail.setSslSmtpPort(senderEmail.getSmtpPort().toString());
+      } else {
+        htmlEmail.setSmtpPort(senderEmail.getSmtpPort());
+      }
+      htmlEmail.setSubject(mail.getSubject());
+      htmlEmail.setHtmlMsg(html);
+      htmlEmail.addTo(mails);
+      htmlEmail.send();
+      return true;
+    } catch (Exception e) {
+      throw new AlertException("Failed send email alert", e);
     }
-
+  }
 }

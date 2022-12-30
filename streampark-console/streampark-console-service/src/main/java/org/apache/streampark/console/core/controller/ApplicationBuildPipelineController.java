@@ -53,80 +53,95 @@ import java.util.Optional;
 @RequestMapping("flink/pipe")
 public class ApplicationBuildPipelineController {
 
-    @Autowired
-    private AppBuildPipeService appBuildPipeService;
+  @Autowired private AppBuildPipeService appBuildPipeService;
 
-    @Autowired
-    private ApplicationService applicationService;
+  @Autowired private ApplicationService applicationService;
 
-    @Autowired
-    private FlinkSqlService flinkSqlService;
+  @Autowired private FlinkSqlService flinkSqlService;
 
-    /**
-     * Launch application building pipeline.
-     *
-     * @param appId      application id
-     * @param forceBuild forced start pipeline or not
-     * @return Whether the pipeline was successfully started
-     */
-    @ApiAccess
-    @ApiOperation(value = "Launch application", notes = "Launch application", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "appId", value = "APP_ID", required = true, paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "forceBuild", value = "FORCE_BUILD", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false"),
-    })
-    @PostMapping(value = "build", consumes = "application/x-www-form-urlencoded")
-    @RequiresPermissions("app:create")
-    public RestResponse buildApplication(Long appId, boolean forceBuild) {
-        try {
-            Application app = applicationService.getById(appId);
-            Boolean envOk = applicationService.checkEnv(app);
-            if (!envOk) {
-                throw new ApiAlertException("Check flink env failed, please check the flink version of this job");
-            }
+  /**
+   * Launch application building pipeline.
+   *
+   * @param appId application id
+   * @param forceBuild forced start pipeline or not
+   * @return Whether the pipeline was successfully started
+   */
+  @ApiAccess
+  @ApiOperation(
+      value = "Launch application",
+      notes = "Launch application",
+      tags = ApiDocConstant.FLINK_APP_OP_TAG,
+      consumes = "application/x-www-form-urlencoded")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        name = "appId",
+        value = "APP_ID",
+        required = true,
+        paramType = "query",
+        dataTypeClass = Long.class),
+    @ApiImplicitParam(
+        name = "forceBuild",
+        value = "FORCE_BUILD",
+        required = true,
+        paramType = "query",
+        dataTypeClass = Boolean.class,
+        defaultValue = "false"),
+  })
+  @PostMapping(value = "build", consumes = "application/x-www-form-urlencoded")
+  @RequiresPermissions("app:create")
+  public RestResponse buildApplication(Long appId, boolean forceBuild) {
+    try {
+      Application app = applicationService.getById(appId);
+      Boolean envOk = applicationService.checkEnv(app);
+      if (!envOk) {
+        throw new ApiAlertException(
+            "Check flink env failed, please check the flink version of this job");
+      }
 
-            if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
-                throw new ApiAlertException("The job is invalid, or the job cannot be built while it is running");
-            }
-            // check if you need to go through the build process (if the jar and pom have changed,
-            // you need to go through the build process, if other common parameters are modified,
-            // you don't need to go through the build process)
-            boolean needBuild = applicationService.checkBuildAndUpdate(app);
-            if (!needBuild) {
-                return RestResponse.success(true);
-            }
+      if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
+        throw new ApiAlertException(
+            "The job is invalid, or the job cannot be built while it is running");
+      }
+      // check if you need to go through the build process (if the jar and pom have changed,
+      // you need to go through the build process, if other common parameters are modified,
+      // you don't need to go through the build process)
+      boolean needBuild = applicationService.checkBuildAndUpdate(app);
+      if (!needBuild) {
+        return RestResponse.success(true);
+      }
 
-            // rollback
-            if (app.isNeedRollback() && app.isFlinkSqlJob()) {
-                flinkSqlService.rollback(app);
-            }
+      // rollback
+      if (app.isNeedRollback() && app.isFlinkSqlJob()) {
+        flinkSqlService.rollback(app);
+      }
 
-            boolean actionResult = appBuildPipeService.buildApplication(app);
-            return RestResponse.success(actionResult);
-        } catch (Exception e) {
-            return RestResponse.success(false).message(e.getMessage());
-        }
+      boolean actionResult = appBuildPipeService.buildApplication(app);
+      return RestResponse.success(actionResult);
+    } catch (Exception e) {
+      return RestResponse.success(false).message(e.getMessage());
     }
+  }
 
-    /**
-     * Get application building pipeline progress detail.
-     *
-     * @param appId application id
-     * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
-     */
-    @ApiAccess
-    @PostMapping("/detail")
-    @RequiresPermissions("app:view")
-    public RestResponse getBuildProgressDetail(Long appId) {
-        Map<String, Object> details = new HashMap<>(0);
-        Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
-        details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
+  /**
+   * Get application building pipeline progress detail.
+   *
+   * @param appId application id
+   * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
+   */
+  @ApiAccess
+  @PostMapping("/detail")
+  @RequiresPermissions("app:view")
+  public RestResponse getBuildProgressDetail(Long appId) {
+    Map<String, Object> details = new HashMap<>(0);
+    Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
+    details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
 
-        if (pipeline.isPresent() && PipelineType.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
-            DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
-            details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
-        }
-        return RestResponse.success(details);
+    if (pipeline.isPresent()
+        && PipelineType.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
+      DockerResolvedSnapshot dockerProgress =
+          appBuildPipeService.getDockerProgressDetailSnapshot(appId);
+      details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
     }
-
+    return RestResponse.success(details);
+  }
 }

@@ -21,9 +21,8 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{CompiledPlan, PlanReference, Table, TableDescriptor, TableEnvironment, TableResult}
 import org.apache.flink.table.module.ModuleEntry
 
-class TableContext(override val parameter: ParameterTool,
-                   private val tableEnv: TableEnvironment)
-  extends FlinkTableTrait(parameter, tableEnv) {
+class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment)
+    extends FlinkTableTrait(parameter, tableEnv) {
 
   def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
 

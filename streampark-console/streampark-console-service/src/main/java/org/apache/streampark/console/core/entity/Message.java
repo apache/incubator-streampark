@@ -30,38 +30,33 @@ import java.util.Date;
 @TableName("t_message")
 public class Message {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+  @TableId(type = IdType.AUTO)
+  private Long id;
 
-    private Long appId;
+  private Long appId;
 
-    private Long userId;
+  private Long userId;
 
-    private String title;
+  private String title;
 
-    /**
-     * 1) build failure report
-     * 2) task monitoring exception
-     */
-    private Integer type;
+  /** 1) build failure report 2) task monitoring exception */
+  private Integer type;
 
-    private String context;
+  private String context;
 
-    private Boolean isRead;
+  private Boolean isRead;
 
-    private Date createTime;
+  private Date createTime;
 
-    public Message() {
-    }
+  public Message() {}
 
-    public Message(Long userId, Long appId, String title, String context, NoticeType noticeType) {
-        this.userId = userId;
-        this.appId = appId;
-        this.title = title;
-        this.context = context;
-        this.type = noticeType.get();
-        this.createTime = new Date();
-        this.isRead = false;
-    }
-
+  public Message(Long userId, Long appId, String title, String context, NoticeType noticeType) {
+    this.userId = userId;
+    this.appId = appId;
+    this.title = title;
+    this.context = context;
+    this.type = noticeType.get();
+    this.createTime = new Date();
+    this.isRead = false;
+  }
 }

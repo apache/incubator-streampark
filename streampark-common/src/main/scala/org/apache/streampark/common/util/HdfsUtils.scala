@@ -16,15 +16,16 @@
  */
 package org.apache.streampark.common.util
 
+import java.io.{ByteArrayOutputStream, FileWriter, IOException}
+import java.net.InetSocketAddress
+
+import scala.util.{Failure, Success, Try}
+
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.hadoop.io.IOUtils
 import org.apache.hadoop.ipc.RPC
-
-import java.io.{ByteArrayOutputStream, FileWriter, IOException}
-import java.net.InetSocketAddress
-import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
 
@@ -40,7 +41,8 @@ object HdfsUtils extends Logger {
     val srcPath = getPath(src)
     val dstPath = getPath(dst)
     val dstStatus = HadoopUtils.hdfs.getFileStatus(dstPath)
-    val dstFinalPath = if (dstStatus.isFile) dstPath else {
+    val dstFinalPath = if (dstStatus.isFile) dstPath
+    else {
       getPath(s"$dst/${srcPath.getName}")
     }
     FileUtil.copy(HadoopUtils.hdfs, srcPath, HadoopUtils.hdfs, dstFinalPath, delSrc, overwrite, HadoopUtils.hadoopConf)

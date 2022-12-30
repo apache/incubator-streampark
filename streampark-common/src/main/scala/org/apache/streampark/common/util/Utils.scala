@@ -16,17 +16,17 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.commons.lang3.StringUtils
-
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
+import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
 import java.util.jar.{JarFile, JarInputStream}
-import java.util.{Properties, UUID, jar, Collection => JavaCollection, Map => JavaMap}
+
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
-object Utils {
+import org.apache.commons.lang3.StringUtils
 
+object Utils {
 
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
@@ -52,7 +52,8 @@ object Utils {
     }
   }
 
-  @throws[IOException] def checkJarFile(jar: URL): Unit = {
+  @throws[IOException]
+  def checkJarFile(jar: URL): Unit = {
     val jarFile: File = Try(new File(jar.toURI)) match {
       case Success(x) => x
       case Failure(_) => throw new IOException(s"JAR file path is invalid $jar")
@@ -123,7 +124,6 @@ object Utils {
   def calPercent(num1: Long, num2: Long): Double =
     if (num1 == 0 || num2 == 0) 0.0
     else (num1.toDouble / num2.toDouble * 100).formatted("%.1f").toDouble
-
 
   def hashCode(elements: Any*): Int = {
     if (elements == null) return 0

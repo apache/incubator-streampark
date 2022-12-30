@@ -27,14 +27,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface SavePointService extends IService<SavePoint> {
 
-    void obsolete(Long appId);
+  void obsolete(Long appId);
 
-    SavePoint getLatest(Long id);
+  SavePoint getLatest(Long id);
 
-    Boolean delete(Long id, Application application) throws InternalException;
+  Boolean delete(Long id, Application application) throws InternalException;
 
-    IPage<SavePoint> page(SavePoint savePoint, RestRequest request);
+  IPage<SavePoint> page(SavePoint savePoint, RestRequest request);
 
-    void removeApp(Application application);
-
+  void removeApp(Application application);
 }

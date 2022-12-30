@@ -19,15 +19,13 @@ package org.apache.streampark.connector.doris.conf
 
 import java.util.Properties
 
+import scala.collection.JavaConverters._
+
 import org.apache.streampark.common.conf.ConfigOption
 import org.apache.streampark.common.util.ConfigUtils
 
-import scala.collection.JavaConverters._
-
-
 object DorisSinkConfigOption {
   val DORIS_SINK_PREFIX = "doris.sink"
-
 
   def apply(prefixStr: String = DORIS_SINK_PREFIX, properties: Properties = new Properties): DorisSinkConfigOption =
     new DorisSinkConfigOption(prefixStr, properties)
@@ -51,42 +49,35 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
         .filter(_.nonEmpty)
         .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
         .toList
-    }
-  )
+    })
 
   val user: ConfigOption[String] = ConfigOption(
     key = "user",
     required = true,
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val loadFormat: ConfigOption[String] = ConfigOption(
     key = "loadFormat",
     required = false,
     defaultValue = "csv",
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val password: ConfigOption[String] = ConfigOption(
     key = "password",
     required = true,
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val database: ConfigOption[String] = ConfigOption(
     key = "database",
     required = false,
     defaultValue = "",
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val table: ConfigOption[String] = ConfigOption(
     key = "table",
     required = false,
     defaultValue = "",
-    classType = classOf[String]
-  )
-
+    classType = classOf[String])
 
   val sinkOfferTimeout: ConfigOption[Long] = ConfigOption(
     key = "sinkOfferTimeout",
@@ -95,15 +86,13 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     classType = classOf[Long],
     handle = k => {
       properties.remove(k).toString.toLong
-    }
-  )
+    })
 
   val rowDelimiter: ConfigOption[String] = ConfigOption(
     key = "properties.row_delimiter",
     required = false,
     defaultValue = "\n",
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val flushInterval: ConfigOption[Long] = ConfigOption(
     key = "flushInterval",
@@ -112,64 +101,55 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     classType = classOf[Long],
     handle = k => {
       properties.remove(k).toString.toLong
-    }
-  )
+    })
 
   val connectTimeout: ConfigOption[Int] = ConfigOption(
     key = "connectTimeout",
     required = false,
     defaultValue = 5000,
-    classType = classOf[Long]
-  )
+    classType = classOf[Long])
 
   val maxRequestRetry: ConfigOption[Int] = ConfigOption(
     key = "maxRequestRetry",
     required = false,
     defaultValue = 1,
-    classType = classOf[Long]
-  )
+    classType = classOf[Long])
 
   val maxConnections: ConfigOption[Int] = ConfigOption(
     key = "maxConnections",
     required = false,
     defaultValue = -1,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val maxRow: ConfigOption[Int] = ConfigOption(
     key = "maxRow",
     required = false,
     defaultValue = 100000,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val maxBytes: ConfigOption[Int] = ConfigOption(
     key = "maxRow",
     required = false,
     defaultValue = 94371840,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val maxRetries: ConfigOption[Int] = ConfigOption(
     key = "maxRetries",
     required = false,
     defaultValue = 1,
-    classType = classOf[Int]
-  )
+    classType = classOf[Int])
 
   val lablePrefix: ConfigOption[String] = ConfigOption(
     key = "lablePrefix",
     required = false,
     defaultValue = "doris",
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   val semantic: ConfigOption[String] = ConfigOption(
     key = "semantic",
     required = false,
     defaultValue = "AT_LEAST_ONCE",
-    classType = classOf[String]
-  )
+    classType = classOf[String])
 
   def getInternalConfig(): Properties = {
     ConfigUtils.getConf(prop.asScala.asJava, prefix)("")
@@ -177,6 +157,5 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
   def getInternalProperties(): Properties = {
     ConfigUtils.getConf(prop.asScala.asJava, prefix)(".properties")
   }
-
 
 }

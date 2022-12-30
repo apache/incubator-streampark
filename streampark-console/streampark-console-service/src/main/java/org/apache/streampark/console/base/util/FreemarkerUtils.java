@@ -29,41 +29,42 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 @Slf4j
-public class FreemarkerUtils  {
-    private static final Configuration CONFIGURATION;
+public class FreemarkerUtils {
+  private static final Configuration CONFIGURATION;
 
-    static {
-        SpringTemplateLoader templateLoader = new SpringTemplateLoader(new DefaultResourceLoader(), "classpath:alert-template");
-        CONFIGURATION = new Configuration(Configuration.VERSION_2_3_28);
-        CONFIGURATION.setTemplateLoader(templateLoader);
-        CONFIGURATION.setDefaultEncoding("UTF-8");
-    }
+  static {
+    SpringTemplateLoader templateLoader =
+        new SpringTemplateLoader(new DefaultResourceLoader(), "classpath:alert-template");
+    CONFIGURATION = new Configuration(Configuration.VERSION_2_3_28);
+    CONFIGURATION.setTemplateLoader(templateLoader);
+    CONFIGURATION.setDefaultEncoding("UTF-8");
+  }
 
-    public static Template loadTemplateFile(String fileName) throws ExceptionInInitializerError {
-        try {
-            return CONFIGURATION.getTemplate(fileName);
-        } catch (IOException e) {
-            log.error("{} not found!", fileName);
-            throw new ExceptionInInitializerError(fileName + " not found!");
-        }
+  public static Template loadTemplateFile(String fileName) throws ExceptionInInitializerError {
+    try {
+      return CONFIGURATION.getTemplate(fileName);
+    } catch (IOException e) {
+      log.error("{} not found!", fileName);
+      throw new ExceptionInInitializerError(fileName + " not found!");
     }
+  }
 
-    public static Template loadTemplateString(String template) throws Exception {
-        Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
-        StringTemplateLoader stringTemplateLoader = new StringTemplateLoader();
-        stringTemplateLoader.putTemplate("template", template);
-        configuration.setTemplateLoader(stringTemplateLoader);
-        return configuration.getTemplate("template");
-    }
+  public static Template loadTemplateString(String template) throws Exception {
+    Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
+    StringTemplateLoader stringTemplateLoader = new StringTemplateLoader();
+    stringTemplateLoader.putTemplate("template", template);
+    configuration.setTemplateLoader(stringTemplateLoader);
+    return configuration.getTemplate("template");
+  }
 
-    public static String format(Template template, Object dataModel) throws TemplateException {
-        String result = null;
-        try (StringWriter writer = new StringWriter()) {
-            template.process(dataModel, writer);
-            result = writer.toString();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-        return result;
+  public static String format(Template template, Object dataModel) throws TemplateException {
+    String result = null;
+    try (StringWriter writer = new StringWriter()) {
+      template.process(dataModel, writer);
+      result = writer.toString();
+    } catch (IOException e) {
+      log.error(e.getMessage());
     }
+    return result;
+  }
 }

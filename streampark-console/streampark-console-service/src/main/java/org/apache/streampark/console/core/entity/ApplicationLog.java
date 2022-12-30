@@ -30,32 +30,20 @@ import java.util.Date;
 @Slf4j
 public class ApplicationLog {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
-    /**
-     * appId
-     */
-    private Long appId;
-    /**
-     * applicationId
-     */
-    private String yarnAppId;
-    /**
-     * The address of the jobmanager, that is, the direct access address of the Flink web UI
-     */
-    private String jobManagerUrl;
-    /**
-     * start status
-     */
-    private Boolean success;
+  @TableId(type = IdType.AUTO)
+  private Long id;
+  /** appId */
+  private Long appId;
+  /** applicationId */
+  private String yarnAppId;
+  /** The address of the jobmanager, that is, the direct access address of the Flink web UI */
+  private String jobManagerUrl;
+  /** start status */
+  private Boolean success;
 
-    /**
-     * option time
-     */
-    private Date optionTime;
+  /** option time */
+  private Date optionTime;
 
-    /**
-     * exception at the start
-     */
-    private String exception;
+  /** exception at the start */
+  private String exception;
 }

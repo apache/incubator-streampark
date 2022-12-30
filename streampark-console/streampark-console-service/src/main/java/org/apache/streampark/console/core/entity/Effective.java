@@ -32,28 +32,27 @@ import java.util.Date;
 @Slf4j
 public class Effective {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
-    private Long appId;
-    /**
-     * 1) config <br>
-     * 2) flink Sql<br>
-     */
-    private Integer targetType;
-    private Long targetId;
-    private Date createTime;
+  @TableId(type = IdType.AUTO)
+  private Long id;
 
-    private transient EffectiveType effectiveType;
+  private Long appId;
+  /**
+   * 1) config <br>
+   * 2) flink Sql<br>
+   */
+  private Integer targetType;
 
-    public Effective() {
+  private Long targetId;
+  private Date createTime;
 
-    }
+  private transient EffectiveType effectiveType;
 
-    public Effective(Long appId, EffectiveType type, Long targetId) {
-        this.appId = appId;
-        this.targetType = type.getType();
-        this.targetId = targetId;
-        this.createTime = new Date();
-    }
+  public Effective() {}
 
+  public Effective(Long appId, EffectiveType type, Long targetId) {
+    this.appId = appId;
+    this.targetType = type.getType();
+    this.targetId = targetId;
+    this.createTime = new Date();
+  }
 }

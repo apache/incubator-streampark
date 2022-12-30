@@ -26,5 +26,5 @@ import org.apache.ibatis.annotations.Param;
 
 public interface RoleMapper extends BaseMapper<Role> {
 
-    IPage<Role> findRole(Page<Role> page, @Param("role") Role role);
+  IPage<Role> findRole(Page<Role> page, @Param("role") Role role);
 }

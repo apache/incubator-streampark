@@ -17,6 +17,8 @@
 
 package org.apache.streampark.flink.core.scala
 
+import java.time.Duration
+
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction => ProcFunc}
@@ -25,8 +27,6 @@ import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.runtime.operators.util.{AssignerWithPeriodicWatermarksAdapter, AssignerWithPunctuatedWatermarksAdapter}
 import org.apache.flink.util.Collector
-
-import java.time.Duration
 
 object DataStreamExt {
 
@@ -46,9 +46,10 @@ object DataStreamExt {
     def sideGet[R: TypeInformation](sideTag: String): DStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
     def boundedOutOfOrdernessWatermark(func: T => Long, duration: Duration): DStream[T] = {
-      dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forBoundedOutOfOrderness[T](duration).withTimestampAssigner(new SerializableTimestampAssigner[T]() {
-        override def extractTimestamp(element: T, recordTimestamp: Long): Long = func(element)
-      }))
+      dataStream.assignTimestampsAndWatermarks(
+        WatermarkStrategy.forBoundedOutOfOrderness[T](duration).withTimestampAssigner(new SerializableTimestampAssigner[T]() {
+          override def extractTimestamp(element: T, recordTimestamp: Long): Long = func(element)
+        }))
     }
 
     def timeLagWatermark(fun: T => Long, maxTimeLag: Time): DStream[T] = {
@@ -79,8 +80,9 @@ object DataStreamExt {
      * @tparam R
      * @return
      */
-    def proc[R: TypeInformation](processFunction: (T, ProcFunc[T, R]#Context, Collector[R]) => Unit,
-                                 onTimerFunction: (Long, ProcFunc[T, R]#OnTimerContext, Collector[R]) => Unit = null): DStream[R] = {
+    def proc[R: TypeInformation](
+        processFunction: (T, ProcFunc[T, R]#Context, Collector[R]) => Unit,
+        onTimerFunction: (Long, ProcFunc[T, R]#OnTimerContext, Collector[R]) => Unit = null): DStream[R] = {
 
       dataStream.process(new ProcFunc[T, R] {
         override def processElement(value: T, ctx: ProcFunc[T, R]#Context, out: Collector[R]): Unit = processFunction(value, ctx, out)

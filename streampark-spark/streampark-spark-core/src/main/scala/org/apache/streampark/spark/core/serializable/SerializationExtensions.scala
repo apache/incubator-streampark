@@ -17,6 +17,8 @@
 
 package org.apache.streampark.spark.core.serializable
 
+import scala.reflect.{classTag, ClassTag}
+
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.mapred.AvroKey
@@ -29,20 +31,18 @@ import org.apache.log4j.Logger
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
-import scala.reflect.{ClassTag, classTag}
-
 object SerializationExtensions {
 
   private val logger = Logger.getLogger(getClass)
 
   /**
-    * Build a AvroJob
-    *
-    * @param job
-    * @tparam T
-    * @return
-    */
-  def avroJob[T <: GenericRecord : ClassTag](job: Job = Job.getInstance(new Configuration())): Job = {
+   * Build a AvroJob
+   *
+   * @param job
+   * @tparam T
+   * @return
+   */
+  def avroJob[T <: GenericRecord: ClassTag](job: Job = Job.getInstance(new Configuration())): Job = {
     val schema: Schema = SpecificData.get.getSchema(classTag[T].runtimeClass)
     AvroJob.setInputKeySchema(job, schema)
     AvroJob.setOutputKeySchema(job, schema)
@@ -58,48 +58,41 @@ object SerializationExtensions {
   implicit class AvroRDDSparkContext(val sparkContext: SparkContext) extends AnyVal {
 
     /**
-      * Read the Avro file in the specified path
-      *
-      * @param path
-      * @tparam T
-      * @return
-      */
+     * Read the Avro file in the specified path
+     *
+     * @param path
+     * @tparam T
+     * @return
+     */
     def avroFile[T: ClassTag](path: String): RDD[T] = {
-      sparkContext.newAPIHadoopFile(path,
-        classOf[AvroKeyInputFormat[T]],
-        classOf[AvroKey[T]],
-        classOf[NullWritable],
-        avroJob().getConfiguration)
+      sparkContext.newAPIHadoopFile(path, classOf[AvroKeyInputFormat[T]], classOf[AvroKey[T]], classOf[NullWritable], avroJob().getConfiguration)
         .map[T](_._1.datum())
     }
   }
 
-  implicit class AvroRDD[T <: GenericRecord : ClassTag](val avroRDD: RDD[T]) {
+  implicit class AvroRDD[T <: GenericRecord: ClassTag](val avroRDD: RDD[T]) {
     def filterIfUnexpectedNull(fields: String*): RDD[T] = {
       avroRDD.filter(r => fields.forall(isDefined(r, _)))
     }
 
     /**
-      * Save as avro file
-      */
+     * Save as avro file
+     */
     def saveAsAvroFile(outputPath: String): Unit = {
       avroRDD.map(r => (new AvroKey[T](r), NullWritable.get))
-        .saveAsNewAPIHadoopFile(outputPath,
-          classOf[AvroKey[T]],
-          classOf[NullWritable],
-          classOf[AvroKeyOutputFormat[T]],
-          avroJob[T]().getConfiguration)
+        .saveAsNewAPIHadoopFile(outputPath, classOf[AvroKey[T]], classOf[NullWritable], classOf[AvroKeyOutputFormat[T]], avroJob[T]().getConfiguration)
     }
 
     /**
-      * Save the specified avro files according to the Key value
-      *
-      * @param outputKeyFun outputKeyFunction
-      * @param outputPath outputPath
-      */
+     * Save the specified avro files according to the Key value
+     *
+     * @param outputKeyFun outputKeyFunction
+     * @param outputPath outputPath
+     */
     def saveAsMultipleAvroFiles(outputKeyFun: (T) => String, outputPath: String): Unit = {
       avroRDD.map(r => ((outputKeyFun(r), new AvroKey(r)), NullWritable.get))
-        .saveAsNewAPIHadoopFile(outputPath,
+        .saveAsNewAPIHadoopFile(
+          outputPath,
           classOf[AvroKey[(String, T)]],
           classOf[NullWritable],
           classOf[MultipleAvroOutputsFormat[T]],

@@ -52,124 +52,130 @@ import java.util.stream.Collectors;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
-    @Autowired
-    private UserService userService;
+  @Autowired private UserService userService;
 
-    @Autowired
-    private RoleMenuServie roleMenuServie;
+  @Autowired private RoleMenuServie roleMenuServie;
 
-    @Override
-    public List<String> findUserPermissions(Long userId, Long teamId) {
-        User user = Optional.ofNullable(userService.getById(userId))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The userId [%s] not found", userId)));
-        // Admin has the permission for all menus.
-        if (UserType.ADMIN.equals(user.getUserType())) {
-            return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
-        }
-        return this.baseMapper.findUserPermissions(userId, teamId);
+  @Override
+  public List<String> findUserPermissions(Long userId, Long teamId) {
+    User user =
+        Optional.ofNullable(userService.getById(userId))
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        String.format("The userId [%s] not found", userId)));
+    // Admin has the permission for all menus.
+    if (UserType.ADMIN.equals(user.getUserType())) {
+      return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
     }
+    return this.baseMapper.findUserPermissions(userId, teamId);
+  }
 
-    @Override
-    public List<Menu> findUserMenus(Long userId, Long teamId) {
-        User user = Optional.ofNullable(userService.getById(userId))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The userId:[%s] not found", userId)));
-        // Admin has the permission for all menus.
-        if (UserType.ADMIN.equals(user.getUserType())) {
-            LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<Menu>()
-                .eq(Menu::getType, "0")
-                .orderByAsc(Menu::getOrderNum);
-            return this.list(queryWrapper);
-        }
-        return this.baseMapper.findUserMenus(userId, teamId);
+  @Override
+  public List<Menu> findUserMenus(Long userId, Long teamId) {
+    User user =
+        Optional.ofNullable(userService.getById(userId))
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        String.format("The userId:[%s] not found", userId)));
+    // Admin has the permission for all menus.
+    if (UserType.ADMIN.equals(user.getUserType())) {
+      LambdaQueryWrapper<Menu> queryWrapper =
+          new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum);
+      return this.list(queryWrapper);
     }
+    return this.baseMapper.findUserMenus(userId, teamId);
+  }
 
-    @Override
-    public Map<String, Object> findMenus(Menu menu) {
-        Map<String, Object> result = new HashMap<>(16);
-        try {
-            LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
-            if (StringUtils.isNotBlank(menu.getMenuName())) {
-                queryWrapper.eq(Menu::getMenuName, menu.getMenuName());
-            }
-            if (StringUtils.isNotBlank(menu.getCreateTimeFrom())
-                && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
-                queryWrapper
-                    .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
-                    .le(Menu::getCreateTime, menu.getCreateTimeTo());
-            }
-            List<Menu> menus = baseMapper.selectList(queryWrapper);
+  @Override
+  public Map<String, Object> findMenus(Menu menu) {
+    Map<String, Object> result = new HashMap<>(16);
+    try {
+      LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
+      if (StringUtils.isNotBlank(menu.getMenuName())) {
+        queryWrapper.eq(Menu::getMenuName, menu.getMenuName());
+      }
+      if (StringUtils.isNotBlank(menu.getCreateTimeFrom())
+          && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
+        queryWrapper
+            .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
+            .le(Menu::getCreateTime, menu.getCreateTimeTo());
+      }
+      List<Menu> menus = baseMapper.selectList(queryWrapper);
 
-            List<RouterTree<Menu>> trees = new ArrayList<>();
-            List<String> ids = new ArrayList<>();
+      List<RouterTree<Menu>> trees = new ArrayList<>();
+      List<String> ids = new ArrayList<>();
 
-            menus.forEach(m -> {
-                ids.add(m.getMenuId().toString());
-                trees.add(new RouterTree(m));
-            });
-            result.put("ids", ids);
-            result.put("total", menus.size());
-            RouterTree<Menu> routerTree = VueRouterUtils.buildRouterTree(trees);
-            result.put("rows", routerTree);
-        } catch (Exception e) {
-            log.error("Failed to query menu", e);
-            result.put("rows", null);
-            result.put("total", 0);
-        }
-        return result;
+      menus.forEach(
+          m -> {
+            ids.add(m.getMenuId().toString());
+            trees.add(new RouterTree(m));
+          });
+      result.put("ids", ids);
+      result.put("total", menus.size());
+      RouterTree<Menu> routerTree = VueRouterUtils.buildRouterTree(trees);
+      result.put("rows", routerTree);
+    } catch (Exception e) {
+      log.error("Failed to query menu", e);
+      result.put("rows", null);
+      result.put("total", 0);
     }
+    return result;
+  }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void createMenu(Menu menu) {
-        menu.setCreateTime(new Date());
-        setMenu(menu);
-        this.save(menu);
-    }
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void createMenu(Menu menu) {
+    menu.setCreateTime(new Date());
+    setMenu(menu);
+    this.save(menu);
+  }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateMenu(Menu menu) throws Exception {
-        menu.setModifyTime(new Date());
-        setMenu(menu);
-        baseMapper.updateById(menu);
-    }
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void updateMenu(Menu menu) throws Exception {
+    menu.setModifyTime(new Date());
+    setMenu(menu);
+    baseMapper.updateById(menu);
+  }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteMenus(String[] menuIds) throws Exception {
-        // Find users associated with these menus/buttons
-        this.roleMenuServie.deleteByMenuId(menuIds);
-        // Recursively delete these menus/buttons
-        this.removeByIds(Arrays.asList(menuIds));
-    }
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void deleteMenus(String[] menuIds) throws Exception {
+    // Find users associated with these menus/buttons
+    this.roleMenuServie.deleteByMenuId(menuIds);
+    // Recursively delete these menus/buttons
+    this.removeByIds(Arrays.asList(menuIds));
+  }
 
-    @Override
-    public ArrayList<VueRouter<Menu>> getUserRouters(Long userId, Long teamId) {
-        List<VueRouter<Menu>> routes = new ArrayList<>();
-        // The query type is the menu type
-        List<Menu> menus = this.findUserMenus(userId, teamId);
-        menus.forEach(menu -> {
-            VueRouter<Menu> route = new VueRouter<>();
-            route.setId(menu.getMenuId().toString());
-            route.setParentId(menu.getParentId().toString());
-            route.setPath(menu.getPath());
-            route.setComponent(menu.getComponent());
-            route.setName(menu.getMenuName());
-            route.setMeta(new RouterMeta(true, !menu.isDisplay(), true, menu.getIcon()));
-            routes.add(route);
+  @Override
+  public ArrayList<VueRouter<Menu>> getUserRouters(Long userId, Long teamId) {
+    List<VueRouter<Menu>> routes = new ArrayList<>();
+    // The query type is the menu type
+    List<Menu> menus = this.findUserMenus(userId, teamId);
+    menus.forEach(
+        menu -> {
+          VueRouter<Menu> route = new VueRouter<>();
+          route.setId(menu.getMenuId().toString());
+          route.setParentId(menu.getParentId().toString());
+          route.setPath(menu.getPath());
+          route.setComponent(menu.getComponent());
+          route.setName(menu.getMenuName());
+          route.setMeta(new RouterMeta(true, !menu.isDisplay(), true, menu.getIcon()));
+          routes.add(route);
         });
-        return VueRouterUtils.buildVueRouter(routes);
-    }
+    return VueRouterUtils.buildVueRouter(routes);
+  }
 
-    private void setMenu(Menu menu) {
-        if (menu.getParentId() == null) {
-            menu.setParentId(0L);
-        }
-        if (Menu.TYPE_BUTTON.equals(menu.getType())) {
-            menu.setPath(null);
-            menu.setIcon(null);
-            menu.setComponent(null);
-        }
+  private void setMenu(Menu menu) {
+    if (menu.getParentId() == null) {
+      menu.setParentId(0L);
     }
-
+    if (Menu.TYPE_BUTTON.equals(menu.getType())) {
+      menu.setPath(null);
+      menu.setIcon(null);
+      menu.setComponent(null);
+    }
+  }
 }

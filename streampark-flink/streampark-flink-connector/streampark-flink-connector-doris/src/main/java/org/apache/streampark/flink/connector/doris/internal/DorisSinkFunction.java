@@ -41,94 +41,97 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Properties;
 
-/**
- * DorisSinkFunction
- **/
+/** DorisSinkFunction */
 public class DorisSinkFunction<T> extends RichSinkFunction<T> implements CheckpointedFunction {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DorisSinkFunction.class);
-    private final Properties properties;
-    private final DorisSinkWriter dorisSinkWriter;
-    private final DorisConfig dorisConfig;
-    // state only works with `EXACTLY_ONCE`
-    private transient ListState<Map<String, DorisSinkBufferEntry>> checkpointedState;
-    private transient Counter totalInvokeRowsTime;
-    private transient Counter totalInvokeRows;
-    private static final String COUNTER_INVOKE_ROWS_COST_TIME = "totalInvokeRowsTimeNs";
-    private static final String COUNTER_INVOKE_ROWS = "totalInvokeRows";
+  private static final Logger LOGGER = LoggerFactory.getLogger(DorisSinkFunction.class);
+  private final Properties properties;
+  private final DorisSinkWriter dorisSinkWriter;
+  private final DorisConfig dorisConfig;
+  // state only works with `EXACTLY_ONCE`
+  private transient ListState<Map<String, DorisSinkBufferEntry>> checkpointedState;
+  private transient Counter totalInvokeRowsTime;
+  private transient Counter totalInvokeRows;
+  private static final String COUNTER_INVOKE_ROWS_COST_TIME = "totalInvokeRowsTimeNs";
+  private static final String COUNTER_INVOKE_ROWS = "totalInvokeRows";
 
-    public DorisSinkFunction(StreamingContext context) {
-        this.properties = context.parameter().getProperties();
-        this.dorisConfig = new DorisConfig(properties);
-        this.dorisSinkWriter = new DorisSinkWriter(dorisConfig);
+  public DorisSinkFunction(StreamingContext context) {
+    this.properties = context.parameter().getProperties();
+    this.dorisConfig = new DorisConfig(properties);
+    this.dorisSinkWriter = new DorisSinkWriter(dorisConfig);
+  }
+
+  @Override
+  public void open(Configuration parameters) throws Exception {
+    super.open(parameters);
+    dorisSinkWriter.setRuntimeContext(getRuntimeContext());
+    totalInvokeRows = getRuntimeContext().getMetricGroup().counter(COUNTER_INVOKE_ROWS);
+    totalInvokeRowsTime =
+        getRuntimeContext().getMetricGroup().counter(COUNTER_INVOKE_ROWS_COST_TIME);
+    dorisSinkWriter.startScheduler();
+    dorisSinkWriter.startAsyncFlushing();
+  }
+
+  @Override
+  public void invoke(T value, SinkFunction.Context context) throws Exception {
+    long start = System.nanoTime();
+    if (value instanceof DorisSinkRowDataWithMeta) {
+      DorisSinkRowDataWithMeta data = (DorisSinkRowDataWithMeta) value;
+      if (Strings.isNullOrEmpty(data.getDatabase())
+          || Strings.isNullOrEmpty(data.getTable())
+          || null == data.getDataRows()) {
+        LOGGER.warn(
+            String.format(
+                " row data not fullfilled. {database: %s, table: %s, dataRows: %s}",
+                data.getDatabase(), data.getTable(), data.getDataRows()));
+        return;
+      }
+      dorisSinkWriter.writeRecords(data.getDatabase(), data.getTable(), data.getDataRows());
+    } else {
+      if (Strings.isNullOrEmpty(dorisConfig.database())
+          || Strings.isNullOrEmpty(dorisConfig.table())) {
+        throw new RuntimeException(
+            " database|table  is empt ,please check your config or create DorisSinkRowDataWithMeta instance");
+      }
+      dorisSinkWriter.writeRecords(dorisConfig.database(), dorisConfig.table(), (String) value);
     }
+    // raw data sink
+    totalInvokeRows.inc(1);
+    totalInvokeRowsTime.inc(System.nanoTime() - start);
+  }
 
-    @Override
-    public void open(Configuration parameters) throws Exception {
-        super.open(parameters);
-        dorisSinkWriter.setRuntimeContext(getRuntimeContext());
-        totalInvokeRows = getRuntimeContext().getMetricGroup().counter(COUNTER_INVOKE_ROWS);
-        totalInvokeRowsTime = getRuntimeContext().getMetricGroup().counter(COUNTER_INVOKE_ROWS_COST_TIME);
-        dorisSinkWriter.startScheduler();
-        dorisSinkWriter.startAsyncFlushing();
+  @Override
+  public void close() throws Exception {
+    super.close();
+    dorisSinkWriter.close();
+  }
+
+  @Override
+  public void snapshotState(FunctionSnapshotContext context) throws Exception {
+    if (Semantic.EXACTLY_ONCE.equals(Semantic.of(dorisConfig.semantic()))) {
+      // save state
+      checkpointedState.add(dorisSinkWriter.getBufferedBatchMap());
+      flushPreviousState();
     }
+  }
 
-    @Override
-    public void invoke(T value, SinkFunction.Context context) throws Exception {
-        long start = System.nanoTime();
-        if (value instanceof DorisSinkRowDataWithMeta) {
-            DorisSinkRowDataWithMeta data = (DorisSinkRowDataWithMeta) value;
-            if (Strings.isNullOrEmpty(data.getDatabase()) || Strings.isNullOrEmpty(data.getTable()) || null == data.getDataRows()) {
-                LOGGER.warn(String.format(" row data not fullfilled. {database: %s, table: %s, dataRows: %s}", data.getDatabase(), data.getTable(), data.getDataRows()));
-                return;
-            }
-            dorisSinkWriter.writeRecords(data.getDatabase(), data.getTable(), data.getDataRows());
-        } else {
-            if (Strings.isNullOrEmpty(dorisConfig.database()) || Strings.isNullOrEmpty(dorisConfig.table())) {
-                throw new RuntimeException(" database|table  is empt ,please check your config or create DorisSinkRowDataWithMeta instance");
-            }
-            dorisSinkWriter.writeRecords(dorisConfig.database(), dorisConfig.table(), (String) value);
-        }
-        // raw data sink
-        totalInvokeRows.inc(1);
-        totalInvokeRowsTime.inc(System.nanoTime() - start);
+  @Override
+  public void initializeState(FunctionInitializationContext context) throws Exception {
+    if (Semantic.EXACTLY_ONCE.equals(Semantic.of(dorisConfig.semantic()))) {
+      ListStateDescriptor<Map<String, DorisSinkBufferEntry>> descriptor =
+          new ListStateDescriptor<>(
+              "buffered-rows",
+              TypeInformation.of(new TypeHint<Map<String, DorisSinkBufferEntry>>() {}));
+      checkpointedState = context.getOperatorStateStore().getListState(descriptor);
     }
+  }
 
-    @Override
-    public void close() throws Exception {
-        super.close();
-        dorisSinkWriter.close();
-
+  private void flushPreviousState() throws Exception {
+    // flush the batch saved at the previous checkpoint
+    for (Map<String, DorisSinkBufferEntry> state : checkpointedState.get()) {
+      dorisSinkWriter.setBufferedBatchMap(state);
+      dorisSinkWriter.flush(null, true);
     }
-
-    @Override
-    public void snapshotState(FunctionSnapshotContext context) throws Exception {
-        if (Semantic.EXACTLY_ONCE.equals(Semantic.of(dorisConfig.semantic()))) {
-            // save state
-            checkpointedState.add(dorisSinkWriter.getBufferedBatchMap());
-            flushPreviousState();
-        }
-    }
-
-    @Override
-    public void initializeState(FunctionInitializationContext context) throws Exception {
-        if (Semantic.EXACTLY_ONCE.equals(Semantic.of(dorisConfig.semantic()))) {
-            ListStateDescriptor<Map<String, DorisSinkBufferEntry>> descriptor =
-                new ListStateDescriptor<>(
-                    "buffered-rows",
-                    TypeInformation.of(new TypeHint<Map<String, DorisSinkBufferEntry>>() {
-                    })
-                );
-            checkpointedState = context.getOperatorStateStore().getListState(descriptor);
-        }
-    }
-
-    private void flushPreviousState() throws Exception {
-        // flush the batch saved at the previous checkpoint
-        for (Map<String, DorisSinkBufferEntry> state : checkpointedState.get()) {
-            dorisSinkWriter.setBufferedBatchMap(state);
-            dorisSinkWriter.flush(null, true);
-        }
-        checkpointedState.clear();
-    }
+    checkpointedState.clear();
+  }
 }

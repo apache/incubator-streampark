@@ -16,16 +16,17 @@
  */
 package org.apache.streampark.common.fs
 
+import java.io.{File, FileInputStream}
+import java.nio.file.{Files, Paths}
 
-import org.apache.streampark.common.fs.LfsOperatorTest.withTempDir
+import scala.language.implicitConversions
+
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.junit.jupiter.api.Assertions._
 import org.junit.jupiter.api.Test
 
-import java.io.{File, FileInputStream}
-import java.nio.file.{Files, Paths}
-import scala.language.implicitConversions
+import org.apache.streampark.common.fs.LfsOperatorTest.withTempDir
 
 object LfsOperatorTest {
 
@@ -33,8 +34,7 @@ object LfsOperatorTest {
     val tempDirPath = Files.createTempDirectory("LfsOperatorTest-output")
     try {
       block(tempDirPath.toAbsolutePath.toString)
-    }
-    finally {
+    } finally {
       FileUtils.deleteQuietly(tempDirPath.toFile)
     }
   }
@@ -56,7 +56,6 @@ class LfsOperatorTest {
     }
   }
 
-
   @Test
   def testExists(): Unit = withTempDir { outputDir =>
     assertDoesNotThrow {
@@ -72,7 +71,6 @@ class LfsOperatorTest {
     assertFalse(LfsOperator.exists(""))
     assertFalse(LfsOperator.exists(s"$outputDir/233"))
   }
-
 
   @Test
   def testMkCleanDirs(): Unit = withTempDir { outputDir =>
@@ -97,7 +95,6 @@ class LfsOperatorTest {
     }
   }
 
-
   @Test
   def listDir(): Unit = withTempDir { outputDir =>
     // list directory
@@ -120,7 +117,6 @@ class LfsOperatorTest {
     assertTrue(LfsOperator.listDir(s"$outputDir/114514").isEmpty)
   }
 
-
   @Test
   def testDelete(): Unit = withTempDir { outputDir =>
     // delete directory
@@ -142,9 +138,9 @@ class LfsOperatorTest {
     assertDoesNotThrow(LfsOperator.delete(s"$outputDir/114514"))
   }
 
-  //noinspection TypeAnnotation
+  // noinspection TypeAnnotation
   val md5Hex = (f: File) => DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(f)))
-  //noinspection TypeAnnotation
+  // noinspection TypeAnnotation
   val sameFilesHex = (f1: Seq[File], f2: Seq[File]) =>
     f1.map(_.getName).sorted == f2.map(_.getName).sorted && f1.map(md5Hex).sorted == f2.map(md5Hex).sorted
 
@@ -213,7 +209,6 @@ class LfsOperatorTest {
 
   }
 
-
   @Test
   def testCopyDir(): Unit = withTempDir { outputDir =>
     // copy dir
@@ -238,8 +233,7 @@ class LfsOperatorTest {
     // copy file
     assertThrows(
       classOf[IllegalArgumentException],
-      LfsOperator.copyDir(genRandomFile(outputDir).getAbsolutePath, s"$outputDir/out-3")
-    )
+      LfsOperator.copyDir(genRandomFile(outputDir).getAbsolutePath, s"$outputDir/out-3"))
 
     // delete or not delete the original dir
     assertDoesNotThrow {
@@ -253,7 +247,6 @@ class LfsOperatorTest {
     }
 
   }
-
 
   @Test
   def testMove(): Unit = withTempDir { outputDir =>
@@ -309,7 +302,6 @@ class LfsOperatorTest {
     }
   }
 
-
   @Test
   def testfileMd5(): Unit = {
     assertThrows(classOf[IllegalArgumentException], LfsOperator.fileMd5(null))
@@ -317,7 +309,4 @@ class LfsOperatorTest {
     assertThrows(classOf[IllegalArgumentException], LfsOperator.fileMd5("ttt/144514.dat"))
   }
 
-
 }
-
-

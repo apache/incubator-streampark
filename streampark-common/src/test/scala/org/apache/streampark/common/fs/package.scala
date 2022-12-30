@@ -16,19 +16,19 @@
  */
 package org.apache.streampark.common
 
-import org.apache.commons.io.FileUtils
-import org.junit.jupiter.api.function.Executable
-
 import java.io.File
+
 import scala.language.implicitConversions
 import scala.util.Random
+
+import org.apache.commons.io.FileUtils
+import org.junit.jupiter.api.function.Executable
 
 package object fs {
 
   implicit def funcToExecutable[R](func: => R): Executable = new Executable() {
     override def execute(): Unit = func
   }
-
 
   /**
    * generate a random binary file

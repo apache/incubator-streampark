@@ -24,11 +24,11 @@ import java.io.Serializable;
 @Data
 public class RestRequest implements Serializable {
 
-    private static final long serialVersionUID = -4869594085374385813L;
+  private static final long serialVersionUID = -4869594085374385813L;
 
-    private int pageSize = 10;
-    private int pageNum = 1;
+  private int pageSize = 10;
+  private int pageNum = 1;
 
-    private String sortField;
-    private String sortOrder;
+  private String sortField;
+  private String sortOrder;
 }

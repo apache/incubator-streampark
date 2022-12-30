@@ -25,98 +25,99 @@ import java.util.List;
 
 public final class VueRouterUtils {
 
-    private VueRouterUtils() {
+  private VueRouterUtils() {}
+
+  private static final String TOP_NODE_ID = "0";
+
+  /**
+   * build menu or department tree
+   *
+   * @param nodes nodes
+   * @param <T> <T>
+   * @return <T> Tree<T>
+   */
+  public static <T> RouterTree<T> buildRouterTree(List<RouterTree<T>> nodes) {
+    if (nodes == null) {
+      return null;
     }
-
-    private static final String TOP_NODE_ID = "0";
-
-    /**
-     * build menu or department tree
-     *
-     * @param nodes nodes
-     * @param <T>   <T>
-     * @return <T> Tree<T>
-     */
-    public static <T> RouterTree<T> buildRouterTree(List<RouterTree<T>> nodes) {
-        if (nodes == null) {
-            return null;
-        }
-        List<RouterTree<T>> topNodes = new ArrayList<>();
-        nodes.forEach(node -> {
-            String pid = node.getParentId();
-            if (pid == null || TOP_NODE_ID.equals(pid)) {
-                topNodes.add(node);
-                return;
+    List<RouterTree<T>> topNodes = new ArrayList<>();
+    nodes.forEach(
+        node -> {
+          String pid = node.getParentId();
+          if (pid == null || TOP_NODE_ID.equals(pid)) {
+            topNodes.add(node);
+            return;
+          }
+          for (RouterTree<T> n : nodes) {
+            String id = n.getId();
+            if (id != null && id.equals(pid)) {
+              if (n.getChildren() == null) {
+                n.initChildren();
+              }
+              n.getChildren().add(node);
+              node.setHasParent(true);
+              n.setHasChildren(true);
+              n.setHasParent(true);
+              return;
             }
-            for (RouterTree<T> n : nodes) {
-                String id = n.getId();
-                if (id != null && id.equals(pid)) {
-                    if (n.getChildren() == null) {
-                        n.initChildren();
-                    }
-                    n.getChildren().add(node);
-                    node.setHasParent(true);
-                    n.setHasChildren(true);
-                    n.setHasParent(true);
-                    return;
-                }
-            }
-            if (topNodes.isEmpty()) {
-                topNodes.add(node);
-            }
+          }
+          if (topNodes.isEmpty()) {
+            topNodes.add(node);
+          }
         });
 
-        RouterTree<T> root = new RouterTree<>();
-        root.setId("0");
-        root.setParentId("");
-        root.setHasParent(false);
-        root.setHasChildren(true);
-        root.setChildren(topNodes);
-        root.setText("root");
-        return root;
-    }
+    RouterTree<T> root = new RouterTree<>();
+    root.setId("0");
+    root.setParentId("");
+    root.setHasParent(false);
+    root.setHasChildren(true);
+    root.setChildren(topNodes);
+    root.setText("root");
+    return root;
+  }
 
-    /**
-     * build vue router
-     *
-     * @param routes routes
-     * @param <T>    T
-     * @return ArrayList<VueRouter < T>>
-     */
-    public static <T> ArrayList<VueRouter<T>> buildVueRouter(List<VueRouter<T>> routes) {
-        if (routes == null) {
-            return null;
-        }
-        List<VueRouter<T>> topRoutes = new ArrayList<>();
-        routes.forEach(route -> {
-            String parentId = route.getParentId();
-            if (parentId == null || TOP_NODE_ID.equals(parentId)) {
-                topRoutes.add(route);
-                return;
+  /**
+   * build vue router
+   *
+   * @param routes routes
+   * @param <T> T
+   * @return ArrayList<VueRouter < T>>
+   */
+  public static <T> ArrayList<VueRouter<T>> buildVueRouter(List<VueRouter<T>> routes) {
+    if (routes == null) {
+      return null;
+    }
+    List<VueRouter<T>> topRoutes = new ArrayList<>();
+    routes.forEach(
+        route -> {
+          String parentId = route.getParentId();
+          if (parentId == null || TOP_NODE_ID.equals(parentId)) {
+            topRoutes.add(route);
+            return;
+          }
+          for (VueRouter<T> parent : routes) {
+            String id = parent.getId();
+            if (parentId.equals(id)) {
+              if (parent.getChildren() == null) {
+                parent.initChildren();
+              }
+              parent.getChildren().add(route);
+              parent.setHasChildren(true);
+              route.setHasParent(true);
+              parent.setHasParent(true);
+              return;
             }
-            for (VueRouter<T> parent : routes) {
-                String id = parent.getId();
-                if (parentId.equals(id)) {
-                    if (parent.getChildren() == null) {
-                        parent.initChildren();
-                    }
-                    parent.getChildren().add(route);
-                    parent.setHasChildren(true);
-                    route.setHasParent(true);
-                    parent.setHasParent(true);
-                    return;
-                }
-            }
+          }
         });
 
-        ArrayList<VueRouter<T>> list = new ArrayList<>();
-        VueRouter<T> root = new VueRouter<>();
-        root.setName("Root");
-        root.setComponent("BasicView");
-        root.setPath("/");
-        root.setChildren(topRoutes);
-        list.add(root);
+    ArrayList<VueRouter<T>> list = new ArrayList<>();
+    VueRouter<T> root = new VueRouter<>();
+    root.setName("Root");
+    root.setComponent("BasicView");
+    root.setPath("/");
+    root.setChildren(topRoutes);
+    list.add(root);
 
-        return list;
-    }
+    return list;
+  }
 }

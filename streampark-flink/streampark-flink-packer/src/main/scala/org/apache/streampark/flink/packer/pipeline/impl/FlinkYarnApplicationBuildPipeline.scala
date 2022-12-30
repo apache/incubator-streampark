@@ -17,19 +17,19 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
+import java.io.{File, FileInputStream, IOException}
+
+import org.apache.commons.codec.digest.DigestUtils
+
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.fs.{FsOperator, HdfsOperator, LfsOperator}
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
-import org.apache.commons.codec.digest.DigestUtils
-
-import java.io.{File, FileInputStream, IOException}
 
 /**
  * Building pipeline for flink yarn application mode
- *
  */
 class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildRequest) extends BuildPipeline {
 
@@ -45,7 +45,8 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
    * the effective steps progress should be implemented in
    * multiple BuildPipeline.execStep() functions.
    */
-  @throws[Throwable] override protected def buildProcess(): SimpleBuildResponse = {
+  @throws[Throwable]
+  override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
       request.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
@@ -76,7 +77,8 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
     SimpleBuildResponse()
   }
 
-  @throws[IOException] private[this] def uploadToHdfs(fsOperator: FsOperator, origin: String, target: String): Unit = {
+  @throws[IOException]
+  private[this] def uploadToHdfs(fsOperator: FsOperator, origin: String, target: String): Unit = {
     val originFile = new File(origin)
     if (!fsOperator.exists(target)) {
       fsOperator.mkdirs(target)

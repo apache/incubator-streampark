@@ -26,9 +26,8 @@ import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.types.Row
 
-class StreamTableContext(override val parameter: ParameterTool,
-                         private val streamEnv: StreamExecutionEnvironment,
-                         private val tableEnv: StreamTableEnvironment) extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
+class StreamTableContext(override val parameter: ParameterTool, private val streamEnv: StreamExecutionEnvironment, private val tableEnv: StreamTableEnvironment)
+    extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
 
   def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
 
@@ -40,7 +39,8 @@ class StreamTableContext(override val parameter: ParameterTool,
 
   override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema): Table = tableEnv.fromChangelogStream(dataStream, schema)
 
-  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema, changelogMode: ChangelogMode): Table = tableEnv.fromChangelogStream(dataStream, schema, changelogMode)
+  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema, changelogMode: ChangelogMode): Table =
+    tableEnv.fromChangelogStream(dataStream, schema, changelogMode)
 
   override def createTemporaryView[T](path: String, dataStream: DataStream[T], schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
 

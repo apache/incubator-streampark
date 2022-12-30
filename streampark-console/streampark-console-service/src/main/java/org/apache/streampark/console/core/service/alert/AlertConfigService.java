@@ -26,9 +26,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface AlertConfigService extends IService<AlertConfig> {
-    IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request);
+  IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request);
 
-    boolean exist(AlertConfig alertConfig);
+  boolean exist(AlertConfig alertConfig);
 
-    boolean deleteById(Long id) throws AlertException;
+  boolean deleteById(Long id) throws AlertException;
 }

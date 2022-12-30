@@ -16,12 +16,13 @@
  */
 package org.apache.streampark.common.util
 
+import java.text.SimpleDateFormat
+
+import scala.reflect.ClassTag
+
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-
-import java.text.SimpleDateFormat
-import scala.reflect.ClassTag
 
 object JsonUtils extends Serializable {
 

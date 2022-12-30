@@ -22,56 +22,40 @@ import java.util.Arrays;
 
 public enum LaunchState implements Serializable {
 
-    /**
-     * launch failed
-     */
-    FAILED(-1),
-    /**
-     * launch done
-     */
-    DONE(0),
+  /** launch failed */
+  FAILED(-1),
+  /** launch done */
+  DONE(0),
 
-    /**
-     * need relaunch after modify task
-     */
-    NEED_LAUNCH(1),
+  /** need relaunch after modify task */
+  NEED_LAUNCH(1),
 
-    /**
-     * launching
-     */
-    LAUNCHING(2),
+  /** launching */
+  LAUNCHING(2),
 
-    /**
-     * launch complete, need restart
-     */
-    NEED_RESTART(3),
+  /** launch complete, need restart */
+  NEED_RESTART(3),
 
-    /**
-     * need rollback
-     */
-    NEED_ROLLBACK(4),
+  /** need rollback */
+  NEED_ROLLBACK(4),
 
-    /**
-     * project has changed, need to check the jar whether to be re-selected
-     */
-    NEED_CHECK(5),
+  /** project has changed, need to check the jar whether to be re-selected */
+  NEED_CHECK(5),
 
-    /**
-     * revoked
-     */
-    REVOKED(10);
+  /** revoked */
+  REVOKED(10);
 
-    private final int value;
+  private final int value;
 
-    LaunchState(int value) {
-        this.value = value;
-    }
+  LaunchState(int value) {
+    this.value = value;
+  }
 
-    public int get() {
-        return this.value;
-    }
+  public int get() {
+    return this.value;
+  }
 
-    public static LaunchState of(Integer state) {
-        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
-    }
+  public static LaunchState of(Integer state) {
+    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+  }
 }

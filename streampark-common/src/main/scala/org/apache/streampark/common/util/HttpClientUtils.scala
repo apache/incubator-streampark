@@ -16,6 +16,12 @@
  */
 package org.apache.streampark.common.util
 
+import java.nio.charset.{Charset, StandardCharsets}
+import java.security.Principal
+import java.util
+
+import scala.collection.JavaConversions._
+
 import org.apache.http.NameValuePair
 import org.apache.http.auth.{AuthSchemeProvider, AuthScope, Credentials}
 import org.apache.http.client.config.{AuthSchemes, RequestConfig}
@@ -29,11 +35,6 @@ import org.apache.http.impl.client.{BasicCredentialsProvider, CloseableHttpClien
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
-
-import java.nio.charset.{Charset, StandardCharsets}
-import java.security.Principal
-import java.util
-import scala.collection.JavaConversions._
 
 object HttpClientUtils {
 
@@ -109,16 +110,11 @@ object HttpClientUtils {
 
   def httpPatchRequest(url: String, params: String): String = httpRequest(new HttpPatch(url), params)
 
-
-  def httpPostRequest(url: String,
-                      params: util.Map[String, AnyRef],
-                      headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
+  def httpPostRequest(url: String, params: util.Map[String, AnyRef], headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
     httpRequest(new HttpPost(url), headers, params)
   }
 
-  def httpPatchRequest(url: String,
-                       params: util.Map[String, AnyRef],
-                       headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
+  def httpPatchRequest(url: String, params: util.Map[String, AnyRef], headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
     httpRequest(new HttpPatch(url), headers, params)
   }
 
@@ -164,8 +160,7 @@ object HttpClientUtils {
 
     getHttpResult(
       getHttpGet(url, null, config),
-      getHttpAuthClient
-    )
+      getHttpAuthClient)
   }
 
   /**
@@ -184,6 +179,5 @@ object HttpClientUtils {
       case e: Exception => throw e
     }
   }
-
 
 }

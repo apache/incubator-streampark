@@ -18,11 +18,11 @@
 package org.apache.streampark.spark.core.util
 
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.{SQLContext, SparkSession}
+import org.apache.spark.sql.{SparkSession, SQLContext}
 
 /**
-  * SQLContext singleton
-  */
+ * SQLContext singleton
+ */
 object SQLContextUtil {
 
   @transient private var instance: SQLContext = _
@@ -36,8 +36,8 @@ object SQLContextUtil {
   }
 
   /**
-    * Get HiveContext
-    */
+   * Get HiveContext
+   */
   def getHiveContext(@transient sparkContext: SparkContext): SQLContext = {
     if (hiveContext == null) {
       hiveContext = SparkSession.builder().config(sparkContext.getConf).enableHiveSupport().getOrCreate().sqlContext

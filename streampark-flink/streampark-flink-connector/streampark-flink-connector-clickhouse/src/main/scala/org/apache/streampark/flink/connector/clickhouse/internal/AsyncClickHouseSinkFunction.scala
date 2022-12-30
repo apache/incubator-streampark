@@ -17,6 +17,13 @@
 
 package org.apache.streampark.flink.connector.clickhouse.internal
 
+import java.util.Properties
+
+import scala.util.{Failure, Try}
+
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
+
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.Logger
@@ -25,11 +32,6 @@ import org.apache.streampark.flink.connector.clickhouse.internal
 import org.apache.streampark.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
 import org.apache.streampark.flink.connector.failover.{FailoverChecker, SinkBuffer}
 import org.apache.streampark.flink.connector.function.TransformFunction
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
-
-import java.util.Properties
-import scala.util.{Failure, Try}
 
 class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, properties: Properties) extends RichSinkFunction[T] with Logger {
 
@@ -41,14 +43,13 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
   private[this] var scalaSqlFunc: T => String = _
   private[this] var javaSqlFunc: TransformFunction[T, String] = _
 
-
-  //for Scala
+  // for Scala
   def this(properties: Properties, scalaSqlFunc: T => String) = {
     this(ApiType.scala, properties)
     this.scalaSqlFunc = scalaSqlFunc
   }
 
-  //for JAVA
+  // for JAVA
   def this(properties: Properties, javaSqlFunc: TransformFunction[T, String]) = {
     this(ApiType.java, properties)
     this.javaSqlFunc = javaSqlFunc
@@ -80,9 +81,9 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
     val sql = (javaSqlFunc, scalaSqlFunc) match {
       case (null, null) => convert[T](value)
       case _ => apiType match {
-        case ApiType.java => javaSqlFunc.transform(value)
-        case ApiType.scala => scalaSqlFunc(value)
-      }
+          case ApiType.java => javaSqlFunc.transform(value)
+          case ApiType.scala => scalaSqlFunc(value)
+        }
     }
 
     Try(sinkBuffer.put(sql)) match {
@@ -92,7 +93,6 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
       case _ =>
     }
   }
-
 
   override def close(): Unit = {
     if (!isClosed) {

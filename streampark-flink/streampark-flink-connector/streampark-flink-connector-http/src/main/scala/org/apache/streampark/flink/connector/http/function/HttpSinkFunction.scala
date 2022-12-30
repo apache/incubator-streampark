@@ -17,22 +17,21 @@
 
 package org.apache.streampark.flink.connector.http.function
 
+import java.util.Properties
+import java.util.concurrent.locks.ReentrantLock
+
+import scala.collection.mutable
+
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
+
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.connector.conf.ThresholdConf
 import org.apache.streampark.flink.connector.failover.{FailoverChecker, SinkBuffer}
 import org.apache.streampark.flink.connector.http.conf.HttpConfigOption
 import org.apache.streampark.flink.connector.http.internal.HttpSinkWriter
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 
-import java.util.Properties
-import java.util.concurrent.locks.ReentrantLock
-import scala.collection.mutable
-
-
-class HttpSinkFunction(properties: mutable.Map[String, String],
-                       header: Map[String, String],
-                       method: String) extends RichSinkFunction[String] with Logger {
+class HttpSinkFunction(properties: mutable.Map[String, String], header: Map[String, String], method: String) extends RichSinkFunction[String] with Logger {
 
   private[this] object Lock {
     @volatile var initialized = false

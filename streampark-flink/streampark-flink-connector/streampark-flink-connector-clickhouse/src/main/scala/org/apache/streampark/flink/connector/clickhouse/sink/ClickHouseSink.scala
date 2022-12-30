@@ -17,22 +17,23 @@
 
 package org.apache.streampark.flink.connector.clickhouse.sink
 
+import java.util.Properties
+
+import scala.annotation.meta.param
+
+import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream}
+import org.apache.flink.streaming.api.datastream.DataStreamSink
+import org.apache.flink.streaming.api.scala.DataStream
+
 import org.apache.streampark.common.util._
 import org.apache.streampark.flink.connector.clickhouse.internal.{AsyncClickHouseSinkFunction, ClickHouseSinkFunction}
 import org.apache.streampark.flink.connector.function.TransformFunction
 import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
-import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream}
-
-import java.util.Properties
-import scala.annotation.meta.param
 
 object ClickHouseSink {
 
   /**
-   *
    * @param property
    * @param parallelism
    * @param name
@@ -41,19 +42,21 @@ object ClickHouseSink {
    * @return
    */
 
-  def apply(@(transient@param)
-            property: Properties = new Properties(),
-            parallelism: Int = 0,
-            name: String = null,
-            uid: String = null)(implicit ctx: StreamingContext): ClickHouseSink = new ClickHouseSink(ctx, property, parallelism, name, uid)
+  def apply(
+      @(transient @param)
+      property: Properties = new Properties(),
+      parallelism: Int = 0,
+      name: String = null,
+      uid: String = null)(implicit ctx: StreamingContext): ClickHouseSink = new ClickHouseSink(ctx, property, parallelism, name, uid)
 
 }
 
-class ClickHouseSink(@(transient@param) ctx: StreamingContext,
-                     property: Properties = new Properties(),
-                     parallelism: Int = 0,
-                     name: String = null,
-                     uid: String = null)(implicit alias: String = "") extends Sink with Logger {
+class ClickHouseSink(
+    @(transient @param) ctx: StreamingContext,
+    property: Properties = new Properties(),
+    parallelism: Int = 0,
+    name: String = null,
+    uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
   val prop = ctx.parameter.getProperties
 

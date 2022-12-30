@@ -19,15 +19,11 @@ package org.apache.streampark.console.core.bean;
 
 import lombok.Data;
 
-/**
- * The robot alarm response of DingTalk And WeCom
- *
- */
+/** The robot alarm response of DingTalk And WeCom */
 @Data
 public class RobotResponse {
 
-    private Integer errcode;
+  private Integer errcode;
 
-    private String errmsg;
-
+  private String errmsg;
 }

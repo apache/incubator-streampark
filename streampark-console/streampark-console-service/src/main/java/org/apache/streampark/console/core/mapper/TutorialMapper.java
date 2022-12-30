@@ -21,6 +21,4 @@ import org.apache.streampark.console.core.entity.Tutorial;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface TutorialMapper extends BaseMapper<Tutorial> {
-
-}
+public interface TutorialMapper extends BaseMapper<Tutorial> {}

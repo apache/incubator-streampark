@@ -23,7 +23,6 @@ import org.apache.streampark.flink.packer.pipeline._
 
 /**
  * Building pipeline for flink standalone session mode
- *
  */
 class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends BuildPipeline {
 
@@ -34,7 +33,8 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
   /**
    * The construction logic needs to be implemented by subclasses
    */
-  @throws[Throwable] override protected def buildProcess(): ShadedBuildResponse = {
+  @throws[Throwable]
+  override protected def buildProcess(): ShadedBuildResponse = {
     // create workspace.
     // the sub workspace path like: APP_WORKSPACE/jobName
     if (request.skipBuild) {
@@ -61,5 +61,3 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
 object FlinkRemoteBuildPipeline {
   def of(request: FlinkRemotePerJobBuildRequest): FlinkRemoteBuildPipeline = new FlinkRemoteBuildPipeline(request)
 }
-
-

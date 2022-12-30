@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.packer.maven
 
 import java.util.regex.Pattern
+
 import org.eclipse.aether.artifact.{Artifact => AetherArtifact}
 
 case class Artifact(groupId: String, artifactId: String, version: String) {
@@ -50,7 +51,8 @@ object Artifact {
         val v = m.group(3)
         Artifact(g, a, v)
       case _ =>
-        throw new IllegalArgumentException(s"Bad artifact coordinates $coords, expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>")
+        throw new IllegalArgumentException(
+          s"Bad artifact coordinates $coords, expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>")
     }
   }
 }

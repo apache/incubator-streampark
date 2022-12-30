@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.connector.elasticsearch6.conf
 
-import org.apache.http.HttpHost
-
 import java.util.Properties
+
+import org.apache.http.HttpHost
 
 class ES6Config(parameters: Properties) extends Serializable {
 
@@ -58,6 +58,5 @@ class ES6Config(parameters: Properties) extends Serializable {
   val contentCompressionEnabled: Boolean = sinkOption.contentCompressionEnabled.get()
 
   val normalizeUri: Boolean = sinkOption.normalizeUri.get()
-
 
 }

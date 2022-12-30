@@ -17,18 +17,20 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
-import org.apache.streampark.common.util.Logger
+import java.{util => ju}
+import java.lang.reflect.Constructor
+
+import scala.reflect.ClassTag
+
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka010._
-import org.apache.spark.{SparkConf, SparkContext}
 
-import java.lang.reflect.Constructor
-import java.{util => ju}
-import scala.reflect.ClassTag
+import org.apache.streampark.common.util.Logger
 
 class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
@@ -61,11 +63,10 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
   private var canCommitOffsets: CanCommitOffsets = _
 
-  def createDirectStream[K: ClassTag, V: ClassTag](ssc: StreamingContext,
-                                                   kafkaParams: Map[String, Object],
-                                                   topics: Set[String]
-                                                  ): InputDStream[ConsumerRecord[K, V]] = {
-
+  def createDirectStream[K: ClassTag, V: ClassTag](
+      ssc: StreamingContext,
+      kafkaParams: Map[String, Object],
+      topics: Set[String]): InputDStream[ConsumerRecord[K, V]] = {
 
     var consumerOffsets = Map.empty[TopicPartition, Long]
 
@@ -79,27 +80,25 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
     if (consumerOffsets.nonEmpty) {
       logInfo(s"read topics ==[$topics]== from offsets ==[$consumerOffsets]==")
-      val stream = KafkaUtils.createDirectStream[K, V](ssc,
+      val stream = KafkaUtils.createDirectStream[K, V](
+        ssc,
         LocationStrategies.PreferConsistent,
-        ConsumerStrategies.Assign[K, V](consumerOffsets.keys, kafkaParams, consumerOffsets)
-      )
+        ConsumerStrategies.Assign[K, V](consumerOffsets.keys, kafkaParams, consumerOffsets))
       canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
       stream
     } else {
-      val stream = KafkaUtils.createDirectStream[K, V](ssc,
-        LocationStrategies.PreferConsistent,
-        ConsumerStrategies.Subscribe[K, V](topics, kafkaParams)
-      )
+      val stream = KafkaUtils.createDirectStream[K, V](ssc, LocationStrategies.PreferConsistent, ConsumerStrategies.Subscribe[K, V](topics, kafkaParams))
       canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
       stream
     }
 
   }
 
-  def createRDD[K: ClassTag, V: ClassTag](sc: SparkContext,
-                                          kafkaParams: ju.Map[String, Object],
-                                          offsetRanges: Array[OffsetRange],
-                                          locationStrategy: LocationStrategy): RDD[ConsumerRecord[K, V]] = {
+  def createRDD[K: ClassTag, V: ClassTag](
+      sc: SparkContext,
+      kafkaParams: ju.Map[String, Object],
+      offsetRanges: Array[OffsetRange],
+      locationStrategy: LocationStrategy): RDD[ConsumerRecord[K, V]] = {
     KafkaUtils.createRDD(sc, kafkaParams, offsetRanges, locationStrategy)
   }
 
@@ -113,4 +112,3 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
   }
 
 }
-

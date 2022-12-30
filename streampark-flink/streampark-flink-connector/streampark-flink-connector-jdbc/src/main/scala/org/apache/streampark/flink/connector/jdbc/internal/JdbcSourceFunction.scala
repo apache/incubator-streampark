@@ -17,10 +17,14 @@
 
 package org.apache.streampark.flink.connector.jdbc.internal
 
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{FlinkUtils, JdbcUtils, Logger}
-import org.apache.streampark.flink.connector.function.{RunningFunction, SQLQueryFunction, SQLResultFunction}
+import java.lang
+import java.util.Properties
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.collection.Map
+import scala.util.{Success, Try}
+
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
@@ -28,17 +32,15 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 
-import java.lang
-import java.util.Properties
-import scala.collection.Map
-import scala.util.{Success, Try}
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{FlinkUtils, JdbcUtils, Logger}
+import org.apache.streampark.flink.connector.function.{RunningFunction, SQLQueryFunction, SQLResultFunction}
 
 class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSourceFunction[R]
-  with CheckpointedFunction
-  with CheckpointListener
-  with Logger {
+    with CheckpointedFunction
+    with CheckpointListener
+    with Logger {
 
   @volatile private[this] var running = true
   private[this] var scalaRunningFunc: Unit => Boolean = (_) => true
@@ -53,10 +55,7 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   private[this] var last: R = _
 
   // for Scala
-  def this(jdbc: Properties,
-           sqlFunc: R => String,
-           resultFunc: Iterable[Map[String, _]] => Iterable[R],
-           runningFunc: Unit => Boolean) = {
+  def this(jdbc: Properties, sqlFunc: R => String, resultFunc: Iterable[Map[String, _]] => Iterable[R], runningFunc: Unit => Boolean) = {
 
     this(ApiType.scala, jdbc)
     this.scalaSqlFunc = sqlFunc
@@ -65,15 +64,13 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   }
 
   // for JAVA
-  def this(jdbc: Properties,
-           javaSqlFunc: SQLQueryFunction[R],
-           javaResultFunc: SQLResultFunction[R],
-           runningFunc: RunningFunction) {
+  def this(jdbc: Properties, javaSqlFunc: SQLQueryFunction[R], javaResultFunc: SQLResultFunction[R], runningFunc: RunningFunction) {
 
     this(ApiType.java, jdbc)
     this.javaSqlFunc = javaSqlFunc
     this.javaResultFunc = javaResultFunc
-    this.javaRunningFunc = if (runningFunc != null) runningFunc else new RunningFunction {
+    this.javaRunningFunc = if (runningFunc != null) runningFunc
+    else new RunningFunction {
       override def running(): lang.Boolean = true
     }
   }

@@ -25,10 +25,8 @@ package org.apache.streampark.flink.packer.docker
  * @param flinkMainJarPath   Path of flink job main jar which would copy to $FLINK_HOME/usrlib/
  * @param flinkExtraLibPaths Path of additional flink lib path which would copy to $FLINK_HOME/lib/
  */
-case class FlinkDockerfileTemplate(workspacePath: String,
-                                   flinkBaseImage: String,
-                                   flinkMainJarPath: String,
-                                   flinkExtraLibPaths: Set[String]) extends FlinkDockerfileTemplateTrait {
+case class FlinkDockerfileTemplate(workspacePath: String, flinkBaseImage: String, flinkMainJarPath: String, flinkExtraLibPaths: Set[String])
+    extends FlinkDockerfileTemplateTrait {
 
   /**
    * offer content of DockerFile

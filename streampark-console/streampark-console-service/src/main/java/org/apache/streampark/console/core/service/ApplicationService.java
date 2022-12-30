@@ -33,86 +33,84 @@ import java.util.Map;
 
 public interface ApplicationService extends IService<Application> {
 
-    IPage<Application> page(Application app, RestRequest request);
+  IPage<Application> page(Application app, RestRequest request);
 
-    boolean existsByTeamId(Long teamId);
+  boolean existsByTeamId(Long teamId);
 
-    boolean create(Application app) throws IOException;
+  boolean create(Application app) throws IOException;
 
-    Long copy(Application app) throws IOException;
+  Long copy(Application app) throws IOException;
 
-    boolean update(Application app);
+  boolean update(Application app);
 
-    void starting(Application app);
+  void starting(Application app);
 
-    void start(Application app, boolean auto) throws Exception;
+  void start(Application app, boolean auto) throws Exception;
 
-    void restart(Application application) throws Exception;
+  void restart(Application application) throws Exception;
 
-    String getYarnName(Application app);
+  String getYarnName(Application app);
 
-    AppExistsState checkExists(Application app);
+  AppExistsState checkExists(Application app);
 
-    String checkSavepointPath(Application app) throws Exception;
+  String checkSavepointPath(Application app) throws Exception;
 
-    void cancel(Application app) throws Exception;
+  void cancel(Application app) throws Exception;
 
-    void updateTracking(Application application);
+  void updateTracking(Application application);
 
-    void clean(Application app);
+  void clean(Application app);
 
-    String readConf(Application app) throws IOException;
+  String readConf(Application app) throws IOException;
 
-    Application getApp(Application app);
+  Application getApp(Application app);
 
-    String getMain(Application application);
+  String getMain(Application application);
 
-    boolean mapping(Application app);
+  boolean mapping(Application app);
 
-    Map<String, Serializable> dashboard(Long teamId);
+  Map<String, Serializable> dashboard(Long teamId);
 
-    void tailMvnDownloading(Long id);
+  void tailMvnDownloading(Long id);
 
-    String upload(MultipartFile file) throws ApplicationException;
+  String upload(MultipartFile file) throws ApplicationException;
 
-    /**
-     * set the latest to Effective, it will really become the current effective
-     */
-    void toEffective(Application application);
+  /** set the latest to Effective, it will really become the current effective */
+  void toEffective(Application application);
 
-    void revoke(Application app) throws ApplicationException;
+  void revoke(Application app) throws ApplicationException;
 
-    Boolean delete(Application app);
+  Boolean delete(Application app);
 
-    boolean checkEnv(Application app) throws ApplicationException;
+  boolean checkEnv(Application app) throws ApplicationException;
 
-    boolean checkAlter(Application application);
+  boolean checkAlter(Application application);
 
-    void updateLaunch(Application application);
+  void updateLaunch(Application application);
 
-    List<Application> getByProjectId(Long id);
+  List<Application> getByProjectId(Long id);
 
-    List<Application> getByTeamId(Long teamId);
+  List<Application> getByTeamId(Long teamId);
 
-    boolean checkBuildAndUpdate(Application app);
+  boolean checkBuildAndUpdate(Application app);
 
-    void forcedStop(Application app);
+  void forcedStop(Application app);
 
-    boolean existsRunningJobByClusterId(Long clusterId);
+  boolean existsRunningJobByClusterId(Long clusterId);
 
-    boolean existsJobByClusterId(Long id);
+  boolean existsJobByClusterId(Long id);
 
-    List<String> getRecentK8sNamespace();
+  List<String> getRecentK8sNamespace();
 
-    List<String> getRecentK8sClusterId(Integer executionMode);
+  List<String> getRecentK8sClusterId(Integer executionMode);
 
-    List<String> getRecentFlinkBaseImage();
+  List<String> getRecentFlinkBaseImage();
 
-    List<String> getRecentK8sPodTemplate();
+  List<String> getRecentK8sPodTemplate();
 
-    List<String> getRecentK8sJmPodTemplate();
+  List<String> getRecentK8sJmPodTemplate();
 
-    List<String> getRecentK8sTmPodTemplate();
+  List<String> getRecentK8sTmPodTemplate();
 
-    List<String> historyUploadJars();
+  List<String> historyUploadJars();
 }

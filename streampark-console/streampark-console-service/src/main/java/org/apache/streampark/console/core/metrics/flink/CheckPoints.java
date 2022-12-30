@@ -29,59 +29,58 @@ import java.util.List;
 @Data
 public class CheckPoints implements Serializable {
 
-    private List<CheckPoint> history;
+  private List<CheckPoint> history;
 
-    private Latest latest;
+  private Latest latest;
 
-    @Data
-    public static class CheckPoint implements Serializable {
-        private Long id;
-        private String status;
+  @Data
+  public static class CheckPoint implements Serializable {
+    private Long id;
+    private String status;
 
-        @JsonProperty("external_path")
-        private String externalPath;
+    @JsonProperty("external_path")
+    private String externalPath;
 
-        @JsonProperty("is_savepoint")
-        private Boolean isSavepoint;
+    @JsonProperty("is_savepoint")
+    private Boolean isSavepoint;
 
-        @JsonProperty("latest_ack_timestamp")
-        private Long latestAckTimestamp;
+    @JsonProperty("latest_ack_timestamp")
+    private Long latestAckTimestamp;
 
-        @JsonProperty("checkpoint_type")
-        private String checkpointType;
+    @JsonProperty("checkpoint_type")
+    private String checkpointType;
 
-        @JsonProperty("trigger_timestamp")
-        private Long triggerTimestamp;
+    @JsonProperty("trigger_timestamp")
+    private Long triggerTimestamp;
 
-        @JsonProperty("state_size")
-        private Long stateSize;
+    @JsonProperty("state_size")
+    private Long stateSize;
 
-        @JsonProperty("end_to_end_duration")
-        private Long endToEndDuration;
+    @JsonProperty("end_to_end_duration")
+    private Long endToEndDuration;
 
-        private Boolean discarded;
+    private Boolean discarded;
 
-        public CheckPointStatus getCheckPointStatus() {
-            return CheckPointStatus.valueOf(this.status);
-        }
-
-        public CheckPointType getCheckPointType() {
-            if ("CHECKPOINT".equals(this.checkpointType)) {
-                return CheckPointType.CHECKPOINT;
-            } else if ("SAVEPOINT".equals(this.checkpointType)) {
-                return CheckPointType.SAVEPOINT;
-            }
-            return CheckPointType.SYNC_SAVEPOINT;
-        }
-
-        public String getPath() {
-            return this.getExternalPath().replaceFirst("^hdfs:/[^/]", "hdfs:///");
-        }
+    public CheckPointStatus getCheckPointStatus() {
+      return CheckPointStatus.valueOf(this.status);
     }
 
-    @Data
-    public static class Latest implements Serializable {
-        private CheckPoint completed;
+    public CheckPointType getCheckPointType() {
+      if ("CHECKPOINT".equals(this.checkpointType)) {
+        return CheckPointType.CHECKPOINT;
+      } else if ("SAVEPOINT".equals(this.checkpointType)) {
+        return CheckPointType.SAVEPOINT;
+      }
+      return CheckPointType.SYNC_SAVEPOINT;
     }
 
+    public String getPath() {
+      return this.getExternalPath().replaceFirst("^hdfs:/[^/]", "hdfs:///");
+    }
+  }
+
+  @Data
+  public static class Latest implements Serializable {
+    private CheckPoint completed;
+  }
 }

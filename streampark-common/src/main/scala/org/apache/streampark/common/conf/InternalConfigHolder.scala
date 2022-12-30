@@ -17,26 +17,20 @@
 
 package org.apache.streampark.common.conf
 
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
-
-import java.lang.{
-  Boolean => JavaBool,
-  Double => JavaDouble,
-  Float => JavaFloat,
-  Integer => JavaInt,
-  Long => JavaLong
-}
+import java.lang.{Boolean => JavaBool, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong}
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.{Nonnull, Nullable}
+
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
+
+import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 
 /**
  * Thread-safe configuration storage containers.
  * All configurations will be automatically initialized from the spring
  * configuration items of the same name.
- *
  */
 object InternalConfigHolder extends Logger {
 
@@ -176,12 +170,11 @@ object InternalConfigHolder extends Logger {
     logInfo(
       s"""registered configs:
          |ConfigHub collected configs: ${configKeys.size}
-         |  ${configKeys.map(key => s"$key = ${if (key.contains("password")) ConfigConst.DEFAULT_DATAMASK_STRING else get(key)}").mkString("\n  ")}""".stripMargin)
+         |  ${configKeys.map(key => s"$key = ${if (key.contains("password")) ConfigConst.DEFAULT_DATAMASK_STRING else get(key)}").mkString(
+          "\n  ")}""".stripMargin)
   }
 
-
 }
-
 
 object Converter {
 
@@ -203,5 +196,3 @@ object Converter {
     }
   }
 }
-
-

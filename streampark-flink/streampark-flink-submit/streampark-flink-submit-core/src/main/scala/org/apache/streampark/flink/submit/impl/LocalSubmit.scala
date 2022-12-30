@@ -17,16 +17,17 @@
 
 package org.apache.streampark.flink.submit.impl
 
-import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.submit.`trait`.FlinkSubmitTrait
-import org.apache.streampark.flink.submit.bean._
+import java.lang.{Integer => JavaInt}
+
 import org.apache.flink.client.deployment.executors.RemoteExecutor
-import org.apache.flink.client.program.MiniClusterClient.MiniClusterId
 import org.apache.flink.client.program.{ClusterClient, MiniClusterClient, PackagedProgram}
+import org.apache.flink.client.program.MiniClusterClient.MiniClusterId
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 
-import java.lang.{Integer => JavaInt}
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.submit.`trait`.FlinkSubmitTrait
+import org.apache.streampark.flink.submit.bean._
 
 object LocalSubmit extends FlinkSubmitTrait {
 
@@ -75,8 +76,7 @@ object LocalSubmit extends FlinkSubmitTrait {
     val cluster = {
       val numTaskManagers = flinkConfig.getInteger(
         ConfigConstants.LOCAL_NUMBER_TASK_MANAGER,
-        ConfigConstants.DEFAULT_LOCAL_NUMBER_TASK_MANAGER
-      )
+        ConfigConstants.DEFAULT_LOCAL_NUMBER_TASK_MANAGER)
 
       val numSlotsPerTaskManager = flinkConfig.getInteger(TaskManagerOptions.NUM_TASK_SLOTS)
 

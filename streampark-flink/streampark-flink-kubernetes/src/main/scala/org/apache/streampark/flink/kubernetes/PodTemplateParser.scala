@@ -17,16 +17,17 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.commons.collections.CollectionUtils
-import org.apache.commons.lang3.StringUtils
-import org.yaml.snakeyaml.Yaml
-
 import java.util
 import java.util.{List => JList, Map => JMap}
+
 import scala.collection.JavaConverters._
 import scala.language.postfixOps
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
+
+import org.apache.commons.collections.CollectionUtils
+import org.apache.commons.lang3.StringUtils
+import org.yaml.snakeyaml.Yaml
 
 object PodTemplateParser {
 
@@ -59,11 +60,14 @@ object PodTemplateParser {
     val res = new util.LinkedHashMap[String, Any] {
       put("apiVersion", root.getOrDefault("apiVersion", "v1"))
       put("kind", root.getOrDefault("kind", "Pod"))
-      put("metadata", root.getOrDefault("metadata", {
-        new util.LinkedHashMap[String, Any] {
-          put("name", "pod-template")
-        }
-      }))
+      put(
+        "metadata",
+        root.getOrDefault(
+          "metadata", {
+            new util.LinkedHashMap[String, Any] {
+              put("name", "pod-template")
+            }
+          }))
     }
 
     if (root.containsKey("spec")
@@ -116,11 +120,11 @@ object PodTemplateParser {
         .groupBy(_._2)
         .mapValues(_.keys)
         .toList.map(e => {
-        val map = new util.LinkedHashMap[String, Any]()
-        map.put("ip", e._1)
-        map.put("hostnames", new util.ArrayList(e._2.toList.asJava))
-        map
-      }).asJava)
+          val map = new util.LinkedHashMap[String, Any]()
+          map.put("ip", e._1)
+          map.put("hostnames", new util.ArrayList(e._2.toList.asJava))
+          map
+        }).asJava)
 
   /**
    * Extract host-ip map from pod template.
@@ -178,6 +182,5 @@ object PodTemplateParser {
     val yaml = new Yaml
     yaml.dumpAsMap(root)
   }
-
 
 }

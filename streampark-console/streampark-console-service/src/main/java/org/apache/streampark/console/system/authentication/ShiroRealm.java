@@ -37,71 +37,69 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
 
-/**
- * Implementation of ShiroRealm, including two modules: authentication and authorization
- */
+/** Implementation of ShiroRealm, including two modules: authentication and authorization */
 public class ShiroRealm extends AuthorizingRealm {
 
-    @Autowired
-    private UserService userService;
+  @Autowired private UserService userService;
 
-    @Autowired
-    private AccessTokenService accessTokenService;
+  @Autowired private AccessTokenService accessTokenService;
 
-    @Override
-    public boolean supports(AuthenticationToken token) {
-        return token instanceof JWTToken;
+  @Override
+  public boolean supports(AuthenticationToken token) {
+    return token instanceof JWTToken;
+  }
+
+  /**
+   * Authorization module to get user roles and permissions
+   *
+   * @param token token
+   * @return AuthorizationInfo permission information
+   */
+  @Override
+  protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection token) {
+    Long userId = JWTUtil.getUserId(token.toString());
+
+    SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
+
+    // Get user permission set
+    Set<String> permissionSet = userService.getPermissions(userId, null);
+    simpleAuthorizationInfo.setStringPermissions(permissionSet);
+    return simpleAuthorizationInfo;
+  }
+
+  /**
+   * User Authentication
+   *
+   * @param authenticationToken authentication token
+   * @return AuthenticationInfo authentication information
+   * @throws AuthenticationException authentication related exceptions
+   */
+  @Override
+  protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken)
+      throws AuthenticationException {
+    // The token here is passed from the executeLogin method of JWTFilter and has been decrypted
+    String token = (String) authenticationToken.getCredentials();
+    String username = JWTUtil.getUserName(token);
+    if (StringUtils.isBlank(username)) {
+      throw new AuthenticationException("Token verification failed");
+    }
+    // Query user information by username
+    User user = userService.findByName(username);
+
+    if (user == null) {
+      throw new AuthenticationException("ERROR Incorrect username or password!");
     }
 
-    /**
-     * Authorization module to get user roles and permissions
-     *
-     * @param token token
-     * @return AuthorizationInfo permission information
-     */
-    @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection token) {
-        Long userId = JWTUtil.getUserId(token.toString());
-
-        SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
-
-        // Get user permission set
-        Set<String> permissionSet = userService.getPermissions(userId, null);
-        simpleAuthorizationInfo.setStringPermissions(permissionSet);
-        return simpleAuthorizationInfo;
+    if (!JWTUtil.verify(token, username, user.getPassword())) {
+      // Check whether the token belongs to the api and whether the permission is valid
+      String tokenDb = WebUtils.encryptToken(token);
+      boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
+      if (!effective) {
+        throw new AuthenticationException(
+            "Token checked failed: 1-[Browser Request] please check the username or password; 2-[Api Request] please check the user status or accessToken status");
+      }
+      SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
     }
-
-    /**
-     * User Authentication
-     *
-     * @param authenticationToken authentication token
-     * @return AuthenticationInfo authentication information
-     * @throws AuthenticationException authentication related exceptions
-     */
-    @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        // The token here is passed from the executeLogin method of JWTFilter and has been decrypted
-        String token = (String) authenticationToken.getCredentials();
-        String username = JWTUtil.getUserName(token);
-        if (StringUtils.isBlank(username)) {
-            throw new AuthenticationException("Token verification failed");
-        }
-        // Query user information by username
-        User user = userService.findByName(username);
-
-        if (user == null) {
-            throw new AuthenticationException("ERROR Incorrect username or password!");
-        }
-
-        if (!JWTUtil.verify(token, username, user.getPassword())) {
-            // Check whether the token belongs to the api and whether the permission is valid
-            String tokenDb = WebUtils.encryptToken(token);
-            boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
-            if (!effective) {
-                throw new AuthenticationException("Token checked failed: 1-[Browser Request] please check the username or password; 2-[Api Request] please check the user status or accessToken status");
-            }
-            SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
-        }
-        return new SimpleAuthenticationInfo(token, token, "streampark_shiro_realm");
-    }
+    return new SimpleAuthenticationInfo(token, token, "streampark_shiro_realm");
+  }
 }

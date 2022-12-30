@@ -36,86 +36,88 @@ import java.util.Date;
 import java.util.TimeZone;
 
 class AlertServiceTest {
-    AlertTemplate alertTemplate;
-    AlertConfigWithParams params = new AlertConfigWithParams();
-    ObjectMapper mapper = new ObjectMapper();
-    RestTemplate restTemplate = new RestTemplate();
+  AlertTemplate alertTemplate;
+  AlertConfigWithParams params = new AlertConfigWithParams();
+  ObjectMapper mapper = new ObjectMapper();
+  RestTemplate restTemplate = new RestTemplate();
 
-    @BeforeEach
-    void before1() {
-        alertTemplate = new AlertTemplate();
-        alertTemplate.setTitle("Notify: StreamPark alert job for test");
-        alertTemplate.setSubject("StreamPark Alert: test-job OTHER");
-        alertTemplate.setJobName("StreamPark alert job for test");
-        alertTemplate.setLink("http://127.0.0.1:8080");
-        alertTemplate.setStatus("TEST");
-        alertTemplate.setType(1);
-        alertTemplate.setRestart(true);
-        alertTemplate.setTotalRestart(5);
-        alertTemplate.setRestartIndex(2);
-        Date date = new Date();
-        alertTemplate.setStartTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-        alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-        alertTemplate.setDuration("");
-    }
+  @BeforeEach
+  void before1() {
+    alertTemplate = new AlertTemplate();
+    alertTemplate.setTitle("Notify: StreamPark alert job for test");
+    alertTemplate.setSubject("StreamPark Alert: test-job OTHER");
+    alertTemplate.setJobName("StreamPark alert job for test");
+    alertTemplate.setLink("http://127.0.0.1:8080");
+    alertTemplate.setStatus("TEST");
+    alertTemplate.setType(1);
+    alertTemplate.setRestart(true);
+    alertTemplate.setTotalRestart(5);
+    alertTemplate.setRestartIndex(2);
+    Date date = new Date();
+    alertTemplate.setStartTime(
+        DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+    alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+    alertTemplate.setDuration("");
+  }
 
-    void before2() {
-        alertTemplate = new AlertTemplate();
-        alertTemplate.setTitle("Alert: StreamPark alert job for test");
-        alertTemplate.setSubject("StreamPark Alert: test-job OTHER");
-        alertTemplate.setJobName("StreamPark alert job for test");
-        alertTemplate.setLink("http://127.0.0.1:8080");
-        alertTemplate.setStatus("TEST");
-        alertTemplate.setType(2);
-        alertTemplate.setCpMaxFailureInterval(5);
-        alertTemplate.setCpFailureRateInterval("10%");
-        Date date = new Date();
-        alertTemplate.setStartTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-        alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-        alertTemplate.setDuration("");
-    }
+  void before2() {
+    alertTemplate = new AlertTemplate();
+    alertTemplate.setTitle("Alert: StreamPark alert job for test");
+    alertTemplate.setSubject("StreamPark Alert: test-job OTHER");
+    alertTemplate.setJobName("StreamPark alert job for test");
+    alertTemplate.setLink("http://127.0.0.1:8080");
+    alertTemplate.setStatus("TEST");
+    alertTemplate.setType(2);
+    alertTemplate.setCpMaxFailureInterval(5);
+    alertTemplate.setCpFailureRateInterval("10%");
+    Date date = new Date();
+    alertTemplate.setStartTime(
+        DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+    alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+    alertTemplate.setDuration("");
+  }
 
-    @Test
-    void dingTalkAlertTest() throws Exception {
-        DingTalkAlertNotifyServiceImpl notifyService = new DingTalkAlertNotifyServiceImpl(restTemplate);
+  @Test
+  void dingTalkAlertTest() throws Exception {
+    DingTalkAlertNotifyServiceImpl notifyService = new DingTalkAlertNotifyServiceImpl(restTemplate);
 
-        notifyService.loadTemplateFile();
-        AlertDingTalkParams dingTalkParams = new AlertDingTalkParams();
-        dingTalkParams.setToken("your_token");
-        dingTalkParams.setContacts("175xxxx1234");
-        dingTalkParams.setIsAtAll(true);
+    notifyService.loadTemplateFile();
+    AlertDingTalkParams dingTalkParams = new AlertDingTalkParams();
+    dingTalkParams.setToken("your_token");
+    dingTalkParams.setContacts("175xxxx1234");
+    dingTalkParams.setIsAtAll(true);
 
-        params.setAlertType(2);
-        params.setDingTalkParams(dingTalkParams);
+    params.setAlertType(2);
+    params.setDingTalkParams(dingTalkParams);
 
-        notifyService.doAlert(params, alertTemplate);
-    }
+    notifyService.doAlert(params, alertTemplate);
+  }
 
-    @Test
-    void weComAlertTest() throws Exception {
-        WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate);
-        notifyService.loadTemplateFile();
+  @Test
+  void weComAlertTest() throws Exception {
+    WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate);
+    notifyService.loadTemplateFile();
 
-        AlertWeComParams weComParams = new AlertWeComParams();
-        weComParams.setToken("your_token");
+    AlertWeComParams weComParams = new AlertWeComParams();
+    weComParams.setToken("your_token");
 
-        params.setAlertType(4);
-        params.setWeComParams(weComParams);
+    params.setAlertType(4);
+    params.setWeComParams(weComParams);
 
-        notifyService.doAlert(params, alertTemplate);
-    }
+    notifyService.doAlert(params, alertTemplate);
+  }
 
-    @Test
-    void larkAlertTest() {
-        LarkAlertNotifyServiceImpl notifyService = new LarkAlertNotifyServiceImpl(restTemplate, mapper);
-        notifyService.loadTemplateFile();
+  @Test
+  void larkAlertTest() {
+    LarkAlertNotifyServiceImpl notifyService = new LarkAlertNotifyServiceImpl(restTemplate, mapper);
+    notifyService.loadTemplateFile();
 
-        AlertLarkParams alertLarkParams = new AlertLarkParams();
-        alertLarkParams.setToken("your_token");
+    AlertLarkParams alertLarkParams = new AlertLarkParams();
+    alertLarkParams.setToken("your_token");
 
-        params.setAlertType(16);
-        params.setLarkParams(alertLarkParams);
+    params.setAlertType(16);
+    params.setLarkParams(alertLarkParams);
 
-        notifyService.doAlert(params, alertTemplate);
-    }
+    notifyService.doAlert(params, alertTemplate);
+  }
 }

@@ -17,12 +17,13 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import javax.annotation.Nullable
+
+import org.apache.flink.annotation.Public
+
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.event.BuildInEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
-import org.apache.flink.annotation.Public
-
-import javax.annotation.Nullable
 
 /**
  * Tracking monitor for flink-k8s-native mode, including
@@ -30,7 +31,6 @@ import javax.annotation.Nullable
  * information.
  * This is the entry point for external calls to the
  * streampark.flink.kubernetes package.
- *
  */
 @Public
 trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {

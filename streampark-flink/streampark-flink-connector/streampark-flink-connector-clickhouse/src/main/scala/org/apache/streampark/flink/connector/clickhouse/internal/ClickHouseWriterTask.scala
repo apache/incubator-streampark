@@ -17,42 +17,46 @@
 
 package org.apache.streampark.flink.connector.clickhouse.internal
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.clickhouse.conf.ClickHouseHttpConfig
-import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
+import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
+
+import scala.collection.JavaConversions._
+import scala.util.Try
+
 import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaders}
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}
 
-import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
-import scala.util.Try
-import scala.collection.JavaConversions._
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.clickhouse.conf.ClickHouseHttpConfig
+import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
 
-case class ClickHouseWriterTask(id: Int,
-                                clickHouseConf: ClickHouseHttpConfig,
-                                asyncHttpClient: AsyncHttpClient,
-                                queue: BlockingQueue[SinkRequest],
-                                callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
+case class ClickHouseWriterTask(
+    id: Int,
+    clickHouseConf: ClickHouseHttpConfig,
+    asyncHttpClient: AsyncHttpClient,
+    queue: BlockingQueue[SinkRequest],
+    callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
 
   @volatile var isWorking = false
 
   val failoverWriter: FailoverWriter = new FailoverWriter(clickHouseConf.storageType, clickHouseConf.getFailoverConfig)
 
-  override def run(): Unit = try {
-    isWorking = true
-    logInfo(s"Start writer task, id = $id")
-    while (isWorking || queue.nonEmpty) {
-      val req = queue.poll(300, TimeUnit.MILLISECONDS)
-      if (req != null) {
-        send(req)
+  override def run(): Unit =
+    try {
+      isWorking = true
+      logInfo(s"Start writer task, id = $id")
+      while (isWorking || queue.nonEmpty) {
+        val req = queue.poll(300, TimeUnit.MILLISECONDS)
+        if (req != null) {
+          send(req)
+        }
       }
+    } catch {
+      case e: Exception =>
+        logError("Error while inserting data", e)
+        throw new RuntimeException(e)
+    } finally {
+      logInfo(s"Task id = $id is finished")
     }
-  } catch {
-    case e: Exception =>
-      logError("Error while inserting data", e)
-      throw new RuntimeException(e)
-  } finally {
-    logInfo(s"Task id = $id is finished")
-  }
 
   def send(sinkRequest: SinkRequest): Unit = {
     val request = buildRequest(sinkRequest)
@@ -70,7 +74,7 @@ case class ClickHouseWriterTask(id: Int,
       .setHeader(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=utf-8")
       .setBody(sinkRequest.sqlStatement)
     if (clickHouseConf.credentials != null) {
-      builder.setHeader( HttpHeaderNames.AUTHORIZATION, "Basic " + clickHouseConf.credentials)
+      builder.setHeader(HttpHeaderNames.AUTHORIZATION, "Basic " + clickHouseConf.credentials)
     }
     builder.build
   }
@@ -97,7 +101,8 @@ case class ClickHouseWriterTask(id: Int,
    */
   def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = {
     if (sinkRequest.attemptCounter > clickHouseConf.maxRetries) {
-      logWarn(s"""Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.storageType}""")
+      logWarn(
+        s"""Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.storageType}""")
       failoverWriter.write(sinkRequest)
       logInfo(s"failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
     } else {
@@ -106,7 +111,6 @@ case class ClickHouseWriterTask(id: Int,
       queue.put(sinkRequest)
     }
   }
-
 
   override def close(): Unit = {
     isWorking = false

@@ -17,22 +17,22 @@
 
 package org.apache.streampark.flink.connector.redis.conf
 
+import java.util.Properties
+
+import scala.collection.JavaConverters._
 
 import org.apache.streampark.common.conf.ConfigOption
 import org.apache.streampark.common.util.ConfigUtils
-
-import java.util.Properties
-import scala.collection.JavaConverters._
 
 object RedisSinkConfigOption {
   val REDIS_SINK_PREFIX = "redis.sink"
 
   /**
-   *
    * @param properties
    * @return
    */
-  def apply(prefixStr: String = REDIS_SINK_PREFIX, properties: Properties = new Properties): RedisSinkConfigOption = new RedisSinkConfigOption(prefixStr, properties)
+  def apply(prefixStr: String = REDIS_SINK_PREFIX, properties: Properties = new Properties): RedisSinkConfigOption =
+    new RedisSinkConfigOption(prefixStr, properties)
 
 }
 
@@ -46,15 +46,13 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
 
   val SIGN_COLON = ":"
 
-
   val host: ConfigOption[String] = ConfigOption(
     key = "host",
     required = true,
     classType = classOf[String],
     handle = key => {
       properties.remove(key).toString
-    }
-  )
+    })
 
   val connectType: ConfigOption[String] = ConfigOption(
     key = "connectType",
@@ -65,9 +63,7 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
       val value: String = properties
         .remove(k).toString
       if (value == null || value.isEmpty) DEFAULT_CONNECT_TYPE else value
-    }
-  )
-
+    })
 
   val port: ConfigOption[Int] = ConfigOption(
     key = "port",
@@ -78,12 +74,10 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
       val value: String = properties
         .remove(k).toString
       if (value == null || value.isEmpty) 6379 else value.toInt
-    }
-  )
+    })
 
   def getInternalConfig(): Properties = {
     ConfigUtils.getConf(prop.asScala.asJava, prefix)(alias = "")
   }
-
 
 }

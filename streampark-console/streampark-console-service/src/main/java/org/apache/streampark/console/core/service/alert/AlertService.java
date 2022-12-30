@@ -26,9 +26,9 @@ import org.apache.streampark.console.core.enums.FlinkAppState;
 
 public interface AlertService {
 
-    void alert(Application application, CheckPointStatus checkPointStatus);
+  void alert(Application application, CheckPointStatus checkPointStatus);
 
-    void alert(Application application, FlinkAppState appState);
+  void alert(Application application, FlinkAppState appState);
 
-    boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate) throws AlertException;
+  boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate) throws AlertException;
 }

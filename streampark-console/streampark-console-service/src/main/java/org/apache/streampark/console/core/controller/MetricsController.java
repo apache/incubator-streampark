@@ -37,19 +37,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("metrics")
 public class MetricsController {
 
-    @Autowired
-    private MessageService messageService;
+  @Autowired private MessageService messageService;
 
-    @PostMapping("notice")
-    public RestResponse notice(Integer type, RestRequest request) {
-        NoticeType noticeType = NoticeType.of(type);
-        IPage<Message> pages = messageService.getUnRead(noticeType, request);
-        return RestResponse.success(pages);
-    }
+  @PostMapping("notice")
+  public RestResponse notice(Integer type, RestRequest request) {
+    NoticeType noticeType = NoticeType.of(type);
+    IPage<Message> pages = messageService.getUnRead(noticeType, request);
+    return RestResponse.success(pages);
+  }
 
-    @PostMapping("delnotice")
-    public RestResponse delNotice(Long id) {
-        return RestResponse.success(messageService.removeById(id));
-    }
-
+  @PostMapping("delnotice")
+  public RestResponse delNotice(Long id) {
+    return RestResponse.success(messageService.removeById(id));
+  }
 }

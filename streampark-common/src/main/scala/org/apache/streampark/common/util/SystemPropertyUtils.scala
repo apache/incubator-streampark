@@ -18,6 +18,7 @@ package org.apache.streampark.common.util
 
 import java.io.File
 import java.security.{AccessController, PrivilegedAction}
+
 import scala.util.{Failure, Success, Try}
 
 object SystemPropertyUtils extends Logger {
@@ -45,8 +46,8 @@ object SystemPropertyUtils extends Logger {
           System.getSecurityManager match {
             case null => System.getProperty(other)
             case _ => AccessController.doPrivileged(new PrivilegedAction[String]() {
-              override def run: String = System.getProperty(other)
-            })
+                override def run: String = System.getProperty(other)
+              })
           }
         } match {
           case Success(ok) =>
@@ -76,8 +77,7 @@ object SystemPropertyUtils extends Logger {
 
   def getInt(key: String, default: Int): Int = {
     Try(
-      get(key).toInt
-    ) match {
+      get(key).toInt) match {
       case Success(ok) => ok
       case Failure(_) => default
     }
@@ -85,8 +85,7 @@ object SystemPropertyUtils extends Logger {
 
   def getLong(key: String, default: Long): Long = {
     Try(
-      get(key).toLong
-    ) match {
+      get(key).toLong) match {
       case Success(ok) => ok
       case Failure(_) => default
     }
@@ -120,6 +119,6 @@ object SystemPropertyUtils extends Logger {
     }
   }
 
-  def getTmpdir() : String = get("java.io.tmpdir", "temp")
+  def getTmpdir(): String = get("java.io.tmpdir", "temp")
 
 }

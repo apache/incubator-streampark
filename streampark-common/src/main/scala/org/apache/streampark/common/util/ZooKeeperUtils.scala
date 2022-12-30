@@ -16,14 +16,15 @@
  */
 package org.apache.streampark.common.util
 
+import java.nio.charset.StandardCharsets
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable
+
 import org.apache.curator.RetryPolicy
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.RetryNTimes
 import org.apache.zookeeper.CreateMode
-
-import java.nio.charset.StandardCharsets
-import scala.collection.JavaConversions._
-import scala.collection.mutable
 
 object ZooKeeperUtils {
 
@@ -37,9 +38,9 @@ object ZooKeeperUtils {
       case None =>
         try {
           // Set the reconnection policy ExponentialBackoffRetry, baseSleepTimeMs: initial sleep time, maxRetries: maximum number of retries, maxSleepMs: maximum retry time
-          //val retryPolicy = new ExponentialBackoffRetry(10000, 5)
+          // val retryPolicy = new ExponentialBackoffRetry(10000, 5)
           // (Recommended) Curator link zookeeper strategy: RetryNTimes n: the number of retries sleepMsBetweenRetries: the time between each retry
-          //val retryPolicy:RetryPolicy = new RetryNTimes(3, 5000)
+          // val retryPolicy:RetryPolicy = new RetryNTimes(3, 5000)
           // (Not recommended) Curator link zookeeper strategy: RetryOneTime sleepMsBetweenRetry: the time between each retry, this strategy will only be retried once
           // val retryPolicy:RetryPolicy = new RetryOneTime(3000)
           // Retry forever, not recommended

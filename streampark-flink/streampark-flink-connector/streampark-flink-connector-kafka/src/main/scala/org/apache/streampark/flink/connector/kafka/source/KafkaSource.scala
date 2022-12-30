@@ -17,47 +17,49 @@
 
 package org.apache.streampark.flink.connector.kafka.source
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.util.{ConfigUtils, Utils}
-import org.apache.streampark.flink.connector.kafka.bean.KafkaRecord
-import org.apache.streampark.flink.core.scala.StreamingContext
-import org.apache.flink.api.common.eventtime.WatermarkStrategy
-import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
-import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
-import org.apache.flink.streaming.api.scala.{DataStream, _}
-import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
-import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDeserializationSchema}
-import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
-
 import java.io
 import java.util.Properties
 import java.util.regex.Pattern
+
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
+import org.apache.flink.api.common.eventtime.WatermarkStrategy
+import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
+import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
+import org.apache.flink.streaming.api.scala.{DataStream, _}
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDeserializationSchema}
+import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
+import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
+
+import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.util.{ConfigUtils, Utils}
+import org.apache.streampark.flink.connector.kafka.bean.KafkaRecord
+import org.apache.streampark.flink.core.scala.StreamingContext
+
 object KafkaSource {
 
-  def apply(@(transient@param) property: Properties = new Properties())(implicit ctx: StreamingContext): KafkaSource = new KafkaSource(ctx, property)
+  def apply(@(transient @param) property: Properties = new Properties())(implicit ctx: StreamingContext): KafkaSource = new KafkaSource(ctx, property)
 
-  def getSource[T: TypeInformation](ctx: StreamingContext,
-                                    property: Properties = new Properties(),
-                                    topic: io.Serializable,
-                                    alias: String,
-                                    deserializer: KafkaDeserializationSchema[T],
-                                    strategy: WatermarkStrategy[KafkaRecord[T]]
-                                   ): FlinkKafkaConsumer[KafkaRecord[T]] = {
+  def getSource[T: TypeInformation](
+      ctx: StreamingContext,
+      property: Properties = new Properties(),
+      topic: io.Serializable,
+      alias: String,
+      deserializer: KafkaDeserializationSchema[T],
+      strategy: WatermarkStrategy[KafkaRecord[T]]): FlinkKafkaConsumer[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
     Utils.copyProperties(property, prop)
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC || x._1 == KEY_KAFKA_PATTERN))
 
-    //start.form parameter...
+    // start.form parameter...
     val timestamp = Try(Some(prop(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_TIMESTAMP").toLong)).getOrElse(None)
     val startFrom = StartFrom.startForm(prop)
     require(!(timestamp.nonEmpty && startFrom != null), s"[StreamPark] start.form timestamp and offset cannot be defined at the same time")
 
-    //topic parameter
+    // topic parameter
     val topicOpt = Try(Some(prop.remove(KEY_KAFKA_TOPIC).toString)).getOrElse(None)
     val regexOpt = Try(Some(prop.remove(KEY_KAFKA_PATTERN).toString)).getOrElse(None)
 
@@ -90,7 +92,8 @@ object KafkaSource {
     val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
     (ctx.getCheckpointConfig.isCheckpointingEnabled, autoCommit) match {
       case (true, _) => consumer.setCommitOffsetsOnCheckpoints(true)
-      case (_, false) => throw new IllegalArgumentException("[StreamPark] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
+      case (_, false) => throw new IllegalArgumentException(
+          "[StreamPark] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
       case _ =>
     }
 
@@ -127,7 +130,7 @@ object KafkaSource {
           case _ => null
         }
 
-        //startOffsets...
+        // startOffsets...
         val startOffsets = new java.util.HashMap[KafkaTopicPartition, java.lang.Long]()
         startFroms.filter(x => x != null && x.partitionOffset != null).foreach(start => {
           start.partitionOffset.foreach(x => startOffsets.put(new KafkaTopicPartition(start.topic, x._1), x._2))
@@ -142,40 +145,38 @@ object KafkaSource {
 
 }
 
-class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, property: Properties = new Properties()) {
+class KafkaSource(@(transient @param) private[this] val ctx: StreamingContext, property: Properties = new Properties()) {
+
   /**
-    * commit offset method:<br/>
-    * &nbsp;&nbsp;Flink kafka consumer commit offset method needs to distinguish whether checkpoint is enabled. <br/>
-    * &nbsp;&nbsp; 1) Checkpoint off: commit offset depends on auto commit of kafka client.
-    * Need to set enable.auto.commit, auto.commit.interval.ms parameters to consumer properties,
-    * It will periodically auto commit offset to kafka at regular intervals. <br/>
-    * &nbsp;&nbsp; 2) Checkpoint is enabled: At this time, the offset consumed by the job is managed and fault-tolerant by Flink in the state.
-    * Submitting offsets to kafka at this time is generally used as an external progress monitor. I want to know the location and lag of job consumption in real time.
-    * At this point, setCommitOffsetsOnCheckpoints needs to be true to set the offset to be submitted to kafka when the checkpoint is successful.
-    * At this time, the interval of commit offset depends on the interval of checkpoint
-    *
-    * Get DStream stream
-    *
-    * @param topic        a group of topics or a single topic
-    * @param alias        Aliases to distinguish different kafka connection instances
-    * @param deserializer DeserializationSchema
-    * @param strategy     Watermarks strategy
-    * @tparam T
-    */
-  def getDataStream[T: TypeInformation](topic: java.io.Serializable = null,
-                                        alias: String = "",
-                                        deserializer: KafkaDeserializationSchema[T] = new KafkaStringDeserializationSchema().asInstanceOf[KafkaDeserializationSchema[T]],
-                                        strategy: WatermarkStrategy[KafkaRecord[T]] = null
-                                       ): DataStream[KafkaRecord[T]] = {
+   * commit offset method:<br/>
+   * &nbsp;&nbsp;Flink kafka consumer commit offset method needs to distinguish whether checkpoint is enabled. <br/>
+   * &nbsp;&nbsp; 1) Checkpoint off: commit offset depends on auto commit of kafka client.
+   * Need to set enable.auto.commit, auto.commit.interval.ms parameters to consumer properties,
+   * It will periodically auto commit offset to kafka at regular intervals. <br/>
+   * &nbsp;&nbsp; 2) Checkpoint is enabled: At this time, the offset consumed by the job is managed and fault-tolerant by Flink in the state.
+   * Submitting offsets to kafka at this time is generally used as an external progress monitor. I want to know the location and lag of job consumption in real time.
+   * At this point, setCommitOffsetsOnCheckpoints needs to be true to set the offset to be submitted to kafka when the checkpoint is successful.
+   * At this time, the interval of commit offset depends on the interval of checkpoint
+   *
+   * Get DStream stream
+   *
+   * @param topic        a group of topics or a single topic
+   * @param alias        Aliases to distinguish different kafka connection instances
+   * @param deserializer DeserializationSchema
+   * @param strategy     Watermarks strategy
+   * @tparam T
+   */
+  def getDataStream[T: TypeInformation](
+      topic: java.io.Serializable = null,
+      alias: String = "",
+      deserializer: KafkaDeserializationSchema[T] = new KafkaStringDeserializationSchema().asInstanceOf[KafkaDeserializationSchema[T]],
+      strategy: WatermarkStrategy[KafkaRecord[T]] = null): DataStream[KafkaRecord[T]] = {
 
     val consumer = KafkaSource.getSource[T](this.ctx, property, topic, alias, deserializer, strategy)
     ctx.addSource(consumer)
   }
 
 }
-
-
-
 
 class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
 
@@ -205,14 +206,14 @@ class KafkaStringDeserializationSchema extends KafkaDeserializationSchema[String
 
 }
 
-
 object StartFrom {
 
   def startForm(prop: Properties): Array[StartFrom] = {
     val startProp = prop.filter(_._1.startsWith(KEY_KAFKA_START_FROM))
     startProp.foreach(x => prop.remove(x._1))
     val topic = Try(startProp(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_OFFSET.$KEY_KAFKA_TOPIC").split(",")).getOrElse(Array.empty[String])
-    if (topic.isEmpty) Array.empty[StartFrom] else {
+    if (topic.isEmpty) Array.empty[StartFrom]
+    else {
       topic.map(x => {
         val offset = Try(Some(startProp(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_OFFSET.$x"))).getOrElse(None)
         offset match {
@@ -221,8 +222,7 @@ object StartFrom {
               o.split(",").map(x => {
                 val array = x.split(":")
                 array.head.toInt -> array.last.toLong
-              })
-            ) match {
+              })) match {
               case Success(v) => new StartFrom(x, v)
               case Failure(_) => throw new IllegalArgumentException(s"[StreamPark] topic:$x start.form offset error, e.g: 1:10000,2:10000,3:10002")
             }

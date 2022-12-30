@@ -34,92 +34,89 @@ import java.util.Date;
 @Slf4j
 public class JWTUtil {
 
+  private static final long JWT_TIME_OUT =
+      SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
 
-    private static final long JWT_TIME_OUT = SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
-
-    /**
-     * verify token
-     *
-     * @param token  token
-     * @param secret secret
-     * @return is valid token
-     */
-    public static boolean verify(String token, String username, String secret) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            JWTVerifier verifier = JWT.require(algorithm).withClaim("userName", username).build();
-            verifier.verify(token);
-            return true;
-        } catch (TokenExpiredException e) {
-            throw new AuthenticationException(e.getMessage());
-        } catch (Exception e) {
-            log.info("token is invalid:{} , e:{}", e.getMessage(), e.getClass());
-            return false;
-        }
+  /**
+   * verify token
+   *
+   * @param token token
+   * @param secret secret
+   * @return is valid token
+   */
+  public static boolean verify(String token, String username, String secret) {
+    try {
+      Algorithm algorithm = Algorithm.HMAC256(secret);
+      JWTVerifier verifier = JWT.require(algorithm).withClaim("userName", username).build();
+      verifier.verify(token);
+      return true;
+    } catch (TokenExpiredException e) {
+      throw new AuthenticationException(e.getMessage());
+    } catch (Exception e) {
+      log.info("token is invalid:{} , e:{}", e.getMessage(), e.getClass());
+      return false;
     }
+  }
 
-    /**
-     * get username from token
-     */
-    public static String getUserName(String token) {
-        try {
-            DecodedJWT jwt = JWT.decode(token);
-            return jwt.getClaim("userName").asString();
-        } catch (JWTDecodeException e) {
-            log.info("error：{}", e.getMessage());
-            return null;
-        }
+  /** get username from token */
+  public static String getUserName(String token) {
+    try {
+      DecodedJWT jwt = JWT.decode(token);
+      return jwt.getClaim("userName").asString();
+    } catch (JWTDecodeException e) {
+      log.info("error：{}", e.getMessage());
+      return null;
     }
+  }
 
-    public static Long getUserId(String token) {
-        try {
-            DecodedJWT jwt = JWT.decode(token);
-            return jwt.getClaim("userId").asLong();
-        } catch (JWTDecodeException e) {
-            log.info("error：{}", e.getMessage());
-            return null;
-        }
+  public static Long getUserId(String token) {
+    try {
+      DecodedJWT jwt = JWT.decode(token);
+      return jwt.getClaim("userId").asLong();
+    } catch (JWTDecodeException e) {
+      log.info("error：{}", e.getMessage());
+      return null;
     }
+  }
 
-    /**
-     * generate token
-     * @param userId
-     * @param userName
-     * @param secret
-     * @return
-     */
-    public static String sign(Long userId, String userName, String secret) {
-        return sign(userId, userName, secret, getExpireTime());
+  /**
+   * generate token
+   *
+   * @param userId
+   * @param userName
+   * @param secret
+   * @return
+   */
+  public static String sign(Long userId, String userName, String secret) {
+    return sign(userId, userName, secret, getExpireTime());
+  }
+
+  /**
+   * generate token
+   *
+   * @param userId
+   * @param userName
+   * @param secret
+   * @param expireTime
+   * @return
+   */
+  public static String sign(Long userId, String userName, String secret, Long expireTime) {
+    try {
+      Date date = new Date(expireTime);
+      Algorithm algorithm = Algorithm.HMAC256(secret);
+      return JWT.create()
+          .withClaim("userId", userId)
+          .withClaim("userName", userName)
+          .withExpiresAt(date)
+          .sign(algorithm);
+    } catch (Exception e) {
+      log.info("error：{}", e);
+      return null;
     }
+  }
 
-    /**
-     * generate token
-     * @param userId
-     * @param userName
-     * @param secret
-     * @param expireTime
-     * @return
-     */
-    public static String sign(Long userId, String userName, String secret, Long expireTime) {
-        try {
-            Date date = new Date(expireTime);
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.create()
-                .withClaim("userId", userId)
-                .withClaim("userName", userName)
-                .withExpiresAt(date)
-                .sign(algorithm);
-        } catch (Exception e) {
-            log.info("error：{}", e);
-            return null;
-        }
-    }
-
-    /**
-     * get token expire timestamp
-     */
-    private static Long getExpireTime() {
-        return System.currentTimeMillis() + JWT_TIME_OUT;
-    }
-
+  /** get token expire timestamp */
+  private static Long getExpireTime() {
+    return System.currentTimeMillis() + JWT_TIME_OUT;
+  }
 }

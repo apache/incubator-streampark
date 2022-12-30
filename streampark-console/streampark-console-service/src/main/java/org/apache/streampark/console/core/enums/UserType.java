@@ -21,33 +21,26 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 
 import java.util.Arrays;
 
-/**
- * The user type.
- */
+/** The user type. */
 public enum UserType {
 
-    /**
-     * The admin of StreamPark.
-     */
-    ADMIN(1),
+  /** The admin of StreamPark. */
+  ADMIN(1),
 
-    /**
-     * The user of StreamPark.
-     */
-    USER(2);
+  /** The user of StreamPark. */
+  USER(2);
 
-    @EnumValue
-    private final int code;
+  @EnumValue private final int code;
 
-    UserType(int code) {
-        this.code = code;
-    }
+  UserType(int code) {
+    this.code = code;
+  }
 
-    public int getCode() {
-        return code;
-    }
+  public int getCode() {
+    return code;
+  }
 
-    public static UserType of(Integer code) {
-        return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
-    }
+  public static UserType of(Integer code) {
+    return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+  }
 }

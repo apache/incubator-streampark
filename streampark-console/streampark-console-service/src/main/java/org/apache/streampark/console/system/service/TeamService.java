@@ -27,16 +27,15 @@ import java.util.List;
 
 public interface TeamService extends IService<Team> {
 
-    IPage<Team> findTeams(Team team, RestRequest request);
+  IPage<Team> findTeams(Team team, RestRequest request);
 
-    Team findByName(String teamName);
+  Team findByName(String teamName);
 
-    void createTeam(Team team);
+  void createTeam(Team team);
 
-    void deleteTeam(Long teamId);
+  void deleteTeam(Long teamId);
 
-    void updateTeam(Team team);
+  void updateTeam(Team team);
 
-    List<Team> findUserTeams(Long userId);
-
+  List<Team> findUserTeams(Long userId);
 }

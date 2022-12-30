@@ -17,18 +17,17 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.ConfigConst._
-import redis.clients.jedis.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
-import redis.clients.jedis.{Jedis, Protocol}
-
 import java.net.URI
 import java.util.Properties
+
 import scala.collection.JavaConversions._
 
+import redis.clients.jedis.{Jedis, Protocol}
+import redis.clients.jedis.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
+
+import org.apache.streampark.common.conf.ConfigConst._
+
 /**
- *
- *
- *
  * RedisEndpoint represents a redis connection endpoint info: host, port, auth password
  * db number, and timeout
  *
@@ -37,12 +36,13 @@ import scala.collection.JavaConversions._
  * @param auth the authentication password
  * @param db   database number (should be avoided in general)
  */
-case class RedisEndpoint(host: String = Protocol.DEFAULT_HOST,
-                         port: Int = Protocol.DEFAULT_PORT,
-                         auth: String = null,
-                         db: Int = Protocol.DEFAULT_DATABASE,
-                         timeout: Int = Protocol.DEFAULT_TIMEOUT)
-  extends Serializable {
+case class RedisEndpoint(
+    host: String = Protocol.DEFAULT_HOST,
+    port: Int = Protocol.DEFAULT_PORT,
+    auth: String = null,
+    db: Int = Protocol.DEFAULT_DATABASE,
+    timeout: Int = Protocol.DEFAULT_TIMEOUT)
+    extends Serializable {
 
   /**
    * Constructor from Properties. set params with redis.host, redis.port, redis.password and redis.db
@@ -55,8 +55,7 @@ case class RedisEndpoint(host: String = Protocol.DEFAULT_HOST,
       conf.getOrElse(KEY_PORT, Protocol.DEFAULT_PORT).toString.toInt,
       conf.getOrElse(KEY_PASSWORD, null),
       conf.getOrElse(KEY_DB, Protocol.DEFAULT_DATABASE).toString.toInt,
-      conf.getOrElse(KEY_TIMEOUT, Protocol.DEFAULT_TIMEOUT).toString.toInt
-    )
+      conf.getOrElse(KEY_TIMEOUT, Protocol.DEFAULT_TIMEOUT).toString.toInt)
   }
 
   /**
@@ -83,11 +82,7 @@ case class RedisEndpoint(host: String = Protocol.DEFAULT_HOST,
 
 }
 
-case class RedisNode(endpoint: RedisEndpoint,
-                     startSlot: Int,
-                     endSlot: Int,
-                     idx: Int,
-                     total: Int) {
+case class RedisNode(endpoint: RedisEndpoint, startSlot: Int, endSlot: Int, idx: Int, total: Int) {
   def connect(): Jedis = {
     endpoint.connect()
   }
@@ -129,8 +124,7 @@ class RedisConfig(val initialHost: RedisEndpoint) extends Serializable {
     def inter(sPos1: Int, ePos1: Int, sPos2: Int, ePos2: Int) =
       if (sPos1 <= sPos2) ePos1 >= sPos2 else ePos2 >= sPos1
 
-    nodes.filter(node => inter(sPos, ePos, node.startSlot, node.endSlot)).
-      filter(_.idx == 0) //master only now
+    nodes.filter(node => inter(sPos, ePos, node.startSlot, node.endSlot)).filter(_.idx == 0) // master only now
   }
 
   /**
@@ -168,7 +162,6 @@ class RedisConfig(val initialHost: RedisEndpoint) extends Serializable {
     })(0)
   }
 
-
   /**
    * @param initialHost any redis endpoint of a cluster or a single server
    * @return list of host nodes
@@ -193,12 +186,11 @@ class RedisConfig(val initialHost: RedisEndpoint) extends Serializable {
       val host = replinfo.filter(_.contains("master_host:"))(0).trim.substring(12)
       val port = replinfo.filter(_.contains("master_port:"))(0).trim.substring(12).toInt
 
-      //simply re-enter this function witht he master host/port
-      getNonClusterNodes(initialHost = RedisEndpoint(host, port,
-        initialHost.auth, initialHost.db))
+      // simply re-enter this function witht he master host/port
+      getNonClusterNodes(initialHost = RedisEndpoint(host, port, initialHost.auth, initialHost.db))
 
     } else {
-      //this is a master - take its slaves
+      // this is a master - take its slaves
 
       val slaves = replinfo.filter(x => x.contains("slave") && x.contains("online")).map(rl => {
         val content = rl.substring(rl.indexOf(':') + 1).split(",")
@@ -210,9 +202,7 @@ class RedisConfig(val initialHost: RedisEndpoint) extends Serializable {
       val nodes = master +: slaves
       val range = nodes.length
       (0 until range).map(i =>
-        RedisNode(RedisEndpoint(nodes(i)._1, nodes(i)._2, initialHost.auth, initialHost.db,
-          initialHost.timeout),
-          0, 16383, i, range)).toArray
+        RedisNode(RedisEndpoint(nodes(i)._1, nodes(i)._2, initialHost.auth, initialHost.db, initialHost.timeout), 0, 16383, i, range)).toArray
     }
   }
 
@@ -223,31 +213,27 @@ class RedisConfig(val initialHost: RedisEndpoint) extends Serializable {
   private def getClusterNodes(initialHost: RedisEndpoint): Array[RedisNode] = {
     val conn = initialHost.connect()
     val res = conn.clusterSlots().flatMap {
-      slotInfoObj => {
-        val slotInfo = slotInfoObj.asInstanceOf[java.util.List[java.lang.Object]]
-        val sPos = slotInfo.get(0).toString.toInt
-        val ePos = slotInfo.get(1).toString.toInt
-        /*
-         * We will get all the nodes with the slots range [sPos, ePos],
-         * and create RedisNode for each nodes, the total field of all
-         * RedisNode are the number of the nodes whose slots range is
-         * as above, and the idx field is just an index for each node
-         * which will be used for adding support for slaves and so on.
-         * And the idx of a master is always 0, we rely on this fact to
-         * filter master.
-         */
-        (0 until (slotInfo.size - 2)).map(i => {
-          val node = slotInfo(i + 2).asInstanceOf[java.util.List[java.lang.Object]]
-          val host = SafeEncoder.encode(node.get(0).asInstanceOf[Array[scala.Byte]])
-          val port = node.get(1).toString.toInt
-          RedisNode(RedisEndpoint(host, port, initialHost.auth, initialHost.db,
-            initialHost.timeout),
-            sPos,
-            ePos,
-            i,
-            slotInfo.size - 2)
-        })
-      }
+      slotInfoObj =>
+        {
+          val slotInfo = slotInfoObj.asInstanceOf[java.util.List[java.lang.Object]]
+          val sPos = slotInfo.get(0).toString.toInt
+          val ePos = slotInfo.get(1).toString.toInt
+          /*
+           * We will get all the nodes with the slots range [sPos, ePos],
+           * and create RedisNode for each nodes, the total field of all
+           * RedisNode are the number of the nodes whose slots range is
+           * as above, and the idx field is just an index for each node
+           * which will be used for adding support for slaves and so on.
+           * And the idx of a master is always 0, we rely on this fact to
+           * filter master.
+           */
+          (0 until (slotInfo.size - 2)).map(i => {
+            val node = slotInfo(i + 2).asInstanceOf[java.util.List[java.lang.Object]]
+            val host = SafeEncoder.encode(node.get(0).asInstanceOf[Array[scala.Byte]])
+            val port = node.get(1).toString.toInt
+            RedisNode(RedisEndpoint(host, port, initialHost.auth, initialHost.db, initialHost.timeout), sPos, ePos, i, slotInfo.size - 2)
+          })
+        }
     }.toArray
     conn.close()
     res

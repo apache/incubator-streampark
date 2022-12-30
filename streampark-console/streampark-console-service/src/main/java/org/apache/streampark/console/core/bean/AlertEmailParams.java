@@ -31,7 +31,7 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertEmailParams implements Serializable {
 
-    @ApiModelProperty(name = "contacts", value = "email address")
-    @NotBlank(message = "The address of email must be not empty")
-    private String contacts;
+  @ApiModelProperty(name = "contacts", value = "email address")
+  @NotBlank(message = "The address of email must be not empty")
+  private String contacts;
 }

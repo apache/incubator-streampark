@@ -28,37 +28,38 @@ import java.util.List;
 
 public interface ApplicationMapper extends BaseMapper<Application> {
 
-    IPage<Application> page(Page<Application> page, @Param("application") Application application);
+  IPage<Application> page(Page<Application> page, @Param("application") Application application);
 
-    Application getApp(@Param("application") Application application);
+  Application getApp(@Param("application") Application application);
 
-    void updateTracking(@Param("application") Application application);
+  void updateTracking(@Param("application") Application application);
 
-    List<Application> getByTeamId(@Param("teamId") Long teamId);
+  List<Application> getByTeamId(@Param("teamId") Long teamId);
 
-    boolean mapping(@Param("application") Application appParam);
+  boolean mapping(@Param("application") Application appParam);
 
-    List<String> getRecentK8sNamespace(@Param("limitSize") Integer limit);
+  List<String> getRecentK8sNamespace(@Param("limitSize") Integer limit);
 
-    List<String> getRecentK8sClusterId(@Param("executionMode") Integer executionMode, @Param("limitSize") Integer limit);
+  List<String> getRecentK8sClusterId(
+      @Param("executionMode") Integer executionMode, @Param("limitSize") Integer limit);
 
-    List<String> getRecentFlinkBaseImage(@Param("limitSize") Integer limit);
+  List<String> getRecentFlinkBaseImage(@Param("limitSize") Integer limit);
 
-    List<String> getRecentK8sPodTemplate(@Param("limitSize") Integer limit);
+  List<String> getRecentK8sPodTemplate(@Param("limitSize") Integer limit);
 
-    List<String> getRecentK8sJmPodTemplate(@Param("limitSize") Integer limit);
+  List<String> getRecentK8sJmPodTemplate(@Param("limitSize") Integer limit);
 
-    List<String> getRecentK8sTmPodTemplate(@Param("limitSize") Integer limit);
+  List<String> getRecentK8sTmPodTemplate(@Param("limitSize") Integer limit);
 
-    void resetOptionState();
+  void resetOptionState();
 
-    Boolean existsByTeamId(@Param("teamId") Long teamId);
+  Boolean existsByTeamId(@Param("teamId") Long teamId);
 
-    Boolean existsByJobName(@Param("jobName") String jobName);
+  Boolean existsByJobName(@Param("jobName") String jobName);
 
-    List<Application> getByProjectId(@Param("projectId") Long id);
+  List<Application> getByProjectId(@Param("projectId") Long id);
 
-    boolean existsRunningJobByClusterId(@Param("clusterId")Long clusterId);
+  boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
 
-    boolean existsJobByClusterId(@Param("clusterId")Long clusterId);
+  boolean existsJobByClusterId(@Param("clusterId") Long clusterId);
 }

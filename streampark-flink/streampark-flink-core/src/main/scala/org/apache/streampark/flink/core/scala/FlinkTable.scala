@@ -17,20 +17,21 @@
 
 package org.apache.streampark.flink.core.scala
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
-import org.apache.streampark.flink.core.{FlinkTableInitializer, TableContext}
+import scala.language.implicitConversions
+
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.TableConfig
 
-import scala.language.implicitConversions
+import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
+import org.apache.streampark.flink.core.{FlinkTableInitializer, TableContext}
 
 trait FlinkTable extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _
 
-  final implicit lazy val parameter: ParameterTool = context.parameter
+  implicit final lazy val parameter: ParameterTool = context.parameter
 
   implicit var context: TableContext = _
 

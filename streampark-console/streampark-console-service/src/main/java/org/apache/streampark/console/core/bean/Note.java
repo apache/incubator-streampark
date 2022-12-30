@@ -28,40 +28,40 @@ import java.util.Scanner;
 @Data
 public class Note {
 
-    private String jobName;
+  private String jobName;
 
-    private String env;
+  private String env;
 
-    private String text;
+  private String text;
 
-    private Content content = null;
+  private Content content = null;
 
-    public Content getContent() {
-        if (this.content == null) {
-            Properties properties;
-            StringBuilder codeBuilder;
-            try (Scanner scanner = new Scanner(this.text)) {
-                properties = new Properties();
-                codeBuilder = new StringBuilder();
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    if (line.startsWith("%flink.")) {
-                        String[] dyProp = line.trim().split("=");
-                        properties.setProperty(dyProp[0].substring(1), dyProp[1]);
-                    } else {
-                        codeBuilder.append(line).append("\n");
-                    }
-                }
-            }
-            this.content = new Content(properties, codeBuilder.toString());
+  public Content getContent() {
+    if (this.content == null) {
+      Properties properties;
+      StringBuilder codeBuilder;
+      try (Scanner scanner = new Scanner(this.text)) {
+        properties = new Properties();
+        codeBuilder = new StringBuilder();
+        while (scanner.hasNextLine()) {
+          String line = scanner.nextLine();
+          if (line.startsWith("%flink.")) {
+            String[] dyProp = line.trim().split("=");
+            properties.setProperty(dyProp[0].substring(1), dyProp[1]);
+          } else {
+            codeBuilder.append(line).append("\n");
+          }
         }
-        return this.content;
+      }
+      this.content = new Content(properties, codeBuilder.toString());
     }
+    return this.content;
+  }
 
-    @Data
-    @AllArgsConstructor
-    public static class Content {
-        private Properties properties;
-        private String code;
-    }
+  @Data
+  @AllArgsConstructor
+  public static class Content {
+    private Properties properties;
+    private String code;
+  }
 }

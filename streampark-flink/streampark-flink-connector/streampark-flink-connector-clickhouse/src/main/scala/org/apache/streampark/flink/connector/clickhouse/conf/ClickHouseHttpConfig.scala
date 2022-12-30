@@ -17,21 +17,20 @@
 
 package org.apache.streampark.flink.connector.clickhouse.conf
 
+import java.util.{Base64, Properties}
+import java.util.concurrent.ThreadLocalRandom
+
+import scala.collection.JavaConversions._
+
 import org.apache.streampark.common.conf.ConfigConst
 import org.apache.streampark.flink.connector.conf.ThresholdConf
 
-import java.util.{Base64, Properties}
-import java.util.concurrent.ThreadLocalRandom
-import scala.collection.JavaConversions._
-
 /**
- *
  * Flink sink for Clickhouse database. Powered by Async Http Client.
  *
  * High-performance library for loading data to Clickhouse.
  *
  * It has two triggers for loading data: by timeout and by buffer size.
- *
  */
 //---------------------------------------------------------------------------------------
 

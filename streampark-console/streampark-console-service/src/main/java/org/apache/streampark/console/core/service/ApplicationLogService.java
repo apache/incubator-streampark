@@ -25,8 +25,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface ApplicationLogService extends IService<ApplicationLog> {
 
-    IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request);
+  IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request);
 
-    void removeApp(Long appId);
-
+  void removeApp(Long appId);
 }

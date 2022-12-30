@@ -32,100 +32,101 @@ import java.util.Set;
 
 public interface UserService extends IService<User> {
 
-    /**
-     * find user by name
-     *
-     * @param username username
-     * @return user
-     */
-    User findByName(String username);
+  /**
+   * find user by name
+   *
+   * @param username username
+   * @return user
+   */
+  User findByName(String username);
 
-    /**
-     * find uer detail, contains basic info, role, department
-     *
-     * @param user        user
-     * @param restRequest queryRequest
-     * @return IPage
-     */
-    IPage<User> findUserDetail(User user, RestRequest restRequest);
+  /**
+   * find uer detail, contains basic info, role, department
+   *
+   * @param user user
+   * @param restRequest queryRequest
+   * @return IPage
+   */
+  IPage<User> findUserDetail(User user, RestRequest restRequest);
 
-    /**
-     * update login time
-     *
-     * @param username username
-     */
-    void updateLoginTime(String username) throws Exception;
+  /**
+   * update login time
+   *
+   * @param username username
+   */
+  void updateLoginTime(String username) throws Exception;
 
-    /**
-     * create user
-     *
-     * @param user user
-     */
-    void createUser(User user) throws Exception;
+  /**
+   * create user
+   *
+   * @param user user
+   */
+  void createUser(User user) throws Exception;
 
-    /**
-     * update user
-     *
-     * @param user user
-     */
-    void updateUser(User user) throws Exception;
+  /**
+   * update user
+   *
+   * @param user user
+   */
+  void updateUser(User user) throws Exception;
 
-    /**
-     * delete user
-     *
-     * @param userId user id
-     */
-    void deleteUser(Long userId) throws Exception;
+  /**
+   * delete user
+   *
+   * @param userId user id
+   */
+  void deleteUser(Long userId) throws Exception;
 
-    /**
-     * update user
-     *
-     * @param user user
-     */
-    void updateProfile(User user) throws Exception;
+  /**
+   * update user
+   *
+   * @param user user
+   */
+  void updateProfile(User user) throws Exception;
 
-    /**
-     * update user avatar
-     *
-     * @param username name
-     * @param avatar   avatar
-     */
-    void updateAvatar(String username, String avatar) throws Exception;
+  /**
+   * update user avatar
+   *
+   * @param username name
+   * @param avatar avatar
+   */
+  void updateAvatar(String username, String avatar) throws Exception;
 
-    /**
-     * update password
-     * @param user
-     * @throws Exception
-     */
-    void updatePassword(User user) throws Exception;
+  /**
+   * update password
+   *
+   * @param user
+   * @throws Exception
+   */
+  void updatePassword(User user) throws Exception;
 
-    /**
-     * reset password
-     *
-     * @param usernames user list
-     */
-    void resetPassword(String[] usernames) throws Exception;
+  /**
+   * reset password
+   *
+   * @param usernames user list
+   */
+  void resetPassword(String[] usernames) throws Exception;
 
-    /**
-     * Get the permissions of current userId.
-     *
-     * @param userId the user Id
-     * @param teamId team id. If it's null, will find permissions from all teams.
-     * @return permissions
-     */
-    Set<String> getPermissions(Long userId, @Nullable Long teamId);
+  /**
+   * Get the permissions of current userId.
+   *
+   * @param userId the user Id
+   * @param teamId team id. If it's null, will find permissions from all teams.
+   * @return permissions
+   */
+  Set<String> getPermissions(Long userId, @Nullable Long teamId);
 
-    List<User> getNoTokenUser();
+  List<User> getNoTokenUser();
 
-    void setLastTeam(Long teamId, Long userId);
+  void setLastTeam(Long teamId, Long userId);
 
-    void clearLastTeam(Long userId, Long teamId);
+  void clearLastTeam(Long userId, Long teamId);
 
-    void clearLastTeam(Long teamId);
+  void clearLastTeam(Long teamId);
 
-    void fillInTeam(User user);
+  void fillInTeam(User user);
 
-    List<User> findByAppOwner(Long teamId);
+  List<User> findByAppOwner(Long teamId);
 
-    Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
+  Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 }

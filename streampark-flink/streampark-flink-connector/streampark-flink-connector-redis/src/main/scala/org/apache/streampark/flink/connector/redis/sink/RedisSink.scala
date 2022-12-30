@@ -17,40 +17,43 @@
 
 package org.apache.streampark.flink.connector.redis.sink
 
+import java.lang.reflect.Field
+import java.util
+import java.util.Properties
+
+import scala.annotation.meta.param
+import scala.collection.JavaConversions._
+import scala.util.Try
+
+import org.apache.flink.streaming.api.CheckpointingMode
+import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream, DataStreamSink}
+import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
+
 import org.apache.streampark.common.util.{FlinkUtils, Utils}
 import org.apache.streampark.flink.connector.redis.bean.RedisMapper
 import org.apache.streampark.flink.connector.redis.conf.RedisConfig
 import org.apache.streampark.flink.connector.redis.internal.{Redis2PCSinkFunction, RedisSinkFunction}
 import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
-import org.apache.flink.streaming.api.CheckpointingMode
-import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}
-import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
-
-import java.lang.reflect.Field
-import java.util
-import java.util.Properties
-import scala.annotation.meta.param
-import scala.collection.JavaConversions._
-import scala.util.Try
 
 object RedisSink {
 
-  def apply(@(transient@param)
-            property: Properties = new Properties(),
-            parallelism: Int = 0,
-            name: String = null,
-            uid: String = null)(implicit ctx: StreamingContext): RedisSink = new RedisSink(ctx, property, parallelism, name, uid)
+  def apply(
+      @(transient @param)
+      property: Properties = new Properties(),
+      parallelism: Int = 0,
+      name: String = null,
+      uid: String = null)(implicit ctx: StreamingContext): RedisSink = new RedisSink(ctx, property, parallelism, name, uid)
 }
 
-class RedisSink(@(transient@param) ctx: StreamingContext,
-                property: Properties = new Properties(),
-                parallelism: Int = 0,
-                name: String = null,
-                uid: String = null
-               ) extends Sink {
+class RedisSink(
+    @(transient @param) ctx: StreamingContext,
+    property: Properties = new Properties(),
+    parallelism: Int = 0,
+    name: String = null,
+    uid: String = null) extends Sink {
 
   def this(ctx: StreamingContext) {
     this(ctx, new Properties(), 0, null, null)
@@ -63,9 +66,8 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
   val enableCheckpoint: Boolean = FlinkUtils.isCheckpointEnabled(allProperties)
 
   val cpMode: CheckpointingMode = Try(
-    CheckpointingMode.valueOf(allProperties.get(ExecutionCheckpointingOptions.CHECKPOINTING_MODE.key()))
-  ).getOrElse(ExecutionCheckpointingOptions.CHECKPOINTING_MODE.defaultValue())
-
+    CheckpointingMode.valueOf(allProperties.get(ExecutionCheckpointingOptions.CHECKPOINTING_MODE.key()))).getOrElse(
+    ExecutionCheckpointingOptions.CHECKPOINTING_MODE.defaultValue())
 
   lazy val config: FlinkJedisConfigBase = {
     val connectType: String = redisConfig.connectType

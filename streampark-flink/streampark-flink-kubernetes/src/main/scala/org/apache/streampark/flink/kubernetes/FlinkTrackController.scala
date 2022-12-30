@@ -17,12 +17,14 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import java.util.concurrent.TimeUnit
+
+import scala.collection.JavaConversions._
+
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
+
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.model._
-
-import java.util.concurrent.TimeUnit
-import scala.collection.JavaConversions._
 
 /**
  * Tracking info cache pool on flink kubernetes mode.
@@ -61,7 +63,8 @@ class FlinkTrackController extends Logger with AutoCloseable {
    * determines whether the specified TrackId is in the trace
    */
   def isInTracking(trackId: TrackId): Boolean = {
-    if (!trackId.isLegal) false; else {
+    if (!trackId.isLegal) false;
+    else {
       trackIds.get(trackId) != null
     }
   }
@@ -204,7 +207,6 @@ class K8sDeploymentEventCache {
   def asMap(): Map[K8sEventKey, K8sDeploymentEventCV] = cache.asMap().toMap
 
   def cleanUp(): Unit = cache.cleanUp()
-
 
   val cache: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
 

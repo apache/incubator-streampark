@@ -17,18 +17,18 @@
 
 package org.apache.streampark.flink.connector.elasticsearch5.conf
 
+import java.net.InetSocketAddress
+import java.util.{Map => JavaMap, Properties}
+
+import scala.collection.JavaConverters._
+
 import org.apache.streampark.common.conf.ConfigOption
 import org.apache.streampark.common.util.ConfigUtils
-
-import java.net.InetSocketAddress
-import java.util.{Properties, Map => JavaMap}
-import scala.collection.JavaConverters._
 
 object ESSinkConfigOption {
   val ES_SINK_PREFIX = "es.sink"
 
   /**
-   *
    * @param properties
    * @return
    */
@@ -40,7 +40,6 @@ class ESSinkConfigOption(prefixStr: String, properties: Properties) extends Seri
 
   implicit val (prefix, prop) = (prefixStr, properties)
 
-
   val SIGN_COMMA = ","
 
   val SIGN_COLON = ":"
@@ -49,23 +48,21 @@ class ESSinkConfigOption(prefixStr: String, properties: Properties) extends Seri
     key = "es.disableFlushOnCheckpoint",
     required = false,
     classType = classOf[Boolean],
-    defaultValue = false
-  )
+    defaultValue = false)
 
   val host: ConfigOption[Array[InetSocketAddress]] = ConfigOption(
     key = "host",
     required = true,
     classType = classOf[Array[InetSocketAddress]],
-    handle = key => properties.getProperty(key).split(SIGN_COMMA).map(x => {
-      x.split(SIGN_COLON) match {
-        case Array(host, port) => new InetSocketAddress(host, port.toInt)
-      }
-    })
-  )
+    handle = key =>
+      properties.getProperty(key).split(SIGN_COMMA).map(x => {
+        x.split(SIGN_COLON) match {
+          case Array(host, port) => new InetSocketAddress(host, port.toInt)
+        }
+      }))
 
   def getInternalConfig(): JavaMap[String, String] = {
     ConfigUtils.getConf(prop.asScala.asJava, prefix)(alias = "").asScala.asJava
   }
-
 
 }

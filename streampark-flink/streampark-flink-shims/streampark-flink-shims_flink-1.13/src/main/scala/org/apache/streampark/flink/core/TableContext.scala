@@ -16,16 +16,16 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.printLogo
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{Table, TableEnvironment}
-import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor}
+import org.apache.flink.table.descriptors.{ConnectorDescriptor, ConnectTableDescriptor}
 import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.sources.TableSource
 
-class TableContext(override val parameter: ParameterTool,
-                   private val tableEnv: TableEnvironment) extends FlinkTableTrait(parameter, tableEnv) {
+import org.apache.streampark.common.conf.ConfigConst.printLogo
+
+class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment) extends FlinkTableTrait(parameter, tableEnv) {
 
   /**
    * for scala
@@ -41,9 +41,7 @@ class TableContext(override val parameter: ParameterTool,
    */
   def this(args: TableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-
   override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
-
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 
@@ -56,7 +54,8 @@ class TableContext(override val parameter: ParameterTool,
 
   @deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
 
-  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
+  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
+    tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
   @deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
 

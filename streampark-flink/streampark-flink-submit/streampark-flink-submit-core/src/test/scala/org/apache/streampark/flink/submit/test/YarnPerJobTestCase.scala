@@ -16,17 +16,21 @@
  */
 package org.apache.streampark.flink.submit.test
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.core.conf.FlinkRunOption
-import org.apache.streampark.flink.submit.bean
+import java.io.File
+import java.lang.reflect.Method
+import java.util
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+
 import org.apache.commons.cli.Options
-import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.{CliFrontendParser, CustomCommandLine}
-import org.apache.flink.client.deployment.application.ApplicationConfiguration
+import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.{ClusterSpecification, DefaultClusterClientServiceLoader}
+import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClientProvider, PackagedProgram, PackagedProgramUtils}
-import org.apache.flink.configuration.MemorySize.MemoryUnit
 import org.apache.flink.configuration._
+import org.apache.flink.configuration.MemorySize.MemoryUnit
 import org.apache.flink.runtime.jobgraph.JobGraph
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.YarnClusterDescriptor
@@ -35,11 +39,9 @@ import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
-import java.io.File
-import java.lang.reflect.Method
-import java.util
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.core.conf.FlinkRunOption
+import org.apache.streampark.flink.submit.bean
 
 /**
  * perJob to submit jobs programmatically,
@@ -59,6 +61,7 @@ object YarnPerJobTestCase extends Logger {
    * SocketWindowWordCount.jar Download the built-in sample program in flink/examples
    */
   val userJar = s"$FLINK_HOME/examples/streaming/SocketWindowWordCount.jar"
+
   /**
    * Parameters required to run the program
    */
@@ -71,7 +74,7 @@ object YarnPerJobTestCase extends Logger {
 
   lazy val flinkDefaultConfiguration: Configuration = {
     require(FLINK_HOME != null)
-    //获取flink的配置
+    // get flink config
     GlobalConfiguration.loadConfiguration(s"$FLINK_HOME/conf")
   }
 
@@ -92,27 +95,26 @@ object YarnPerJobTestCase extends Logger {
       classOf[String],
       classOf[String],
       classOf[JobGraph],
-      Boolean2boolean(true).getClass
-    )
+      Boolean2boolean(true).getClass)
     val deployInternal = classOf[YarnClusterDescriptor].getDeclaredMethod("deployInternal", paramClass: _*)
     deployInternal.setAccessible(true)
     deployInternal
   }
 
-  def deployInternal(clusterDescriptor: YarnClusterDescriptor,
-                     clusterSpecification: ClusterSpecification,
-                     applicationName: String,
-                     yarnClusterEntrypoint: String,
-                     jobGraph: JobGraph,
-                     detached: java.lang.Boolean): ClusterClientProvider[ApplicationId] = {
+  def deployInternal(
+      clusterDescriptor: YarnClusterDescriptor,
+      clusterSpecification: ClusterSpecification,
+      applicationName: String,
+      yarnClusterEntrypoint: String,
+      jobGraph: JobGraph,
+      detached: java.lang.Boolean): ClusterClientProvider[ApplicationId] = {
     deployInternalMethod.invoke(
       clusterDescriptor,
       clusterSpecification,
       applicationName,
       yarnClusterEntrypoint,
       jobGraph,
-      detached
-    ).asInstanceOf[ClusterClientProvider[ApplicationId]]
+      detached).asInstanceOf[ClusterClientProvider[ApplicationId]]
   }
 
   def main(args: Array[String]): Unit = {
@@ -130,7 +132,7 @@ object YarnPerJobTestCase extends Logger {
 
     val activeCommandLine = {
       val line = checkNotNull(commandLine)
-      println("Custom commandlines: {}", customCommandLines)
+      logInfo("Custom commandlines: $customCommandLines")
       customCommandLines.filter(_.isActive(line)).get(0)
     }
 
@@ -170,8 +172,7 @@ object YarnPerJobTestCase extends Logger {
           packagedProgram,
           flinkConfig,
           1,
-          false
-        )
+          false)
         logInfo("------------------<<jobId>>------------------")
         logger.info(s"${jobGraph.getJobID.toString}")
         logInfo("------------------------------------")
@@ -182,8 +183,7 @@ object YarnPerJobTestCase extends Logger {
           "MyJob",
           classOf[YarnJobClusterEntrypoint].getName,
           jobGraph,
-          false
-        ).getClusterClient
+          false).getClusterClient
       }
       val applicationId = clusterClient.getClusterId
       logInfo("------------------<<applicationId>>-------------------")
@@ -191,8 +191,8 @@ object YarnPerJobTestCase extends Logger {
       logInfo("-------------------------------------")
       bean.SubmitResponse(applicationId.toString, flinkConfig.toMap)
     } finally if (clusterDescriptor != null) {
-      clusterDescriptor.close()
-    }
+        clusterDescriptor.close()
+      }
   }
 
 }

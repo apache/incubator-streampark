@@ -16,15 +16,15 @@
  */
 package org.apache.streampark.common.util
 
+import java.io.File
+import java.time.Duration
+import java.util
+
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext
 import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
 import org.apache.flink.util.TimeUtils
-
-import java.io.File
-import java.time.Duration
-import java.util
 
 object FlinkUtils {
 

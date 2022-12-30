@@ -16,14 +16,13 @@
  */
 package org.apache.streampark.flink.kubernetes
 
+import scala.collection.JavaConverters._
+
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-import scala.collection.JavaConverters._
-
 // scalastyle:off println
 class PodTemplateParserTest {
-
 
   @Test
   def testCompleteInitPodTemplate(): Unit = {
@@ -34,18 +33,17 @@ class PodTemplateParserTest {
           |metadata:
           |  name: pod-template
           |""".stripMargin,
-
       """apiVersion: v1
         |kind: Pod
         |metadata:
         |  name: jm-pod-template
         |""".stripMargin
         ->
-        """apiVersion: v1
-          |kind: Pod
-          |metadata:
-          |  name: jm-pod-template
-          |""".stripMargin,
+          """apiVersion: v1
+            |kind: Pod
+            |metadata:
+            |  name: jm-pod-template
+            |""".stripMargin,
       """apiVersion: v1
         |kind: Pod
         |metadata:
@@ -53,20 +51,20 @@ class PodTemplateParserTest {
         |spec:
         |""".stripMargin
         ->
-        """apiVersion: v1
-          |kind: Pod
-          |metadata:
-          |  name: pod-template
-          |""".stripMargin,
+          """apiVersion: v1
+            |kind: Pod
+            |metadata:
+            |  name: pod-template
+            |""".stripMargin,
       """apiVersion: v1
         |spec:
         |""".stripMargin
         ->
-        """apiVersion: v1
-          |kind: Pod
-          |metadata:
-          |  name: pod-template
-          |""".stripMargin,
+          """apiVersion: v1
+            |kind: Pod
+            |metadata:
+            |  name: pod-template
+            |""".stripMargin,
       """apiVersion: v1
         |kind: Pod
         |metadata:
@@ -88,32 +86,31 @@ class PodTemplateParserTest {
         |        claimName: flink-savepoint
         |""".stripMargin
         ->
-        """apiVersion: v1
-          |kind: Pod
-          |metadata:
-          |  name: pod-template
-          |spec:
-          |  containers:
-          |  - name: flink-main-container
-          |    volumeMounts:
-          |    - name: checkpoint-pvc
-          |      mountPath: /opt/flink/checkpoints
-          |    - name: savepoint-pvc
-          |      mountPath: /opt/flink/savepoints
-          |  volumes:
-          |  - name: checkpoint-pvc
-          |    persistentVolumeClaim:
-          |      claimName: flink-checkpoint
-          |  - name: savepoint-pvc
-          |    persistentVolumeClaim:
-          |      claimName: flink-savepoint
-          |""".stripMargin)
+          """apiVersion: v1
+            |kind: Pod
+            |metadata:
+            |  name: pod-template
+            |spec:
+            |  containers:
+            |  - name: flink-main-container
+            |    volumeMounts:
+            |    - name: checkpoint-pvc
+            |      mountPath: /opt/flink/checkpoints
+            |    - name: savepoint-pvc
+            |      mountPath: /opt/flink/savepoints
+            |  volumes:
+            |  - name: checkpoint-pvc
+            |    persistentVolumeClaim:
+            |      claimName: flink-checkpoint
+            |  - name: savepoint-pvc
+            |    persistentVolumeClaim:
+            |      claimName: flink-savepoint
+            |""".stripMargin)
     for (expect <- podTemplateExpect) {
       val res = PodTemplateParser.completeInitPodTemplate(expect._1)
       assertEquals(expect._2.trim, res.trim)
     }
   }
-
 
   @Test
   def testHostAliasSpecToPodTemplate(): Unit = {
@@ -122,8 +119,7 @@ class PodTemplateParserTest {
       "hdp02" -> "192.168.3.115",
       "hdp01.assad.site" -> "192.168.3.114",
       "hdp02.assad.site" -> "192.168.3.115",
-      "hdp03.assad.site" -> "192.168.3.116"
-    ).asJava
+      "hdp03.assad.site" -> "192.168.3.116").asJava
 
     val expected = Map(
       "" ->
@@ -145,7 +141,6 @@ class PodTemplateParserTest {
           |    - hdp02
           |    - hdp02.assad.site
           |""".stripMargin,
-
       """apiVersion: v1
         |kind: Pod
         |metadata:
@@ -250,14 +245,12 @@ class PodTemplateParserTest {
           |    hostnames:
           |    - hdp02
           |    - hdp02.assad.site
-          |""".stripMargin
-    )
+          |""".stripMargin)
     for (expect <- expected) {
       val result = PodTemplateParser.completeHostAliasSpec(hostMap, expect._1)
       assertEquals(result, expect._2)
     }
   }
-
 
   @Test
   def testExtractHostAliasMapFromPodTemplate(): Unit = {
@@ -295,12 +288,12 @@ class PodTemplateParserTest {
         |    - hdp02
         |""".stripMargin
         ->
-        Map("hdp01.assad.site" -> "192.168.3.114",
-          "hdp01" -> "192.168.3.114",
-          "hdp03.assad.site" -> "192.168.3.116",
-          "hdp02.assad.site" -> "192.168.3.115",
-          "hdp02" -> "192.168.3.115"
-        ),
+          Map(
+            "hdp01.assad.site" -> "192.168.3.114",
+            "hdp01" -> "192.168.3.114",
+            "hdp03.assad.site" -> "192.168.3.116",
+            "hdp02.assad.site" -> "192.168.3.115",
+            "hdp02" -> "192.168.3.115"),
       """apiVersion: v1
         |kind: Pod
         |metadata:
@@ -323,7 +316,7 @@ class PodTemplateParserTest {
         |  hostAliases:
         |""".stripMargin
         ->
-        Map(),
+          Map(),
       """apiVersion: v1
         |kind: Pod
         |metadata:
@@ -350,8 +343,7 @@ class PodTemplateParserTest {
         |  name: pod-template
         |spec: 2333
         |""".stripMargin
-        -> Map()
-    )
+        -> Map())
 
     for (expect <- expected) {
       val hostsMap = PodTemplateParser.extractHostAliasMap(expect._1).asScala
@@ -361,15 +353,14 @@ class PodTemplateParserTest {
 
   @Test
   def testPreviewHostAliasSpec(): Unit = {
-    val hosts = Map("hdp01.assad.site" -> "192.168.3.114",
+    val hosts = Map(
+      "hdp01.assad.site" -> "192.168.3.114",
       "hdp01" -> "192.168.3.114",
       "hdp03.assad.site" -> "192.168.3.116",
       "hdp02.assad.site" -> "192.168.3.115",
-      "hdp02" -> "192.168.3.115"
-    )
+      "hdp02" -> "192.168.3.115")
     val hostAlias = PodTemplateParser.previewHostAliasSpec(hosts.asJava)
     println(hostAlias)
   }
-
 
 }

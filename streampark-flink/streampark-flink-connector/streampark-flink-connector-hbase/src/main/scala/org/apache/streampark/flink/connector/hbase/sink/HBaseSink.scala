@@ -17,36 +17,39 @@
 
 package org.apache.streampark.flink.connector.hbase.sink
 
+import java.lang.{Iterable => JIter}
+import java.util.Properties
+
+import scala.annotation.meta.param
+
+import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream, DataStreamSink}
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.hadoop.hbase.client._
+
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.util.{ConfigUtils, Logger, Utils}
 import org.apache.streampark.flink.connector.function.TransformFunction
 import org.apache.streampark.flink.connector.hbase.internal.HBaseSinkFunction
 import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
-import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.hadoop.hbase.client._
-
-import java.lang.{Iterable => JIter}
-import java.util.Properties
-import scala.annotation.meta.param
 
 object HBaseSink {
 
-  def apply(@(transient@param)
-            property: Properties = new Properties(),
-            parallelism: Int = 0,
-            name: String = null,
-            uid: String = null)(implicit ctx: StreamingContext): HBaseSink = new HBaseSink(ctx, property, parallelism, name, uid)
+  def apply(
+      @(transient @param)
+      property: Properties = new Properties(),
+      parallelism: Int = 0,
+      name: String = null,
+      uid: String = null)(implicit ctx: StreamingContext): HBaseSink = new HBaseSink(ctx, property, parallelism, name, uid)
 
 }
 
-class HBaseSink(@(transient@param) ctx: StreamingContext,
-                property: Properties = new Properties(),
-                parallelism: Int = 0,
-                name: String = null,
-                uid: String = null)(implicit alias: String = "") extends Sink with Logger {
-
+class HBaseSink(
+    @(transient @param) ctx: StreamingContext,
+    property: Properties = new Properties(),
+    parallelism: Int = 0,
+    name: String = null,
+    uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
   def this(ctx: StreamingContext) {
     this(ctx, new Properties, 0, null, null)
@@ -75,7 +78,3 @@ class HBaseSink(@(transient@param) ctx: StreamingContext,
     prop
   }
 }
-
-
-
-

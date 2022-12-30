@@ -56,153 +56,158 @@ import java.util.Map;
 @TableName("t_flink_cluster")
 public class FlinkCluster implements Serializable {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+  @TableId(type = IdType.AUTO)
+  private Long id;
 
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private String address;
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
+  private String address;
 
-    private String clusterId;
+  private String clusterId;
 
-    private String clusterName;
+  private String clusterName;
 
-    private Integer executionMode;
+  private Integer executionMode;
 
-    /**
-     * flink version
-     */
-    private Long versionId;
+  /** flink version */
+  private Long versionId;
 
-    private String k8sNamespace;
+  private String k8sNamespace;
 
-    private String serviceAccount;
+  private String serviceAccount;
 
-    private String description;
+  private String description;
 
-    private Long userId;
+  private Long userId;
 
-    private String flinkImage;
+  private String flinkImage;
 
-    private String options;
+  private String options;
 
-    private String yarnQueue;
+  private String yarnQueue;
 
-    private Boolean k8sHadoopIntegration;
+  private Boolean k8sHadoopIntegration;
 
-    private String dynamicProperties;
+  private String dynamicProperties;
 
-    private Integer k8sRestExposedType;
+  private Integer k8sRestExposedType;
 
-    private String k8sConf;
+  private String k8sConf;
 
-    private Integer resolveOrder;
+  private Integer resolveOrder;
 
-    private String exception;
+  private String exception;
 
-    private Integer clusterState;
+  private Integer clusterState;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date createTime = new Date();
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+  private Date createTime = new Date();
 
-    @JsonIgnore
-    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
-        return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
+  @JsonIgnore
+  public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
+    return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
+  }
+
+  public ExecutionMode getExecutionModeEnum() {
+    return ExecutionMode.of(this.executionMode);
+  }
+
+  public ClusterState getClusterStateEnum() {
+    return ClusterState.of(this.clusterState);
+  }
+
+  @JsonIgnore
+  @SneakyThrows
+  public Map<String, Object> getOptionMap() {
+    if (StringUtils.isBlank(this.options)) {
+      return Collections.emptyMap();
     }
-
-    public ExecutionMode getExecutionModeEnum() {
-        return ExecutionMode.of(this.executionMode);
+    Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
+    if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
+      map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
+      if (StringUtils.isNotEmpty(this.yarnQueue)) {
+        map.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.yarnQueue);
+      }
     }
+    map.entrySet().removeIf(entry -> entry.getValue() == null);
+    return map;
+  }
 
-    public ClusterState getClusterStateEnum() {
-        return ClusterState.of(this.clusterState);
+  @JsonIgnore
+  public URI getRemoteURI() {
+    try {
+      HttpClientUtils.httpGetRequest(
+          this.address, RequestConfig.custom().setSocketTimeout(2000).build());
+      return new URI(address);
+    } catch (Exception ignored) {
+      //
     }
+    return null;
+  }
 
-    @JsonIgnore
-    @SneakyThrows
-    public Map<String, Object> getOptionMap() {
-        if (StringUtils.isBlank(this.options)) {
-            return Collections.emptyMap();
-        }
-        Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
-        if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
-            map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
-            if (StringUtils.isNotEmpty(this.yarnQueue)) {
-                map.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.yarnQueue);
-            }
-        }
-        map.entrySet().removeIf(entry -> entry.getValue() == null);
-        return map;
-    }
-
-    @JsonIgnore
-    public URI getRemoteURI() {
-        try {
-            HttpClientUtils.httpGetRequest(this.address, RequestConfig.custom().setSocketTimeout(2000).build());
-            return new URI(address);
-        } catch (Exception ignored) {
-            //
-        }
-        return null;
-    }
-
-    public boolean verifyClusterConnection() {
-        if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
-            if (address == null) {
-                return false;
-            }
-            //1) check url is Legal
-            if (!CommonUtils.isLegalUrl(address)) {
-                return false;
-            }
-            //2) check connection
-            try {
-                String restUrl = address + "/overview";
-                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-                JacksonUtils.read(result, Overview.class);
-                return true;
-            } catch (Exception ignored) {
-                //
-            }
-            return false;
-        } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
-            try {
-                String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
-                String result = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-                JacksonUtils.read(result, Overview.class);
-                return true;
-            } catch (Exception ignored) {
-                //
-            }
-            return false;
-        }
+  public boolean verifyClusterConnection() {
+    if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
+      if (address == null) {
         return false;
+      }
+      // 1) check url is Legal
+      if (!CommonUtils.isLegalUrl(address)) {
+        return false;
+      }
+      // 2) check connection
+      try {
+        String restUrl = address + "/overview";
+        String result =
+            HttpClientUtils.httpGetRequest(
+                restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+        JacksonUtils.read(result, Overview.class);
+        return true;
+      } catch (Exception ignored) {
+        //
+      }
+      return false;
+    } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+      try {
+        String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
+        String result =
+            HttpClientUtils.httpGetRequest(
+                restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+        JacksonUtils.read(result, Overview.class);
+        return true;
+      } catch (Exception ignored) {
+        //
+      }
+      return false;
     }
+    return false;
+  }
 
-    @JsonIgnore
-    public Map<String, String> getFlinkConfig() throws JsonProcessingException {
-        String restUrl = this.address + "/jobmanager/config";
-        String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-        if (StringUtils.isEmpty(json)) {
-            return Collections.emptyMap();
-        }
-        List<Map<String, String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
-        });
-        Map<String, String> config = new HashMap<>(0);
-        confList.forEach(k -> config.put(k.get("key"), k.get("value")));
-        return config;
+  @JsonIgnore
+  public Map<String, String> getFlinkConfig() throws JsonProcessingException {
+    String restUrl = this.address + "/jobmanager/config";
+    String json =
+        HttpClientUtils.httpGetRequest(
+            restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+    if (StringUtils.isEmpty(json)) {
+      return Collections.emptyMap();
     }
+    List<Map<String, String>> confList =
+        JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {});
+    Map<String, String> config = new HashMap<>(0);
+    confList.forEach(k -> config.put(k.get("key"), k.get("value")));
+    return config;
+  }
 
-    @JsonIgnore
-    public Map<String, Object> getProperties() {
-        Map<String, Object> map = new HashMap<>();
-        Map<String, String> dynamicProperties = FlinkSubmitter.extractDynamicPropertiesAsJava(this.getDynamicProperties());
-        map.putAll(this.getOptionMap());
-        map.putAll(dynamicProperties);
-        ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
-        if (resolveOrder != null) {
-            map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
-        }
-        return map;
+  @JsonIgnore
+  public Map<String, Object> getProperties() {
+    Map<String, Object> map = new HashMap<>();
+    Map<String, String> dynamicProperties =
+        FlinkSubmitter.extractDynamicPropertiesAsJava(this.getDynamicProperties());
+    map.putAll(this.getOptionMap());
+    map.putAll(dynamicProperties);
+    ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
+    if (resolveOrder != null) {
+      map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
     }
-
+    return map;
+  }
 }

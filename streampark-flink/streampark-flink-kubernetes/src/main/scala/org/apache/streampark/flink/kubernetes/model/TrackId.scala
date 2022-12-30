@@ -17,20 +17,15 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
+import scala.util.Try
+
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
-import scala.util.Try
-
 /**
  * tracking identifier for flink on kubernetes
- *
  */
-case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
-                   namespace: String = "default",
-                   clusterId: String,
-                   appId: Long,
-                   jobId: String) {
+case class TrackId(executeMode: FlinkK8sExecuteMode.Value, namespace: String = "default", clusterId: String, appId: Long, jobId: String) {
 
   def isLegal: Boolean = {
     executeMode match {
@@ -63,10 +58,10 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
     obj match {
       case that: TrackId =>
         this.executeMode == that.executeMode &&
-          this.clusterId == that.clusterId &&
-          this.namespace == that.namespace &&
-          this.appId == that.appId &&
-          this.jobId == that.jobId
+        this.clusterId == that.clusterId &&
+        this.namespace == that.namespace &&
+        this.appId == that.appId &&
+        this.jobId == that.jobId
       case _ => false
     }
   }
@@ -75,10 +70,10 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
 
 object TrackId {
   def onSession(namespace: String, clusterId: String, appId: Long, jobId: String): TrackId = {
-    this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId)
+    this(FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId)
   }
 
   def onApplication(namespace: String, clusterId: String, appId: Long, jobId: String = null): TrackId = {
-    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId)
+    this(FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId)
   }
 }

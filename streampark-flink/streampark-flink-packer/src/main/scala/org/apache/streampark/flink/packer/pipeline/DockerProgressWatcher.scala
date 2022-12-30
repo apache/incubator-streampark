@@ -20,7 +20,6 @@ package org.apache.streampark.flink.packer.pipeline
 /**
  * Trait for watching the change events of the Docker resolved progress
  * for a BuildPipeline instance.
- *
  */
 trait DockerProgressWatcher {
 

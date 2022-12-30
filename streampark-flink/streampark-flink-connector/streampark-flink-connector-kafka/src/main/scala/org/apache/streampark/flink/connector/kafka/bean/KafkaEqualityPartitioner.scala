@@ -17,14 +17,14 @@
 
 package org.apache.streampark.flink.connector.kafka.bean
 
-import org.apache.streampark.common.util.Logger
-import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
-
 import java.util.concurrent.atomic.AtomicInteger
 import javax.annotation.Nullable
 
+import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
+
+import org.apache.streampark.common.util.Logger
+
 /**
- *
  * <b>KafkaEqualityPartitioner</b>Equality Partitioner, the partitioner can evenly write data to each partition
  *
  * @param parallelism
@@ -38,7 +38,9 @@ class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitione
 
   override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
     logInfo(s"KafkaEqualityPartitioner: parallelism $parallelism")
-    require(parallelInstanceId >= 0 && parallelInstances > 0, "[StreamPark] KafkaEqualityPartitioner:Id of this subtask cannot be negative,Number of subtasks must be larger than 0.")
+    require(
+      parallelInstanceId >= 0 && parallelInstances > 0,
+      "[StreamPark] KafkaEqualityPartitioner:Id of this subtask cannot be negative,Number of subtasks must be larger than 0.")
     this.parallelInstanceId = parallelInstanceId
   }
 

@@ -21,39 +21,28 @@ import java.io.Serializable;
 
 public enum AppExistsState implements Serializable {
 
-    /**
-     * no exists
-     */
-    NO(0),
+  /** no exists */
+  NO(0),
 
-    /**
-     * exists in database
-     */
-    IN_DB(1),
+  /** exists in database */
+  IN_DB(1),
 
-    /**
-     * exists in yarn
-     */
-    IN_YARN(2),
+  /** exists in yarn */
+  IN_YARN(2),
 
-    /**
-     * exists in remote kubernetes cluster.
-     */
-    IN_KUBERNETES(3),
+  /** exists in remote kubernetes cluster. */
+  IN_KUBERNETES(3),
 
-    /**
-     * job name invalid because of special utf-8 character
-     *
-     */
-    INVALID(4);
+  /** job name invalid because of special utf-8 character */
+  INVALID(4);
 
-    private final int value;
+  private final int value;
 
-    AppExistsState(int value) {
-        this.value = value;
-    }
+  AppExistsState(int value) {
+    this.value = value;
+  }
 
-    public int get() {
-        return this.value;
-    }
+  public int get() {
+    return this.value;
+  }
 }

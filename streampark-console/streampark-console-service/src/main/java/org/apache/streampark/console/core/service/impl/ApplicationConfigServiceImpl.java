@@ -57,211 +57,206 @@ public class ApplicationConfigServiceImpl
     extends ServiceImpl<ApplicationConfigMapper, ApplicationConfig>
     implements ApplicationConfigService {
 
-    private String flinkConfTemplate = null;
+  private String flinkConfTemplate = null;
 
-    @Autowired
-    private ResourceLoader resourceLoader;
+  @Autowired private ResourceLoader resourceLoader;
 
-    @Autowired
-    private EffectiveService effectiveService;
+  @Autowired private EffectiveService effectiveService;
 
-    @Override
-    @Transactional(rollbackFor = {Exception.class})
-    public synchronized void create(Application application, Boolean latest) {
+  @Override
+  @Transactional(rollbackFor = {Exception.class})
+  public synchronized void create(Application application, Boolean latest) {
+    String decode = new String(Base64.getDecoder().decode(application.getConfig()));
+    String config = DeflaterUtils.zipString(decode.trim());
+
+    ApplicationConfig applicationConfig = new ApplicationConfig();
+    applicationConfig.setAppId(application.getId());
+
+    if (application.getFormat() != null) {
+      ConfigFileType fileType = ConfigFileType.of(application.getFormat());
+      if (fileType == null || ConfigFileType.UNKNOWN.equals(fileType)) {
+        throw new ApiAlertException(
+            "application' config error. must be (.properties|.yaml|.yml |.conf)");
+      }
+      applicationConfig.setFormat(fileType.getValue());
+    }
+
+    applicationConfig.setContent(config);
+    applicationConfig.setCreateTime(new Date());
+    Integer version = this.baseMapper.getLastVersion(application.getId());
+    applicationConfig.setVersion(version == null ? 1 : version + 1);
+    save(applicationConfig);
+    this.setLatestOrEffective(latest, applicationConfig.getId(), application.getId());
+  }
+
+  @Transactional(rollbackFor = {Exception.class})
+  public void setLatest(Long appId, Long configId) {
+    LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
+    updateWrapper.set(ApplicationConfig::getLatest, false).eq(ApplicationConfig::getAppId, appId);
+    this.update(updateWrapper);
+
+    updateWrapper.clear();
+    updateWrapper.set(ApplicationConfig::getLatest, true).eq(ApplicationConfig::getId, configId);
+    this.update(updateWrapper);
+  }
+
+  @Override
+  @Transactional(rollbackFor = {Exception.class})
+  public synchronized void update(Application application, Boolean latest) {
+    // flink sql job
+    ApplicationConfig latestConfig = getLatest(application.getId());
+    if (application.isFlinkSqlJob()) {
+      // get effect config
+      ApplicationConfig effectiveConfig = getEffective(application.getId());
+      if (Utils.isEmpty(application.getConfig())) {
+        if (effectiveConfig != null) {
+          effectiveService.delete(application.getId(), EffectiveType.CONFIG);
+        }
+      } else {
+        // there was no configuration before, is a new configuration
+        if (effectiveConfig == null) {
+          if (latestConfig != null) {
+            removeById(latestConfig.getId());
+          }
+          this.create(application, latest);
+        } else {
+          String decode = new String(Base64.getDecoder().decode(application.getConfig()));
+          String encode = DeflaterUtils.zipString(decode.trim());
+          // need to diff the two configs are consistent
+          if (!effectiveConfig.getContent().equals(encode)) {
+            if (latestConfig != null) {
+              removeById(latestConfig.getId());
+            }
+            this.create(application, latest);
+          }
+        }
+      }
+    } else {
+      // may be re-selected a config file (without config id), or may be based on an original edit
+      // (with config Id).
+      Long configId = application.getConfigId();
+      // an original edit
+      if (configId != null) {
+        ApplicationConfig config = this.getById(configId);
         String decode = new String(Base64.getDecoder().decode(application.getConfig()));
-        String config = DeflaterUtils.zipString(decode.trim());
-
-        ApplicationConfig applicationConfig = new ApplicationConfig();
-        applicationConfig.setAppId(application.getId());
-
-        if (application.getFormat() != null) {
-            ConfigFileType fileType = ConfigFileType.of(application.getFormat());
-            if (fileType == null || ConfigFileType.UNKNOWN.equals(fileType)) {
-                throw new ApiAlertException("application' config error. must be (.properties|.yaml|.yml |.conf)");
-            }
-            applicationConfig.setFormat(fileType.getValue());
-        }
-
-        applicationConfig.setContent(config);
-        applicationConfig.setCreateTime(new Date());
-        Integer version = this.baseMapper.getLastVersion(application.getId());
-        applicationConfig.setVersion(version == null ? 1 : version + 1);
-        save(applicationConfig);
-        this.setLatestOrEffective(latest, applicationConfig.getId(), application.getId());
-    }
-
-    @Transactional(rollbackFor = {Exception.class})
-    public void setLatest(Long appId, Long configId) {
-        LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.set(ApplicationConfig::getLatest, false)
-            .eq(ApplicationConfig::getAppId, appId);
-        this.update(updateWrapper);
-
-        updateWrapper.clear();
-        updateWrapper.set(ApplicationConfig::getLatest, true)
-            .eq(ApplicationConfig::getId, configId);
-        this.update(updateWrapper);
-    }
-
-    @Override
-    @Transactional(rollbackFor = {Exception.class})
-    public synchronized void update(Application application, Boolean latest) {
-        // flink sql job
-        ApplicationConfig latestConfig = getLatest(application.getId());
-        if (application.isFlinkSqlJob()) {
-            // get effect config
-            ApplicationConfig effectiveConfig = getEffective(application.getId());
-            if (Utils.isEmpty(application.getConfig())) {
-                if (effectiveConfig != null) {
-                    effectiveService.delete(application.getId(), EffectiveType.CONFIG);
-                }
-            } else {
-                // there was no configuration before, is a new configuration
-                if (effectiveConfig == null) {
-                    if (latestConfig != null) {
-                        removeById(latestConfig.getId());
-                    }
-                    this.create(application, latest);
-                } else {
-                    String decode = new String(Base64.getDecoder().decode(application.getConfig()));
-                    String encode = DeflaterUtils.zipString(decode.trim());
-                    // need to diff the two configs are consistent
-                    if (!effectiveConfig.getContent().equals(encode)) {
-                        if (latestConfig != null) {
-                            removeById(latestConfig.getId());
-                        }
-                        this.create(application, latest);
-                    }
-                }
-            }
+        String encode = DeflaterUtils.zipString(decode.trim());
+        // create...
+        if (!config.getContent().equals(encode)) {
+          if (latestConfig != null) {
+            removeById(latestConfig.getId());
+          }
+          this.create(application, latest);
         } else {
-            // may be re-selected a config file (without config id), or may be based on an original edit (with config Id).
-            Long configId = application.getConfigId();
-            // an original edit
-            if (configId != null) {
-                ApplicationConfig config = this.getById(configId);
-                String decode = new String(Base64.getDecoder().decode(application.getConfig()));
-                String encode = DeflaterUtils.zipString(decode.trim());
-                // create...
-                if (!config.getContent().equals(encode)) {
-                    if (latestConfig != null) {
-                        removeById(latestConfig.getId());
-                    }
-                    this.create(application, latest);
-                } else {
-                    this.setLatestOrEffective(latest, configId, application.getId());
-                }
-            } else {
-                ApplicationConfig config = getEffective(application.getId());
-                if (config != null) {
-                    String decode = new String(Base64.getDecoder().decode(application.getConfig()));
-                    String encode = DeflaterUtils.zipString(decode.trim());
-                    // create...
-                    if (!config.getContent().equals(encode)) {
-                        this.create(application, latest);
-                    }
-                } else {
-                    this.create(application, latest);
-                }
-            }
+          this.setLatestOrEffective(latest, configId, application.getId());
         }
-    }
-
-    /**
-     * Not running tasks are set to Effective, running tasks are set to Latest
-     */
-    @Override
-    public void setLatestOrEffective(Boolean latest, Long configId, Long appId) {
-        if (latest) {
-            this.setLatest(appId, configId);
+      } else {
+        ApplicationConfig config = getEffective(application.getId());
+        if (config != null) {
+          String decode = new String(Base64.getDecoder().decode(application.getConfig()));
+          String encode = DeflaterUtils.zipString(decode.trim());
+          // create...
+          if (!config.getContent().equals(encode)) {
+            this.create(application, latest);
+          }
         } else {
-            this.toEffective(appId, configId);
+          this.create(application, latest);
         }
+      }
     }
+  }
 
-    @Override
-    public void toEffective(Long appId, Long configId) {
-        LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.eq(ApplicationConfig::getAppId, appId)
-            .set(ApplicationConfig::getLatest, false);
-        this.update(updateWrapper);
-        effectiveService.saveOrUpdate(appId, EffectiveType.CONFIG, configId);
+  /** Not running tasks are set to Effective, running tasks are set to Latest */
+  @Override
+  public void setLatestOrEffective(Boolean latest, Long configId, Long appId) {
+    if (latest) {
+      this.setLatest(appId, configId);
+    } else {
+      this.toEffective(appId, configId);
     }
+  }
 
-    @Override
-    public ApplicationConfig getLatest(Long appId) {
-        return baseMapper.getLatest(appId);
+  @Override
+  public void toEffective(Long appId, Long configId) {
+    LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
+    updateWrapper.eq(ApplicationConfig::getAppId, appId).set(ApplicationConfig::getLatest, false);
+    this.update(updateWrapper);
+    effectiveService.saveOrUpdate(appId, EffectiveType.CONFIG, configId);
+  }
+
+  @Override
+  public ApplicationConfig getLatest(Long appId) {
+    return baseMapper.getLatest(appId);
+  }
+
+  @Override
+  @Transactional(rollbackFor = {Exception.class})
+  public ApplicationConfig getEffective(Long appId) {
+    return baseMapper.getEffective(appId);
+  }
+
+  @Override
+  public ApplicationConfig get(Long id) {
+    ApplicationConfig config = getById(id);
+    if (config.getContent() != null) {
+      String unzipString = DeflaterUtils.unzipString(config.getContent());
+      String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
+      config.setContent(encode);
     }
+    return config;
+  }
 
-    @Override
-    @Transactional(rollbackFor = {Exception.class})
-    public ApplicationConfig getEffective(Long appId) {
-        return baseMapper.getEffective(appId);
-    }
+  @Override
+  public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
+    Page<ApplicationConfig> page =
+        new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
+    return this.baseMapper.pageByAppId(page, config.getAppId());
+  }
 
-    @Override
-    public ApplicationConfig get(Long id) {
-        ApplicationConfig config = getById(id);
-        if (config.getContent() != null) {
-            String unzipString = DeflaterUtils.unzipString(config.getContent());
-            String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
-            config.setContent(encode);
-        }
-        return config;
-    }
-
-    @Override
-    public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
-        Page<ApplicationConfig> page = new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
-        return this.baseMapper.pageByAppId(page, config.getAppId());
-    }
-
-    @Override
-    public List<ApplicationConfig> history(Application application) {
-        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
+  @Override
+  public List<ApplicationConfig> history(Application application) {
+    LambdaQueryWrapper<ApplicationConfig> queryWrapper =
+        new LambdaQueryWrapper<ApplicationConfig>()
             .eq(ApplicationConfig::getAppId, application.getId())
             .orderByDesc(ApplicationConfig::getVersion);
 
-        List<ApplicationConfig> configList = this.baseMapper.selectList(queryWrapper);
-        ApplicationConfig effective = getEffective(application.getId());
+    List<ApplicationConfig> configList = this.baseMapper.selectList(queryWrapper);
+    ApplicationConfig effective = getEffective(application.getId());
 
-        if (effective != null) {
-            for (ApplicationConfig config : configList) {
-                if (config.getId().equals(effective.getId())) {
-                    config.setEffective(true);
-                    break;
-                }
-            }
+    if (effective != null) {
+      for (ApplicationConfig config : configList) {
+        if (config.getId().equals(effective.getId())) {
+          config.setEffective(true);
+          break;
         }
-        return configList;
+      }
     }
+    return configList;
+  }
 
-    @Override
-    public synchronized String readTemplate() {
-        if (flinkConfTemplate == null) {
-            try {
-                Resource resource = resourceLoader.getResource("classpath:flink-application.conf");
-                Scanner scanner = new Scanner(resource.getInputStream());
-                StringBuilder stringBuffer = new StringBuilder();
-                while (scanner.hasNextLine()) {
-                    stringBuffer.append(scanner.nextLine())
-                        .append(System.lineSeparator());
-                }
-                scanner.close();
-                String template = stringBuffer.toString();
-                this.flinkConfTemplate = Base64.getEncoder().encodeToString(template.getBytes());
-            } catch (Exception e) {
-                log.error("Read conf/flink-application.conf failed, please check your deployment");
-                log.error(e.getMessage(), e);
-            }
+  @Override
+  public synchronized String readTemplate() {
+    if (flinkConfTemplate == null) {
+      try {
+        Resource resource = resourceLoader.getResource("classpath:flink-application.conf");
+        Scanner scanner = new Scanner(resource.getInputStream());
+        StringBuilder stringBuffer = new StringBuilder();
+        while (scanner.hasNextLine()) {
+          stringBuffer.append(scanner.nextLine()).append(System.lineSeparator());
         }
-        return this.flinkConfTemplate;
+        scanner.close();
+        String template = stringBuffer.toString();
+        this.flinkConfTemplate = Base64.getEncoder().encodeToString(template.getBytes());
+      } catch (Exception e) {
+        log.error("Read conf/flink-application.conf failed, please check your deployment");
+        log.error(e.getMessage(), e);
+      }
     }
+    return this.flinkConfTemplate;
+  }
 
-    @Override
-    public void removeApp(Long appId) {
-        baseMapper.delete(
-            new LambdaQueryWrapper<ApplicationConfig>().eq(ApplicationConfig::getAppId, appId)
-        );
-    }
+  @Override
+  public void removeApp(Long appId) {
+    baseMapper.delete(
+        new LambdaQueryWrapper<ApplicationConfig>().eq(ApplicationConfig::getAppId, appId));
+  }
 }

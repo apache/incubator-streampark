@@ -16,12 +16,13 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.ConfigConst._
+import java.util.{Map => JavaMap, Properties}
 
-import java.util.{Properties, Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.collection.immutable.{Map => ScalaMap}
 import scala.util.Try
+
+import org.apache.streampark.common.conf.ConfigConst._
 
 object ConfigUtils {
 
@@ -39,7 +40,8 @@ object ConfigUtils {
   def getKafkaSinkConf(parameter: JavaMap[String, String], topic: String = "", alias: String = ""): Properties = {
     val prefix = KAFKA_SINK_PREFIX + alias
     val param: ScalaMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"$prefix.")
-    if (param.isEmpty) throw new IllegalArgumentException(s"${topic} init error...") else {
+    if (param.isEmpty) throw new IllegalArgumentException(s"${topic} init error...")
+    else {
       val kafkaProperty = new Properties()
       param.foreach(x => kafkaProperty.put(x._1, x._2.trim))
       val _topic = topic match {
@@ -61,7 +63,6 @@ object ConfigUtils {
   }
 
   /**
-   *
    * @param parameter
    * @param dialect
    * @param alias
@@ -79,7 +80,8 @@ object ConfigUtils {
 
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"Jdbc instance:$prefix error,[driver|url] must not be null")
-      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException("Jdbc instance:" + prefix + " error, [user|password] must be all null,or all not null ")
+      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) =>
+        throw new IllegalArgumentException("Jdbc instance:" + prefix + " error, [user|password] must be all null,or all not null ")
       case _ =>
     }
     val param: ScalaMap[String, String] = filterParam(parameter, prefix)
@@ -96,8 +98,7 @@ object ConfigUtils {
       .toMap
       .filter(x => x._1.startsWith(fix) && Try(x._2 != null).getOrElse(false))
       .flatMap(x =>
-        Some(x._1.substring(fix.length).replaceFirst("^\\.", "") -> x._2)
-      )
+        Some(x._1.substring(fix.length).replaceFirst("^\\.", "") -> x._2))
   }
 
 }

@@ -20,7 +20,6 @@ package org.apache.streampark.flink.kubernetes.model
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 
 /**
- *
  * @param jobState     state of flink job
  * @param jobId        flink jobId hex string
  * @param jobName      flink job name
@@ -28,12 +27,13 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
  * @param pollEmitTime tracking polling emit timestamp
  * @param pollAckTime  tracking polling result receive timestamp
  */
-case class JobStatusCV(jobState: FlinkJobState.Value,
-                       jobId: String,
-                       jobName: String = "",
-                       jobStartTime: Long = -1,
-                       jobEndTime: Long = -1,
-                       duration: Long = 0,
-                       taskTotal: Int = 0,
-                       pollEmitTime: Long,
-                       pollAckTime: Long)
+case class JobStatusCV(
+    jobState: FlinkJobState.Value,
+    jobId: String,
+    jobName: String = "",
+    jobStartTime: Long = -1,
+    jobEndTime: Long = -1,
+    duration: Long = 0,
+    taskTotal: Int = 0,
+    pollEmitTime: Long,
+    pollAckTime: Long)

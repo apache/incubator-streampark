@@ -17,19 +17,20 @@
 
 package org.apache.streampark.flink.submit.bean
 
+import java.util.{Map => JavaMap}
+import javax.annotation.Nullable
+
 import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.common.domain.FlinkVersion
 import org.apache.streampark.common.enums.ExecutionMode
 
-import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
-
-case class CancelRequest(flinkVersion: FlinkVersion,
-                         executionMode: ExecutionMode,
-                         clusterId: String,
-                         jobId: String,
-                         withSavePoint: Boolean,
-                         withDrain: Boolean,
-                         customSavePointPath: String,
-                         kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-                         @Nullable properties: JavaMap[String, Any])
+case class CancelRequest(
+    flinkVersion: FlinkVersion,
+    executionMode: ExecutionMode,
+    clusterId: String,
+    jobId: String,
+    withSavePoint: Boolean,
+    withDrain: Boolean,
+    customSavePointPath: String,
+    kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
+    @Nullable properties: JavaMap[String, Any])

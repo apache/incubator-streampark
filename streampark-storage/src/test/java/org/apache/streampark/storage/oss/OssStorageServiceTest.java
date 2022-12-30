@@ -24,14 +24,19 @@ import org.junit.jupiter.api.Test;
 
 class OssStorageServiceTest {
 
-    @Test
-    void testHandleException() {
-        OSSException ossException = new OSSException("mock error", "MOCK_CODE", "requestId", "hostId", "header", "resource", "GET");
-        RuntimeException exp = OssStorageService.handleOssException(ossException);
-        Assertions.assertEquals("Caught an OSSException. Error Message: mock error. Error Code: MOCK_CODE. Request ID: requestId", exp.getMessage());
+  @Test
+  void testHandleException() {
+    OSSException ossException =
+        new OSSException(
+            "mock error", "MOCK_CODE", "requestId", "hostId", "header", "resource", "GET");
+    RuntimeException exp = OssStorageService.handleOssException(ossException);
+    Assertions.assertEquals(
+        "Caught an OSSException. Error Message: mock error. Error Code: MOCK_CODE. Request ID: requestId",
+        exp.getMessage());
 
-        ClientException ossClientException = new ClientException("Client ERROR");
-        exp = OssStorageService.handleOssException(ossClientException);
-        Assertions.assertTrue(exp.getMessage().startsWith("Caught an ClientException. Error Message: Client ERROR"));
-    }
+    ClientException ossClientException = new ClientException("Client ERROR");
+    exp = OssStorageService.handleOssException(ossClientException);
+    Assertions.assertTrue(
+        exp.getMessage().startsWith("Caught an ClientException. Error Message: Client ERROR"));
+  }
 }

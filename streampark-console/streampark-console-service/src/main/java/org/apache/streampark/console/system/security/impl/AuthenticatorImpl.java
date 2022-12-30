@@ -32,45 +32,43 @@ import java.util.Date;
 
 @Component
 public class AuthenticatorImpl implements Authenticator {
-    @Autowired
-    private UserService usersService;
-    @Autowired
-    private LdapService ldapService;
+  @Autowired private UserService usersService;
+  @Autowired private LdapService ldapService;
 
-    @Override
-    public User authenticate(String username, String password) {
-        User user = usersService.findByName(username);
-        if (user == null) {
-            return null;
-        }
-        String salt = user.getSalt();
-        password = ShaHashUtils.encrypt(salt, password);
-        if (!StringUtils.equals(user.getPassword(), password)) {
-            return null;
-        }
-        return user;
+  @Override
+  public User authenticate(String username, String password) {
+    User user = usersService.findByName(username);
+    if (user == null) {
+      return null;
     }
+    String salt = user.getSalt();
+    password = ShaHashUtils.encrypt(salt, password);
+    if (!StringUtils.equals(user.getPassword(), password)) {
+      return null;
+    }
+    return user;
+  }
 
-    @Override
-    public User ldapAuthenticate(String username, String password) throws Exception {
-        String ldapEmail = ldapService.ldapLogin(username, password);
-        if (ldapEmail == null) {
-            return null;
-        }
-        //check if user exist
-        User user = usersService.findByName(username);
-        if (user != null || !ldapService.createIfUserNotExists()) {
-            return user;
-        }
-        User newUser = new User();
-        newUser.setCreateTime(new Date());
-        newUser.setUsername(username);
-        newUser.setNickName(username);
-        newUser.setUserType(UserType.USER);
-        newUser.setStatus(User.STATUS_VALID);
-        newUser.setSex(User.SEX_UNKNOW);
-        newUser.setPassword(password);
-        usersService.createUser(newUser);
-        return newUser;
+  @Override
+  public User ldapAuthenticate(String username, String password) throws Exception {
+    String ldapEmail = ldapService.ldapLogin(username, password);
+    if (ldapEmail == null) {
+      return null;
     }
+    // check if user exist
+    User user = usersService.findByName(username);
+    if (user != null || !ldapService.createIfUserNotExists()) {
+      return user;
+    }
+    User newUser = new User();
+    newUser.setCreateTime(new Date());
+    newUser.setUsername(username);
+    newUser.setNickName(username);
+    newUser.setUserType(UserType.USER);
+    newUser.setStatus(User.STATUS_VALID);
+    newUser.setSex(User.SEX_UNKNOW);
+    newUser.setPassword(password);
+    usersService.createUser(newUser);
+    return newUser;
+  }
 }

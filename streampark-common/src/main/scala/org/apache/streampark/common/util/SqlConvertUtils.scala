@@ -19,21 +19,19 @@ package org.apache.streampark.common.util
 import java.util
 import java.util.Scanner
 import java.util.regex.Pattern
+
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-
 
 object SqlConvertUtils extends Logger {
 
   private[this] val FIELD_REGEXP = Pattern.compile(
     "\\s*(.*?)\\s+(([a-z]+)\\((.*?)\\)|[a-z]+)(\\s*|((.*?)(comment)\\s+(['|\"](.*?)['|\"])|(.*?))),$",
-    Pattern.CASE_INSENSITIVE
-  )
+    Pattern.CASE_INSENSITIVE)
 
   private[this] val PRIMARY_REGEXP = Pattern.compile(
     "primary\\s+key\\s+\\((.*?)\\)",
-    Pattern.CASE_INSENSITIVE
-  )
+    Pattern.CASE_INSENSITIVE)
 
   /**
    * convert to flink types
@@ -71,11 +69,11 @@ object SqlConvertUtils extends Logger {
         length match {
           case null => "Int32"
           case x => x.trim.toInt match {
-            case x if x < 3 => "Int8"
-            case x if x < 5 => "Int16"
-            case x if x < 9 => "Int32"
-            case _ => "Int64"
-          }
+              case x if x < 3 => "Int8"
+              case x if x < 5 => "Int16"
+              case x if x < 9 => "Int32"
+              case _ => "Int64"
+            }
         }
       case "DECIMAL" =>
         length.split(",").map(_.trim.toInt) match {
@@ -91,7 +89,6 @@ object SqlConvertUtils extends Logger {
     }
   }
 
-
   /**
    * An magic code for format sql. only support ddl, create table syntax, etc.
    *
@@ -104,9 +101,7 @@ object SqlConvertUtils extends Logger {
 
     val COMMENT_REGEXP = Pattern.compile("(comment)\\s+(['\"])", Pattern.CASE_INSENSITIVE)
 
-    @tailrec def commentJoin(map: util.Map[Integer, String],
-                             index: Integer,
-                             segment: String): (Integer, String) = {
+    @tailrec def commentJoin(map: util.Map[Integer, String], index: Integer, segment: String): (Integer, String) = {
       val matcher = COMMENT_REGEXP.matcher(segment)
       matcher.find() match {
         case b if !b => index -> segment
@@ -126,9 +121,9 @@ object SqlConvertUtils extends Logger {
     }
 
     @tailrec def lengthJoin(
-                             map: util.Map[Integer, String],
-                             index: Integer,
-                             segment: String): (Integer, String) = {
+        map: util.Map[Integer, String],
+        index: Integer,
+        segment: String): (Integer, String) = {
       LENGTH_REGEXP.findFirstIn(segment) match {
         case None => commentJoin(map, index, segment)
         case Some(_) =>
@@ -173,17 +168,13 @@ object SqlConvertUtils extends Logger {
   }
 
   /**
-   *
    * @param sql      : original sql statement to be converted
    * @param typeFunc : type conversion function
    * @param keyFunc  : handle primary key function
    * @param postfix  : suffix content
    * @return
    */
-  private[this] def convertSql(sql: String,
-                               typeFunc: (String, String) => String = null,
-                               keyFunc: String => String = null,
-                               postfix: String = null): String = {
+  private[this] def convertSql(sql: String, typeFunc: (String, String) => String = null, keyFunc: String => String = null, postfix: String = null): String = {
 
     val formattedSql = formatSql(sql)
     val scanner = new Scanner(formattedSql)
@@ -200,14 +191,16 @@ object SqlConvertUtils extends Logger {
             }
           case a if !a.startsWith("UNIQUE KEY ") && !a.startsWith("KEY ") =>
             val matcher = FIELD_REGEXP.matcher(line)
-            if (!matcher.find()) null; else {
+            if (!matcher.find()) null;
+            else {
               val fieldName = matcher.group(1)
               val dataType = (matcher.group(2), matcher.group(3)) match {
                 case (_, b) if b != null => b
                 case (a, _) => a
               }
               val length = matcher.group(4)
-              if (dataType == null) null; else {
+              if (dataType == null) null;
+              else {
                 val fieldType = typeFunc(dataType, length)
                 matcher.group(8) match {
                   case x if x != null => s"$fieldName $fieldType COMMENT '${matcher.group(10)}'"
@@ -239,10 +232,8 @@ object SqlConvertUtils extends Logger {
         case _ => null
       }
     },
-    postfix
-  )
+    postfix)
 
   def mysqlToClickhouse(sql: String, postfix: String): String = convertSql(sql, toClickhouseDataType, postfix = postfix)
-
 
 }

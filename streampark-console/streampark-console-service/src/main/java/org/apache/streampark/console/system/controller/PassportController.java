@@ -48,69 +48,69 @@ import java.util.Map;
 @RequestMapping("passport")
 public class PassportController {
 
-    @Autowired
-    private UserService userService;
+  @Autowired private UserService userService;
 
-    @Autowired
-    private ShiroProperties properties;
+  @Autowired private ShiroProperties properties;
 
-    @Autowired
-    private Authenticator authenticator;
+  @Autowired private Authenticator authenticator;
 
-    @PostMapping("signin")
-    public RestResponse signin(
-        @NotBlank(message = "{required}") String username,
-        @NotBlank(message = "{required}") String password) throws Exception {
-        if (StringUtils.isEmpty(username)) {
-            return RestResponse.success().put("code", 0);
-        }
-        User user = authenticator.authenticate(username, password);
-        return login(username, password, user);
+  @PostMapping("signin")
+  public RestResponse signin(
+      @NotBlank(message = "{required}") String username,
+      @NotBlank(message = "{required}") String password)
+      throws Exception {
+    if (StringUtils.isEmpty(username)) {
+      return RestResponse.success().put("code", 0);
+    }
+    User user = authenticator.authenticate(username, password);
+    return login(username, password, user);
+  }
+
+  @PostMapping("ldapSignin")
+  public RestResponse ldapSignin(
+      @NotBlank(message = "{required}") String username,
+      @NotBlank(message = "{required}") String password)
+      throws Exception {
+    if (StringUtils.isEmpty(username)) {
+      return RestResponse.success().put("code", 0);
+    }
+    User user = authenticator.ldapAuthenticate(username, password);
+    return login(username, password, user);
+  }
+
+  @PostMapping("signout")
+  public RestResponse signout() {
+    SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
+    return new RestResponse();
+  }
+
+  private RestResponse login(String username, String password, User user) throws Exception {
+    if (user == null) {
+      return RestResponse.success().put("code", 0);
     }
 
-    @PostMapping("ldapSignin")
-    public RestResponse ldapSignin(
-        @NotBlank(message = "{required}") String username,
-        @NotBlank(message = "{required}") String password) throws Exception {
-        if (StringUtils.isEmpty(username)) {
-            return RestResponse.success().put("code", 0);
-        }
-        User user = authenticator.ldapAuthenticate(username, password);
-        return login(username, password, user);
+    if (User.STATUS_LOCK.equals(user.getStatus())) {
+      return RestResponse.success().put("code", 1);
     }
 
-    @PostMapping("signout")
-    public RestResponse signout() {
-        SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
-        return new RestResponse();
+    userService.fillInTeam(user);
+
+    // no team.
+    if (user.getLastTeamId() == null) {
+      return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
     }
 
-    private RestResponse login(String username, String password, User user) throws Exception {
-        if (user == null) {
-            return RestResponse.success().put("code", 0);
-        }
+    password = ShaHashUtils.encrypt(user.getSalt(), password);
 
-        if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
-        }
-
-        userService.fillInTeam(user);
-
-        //no team.
-        if (user.getLastTeamId() == null) {
-            return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
-        }
-
-        password = ShaHashUtils.encrypt(user.getSalt(), password);
-
-        this.userService.updateLoginTime(username);
-        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), username, password));
-        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
-        String expireTimeStr = DateUtils.formatFullTime(expireTime);
-        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
-        String userId = RandomStringUtils.randomAlphanumeric(20);
-        user.setId(userId);
-        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
-        return new RestResponse().data(userInfo);
-    }
+    this.userService.updateLoginTime(username);
+    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), username, password));
+    LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
+    String expireTimeStr = DateUtils.formatFullTime(expireTime);
+    JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+    String userId = RandomStringUtils.randomAlphanumeric(20);
+    user.setId(userId);
+    Map<String, Object> userInfo =
+        userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
+    return new RestResponse().data(userInfo);
+  }
 }

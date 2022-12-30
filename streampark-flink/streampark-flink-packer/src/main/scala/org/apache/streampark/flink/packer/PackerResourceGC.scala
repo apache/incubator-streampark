@@ -17,12 +17,14 @@
 
 package org.apache.streampark.flink.packer
 
-import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.util.Logger
+import java.io.File
+
+import scala.util.Try
+
 import org.apache.commons.io.FileUtils
 
-import java.io.File
-import scala.util.Try
+import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.util.Logger
 
 /**
  * Garbage resource collector during packing.

@@ -25,63 +25,63 @@ import java.io.IOException;
 
 public interface FlinkEnvService extends IService<FlinkEnv> {
 
-    /**
-     * check exists
-     *
-     * @param version
-     * @return
-     */
-    boolean exists(FlinkEnv version);
+  /**
+   * check exists
+   *
+   * @param version
+   * @return
+   */
+  boolean exists(FlinkEnv version);
 
-    /**
-     * create new
-     *
-     * @param version
-     * @throws IOException
-     */
-    boolean create(FlinkEnv version) throws Exception;
+  /**
+   * create new
+   *
+   * @param version
+   * @throws IOException
+   */
+  boolean create(FlinkEnv version) throws Exception;
 
-    /**
-     * update
-     *
-     * @param version
-     * @throws IOException
-     */
-    void update(FlinkEnv version) throws IOException;
+  /**
+   * update
+   *
+   * @param version
+   * @throws IOException
+   */
+  void update(FlinkEnv version) throws IOException;
 
-    /**
-     * get flink version by appid
-     *
-     * @param appId
-     * @return
-     */
-    FlinkEnv getByAppId(Long appId);
+  /**
+   * get flink version by appid
+   *
+   * @param appId
+   * @return
+   */
+  FlinkEnv getByAppId(Long appId);
 
-    /**
-     * set a flink version as the default
-     *
-     * @param id
-     */
-    void setDefault(Long id);
+  /**
+   * set a flink version as the default
+   *
+   * @param id
+   */
+  void setDefault(Long id);
 
-    /**
-     * get default version
-     *
-     * @return
-     */
-    FlinkEnv getDefault();
+  /**
+   * get default version
+   *
+   * @return
+   */
+  FlinkEnv getDefault();
 
-    /**
-     * get flink version, if null, get default version
-     *
-     * @return
-     */
-    FlinkEnv getByIdOrDefault(Long id);
+  /**
+   * get flink version, if null, get default version
+   *
+   * @return
+   */
+  FlinkEnv getByIdOrDefault(Long id);
 
-    /**
-     * sycn conf file
-     *
-     * @param id
-     */
-    void syncConf(Long id) throws IOException;
+  /**
+   * sycn conf file
+   *
+   * @param id
+   */
+  void syncConf(Long id) throws IOException;
 }

@@ -22,11 +22,8 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 /**
  * flink cluster identifier on kubernetes
  */
-case class ClusterKey(executeMode: FlinkK8sExecuteMode.Value,
-                      namespace: String = "default",
-                      clusterId: String)
+case class ClusterKey(executeMode: FlinkK8sExecuteMode.Value, namespace: String = "default", clusterId: String)
 
 object ClusterKey {
   def of(trackId: TrackId): ClusterKey = ClusterKey(trackId.executeMode, trackId.namespace, trackId.clusterId)
 }
-

@@ -19,24 +19,22 @@ package org.apache.streampark.console.base.enums;
 
 public enum FileType {
 
-    /**
-     * JAR Archive
-     */
-    JAR("JAR", "504B0304");
+  /** JAR Archive */
+  JAR("JAR", "504B0304");
 
-    private final String alias;
-    private final String magicNumber;
+  private final String alias;
+  private final String magicNumber;
 
-    FileType(String alias, String magicNumber) {
-        this.alias = alias;
-        this.magicNumber = magicNumber;
-    }
+  FileType(String alias, String magicNumber) {
+    this.alias = alias;
+    this.magicNumber = magicNumber;
+  }
 
-    public String getAlias() {
-        return alias;
-    }
+  public String getAlias() {
+    return alias;
+  }
 
-    public String getMagicNumber() {
-        return magicNumber;
-    }
+  public String getMagicNumber() {
+    return magicNumber;
+  }
 }

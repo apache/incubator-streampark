@@ -17,21 +17,23 @@
 
 package org.apache.streampark.flink.submit.impl
 
-import org.apache.streampark.common.util.{FlinkUtils, Utils}
-import org.apache.streampark.flink.submit.`trait`.YarnSubmitTrait
-import org.apache.streampark.flink.submit.bean._
+import java.io.File
+import java.lang.{Boolean => JavaBool}
+
+import scala.collection.JavaConversions._
+
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
+import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
-import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
-import java.io.File
-import java.lang.{Boolean => JavaBool}
-import scala.collection.JavaConversions._
+import org.apache.streampark.common.util.{FlinkUtils, Utils}
+import org.apache.streampark.flink.submit.`trait`.YarnSubmitTrait
+import org.apache.streampark.flink.submit.bean._
 
 /**
  * yarn PerJob mode submit
@@ -39,7 +41,7 @@ import scala.collection.JavaConversions._
 object YarnPerJobSubmit extends YarnSubmitTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
-    //execution.target
+    // execution.target
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
       .safeSet(DeploymentOptions.ATTACHED, JavaBool.TRUE)
@@ -96,8 +98,7 @@ object YarnPerJobSubmit extends YarnSubmitTrait {
           submitRequest.effectiveAppName,
           classOf[YarnJobClusterEntrypoint].getName,
           jobGraph,
-          true
-        ).getClusterClient
+          true).getClusterClient
 
       }
       val applicationId = clusterClient.getClusterId

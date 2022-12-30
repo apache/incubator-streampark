@@ -20,10 +20,9 @@ package org.apache.streampark.flink.connector.kafka.bean
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
 class KafkaRecord[T: TypeInformation](
-                                       val topic: String,
-                                       val partition: Long,
-                                       val timestamp: Long,
-                                       val offset: Long,
-                                       val key: String,
-                                       val value: T
-                                     )
+    val topic: String,
+    val partition: Long,
+    val timestamp: Long,
+    val offset: Long,
+    val key: String,
+    val value: T)

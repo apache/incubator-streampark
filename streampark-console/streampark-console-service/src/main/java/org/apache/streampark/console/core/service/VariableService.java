@@ -28,45 +28,46 @@ import java.util.List;
 
 public interface VariableService extends IService<Variable> {
 
-    /**
-     * find variable
-     *
-     * @param variable        variable
-     * @param restRequest queryRequest
-     * @return IPage
-     */
-    IPage<Variable> page(Variable variable, RestRequest restRequest);
+  /**
+   * find variable
+   *
+   * @param variable variable
+   * @param restRequest queryRequest
+   * @return IPage
+   */
+  IPage<Variable> page(Variable variable, RestRequest restRequest);
 
-    /**
-     * get variables through team
-     * @param teamId
-     * @return
-     */
-    List<Variable> findByTeamId(Long teamId);
+  /**
+   * get variables through team
+   *
+   * @param teamId
+   * @return
+   */
+  List<Variable> findByTeamId(Long teamId);
 
-    /**
-     * Get variables through team and search keywords.
-     * @param teamId
-     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
-     * @return
-     */
-    List<Variable> findByTeamId(Long teamId, String keyword);
+  /**
+   * Get variables through team and search keywords.
+   *
+   * @param teamId
+   * @param keyword Fuzzy search keywords through variable code or description, Nullable.
+   * @return
+   */
+  List<Variable> findByTeamId(Long teamId, String keyword);
 
-    boolean existsByTeamId(Long teamId);
+  boolean existsByTeamId(Long teamId);
 
-    /**
-     * create variable
-     *
-     * @param variable variable
-     */
-    void createVariable(Variable variable);
+  /**
+   * create variable
+   *
+   * @param variable variable
+   */
+  void createVariable(Variable variable);
 
-    void deleteVariable(Variable variable);
+  void deleteVariable(Variable variable);
 
-    Variable findByVariableCode(Long teamId, String variableCode);
+  Variable findByVariableCode(Long teamId, String variableCode);
 
-    String replaceVariable(Long teamId, String mixed);
+  String replaceVariable(Long teamId, String mixed);
 
-    IPage<Application> dependAppsPage(Variable variable, RestRequest request);
-
+  IPage<Application> dependAppsPage(Variable variable, RestRequest request);
 }

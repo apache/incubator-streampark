@@ -17,8 +17,9 @@
 
 package org.apache.streampark.flink.proxy
 
-import java.io.{IOException, InputStream, ObjectInputStream, ObjectStreamClass}
+import java.io.{InputStream, IOException, ObjectInputStream, ObjectStreamClass}
 import java.lang.reflect.Proxy
+
 import scala.util.Try
 
 /**

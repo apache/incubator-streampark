@@ -16,13 +16,14 @@
  */
 package org.apache.streampark.flink.packer
 
-import org.apache.streampark.flink.packer.docker.FlinkDockerfileTemplate
+import java.io.File
+
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import java.io.File
+import org.apache.streampark.flink.packer.docker.FlinkDockerfileTemplate
 
 class FlinkDockerfileTemplateSpec extends AnyWordSpec with BeforeAndAfter with Matchers {
 

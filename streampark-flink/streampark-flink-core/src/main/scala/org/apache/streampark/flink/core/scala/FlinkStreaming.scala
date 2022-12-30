@@ -17,19 +17,21 @@
 
 package org.apache.streampark.flink.core.scala
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
-import org.apache.streampark.flink.core.EnhancerImplicit._
-import org.apache.streampark.flink.core.{FlinkStreamingInitializer, StreamEnvConfig}
+import scala.language.implicitConversions
+
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.streaming.api.scala._
 
-import scala.language.implicitConversions
+import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
+import org.apache.streampark.flink.core.{FlinkStreamingInitializer, StreamEnvConfig}
+import org.apache.streampark.flink.core.EnhancerImplicit._
 
-class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
+class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment)
+    extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
   /**
    * for scala
@@ -57,14 +59,14 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
   }
 }
 
-
 trait FlinkStreaming extends Serializable with Logger {
 
-  final implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt.DataStream[T] = new DataStreamExt.DataStream[T](dataStream)
+  implicit final def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt.DataStream[T] = new DataStreamExt.DataStream[T](dataStream)
 
-  final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): DataStreamExt.ProcessFunction[IN, OUT] = new DataStreamExt.ProcessFunction[IN, OUT](ctx)
+  implicit final def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): DataStreamExt.ProcessFunction[IN, OUT] =
+    new DataStreamExt.ProcessFunction[IN, OUT](ctx)
 
-  final implicit lazy val parameter: ParameterTool = context.parameter
+  implicit final lazy val parameter: ParameterTool = context.parameter
 
   implicit var context: StreamingContext = _
 
@@ -92,6 +94,3 @@ trait FlinkStreaming extends Serializable with Logger {
   def destroy(): Unit = {}
 
 }
-
-
-

@@ -23,35 +23,35 @@ import java.util.List;
 
 public class DorisSinkRowDataWithMeta implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private String table;
-    private String database;
-    private final List<String> dataRows = new ArrayList<>();
+  private String table;
+  private String database;
+  private final List<String> dataRows = new ArrayList<>();
 
-    public DorisSinkRowDataWithMeta database(String database) {
-        this.database = database;
-        return this;
-    }
+  public DorisSinkRowDataWithMeta database(String database) {
+    this.database = database;
+    return this;
+  }
 
-    public DorisSinkRowDataWithMeta table(String table) {
-        this.table = table;
-        return this;
-    }
+  public DorisSinkRowDataWithMeta table(String table) {
+    this.table = table;
+    return this;
+  }
 
-    public String[] getDataRows() {
-        return dataRows.toArray(new String[]{});
-    }
+  public String[] getDataRows() {
+    return dataRows.toArray(new String[] {});
+  }
 
-    public void addDataRow(String dataRow) {
-        this.dataRows.add(dataRow);
-    }
+  public void addDataRow(String dataRow) {
+    this.dataRows.add(dataRow);
+  }
 
-    public String getTable() {
-        return table;
-    }
+  public String getTable() {
+    return table;
+  }
 
-    public String getDatabase() {
-        return database;
-    }
+  public String getDatabase() {
+    return database;
+  }
 }

@@ -17,12 +17,12 @@
 
 package org.apache.streampark.flink.connector.hbase.internal
 
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{FlinkUtils, Logger}
-import org.apache.streampark.flink.connector.function.RunningFunction
-import org.apache.streampark.flink.connector.hbase.bean.HBaseQuery
-import org.apache.streampark.flink.connector.hbase.function.{HBaseQueryFunction, HBaseResultFunction}
+import java.lang
+import java.util.Properties
+
+import scala.collection.JavaConversions._
+import scala.util.{Success, Try}
+
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
@@ -32,13 +32,15 @@ import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.apache.hadoop.hbase.client.{Result, Table}
 
-import java.lang
-import java.util.Properties
-import scala.util.{Success, Try}
-import scala.collection.JavaConversions._
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{FlinkUtils, Logger}
+import org.apache.streampark.flink.connector.function.RunningFunction
+import org.apache.streampark.flink.connector.hbase.bean.HBaseQuery
+import org.apache.streampark.flink.connector.hbase.function.{HBaseQueryFunction, HBaseResultFunction}
 
-class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, prop: Properties) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
-
+class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, prop: Properties) extends RichSourceFunction[R] with CheckpointedFunction
+    with CheckpointListener with Logger {
 
   @volatile private[this] var running = true
   private[this] var scalaRunningFunc: Unit => Boolean = _
@@ -58,11 +60,8 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   private val OFFSETS_STATE_NAME: String = "hbase-source-query-states"
   private[this] var last: R = _
 
-  //for Scala
-  def this(prop: Properties,
-           queryFunc: R => HBaseQuery,
-           resultFunc: Result => R,
-           runningFunc: Unit => Boolean) = {
+  // for Scala
+  def this(prop: Properties, queryFunc: R => HBaseQuery, resultFunc: Result => R, runningFunc: Unit => Boolean) = {
 
     this(ApiType.scala, prop)
     this.scalaQueryFunc = queryFunc
@@ -71,16 +70,14 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
 
   }
 
-  //for JAVA
-  def this(prop: Properties,
-           queryFunc: HBaseQueryFunction[R],
-           resultFunc: HBaseResultFunction[R],
-           runningFunc: RunningFunction) {
+  // for JAVA
+  def this(prop: Properties, queryFunc: HBaseQueryFunction[R], resultFunc: HBaseResultFunction[R], runningFunc: RunningFunction) {
 
     this(ApiType.java, prop)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
-    this.javaRunningFunc = if (runningFunc != null) runningFunc else new RunningFunction {
+    this.javaRunningFunc = if (runningFunc != null) runningFunc
+    else new RunningFunction {
       override def running(): lang.Boolean = true
     }
 
