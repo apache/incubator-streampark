@@ -132,7 +132,7 @@ object YarnPerJobTestCase extends Logger {
 
     val activeCommandLine = {
       val line = checkNotNull(commandLine)
-      println("Custom commandlines: {}", customCommandLines)
+      logInfo("Custom commandlines: $customCommandLines")
       customCommandLines.filter(_.isActive(line)).get(0)
     }
 
