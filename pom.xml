@@ -132,6 +132,7 @@
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
         <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
+        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <scalastyle.fails.on.error>true</scalastyle.fails.on.error>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
@@ -683,6 +684,7 @@
     </dependencies>
 
     <build>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -743,6 +745,56 @@
                                 <goal>check</goal>
                             </goals>
                             <phase>process-sources</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven-checkstyle-plugin.version}</version>
+                    <configuration>
+                        <suppressionsLocation>/tools/checkstyle/suppressions.xml</suppressionsLocation>
+                        <configLocation>/tools/checkstyle/checkstyle.xml</configLocation>
+                        <inputEncoding>UTF-8</inputEncoding>
+                        <outputEncoding>UTF-8</outputEncoding>
+                        <consoleOutput>true</consoleOutput>
+                        <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                        <failOnViolation>true</failOnViolation>
+                        <sourceDirectories>
+                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                            <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+                        </sourceDirectories>
+                        <resourceIncludes>
+                            **/*.properties,
+                            **/*.sh,
+                            **/*.bat,
+                            **/*.yml,
+                            **/*.yaml,
+                            **/*.xml,
+                            **/*.dict
+                        </resourceIncludes>
+                        <resourceExcludes>
+                            **/.asf.yaml,
+                            **/.github/**
+                        </resourceExcludes>
+                        <excludes>
+                        </excludes>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>9.3</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>process-sources</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
@@ -842,6 +894,32 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${maven-shade-plugin.version}</version>
+                    <configuration>
+                        <shadedArtifactId>true</shadedArtifactId>
+                        <createDependencyReducedPom>true</createDependencyReducedPom>
+                        <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                        <artifactSet>
+                            <includes>
+                                <!--
+                                  This is a dummy dependency that is used to trigger the maven-shade plugin
+                                  so that streampark's published POMs are flattened and do not contain variables.
+
+                                  references:
+                                  [SPARK-3812]: https://issues.apache.org/jira/browse/SPARK-3812
+                                  [FLINK-3565]: https://issues.apache.org/jira/browse/FLINK-3565
+                                -->
+                                <include>org.apache.flink:force-shading</include>
+                            </includes>
+                        </artifactSet>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                    </executions>
                 </plugin>
                 <!--(end) shade -->
 
@@ -904,32 +982,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
-                    <shadedArtifactId>true</shadedArtifactId>
-                    <createDependencyReducedPom>true</createDependencyReducedPom>
-                    <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
-                    <artifactSet>
-                        <includes>
-                            <!--
-                              This is a dummy dependency that is used to trigger the maven-shade plugin
-                              so that streampark's published POMs are flattened and do not contain variables.
-
-                              references:
-                              [SPARK-3812]: https://issues.apache.org/jira/browse/SPARK-3812
-                              [FLINK-3565]: https://issues.apache.org/jira/browse/FLINK-3565
-                            -->
-                            <include>org.apache.flink:force-shading</include>
-                        </includes>
-                    </artifactSet>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
@@ -943,8 +995,8 @@
             </plugin>
 
             <plugin>
-                <groupId>org.scalastyle</groupId>
-                <artifactId>scalastyle-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
 
             <plugin>
@@ -952,14 +1004,16 @@
                 <artifactId>spotless-maven-plugin</artifactId>
             </plugin>
 
+            <plugin>
+                <groupId>org.scalastyle</groupId>
+                <artifactId>scalastyle-maven-plugin</artifactId>
+            </plugin>
         </plugins>
 
     </build>
 
     <profiles>
-        <!--
-        include streampark-console(streaming application operation platform) modules
-        -->
+        <!-- include streampark-console(streaming application operation platform) modules -->
         <profile>
             <id>console</id>
             <modules>
@@ -1003,11 +1057,11 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-deploy-plugin</artifactId>
+                        <artifactId>maven-source-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
+                        <artifactId>maven-deploy-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>

@@ -58,11 +58,9 @@ jobs:
         with:
           submodules: true
       - name: Check codestyle for scala 2.11
-        run: ./mvnw -B -q -nsu -Pscala-2.11 clean spotless:check
+        run: ./mvnw -B -q -nsu -Pscala-2.11,console checkstyle:check spotless:check
       - name: Check codestyle for scala 2.12
-        run: ./mvnw -B -q -nsu -Pscala-2.12 clean spotless:check
-      - name: Check codestyle for console
-        run: ./mvnw -B -q -nsu -Pconsole clean spotless:check
+        run: ./mvnw -B -q -nsu -Pscala-2.12,console checkstyle:check spotless:check
   dead-link:
     if: github.repository == 'apache/incubator-streampark'
     name: Dead links
