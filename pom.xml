@@ -132,7 +132,7 @@
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
         <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
-        <maven-checkstyle-plugin.version>2.17</maven-checkstyle-plugin.version>
+        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <scalastyle.fails.on.error>true</scalastyle.fails.on.error>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
@@ -753,30 +753,50 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${maven-checkstyle-plugin.version}</version>
+                    <configuration>
+                        <suppressionsLocation>/tools/checkstyle/suppressions.xml</suppressionsLocation>
+                        <configLocation>/tools/checkstyle/checkstyle.xml</configLocation>
+                        <inputEncoding>UTF-8</inputEncoding>
+                        <outputEncoding>UTF-8</outputEncoding>
+                        <consoleOutput>true</consoleOutput>
+                        <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                        <failOnViolation>true</failOnViolation>
+                        <sourceDirectories>
+                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                            <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+                        </sourceDirectories>
+                        <resourceIncludes>
+                            **/*.properties,
+                            **/*.sh,
+                            **/*.bat,
+                            **/*.yml,
+                            **/*.yaml,
+                            **/*.xml,
+                            **/*.dict
+                        </resourceIncludes>
+                        <resourceExcludes>
+                            **/.asf.yaml,
+                            **/.github/**
+                        </resourceExcludes>
+                        <excludes>
+                        </excludes>
+                    </configuration>
                     <dependencies>
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <!-- Note: for ide setup -->
-                            <version>8.14</version>
+                            <version>9.3</version>
                         </dependency>
                     </dependencies>
                     <executions>
                         <execution>
                             <id>validate</id>
-                            <phase>validate</phase>
+                            <phase>process-sources</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>
                         </execution>
                     </executions>
-                    <configuration>
-                        <suppressionsLocation>/tools/checkstyle/suppressions.xml</suppressionsLocation>
-                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        <configLocation>/tools/checkstyle/checkstyle.xml</configLocation>
-                        <logViolationsToConsole>true</logViolationsToConsole>
-                        <failOnViolation>true</failOnViolation>
-                    </configuration>
                 </plugin>
 
                 <plugin>
