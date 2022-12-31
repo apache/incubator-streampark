@@ -30,7 +30,6 @@ import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
@@ -59,7 +58,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
 
   @Autowired private FlinkEnvService flinkEnvService;
 
-  @Autowired private VariableService variableService;
+  private static final String FLINKSQL_VALIDATOR_CLASS =
+      "org.apache.streampark.flink.core.FlinkSqlValidator";
 
   @Override
   public FlinkSql getEffective(Long appId, boolean decode) {
@@ -190,8 +190,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
         flinkEnv.getFlinkVersion(),
         classLoader -> {
           try {
-            Class<?> clazz =
-                classLoader.loadClass("org.apache.streampark.flink.core.FlinkSqlValidator");
+            Class<?> clazz = classLoader.loadClass(FLINKSQL_VALIDATOR_CLASS);
             Method method = clazz.getDeclaredMethod("verifySql", String.class);
             method.setAccessible(true);
             Object result = method.invoke(null, sql);
