@@ -34,7 +34,7 @@ import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
-import org.apache.streampark.console.core.enums.GitProtocol;
+import org.apache.streampark.console.core.enums.GitCredential;
 import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -120,17 +120,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       project.setName(projectParam.getName());
       project.setUrl(projectParam.getUrl());
       project.setBranches(projectParam.getBranches());
-      project.setGitProtocol(projectParam.getGitProtocol());
-      project.setRsaPath(projectParam.getRsaPath());
+      project.setGitCredential(projectParam.getGitCredential());
+      project.setPrvkeyPath(projectParam.getPrvkeyPath());
       project.setUserName(projectParam.getUserName());
       project.setPassword(projectParam.getPassword());
       project.setPom(projectParam.getPom());
       project.setDescription(projectParam.getDescription());
       project.setBuildArgs(projectParam.getBuildArgs());
-      if (GitProtocol.SSH.equals(GitProtocol.of(project.getGitProtocol()))) {
+      if (GitCredential.isSSH(project.getGitCredential())) {
         project.setUserName(null);
       } else {
-        project.setRsaPath(null);
+        project.setPrvkeyPath(null);
       }
       if (projectParam.getBuildState() != null) {
         project.setBuildState(projectParam.getBuildState());

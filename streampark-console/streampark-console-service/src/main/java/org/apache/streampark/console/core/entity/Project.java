@@ -63,7 +63,7 @@ public class Project implements Serializable {
 
   private Date lastBuild;
 
-  private Integer gitProtocol;
+  private Integer gitCredential;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String userName;
@@ -72,7 +72,7 @@ public class Project implements Serializable {
   private String password;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String rsaPath;
+  private String prvkeyPath;
 
   /** 1:git 2:svn */
   private Integer repository;

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
-import org.apache.streampark.console.core.enums.GitProtocol;
+import org.apache.streampark.console.core.enums.GitCredential;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class GitTest {
   @BeforeEach
   void before() {
     project.setUrl("https://github.com/apache/incubator-streampark.git");
-    project.setGitProtocol(GitProtocol.HTTPS.getValue());
+    project.setGitCredential(GitCredential.HTTPS.getValue());
   }
 
   @Test

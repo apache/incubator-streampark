@@ -19,18 +19,22 @@ package org.apache.streampark.console.core.enums;
 
 import java.util.Arrays;
 
-public enum GitProtocol {
+public enum GitCredential {
   HTTPS(1),
   SSH(2);
 
   private final int value;
 
-  GitProtocol(int value) {
+  GitCredential(int value) {
     this.value = value;
   }
 
-  public static GitProtocol of(Integer value) {
+  public static GitCredential of(Integer value) {
     return Arrays.stream(values()).filter(x -> x.value == value).findFirst().orElse(null);
+  }
+
+  public static boolean isSSH(Integer gitCredential) {
+    return GitCredential.SSH.equals(GitCredential.of(gitCredential));
   }
 
   public Integer getValue() {

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.console.core.entity.Project;
-import org.apache.streampark.console.core.enums.GitProtocol;
+import org.apache.streampark.console.core.enums.GitCredential;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -74,8 +74,8 @@ public class GitUtils {
   }
 
   private static void setCredentials(TransportCommand<?, ?> transportCommand, Project project) {
-    GitProtocol gitProtocol = GitProtocol.of(project.getGitProtocol());
-    switch (gitProtocol) {
+    GitCredential gitCredential = GitCredential.of(project.getGitCredential());
+    switch (gitCredential) {
       case HTTPS:
         if (!StringUtils.isAllEmpty(project.getUserName(), project.getPassword())) {
           UsernamePasswordCredentialsProvider credentialsProvider =
@@ -97,13 +97,13 @@ public class GitUtils {
                     @Override
                     protected JSch createDefaultJSch(FS fs) throws JSchException {
                       JSch jSch = super.createDefaultJSch(fs);
-                      if (project.getRsaPath() == null) {
+                      if (project.getPrvkeyPath() == null) {
                         return jSch;
                       }
                       if (StringUtils.isEmpty(project.getPassword())) {
-                        jSch.addIdentity(project.getRsaPath());
+                        jSch.addIdentity(project.getPrvkeyPath());
                       } else {
-                        jSch.addIdentity(project.getRsaPath(), project.getPassword());
+                        jSch.addIdentity(project.getPrvkeyPath(), project.getPassword());
                       }
                       return jSch;
                     }

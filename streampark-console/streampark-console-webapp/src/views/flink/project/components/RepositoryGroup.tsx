@@ -18,11 +18,11 @@ import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import { Form, Input, Select } from 'ant-design-vue';
 export interface RepositoryProps {
-  gitProtocol: string | number;
+  gitCredential: string | number;
   url: string;
 }
 import { useI18n } from '/@/hooks/web/useI18n';
-import { GitProtocolEnum } from '/@/enums/projectEnum';
+import { GitCredentialEnum } from '/@/enums/projectEnum';
 export default defineComponent({
   name: 'RepositoryUrl',
   props: {
@@ -45,8 +45,8 @@ export default defineComponent({
     };
 
     const options = [
-      { label: 'http/https', value: GitProtocolEnum.HTTPS },
-      { label: 'ssh', value: GitProtocolEnum.SSH },
+      { label: 'http/https', value: GitCredentialEnum.HTTPS },
+      { label: 'ssh', value: GitCredentialEnum.SSH },
     ];
 
     return () => {
@@ -54,10 +54,10 @@ export default defineComponent({
         <div>
           <Input.Group compact class="!flex custom-input-group">
             <Select
-              name="gitProtocol"
+              name="gitCredential"
               style="width: 120px"
-              placeholder={t('flink.project.form.gitProtocolPlaceholder')}
-              value={props.value?.gitProtocol}
+              placeholder={t('flink.project.form.gitCredentialPlaceholder')}
+              value={props.value?.gitCredential}
               onChange={(e: any) => handleProtocolChange(e)}
               options={options}
             />
