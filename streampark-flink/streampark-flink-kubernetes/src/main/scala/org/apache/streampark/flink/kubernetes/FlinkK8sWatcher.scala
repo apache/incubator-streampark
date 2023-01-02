@@ -130,7 +130,8 @@ trait FlinkK8sWatcher extends Logger with AutoCloseable {
 
 }
 
-@Public object FlinkK8sWatcher {
+@Public
+object FlinkK8sWatcherFactory {
 
   /**
    * Create FlinkK8sWatcher instance.

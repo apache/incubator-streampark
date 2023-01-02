@@ -21,6 +21,7 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
+import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
@@ -65,7 +66,7 @@ public class FlinkK8sWatcherWrapper {
   public FlinkK8sWatcher registerFlinkK8sWatcher() {
     // lazy start tracking monitor
     FlinkK8sWatcher flinkK8sWatcher =
-        FlinkK8sWatcher.createInstance(FlinkTrackConfig.fromConfigHub(), true);
+        FlinkK8sWatcherFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
     initFlinkK8sWatcher(flinkK8sWatcher);
 
     /* Dev scaffold: watch flink k8s tracking cache,
