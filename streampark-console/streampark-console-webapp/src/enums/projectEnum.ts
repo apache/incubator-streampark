@@ -20,7 +20,7 @@ export enum ProjectTypeEnum {
   SPARK = 2,
 }
 
-export enum GitProtocolEnum {
+export enum GitCredentialEnum {
   HTTPS = 1,
   SSH = 2,
 }
