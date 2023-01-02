@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,12 +46,10 @@ public class FileHeaderCheckInterceptor implements HandlerInterceptor {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    if (request != null && request instanceof MultipartHttpServletRequest) {
+    if (request instanceof MultipartHttpServletRequest) {
       MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
       Map<String, MultipartFile> files = multipartRequest.getFileMap();
-      Iterator<String> iterator = files.keySet().iterator();
-      while (iterator.hasNext()) {
-        String formKey = iterator.next();
+      for (String formKey : files.keySet()) {
         MultipartFile multipartFile = multipartRequest.getFile(formKey);
         byte[] file = multipartFile.getBytes();
         if (file.length > HEADER_LENGTH) {
