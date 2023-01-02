@@ -57,7 +57,7 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
   /**
    * collect all tracking identifiers
    */
-  def getAllWatchingIds: Set[TrackId] = trackIds.getAll()
+  def getAllWatchingIds(): Set[TrackId] = trackIds.getAll()
 
   /**
    * determines whether the specified TrackId is in the trace
@@ -82,14 +82,14 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
   /**
    * collect all legal tracking ids, and covert to ClusterKey
    */
-  private[kubernetes] def collectTracks(): Set[TrackId] = getAllWatchingIds().filter(_.isActive)
+  private[kubernetes] def getActiveWatchingIds(): Set[TrackId] = getAllWatchingIds().filter(_.isActive)
 
   /**
    * collect the aggregation of flink metrics that in tracking
    */
   def collectAccMetric(): FlinkMetricCV = {
     // get cluster metrics that in tracking
-    collectTracks() match {
+    getActiveWatchingIds() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
         flinkMetrics.getAll(for (elem <- k) yield {
