@@ -18,7 +18,6 @@
   import { reactive, defineComponent } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { exceptionPropWidth } from '/@/utils';
-  import { isK8sExecMode } from '../../utils';
 
   export default defineComponent({
     name: 'StartApplicationModal',

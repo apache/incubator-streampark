@@ -77,19 +77,15 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     this.baseMapper.updateBuildTime(project.getId());
     this.deploy(project);
     List<Application> applications = this.applicationService.getByProjectId(project.getId());
-    // Update the deployment state
-    FlinkTrackingTask.refreshTracking(
-        () ->
-            applications.forEach(
-                (app) -> {
-                  fileLogger.info(
-                      "update deploy by project: {}, appName:{}",
-                      project.getName(),
-                      app.getJobName());
-                  app.setLaunch(LaunchState.NEED_LAUNCH.get());
-                  app.setBuild(true);
-                  this.applicationService.updateLaunch(app);
-                }));
+
+    applications.forEach(
+        (app) -> {
+          fileLogger.info(
+              "update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
+          app.setLaunch(LaunchState.NEED_LAUNCH.get());
+          app.setBuild(true);
+          this.applicationService.updateLaunch(app);
+        });
   }
 
   @Override

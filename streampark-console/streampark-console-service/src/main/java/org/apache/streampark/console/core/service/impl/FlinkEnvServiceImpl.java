@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
 import org.apache.streampark.console.core.service.FlinkEnvService;
-import org.apache.streampark.console.core.task.FlinkTrackingTask;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -74,7 +73,6 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
       flinkEnv.doSetVersion();
     }
     updateById(flinkEnv);
-    FlinkTrackingTask.getFlinkEnvMap().put(flinkEnv.getId(), flinkEnv);
   }
 
   @Override

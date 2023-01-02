@@ -50,7 +50,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   @Autowired private FlinkEnvService flinkEnvService;
 
   @Override
-  public void obsolete(Long appId) {
+  public void expire(Long appId) {
     SavePoint savePoint = new SavePoint();
     savePoint.setLatest(false);
     LambdaQueryWrapper<SavePoint> queryWrapper =
@@ -61,7 +61,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   @Override
   public boolean save(SavePoint entity) {
     this.expire(entity);
-    this.obsolete(entity.getAppId());
+    this.expire(entity.getAppId());
     return super.save(entity);
   }
 

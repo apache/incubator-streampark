@@ -25,7 +25,7 @@ import VueTypes, {
 
 export default class ProjectTypes extends VueTypes {
   // define a custom validator that accepts configuration parameters
-  static maxLength(max) {
+  static maxLength() {
     return toType('maxLength', {
       type: String,
       validator: (max, v) => v.length <= max,

@@ -212,3 +212,8 @@ export enum AlertTypeEnum {
   /** lark */
   LARK = 16,
 }
+
+export enum FailoverStrategyEnum {
+  ALERT = 1,
+  RESTART = 2,
+}
