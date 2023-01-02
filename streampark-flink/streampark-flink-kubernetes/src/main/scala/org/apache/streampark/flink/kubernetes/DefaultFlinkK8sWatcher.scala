@@ -59,7 +59,7 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   override def restart(): Unit = allWatchers.foreach(_.restart())
 
   override def close(): Unit = {
-    allWatchers.foreach(_.close)
+    allWatchers.foreach(_.close())
     watchController.close()
   }
 
@@ -73,7 +73,7 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
     watchController.canceling.set(trackId)
   }
 
-  override def isInWatching(trackId: TrackId): Boolean = watchController.isInTracking(trackId)
+  override def isInWatching(trackId: TrackId): Boolean = watchController.isInWatching(trackId)
 
   override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(watchController.jobStatuses.get(trackId))
 
@@ -85,7 +85,7 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
 
   override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(watchController.flinkMetrics.get(clusterKey))
 
-  override def getWatchingIds: Set[TrackId] = watchController.collectAllTrackIds()
+  override def getAllWatchingIds: Set[TrackId] = watchController.getAllWatchingIds()
 
   override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
     if (!trackId.isLegal) false;

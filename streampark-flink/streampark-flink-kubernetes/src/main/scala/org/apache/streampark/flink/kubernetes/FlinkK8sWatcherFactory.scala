@@ -84,7 +84,7 @@ trait FlinkK8sWatcher extends Logger with AutoCloseable {
   /**
    * collect all TrackId which in tracking
    */
-  def getWatchingIds: Set[TrackId]
+  def getAllWatchingIds: Set[TrackId]
 
   /**
    * get flink status

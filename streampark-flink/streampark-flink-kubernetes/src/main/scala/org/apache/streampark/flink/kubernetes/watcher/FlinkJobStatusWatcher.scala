@@ -98,7 +98,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     this.synchronized {
       logInfo("[FlinkJobStatusWatcher]: Status monitoring process begins - " + Thread.currentThread().getName)
       // get all legal tracking ids
-      val trackIds = Try(watchController.collectAllTrackIds()).filter(_.nonEmpty).getOrElse(return
+      val trackIds = Try(watchController.getAllWatchingIds()).filter(_.nonEmpty).getOrElse(return
       )
 
       // retrieve flink job status in thread pool
@@ -123,7 +123,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             }
             if (FlinkJobState.isEndState(jobState.jobState)) {
               // remove trackId from cache of job that needs to be untracked
-              watchController.unTracking(trackId)
+              watchController.unWatching(trackId)
               if (trackId.executeMode == APPLICATION) {
                 watchController.endpoints.invalidate(trackId.toClusterKey)
               }

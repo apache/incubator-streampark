@@ -34,70 +34,70 @@ object KubernetesWatcherHelper {
 
   // scalastyle:off println
   // print job status cache size info
-  def watchJobStatusCacheSize(implicit trackMonitor: FlinkK8sWatcher): Unit =
+  def watchJobStatusCacheSize(implicit k8sWatcher: FlinkK8sWatcher): Unit =
     new Timer().scheduleAtFixedRate(
       () =>
         println(s"[flink-k8s][status-size]-${System.currentTimeMillis} => " +
-          s"${trackMonitor.getAllJobStatus.size}"),
+          s"${k8sWatcher.getAllJobStatus.size}"),
       0,
       1500)
 
   // print agg flink cluster metrics cache detail
-  def watchAggClusterMetricsCache(implicit trackMonitor: FlinkK8sWatcher): Unit =
+  def watchAggClusterMetricsCache(implicit k8sWatcher: FlinkK8sWatcher): Unit =
     new Timer().scheduleAtFixedRate(
       () =>
         println(s"[flink-k8s][agg-metric]-${System.currentTimeMillis} => " +
-          s"${trackMonitor.getAccClusterMetrics}"),
+          s"${k8sWatcher.getAccClusterMetrics}"),
       0,
       1500)
 
   // print all cluster metrics for each flink cluster
-  def watchClusterMetricsCache(implicit trackMonitor: FlinkK8sWatcher): Unit =
+  def watchClusterMetricsCache(implicit k8sWatcher: FlinkK8sWatcher): Unit =
     new Timer().scheduleAtFixedRate(
       () =>
         println(s"[flink-k8s][metric]-${System.currentTimeMillis} => " +
-          s"count=${trackMonitor.asInstanceOf[DefaultFlinkK8sWatcher].watchController.flinkMetrics.asMap().size} | " +
-          s"${trackMonitor.asInstanceOf[DefaultFlinkK8sWatcher].watchController.flinkMetrics.asMap().mkString(",")}"),
+          s"count=${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.flinkMetrics.asMap().size} | " +
+          s"${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.flinkMetrics.asMap().mkString(",")}"),
       0,
       1500)
 
   // print job cache detail
-  def watchJobStatusCache(implicit trackMonitor: FlinkK8sWatcher): Unit =
+  def watchJobStatusCache(implicit k8sWatcher: FlinkK8sWatcher): Unit =
     new Timer().scheduleAtFixedRate(
       () =>
         println(s"[flink-k8s][status]-${System.currentTimeMillis} =>" +
-          s"count=${trackMonitor.getAllJobStatus.size} | " +
-          s" ${trackMonitor.getAllJobStatus.mkString(", ")}"),
+          s"count=${k8sWatcher.getAllJobStatus.size} | " +
+          s" ${k8sWatcher.getAllJobStatus.mkString(", ")}"),
       0,
       1500)
 
   // print trackId cache detail
-  def watchTrackIdsCache(implicit trackMonitor: FlinkK8sWatcher): Unit = {
+  def watchTrackIdsCache(implicit k8sWatcher: FlinkK8sWatcher): Unit = {
     new Timer().scheduleAtFixedRate(
       () =>
         println(s"[flink-k8s][trackIds]-${System.currentTimeMillis} => " +
-          s"${trackMonitor.getWatchingIds.mkString(",")}"),
+          s"${k8sWatcher.getAllWatchingIds.mkString(",")}"),
       0,
       1500)
   }
 
   // print trackId cache size info
-  def watchTrackIdsCacheSize(implicit trackMonitor: FlinkK8sWatcher): Unit = {
+  def watchTrackIdsCacheSize(implicit k8sWatcher: FlinkK8sWatcher): Unit = {
     new Timer().scheduleAtFixedRate(
       () =>
         println(s"[flink-k8s][trackIds-size]-${System.currentTimeMillis} => " +
-          s"${trackMonitor.getWatchingIds.size}"),
+          s"${k8sWatcher.getAllWatchingIds.size}"),
       0,
       1500)
   }
 
   // print k8s event cache detail
-  def watchK8sEventCache(implicit trackMonitor: FlinkK8sWatcher): Unit = {
+  def watchK8sEventCache(implicit k8sWatcher: FlinkK8sWatcher): Unit = {
     new Timer().scheduleAtFixedRate(
       () =>
         println(s"[flink-k8s][k8s-event]-${System.currentTimeMillis} => " +
-          s"count=${trackMonitor.asInstanceOf[DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().size} | " +
-          s"${trackMonitor.asInstanceOf[DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().mkString(",")}"),
+          s"count=${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().size} | " +
+          s"${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().mkString(",")}"),
       0,
       1500)
   }

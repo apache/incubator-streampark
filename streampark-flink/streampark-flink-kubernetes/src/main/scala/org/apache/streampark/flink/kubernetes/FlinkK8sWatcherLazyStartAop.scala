@@ -42,9 +42,9 @@ trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
     super.isInWatching(trackId)
   }
 
-  abstract override def getWatchingIds: Set[TrackId] = {
+  abstract override def getAllWatchingIds: Set[TrackId] = {
     start()
-    super.getWatchingIds
+    super.getAllWatchingIds
   }
 
   abstract override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = {
