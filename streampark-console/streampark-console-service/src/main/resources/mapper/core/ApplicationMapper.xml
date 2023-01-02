@@ -182,7 +182,7 @@
         where t.id = #{application.id}
     </select>
 
-    <update id="updateTracking" parameterType="org.apache.streampark.console.core.entity.Application">
+    <update id="persistMetrics" parameterType="org.apache.streampark.console.core.entity.Application">
         update t_flink_app
         <set>
             <if test="application.jobId != null and application.jobId != ''">

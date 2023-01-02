@@ -57,7 +57,7 @@ public interface ApplicationService extends IService<Application> {
 
   void cancel(Application app) throws Exception;
 
-  void updateTracking(Application application);
+  void persistMetrics(Application application);
 
   void clean(Application app);
 

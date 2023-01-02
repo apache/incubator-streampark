@@ -88,7 +88,7 @@ public class K8sFlinkChangeEventListener {
     }
     // update application record
     Application newApp = getUpdateAppWithJobStatusCV(app, jobStatus);
-    applicationService.updateTracking(newApp);
+    applicationService.persistMetrics(newApp);
 
     // email alerts when necessary
     FlinkAppState state = FlinkAppState.of(newApp.getState());
@@ -129,7 +129,7 @@ public class K8sFlinkChangeEventListener {
     newApp.setTotalSlot(metrics.totalSlot());
     newApp.setAvailableSlot(metrics.availableSlot());
 
-    applicationService.updateTracking(newApp);
+    applicationService.persistMetrics(newApp);
   }
 
   @SuppressWarnings("UnstableApiUsage")

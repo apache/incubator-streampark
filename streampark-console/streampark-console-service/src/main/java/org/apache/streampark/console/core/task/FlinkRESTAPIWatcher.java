@@ -64,8 +64,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.common.enums.ExecutionMode.isKubernetesMode;
-
 /** This implementation is currently used for tracing flink job on yarn,standalone,remote mode */
 @Slf4j
 @Component
@@ -137,7 +135,7 @@ public class FlinkRESTAPIWatcher {
 
   private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>(0);
 
-  private Long lastWatchTime = 0L;
+  private Long lastWatchingTime = 0L;
 
   private Long lastOptionTime = 0L;
 
@@ -166,7 +164,7 @@ public class FlinkRESTAPIWatcher {
   public void doStop() {
     log.info(
         "FlinkRESTAPIWatcher StreamPark Console will be shutdown,persistent application to database.");
-    WATCHING_APPS.forEach((k, v) -> persistent(v));
+    WATCHING_APPS.forEach((k, v) -> applicationService.persistMetrics(v));
   }
 
   /**
@@ -179,15 +177,14 @@ public class FlinkRESTAPIWatcher {
    */
   @Scheduled(fixedDelay = 1000)
   public void start() {
-
     // The application has been started at the first time, or the front-end is operating start/stop,
     // need to return status info immediately.
-    if (lastWatchTime == null || !OPTIONING.isEmpty()) {
+    if (lastWatchingTime == null || !OPTIONING.isEmpty()) {
       doWatch();
     } else if (System.currentTimeMillis() - lastOptionTime <= OPTION_INTERVAL) {
       // The last operation time is less than option interval.(10 seconds)
       doWatch();
-    } else if (System.currentTimeMillis() - lastWatchTime >= WATCHING_INTERVAL) {
+    } else if (System.currentTimeMillis() - lastWatchingTime >= WATCHING_INTERVAL) {
       // Normal information obtain, check if there is 5 seconds interval between this time and the
       // last time.(once every 5 seconds)
       doWatch();
@@ -195,71 +192,68 @@ public class FlinkRESTAPIWatcher {
   }
 
   private void doWatch() {
-    lastWatchTime = System.currentTimeMillis();
+    lastWatchingTime = System.currentTimeMillis();
     for (Map.Entry<Long, Application> entry : WATCHING_APPS.entrySet()) {
-      if (!isKubernetesMode(entry.getValue().getExecutionMode())) {
-        EXECUTOR.execute(
-            () -> {
-              long key = entry.getKey();
-              Application application = entry.getValue();
-              final StopFrom stopFrom =
-                  STOP_FROM_MAP.getOrDefault(key, null) == null
-                      ? StopFrom.NONE
-                      : STOP_FROM_MAP.get(key);
-              final OptionState optionState = OPTIONING.get(key);
+      EXECUTOR.execute(
+          () -> {
+            long key = entry.getKey();
+            Application application = entry.getValue();
+            final StopFrom stopFrom =
+                STOP_FROM_MAP.getOrDefault(key, null) == null
+                    ? StopFrom.NONE
+                    : STOP_FROM_MAP.get(key);
+            final OptionState optionState = OPTIONING.get(key);
+            try {
+              // query status from flink rest api
+              AssertUtils.state(application.getId() != null);
+              getFromFlinkRestApi(application, stopFrom);
+            } catch (Exception flinkException) {
+              // query status from yarn rest api
               try {
-                // query status from flink rest api
-                AssertUtils.state(application.getId() != null);
-                getFromFlinkRestApi(application, stopFrom);
-              } catch (Exception flinkException) {
-                // query status from yarn rest api
-                try {
-                  getFromYarnRestApi(application, stopFrom);
-                } catch (Exception yarnException) {
-                  /*
-                   Query from flink's restAPI and yarn's restAPI both failed.
-                   In this case, it is necessary to decide whether to return to the final state depending on the state being operated
-                  */
-                  if (optionState == null || !optionState.equals(OptionState.STARTING)) {
-                    // non-mapping
-                    if (application.getState() != FlinkAppState.MAPPING.getValue()) {
-                      log.error(
-                          "FlinkRESTAPIWatcher getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
-                      if (StopFrom.NONE.equals(stopFrom)) {
-                        savePointService.expire(application.getId());
-                        application.setState(FlinkAppState.LOST.getValue());
-                        alertService.alert(application, FlinkAppState.LOST);
-                      } else {
-                        application.setState(FlinkAppState.CANCELED.getValue());
-                      }
+                getFromYarnRestApi(application, stopFrom);
+              } catch (Exception yarnException) {
+                /*
+                 Query from flink's restAPI and yarn's restAPI both failed.
+                 In this case, it is necessary to decide whether to return to the final state depending on the state being operated
+                */
+                if (optionState == null || !optionState.equals(OptionState.STARTING)) {
+                  // non-mapping
+                  if (application.getState() != FlinkAppState.MAPPING.getValue()) {
+                    log.error(
+                        "FlinkRESTAPIWatcher getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
+                    if (StopFrom.NONE.equals(stopFrom)) {
+                      savePointService.expire(application.getId());
+                      application.setState(FlinkAppState.LOST.getValue());
+                      alertService.alert(application, FlinkAppState.LOST);
+                    } else {
+                      application.setState(FlinkAppState.CANCELED.getValue());
                     }
-                    /*
-                     This step means that the above two ways to get information have failed, and this step is the last step,
-                     which will directly identify the mission as cancelled or lost.
-                     Need clean savepoint.
-                    */
-                    cleanSavepoint(application);
-                    cleanOptioning(optionState, key);
-                    application.setEndTime(new Date());
-                    this.persistentAndClean(application);
-
-                    FlinkAppState appState = FlinkAppState.of(application.getState());
-                    if (appState.equals(FlinkAppState.FAILED)
-                        || appState.equals(FlinkAppState.LOST)) {
-                      alertService.alert(application, FlinkAppState.of(application.getState()));
-                      if (appState.equals(FlinkAppState.FAILED)) {
-                        try {
-                          applicationService.start(application, true);
-                        } catch (Exception e) {
-                          log.error(e.getMessage(), e);
-                        }
+                  }
+                  /*
+                   This step means that the above two ways to get information have failed, and this step is the last step,
+                   which will directly identify the mission as cancelled or lost.
+                   Need clean savepoint.
+                  */
+                  application.setEndTime(new Date());
+                  cleanSavepoint(application);
+                  cleanOptioning(optionState, key);
+                  doPersistMetrics(application, true);
+                  FlinkAppState appState = FlinkAppState.of(application.getState());
+                  if (appState.equals(FlinkAppState.FAILED)
+                      || appState.equals(FlinkAppState.LOST)) {
+                    alertService.alert(application, FlinkAppState.of(application.getState()));
+                    if (appState.equals(FlinkAppState.FAILED)) {
+                      try {
+                        applicationService.start(application, true);
+                      } catch (Exception e) {
+                        log.error(e.getMessage(), e);
                       }
                     }
                   }
                 }
               }
-            });
-      }
+            }
+          });
     }
   }
 
@@ -400,11 +394,11 @@ public class FlinkRESTAPIWatcher {
       application.setOptionState(OptionState.NONE.getValue());
     }
     application.setState(currentState.getValue());
-    syncTracking(application);
+    doPersistMetrics(application, false);
     cleanOptioning(optionState, application.getId());
   }
 
-  private void syncTracking(Application application) {
+  private void doPersistMetrics(Application application, boolean stopWatch) {
     if (FlinkAppState.isEndState(application.getState())) {
       application.setOverview(null);
       application.setTotalTM(null);
@@ -413,9 +407,13 @@ public class FlinkRESTAPIWatcher {
       application.setAvailableSlot(null);
       application.setJmMemory(null);
       application.setTmMemory(null);
+      stopWatching(application.getId());
+    } else if (stopWatch) {
+      stopWatching(application.getId());
+    } else {
+      WATCHING_APPS.put(application.getId(), application);
     }
-    WATCHING_APPS.put(application.getId(), application);
-    persistent(application);
+    applicationService.persistMetrics(application);
   }
 
   /**
@@ -437,7 +435,7 @@ public class FlinkRESTAPIWatcher {
         CANCELING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
         cleanSavepoint(application);
         application.setState(currentState.getValue());
-        syncTracking(application);
+        doPersistMetrics(application, false);
         break;
       case CANCELED:
         log.info(
@@ -455,14 +453,14 @@ public class FlinkRESTAPIWatcher {
           alertService.alert(application, FlinkAppState.CANCELED);
         }
         STOP_FROM_MAP.remove(application.getId());
-        persistentAndClean(application);
+        doPersistMetrics(application, true);
         cleanOptioning(optionState, application.getId());
         break;
       case FAILED:
         cleanSavepoint(application);
         STOP_FROM_MAP.remove(application.getId());
         application.setState(FlinkAppState.FAILED.getValue());
-        persistentAndClean(application);
+        doPersistMetrics(application, true);
         alertService.alert(application, FlinkAppState.FAILED);
         applicationService.start(application, true);
         break;
@@ -474,7 +472,7 @@ public class FlinkRESTAPIWatcher {
         break;
       default:
         application.setState(currentState.getValue());
-        syncTracking(application);
+        doPersistMetrics(application, false);
     }
   }
 
@@ -505,7 +503,7 @@ public class FlinkRESTAPIWatcher {
       application.setState(FlinkAppState.CANCELED.getValue());
       cleanSavepoint(application);
       cleanOptioning(optionState, application.getId());
-      this.persistentAndClean(application);
+      doPersistMetrics(application, true);
     } else {
       // query the status from the yarn rest Api
       YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
@@ -535,8 +533,7 @@ public class FlinkRESTAPIWatcher {
           }
           application.setState(flinkAppState.getValue());
           cleanOptioning(optionState, application.getId());
-          this.persistentAndClean(application);
-
+          doPersistMetrics(application, true);
           if (flinkAppState.equals(FlinkAppState.FAILED)
               || flinkAppState.equals(FlinkAppState.LOST)
               || (flinkAppState.equals(FlinkAppState.CANCELED) && StopFrom.NONE.equals(stopFrom))
@@ -568,15 +565,6 @@ public class FlinkRESTAPIWatcher {
     application.setOptionState(OptionState.NONE.getValue());
   }
 
-  private void persistent(Application application) {
-    applicationService.updateTracking(application);
-  }
-
-  private void persistentAndClean(Application application) {
-    persistent(application);
-    stopTracking(application.getId());
-  }
-
   /** set current option state */
   public static void setOptionState(Long appId, OptionState state) {
     if (isKubernetesApp(appId)) {
@@ -589,7 +577,7 @@ public class FlinkRESTAPIWatcher {
     }
   }
 
-  public static void addTracking(Application application) {
+  public static void addWatching(Application application) {
     if (isKubernetesApp(application)) {
       return;
     }
@@ -613,7 +601,7 @@ public class FlinkRESTAPIWatcher {
     }
   }
 
-  public static void stopTracking(Long appId) {
+  public static void stopWatching(Long appId) {
     if (isKubernetesApp(appId)) {
       return;
     }

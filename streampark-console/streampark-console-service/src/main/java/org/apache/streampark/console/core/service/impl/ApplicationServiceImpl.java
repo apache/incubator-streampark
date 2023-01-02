@@ -123,6 +123,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
@@ -394,7 +395,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       if (isKubernetesApp(paramApp)) {
         k8SFlinkTrackMonitor.unTrackingJob(toTrackId(application));
       } else {
-        FlinkRESTAPIWatcher.stopTracking(paramApp.getId());
+        FlinkRESTAPIWatcher.stopWatching(paramApp.getId());
       }
       return true;
     } catch (Exception e) {
@@ -1033,7 +1034,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public String readConf(Application appParam) throws IOException {
     File file = new File(appParam.getConfig());
-    String conf = FileUtils.readFileToString(file);
+    String conf = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
     return Base64.getEncoder().encodeToString(conf.getBytes());
   }
 
@@ -1107,7 +1108,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (isKubernetesApp(application)) {
       k8SFlinkTrackMonitor.trackingJob(toTrackId(application));
     } else {
-      FlinkRESTAPIWatcher.addTracking(application);
+      FlinkRESTAPIWatcher.addWatching(application);
     }
     return mapping;
   }
@@ -1235,7 +1236,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                   k8SFlinkTrackMonitor.unTrackingJob(id);
                   k8SFlinkTrackMonitor.trackingJob(id);
                 } else {
-                  FlinkRESTAPIWatcher.stopTracking(application.getId());
+                  FlinkRESTAPIWatcher.stopWatching(application.getId());
                 }
 
                 ApplicationLog log = new ApplicationLog();
@@ -1294,8 +1295,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public void updateTracking(Application appParam) {
-    this.baseMapper.updateTracking(appParam);
+  public void persistMetrics(Application appParam) {
+    this.baseMapper.persistMetrics(appParam);
   }
 
   /**
@@ -1529,7 +1530,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 k8SFlinkTrackMonitor.trackingJob(toTrackId(application));
               } else {
                 FlinkRESTAPIWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
-                FlinkRESTAPIWatcher.addTracking(application);
+                FlinkRESTAPIWatcher.addWatching(application);
               }
 
               applicationLog.setSuccess(true);
@@ -1552,7 +1553,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (isKubernetesApp(app)) {
                   k8SFlinkTrackMonitor.unTrackingJob(toTrackId(app));
                 } else {
-                  FlinkRESTAPIWatcher.stopTracking(appParam.getId());
+                  FlinkRESTAPIWatcher.stopWatching(appParam.getId());
                 }
               }
             })
@@ -1633,7 +1634,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       k8SFlinkTrackMonitor.unTrackingJob(id);
       k8SFlinkTrackMonitor.trackingJob(id);
     } else {
-      FlinkRESTAPIWatcher.stopTracking(application.getId());
+      FlinkRESTAPIWatcher.stopWatching(application.getId());
     }
   }
 
