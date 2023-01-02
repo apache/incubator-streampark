@@ -62,7 +62,7 @@ public class FlinkK8sWatcherWrapper {
 
   /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
   @Bean(destroyMethod = "close")
-  public FlinkK8sWatcher registerFlinkTrackingMonitor() {
+  public FlinkK8sWatcher registerFlinkK8sWatcher() {
     // lazy start tracking monitor
     FlinkK8sWatcher flinkK8sWatcher =
         FlinkK8sWatcher.createInstance(FlinkTrackConfig.fromConfigHub(), true);
@@ -71,10 +71,10 @@ public class FlinkK8sWatcherWrapper {
     /* Dev scaffold: watch flink k8s tracking cache,
        see org.apache.streampark.flink.kubernetes.helper.KubernetesWatcherHelper for items.
        Example:
-           KubernetesWatcherHelper.watchTrackIdsCache(trackMonitor);
-           KubernetesWatcherHelper.watchJobStatusCache(trackMonitor);
-           KubernetesWatcherHelper.watchAggClusterMetricsCache(trackMonitor);
-           KubernetesWatcherHelper.watchClusterMetricsCache(trackMonitor);
+           KubernetesWatcherHelper.watchTrackIdsCache(flinkK8sWatcher);
+           KubernetesWatcherHelper.watchJobStatusCache(flinkK8sWatcher);
+           KubernetesWatcherHelper.watchAggClusterMetricsCache(flinkK8sWatcher);
+           KubernetesWatcherHelper.watchClusterMetricsCache(flinkK8sWatcher);
     */
     return flinkK8sWatcher;
   }
