@@ -21,9 +21,9 @@ import org.apache.streampark.flink.kubernetes.event.BuildInEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
 
 /**
- * AOP for FlinkTrackMonitor used to trigger the run behavior.
+ * AOP for FlinkK8sWatcher used to trigger the run behavior.
  * What more, this AOP has the ability to automatically recover
- * the FlinkTrackMonitor's internal FlinkWatcher.
+ * the FlinkK8sWatcher's internal FlinkWatcher.
  */
 trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
 
@@ -63,12 +63,12 @@ trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
   }
 
   abstract override def getAccClusterMetrics: FlinkMetricCV = {
-    // behavior of getting cluster metrics will not trgger a delayed start
+    // behavior of getting cluster metrics will not trigger a delayed start
     super.getAccClusterMetrics
   }
 
   abstract override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = {
-    // behavior of getting cluster metrics will not trgger a delayed start
+    // behavior of getting cluster metrics will not trigger a delayed start
     super.getClusterMetrics(clusterKey)
   }
 

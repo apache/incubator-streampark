@@ -130,19 +130,14 @@ trait FlinkK8sWatcher extends Logger with AutoCloseable {
 
 }
 
-/**
- * Factory of FlinkTrackMonitor.
- * This is the entry point for external calls to the
- * streampark.flink.kubernetes package.
- */
 @Public object FlinkK8sWatcher {
 
   /**
-   * Create FlinkTrackMonitor instance.
+   * Create FlinkK8sWatcher instance.
    *
    * @param conf      configuration
    * @param lazyStart Whether monitor will performs delayed auto-start when necessary.
-   *                  In this case, there is no need to display the call to FlinkTrackMonitor.start(),
+   *                  In this case, there is no need to display the call to FlinkK8sWatcher.start(),
    *                  useless the monitor is expected to start immediately.
    */
   def createInstance(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf, lazyStart: Boolean = false): FlinkK8sWatcher =
