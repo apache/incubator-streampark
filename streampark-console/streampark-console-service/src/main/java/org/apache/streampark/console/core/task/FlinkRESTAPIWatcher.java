@@ -407,9 +407,9 @@ public class FlinkRESTAPIWatcher {
       application.setAvailableSlot(null);
       application.setJmMemory(null);
       application.setTmMemory(null);
-      stopWatching(application.getId());
+      unWatching(application.getId());
     } else if (stopWatch) {
-      stopWatching(application.getId());
+      unWatching(application.getId());
     } else {
       WATCHING_APPS.put(application.getId(), application);
     }
@@ -577,7 +577,7 @@ public class FlinkRESTAPIWatcher {
     }
   }
 
-  public static void addWatching(Application application) {
+  public static void doWatching(Application application) {
     if (isKubernetesApp(application)) {
       return;
     }
@@ -601,7 +601,7 @@ public class FlinkRESTAPIWatcher {
     }
   }
 
-  public static void stopWatching(Long appId) {
+  public static void unWatching(Long appId) {
     if (isKubernetesApp(appId)) {
       return;
     }
@@ -631,12 +631,12 @@ public class FlinkRESTAPIWatcher {
   }
 
   private static boolean isKubernetesApp(Application application) {
-    return K8sFlinkTrackMonitorWrapper.isKubernetesApp(application);
+    return FlinkK8sWatcherWrapper.isKubernetesApp(application);
   }
 
   private static boolean isKubernetesApp(Long appId) {
     Application app = WATCHING_APPS.get(appId);
-    return K8sFlinkTrackMonitorWrapper.isKubernetesApp(app);
+    return FlinkK8sWatcherWrapper.isKubernetesApp(app);
   }
 
   private FlinkCluster getFlinkCluster(Application application) {

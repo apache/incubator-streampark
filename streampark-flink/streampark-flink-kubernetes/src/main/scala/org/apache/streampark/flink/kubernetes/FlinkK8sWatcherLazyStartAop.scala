@@ -25,26 +25,26 @@ import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, 
  * What more, this AOP has the ability to automatically recover
  * the FlinkTrackMonitor's internal FlinkWatcher.
  */
-trait K8sFlinkTrackMonitorLazyStartAop extends K8sFlinkTrackMonitor {
+trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
 
-  abstract override def trackingJob(trackId: TrackId): Unit = {
+  abstract override def doWatching(trackId: TrackId): Unit = {
     start()
-    super.trackingJob(trackId)
+    super.doWatching(trackId)
   }
 
-  abstract override def unTrackingJob(trackId: TrackId): Unit = {
+  abstract override def unWatching(trackId: TrackId): Unit = {
     start()
-    super.unTrackingJob(trackId)
+    super.unWatching(trackId)
   }
 
-  abstract override def isInTracking(trackId: TrackId): Boolean = {
+  abstract override def isInWatching(trackId: TrackId): Boolean = {
     start()
-    super.isInTracking(trackId)
+    super.isInWatching(trackId)
   }
 
-  abstract override def getAllTrackingIds: Set[TrackId] = {
+  abstract override def getWatchingIds: Set[TrackId] = {
     start()
-    super.getAllTrackingIds
+    super.getWatchingIds
   }
 
   abstract override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = {

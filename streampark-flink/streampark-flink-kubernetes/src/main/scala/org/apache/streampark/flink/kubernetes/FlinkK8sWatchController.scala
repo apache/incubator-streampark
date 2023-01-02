@@ -29,7 +29,7 @@ import org.apache.streampark.flink.kubernetes.model._
 /**
  * Tracking info cache pool on flink kubernetes mode.
  */
-class FlinkTrackController extends Logger with AutoCloseable {
+class FlinkK8sWatchController extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
   lazy val trackIds: TrackIdCache = TrackIdCache.build()

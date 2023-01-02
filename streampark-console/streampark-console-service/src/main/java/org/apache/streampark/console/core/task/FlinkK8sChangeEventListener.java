@@ -54,7 +54,7 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8
 
 /** Event Listener for K8sFlinkTrackMonitor */
 @Component
-public class K8sFlinkChangeEventListener {
+public class FlinkK8sChangeEventListener {
 
   @Lazy @Autowired private ApplicationService applicationService;
 

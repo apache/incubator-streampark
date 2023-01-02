@@ -26,7 +26,7 @@ import io.fabric8.kubernetes.client.{KubernetesClient, Watcher}
 import org.apache.flink.kubernetes.kubeclient.resources.{CompatibleKubernetesWatcher, CompKubernetesDeployment}
 
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.{FlinkTrackController, KubernetesRetriever}
+import org.apache.streampark.flink.kubernetes.{FlinkK8sWatchController, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey}
 
 /**
@@ -35,7 +35,7 @@ import org.apache.streampark.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEv
  * The results of traced events would written into cachePool.
  */
 @ThreadSafe
-class FlinkK8sEventWatcher(implicit trackController: FlinkTrackController) extends Logger with FlinkWatcher {
+class FlinkK8sEventWatcher(implicit watchController: FlinkK8sWatchController) extends Logger with FlinkWatcher {
 
   private var k8sClient: KubernetesClient = _
 
@@ -81,7 +81,7 @@ class FlinkK8sEventWatcher(implicit trackController: FlinkTrackController) exten
     // if (!cachePool.isInTracking(TrackId.onApplication(namespace, clusterId)))
     //  return
     // just tracking every flink-k8s-native event :)
-    trackController.k8sDeploymentEvents.put(
+    watchController.k8sDeploymentEvents.put(
       K8sEventKey(namespace, clusterId),
       K8sDeploymentEventCV(action, event, System.currentTimeMillis()))
   }
