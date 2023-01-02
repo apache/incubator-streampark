@@ -24,8 +24,7 @@ import java.util.regex.Pattern
 
 import scala.collection.mutable.{ListBuffer, Map => MutableMap}
 
-import org.apache.streampark.common.conf.ConfigConst
-import org.apache.streampark.common.domain.FlinkVersion
+import org.apache.streampark.common.conf.{ConfigConst, FlinkVersion}
 import org.apache.streampark.common.util.{ClassLoaderUtils, Logger, Utils}
 
 object FlinkShimsProxy extends Logger {

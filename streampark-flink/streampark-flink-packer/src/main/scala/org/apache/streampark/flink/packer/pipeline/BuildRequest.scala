@@ -19,8 +19,7 @@ package org.apache.streampark.flink.packer.pipeline
 
 import scala.collection.mutable.ArrayBuffer
 
-import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.domain.FlinkVersion
+import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.enums.{DevelopmentMode, ExecutionMode}
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 import org.apache.streampark.flink.packer.docker.DockerConf
