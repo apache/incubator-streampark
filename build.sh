@@ -172,37 +172,37 @@ selectMode() {
 
 
 mixedPackage() {
-  scalaProfile="scala-2.11"
+  scala="scala-2.11"
   if [ "$1" == 2 ]; then
-    scalaProfile="scala-2.12"
+    scala="scala-2.12"
   fi
 
-  echo_g "build info: package mode @ mixed, $scalaProfile, now build starting..."
+  echo_g "build info: package mode @ mixed, $scala, now build starting..."
 
-  "$PRG_DIR/mvnw" clean package -DskipTests -P$scalaProfile,console,webapp,dist
+  "$PRG_DIR/mvnw" -P$scala,console,webapp,dist -DskipTests clean package
 
   if [ $? -eq 0 ]; then
      printf '\n'
      echo_g """StreamPark project build successful!
-     info: package mode @ mixed, $scalaProfile
+     info: package mode @ mixed, $scala
      dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
   fi
 }
 
 detachedPackage () {
-  scalaProfile="scala-2.11"
+  scala="scala-2.11"
   if [ "$1" == 2 ]; then
-    scalaProfile="scala-2.12"
+    scala="scala-2.12"
   fi
 
-  echo_g "build info: package mode @ detached, $scalaProfile, now build starting..."
+  echo_g "build info: package mode @ detached, $scala, now build starting..."
 
-  "$PRG_DIR"/mvnw clean package -DskipTests -P$scalaProfile,console,dist
+  "$PRG_DIR"/mvnw -P$scala,console,dist -DskipTests clean package
 
   if [ $? -eq 0 ]; then
     printf '\n'
     echo_g """StreamPark project build successful!
-    info: package mode @ detached, $scalaProfile
+    info: package mode @ detached, $scala
     dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist
 
     Next, you need to build front-end by yourself.
