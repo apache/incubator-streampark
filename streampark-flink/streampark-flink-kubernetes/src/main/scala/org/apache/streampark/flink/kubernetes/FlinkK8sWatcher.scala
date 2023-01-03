@@ -33,7 +33,7 @@ import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, 
  * streampark.flink.kubernetes package.
  */
 @Public
-trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
+trait FlinkK8sWatcher extends Logger with AutoCloseable {
 
   /**
    * Register listener to EventBus.
@@ -65,26 +65,26 @@ trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
    *
    * @param trackId identifier of flink job
    */
-  def trackingJob(trackId: TrackId): Unit
+  def doWatching(trackId: TrackId): Unit
 
   /**
    * remove tracking for the specified flink job which on k8s cluster.
    *
    * @param trackId identifier of flink job
    */
-  def unTrackingJob(trackId: TrackId): Unit
+  def unWatching(trackId: TrackId): Unit
 
   /**
    * check whether the specified flink job is in tracking.
    *
    * @param trackId identifier of flink job
    */
-  def isInTracking(trackId: TrackId): Boolean
+  def isInWatching(trackId: TrackId): Boolean
 
   /**
    * collect all TrackId which in tracking
    */
-  def getAllTrackingIds: Set[TrackId]
+  def getAllWatchingIds: Set[TrackId]
 
   /**
    * get flink status
@@ -130,25 +130,21 @@ trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
 
 }
 
-/**
- * Factory of FlinkTrackMonitor.
- * This is the entry point for external calls to the
- * streampark.flink.kubernetes package.
- */
-@Public object K8sFlinkTrackMonitorFactory {
+@Public
+object FlinkK8sWatcherFactory {
 
   /**
-   * Create FlinkTrackMonitor instance.
+   * Create FlinkK8sWatcher instance.
    *
    * @param conf      configuration
    * @param lazyStart Whether monitor will performs delayed auto-start when necessary.
-   *                  In this case, there is no need to display the call to FlinkTrackMonitor.start(),
+   *                  In this case, there is no need to display the call to FlinkK8sWatcher.start(),
    *                  useless the monitor is expected to start immediately.
    */
-  def createInstance(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf, lazyStart: Boolean = false): K8sFlinkTrackMonitor =
+  def createInstance(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf, lazyStart: Boolean = false): FlinkK8sWatcher =
     if (lazyStart) {
-      new DefaultK8sFlinkTrackMonitor(conf) with K8sFlinkTrackMonitorLazyStartAop
+      new DefaultFlinkK8sWatcher(conf) with FlinkK8sWatcherLazyStartAop
     } else {
-      new DefaultK8sFlinkTrackMonitor(conf)
+      new DefaultFlinkK8sWatcher(conf)
     }
 }

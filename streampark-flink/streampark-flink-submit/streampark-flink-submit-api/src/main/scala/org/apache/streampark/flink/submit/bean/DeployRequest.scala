@@ -24,8 +24,7 @@ import javax.annotation.Nullable
 import org.apache.commons.io.FileUtils
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.domain.FlinkVersion
+import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
 import org.apache.streampark.common.util.FlinkUtils
 

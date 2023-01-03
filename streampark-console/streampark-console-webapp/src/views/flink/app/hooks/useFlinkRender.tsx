@@ -39,7 +39,7 @@ import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
-import { CandidateTypeEnum } from '/@/enums/flinkEnum';
+import { CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 
 const { t } = useI18n();
@@ -91,7 +91,7 @@ export const renderInputDropdown = (
 export function handleCheckCheckpoint(values: Recordable) {
   const { cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction } = values.checkPointFailure;
   if (cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null) {
-    if (cpFailureAction === 1) {
+    if (cpFailureAction === FailoverStrategyEnum.ALERT) {
       if (values.alertId == null) {
         // this.form.setFields({
         //   alertEmail: {

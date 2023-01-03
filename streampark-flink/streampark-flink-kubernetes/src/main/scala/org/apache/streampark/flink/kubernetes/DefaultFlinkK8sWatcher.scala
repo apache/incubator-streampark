@@ -30,10 +30,10 @@ import org.apache.streampark.flink.kubernetes.watcher.{FlinkCheckpointWatcher, F
 /**
  * Default K8sFlinkTrackMonitor implementation.
  */
-class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf) extends K8sFlinkTrackMonitor {
+class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf) extends FlinkK8sWatcher {
 
   // cache pool for storage tracking result
-  implicit val trackController: FlinkTrackController = new FlinkTrackController()
+  implicit val watchController: FlinkK8sWatchController = new FlinkK8sWatchController()
 
   // eventBus for change event
   implicit lazy val eventBus: ChangeEventBus = {
@@ -59,33 +59,33 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
   override def restart(): Unit = allWatchers.foreach(_.restart())
 
   override def close(): Unit = {
-    allWatchers.foreach(_.close)
-    trackController.close()
+    allWatchers.foreach(_.close())
+    watchController.close()
   }
 
-  def trackingJob(trackId: TrackId): Unit = {
+  def doWatching(trackId: TrackId): Unit = {
     if (trackId.isLegal) {
-      trackController.trackIds.set(trackId)
+      watchController.trackIds.set(trackId)
     }
   }
 
-  def unTrackingJob(trackId: TrackId): Unit = {
-    trackController.canceling.set(trackId)
+  def unWatching(trackId: TrackId): Unit = {
+    watchController.canceling.set(trackId)
   }
 
-  override def isInTracking(trackId: TrackId): Boolean = trackController.isInTracking(trackId)
+  override def isInWatching(trackId: TrackId): Boolean = watchController.isInWatching(trackId)
 
-  override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(trackController.jobStatuses.get(trackId))
+  override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(watchController.jobStatuses.get(trackId))
 
-  override def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] = trackController.jobStatuses.getAsMap(trackIds)
+  override def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] = watchController.jobStatuses.getAsMap(trackIds)
 
-  override def getAllJobStatus: Map[CacheKey, JobStatusCV] = trackController.jobStatuses.asMap()
+  override def getAllJobStatus: Map[CacheKey, JobStatusCV] = watchController.jobStatuses.asMap()
 
-  override def getAccClusterMetrics: FlinkMetricCV = trackController.collectAccMetric()
+  override def getAccClusterMetrics: FlinkMetricCV = watchController.collectAccMetric()
 
-  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(trackController.flinkMetrics.get(clusterKey))
+  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(watchController.flinkMetrics.get(clusterKey))
 
-  override def getAllTrackingIds: Set[TrackId] = trackController.collectAllTrackIds()
+  override def getAllWatchingIds: Set[TrackId] = watchController.getAllWatchingIds()
 
   override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
     if (!trackId.isLegal) false;
@@ -109,7 +109,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
     }
   }
 
-  @Nullable override def getRemoteRestUrl(trackId: TrackId): String = trackController.endpoints.get(trackId.toClusterKey)
+  @Nullable override def getRemoteRestUrl(trackId: TrackId): String = watchController.endpoints.get(trackId.toClusterKey)
 
   /**
    * Build-in Event Listener of K8sFlinkTrackMonitor.
@@ -123,7 +123,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
     // noinspection UnstableApiUsage
     @Subscribe def subscribeFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {
       if (event.trackId.isLegal) {
-        val latest = trackController.jobStatuses.get(event.trackId)
+        val latest = watchController.jobStatuses.get(event.trackId)
         // determine if the current event should be ignored
         val shouldIgnore: Boolean = (latest, event) match {
           case (preCache, _) if preCache == null => false
@@ -146,7 +146,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
                 pollAckTime = System.currentTimeMillis)
             }
           }
-          trackController.jobStatuses.put(event.trackId, newCache)
+          watchController.jobStatuses.put(event.trackId, newCache)
           // post new FlinkJobStatusChangeEvent
           eventBus.postAsync(FlinkJobStatusChangeEvent(event.trackId, newCache))
         }

@@ -32,7 +32,7 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
   Application getApp(@Param("application") Application application);
 
-  void updateTracking(@Param("application") Application application);
+  void persistMetrics(@Param("application") Application application);
 
   List<Application> getByTeamId(@Param("teamId") Long teamId);
 

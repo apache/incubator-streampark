@@ -29,7 +29,7 @@ import org.apache.streampark.flink.kubernetes.model._
 /**
  * Tracking info cache pool on flink kubernetes mode.
  */
-class FlinkTrackController extends Logger with AutoCloseable {
+class FlinkK8sWatchController extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
   lazy val trackIds: TrackIdCache = TrackIdCache.build()
@@ -57,19 +57,19 @@ class FlinkTrackController extends Logger with AutoCloseable {
   /**
    * collect all tracking identifiers
    */
-  def collectAllTrackIds(): Set[TrackId] = trackIds.getAll()
+  def getAllWatchingIds(): Set[TrackId] = trackIds.getAll()
 
   /**
    * determines whether the specified TrackId is in the trace
    */
-  def isInTracking(trackId: TrackId): Boolean = {
+  def isInWatching(trackId: TrackId): Boolean = {
     if (!trackId.isLegal) false;
     else {
       trackIds.get(trackId) != null
     }
   }
 
-  def unTracking(trackId: TrackId): Unit = {
+  def unWatching(trackId: TrackId): Unit = {
     if (trackId.isLegal) {
       trackIds.invalidate(trackId)
       canceling.invalidate(trackId)
@@ -82,14 +82,14 @@ class FlinkTrackController extends Logger with AutoCloseable {
   /**
    * collect all legal tracking ids, and covert to ClusterKey
    */
-  private[kubernetes] def collectTracks(): Set[TrackId] = collectAllTrackIds().filter(_.isActive)
+  private[kubernetes] def getActiveWatchingIds(): Set[TrackId] = getAllWatchingIds().filter(_.isActive)
 
   /**
    * collect the aggregation of flink metrics that in tracking
    */
   def collectAccMetric(): FlinkMetricCV = {
     // get cluster metrics that in tracking
-    collectTracks() match {
+    getActiveWatchingIds() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
         flinkMetrics.getAll(for (elem <- k) yield {

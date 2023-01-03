@@ -20,7 +20,7 @@ package org.apache.streampark.flink.submit.bean
 import java.util.{Map => JavaMap}
 import javax.annotation.Nullable
 
-import org.apache.streampark.common.domain.FlinkVersion
+import org.apache.streampark.common.conf.FlinkVersion
 import org.apache.streampark.common.enums.ExecutionMode
 
 case class ShutDownRequest(

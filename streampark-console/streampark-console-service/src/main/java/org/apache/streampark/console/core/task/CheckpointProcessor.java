@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.task;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
+import org.apache.streampark.console.core.enums.FailoverStrategy;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.SavePointService;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class CheckpointProcessor {
@@ -80,19 +82,27 @@ public class CheckpointProcessor {
       } else {
         long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
         if (minute <= application.getCpFailureRateInterval()
-            && counter.count >= application.getCpMaxFailureInterval()) {
+            && counter.getCount() >= application.getCpMaxFailureInterval()) {
           checkPointFailedCache.remove(appId);
-          if (application.getCpFailureAction() == 1) {
-            alertService.alert(application, CheckPointStatus.FAILED);
-          } else {
-            try {
-              applicationService.restart(application);
-            } catch (Exception e) {
-              throw new RuntimeException(e);
-            }
+          FailoverStrategy failoverStrategy = FailoverStrategy.of(application.getCpFailureAction());
+          if (failoverStrategy == null) {
+            throw new IllegalArgumentException(
+                "Unexpected cpFailureAction: " + application.getCpFailureAction());
+          }
+          switch (failoverStrategy) {
+            case ALERT:
+              alertService.alert(application, CheckPointStatus.FAILED);
+              break;
+            case RESTART:
+              try {
+                applicationService.restart(application);
+              } catch (Exception e) {
+                throw new RuntimeException(e);
+              }
+              break;
           }
         } else {
-          counter.add();
+          counter.increment();
         }
       }
     }
@@ -112,19 +122,19 @@ public class CheckpointProcessor {
 
   public static class Counter {
     private final Long timestamp;
-    private Integer count;
+    private final AtomicInteger count;
 
     public Counter(Long timestamp) {
       this.timestamp = timestamp;
-      this.count = 1;
+      this.count = new AtomicInteger(1);
     }
 
-    public void add() {
-      this.count += 1;
+    public void increment() {
+      this.count.incrementAndGet();
     }
 
     public Integer getCount() {
-      return count;
+      return count.get();
     }
 
     public long getDuration(Long currentTimestamp) {

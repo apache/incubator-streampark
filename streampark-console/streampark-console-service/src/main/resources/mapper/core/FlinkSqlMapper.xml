@@ -36,7 +36,7 @@
     </select>
 
     <select id="getLatestVersion" resultType="java.lang.Integer" parameterType="java.lang.Long">
-        select max(`version`) as maxVersion
+        select max(version) as maxVersion
         from t_flink_sql
         where app_id = #{appId}
     </select>

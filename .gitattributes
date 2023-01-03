@@ -14,31 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-version = 3.6.1
-runner.dialect=scala212
-project.git=true
 
-align.preset = none
-align.openParenDefnSite = false
-align.openParenCallSite = false
-align.stripMargin = true
-align.tokens = []
-assumeStandardLibraryStripMargin = true
-danglingParentheses.preset = false
-docstrings.style = Asterisk
-docstrings.wrap = no
-importSelectors = singleLine
-indent.extendSite = 4
-literals.hexDigits = Upper
-maxColumn = 160
-newlines.source = keep
-newlines.topLevelStatementBlankLines = []
-optIn.configStyleArguments = false
-rewrite.imports.groups = [
-  ["javax?\\..*"],
-  ["scala\\..*"],
-  ["(?!org\\.apache\\.streampark\\.).*"],
-  ["org\\.apache\\.streampark\\..*"]
-]
-rewrite.imports.sort = scalastyle
-rewrite.rules = [Imports, SortModifiers]
+* text eol=lf
+*.jpg -text
+*.jpeg -text
+*.png -text
+*.eot -text
+*.ttf -text

@@ -27,7 +27,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface SavePointService extends IService<SavePoint> {
 
-  void obsolete(Long appId);
+  void expire(Long appId);
 
   SavePoint getLatest(Long id);
 

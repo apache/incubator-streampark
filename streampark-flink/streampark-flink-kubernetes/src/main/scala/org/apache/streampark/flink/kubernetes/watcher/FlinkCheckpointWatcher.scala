@@ -33,13 +33,13 @@ import org.json4s.JsonAST.JNothing
 import org.json4s.jackson.JsonMethods.parse
 
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkTrackController, KubernetesRetriever, MetricWatcherConfig}
+import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, KubernetesRetriever, MetricWatcherConfig}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
 import org.apache.streampark.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
 
 @ThreadSafe
 class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)(
-    implicit val trackController: FlinkTrackController,
+    implicit val watchController: FlinkK8sWatchController,
     implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
   private val trackTaskExecPool = Executors.newWorkStealingPool()
@@ -78,8 +78,9 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    */
   override def doWatch(): Unit = {
     // get all legal tracking cluster key
-    val trackIds: Set[TrackId] = Try(trackController.collectTracks()).filter(_.nonEmpty).getOrElse(return
-    )
+    val trackIds: Set[TrackId] = Try(watchController.getActiveWatchingIds()).filter(_.nonEmpty)
+      .getOrElse(return
+      )
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[CheckpointCV]]] =
       trackIds.map(id => {
@@ -107,7 +108,7 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    */
   def collect(trackId: TrackId): Option[CheckpointCV] = {
     if (trackId.jobId != null) {
-      val flinkJmRestUrl = trackController.getClusterRestUrl(ClusterKey.of(trackId)).filter(_.nonEmpty).getOrElse(return None)
+      val flinkJmRestUrl = watchController.getClusterRestUrl(ClusterKey.of(trackId)).filter(_.nonEmpty).getOrElse(return None)
       // call flink rest overview api
       val checkpoint: Checkpoint = Try(
         Checkpoint.as(

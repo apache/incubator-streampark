@@ -33,13 +33,13 @@ import org.json4s.{DefaultFormats, JArray}
 import org.json4s.jackson.JsonMethods.parse
 
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkTrackController, KubernetesRetriever, MetricWatcherConfig}
+import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, KubernetesRetriever, MetricWatcherConfig}
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, TrackId}
 
 @ThreadSafe
 class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)(
-    implicit val trackController: FlinkTrackController,
+    implicit val watchController: FlinkK8sWatchController,
     implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
   private val trackTaskExecPool = Executors.newWorkStealingPool()
@@ -78,8 +78,9 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
    */
   override def doWatch(): Unit = {
     // get all legal tracking cluster key
-    val trackIds: Set[TrackId] = Try(trackController.collectTracks()).filter(_.nonEmpty).getOrElse(return
-    )
+    val trackIds: Set[TrackId] = Try(watchController.getActiveWatchingIds()).filter(_.nonEmpty)
+      .getOrElse(return
+      )
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[FlinkMetricCV]]] =
       trackIds.map(id => {
@@ -88,9 +89,9 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
           case Some(metric) =>
             val clusterKey = id.toClusterKey
             // update current flink cluster metrics on cache
-            trackController.flinkMetrics.put(clusterKey, metric)
+            watchController.flinkMetrics.put(clusterKey, metric)
             val isMetricChanged = {
-              val preMetric = trackController.flinkMetrics.get(clusterKey)
+              val preMetric = watchController.flinkMetrics.get(clusterKey)
               preMetric == null || !preMetric.equalsPayload(metric)
             }
             if (isMetricChanged) {
@@ -120,7 +121,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
   def collectMetrics(id: TrackId): Option[FlinkMetricCV] = {
     // get flink rest api
     val clusterKey: ClusterKey = ClusterKey.of(id)
-    val flinkJmRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
+    val flinkJmRestUrl = watchController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
 
     // call flink rest overview api
     val flinkOverview: FlinkRestOverview = FlinkRestOverview.as(

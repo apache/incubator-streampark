@@ -21,30 +21,30 @@ import org.apache.streampark.flink.kubernetes.event.BuildInEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
 
 /**
- * AOP for FlinkTrackMonitor used to trigger the run behavior.
+ * AOP for FlinkK8sWatcher used to trigger the run behavior.
  * What more, this AOP has the ability to automatically recover
- * the FlinkTrackMonitor's internal FlinkWatcher.
+ * the FlinkK8sWatcher's internal FlinkWatcher.
  */
-trait K8sFlinkTrackMonitorLazyStartAop extends K8sFlinkTrackMonitor {
+trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
 
-  abstract override def trackingJob(trackId: TrackId): Unit = {
+  abstract override def doWatching(trackId: TrackId): Unit = {
     start()
-    super.trackingJob(trackId)
+    super.doWatching(trackId)
   }
 
-  abstract override def unTrackingJob(trackId: TrackId): Unit = {
+  abstract override def unWatching(trackId: TrackId): Unit = {
     start()
-    super.unTrackingJob(trackId)
+    super.unWatching(trackId)
   }
 
-  abstract override def isInTracking(trackId: TrackId): Boolean = {
+  abstract override def isInWatching(trackId: TrackId): Boolean = {
     start()
-    super.isInTracking(trackId)
+    super.isInWatching(trackId)
   }
 
-  abstract override def getAllTrackingIds: Set[TrackId] = {
+  abstract override def getAllWatchingIds: Set[TrackId] = {
     start()
-    super.getAllTrackingIds
+    super.getAllWatchingIds
   }
 
   abstract override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = {
@@ -63,12 +63,12 @@ trait K8sFlinkTrackMonitorLazyStartAop extends K8sFlinkTrackMonitor {
   }
 
   abstract override def getAccClusterMetrics: FlinkMetricCV = {
-    // behavior of getting cluster metrics will not trgger a delayed start
+    // behavior of getting cluster metrics will not trigger a delayed start
     super.getAccClusterMetrics
   }
 
   abstract override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = {
-    // behavior of getting cluster metrics will not trgger a delayed start
+    // behavior of getting cluster metrics will not trigger a delayed start
     super.getClusterMetrics(clusterKey)
   }
 

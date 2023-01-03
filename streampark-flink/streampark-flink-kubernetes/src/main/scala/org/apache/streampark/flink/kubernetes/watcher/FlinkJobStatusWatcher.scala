@@ -42,7 +42,7 @@ import org.json4s.jackson.JsonMethods.parse
 
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkTrackController, IngressController, JobStatusWatcherConfig, KubernetesRetriever}
+import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, IngressController, JobStatusWatcherConfig, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
@@ -56,7 +56,7 @@ import org.apache.streampark.flink.kubernetes.model._
  */
 @ThreadSafe
 class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfig.defaultConf)(
-    implicit val trackController: FlinkTrackController,
+    implicit val watchController: FlinkK8sWatchController,
     implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
   private val trackTaskExecPool = Executors.newWorkStealingPool()
@@ -98,7 +98,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     this.synchronized {
       logInfo("[FlinkJobStatusWatcher]: Status monitoring process begins - " + Thread.currentThread().getName)
       // get all legal tracking ids
-      val trackIds = Try(trackController.collectAllTrackIds()).filter(_.nonEmpty).getOrElse(return
+      val trackIds = Try(watchController.getAllWatchingIds()).filter(_.nonEmpty).getOrElse(return
       )
 
       // retrieve flink job status in thread pool
@@ -113,19 +113,19 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         future onComplete (_.getOrElse(None) match {
           case Some(jobState) =>
             val trackId = id.copy(jobId = jobState.jobId)
-            val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
+            val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
             if (latest == null || latest.jobState != jobState.jobState || latest.jobId != jobState.jobId) {
               // put job status to cache
-              trackController.jobStatuses.put(trackId, jobState)
+              watchController.jobStatuses.put(trackId, jobState)
               // set jobId to trackIds
-              trackController.trackIds.update(trackId)
+              watchController.trackIds.update(trackId)
               eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
             }
             if (FlinkJobState.isEndState(jobState.jobState)) {
               // remove trackId from cache of job that needs to be untracked
-              trackController.unTracking(trackId)
+              watchController.unWatching(trackId)
               if (trackId.executeMode == APPLICATION) {
-                trackController.endpoints.invalidate(trackId.toClusterKey)
+                watchController.endpoints.invalidate(trackId.toClusterKey)
               }
             }
           case _ =>
@@ -162,7 +162,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     val rsMap = touchSessionAllJob(clusterId, namespace, appId).toMap
     val id = TrackId.onSession(namespace, clusterId, appId, jobId)
     val jobState = rsMap.get(id).filter(_.jobState != FlinkJobState.SILENT).getOrElse {
-      val preCache = trackController.jobStatuses.get(id)
+      val preCache = watchController.jobStatuses.get(id)
       val state = inferSilentOrLostFromPreCache(preCache)
       val nonFirstSilent = state == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT
       if (nonFirstSilent) {
@@ -222,12 +222,12 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   private def listJobsDetails(clusterKey: ClusterKey): Option[JobDetails] = {
     // get flink rest api
     Try {
-      val clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
+      val clusterRestUrl = watchController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
       // list flink jobs from rest api
       callJobsOverviewsApi(clusterRestUrl)
     }.getOrElse {
       logger.warn("Failed to visit remote flink jobs on kubernetes-native-mode cluster, and the retry access logic is performed.")
-      val clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
+      val clusterRestUrl = watchController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
       Try(callJobsOverviewsApi(clusterRestUrl)) match {
         case Success(s) =>
           logger.info("The retry is successful.")
@@ -259,10 +259,10 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   private def inferApplicationFlinkJobStateFromK8sEvent(@Nonnull trackId: TrackId)(implicit pollEmitTime: Long): Option[JobStatusCV] = {
 
     // infer from k8s deployment and event
-    val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
-    logger.info(s"Query the local cache result:${trackController.canceling.has(trackId).toString},trackId ${trackId.toString}.")
+    val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
+    logger.info(s"Query the local cache result:${watchController.canceling.has(trackId).toString},trackId ${trackId.toString}.")
     val jobState = {
-      if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED
+      if (watchController.canceling.has(trackId)) FlinkJobState.CANCELED
       else {
         // whether deployment exists on kubernetes cluster
         val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)

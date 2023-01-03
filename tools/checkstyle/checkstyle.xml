@@ -29,6 +29,11 @@ This file is based on the checkstyle file of Apache Beam.
 
 <module name="Checker">
 
+    <module name="NewlineAtEndOfFile">
+        <!-- windows can use \r\n vs \n, so enforce the most used one ie UNIx style -->
+        <property name="lineSeparator" value="lf"/>
+    </module>
+
     <module name="RegexpSingleline">
         <!-- Checks that TODOs don't have stuff in parenthesis, e.g., username. -->
         <property name="format" value="((//.*)|(\*.*))TODO\("/>
@@ -57,11 +62,10 @@ This file is based on the checkstyle file of Apache Beam.
         <property name="file" value="${checkstyle.suppressions.file}" default="suppressions.xml"/>
     </module>
 
-    <!--
+    <!-- Check that every module has a package-info.java -->
+    <!--<module name="JavadocPackage"/>-->
 
-    StreamPark CUSTOM CHECKS
-
-    -->
+    <!-- CUSTOM CHECKS -->
 
     <module name="FileLength">
         <property name="max" value="3000"/>
@@ -169,6 +173,7 @@ This file is based on the checkstyle file of Apache Beam.
             <property name="illegalPkgs"
                       value="autovalue.shaded, avro.shaded, com.google.api.client.repackaged, com.google.appengine.repackaged"/>
         </module>
+
         <module name="RedundantModifier">
             <!-- Checks for redundant modifiers on various symbol definitions.
               See: http://checkstyle.sourceforge.net/config_modifier.html#RedundantModifier

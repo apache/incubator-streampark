@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.streampark.common.domain
+package org.apache.streampark.common.conf
 
 import java.io.File
 import java.net.{URL => NetURL}
@@ -23,6 +23,7 @@ import java.util.function.Consumer
 import java.util.regex.Pattern
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 import org.apache.streampark.common.util.{CommandUtils, Logger}
 
@@ -63,7 +64,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
     val flinkVersion = new AtomicReference[String]
     val cmd = List(s"java -classpath ${flinkDistJar.getAbsolutePath} org.apache.flink.client.cli.CliFrontend --version")
     val success = new AtomicBoolean(false)
-    val buffer = new StringBuilder
+    val buffer = new mutable.StringBuilder
     CommandUtils.execute(
       flinkLib.getAbsolutePath,
       cmd,

@@ -121,6 +121,17 @@ public enum FlinkAppState implements Serializable {
     return FlinkAppState.OTHER;
   }
 
+  public static boolean isEndState(Integer appState) {
+    FlinkAppState flinkAppState = FlinkAppState.of(appState);
+    return FlinkAppState.CANCELED == flinkAppState
+        || FlinkAppState.FAILED == flinkAppState
+        || FlinkAppState.KILLED == flinkAppState
+        || FlinkAppState.FINISHED == flinkAppState
+        || FlinkAppState.SUCCEEDED == flinkAppState
+        || FlinkAppState.LOST == flinkAppState
+        || FlinkAppState.TERMINATED == flinkAppState;
+  }
+
   /** type conversion bridging */
   public static class Bridge {
     /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */

@@ -28,9 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.io.FileUtils
 import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
 
-import org.apache.streampark.common.conf.{ConfigConst, Workspace}
+import org.apache.streampark.common.conf.{ConfigConst, FlinkVersion, Workspace}
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.domain.FlinkVersion
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util.{DeflaterUtils, FlinkUtils, HdfsUtils, PropertiesUtils}
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}

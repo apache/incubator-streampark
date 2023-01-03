@@ -35,7 +35,6 @@ import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.task.FlinkTrackingTask;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -98,70 +97,57 @@ public class ApplicationBackUpServiceImpl
     if (!fsOperator.exists(backParam.getPath())) {
       return;
     }
-    executorService.execute(
-        () -> {
-          try {
-            FlinkTrackingTask.refreshTracking(
-                backParam.getAppId(),
-                () -> {
-                  // if backup files exists, will be rollback
-                  // When rollback, determine the currently effective project is necessary to be
-                  // backed up.
-                  // If necessary, perform the backup first
-                  if (backParam.isBackup()) {
-                    application.setBackUpDescription(backParam.getDescription());
-                    if (application.isFlinkSqlJob()) {
-                      FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-                      backup(application, flinkSql);
-                    } else {
-                      backup(application, null);
-                    }
-                  }
 
-                  // restore config and sql
+    // if backup files exists, will be rollback
+    // When rollback, determine the currently effective project is necessary to be
+    // backed up.
+    // If necessary, perform the backup first
+    if (backParam.isBackup()) {
+      application.setBackUpDescription(backParam.getDescription());
+      if (application.isFlinkSqlJob()) {
+        FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+        backup(application, flinkSql);
+      } else {
+        backup(application, null);
+      }
+    }
 
-                  // if running, set Latest
-                  if (application.isRunning()) {
-                    // rollback to buckup config
-                    configService.setLatestOrEffective(
-                        true, backParam.getId(), backParam.getAppId());
-                  } else {
-                    effectiveService.saveOrUpdate(
-                        backParam.getAppId(), EffectiveType.CONFIG, backParam.getId());
-                    // if flink sql task, will be rollback sql and dependencies
-                    if (application.isFlinkSqlJob()) {
-                      effectiveService.saveOrUpdate(
-                          backParam.getAppId(), EffectiveType.FLINKSQL, backParam.getSqlId());
-                    }
-                  }
+    // restore config and sql
 
-                  // delete the current valid project files (Note: If the rollback failed, need to
-                  // restore)
-                  fsOperator.delete(application.getAppHome());
+    // if running, set Latest
+    if (application.isRunning()) {
+      // rollback to buckup config
+      configService.setLatestOrEffective(true, backParam.getId(), backParam.getAppId());
+    } else {
+      effectiveService.saveOrUpdate(backParam.getAppId(), EffectiveType.CONFIG, backParam.getId());
+      // if flink sql task, will be rollback sql and dependencies
+      if (application.isFlinkSqlJob()) {
+        effectiveService.saveOrUpdate(
+            backParam.getAppId(), EffectiveType.FLINKSQL, backParam.getSqlId());
+      }
+    }
 
-                  try {
-                    // copy backup files to a valid dir
-                    fsOperator.copyDir(backParam.getPath(), application.getAppHome());
-                  } catch (Exception e) {
-                    throw e;
-                  }
+    // delete the current valid project files (Note: If the rollback failed, need to
+    // restore)
+    fsOperator.delete(application.getAppHome());
 
-                  // update restart status
-                  try {
-                    applicationService.update(
-                        new UpdateWrapper<Application>()
-                            .lambda()
-                            .eq(Application::getId, application.getId())
-                            .set(Application::getLaunch, LaunchState.NEED_RESTART.get()));
-                  } catch (Exception e) {
-                    throw e;
-                  }
-                  return null;
-                });
-          } catch (Exception e) {
-            log.error(e.getMessage(), e);
-          }
-        });
+    try {
+      // copy backup files to a valid dir
+      fsOperator.copyDir(backParam.getPath(), application.getAppHome());
+    } catch (Exception e) {
+      throw e;
+    }
+
+    // update restart status
+    try {
+      applicationService.update(
+          new UpdateWrapper<Application>()
+              .lambda()
+              .eq(Application::getId, application.getId())
+              .set(Application::getLaunch, LaunchState.NEED_RESTART.get()));
+    } catch (Exception e) {
+      throw e;
+    }
   }
 
   @Override
@@ -205,19 +191,9 @@ public class ApplicationBackUpServiceImpl
   public void rollbackFlinkSql(Application application, FlinkSql sql) {
     ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
     AssertUtils.state(backUp != null);
-    try {
-      FlinkTrackingTask.refreshTracking(
-          backUp.getAppId(),
-          () -> {
-            // rollback config and sql
-            effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
-            effectiveService.saveOrUpdate(
-                backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-            return null;
-          });
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-    }
+    // rollback config and sql
+    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
+    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
   }
 
   @Override

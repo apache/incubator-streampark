@@ -39,7 +39,6 @@ import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
-import org.apache.streampark.console.core.task.FlinkTrackingTask;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -137,17 +136,15 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
           List<Application> applications = getApplications(project);
           // Update deployment status
-          FlinkTrackingTask.refreshTracking(
-              () ->
-                  applications.forEach(
-                      (app) -> {
-                        log.info(
-                            "update deploy by project: {}, appName:{}",
-                            project.getName(),
-                            app.getJobName());
-                        app.setLaunch(LaunchState.NEED_CHECK.get());
-                        applicationService.updateLaunch(app);
-                      }));
+          applications.forEach(
+              (app) -> {
+                log.info(
+                    "update deploy by project: {}, appName:{}",
+                    project.getName(),
+                    app.getJobName());
+                app.setLaunch(LaunchState.NEED_CHECK.get());
+                applicationService.updateLaunch(app);
+              });
         }
       }
       baseMapper.updateById(project);

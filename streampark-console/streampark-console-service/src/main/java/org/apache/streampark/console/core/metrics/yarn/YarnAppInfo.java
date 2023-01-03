@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Data
-public class AppInfo {
+public class YarnAppInfo {
 
   private App app;
 

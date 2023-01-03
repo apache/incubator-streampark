@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.task;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
+import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
-import org.apache.streampark.flink.kubernetes.K8sFlinkTrackMonitor;
-import org.apache.streampark.flink.kubernetes.K8sFlinkTrackMonitorFactory;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
@@ -55,41 +55,41 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8
  * <p>
  */
 @Configuration
-public class K8sFlinkTrackMonitorWrapper {
+public class FlinkK8sWatcherWrapper {
 
-  @Lazy @Autowired private K8sFlinkChangeEventListener k8sFlinkChangeEventListener;
+  @Lazy @Autowired private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
 
   @Lazy @Autowired private ApplicationService applicationService;
 
   /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
   @Bean(destroyMethod = "close")
-  public K8sFlinkTrackMonitor registerFlinkTrackingMonitor() {
+  public FlinkK8sWatcher registerFlinkK8sWatcher() {
     // lazy start tracking monitor
-    K8sFlinkTrackMonitor trackMonitor =
-        K8sFlinkTrackMonitorFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
-    initK8sFlinkTrackMonitor(trackMonitor);
+    FlinkK8sWatcher flinkK8sWatcher =
+        FlinkK8sWatcherFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
+    initFlinkK8sWatcher(flinkK8sWatcher);
 
     /* Dev scaffold: watch flink k8s tracking cache,
-       see org.apache.streampark.flink.kubernetes.helper.TrackMonitorDebugHelper for items.
+       see org.apache.streampark.flink.kubernetes.helper.KubernetesWatcherHelper for items.
        Example:
-           TrackMonitorDebugHelper.watchTrackIdsCache(trackMonitor);
-           TrackMonitorDebugHelper.watchJobStatusCache(trackMonitor);
-           TrackMonitorDebugHelper.watchAggClusterMetricsCache(trackMonitor);
-           TrackMonitorDebugHelper.watchClusterMetricsCache(trackMonitor);
+           KubernetesWatcherHelper.watchTrackIdsCache(flinkK8sWatcher);
+           KubernetesWatcherHelper.watchJobStatusCache(flinkK8sWatcher);
+           KubernetesWatcherHelper.watchAggClusterMetricsCache(flinkK8sWatcher);
+           KubernetesWatcherHelper.watchClusterMetricsCache(flinkK8sWatcher);
     */
-    return trackMonitor;
+    return flinkK8sWatcher;
   }
 
-  private void initK8sFlinkTrackMonitor(@Nonnull K8sFlinkTrackMonitor trackMonitor) {
+  private void initFlinkK8sWatcher(@Nonnull FlinkK8sWatcher trackMonitor) {
     // register change event listener
-    trackMonitor.registerListener(k8sFlinkChangeEventListener);
+    trackMonitor.registerListener(flinkK8sChangeEventListener);
     // recovery tracking list
-    List<TrackId> k8sApp = getK8sTrackingApplicationFromDB();
-    k8sApp.forEach(trackMonitor::trackingJob);
+    List<TrackId> k8sApp = getK8sWatchingApps();
+    k8sApp.forEach(trackMonitor::doWatching);
   }
 
   /** get flink-k8s job tracking application from db. */
-  private List<TrackId> getK8sTrackingApplicationFromDB() {
+  private List<TrackId> getK8sWatchingApps() {
     // query k8s execution mode application from db
     final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
     queryWrapper

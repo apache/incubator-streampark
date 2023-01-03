@@ -42,7 +42,6 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
-import org.apache.streampark.console.core.annotation.RefreshCache;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -77,10 +76,10 @@ import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
-import org.apache.streampark.console.core.task.FlinkTrackingTask;
+import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.core.conf.ParameterCli;
+import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.IngressController;
-import org.apache.streampark.flink.kubernetes.K8sFlinkTrackMonitor;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
@@ -124,6 +123,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
@@ -144,8 +144,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
-import static org.apache.streampark.console.core.task.K8sFlinkTrackMonitorWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.task.K8sFlinkTrackMonitorWrapper.isKubernetesApp;
+import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
+import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service
@@ -198,7 +198,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Autowired private EnvInitializer envInitializer;
 
-  @Autowired private K8sFlinkTrackMonitor k8SFlinkTrackMonitor;
+  @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
   @Autowired private AppBuildPipeService appBuildPipeService;
 
@@ -228,7 +228,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     Integer runningJob = 0;
 
     // stat metrics from other than kubernetes mode
-    for (Application app : FlinkTrackingTask.getAllTrackingApp().values()) {
+    for (Application app : FlinkRESTAPIWatcher.getWatchingApps()) {
       if (!teamId.equals(app.getTeamId())) {
         continue;
       }
@@ -357,21 +357,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (!application.isRunning()) {
       updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
     }
-    try {
-      FlinkTrackingTask.refreshTracking(
-          application.getId(),
-          () -> {
-            baseMapper.update(null, updateWrapper);
-            return null;
-          });
-    } catch (Exception e) {
-      throw new ApplicationException(e);
-    }
+    baseMapper.update(null, updateWrapper);
   }
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
-  @RefreshCache
   public Boolean delete(Application paramApp) {
 
     Application application = getById(paramApp.getId());
@@ -403,9 +393,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       removeApp(application);
 
       if (isKubernetesApp(paramApp)) {
-        k8SFlinkTrackMonitor.unTrackingJob(toTrackId(application));
+        k8SFlinkTrackMonitor.unWatching(toTrackId(application));
       } else {
-        FlinkTrackingTask.stopTracking(paramApp.getId());
+        FlinkRESTAPIWatcher.unWatching(paramApp.getId());
       }
       return true;
     } catch (Exception e) {
@@ -458,7 +448,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (!FlinkAppState.CANCELED.equals(state)) {
       return false;
     }
-    long cancelUserId = FlinkTrackingTask.getCanceledJobUserId(appId).longValue();
+    long cancelUserId = FlinkRESTAPIWatcher.getCanceledJobUserId(appId).longValue();
     long appUserId = application.getUserId().longValue();
     return cancelUserId != -1 && cancelUserId != appUserId;
   }
@@ -516,17 +506,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         && record.getStartTime().getTime() > 0) {
                       record.setDuration(now - record.getStartTime().getTime());
                     }
-                    return record;
                   }
-                  Application app = FlinkTrackingTask.getTracking(record.getId());
-                  if (app == null) {
-                    return record;
-                  }
-                  app.setNickName(record.getNickName());
-                  app.setUserName(record.getUserName());
-                  app.setFlinkVersion(record.getFlinkVersion());
-                  app.setProjectName(record.getProjectName());
-                  return app;
+                  return record;
                 })
             .collect(Collectors.toList());
     page.setRecords(newRecords);
@@ -544,7 +525,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (exists) {
       return true;
     }
-    for (Application application : FlinkTrackingTask.getAllTrackingApp().values()) {
+    for (Application application : FlinkRESTAPIWatcher.getWatchingApps()) {
       if (clusterId.equals(application.getFlinkClusterId())
           && FlinkAppState.RUNNING.equals(application.getFlinkAppStateEnum())) {
         return true;
@@ -789,7 +770,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
-  @RefreshCache
   public boolean update(Application appParam) {
     try {
       Application application = getById(appParam.getId());
@@ -967,7 +947,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  @RefreshCache
   public void updateLaunch(Application application) {
     LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
     updateWrapper.eq(Application::getId, application.getId());
@@ -990,7 +969,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  @RefreshCache
   public boolean checkBuildAndUpdate(Application application) {
     boolean build = application.getBuild();
     if (!build) {
@@ -1048,7 +1026,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  @RefreshCache
   public void clean(Application appParam) {
     appParam.setLaunch(LaunchState.DONE.get());
     this.updateLaunch(appParam);
@@ -1057,12 +1034,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public String readConf(Application appParam) throws IOException {
     File file = new File(appParam.getConfig());
-    String conf = FileUtils.readFileToString(file);
+    String conf = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
     return Base64.getEncoder().encodeToString(conf.getBytes());
   }
 
   @Override
-  @RefreshCache
   public Application getApp(Application appParam) {
     Application application = this.baseMapper.getApp(appParam);
     ApplicationConfig config = configService.getEffective(appParam.getId());
@@ -1126,27 +1102,25 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  @RefreshCache
   public boolean mapping(Application appParam) {
     boolean mapping = this.baseMapper.mapping(appParam);
     Application application = getById(appParam.getId());
     if (isKubernetesApp(application)) {
-      k8SFlinkTrackMonitor.trackingJob(toTrackId(application));
+      k8SFlinkTrackMonitor.doWatching(toTrackId(application));
     } else {
-      FlinkTrackingTask.addTracking(application);
+      FlinkRESTAPIWatcher.doWatching(application);
     }
     return mapping;
   }
 
   @Override
-  @RefreshCache
   public void cancel(Application appParam) throws Exception {
-    FlinkTrackingTask.setOptionState(appParam.getId(), OptionState.CANCELLING);
+    FlinkRESTAPIWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
     Application application = getById(appParam.getId());
 
     application.setState(FlinkAppState.CANCELLING.getValue());
     if (appParam.getSavePointed()) {
-      FlinkTrackingTask.addSavepoint(application.getId());
+      FlinkRESTAPIWatcher.addSavepoint(application.getId());
       application.setOptionState(OptionState.SAVEPOINTING.getValue());
     } else {
       application.setOptionState(OptionState.CANCELLING.getValue());
@@ -1157,7 +1131,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     Long userId = commonService.getUserId();
     if (!application.getUserId().equals(userId)) {
-      FlinkTrackingTask.addCanceledApp(application.getId(), userId);
+      FlinkRESTAPIWatcher.addCanceledApp(application.getId(), userId);
     }
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
@@ -1240,7 +1214,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 savePointService.save(savePoint);
               }
               if (isKubernetesApp(application)) {
-                k8SFlinkTrackMonitor.unTrackingJob(toTrackId(application));
+                k8SFlinkTrackMonitor.unWatching(toTrackId(application));
               }
             },
             e -> {
@@ -1253,16 +1227,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 updateById(application);
 
                 if (appParam.getSavePointed()) {
-                  savePointService.obsolete(application.getId());
+                  savePointService.expire(application.getId());
                 }
 
                 // re-tracking flink job on kubernetes and logging exception
                 if (isKubernetesApp(application)) {
                   TrackId id = toTrackId(application);
-                  k8SFlinkTrackMonitor.unTrackingJob(id);
-                  k8SFlinkTrackMonitor.trackingJob(id);
+                  k8SFlinkTrackMonitor.unWatching(id);
+                  k8SFlinkTrackMonitor.doWatching(id);
                 } else {
-                  FlinkTrackingTask.stopTracking(application.getId());
+                  FlinkRESTAPIWatcher.unWatching(application.getId());
                 }
 
                 ApplicationLog log = new ApplicationLog();
@@ -1321,8 +1295,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public void updateTracking(Application appParam) {
-    this.baseMapper.updateTracking(appParam);
+  public void persistMetrics(Application appParam) {
+    this.baseMapper.persistMetrics(appParam);
   }
 
   /**
@@ -1331,7 +1305,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
    * @param appParam
    */
   @Override
-  @RefreshCache
   public void starting(Application appParam) {
     Application application = getById(appParam.getId());
     AssertUtils.state(application != null);
@@ -1342,7 +1315,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
-  @RefreshCache
   public void start(Application appParam, boolean auto) throws Exception {
 
     final Application application = getById(appParam.getId());
@@ -1555,16 +1527,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
               // if start completed, will be added task to tracking queue
               if (isKubernetesApp(application)) {
-                k8SFlinkTrackMonitor.trackingJob(toTrackId(application));
+                k8SFlinkTrackMonitor.doWatching(toTrackId(application));
               } else {
-                FlinkTrackingTask.setOptionState(appParam.getId(), OptionState.STARTING);
-                FlinkTrackingTask.addTracking(application);
+                FlinkRESTAPIWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
+                FlinkRESTAPIWatcher.doWatching(application);
               }
 
               applicationLog.setSuccess(true);
               applicationLogService.save(applicationLog);
               // set savepoint to expire
-              savePointService.obsolete(application.getId());
+              savePointService.expire(application.getId());
             },
             e -> {
               if (e.getCause() instanceof CancellationException) {
@@ -1579,9 +1551,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 app.setOptionState(OptionState.NONE.getValue());
                 updateById(app);
                 if (isKubernetesApp(app)) {
-                  k8SFlinkTrackMonitor.unTrackingJob(toTrackId(app));
+                  k8SFlinkTrackMonitor.unWatching(toTrackId(app));
                 } else {
-                  FlinkTrackingTask.stopTracking(appParam.getId());
+                  FlinkRESTAPIWatcher.unWatching(appParam.getId());
                 }
               }
             })
@@ -1655,14 +1627,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     application.setState(FlinkAppState.CANCELED.getValue());
     application.setOptionTime(new Date());
     updateById(application);
-    savePointService.obsolete(application.getId());
+    savePointService.expire(application.getId());
     // re-tracking flink job on kubernetes and logging exception
     if (isKubernetesApp(application)) {
       TrackId id = toTrackId(application);
-      k8SFlinkTrackMonitor.unTrackingJob(id);
-      k8SFlinkTrackMonitor.trackingJob(id);
+      k8SFlinkTrackMonitor.unWatching(id);
+      k8SFlinkTrackMonitor.doWatching(id);
     } else {
-      FlinkTrackingTask.stopTracking(application.getId());
+      FlinkRESTAPIWatcher.unWatching(application.getId());
     }
   }
 

@@ -106,7 +106,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     this.update(
         new LambdaUpdateWrapper<FlinkSql>()
             .eq(FlinkSql::getAppId, appId)
-            .set(FlinkSql::getCandidate, 0));
+            .set(FlinkSql::getCandidate, CandidateType.NONE.get()));
 
     this.update(
         new LambdaUpdateWrapper<FlinkSql>()
