@@ -454,7 +454,7 @@ public class AppBuildPipeServiceImpl
       return Collections.emptyMap();
     }
     return appBuildPipelines.stream()
-        .collect(Collectors.toMap(e -> e.getAppId(), e -> e.getPipelineStatus()));
+        .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipelineStatus));
   }
 
   @Override
