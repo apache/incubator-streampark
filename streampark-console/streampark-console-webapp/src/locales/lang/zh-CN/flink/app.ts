@@ -76,6 +76,7 @@ export default {
     compareConfig: '比较配置',
     candidate: '侯选',
     compare: '比较',
+    compareSelectTips: '请选择目标板本',
     resetApi: '外部系统调用API',
     resetApiToolTip: 'Rest API外部调用接口，其他第三方系统可轻松对接StreamPark',
     copyStartcURL: '复制启动 cURL',

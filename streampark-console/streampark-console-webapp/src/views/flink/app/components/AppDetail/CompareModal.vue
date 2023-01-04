@@ -37,6 +37,7 @@
   const { t } = useI18n();
   defineEmits(['register']);
   const allConfigVersions = ref<any[]>([]);
+  const submitLoading = ref<boolean>(false);
   const compareRecord = reactive<Recordable>({});
   const values = useDetailProviderContext();
 
@@ -55,7 +56,7 @@
     allConfigVersions.value = res.records;
   }
 
-  const [registerForm] = useForm({
+  const [registerForm, { resetFields, submit }] = useForm({
     labelWidth: 180,
     colon: true,
     name: 'compareForm',
@@ -65,52 +66,63 @@
     showActionButtonGroup: false,
     schemas: [
       { label: 'source version', field: 'source', component: 'Input', slot: 'source' },
-      { label: 'target version', field: 'source', component: 'Input', slot: 'target' },
+      {
+        label: 'target version',
+        field: 'target',
+        defaultValue: undefined,
+        component: 'Select',
+        slot: 'target',
+        required: true,
+      },
     ],
   });
-  function handleCompareCancel() {
-    closeModal();
-  }
-  async function handleCompareOk() {
-    const source = await fetchGetVer({
-      id: compareRecord.value.id,
-    });
-    const sourceConf = decodeByBase64(source.content);
-    const sourceVersion = source.version;
-    const target = await fetchGetVer({
-      id: compareRecord.value.target,
-    });
-    const targetConf = decodeByBase64(target.content);
-    const targetVersion = target.version;
-    openDiffDrawer(true, {
-      immediate: true,
-      param: [
-        {
-          name: 'Configuration',
-          format: 'yaml',
-          original: sourceConf,
-          modified: targetConf,
-        },
-      ],
-      original: sourceVersion,
-      modified: targetVersion,
-    });
+
+  // submit form
+  async function handleCompareOk(values: Recordable) {
+    submitLoading.value = true;
+    try {
+      const source = await fetchGetVer({
+        id: compareRecord.id,
+      });
+      const sourceConf = decodeByBase64(source.content);
+      const sourceVersion = source.version;
+      const target = await fetchGetVer({
+        id: values.target,
+      });
+      const targetConf = decodeByBase64(target.content);
+      const targetVersion = target.version;
+      closeModal();
+      openDiffDrawer(true, {
+        immediate: true,
+        param: [
+          {
+            name: 'Configuration',
+            format: 'yaml',
+            original: sourceConf,
+            modified: targetConf,
+          },
+        ],
+        original: sourceVersion,
+        modified: targetVersion,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      submitLoading.value = false;
+    }
   }
 
-  function handleCompareTarget(v: string) {
-    compareRecord.value.target = v;
-  }
   const filterNotCurrConfig = computed(() => {
-    return allConfigVersions.value.filter((x) => x.version !== compareRecord.value.version);
+    return allConfigVersions.value.filter((x) => x.version !== compareRecord.version);
   });
 </script>
 <template>
-  <BasicModal @register="registerModal">
+  <BasicModal @register="registerModal" :afterClose="resetFields">
     <template #title>
       <SvgIcon name="swap" />
       {{ t('flink.app.detail.compareConfig') }}
     </template>
-    <BasicForm @register="registerForm">
+    <BasicForm @register="registerForm" @submit="handleCompareOk">
       <template #source>
         <a-button type="primary" shape="circle" size="small" style="margin-right: 10px">
           {{ compareRecord.version }}
@@ -118,8 +130,8 @@
         <Icon icon="ant-design:clock-circle-outlined" style="color: darkgrey" />
         <span style="color: darkgrey">{{ compareRecord.createTime }}</span>
       </template>
-      <template #target>
-        <Select @change="handleCompareTarget">
+      <template #target="{ model }">
+        <Select v-model:value="model.target" :placeholder="t('flink.app.detail.compareSelectTips')">
           <SelectOption v-for="(ver, index) in filterNotCurrConfig" :value="ver.id" :key="index">
             <div style="padding-left: 5px">
               <a-button type="primary" shape="circle" size="small" style="margin-right: 10px">
@@ -142,10 +154,10 @@
       </template>
     </BasicForm>
     <template #footer>
-      <a-button key="back" @click="handleCompareCancel">
+      <a-button key="back" @click="closeModal">
         {{ t('common.closeText') }}
       </a-button>
-      <a-button key="submit" type="primary" @click="handleCompareOk">
+      <a-button key="submit" type="primary" @click="submit" :loading="submitLoading">
         {{ t('flink.app.detail.compare') }}
       </a-button>
     </template>
