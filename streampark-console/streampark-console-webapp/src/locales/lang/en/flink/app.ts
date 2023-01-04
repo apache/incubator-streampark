@@ -77,6 +77,7 @@ export default {
     compareConfig: 'Compare Config',
     candidate: 'Candidate',
     compare: 'Compare',
+    compareSelectTips: 'Please select the target version',
     resetApi: 'Rest Api',
     resetApiToolTip:
       'Rest API external call interface,other third-party systems easy to access StreamPark',

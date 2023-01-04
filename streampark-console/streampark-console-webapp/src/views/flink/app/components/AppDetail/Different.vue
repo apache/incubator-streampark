@@ -33,7 +33,6 @@
 
   const { t } = useI18n();
 
-  const title = ref('edit configuration');
   const items = ref<any[]>([]);
   const renderEleMap = new Map<string, boolean>();
   const version = reactive({
@@ -96,20 +95,24 @@
     @register="registerMergelyDrawer"
     width="80%"
     class="drawer-conf"
+    keyboard
     :destroyOnClose="true"
     @close="handleCancel"
   >
     <template #title>
       <SvgIcon name="swap" />
-      {{ t('flink.app.detail.different.original') }}
+      <span class="px-10px">{{ t('flink.app.detail.compareConfig') }}</span>
+      <span> ( </span>
+      <span class="pr-5px">{{ t('flink.app.detail.different.original') }}</span>
       <a-button type="primary" shape="circle" size="small">
         {{ version.original }}
       </a-button>
-      VS {{ t('flink.app.detail.different.target') }}
+      <span class="px-10px">VS</span>
+      <span class="pr-5px"> {{ t('flink.app.detail.different.target') }} </span>
       <a-button type="primary" shape="circle" size="small">
         {{ version.modified }}
       </a-button>
-      {{ title }}
+      <span> ) </span>
     </template>
     <Tabs type="card" @change="handleRenderTab">
       <TabPane v-for="(item, index) in items" :key="index" :tab="item.name">
