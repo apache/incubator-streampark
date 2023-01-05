@@ -152,8 +152,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       val kubernetesClusterDescriptor = getK8sClusterDescriptorAndSpecification(flinkConfig)
       clusterDescriptor = kubernetesClusterDescriptor._1
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
-
-      if (deployRequest.clusterId != null && kubeClient.getRestService(deployRequest.clusterId).isPresent) {
+      // after flink 1.15 FlinkKubeClient removed the getRestService method
+      if (deployRequest.clusterId != null && hasMethod(kubeClient.getClass, "getRestService")
+        && kubeClient.getRestService(deployRequest.clusterId).isPresent) {
         client = clusterDescriptor.retrieve(deployRequest.clusterId).getClusterClient
       } else {
         client = clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
@@ -170,6 +171,15 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         throw e
     } finally {
       Utils.close(client, clusterDescriptor, kubeClient)
+    }
+  }
+
+  def hasMethod(clazz: Class[_], methodName: String): Boolean = {
+    try {
+      clazz.getMethod(methodName)
+      true
+    } catch {
+      case _: NoSuchMethodException => false
     }
   }
 
@@ -193,7 +203,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, shutDownRequest.kubernetesDeployParam.flinkImage)
         .safeSet(KubernetesConfigOptions.KUBE_CONFIG_FILE, getDefaultKubernetesConf(shutDownRequest.kubernetesDeployParam.kubeConf))
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
-      if (shutDownRequest.clusterId != null && kubeClient.getRestService(shutDownRequest.clusterId).isPresent) {
+      if (shutDownRequest.clusterId != null) {
         kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
         ShutDownResponse()
       } else {

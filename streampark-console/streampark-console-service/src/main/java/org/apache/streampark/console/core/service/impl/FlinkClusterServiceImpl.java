@@ -263,9 +263,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         || ExecutionMode.REMOTE.equals(executionModeEnum)) {
       if (ClusterState.STARTED.equals(ClusterState.of(flinkCluster.getClusterState()))) {
         if (!flinkCluster.verifyClusterConnection()) {
-          updateWrapper.set(FlinkCluster::getAddress, null);
-          updateWrapper.set(FlinkCluster::getClusterState, ClusterState.LOST.getValue());
-          update(updateWrapper);
+          updateClusterIsLost(updateWrapper);
           throw new ApiAlertException("current cluster is not active, please check");
         }
       } else {
@@ -299,6 +297,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STOPED.getValue());
         update(updateWrapper);
       } else {
+        updateClusterIsLost(updateWrapper);
         throw new ApiAlertException("get shutdown response failed");
       }
     } catch (Exception e) {
@@ -308,6 +307,12 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       throw new ApiDetailException(
           "shutdown cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void updateClusterIsLost(LambdaUpdateWrapper<FlinkCluster> updateWrapper) {
+    updateWrapper.set(FlinkCluster::getAddress, null);
+    updateWrapper.set(FlinkCluster::getClusterState, ClusterState.LOST.getValue());
+    update(updateWrapper);
   }
 
   @Override
