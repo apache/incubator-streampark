@@ -240,7 +240,8 @@
                 trigger: 'blur',
               },
               {
-                type: 'email',
+                pattern:
+                  /^([a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6})(,[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6})*?$/,
                 message: t('flink.setting.alert.alertEmailFormatIsInvalid'),
                 trigger: 'blur',
               },

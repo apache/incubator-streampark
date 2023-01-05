@@ -19,7 +19,7 @@ import { h, onMounted, reactive, ref, unref, VNode } from 'vue';
 import { handleAppBuildStatueText } from '../utils';
 import { fetchCheckName, fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app/app';
 import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
-import { fetchLatest, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
+import { fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
 import { AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
@@ -121,22 +121,18 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       Swal.fire('Failed', 'please set flink version first.', 'error');
     } else {
       if (!optionApps.starting.get(app.id) || app['optionState'] === OptionStateEnum.NONE) {
-        const res = await fetchLatest({
+        const resp = await fetchSavePonitHistory({
           appId: app.id,
+          pageNum: 1,
+          pageSize: 9999,
         });
-        if (!res) {
-          const resp = await fetchSavePonitHistory({
-            appId: app.id,
-            pageNum: 1,
-            pageSize: 9999,
-          });
-          historySavePoint.value = resp.records.filter((x: Recordable) => x.path);
-        }
+        historySavePoint.value = resp.records.filter((x: Recordable) => x.path);
+        const latest = resp.records.find((x: Recordable) => x.latest) || null;
         openStartModal(true, {
-          latestSavePoint: res,
           executionMode: app.executionMode,
           application: app,
           historySavePoint: historySavePoint.value,
+          selected: latest,
         });
       }
     }

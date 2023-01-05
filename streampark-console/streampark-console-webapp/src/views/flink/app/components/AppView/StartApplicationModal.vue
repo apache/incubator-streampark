@@ -25,7 +25,7 @@
 </script>
 <script setup lang="ts" name="StartApplicationModal">
   import { h } from 'vue';
-  import { Select, Input } from 'ant-design-vue';
+  import { Select, Input, Tag } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon, Icon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
@@ -46,9 +46,13 @@
     if (data) {
       Object.assign(receiveData, data);
       resetFields();
+      setFieldsValue({
+        startSavePoint: receiveData.selected?.path,
+      });
     }
   });
-  const [registerForm, { resetFields, validate }] = useForm({
+
+  const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
     name: 'startApplicationModal',
     labelWidth: 120,
     schemas: [
@@ -82,7 +86,7 @@
             'restore the application from savepoint or latest checkpoint',
           ),
         slot: 'savepoint',
-        ifShow: ({ values }) => values.startSavePointed && !receiveData.latestSavePoint,
+        ifShow: ({ values }) => values.startSavePointed,
         required: true,
       },
       {
@@ -105,14 +109,13 @@
     wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } },
     baseColProps: { span: 24 },
   });
+
   /* submit */
   async function handleSubmit() {
     try {
       const formValue = (await validate()) as Recordable;
       const savePointed = formValue.startSavePointed;
-      const savePointPath = savePointed
-        ? formValue['startSavePoint'] || receiveData.latestSavePoint.savePoint
-        : null;
+      const savePointPath = savePointed ? formValue['startSavePoint'] : null;
       const { data } = await fetchStart({
         id: receiveData.application.id,
         savePointed,
@@ -164,25 +167,30 @@
   <BasicModal @register="registerModal" @ok="handleSubmit" okText="Apply" cancelText="Cancel">
     <template #title>
       <SvgIcon name="play" />
-
       {{ t('flink.app.view.start') }}
     </template>
+
     <BasicForm @register="registerForm">
       <template #savepoint="{ model, field }">
         <template v-if="receiveData.historySavePoint && receiveData.historySavePoint.length > 0">
-          <Select mode="multiple" allow-clear v-model:value="model[field]">
+          <Select allow-clear v-model:value="model[field]">
             <SelectOption v-for="(k, i) in receiveData.historySavePoint" :key="i" :value="k.path">
-              <span style="color: #108ee9">
-                {{ k.path.substr(k.path.lastIndexOf('-') + 1) }}
-              </span>
-              <span style="float: right; color: darkgrey">
+              <span style="color: darkgrey">
                 <Icon icon="ant-design:clock-circle-outlined" />
                 {{ k.createTime }}
+              </span>
+              <span style="float: left" v-if="k.type === 1">
+                <tag color="cyan">CP</tag>
+              </span>
+              <span style="float: right" v-else>
+                <tag color="blue">SP</tag>
+              </span>
+              <span style="float: right" v-if="k.latest">
+                <tag color="#2db7f5">latest</tag>
               </span>
             </SelectOption>
           </Select>
         </template>
-
         <Input
           v-else
           type="text"
