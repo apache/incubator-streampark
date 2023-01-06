@@ -374,8 +374,8 @@ start() {
     -Dspring.config.location="\"${PROPER}\"" \
     -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
     -Dpid="\"${APP_PID}\"" \
-    org.apache.streampark.console.StreamParkConsoleBootstrap \
-    >> "$APP_OUT" 2>&1 "&"
+    org.apache.streampark.console.StreamParkConsoleBootstrap >> "$APP_OUT" 2>&1 "&"
+
 
    if [ $? -eq "0" ]; then
       local SLEEP_INTERVAL=5
