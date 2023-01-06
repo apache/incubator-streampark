@@ -95,6 +95,7 @@ public class FlinkCluster implements Serializable {
 
   private Integer resolveOrder;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String exception;
 
   private Integer clusterState;
