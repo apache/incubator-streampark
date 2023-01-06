@@ -45,7 +45,6 @@
         <fileSet>
             <directory>${project.build.directory}/../../../.mvn</directory>
             <outputDirectory>bin/.mvn</outputDirectory>
-            <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
