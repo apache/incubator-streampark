@@ -56,7 +56,6 @@ jobs:
       - name: init
         run: |
           sed -i -e 's/eval $NOHUP/eval/' streampark-console/streampark-console-service/src/main/assembly/bin/streampark.sh
-          sed -i -e 's/StreamParkConsoleBootstrap \\/StreamParkConsoleBootstrap/' streampark-console/streampark-console-service/src/main/assembly/bin/streampark.sh
           sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' streampark-console/streampark-console-service/src/main/assembly/bin/streampark.sh
 
       - name: Build project release package
@@ -83,7 +82,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: deploy/docker/console/Dockerfile
+          file: deploy/docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

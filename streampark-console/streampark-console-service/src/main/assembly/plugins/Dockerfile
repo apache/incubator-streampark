@@ -23,7 +23,6 @@ ENV NODE_VERSION=16.1.0
 ENV NPM_VERSION=7.11.2
 
 RUN sed -i -e 's/eval $NOHUP/eval/' bin/streampark.sh \
-    && sed -i -e 's/StreamParkConsoleBootstrap \\/StreamParkConsoleBootstrap/' bin/streampark.sh \
     && sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' bin/streampark.sh \
     && sed -i -e 's/localhost/'$DB'/' conf/application.yml
 
