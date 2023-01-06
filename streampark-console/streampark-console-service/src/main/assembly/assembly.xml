@@ -45,11 +45,13 @@
         <fileSet>
             <directory>${project.build.directory}/../../../.mvn</directory>
             <outputDirectory>bin/.mvn</outputDirectory>
+            <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/../src/main/assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
@@ -85,11 +87,13 @@
         <fileSet>
             <directory>${project.build.directory}/../src/main/assembly/script</directory>
             <outputDirectory>script</outputDirectory>
+            <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/../src/main/resources</directory>
             <outputDirectory>conf</outputDirectory>
+            <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
             <includes>
                 <include>*.yml</include>
