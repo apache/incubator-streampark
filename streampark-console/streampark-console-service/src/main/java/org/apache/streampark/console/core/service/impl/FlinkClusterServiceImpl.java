@@ -252,8 +252,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     // 2) check cluster is active
-    if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)
-        || ExecutionMode.REMOTE.equals(executionModeEnum)) {
+    if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
       if (ClusterState.STARTED.equals(ClusterState.of(flinkCluster.getClusterState()))) {
         if (!flinkCluster.verifyClusterConnection()) {
           flinkCluster.setAddress(null);
