@@ -17,8 +17,8 @@
 version: '3.8'
 services:
   streampark-console:
-    image: ${HUB}:${TAG}
-    command: ${COMMAND}
+    image: apache/streampark:latest
+    command: ${RUN_COMMAND}
     ports:
       - 10000:10000
     env_file: .env
@@ -32,8 +32,8 @@ services:
     networks:
       - streampark
 
-  jobmanager:
-    image: ${FLINK_BASE_IMAGE}
+  flink-jobmanager:
+    image: ${FLINK_IMAGE}
     ports:
       - "8081:8081"
     command: jobmanager
@@ -45,8 +45,8 @@ services:
     networks:
       - streampark
 
-  taskmanager:
-    image: ${FLINK_BASE_IMAGE}
+  flink-taskmanager:
+    image: ${FLINK_IMAGE}
     depends_on:
       - jobmanager
     command: taskmanager
