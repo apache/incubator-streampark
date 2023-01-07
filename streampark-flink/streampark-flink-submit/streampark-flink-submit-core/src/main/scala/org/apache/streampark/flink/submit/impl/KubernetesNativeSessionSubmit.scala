@@ -34,6 +34,7 @@ import org.apache.flink.kubernetes.kubeclient.{FlinkKubeClient, FlinkKubeClientF
 
 import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.flink.core.FlinkKubernetesClient
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
@@ -152,8 +153,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       val kubernetesClusterDescriptor = getK8sClusterDescriptorAndSpecification(flinkConfig)
       clusterDescriptor = kubernetesClusterDescriptor._1
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
+      val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
 
-      if (deployRequest.clusterId != null && kubeClient.getRestService(deployRequest.clusterId).isPresent) {
+      if (deployRequest.clusterId != null && kubeClientWrapper.getService(deployRequest.clusterId).isPresent) {
         client = clusterDescriptor.retrieve(deployRequest.clusterId).getClusterClient
       } else {
         client = clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
@@ -193,7 +195,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, shutDownRequest.kubernetesDeployParam.flinkImage)
         .safeSet(KubernetesConfigOptions.KUBE_CONFIG_FILE, getDefaultKubernetesConf(shutDownRequest.kubernetesDeployParam.kubeConf))
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
-      if (shutDownRequest.clusterId != null && kubeClient.getRestService(shutDownRequest.clusterId).isPresent) {
+      val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
+
+      if (shutDownRequest.clusterId != null && kubeClientWrapper.getService(shutDownRequest.clusterId).isPresent) {
         kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
         ShutDownResponse()
       } else {
