@@ -179,7 +179,7 @@ mixedPackage() {
 
   echo_g "build info: package mode @ mixed, $scala, now build starting..."
 
-  "$PRG_DIR/mvnw" -P$scala,console,webapp,dist -DskipTests clean package
+  "$PRG_DIR/mvnw" -P$scala,webapp,dist -DskipTests clean package
 
   if [ $? -eq 0 ]; then
      printf '\n'
@@ -197,7 +197,7 @@ detachedPackage () {
 
   echo_g "build info: package mode @ detached, $scala, now build starting..."
 
-  "$PRG_DIR"/mvnw -P$scala,console,dist -DskipTests clean package
+  "$PRG_DIR"/mvnw -P$scala,dist -DskipTests clean package
 
   if [ $? -eq 0 ]; then
     printf '\n'
