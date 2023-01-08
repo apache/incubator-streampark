@@ -146,7 +146,6 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
         <MaxMetaspace>512m</MaxMetaspace>
-        <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
     <dependencyManagement>
