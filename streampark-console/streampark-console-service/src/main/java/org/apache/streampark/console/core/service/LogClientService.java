@@ -33,10 +33,10 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 public class LogClientService {
-  public String rollViewLog(String path, int skipLineNum, int limit) {
+  public String rollViewLog(String path, int offset, int limit) {
     String result = "";
     try {
-      List<String> lines = readPartFileContent(path, skipLineNum, limit);
+      List<String> lines = readPartFileContent(path, offset, limit);
       StringBuilder builder = new StringBuilder();
       lines.forEach(line -> builder.append(line).append("\r\n"));
       return builder.toString();
@@ -50,15 +50,15 @@ public class LogClientService {
    * read part file content，can skip any line and read some lines
    *
    * @param filePath file path
-   * @param skipLine skip line
+   * @param offset skip line
    * @param limit read lines limit
    * @return part file content
    */
-  private List<String> readPartFileContent(String filePath, int skipLine, int limit) {
+  private List<String> readPartFileContent(String filePath, int offset, int limit) {
     File file = new File(filePath);
     if (file.exists() && file.isFile()) {
       try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
-        return stream.skip(skipLine).limit(limit).collect(Collectors.toList());
+        return stream.skip(offset).limit(limit).collect(Collectors.toList());
       } catch (IOException e) {
         log.error("read file error", e);
       }

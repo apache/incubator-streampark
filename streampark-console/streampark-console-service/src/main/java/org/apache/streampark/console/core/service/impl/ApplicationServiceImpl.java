@@ -72,6 +72,7 @@ import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.LogClientService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
@@ -134,6 +135,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -205,6 +207,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private VariableService variableService;
+
+  @Autowired private LogClientService logClient;
 
   @PostConstruct
   public void resetOptionState() {
@@ -578,6 +582,36 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         .filter(fn -> fn.endsWith(".jar"))
         .limit(DEFAULT_HISTORY_RECORD_LIMIT)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
+    Application application = getById(id);
+    AssertUtils.state(application != null);
+    if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
+      CompletionStage<String> stage =
+          CompletableFuture.supplyAsync(
+                  () ->
+                      KubernetesDeploymentHelper.watchDeploymentLog(
+                          application.getK8sNamespace(),
+                          application.getJobName(),
+                          application.getJobId()))
+              .exceptionally(
+                  e -> {
+                    try {
+                      return String.format(
+                          "%s/%s_err.log", WebUtils.getAppTempDir(), application.getJobId());
+                    } catch (Exception ex) {
+                      log.error("Generate log path exception:{}", ex.getMessage());
+                      return null;
+                    }
+                  })
+              .thenApply(path -> logClient.rollViewLog(String.valueOf(path), offset, limit));
+      CompletableFuture<String> future = stage.toCompletableFuture();
+      return future.get(5, TimeUnit.SECONDS);
+    }
+    throw new ApiAlertException(
+        "job executionMode must be kubernetes-session|kubernetes-application");
   }
 
   @Override

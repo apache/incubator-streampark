@@ -25,7 +25,7 @@ enum APP_API {
   UPDATE = '/flink/app/update',
   COPY = '/flink/app/copy',
   UPLOAD = '/flink/app/upload',
-  START_LOG = '/flink/app/detail',
+  K8S_START_LOG = '/flink/app/k8sStartLog',
   DEPLOY = '/flink/app/deploy',
   MAPPING = '/flink/app/mapping',
   YARN = '/flink/app/yarn',
@@ -188,8 +188,8 @@ export function fetchMapping(data): Promise<boolean> {
  * @param params
  * @returns {Promise<AxiosResponse<any>>}
  */
-export function fetchStartLog(data): Promise<AxiosResponse<any>> {
-  return defHttp.post({ url: APP_API.START_LOG, data }, { isReturnNativeResponse: true });
+export function fetchK8sStartLog(data): Promise<AxiosResponse<any>> {
+  return defHttp.post({ url: APP_API.K8S_START_LOG, data }, { isReturnNativeResponse: true });
 }
 /**
  * SavepointPath

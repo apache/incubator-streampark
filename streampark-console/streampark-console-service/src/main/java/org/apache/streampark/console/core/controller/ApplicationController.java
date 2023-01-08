@@ -22,7 +22,6 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
@@ -35,7 +34,6 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.LoggerService;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -49,7 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
@@ -61,9 +58,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Api(tags = {"FLINK_APPLICATION_TAG"})
@@ -80,8 +74,6 @@ public class ApplicationController {
   @Autowired private ApplicationLogService applicationLogService;
 
   @Autowired private AppBuildPipeService appBuildPipeService;
-
-  @Autowired private LoggerService logService;
 
   @ApiAccess
   @PostMapping("get")
@@ -421,27 +413,13 @@ public class ApplicationController {
 
   @ApiOperation(value = "Read flink on k8s deploy log")
   @ApiImplicitParams({
-    @ApiImplicitParam(name = "namespace", value = "ks8 namespace"),
-    @ApiImplicitParam(name = "jobName", value = "job name"),
-    @ApiImplicitParam(name = "jobId", value = "job id"),
-    @ApiImplicitParam(name = "skipLineNum", value = "number of log lines skipped loading"),
+    @ApiImplicitParam(name = "id", value = "app id"),
+    @ApiImplicitParam(name = "offset", value = "number of log lines offset"),
     @ApiImplicitParam(name = "limit", value = "number of log lines loaded at once")
   })
-  @PostMapping(value = "/detail")
-  public RestResponse detail(
-      @RequestParam(value = "namespace", required = false) String namespace,
-      @RequestParam(value = "jobName", required = false) String jobName,
-      @RequestParam(value = "jobId", required = false) String jobId,
-      @RequestParam(value = "skipLineNum", required = false) Integer skipLineNum,
-      @RequestParam(value = "limit", required = false) Integer limit) {
-    try {
-      CompletionStage<String> stage =
-          logService.queryLog(namespace, jobName, jobId, skipLineNum, limit);
-      CompletableFuture<String> future = stage.toCompletableFuture();
-      String resp = future.get(5, TimeUnit.SECONDS);
-      return RestResponse.success(resp);
-    } catch (Exception e) {
-      throw new ApiDetailException(e);
-    }
+  @PostMapping(value = "k8sStartLog")
+  public RestResponse k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
+    String resp = applicationService.k8sStartLog(id, offset, limit);
+    return RestResponse.success(resp);
   }
 }
