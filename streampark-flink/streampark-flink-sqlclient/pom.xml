@@ -140,8 +140,16 @@
                     </filters>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>apache-release</id>
+            <properties>
+                <maven.deploy.skip>true</maven.deploy.skip>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

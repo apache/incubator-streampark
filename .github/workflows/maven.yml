@@ -58,9 +58,9 @@ jobs:
         with:
           submodules: true
       - name: Check codestyle for scala 2.11
-        run: ./mvnw -B -q -nsu -Pscala-2.11,console checkstyle:check spotless:check
+        run: ./mvnw -B -q -nsu -Pscala-2.11 checkstyle:check spotless:check
       - name: Check codestyle for scala 2.12
-        run: ./mvnw -B -q -nsu -Pscala-2.12,console checkstyle:check spotless:check
+        run: ./mvnw -B -q -nsu -Pscala-2.12 checkstyle:check spotless:check
   dead-link:
     if: github.repository == 'apache/incubator-streampark'
     name: Dead links
@@ -91,7 +91,7 @@ jobs:
           distribution: "adopt"
           cache: "maven"
       - name: Build with Maven
-        run: ./mvnw -B clean package -P${{ matrix.scala }} -Pconsole -DskipTests
+        run: ./mvnw -B clean package -P${{ matrix.scala }} -DskipTests
       - name: Test with Maven
-        run: ./mvnw -B test -P${{ matrix.scala }} -Pconsole -pl '!streampark-console/streampark-console-service' -am
+        run: ./mvnw -B test -P${{ matrix.scala }} -pl '!streampark-console/streampark-console-service' -am
 

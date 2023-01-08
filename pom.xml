@@ -78,6 +78,8 @@
     <modules>
         <module>streampark-common</module>
         <module>streampark-flink</module>
+        <module>streampark-storage</module>
+        <module>streampark-console</module>
     </modules>
 
     <properties>
@@ -1000,15 +1002,6 @@
     </build>
 
     <profiles>
-        <!-- include streampark-console(streaming application operation platform) modules -->
-        <profile>
-            <id>console</id>
-            <modules>
-                <module>streampark-storage</module>
-                <module>streampark-console</module>
-            </modules>
-        </profile>
-
         <profile>
             <id>flink-1.15</id>
             <properties>
