@@ -44,9 +44,7 @@ public class EncryptUtils {
   }
 
   public static String encrypt(String content, String key) throws Exception {
-    SecretKey secKey = generateKey(key);
-    Cipher cipher = Cipher.getInstance(ALGORITHM);
-    cipher.init(Cipher.ENCRYPT_MODE, secKey);
+    Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, key);
     byte[] bytes = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
     return base64Encode(bytes);
   }
@@ -56,19 +54,20 @@ public class EncryptUtils {
   }
 
   public static String decrypt(String content, String key) throws Exception {
-    SecretKey secKey = generateKey(key);
-    Cipher cipher = Cipher.getInstance(ALGORITHM);
-    cipher.init(Cipher.DECRYPT_MODE, secKey);
+    Cipher cipher = getCipher(Cipher.DECRYPT_MODE, key);
     byte[] decryptBytes = cipher.doFinal(base64Decode(content));
     return new String(decryptBytes, StandardCharsets.UTF_8);
   }
 
-  private static SecretKey generateKey(String key) throws Exception {
+  private static Cipher getCipher(int mode, String key) throws Exception {
     SecureRandom random = SecureRandom.getInstance(RNG_ALGORITHM);
     random.setSeed(key.getBytes(StandardCharsets.UTF_8));
     KeyGenerator gen = KeyGenerator.getInstance(ALGORITHM);
     gen.init(KEY_SIZE, random);
-    return gen.generateKey();
+    SecretKey secKey = gen.generateKey();
+    Cipher cipher = Cipher.getInstance(ALGORITHM);
+    cipher.init(mode, secKey);
+    return cipher;
   }
 
   public static String base64Encode(byte[] bytes) {
