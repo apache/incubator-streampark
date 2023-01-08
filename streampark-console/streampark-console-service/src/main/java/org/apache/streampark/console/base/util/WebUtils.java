@@ -18,7 +18,6 @@
 package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.common.conf.ConfigConst;
-import org.apache.streampark.console.base.domain.Constant;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +40,7 @@ public final class WebUtils {
    */
   public static String encryptToken(String token) {
     try {
-      EncryptUtils encryptUtils = new EncryptUtils(Constant.TOKEN_CACHE_PREFIX);
-      return encryptUtils.encrypt(token);
+      return EncryptUtils.encrypt(token);
     } catch (Exception e) {
       log.info("token encrypt failed: ", e);
       return null;
@@ -57,8 +55,7 @@ public final class WebUtils {
    */
   public static String decryptToken(String encryptToken) {
     try {
-      EncryptUtils encryptUtils = new EncryptUtils(Constant.TOKEN_CACHE_PREFIX);
-      return encryptUtils.decrypt(encryptToken);
+      return EncryptUtils.decrypt(encryptToken);
     } catch (Exception e) {
       log.info("token decrypt failed: ", e);
       return null;

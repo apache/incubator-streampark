@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain;
+package org.apache.streampark.console.base.util;
 
-public class Constant {
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-  // order rules: descend
-  public static final String ORDER_DESC = "desc";
-  // order rules: ascend
-  public static final String ORDER_ASC = "asc";
-  public static final String DEFAULT_SORT_FIELD = "create_time";
-  // button
-  public static final String TYPE_BUTTON = "1";
-  // menu
-  public static final String TYPE_MENU = "0";
-  public static final String APP_MENU_ID = "100015";
-  public static final String APP_DETAIL_MENU_ID = "100018";
+public class EncryptUtilsTest {
+
+  @Test
+  public void testEncrypt() throws Exception {
+    String value = "apache streampark";
+    String encrypt = EncryptUtils.encrypt(value, "streampark");
+    String decrypt = EncryptUtils.decrypt(encrypt, "streampark");
+    Assertions.assertEquals(value, decrypt);
+  }
 }

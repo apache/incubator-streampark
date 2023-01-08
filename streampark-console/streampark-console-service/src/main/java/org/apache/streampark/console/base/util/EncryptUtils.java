@@ -17,86 +17,57 @@
 
 package org.apache.streampark.console.base.util;
 
-import javax.crypto.Cipher;
+import org.apache.commons.codec.digest.DigestUtils;
 
-import java.security.Key;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 public class EncryptUtils {
 
-  private static final String DEFAULT_KEY = "defaultKey";
-  private Cipher encryptCipher = null;
-  private Cipher decryptCipher = null;
+  private static final int KEY_SIZE = 128;
 
-  private static String byteArr2HexStr(byte[] arrB) {
-    int iLen = arrB.length;
-    StringBuilder sb = new StringBuilder(iLen * 2);
-    for (byte anArrB : arrB) {
-      int intTmp = anArrB;
-      while (intTmp < 0) {
-        intTmp = intTmp + 256;
-      }
-      if (intTmp < 16) {
-        sb.append("0");
-      }
-      sb.append(Integer.toString(intTmp, 16));
-    }
-    return sb.toString();
+  private static final String DEFAULT_KEY = DigestUtils.md5Hex("ApacheStreamPark");
+
+  private static final String ALGORITHM = "AES";
+
+  private static final String RNG_ALGORITHM = "SHA1PRNG";
+
+  private EncryptUtils() {}
+
+  public static String encrypt(String content) throws Exception {
+    return encrypt(content, DEFAULT_KEY);
   }
 
-  private static byte[] hexStr2ByteArr(String strIn) {
-    byte[] arrB = strIn.getBytes();
-    int iLen = arrB.length;
-
-    byte[] arrOut = new byte[iLen / 2];
-    for (int i = 0; i < iLen; i = i + 2) {
-      String strTmp = new String(arrB, i, 2);
-      arrOut[i / 2] = (byte) Integer.parseInt(strTmp, 16);
-    }
-    return arrOut;
+  public static String encrypt(String content, String key) throws Exception {
+    Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, key);
+    byte[] bytes = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
+    return Base64.getEncoder().encodeToString(bytes);
   }
 
-  public EncryptUtils() throws Exception {
-    this(DEFAULT_KEY);
+  public static String decrypt(String content) throws Exception {
+    return decrypt(content, DEFAULT_KEY);
   }
 
-  EncryptUtils(String strKey) throws Exception {
-    /*
-     * Security.addProvider(new com.sun.crypto.provider.SunJCE());
-     */
-    Key key = getKey(strKey.getBytes());
-
-    encryptCipher = Cipher.getInstance("DES");
-    encryptCipher.init(Cipher.ENCRYPT_MODE, key);
-
-    decryptCipher = Cipher.getInstance("DES");
-    decryptCipher.init(Cipher.DECRYPT_MODE, key);
+  public static String decrypt(String content, String key) throws Exception {
+    Cipher cipher = getCipher(Cipher.DECRYPT_MODE, key);
+    byte[] base64 = Base64.getDecoder().decode(content);
+    byte[] decryptBytes = cipher.doFinal(base64);
+    return new String(decryptBytes, StandardCharsets.UTF_8);
   }
 
-  private byte[] encrypt(byte[] arrB) throws Exception {
-    return encryptCipher.doFinal(arrB);
-  }
-
-  String encrypt(String strIn) throws Exception {
-    return byteArr2HexStr(encrypt(strIn.getBytes()));
-  }
-
-  private byte[] decrypt(byte[] arrB) throws Exception {
-    return decryptCipher.doFinal(arrB);
-  }
-
-  String decrypt(String strIn) {
-    try {
-      return new String(decrypt(hexStr2ByteArr(strIn)));
-    } catch (Exception e) {
-      return "";
-    }
-  }
-
-  private Key getKey(byte[] arrBTmp) {
-    byte[] arrB = new byte[8];
-    for (int i = 0; i < arrBTmp.length && i < arrB.length; i++) {
-      arrB[i] = arrBTmp[i];
-    }
-    return new javax.crypto.spec.SecretKeySpec(arrB, "DES");
+  private static Cipher getCipher(int mode, String key) throws Exception {
+    SecureRandom random = SecureRandom.getInstance(RNG_ALGORITHM);
+    random.setSeed(key.getBytes(StandardCharsets.UTF_8));
+    KeyGenerator gen = KeyGenerator.getInstance(ALGORITHM);
+    gen.init(KEY_SIZE, random);
+    SecretKey secKey = gen.generateKey();
+    Cipher cipher = Cipher.getInstance(ALGORITHM);
+    cipher.init(mode, secKey);
+    return cipher;
   }
 }
