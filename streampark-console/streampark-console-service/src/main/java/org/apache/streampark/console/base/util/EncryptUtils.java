@@ -46,7 +46,7 @@ public class EncryptUtils {
   public static String encrypt(String content, String key) throws Exception {
     Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, key);
     byte[] bytes = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
-    return base64Encode(bytes);
+    return Base64.getEncoder().encodeToString(bytes);
   }
 
   public static String decrypt(String content) throws Exception {
@@ -55,7 +55,8 @@ public class EncryptUtils {
 
   public static String decrypt(String content, String key) throws Exception {
     Cipher cipher = getCipher(Cipher.DECRYPT_MODE, key);
-    byte[] decryptBytes = cipher.doFinal(base64Decode(content));
+    byte[] base64 = Base64.getDecoder().decode(content);
+    byte[] decryptBytes = cipher.doFinal(base64);
     return new String(decryptBytes, StandardCharsets.UTF_8);
   }
 
@@ -68,13 +69,5 @@ public class EncryptUtils {
     Cipher cipher = Cipher.getInstance(ALGORITHM);
     cipher.init(mode, secKey);
     return cipher;
-  }
-
-  public static String base64Encode(byte[] bytes) {
-    return Base64.getEncoder().encodeToString(bytes);
-  }
-
-  public static byte[] base64Decode(String base64Code) {
-    return Base64.getDecoder().decode(base64Code);
   }
 }
