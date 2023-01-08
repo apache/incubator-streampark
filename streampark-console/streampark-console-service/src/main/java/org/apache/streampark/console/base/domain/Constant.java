@@ -19,8 +19,6 @@ package org.apache.streampark.console.base.domain;
 
 public class Constant {
 
-  // token cache prefix
-  public static final String TOKEN_CACHE_PREFIX = "streampark.cache.token.";
   // order rules: descend
   public static final String ORDER_DESC = "desc";
   // order rules: ascend
@@ -32,4 +30,5 @@ public class Constant {
   public static final String TYPE_MENU = "0";
   public static final String APP_MENU_ID = "100015";
   public static final String APP_DETAIL_MENU_ID = "100018";
+
 }
