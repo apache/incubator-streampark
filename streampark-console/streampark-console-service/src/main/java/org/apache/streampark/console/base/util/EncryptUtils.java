@@ -17,10 +17,8 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 
 import java.nio.charset.StandardCharsets;
@@ -28,38 +26,65 @@ import java.util.Base64;
 
 public class EncryptUtils {
 
-  private static final String DEFAULT_KEY = DigestUtils.md5Hex("ApacheStreamPark");
+  private static final String CIPHER_KEY = "AES";
 
-  private static final int offset = 16;
+  private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
 
-  private static final String ALGORITHM = "AES";
+  private static final String DEFAULT_KEY = "ApacheStreamPark";
 
-  private static final String CIPHER_KEY = "AES/CBC/PKCS5Padding";
+  public static String base64Encode(byte[] bytes) {
+    return Base64.getEncoder().encodeToString(bytes);
+  }
+
+  public static byte[] base64Decode(String base64Code) {
+    return Base64.getDecoder().decode(base64Code);
+  }
 
   public static String encrypt(String content) throws Exception {
     return encrypt(content, DEFAULT_KEY);
+  }
+
+  public static String encrypt(String content, String key) throws Exception {
+    String encryptKey = checkGetKey(key);
+    KeyGenerator keyGenerator = KeyGenerator.getInstance(CIPHER_KEY);
+    keyGenerator.init(128);
+    Cipher cipher = Cipher.getInstance(ALGORITHM);
+    cipher.init(
+        Cipher.ENCRYPT_MODE,
+        new SecretKeySpec(encryptKey.getBytes(StandardCharsets.UTF_8), CIPHER_KEY));
+    byte[] bytes = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
+    return base64Encode(bytes);
   }
 
   public static String decrypt(String content) throws Exception {
     return decrypt(content, DEFAULT_KEY);
   }
 
-  public static String encrypt(String content, String key) throws Exception {
-    SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), ALGORITHM);
-    IvParameterSpec ivSpec = new IvParameterSpec(key.getBytes(), 0, offset);
-    Cipher cipher = Cipher.getInstance(CIPHER_KEY);
-    byte[] byteContent = content.getBytes(StandardCharsets.UTF_8);
-    cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
-    byte[] result = cipher.doFinal(byteContent);
-    return Base64.getEncoder().encodeToString(result);
+  public static String decrypt(String content, String key) throws Exception {
+    String decryptKey = checkGetKey(key);
+    KeyGenerator keyGenerator = KeyGenerator.getInstance(CIPHER_KEY);
+    keyGenerator.init(128);
+    Cipher cipher = Cipher.getInstance(ALGORITHM);
+    cipher.init(
+        Cipher.DECRYPT_MODE,
+        new SecretKeySpec(decryptKey.getBytes(StandardCharsets.UTF_8), CIPHER_KEY));
+    byte[] decryptBytes = cipher.doFinal(base64Decode(content));
+    return new String(decryptBytes, StandardCharsets.UTF_8);
   }
 
-  public static String decrypt(String content, String key) throws Exception {
-    SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), ALGORITHM);
-    IvParameterSpec ivSpec = new IvParameterSpec(key.getBytes(), 0, offset);
-    Cipher cipher = Cipher.getInstance(CIPHER_KEY);
-    cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
-    byte[] result = cipher.doFinal(Base64.getDecoder().decode(content));
-    return new String(result);
+  private static String checkGetKey(String key) {
+    if (key == null) {
+      throw new IllegalArgumentException(
+          "[StreamPark] EncryptUtils: key cannot be null, please check.");
+    }
+    if (key.trim().length() == 0) {
+      throw new IllegalArgumentException(
+          "[StreamPark] EncryptUtils: key cannot be empty, please check.");
+    }
+    if (key.length() == 16) {
+      return key;
+    }
+    throw new IllegalArgumentException(
+        "[StreamPark] EncryptUtils: the length of the key must be 16, please check.");
   }
 }
