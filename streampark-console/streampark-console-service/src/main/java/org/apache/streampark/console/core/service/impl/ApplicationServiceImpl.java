@@ -602,8 +602,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                       return String.format(
                           "%s/%s_err.log", WebUtils.getAppTempDir(), application.getJobId());
                     } catch (Exception ex) {
-                      log.error("Generate log path exception:{}", ex.getMessage());
-                      return null;
+                      throw new ApiDetailException(
+                          "Generate log path exception: " + ex.getMessage());
                     }
                   })
               .thenApply(path -> logClient.rollViewLog(String.valueOf(path), offset, limit));
