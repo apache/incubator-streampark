@@ -22,9 +22,9 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.base.util.MoreFutures;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
@@ -61,6 +61,9 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Api(tags = {"FLINK_APPLICATION_TAG"})
@@ -431,8 +434,14 @@ public class ApplicationController {
       @RequestParam(value = "jobId", required = false) String jobId,
       @RequestParam(value = "skipLineNum", required = false) Integer skipLineNum,
       @RequestParam(value = "limit", required = false) Integer limit) {
-    return RestResponse.success(
-        MoreFutures.derefUsingDefaultTimeout(
-            logService.queryLog(namespace, jobName, jobId, skipLineNum, limit)));
+    try {
+      CompletionStage<String> stage =
+          logService.queryLog(namespace, jobName, jobId, skipLineNum, limit);
+      CompletableFuture<String> future = stage.toCompletableFuture();
+      String resp = future.get(5, TimeUnit.SECONDS);
+      return RestResponse.success(resp);
+    } catch (Exception e) {
+      throw new ApiDetailException(e);
+    }
   }
 }
