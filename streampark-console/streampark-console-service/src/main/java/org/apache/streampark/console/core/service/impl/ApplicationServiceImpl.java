@@ -613,7 +613,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
               })
           .thenApply(path -> logClient.rollViewLog(path, offset, limit))
-          .whenComplete((t, e) -> future.cancel(true))
+          .whenComplete(
+              (t, e) -> {
+                if (!future.isCancelled()) {
+                  future.cancel(true);
+                }
+              })
           .get();
     }
     throw new ApiAlertException(

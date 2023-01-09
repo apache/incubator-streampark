@@ -152,6 +152,7 @@ class CompletableFutureUtilsTest {
   public void thenSupplyNormally() throws Exception {
     String successResult = "success";
     String exceptionResult = "error";
+
     String resp =
         CompletableFutureUtils.supplyTimeout(
                 CompletableFuture.supplyAsync(() -> successResult),
@@ -169,22 +170,27 @@ class CompletableFutureUtilsTest {
   public void thenSupplyTimeout() throws Exception {
     String successResult = "success";
     String exceptionResult = "error";
+    CompletableFuture<String> future =
+        CompletableFuture.supplyAsync(
+            () -> {
+              try {
+                Thread.sleep(5000);
+              } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+              }
+              return successResult;
+            });
     String resp =
         CompletableFutureUtils.supplyTimeout(
-                CompletableFuture.supplyAsync(
-                    () -> {
-                      try {
-                        Thread.sleep(5000);
-                      } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                      }
-                      return successResult;
-                    }),
-                2,
-                TimeUnit.SECONDS,
-                success -> success,
-                e -> exceptionResult)
+                future, 1, TimeUnit.SECONDS, success -> success, e -> exceptionResult)
             .thenApply(r -> r)
+            .whenComplete(
+                (t, e) -> {
+                  if (!future.isCancelled()) {
+                    System.out.println("future canceling");
+                    future.cancel(true);
+                  }
+                })
             .get();
     Assertions.assertEquals(resp, exceptionResult);
   }
