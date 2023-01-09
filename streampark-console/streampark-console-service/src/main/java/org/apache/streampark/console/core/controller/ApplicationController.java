@@ -22,7 +22,6 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.util.MoreFutures;
 import org.apache.streampark.console.core.annotation.ApiAccess;
@@ -373,7 +372,7 @@ public class ApplicationController {
 
   @PostMapping("upload")
   @RequiresPermissions("app:create")
-  public RestResponse upload(MultipartFile file) throws ApplicationException {
+  public RestResponse upload(MultipartFile file) throws Exception {
     String uploadPath = applicationService.upload(file);
     return RestResponse.success(uploadPath);
   }

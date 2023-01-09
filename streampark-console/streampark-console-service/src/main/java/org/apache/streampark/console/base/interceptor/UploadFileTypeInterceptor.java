@@ -17,8 +17,9 @@
 
 package org.apache.streampark.console.base.interceptor;
 
-import org.apache.streampark.console.base.enums.FileType;
-import org.apache.streampark.console.base.exception.IllegalFileTypeException;
+import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.FileUtils;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,19 +30,10 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @Component
-public class FileHeaderCheckInterceptor implements HandlerInterceptor {
-
-  private static final List<String> FILE_HEADERS = new ArrayList<>();
-  private static final int HEADER_LENGTH = 8;
-
-  static {
-    FILE_HEADERS.add(FileType.JAR.getMagicNumber());
-  }
+public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -49,30 +41,15 @@ public class FileHeaderCheckInterceptor implements HandlerInterceptor {
     if (request instanceof MultipartHttpServletRequest) {
       MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
       Map<String, MultipartFile> files = multipartRequest.getFileMap();
-      for (String formKey : files.keySet()) {
-        MultipartFile multipartFile = multipartRequest.getFile(formKey);
-        byte[] file = multipartFile.getBytes();
-        if (file.length > HEADER_LENGTH) {
-          StringBuilder sb = new StringBuilder();
-          for (int i = 0; i < HEADER_LENGTH; i++) {
-            int v = file[i] & 0xFF;
-            String hv = Integer.toHexString(v);
-            if (hv.length() < 2) {
-              sb.append(0);
-            }
-            sb.append(hv);
-          }
-          boolean isFound = false;
-          String fileHead = sb.toString().toUpperCase();
-          for (String header : FILE_HEADERS) {
-            if (fileHead.startsWith(header)) {
-              isFound = true;
-              break;
-            }
-          }
-          if (!isFound) {
-            throw new IllegalFileTypeException("Illegal file type, please check");
-          }
+      for (String file : files.keySet()) {
+        MultipartFile multipartFile = multipartRequest.getFile(file);
+        AssertUtils.state(multipartFile != null);
+        String fileType = FileUtils.getFileType(multipartFile.getInputStream());
+        if (fileType == null) {
+          throw new ApiAlertException("unknown file type, Only standard jar files supported");
+        }
+        if (!"jar".equals(fileType)) {
+          throw new ApiAlertException("Illegal file type: " + fileType + ", please check");
         }
       }
     }

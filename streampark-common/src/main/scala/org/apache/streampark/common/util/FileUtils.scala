@@ -19,8 +19,8 @@ package org.apache.streampark.common.util
 import java.io._
 import java.net.URL
 import java.util
-
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 object FileUtils extends org.apache.commons.io.FileUtils {
 
@@ -93,9 +93,9 @@ object FileUtils extends org.apache.commons.io.FileUtils {
   }
 
   private[this] def bytesToHexString(src: Array[Byte]): String = {
-    val stringBuilder: StringBuilder = new StringBuilder
+    val stringBuilder = new mutable.StringBuilder
     if (src == null || src.length <= 0) return null
-    for (i <- 0 until src.length) {
+    for (i <- src.indices) {
       val v: Int = src(i) & 0xFF
       val hv: String = Integer.toHexString(v).toUpperCase
       if (hv.length < 2) {
@@ -106,19 +106,30 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     stringBuilder.toString
   }
 
+  def getFileType(input: InputStream): String = {
+    if (input == null) {
+      throw new RuntimeException("The inputStream can not be null")
+    }
+    var headerHex = Utils.tryWithResource(input) { in =>
+      val b = new Array[Byte](8)
+      in.read(b, 0, b.length)
+      bytesToHexString(b)
+    }
+    while (headerHex.length > 6) {
+      fileTypes.get(headerHex) match {
+        case Some(t) => return t
+        case None =>
+          headerHex = headerHex.dropRight(1)
+      }
+    }
+    null
+  }
+
   def getFileType(file: File): String = {
     if (!file.exists || !file.isFile) {
       throw new RuntimeException("The file does not exist or the path is a directory")
     }
-    Utils.tryWithResource(new FileInputStream(file)) { in =>
-      val b = new Array[Byte](4)
-      in.read(b, 0, b.length)
-      val fileCode = bytesToHexString(b)
-      fileTypes.find(_._1.startsWith(fileCode)) match {
-        case Some(f) => f._2
-        case _ => null
-      }
-    }
+    getFileType(new FileInputStream(file))
   }
 
   def createTempDir(): File = {

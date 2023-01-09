@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.config;
 
-import org.apache.streampark.console.base.interceptor.FileHeaderCheckInterceptor;
+import org.apache.streampark.console.base.interceptor.UploadFileTypeInterceptor;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +42,7 @@ import java.util.List;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-  @Autowired private FileHeaderCheckInterceptor fileHeaderCheckInterceptor;
+  @Autowired private UploadFileTypeInterceptor uploadFileTypeInterceptor;
 
   @Override
   public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -82,6 +82,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(fileHeaderCheckInterceptor).addPathPatterns("/flink/app/upload");
+    registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
   }
 }

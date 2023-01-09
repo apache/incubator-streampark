@@ -299,7 +299,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public String upload(MultipartFile file) throws ApplicationException {
+  public String upload(MultipartFile file) throws Exception {
     File temp = WebUtils.getAppTempDir();
     String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
     File saveFile = new File(temp, fileName);
@@ -311,7 +311,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     try {
       file.transferTo(saveFile);
     } catch (Exception e) {
-      throw new ApplicationException(e);
+      throw new ApiDetailException(e);
     }
     return saveFile.getAbsolutePath();
   }
@@ -448,8 +448,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (!FlinkAppState.CANCELED.equals(state)) {
       return false;
     }
-    long cancelUserId = FlinkRESTAPIWatcher.getCanceledJobUserId(appId).longValue();
-    long appUserId = application.getUserId().longValue();
+    long cancelUserId = FlinkRESTAPIWatcher.getCanceledJobUserId(appId);
+    long appUserId = application.getUserId();
     return cancelUserId != -1 && cancelUserId != appUserId;
   }
 
@@ -493,7 +493,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     long now = System.currentTimeMillis();
     List<Application> newRecords =
         records.stream()
-            .map(
+            .peek(
                 record -> {
                   // status of flink job on kubernetes mode had been automatically persisted to db
                   // in time.
@@ -507,7 +507,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                       record.setDuration(now - record.getStartTime().getTime());
                     }
                   }
-                  return record;
                 })
             .collect(Collectors.toList());
     page.setRecords(newRecords);
