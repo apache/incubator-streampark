@@ -135,7 +135,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -589,26 +588,29 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     Application application = getById(id);
     AssertUtils.state(application != null);
     if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
-      CompletionStage<String> stage =
-          CompletableFuture.supplyAsync(
+      CompletableFutureUtils.supplyTimeout(
+              CompletableFuture.supplyAsync(
                   () ->
                       KubernetesDeploymentHelper.watchDeploymentLog(
                           application.getK8sNamespace(),
                           application.getJobName(),
-                          application.getJobId()))
-              .exceptionally(
-                  e -> {
-                    try {
-                      return String.format(
-                          "%s/%s_err.log", WebUtils.getAppTempDir(), application.getJobId());
-                    } catch (Exception ex) {
-                      throw new ApiDetailException(
-                          "Generate log path exception: " + ex.getMessage());
-                    }
-                  })
-              .thenApply(path -> logClient.rollViewLog(String.valueOf(path), offset, limit));
-      CompletableFuture<String> future = stage.toCompletableFuture();
-      return future.get(5, TimeUnit.SECONDS);
+                          application.getJobId())),
+              5,
+              TimeUnit.SECONDS,
+              success -> success,
+              exception -> {
+                String errorLog =
+                    String.format(
+                        "%s/%s_err.log", WebUtils.getAppTempDir(), application.getJobId());
+                File file = new File(errorLog);
+                if (file.exists()) {
+                  return errorLog;
+                } else {
+                  throw new ApiDetailException("get job log exception: " + exception.getMessage());
+                }
+              })
+          .thenApply(path -> logClient.rollViewLog(String.valueOf(path), offset, limit))
+          .get();
     }
     throw new ApiAlertException(
         "job executionMode must be kubernetes-session|kubernetes-application");

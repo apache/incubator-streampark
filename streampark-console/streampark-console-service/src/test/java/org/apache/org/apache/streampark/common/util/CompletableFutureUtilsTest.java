@@ -15,16 +15,20 @@
  * limitations under the License.
  */
 
-package java.util.concurrent;
+package org.apache.org.apache.streampark.common.util;
 
 import org.apache.streampark.common.util.CompletableFutureUtils;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-class CompletableFutureTest {
+class CompletableFutureUtilsTest {
 
   @Test
   void testStartJobNormally() throws Exception {
@@ -142,5 +146,65 @@ class CompletableFutureTest {
       throw new RuntimeException(e);
     }
     return "start successful";
+  }
+
+  @Test
+  public void thenSupplyNormally() throws Exception {
+    String resp =
+        CompletableFutureUtils.supplyTimeout(
+                CompletableFuture.supplyAsync(() -> "success"),
+                3,
+                TimeUnit.SECONDS,
+                success -> success,
+                e -> "error")
+            .thenApply(r -> r)
+            .get();
+    System.out.println(resp);
+  }
+
+  @Test
+  public void thenSupplyTimeout() throws Exception {
+    String resp =
+        CompletableFutureUtils.supplyTimeout(
+                CompletableFuture.supplyAsync(
+                    () -> {
+                      try {
+                        Thread.sleep(5000);
+                      } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                      }
+                      return "success";
+                    }),
+                2,
+                TimeUnit.SECONDS,
+                success -> success,
+                e -> "error")
+            .thenApply(r -> r)
+            .get();
+    System.out.println(resp);
+  }
+
+  @Test
+  public void thenSupplyException() throws Exception {
+    String resp =
+        CompletableFutureUtils.supplyTimeout(
+                CompletableFuture.supplyAsync(
+                    () -> {
+                      try {
+                        Thread.sleep(5000);
+                      } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                      }
+                      return "success";
+                    }),
+                2,
+                TimeUnit.SECONDS,
+                success -> success,
+                e -> {
+                  throw new RuntimeException("error...");
+                })
+            .thenApply(r -> r)
+            .get();
+    System.out.println(resp);
   }
 }
