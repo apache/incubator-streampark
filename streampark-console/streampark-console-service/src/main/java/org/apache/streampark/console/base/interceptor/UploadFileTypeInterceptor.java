@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Component
-public class FileHeaderCheckInterceptor implements HandlerInterceptor {
+public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
