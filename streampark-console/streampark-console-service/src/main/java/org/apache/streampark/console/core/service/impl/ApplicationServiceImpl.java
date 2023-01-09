@@ -606,10 +606,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (file.exists()) {
                   return errorLog;
                 } else {
-                  throw new ApiDetailException("get job log exception: " + exception.getMessage());
+                  throw new ApiDetailException("get k8s job log failed: " + exception.getMessage());
                 }
               })
-          .thenApply(path -> logClient.rollViewLog(String.valueOf(path), offset, limit))
+          .thenApply(path -> logClient.rollViewLog(path, offset, limit))
           .get();
     }
     throw new ApiAlertException(
