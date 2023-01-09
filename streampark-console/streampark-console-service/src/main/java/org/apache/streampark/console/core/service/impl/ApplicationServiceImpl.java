@@ -588,13 +588,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     Application application = getById(id);
     AssertUtils.state(application != null);
     if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
+      CompletableFuture<String> future =
+          CompletableFuture.supplyAsync(
+              () ->
+                  KubernetesDeploymentHelper.watchDeploymentLog(
+                      application.getK8sNamespace(),
+                      application.getJobName(),
+                      application.getJobId()));
+
       CompletableFutureUtils.supplyTimeout(
-              CompletableFuture.supplyAsync(
-                  () ->
-                      KubernetesDeploymentHelper.watchDeploymentLog(
-                          application.getK8sNamespace(),
-                          application.getJobName(),
-                          application.getJobId())),
+              future,
               5,
               TimeUnit.SECONDS,
               success -> success,
@@ -610,6 +613,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
               })
           .thenApply(path -> logClient.rollViewLog(path, offset, limit))
+          .whenComplete((t, e) -> future.cancel(true))
           .get();
     }
     throw new ApiAlertException(

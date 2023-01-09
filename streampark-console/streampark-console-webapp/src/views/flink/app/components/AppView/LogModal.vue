@@ -66,7 +66,7 @@
       const { data } = await fetchK8sStartLog({
         id: app.id,
         offset: offset,
-        limit: 100
+        limit: 100,
       });
       const status = data.status || 'error';
       if (status === 'success') {

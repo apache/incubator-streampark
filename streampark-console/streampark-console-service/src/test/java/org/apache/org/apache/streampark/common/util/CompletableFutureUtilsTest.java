@@ -150,20 +150,25 @@ class CompletableFutureUtilsTest {
 
   @Test
   public void thenSupplyNormally() throws Exception {
+    String successResult = "success";
+    String exceptionResult = "error";
     String resp =
         CompletableFutureUtils.supplyTimeout(
-                CompletableFuture.supplyAsync(() -> "success"),
+                CompletableFuture.supplyAsync(() -> successResult),
                 3,
                 TimeUnit.SECONDS,
                 success -> success,
-                e -> "error")
+                e -> exceptionResult)
             .thenApply(r -> r)
             .get();
-    System.out.println(resp);
+
+    Assertions.assertEquals(resp, successResult);
   }
 
   @Test
   public void thenSupplyTimeout() throws Exception {
+    String successResult = "success";
+    String exceptionResult = "error";
     String resp =
         CompletableFutureUtils.supplyTimeout(
                 CompletableFuture.supplyAsync(
@@ -173,38 +178,47 @@ class CompletableFutureUtilsTest {
                       } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                       }
-                      return "success";
+                      return successResult;
                     }),
                 2,
                 TimeUnit.SECONDS,
                 success -> success,
-                e -> "error")
+                e -> exceptionResult)
             .thenApply(r -> r)
             .get();
-    System.out.println(resp);
+    Assertions.assertEquals(resp, exceptionResult);
   }
 
   @Test
-  public void thenSupplyException() throws Exception {
-    String resp =
-        CompletableFutureUtils.supplyTimeout(
-                CompletableFuture.supplyAsync(
-                    () -> {
-                      try {
-                        Thread.sleep(5000);
-                      } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                      }
-                      return "success";
-                    }),
-                2,
-                TimeUnit.SECONDS,
-                success -> success,
-                e -> {
-                  throw new RuntimeException("error...");
-                })
-            .thenApply(r -> r)
-            .get();
-    System.out.println(resp);
+  public void thenSupplyException() {
+    String resp;
+    String exResult = "exception";
+    try {
+      resp = exceptionally();
+    } catch (Exception e) {
+      resp = exResult;
+    }
+    Assertions.assertEquals(resp, exResult);
+  }
+
+  private String exceptionally() throws Exception {
+    return CompletableFutureUtils.supplyTimeout(
+            CompletableFuture.supplyAsync(
+                () -> {
+                  try {
+                    Thread.sleep(5000);
+                  } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                  }
+                  return "success";
+                }),
+            2,
+            TimeUnit.SECONDS,
+            success -> success,
+            e -> {
+              throw new RuntimeException("exception");
+            })
+        .thenApply(r -> r)
+        .get();
   }
 }
