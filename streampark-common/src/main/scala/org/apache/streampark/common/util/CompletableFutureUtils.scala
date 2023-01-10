@@ -61,7 +61,7 @@ object CompletableFutureUtils {
       .exceptionally(exceptionally)
       .whenComplete(new BiConsumer[T, Throwable]() {
         override def accept(t: T, u: Throwable): Unit = {
-          if (!future.isCancelled) {
+          if (!future.isDone) {
             future.cancel(true)
           }
         }
@@ -101,7 +101,7 @@ object CompletableFutureUtils {
       }
     }).whenComplete(new BiConsumer[Unit, Throwable]() {
       override def accept(t: Unit, u: Throwable): Unit = {
-        if (!future.isCancelled) {
+        if (!future.isDone) {
           future.cancel(true)
         }
       }
