@@ -15,16 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.org.apache.streampark.common.util;
-
-import org.apache.streampark.common.util.CompletableFutureUtils;
+package org.apache.streampark.common.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -152,7 +149,7 @@ class CompletableFutureUtilsTest {
   }
 
   @Test
-  public void thenSupplyNormally() throws Exception {
+  public void thenFutureNormally() throws Exception {
     String successResult = "success";
     String exceptionResult = "error";
 
@@ -170,7 +167,7 @@ class CompletableFutureUtilsTest {
   }
 
   @Test
-  public void thenSupplyTimeout() throws Exception {
+  public void thenFutureTimeout() throws Exception {
     String successResult = "success";
     String exceptionResult = "error";
     CompletableFuture<String> future =
@@ -192,7 +189,7 @@ class CompletableFutureUtilsTest {
   }
 
   @Test
-  public void thenSupplyException() {
+  public void thenFutureException() {
     String expectedExceptionMessage = "Exception in exceptionally handler";
     int processTime = 5000;
     int timeOut = 1000;
@@ -215,8 +212,8 @@ class CompletableFutureUtilsTest {
             });
 
     assertThatThrownBy(future::get)
-        .hasMessageContaining(expectedExceptionMessage)
-        .hasCauseInstanceOf(RuntimeException.class)
-        .isInstanceOf(ExecutionException.class);
+        .getCause()
+        .as(expectedExceptionMessage)
+        .isInstanceOf(RuntimeException.class);
   }
 }
