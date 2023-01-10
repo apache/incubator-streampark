@@ -615,8 +615,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           .thenApply(path -> logClient.rollViewLog(path, offset, limit))
           .get();
     } else {
-        throw new ApiAlertException(
-            "job executionMode must be kubernetes-session|kubernetes-application");
+      throw new ApiAlertException(
+          "job executionMode must be kubernetes-session|kubernetes-application");
     }
   }
 
