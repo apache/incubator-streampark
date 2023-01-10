@@ -60,7 +60,11 @@ object CompletableFutureUtils {
       .applyToEither(setTimeout(timeout, unit), handle)
       .exceptionally(exceptionally)
       .whenComplete(new BiConsumer[T, Throwable]() {
-        override def accept(t: T, u: Throwable): Unit = future.cancel(true)
+        override def accept(t: T, u: Throwable): Unit = {
+          if (!future.isCancelled) {
+            future.cancel(true)
+          }
+        }
       })
   }
 
@@ -81,7 +85,7 @@ object CompletableFutureUtils {
       handle: Consumer[T],
       exceptionally: Consumer[Throwable]): CompletableFuture[Unit] = {
 
-    val unitFuture = future.applyToEither(
+    future.applyToEither(
       setTimeout(timeout, unit),
       new JavaFunc[T, Unit]() {
         override def apply(t: T): Unit = {
@@ -95,32 +99,19 @@ object CompletableFutureUtils {
           exceptionally.accept(t)
         }
       }
-    })
-    cancelUnitFuture(unitFuture)
-  }
-
-  def runTimeout[T](future: CompletableFuture[T], timeout: Long, unit: TimeUnit): CompletableFuture[Unit] = {
-    val unitFuture = runTimeout(
-      future,
-      timeout,
-      unit,
-      null,
-      new Consumer[Throwable]() {
-        override def accept(t: Throwable): Unit = {
-          if (!future.isDone) {
-            future.cancel(true)
-          }
-        }
-      })
-    cancelUnitFuture(unitFuture)
-  }
-
-  private[this] def cancelUnitFuture(future: CompletableFuture[Unit]): CompletableFuture[Unit] = {
-    future.whenComplete(new BiConsumer[Unit, Throwable]() {
+    }).whenComplete(new BiConsumer[Unit, Throwable]() {
       override def accept(t: Unit, u: Throwable): Unit = {
-        future.cancel(true)
+        if (!future.isCancelled) {
+          future.cancel(true)
+        }
       }
     })
+  }
+
+  def runTimeout[T](future: CompletableFuture[T],
+                    timeout: Long,
+                    unit: TimeUnit): CompletableFuture[Unit] = {
+    runTimeout(future, timeout, unit, null, null)
   }
 
 }
