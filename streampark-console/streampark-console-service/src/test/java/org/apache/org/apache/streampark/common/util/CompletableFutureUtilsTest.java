@@ -24,9 +24,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CompletableFutureUtilsTest {
 
@@ -156,7 +159,7 @@ class CompletableFutureUtilsTest {
     String resp =
         CompletableFutureUtils.supplyTimeout(
                 CompletableFuture.supplyAsync(() -> successResult),
-                3,
+                1,
                 TimeUnit.SECONDS,
                 success -> success,
                 e -> exceptionResult)
@@ -190,34 +193,30 @@ class CompletableFutureUtilsTest {
 
   @Test
   public void thenSupplyException() {
-    String resp;
-    String exResult = "exception";
-    try {
-      resp = exceptionally();
-    } catch (Exception e) {
-      resp = exResult;
-    }
-    Assertions.assertEquals(resp, exResult);
-  }
-
-  private String exceptionally() throws Exception {
-    return CompletableFutureUtils.supplyTimeout(
+    String expectedExceptionMessage = "Exception in exceptionally handler";
+    int processTime = 5000;
+    int timeOut = 1000;
+    CompletableFuture<String> future =
+        CompletableFutureUtils.supplyTimeout(
             CompletableFuture.supplyAsync(
                 () -> {
                   try {
-                    Thread.sleep(5000);
+                    Thread.sleep(processTime);
                   } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                   }
                   return "success";
                 }),
-            2,
-            TimeUnit.SECONDS,
+            timeOut,
+            TimeUnit.MILLISECONDS,
             success -> success,
             e -> {
-              throw new RuntimeException("exception");
-            })
-        .thenApply(r -> r)
-        .get();
+              throw new RuntimeException(expectedExceptionMessage);
+            });
+
+    assertThatThrownBy(future::get)
+        .hasMessageContaining(expectedExceptionMessage)
+        .hasCauseInstanceOf(RuntimeException.class)
+        .isInstanceOf(ExecutionException.class);
   }
 }
