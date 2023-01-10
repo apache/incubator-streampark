@@ -184,13 +184,6 @@ class CompletableFutureUtilsTest {
         CompletableFutureUtils.supplyTimeout(
                 future, 1, TimeUnit.SECONDS, success -> success, e -> exceptionResult)
             .thenApply(r -> r)
-            .whenComplete(
-                (t, e) -> {
-                  if (!future.isCancelled()) {
-                    System.out.println("future canceling");
-                    future.cancel(true);
-                  }
-                })
             .get();
     Assertions.assertEquals(resp, exceptionResult);
   }

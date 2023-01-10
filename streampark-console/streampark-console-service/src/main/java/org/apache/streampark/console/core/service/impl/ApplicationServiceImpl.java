@@ -613,12 +613,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
               })
           .thenApply(path -> logClient.rollViewLog(path, offset, limit))
-          .whenComplete(
-              (t, e) -> {
-                if (!future.isCancelled()) {
-                  future.cancel(true);
-                }
-              })
           .get();
     }
     throw new ApiAlertException(
@@ -1300,7 +1294,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 IngressController.deleteIngress(
                     application.getK8sNamespace(), application.getJobName());
               }
-              cancelFuture.cancel(true);
               cancelFutureMap.remove(application.getId());
             });
   }
@@ -1604,7 +1597,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             })
         .whenComplete(
             (t, e) -> {
-              future.cancel(true);
               startFutureMap.remove(application.getId());
             });
   }
