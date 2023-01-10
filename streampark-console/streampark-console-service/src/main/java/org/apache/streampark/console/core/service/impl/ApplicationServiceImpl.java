@@ -596,7 +596,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                       application.getJobName(),
                       application.getJobId()));
 
-      CompletableFutureUtils.supplyTimeout(
+      return CompletableFutureUtils.supplyTimeout(
               future,
               5,
               TimeUnit.SECONDS,
@@ -614,9 +614,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               })
           .thenApply(path -> logClient.rollViewLog(path, offset, limit))
           .get();
+    } else {
+        throw new ApiAlertException(
+            "job executionMode must be kubernetes-session|kubernetes-application");
     }
-    throw new ApiAlertException(
-        "job executionMode must be kubernetes-session|kubernetes-application");
   }
 
   @Override
