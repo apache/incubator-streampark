@@ -587,6 +587,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     Application application = getById(id);
     AssertUtils.state(application != null);
     if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
+
       CompletableFuture<String> future =
           CompletableFuture.supplyAsync(
               () ->
@@ -595,24 +596,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                       application.getJobName(),
                       application.getJobId()));
 
-      return CompletableFutureUtils.supplyTimeout(
-              future,
-              5,
-              TimeUnit.SECONDS,
-              success -> success,
-              exception -> {
-                String errorLog =
-                    String.format(
-                        "%s/%s_err.log", WebUtils.getAppTempDir(), application.getJobId());
-                File file = new File(errorLog);
-                if (file.exists()) {
-                  return errorLog;
-                } else {
-                  throw new ApiDetailException("get k8s job log failed: " + exception.getMessage());
+      return future
+          .exceptionally(
+              e ->
+                  String.format(
+                      "%s/%s_err.log",
+                      WebUtils.getAppTempDir().getAbsolutePath(), application.getJobId()))
+          .thenApply(
+              path -> {
+                if (!future.isDone()) {
+                  future.cancel(true);
                 }
+                return logClient.rollViewLog(path, offset, limit);
               })
-          .thenApply(path -> logClient.rollViewLog(path, offset, limit))
-          .get();
+          .toCompletableFuture()
+          .get(5, TimeUnit.SECONDS);
     } else {
       throw new ApiAlertException(
           "job executionMode must be kubernetes-session|kubernetes-application");
