@@ -191,9 +191,6 @@
             <if test="application.tracking != null">
                 tracking=#{application.tracking},
             </if>
-            <if test="application.state != null">
-                state=#{application.state},
-            </if>
             <if test="application.launch != null">
                 launch=#{application.launch},
             </if>
@@ -216,7 +213,7 @@
                     total_task=null,
                     available_slot=null,
                     jm_memory=null,
-                    tm_memory=null
+                    tm_memory=null,
                 </when>
                 <otherwise>
                     <if test="application.totalTM != null">
@@ -235,10 +232,11 @@
                         jm_memory=#{application.jmMemory},
                     </if>
                     <if test="application.tmMemory != null">
-                        tm_memory=#{application.tmMemory}
+                        tm_memory=#{application.tmMemory},
                     </if>
                 </otherwise>
             </choose>
+            state=#{application.state}
         </set>
         where id=#{application.id}
     </update>
