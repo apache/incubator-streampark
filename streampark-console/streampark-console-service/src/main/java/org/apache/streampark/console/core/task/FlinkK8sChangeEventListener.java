@@ -87,11 +87,11 @@ public class FlinkK8sChangeEventListener {
       return;
     }
     // update application record
-    Application newApp = getUpdateAppWithJobStatusCV(app, jobStatus);
-    applicationService.persistMetrics(newApp);
+    setByJobStatusCV(app, jobStatus);
+    applicationService.persistMetrics(app);
 
     // email alerts when necessary
-    FlinkAppState state = FlinkAppState.of(newApp.getState());
+    FlinkAppState state = FlinkAppState.of(app.getState());
     if (FlinkAppState.FAILED.equals(state)
         || FlinkAppState.LOST.equals(state)
         || FlinkAppState.RESTARTING.equals(state)
@@ -108,7 +108,6 @@ public class FlinkK8sChangeEventListener {
   @SuppressWarnings("UnstableApiUsage")
   @Subscribe
   public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
-    FlinkMetricCV metrics = event.metrics();
     TrackId trackId = event.trackId();
     ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.executeMode());
     // discard session mode change
@@ -121,15 +120,14 @@ public class FlinkK8sChangeEventListener {
       return;
     }
 
-    Application newApp = new Application();
-    newApp.setId(trackId.appId());
-    newApp.setJmMemory(metrics.totalJmMemory());
-    newApp.setTmMemory(metrics.totalTmMemory());
-    newApp.setTotalTM(metrics.totalTm());
-    newApp.setTotalSlot(metrics.totalSlot());
-    newApp.setAvailableSlot(metrics.availableSlot());
+    FlinkMetricCV metrics = event.metrics();
+    app.setJmMemory(metrics.totalJmMemory());
+    app.setTmMemory(metrics.totalTmMemory());
+    app.setTotalTM(metrics.totalTm());
+    app.setTotalSlot(metrics.totalSlot());
+    app.setAvailableSlot(metrics.availableSlot());
 
-    applicationService.persistMetrics(newApp);
+    applicationService.persistMetrics(app);
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -151,28 +149,21 @@ public class FlinkK8sChangeEventListener {
     checkpointProcessor.process(event.trackId().appId(), checkPoint);
   }
 
-  private Application getUpdateAppWithJobStatusCV(Application app, JobStatusCV jobStatus) {
-    Application newApp = new Application();
-    newApp.setId(app.getId());
-    newApp.setJobId(jobStatus.jobId());
-    newApp.setTotalTask(jobStatus.taskTotal());
-
+  private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {
     // infer the final flink job state
-    Enumeration.Value state = jobStatus.jobState();
-    Enumeration.Value preState = toK8sFlinkJobState(FlinkAppState.of(app.getState()));
-    state = FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(state, preState);
-    newApp.setState(fromK8sFlinkJobState(state).getValue());
+    Enumeration.Value state =
+        FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
+            jobStatus.jobState(), toK8sFlinkJobState(FlinkAppState.of(app.getState())));
 
     // corrective start-time / end-time / duration
     long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;
     long startTime = Math.max(jobStatus.jobStartTime(), preStartTime);
     long preEndTime = app.getEndTime() != null ? app.getEndTime().getTime() : 0;
     long endTime = Math.max(jobStatus.jobEndTime(), preEndTime);
-
     long duration = jobStatus.duration();
+
     if (FlinkJobState.isEndState(state)) {
       IngressController.deleteIngress(app.getJobName(), app.getK8sNamespace());
-      newApp.setOptionState(OptionState.NONE.getValue());
       if (endTime < startTime) {
         endTime = System.currentTimeMillis();
       }
@@ -180,12 +171,16 @@ public class FlinkK8sChangeEventListener {
         duration = endTime - startTime;
       }
     }
-    newApp.setStartTime(new Date(startTime > 0 ? startTime : 0));
-    newApp.setEndTime(endTime > 0 && endTime >= startTime ? new Date(endTime) : null);
-    newApp.setDuration(duration > 0 ? duration : 0);
+
+    app.setState(fromK8sFlinkJobState(state).getValue());
+    app.setJobId(jobStatus.jobId());
+    app.setTotalTask(jobStatus.taskTotal());
+
+    app.setStartTime(new Date(startTime > 0 ? startTime : 0));
+    app.setEndTime(endTime > 0 && endTime >= startTime ? new Date(endTime) : null);
+    app.setDuration(duration > 0 ? duration : 0);
     // when a flink job status change event can be received, it means
     // that the operation command sent by streampark has been completed.
-    newApp.setOptionState(OptionState.NONE.getValue());
-    return newApp;
+    app.setOptionState(OptionState.NONE.getValue());
   }
 }
