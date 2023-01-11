@@ -39,9 +39,8 @@ Make stream processing easier
 
 ## 🚀 什么是 StreamPark
 
-实时即未来，在实时处理流域 `Apache Spark` 和 `Apache Flink` 是一个伟大的进步，尤其是 `Apache Flink` 被普遍认为是下一代大数据流计算引擎。我们在使用 `Flink` & `Spark` 时发现从编程模型、参数配置到项目部署、运维管理都有很多可以抽象共用的地方，我们将一些好的经验固化下来并结合业内的最佳实践。通过不断努力，终于诞生了今天的框架 —— `StreamPark`。项目的初衷是 —— **让流处理更简单**。
-
-使用 `StreamPark` 开发，可以极大降低学习成本和开发门槛，让开发者只用关心最核心的业务。`StreamPark` 规范了项目的配置，鼓励函数式编程，定义了最佳的编程方式，提供了一系列开箱即用的 `Connectors`，标准化了配置、开发、测试、部署、监控、运维的整个过程，提供了 Scala/Java 两套 API，其最终目的是打造一个一站式大数据平台，流批一体、湖仓一体的解决方案。
+StreamPark 是一个流处理应用程序开发框架。 StreamPark 旨在轻松构建和管理流式应用程序，提供使用 Apache Flink 和 Apache Spark 编写流处理应用程序的开发框架。 此外，StreamPark 还是一个专业的流处理应用管理平台
+，包括不限于应用程序的开发、调试、交互查询、部署、运维等。最初名为StreamX，2022 年 8 月更名为 StreamPark。
 
 ## 🎉 Features
 
