@@ -24,7 +24,7 @@
 </script>
 <script setup lang="ts" name="LogModal">
   import { reactive, ref, unref } from 'vue';
-  import { fetchStartLog } from '/@/api/flink/app/app';
+  import { fetchK8sStartLog } from '/@/api/flink/app/app';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { Icon } from '/@/components/Icon';
   import { formatToDateTime } from '/@/utils/dateUtil';
@@ -34,7 +34,7 @@
   const logTime = ref<string>('');
   const getLogLoading = ref<boolean>(false);
   const app = reactive<Recordable>({});
-  let skipLineNum = 0;
+  let offset = 0;
   let logContent = '';
 
   const [registerModal, { changeLoading, closeModal }] = useModalInner((data) => {
@@ -44,7 +44,7 @@
   const { setContent, logRef, handleRevealLine, getLineCount } = useLog();
 
   function onReceiveModalData(data) {
-    skipLineNum = 0;
+    offset = 0;
     logContent = '';
     Object.assign(app, unref(data.app));
     changeLoading(true);
@@ -63,12 +63,10 @@
   async function refreshLog() {
     try {
       getLogLoading.value = true;
-      const { data } = await fetchStartLog({
-        namespace: app.k8sNamespace,
-        jobName: app.jobName,
-        jobId: app.jobId,
+      const { data } = await fetchK8sStartLog({
+        id: app.id,
+        offset: offset,
         limit: 100,
-        skipLineNum,
       });
       const status = data.status || 'error';
       if (status === 'success') {
@@ -78,10 +76,10 @@
           handleRevealLine();
           setTimeout(() => {
             const currentLineCount = getLineCount() - 1;
-            if (currentLineCount < skipLineNum + 100) {
-              skipLineNum = currentLineCount;
+            if (currentLineCount < offset + 100) {
+              offset = currentLineCount;
             } else {
-              skipLineNum += 100;
+              offset += 100;
             }
           }, 500);
         }

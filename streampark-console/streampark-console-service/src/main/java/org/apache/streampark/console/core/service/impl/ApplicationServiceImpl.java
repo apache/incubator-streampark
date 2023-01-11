@@ -72,6 +72,7 @@ import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.LogClientService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
@@ -205,6 +206,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private VariableService variableService;
+
+  @Autowired private LogClientService logClient;
 
   @PostConstruct
   public void resetOptionState() {
@@ -577,6 +580,43 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         .filter(fn -> fn.endsWith(".jar"))
         .limit(DEFAULT_HISTORY_RECORD_LIMIT)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
+    Application application = getById(id);
+    AssertUtils.state(application != null);
+    if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
+      CompletableFuture<String> future =
+          CompletableFuture.supplyAsync(
+              () ->
+                  KubernetesDeploymentHelper.watchDeploymentLog(
+                      application.getK8sNamespace(),
+                      application.getJobName(),
+                      application.getJobId()));
+
+      return CompletableFutureUtils.supplyTimeout(
+              future,
+              5,
+              TimeUnit.SECONDS,
+              success -> success,
+              exception -> {
+                String errorLog =
+                    String.format(
+                        "%s/%s_err.log", WebUtils.getAppTempDir(), application.getJobId());
+                File file = new File(errorLog);
+                if (file.exists()) {
+                  return errorLog;
+                } else {
+                  throw new ApiDetailException("get k8s job log failed: " + exception.getMessage());
+                }
+              })
+          .thenApply(path -> logClient.rollViewLog(path, offset, limit))
+          .get();
+    } else {
+      throw new ApiAlertException(
+          "job executionMode must be kubernetes-session|kubernetes-application");
+    }
   }
 
   @Override
@@ -1254,7 +1294,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 IngressController.deleteIngress(
                     application.getK8sNamespace(), application.getJobName());
               }
-              cancelFuture.cancel(true);
               cancelFutureMap.remove(application.getId());
             });
   }
@@ -1558,7 +1597,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             })
         .whenComplete(
             (t, e) -> {
-              future.cancel(true);
               startFutureMap.remove(application.getId());
             });
   }

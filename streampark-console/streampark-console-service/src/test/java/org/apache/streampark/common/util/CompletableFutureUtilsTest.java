@@ -15,16 +15,20 @@
  * limitations under the License.
  */
 
-package java.util.concurrent;
-
-import org.apache.streampark.common.util.CompletableFutureUtils;
+package org.apache.streampark.common.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-class CompletableFutureTest {
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+class CompletableFutureUtilsTest {
 
   @Test
   void testStartJobNormally() throws Exception {
@@ -142,5 +146,74 @@ class CompletableFutureTest {
       throw new RuntimeException(e);
     }
     return "start successful";
+  }
+
+  @Test
+  public void thenFutureNormally() throws Exception {
+    String successResult = "success";
+    String exceptionResult = "error";
+
+    String resp =
+        CompletableFutureUtils.supplyTimeout(
+                CompletableFuture.supplyAsync(() -> successResult),
+                1,
+                TimeUnit.SECONDS,
+                success -> success,
+                e -> exceptionResult)
+            .thenApply(r -> r)
+            .get();
+
+    Assertions.assertEquals(resp, successResult);
+  }
+
+  @Test
+  public void thenFutureTimeout() throws Exception {
+    String successResult = "success";
+    String exceptionResult = "error";
+    CompletableFuture<String> future =
+        CompletableFuture.supplyAsync(
+            () -> {
+              try {
+                Thread.sleep(5000);
+              } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+              }
+              return successResult;
+            });
+    String resp =
+        CompletableFutureUtils.supplyTimeout(
+                future, 1, TimeUnit.SECONDS, success -> success, e -> exceptionResult)
+            .thenApply(r -> r)
+            .get();
+    Assertions.assertEquals(resp, exceptionResult);
+  }
+
+  @Test
+  public void thenFutureException() {
+    String expectedExceptionMessage = "Exception in exceptionally handler";
+    int processTime = 5000;
+    int timeOut = 1000;
+    CompletableFuture<String> future =
+        CompletableFutureUtils.supplyTimeout(
+            CompletableFuture.supplyAsync(
+                () -> {
+                  try {
+                    Thread.sleep(processTime);
+                  } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                  }
+                  return "success";
+                }),
+            timeOut,
+            TimeUnit.MILLISECONDS,
+            success -> success,
+            e -> {
+              throw new RuntimeException(expectedExceptionMessage);
+            });
+
+    assertThatThrownBy(future::get)
+        .getCause()
+        .as(expectedExceptionMessage)
+        .isInstanceOf(RuntimeException.class);
   }
 }

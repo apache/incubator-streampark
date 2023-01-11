@@ -113,4 +113,6 @@ public interface ApplicationService extends IService<Application> {
   List<String> getRecentK8sTmPodTemplate();
 
   List<String> historyUploadJars();
+
+  String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception;
 }
