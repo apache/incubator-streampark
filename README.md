@@ -1,5 +1,5 @@
 # Apache StreamPark (Incubating)
-
+<br>
 <a href="https://streampark.apache.org" target="_blank" rel="noopener noreferrer">
     <img width="600" src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo">
 </a>
@@ -16,9 +16,7 @@
 **[Official Website](https://streampark.apache.org)** 
 | **[Document](https://streampark.apache.org/docs/intro)**
 | **[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
-
 <br>
-
 ## 🚀 What is StreamPark?
 
 StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing streaming process application with Apache Flink and Apache Spark. Also, StreamPark is a professional management platform for streaming application
