@@ -19,15 +19,14 @@ package org.apache.streampark.flink.core
 import java.lang.{Boolean => JavaBool}
 import java.util.Scanner
 import java.util.regex.{Matcher, Pattern}
-
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks.{break, breakable}
-
 import enumeratum.EnumEntry
-
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.Logger
+
+import scala.annotation.tailrec
 
 object SqlCommandParser extends Logger {
 
@@ -193,7 +192,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_VIEW extends SqlCommand(
         "create view",
-        "(CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\S+)\\s+AS\\s+SELECT\\s+.+)")
+        "(CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(\\S+)\\s+AS\\s+SELECT\\s+.+)")
 
   /**
    * <pre>
@@ -204,7 +203,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_FUNCTION extends SqlCommand(
         "create function",
-        "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(.*)\\s+AS\\s+.*)")
+        "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(\\S+)\\s+AS\\s+.*)")
 
   // ----DROP Statements--------------------------------------------------------------------------------------------------------------------------------
 
@@ -572,7 +571,7 @@ object SqlSplitter {
   def splitSql(sql: String): List[SqlSegment] = {
     val queries = ListBuffer[String]()
     val lastIndex = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
-    var query = new StringBuilder
+    var query = new mutable.StringBuilder
 
     var multiLineComment = false
     var singleLineComment = false
@@ -608,6 +607,7 @@ object SqlSplitter {
       descriptor
     }
 
+    @tailrec
     def findStartLine(num: Int): Int = if (num >= lineDescriptor.size || lineDescriptor(num)) num else findStartLine(num + 1)
 
     def markLineNumber(): Unit = {
@@ -678,7 +678,7 @@ object SqlSplitter {
           // meet the end of semicolon
           if (query.toString.trim.nonEmpty) {
             queries += query.toString
-            query = new StringBuilder
+            query = new mutable.StringBuilder
           }
         } else if (idx == lastIndex) {
           markLineNumber()
@@ -690,7 +690,7 @@ object SqlSplitter {
 
           if (query.toString.trim.nonEmpty) {
             queries += query.toString
-            query = new StringBuilder
+            query = new mutable.StringBuilder
           }
         } else if (!singleLineComment && !multiLineComment) {
           // normal case, not in single line comment and not in multiple line comment
@@ -736,7 +736,7 @@ object SqlSplitter {
    * @return
    */
   private[this] def extractLineBreaks(text: String): String = {
-    val builder = new StringBuilder
+    val builder = new mutable.StringBuilder
     for (i <- 0 until text.length) {
       if (text.charAt(i) == '\n') {
         builder.append('\n')
