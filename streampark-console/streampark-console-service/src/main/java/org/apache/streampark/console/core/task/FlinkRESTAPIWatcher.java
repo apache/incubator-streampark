@@ -267,7 +267,7 @@ public class FlinkRESTAPIWatcher {
     FlinkCluster flinkCluster = getFlinkCluster(application);
     JobsOverview jobsOverview = httpJobsOverview(application, flinkCluster);
     if (jobsOverview == null) {
-        return;
+      return;
     }
     Optional<JobsOverview.Job> optional;
     ExecutionMode execMode = application.getExecutionModeEnum();
