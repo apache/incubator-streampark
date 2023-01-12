@@ -1,15 +1,31 @@
-<a href="https://streampark.apache.org" target="_blank" rel="noopener noreferrer">
-    <img width="600" src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo">
-</a>
+<div align="center">
+    <br/>
+    <h1>
+        <a href="https://streampark.apache.org" target="_blank" rel="noopener noreferrer">
+        <img width="600" src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo">
+        </a>
+    </h1>
+    <strong style="font-size: 1.5rem">A magical framework that makes stream processing easier!</strong>
+</div>
 
-### A magical framework that makes stream processing easier!
+<br/>
 
-[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![Commit activity](https://img.shields.io/github/commit-activity/m/apache/streampark)](https://github.com/apache/streampark/graphs/commit-activity)
-[![](https://tokei.rs/b1/github.com/apache/streampark)](https://github.com/apache/streampark)
-[![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg)](https://github.com/apache/incubator-streampark/releases)
-[![total downloads](https://img.shields.io/github/downloads/apache/streampark/total.svg)](https://streampark.apache.org/download)
+<p align="center">
+  <a href="https://www.apache.org/licenses/LICENSE-2.0.html"><img src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg"></a>
+  <img src="https://tokei.rs/b1/github/apache/streampark">
+  <img src="https://img.shields.io/github/languages/top/apache/streampark">
+  <img src="https://img.shields.io/github/commit-activity/m/apache/streampark">
+  <img src="https://img.shields.io/github/v/release/apache/streampark.svg">
+  <img src="https://img.shields.io/github/downloads/apache/streampark/total.svg">
 
+</p>
+
+<div align="center">
+
+**[Official Website](https://streampark.apache.org)** |
+**[Document](https://streampark.apache.org/docs/intro)**
+
+</div>
 
 # Apache StreamPark (Incubating)
 
