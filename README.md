@@ -1,7 +1,5 @@
 # Apache StreamPark (Incubating)
 
----
-
 <a href="https://streampark.apache.org" target="_blank" rel="noopener noreferrer">
     <img width="600" src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo">
 </a>
@@ -19,6 +17,7 @@
 | **[Document](https://streampark.apache.org/docs/intro)**
 | **[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
 
+<br>
 
 ## 🚀 What is StreamPark?
 
