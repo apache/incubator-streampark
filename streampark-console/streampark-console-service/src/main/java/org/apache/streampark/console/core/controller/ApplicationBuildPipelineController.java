@@ -92,7 +92,7 @@ public class ApplicationBuildPipelineController {
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
     try {
       Application app = applicationService.getById(appId);
-      Boolean envOk = applicationService.checkEnv(app);
+      boolean envOk = applicationService.checkEnv(app);
       if (!envOk) {
         throw new ApiAlertException(
             "Check flink env failed, please check the flink version of this job");
