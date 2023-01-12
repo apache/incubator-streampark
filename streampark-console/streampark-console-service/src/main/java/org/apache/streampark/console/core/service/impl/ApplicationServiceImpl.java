@@ -598,16 +598,26 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
       return future
           .exceptionally(
-              e ->
-                  String.format(
-                      "%s/%s_err.log",
-                      WebUtils.getAppTempDir().getAbsolutePath(), application.getJobId()))
+              e -> {
+                String errorLog =
+                    String.format(
+                        "%s/%s_err.log",
+                        WebUtils.getAppTempDir().getAbsolutePath(), application.getJobId());
+                File file = new File(errorLog);
+                if (file.exists() && file.isFile()) {
+                  return file.getAbsolutePath();
+                }
+                return null;
+              })
           .thenApply(
               path -> {
                 if (!future.isDone()) {
                   future.cancel(true);
                 }
-                return logClient.rollViewLog(path, offset, limit);
+                if (path != null) {
+                  return logClient.rollViewLog(path, offset, limit);
+                }
+                return null;
               })
           .toCompletableFuture()
           .get(5, TimeUnit.SECONDS);
