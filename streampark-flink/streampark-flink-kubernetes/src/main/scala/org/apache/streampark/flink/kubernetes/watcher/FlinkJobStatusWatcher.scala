@@ -31,7 +31,6 @@ import scala.util.{Failure, Success, Try}
 
 import com.google.common.base.Charsets
 import com.google.common.io.Files
-import org.apache.commons.collections.CollectionUtils
 import org.apache.flink.core.fs.Path
 import org.apache.flink.runtime.history.FsJobArchivist
 import org.apache.hc.client5.http.fluent.Request
@@ -56,8 +55,8 @@ import org.apache.streampark.flink.kubernetes.model._
  */
 @ThreadSafe
 class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfig.defaultConf)(
-    implicit val watchController: FlinkK8sWatchController,
-    implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
+  implicit val watchController: FlinkK8sWatchController,
+  implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
   private val trackTaskExecPool = Executors.newWorkStealingPool()
   implicit private val trackTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trackTaskExecPool)
@@ -96,7 +95,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    */
   override def doWatch(): Unit = {
     this.synchronized {
-      logInfo("[FlinkJobStatusWatcher]: Status monitoring process begins - " + Thread.currentThread().getName)
+      logDebug("[FlinkJobStatusWatcher]: Status monitoring process begins - " + Thread.currentThread().getName)
       // get all legal tracking ids
       val trackIds = Try(watchController.getAllWatchingIds()).filter(_.nonEmpty).getOrElse(return
       )
@@ -136,11 +135,11 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       // blocking until all future are completed or timeout is reached
       Try(Await.ready(Future.sequence(tracksFuture), conf.requestTimeoutSec seconds))
         .failed.map { _ =>
-          logInfo(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
-            s" limitSeconds=${conf.requestTimeoutSec}," +
-            s" trackIds=${trackIds.mkString(",")}")
-        }
-      logInfo("[FlinkJobStatusWatcher]: End of status monitoring process - " + Thread.currentThread().getName)
+        logWarn(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
+          s" limitSeconds=${conf.requestTimeoutSec}," +
+          s" trackIds=${trackIds.mkString(",")}")
+      }
+      logDebug("[FlinkJobStatusWatcher]: End of status monitoring process - " + Thread.currentThread().getName)
     }
   }
 
@@ -308,8 +307,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   private[this] def inferSilentOrLostFromPreCache(preCache: JobStatusCV) = preCache match {
     case preCache if preCache == null => FlinkJobState.SILENT
     case preCache
-        if preCache.jobState == FlinkJobState.SILENT &&
-          System.currentTimeMillis() - preCache.pollAckTime >= conf.silentStateJobKeepTrackingSec * 1000 => FlinkJobState.LOST
+      if preCache.jobState == FlinkJobState.SILENT &&
+        System.currentTimeMillis() - preCache.pollAckTime >= conf.silentStateJobKeepTrackingSec * 1000 => FlinkJobState.LOST
     case _ => FlinkJobState.SILENT
   }
 
@@ -330,10 +329,10 @@ object FlinkJobStatusWatcher {
     current match {
       case FlinkJobState.LOST => if (effectEndStates.contains(current)) previous else FlinkJobState.TERMINATED
       case FlinkJobState.POS_TERMINATED | FlinkJobState.TERMINATED => previous match {
-          case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
-          case FlinkJobState.FAILING => FlinkJobState.FAILED
-          case _ => if (current == FlinkJobState.POS_TERMINATED) FlinkJobState.FINISHED else FlinkJobState.TERMINATED
-        }
+        case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
+        case FlinkJobState.FAILING => FlinkJobState.FAILED
+        case _ => if (current == FlinkJobState.POS_TERMINATED) FlinkJobState.FINISHED else FlinkJobState.TERMINATED
+      }
       case _ => current
     }
   }
@@ -433,41 +432,41 @@ private[kubernetes] object FlinkHistoryArchives {
   def getJobStateFromArchiveFile(jobId: String): String = Try {
     require(jobId != null, "[StreamPark] getJobStateFromArchiveFile: JobId cannot be null.")
     val archivePath = new Path(Workspace.ARCHIVES_FILE_PATH, jobId)
-    val archivedJson = FsJobArchivist.getArchivedJsons(archivePath)
-    var state: String = FAILED_STATE
-    if (CollectionUtils.isNotEmpty(archivedJson)) {
-      archivedJson.foreach { a =>
-        if (a.getPath == s"/jobs/$jobId/exceptions") {
-          Try(parse(a.getJson)) match {
-            case Success(ok) =>
-              val log = (ok \ "root-exception").extractOpt[String].orNull
-              if (log != null) {
-                val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)
-                val file = new File(path)
-                Files.asCharSink(file, Charsets.UTF_8).write(log)
-              }
-            case _ =>
-          }
-        } else if (a.getPath == "/jobs/overview") {
-          Try(parse(a.getJson)) match {
-            case Success(ok) =>
-              ok \ "jobs" match {
-                case JNothing | JNull =>
-                case JArray(arr) =>
-                  arr.foreach(x => {
-                    val jid = (x \ "jid").extractOpt[String].orNull
-                    if (jid == jobId) {
-                      state = (x \ "state").extractOpt[String].orNull
-                    }
-                  })
-                case _ =>
-              }
-            case Failure(_) =>
+    FsJobArchivist.getArchivedJsons(archivePath) match {
+      case r if r.isEmpty => FAILED_STATE
+      case r =>
+        r.foreach { a =>
+          if (a.getPath == s"/jobs/$jobId/exceptions") {
+            Try(parse(a.getJson)) match {
+              case Success(ok) =>
+                val log = (ok \ "root-exception").extractOpt[String].orNull
+                if (log != null) {
+                  val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)
+                  val file = new File(path)
+                  Files.asCharSink(file, Charsets.UTF_8).write(log)
+                }
+              case _ =>
+            }
+          } else if (a.getPath == "/jobs/overview") {
+            Try(parse(a.getJson)) match {
+              case Success(ok) =>
+                ok \ "jobs" match {
+                  case JNothing | JNull =>
+                  case JArray(arr) =>
+                    arr.foreach(x => {
+                      val jid = (x \ "jid").extractOpt[String].orNull
+                      if (jid == jobId) {
+                        return (x \ "state").extractOpt[String].orNull
+                      }
+                    })
+                  case _ =>
+                }
+              case Failure(_) =>
+            }
           }
         }
-      }
+        FAILED_STATE
     }
-    state
   }.getOrElse(FAILED_STATE)
 
 }
