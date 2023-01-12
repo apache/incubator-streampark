@@ -13,9 +13,9 @@
 [![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg)](https://github.com/apache/incubator-streampark/releases)
 [![total downloads](https://img.shields.io/github/downloads/apache/streampark/total.svg)](https://streampark.apache.org/download)
 
-**[Official Website](https://streampark.apache.org)** 
-| **[Document](https://streampark.apache.org/docs/intro)**
-| **[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
+**[Website](https://streampark.apache.org)**&nbsp;&nbsp;|&nbsp;&nbsp;
+**[Document](https://streampark.apache.org/docs/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
+**[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
 <br>
 ## 🚀 What is StreamPark?
 
@@ -87,10 +87,12 @@ Thank you to all the people who already contributed to StreamPark!
 
 
 
-## 💬 Join us (微信公众号)
+## 💬 Social Media
 
-<div align="center">
-    <img src="https://streampark.apache.org/image/wx_qr.png" alt="Join the Group" height="400px"><br>
-</div>
+- [Twitter](https://twitter.com/ASFStreamPark)
+- [Zhihu](https://www.zhihu.com/people/streampark) (in Chinese)
+- [bilibili](https://space.bilibili.com/455330087) (in Chinese)
+- WeChat Official Account (in Chinese, scan the QR code to follow)
 
+<img src="https://streampark.apache.org/image/wx_qr.png" alt="Join the Group" height="350px"><br>
 
