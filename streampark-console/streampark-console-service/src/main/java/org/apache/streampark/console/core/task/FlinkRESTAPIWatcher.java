@@ -266,6 +266,9 @@ public class FlinkRESTAPIWatcher {
   private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
     FlinkCluster flinkCluster = getFlinkCluster(application);
     JobsOverview jobsOverview = httpJobsOverview(application, flinkCluster);
+    if (jobsOverview == null) {
+      return;
+    }
     Optional<JobsOverview.Job> optional;
     ExecutionMode execMode = application.getExecutionModeEnum();
     if (ExecutionMode.YARN_APPLICATION.equals(execMode)

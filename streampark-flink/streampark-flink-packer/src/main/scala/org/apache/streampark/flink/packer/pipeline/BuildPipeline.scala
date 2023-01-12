@@ -156,7 +156,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
       logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
       executor.submit(new Callable[BuildResult] {
         override def call(): BuildResult = buildProcess()
-      }).get(5, TimeUnit.MINUTES)
+      }).get(20, TimeUnit.MINUTES)
     } match {
       case Success(result) =>
         pipeStatus = PipelineStatus.success
