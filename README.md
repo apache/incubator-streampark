@@ -57,12 +57,23 @@ StreamPark is a streaming application development framework. Aimed at ease build
 
 ![](https://user-images.githubusercontent.com/13284744/142746864-d807d728-423f-41c3-b90d-45ce2c21936b.png)
 
+## 🔨 Compiling project
+
+```shell
+git clone git@github.com:apache/incubator-streampark.git
+cd incubator-streampark
+./build.sh
+```
+
+## 🧑‍💻 Downloads
+
+Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)
 
 ## 🚀 Quick Start
 
-click [Document](https://streampark.apache.org/docs/intro) for more information
+click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
 
-## 💋 our users
+## 💋 Our users
 
 Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/apache/incubator-streampark/issues/163)
 
