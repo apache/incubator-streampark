@@ -19,7 +19,7 @@
 <br>
 ## 🚀 What is StreamPark?
 
-StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing streaming process application with Apache Flink and Apache Spark. Also, StreamPark is a professional management platform for streaming application
+StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing streaming process application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application
 , including application development, debugging, interactive query, deployment, operation, maintenance, etc. It was initially known as StreamX and renamed to StreamPark in August 2022.
 
 ## 🎉 Features
