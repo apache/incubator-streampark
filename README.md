@@ -35,32 +35,32 @@
 [![Commit activity](https://img.shields.io/github/commit-activity/m/apache/streampark)](https://github.com/apache/streampark/graphs/commit-activity)
 [![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg)](https://github.com/apache/incubator-streampark/releases)
 [![total downloads](https://img.shields.io/github/downloads/apache/streampark/total.svg)](https://streampark.apache.org/download)
-[![Twitter](https://img.shields.io/twitter/follow/streampark.svg?label=Follow&style=social)](https://twitter.com/StreamPark)
-
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/streampark.svg?style=social&label=Follow%20%40streampark)](https://twitter.com/ASFStreamPark)
 
 **[Website](https://streampark.apache.org)**&nbsp;&nbsp;|&nbsp;&nbsp;
 **[Document](https://streampark.apache.org/docs/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
 **[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
 
+![](https://streampark.apache.org/image/dashboard-preview.png)
+
 </div>
 
-![](https://streampark.apache.org/image/dashboard-preview.png)
 
 ## 🚀 What is StreamPark?
 
-<h4>StreamPark is a streaming process development framework and professional management platform. </h4>
+<h4>StreamPark is a stream processing development framework and professional management platform. </h4>
 
-> StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing streaming process application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application
+> StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing stream processing application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application
 , including application development, debugging, interactive query, deployment, operation, maintenance, etc. It was initially known as StreamX and renamed to StreamPark in August 2022.
+
 
 ## 🎉 Features
 
-* Apache Flink & Spark application development scaffolding
+* Apache Flink & Spark stream processing application development framework
 * Out-of-the-box connectors
-* Support maven compilation
 * Support multiple versions of Flink & Spark
 * Scala 2.11 / 2.12 support
-* One-stop stream processing operation platform
+* One-stop stream processing management platform
 * Support catalog、olap、streaming-warehouse etc.
 * ...
 
