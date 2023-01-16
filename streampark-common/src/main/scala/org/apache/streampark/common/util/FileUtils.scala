@@ -64,6 +64,7 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     maps.put("52617221", "rar")
     maps.put("235468697320636F6E66", "ini")
     maps.put("504B03040A000000", "jar")
+    maps.put("504B030414000808", "jar")
     maps.put("4D5A9000030000000400", "exe")
 
     maps.put("3C25402070616765206C", "jsp")
