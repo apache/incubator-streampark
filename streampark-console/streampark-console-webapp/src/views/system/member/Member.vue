@@ -53,6 +53,7 @@
       @register="registerDrawer"
       @success="handleSuccess"
       :roleOptions="roleListOptions"
+      :userOptions="userListOptions"
       okText="Submit"
     />
   </div>

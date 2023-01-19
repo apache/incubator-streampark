@@ -111,10 +111,10 @@
           showSearch: true,
           optionFilterGroup: "username",
         },
-        //itemProps: getItemProp.value,
-        // rules: unref(isUpdate)
-        //   ? []
-        //   : [{ required: true, validator: checkUserName, trigger: 'blur' }],
+        itemProps: getItemProp.value,
+        rules: unref(isUpdate)
+          ? []
+          : [{ required: true, validator: checkUserName, trigger: 'blur' }],
       },
       {
         field: 'roleId',
