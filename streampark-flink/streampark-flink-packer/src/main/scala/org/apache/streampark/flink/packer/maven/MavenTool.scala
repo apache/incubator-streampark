@@ -150,7 +150,9 @@ object MavenTool extends Logger {
     if (mavenArtifacts == null) Set.empty[File];
     else {
       val (repoSystem, session) = getMavenEndpoint()
-      val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version))
+      val artifacts = mavenArtifacts.map(e => {
+        new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version)
+      })
       logInfo(s"start resolving dependencies: ${artifacts.mkString}")
 
       val remoteRepos = getRemoteRepos()

@@ -21,7 +21,7 @@ import java.util.regex.Pattern
 
 import org.eclipse.aether.artifact.{Artifact => AetherArtifact}
 
-case class Artifact(groupId: String, artifactId: String, version: String) {
+case class Artifact(groupId: String, artifactId: String, version: String, classifier: String) {
 
   def eq(artifact: AetherArtifact): Boolean = {
     artifact.getGroupId match {
@@ -49,7 +49,7 @@ object Artifact {
         val g = m.group(1)
         val a = m.group(2)
         val v = m.group(3)
-        Artifact(g, a, v)
+        Artifact(g, a, v, null)
       case _ =>
         throw new IllegalArgumentException(
           s"Bad artifact coordinates $coords, expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>")
