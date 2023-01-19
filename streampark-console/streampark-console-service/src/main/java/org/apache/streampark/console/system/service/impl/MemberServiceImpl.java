@@ -83,6 +83,14 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
+  public IPage<User> findCandidateUsers(Long teamId, RestRequest request) {
+    Page<User> page = new Page<>();
+    page.setCurrent(request.getPageNum());
+    page.setSize(request.getPageSize());
+    return baseMapper.findUsersNotInTeam(page, teamId);
+  }
+
+  @Override
   public List<Team> findUserTeams(Long userId) {
     return teamService.findUserTeams(userId);
   }
