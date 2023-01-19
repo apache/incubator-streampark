@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { BasicTableParams } from './../model/baseModel';
+import { BasicPageParams, BasicTableParams } from './../model/baseModel';
 import { defHttp } from '/@/utils/http/axios';
 import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
 import { AddMemberParams, MemberListRecord, UpdateMemberParams } from './model/memberModel';
+import { UserListGetResultModel } from '/@/api/base/model/systemModel';
 
 enum MEMBER_API {
   POST = '/member/post',
@@ -27,7 +28,24 @@ enum MEMBER_API {
   TEAMS = '/member/teams',
   CHECK_NAME = '/user/check/name',
   DELETE = '/member/delete',
+  CANDIDATE_USERS = '/member/candidateUsers',
 }
+
+export type UserCandidateParams = {
+  teamId?: number | string;
+};
+
+export type UserCandidatePageParams = BasicPageParams & UserCandidateParams;
+
+/**
+ * get candidate users add to the target team
+ * @param params
+ * @returns
+ */
+export function fetchCandidateUsers(params?: UserCandidatePageParams): Promise<UserListGetResultModel> {
+  return defHttp.post({ url: MEMBER_API.CANDIDATE_USERS, params });
+}
+
 /**
  * get member list
  * @param params

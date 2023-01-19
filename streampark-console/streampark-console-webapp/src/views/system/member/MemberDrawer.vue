@@ -37,7 +37,7 @@
 
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { RoleListItem } from '/@/api/base/model/systemModel';
+  import { RoleListItem, UserListItem } from '/@/api/base/model/systemModel';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RuleObject } from 'ant-design-vue/lib/form';
   import { StoreValue } from 'ant-design-vue/lib/form/interface';
@@ -54,6 +54,10 @@
       type: Array as PropType<Array<Partial<RoleListItem>>>,
       default: () => [],
     },
+    userOptions: {
+      type: Array as PropType<Array<Partial<UserListItem>>>,
+      default: () => []
+    }
   });
 
   const isUpdate = ref(false);
@@ -99,12 +103,18 @@
       {
         field: 'userName',
         label: t('system.member.table.userName'),
-        component: 'Input',
-        componentProps: { disabled: unref(isUpdate) },
-        itemProps: getItemProp.value,
-        rules: unref(isUpdate)
-          ? []
-          : [{ required: true, validator: checkUserName, trigger: 'blur' }],
+        component: 'Select',
+        componentProps: {
+          disabled: unref(isUpdate),
+          options: props.userOptions,
+          fieldNames: { label: 'username', value: 'username' },
+          showSearch: true,
+          optionFilterGroup: "username",
+        },
+        //itemProps: getItemProp.value,
+        // rules: unref(isUpdate)
+        //   ? []
+        //   : [{ required: true, validator: checkUserName, trigger: 'blur' }],
       },
       {
         field: 'roleId',

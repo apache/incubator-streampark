@@ -66,7 +66,7 @@
 <script setup lang="ts" name="member">
   import { computed, defineComponent, onMounted, ref, unref } from 'vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { RoleListItem } from '/@/api/base/model/systemModel';
+  import { RoleListItem, UserListItem } from '/@/api/base/model/systemModel';
   import { useGo } from '/@/hooks/web/usePage';
   import { BasicTable, useTable, TableAction, FormProps } from '/@/components/Table';
   import MemberDrawer from './MemberDrawer.vue';
@@ -74,10 +74,11 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { getRoleListByPage } from '/@/api/base/system';
-  import { fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
+  import { fetchCandidateUsers, fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
   import Icon from '/@/components/Icon';
 
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
+  const userListOptions = ref<Array<Partial<UserListItem>>>([]);
 
   const [registerDrawer, { openDrawer }] = useDrawer();
   const { createMessage } = useMessage();
@@ -175,6 +176,8 @@
       reload();
       const roleList = await getRoleListByPage({ page: 1, pageSize: 9999 });
       roleListOptions.value = roleList?.records;
+      const userList = await fetchCandidateUsers({ page: 1, pageSize: 9999, teamId: userStore.getTeamId})
+      userListOptions.value = userList?.records;
     }
   });
 </script>
