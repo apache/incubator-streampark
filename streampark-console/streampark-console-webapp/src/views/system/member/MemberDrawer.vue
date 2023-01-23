@@ -25,23 +25,25 @@
 </template>
 
 <script lang="ts">
+  import { defineComponent } from 'vue';
+
   export default defineComponent({
     name: 'MemberDrawer',
   });
 </script>
 
 <script setup lang="ts" name="MemberDrawer">
-  import { defineComponent, ref, computed, unref } from 'vue';
+  import { ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { RoleListItem, UserListItem } from '/@/api/base/model/systemModel';
+  import { RoleListItem } from '/@/api/base/model/systemModel';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RuleObject } from 'ant-design-vue/lib/form';
   import { StoreValue } from 'ant-design-vue/lib/form/interface';
-  import { fetchAddMember, fetchCheckUserName, fetchUpdateMember } from '/@/api/system/member';
+  import { fetchAddMember, fetchCandidateUsers, fetchCheckUserName, fetchUpdateMember } from "/@/api/system/member";
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
 
   const { t } = useI18n();
@@ -53,10 +55,6 @@
     roleOptions: {
       type: Array as PropType<Array<Partial<RoleListItem>>>,
       default: () => [],
-    },
-    userOptions: {
-      type: Array as PropType<Array<Partial<UserListItem>>>,
-      default: () => []
     }
   });
 
@@ -103,11 +101,14 @@
       {
         field: 'userName',
         label: t('system.member.table.userName'),
-        component: 'Select',
+        component: 'ApiSelect',
         componentProps: {
           disabled: unref(isUpdate),
-          options: props.userOptions,
-          fieldNames: { label: 'username', value: 'username' },
+          api: fetchCandidateUsers,
+          params: { page: 1, pageSize: 9999, teamId: userStore.getTeamId},
+          resultField: 'records',
+          labelField: 'username',
+          valueField: 'username',
           showSearch: true,
           optionFilterGroup: "username",
         },
