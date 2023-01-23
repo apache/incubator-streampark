@@ -33,7 +33,7 @@
 </script>
 
 <script setup lang="ts" name="MemberDrawer">
-  import { ref, computed, unref } from 'vue';
+  import { defineComponent, ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
@@ -43,7 +43,7 @@
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RuleObject } from 'ant-design-vue/lib/form';
   import { StoreValue } from 'ant-design-vue/lib/form/interface';
-  import { fetchAddMember, fetchCandidateUsers, fetchCheckUserName, fetchUpdateMember } from "/@/api/system/member";
+  import { fetchAddMember, fetchCandidateUsers, fetchCheckUserName, fetchUpdateMember } from '/@/api/system/member';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
 
   const { t } = useI18n();
@@ -55,7 +55,7 @@
     roleOptions: {
       type: Array as PropType<Array<Partial<RoleListItem>>>,
       default: () => [],
-    }
+    },
   });
 
   const isUpdate = ref(false);
@@ -105,8 +105,7 @@
         componentProps: {
           disabled: unref(isUpdate),
           api: fetchCandidateUsers,
-          params: { page: 1, pageSize: 9999, teamId: userStore.getTeamId},
-          resultField: 'records',
+          params: { teamId: userStore.getTeamId},
           labelField: 'username',
           valueField: 'username',
           showSearch: true,

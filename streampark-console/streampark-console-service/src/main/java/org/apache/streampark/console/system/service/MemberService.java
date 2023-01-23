@@ -37,7 +37,7 @@ public interface MemberService extends IService<Member> {
 
   IPage<Member> findUsers(Member member, RestRequest request);
 
-  IPage<User> findCandidateUsers(Long teamId, RestRequest request);
+  List<User> findCandidateUsers(Long teamId);
 
   List<Team> findUserTeams(Long userId);
 

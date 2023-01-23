@@ -55,8 +55,8 @@ public class MemberController {
   }
 
   @PostMapping("candidateUsers")
-  public RestResponse candidateUsers(RestRequest restRequest, Long teamId) {
-    IPage<User> userList = memberService.findCandidateUsers(teamId, restRequest);
+  public RestResponse candidateUsers(Long teamId) {
+    List<User> userList = memberService.findCandidateUsers(teamId);
     return RestResponse.success(userList);
   }
 
