@@ -25,6 +25,8 @@
 </template>
 
 <script lang="ts">
+  import { defineComponent } from 'vue';
+
   export default defineComponent({
     name: 'MemberDrawer',
   });
@@ -41,7 +43,7 @@
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RuleObject } from 'ant-design-vue/lib/form';
   import { StoreValue } from 'ant-design-vue/lib/form/interface';
-  import { fetchAddMember, fetchCheckUserName, fetchUpdateMember } from '/@/api/system/member';
+  import { fetchAddMember, fetchCandidateUsers, fetchCheckUserName, fetchUpdateMember } from '/@/api/system/member';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
 
   const { t } = useI18n();
@@ -99,8 +101,16 @@
       {
         field: 'userName',
         label: t('system.member.table.userName'),
-        component: 'Input',
-        componentProps: { disabled: unref(isUpdate) },
+        component: 'ApiSelect',
+        componentProps: {
+          disabled: unref(isUpdate),
+          api: fetchCandidateUsers,
+          params: { teamId: userStore.getTeamId},
+          labelField: 'username',
+          valueField: 'username',
+          showSearch: true,
+          optionFilterGroup: "username",
+        },
         itemProps: getItemProp.value,
         rules: unref(isUpdate)
           ? []
