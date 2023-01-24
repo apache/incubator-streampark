@@ -136,8 +136,7 @@
         getList({
           ...queryParams,
           pageNum: pageInfo.currentPage,
-          pageSize: pageInfo.pageSize,
-          teamId: userStore.getTeamId,
+          pageSize: pageInfo.pageSize
         }).then((res) => {
           loading.value = false;
           pageInfo.total = Number(res.total);
@@ -164,7 +163,7 @@
       function handleViewLog(value: Recordable) {
         openLogModal(true, { project: value });
       }
-      // teamid update
+      // teamId update
       watch(
         () => userStore.getTeamId,
         (val) => {

@@ -105,7 +105,6 @@
         componentProps: {
           disabled: unref(isUpdate),
           api: fetchCandidateUsers,
-          params: { teamId: userStore.getTeamId},
           labelField: 'username',
           valueField: 'username',
           showSearch: true,
@@ -171,7 +170,7 @@
       setDrawerProps({ confirmLoading: true });
       await (isUpdate.value
         ? fetchUpdateMember({ ...editParams, ...values })
-        : fetchAddMember({ teamId: userStore.getTeamId, ...values }));
+        : fetchAddMember({ ...values }));
       closeDrawer();
       emit('success', isUpdate.value);
     } catch (e) {
