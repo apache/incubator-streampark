@@ -51,7 +51,6 @@ export function fetchMemberList(data: BasicTableParams): Promise<MemberListRecor
 
 /**
  * add member
- * @param {String} teamId organization id
  * @param {String} userName username
  * @param {Number} roleId role id
  * @returns {Promise<boolean>}

@@ -17,7 +17,7 @@
 <template>
   <a-list :class="prefixCls" bordered :pagination="getPagination">
     <template v-for="item in getData" :key="item.id">
-      <a-list-item class="list-item" @click="handleNoticyClick(item)">
+      <a-list-item class="list-item" @click="handleNotifyClick(item)">
         <template #extra>
           <delete-outlined
             v-if="item.readed === 0"
@@ -81,7 +81,7 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { List, Avatar, Tag, Typography } from 'ant-design-vue';
   import { isNumber } from '/@/utils/is';
-  import { NoticyItem } from '/@/api/system/model/notifyModel';
+  import { NotifyItem } from '/@/api/system/model/notifyModel';
   export default defineComponent({
     components: {
       [Avatar.name]: Avatar,
@@ -95,10 +95,10 @@
     },
     props: {
       list: {
-        type: Array as PropType<NoticyItem[]>,
+        type: Array as PropType<NotifyItem[]>,
         default: () => [],
       },
-      noticyType: {
+      notifyType: {
         type: Number,
         default: 1,
       },
@@ -118,10 +118,10 @@
         type: Number,
         default: 2,
       },
-      onNoticyClick: {
+      onNotifyClick: {
         type: Function as PropType<(Recordable) => void>,
       },
-      onNoticyDel: {
+      onNotifyDel: {
         type: Function as PropType<(Recordable) => void>,
       },
     },
@@ -159,18 +159,18 @@
         }
       });
 
-      function handleNoticyClick(item: NoticyItem) {
-        props.onNoticyClick && props.onNoticyClick(item);
+      function handleNotifyClick(item: NotifyItem) {
+        props.onNotifyClick && props.onNotifyClick(item);
       }
       /* delete */
-      async function handleDelete(item: NoticyItem) {
-        props.onNoticyClick && props.onNoticyClick(item);
+      async function handleDelete(item: NotifyItem) {
+        props.onNotifyClick && props.onNotifyClick(item);
       }
       return {
         prefixCls,
         getPagination,
         getData,
-        handleNoticyClick,
+        handleNotifyClick,
         handleDelete,
       };
     },

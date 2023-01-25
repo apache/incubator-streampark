@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface NoticyList {
-  records: NoticyItem[];
+export interface NotifyList {
+  records: NotifyItem[];
   total: string;
 }
-export interface NoticyItem {
+export interface NotifyItem {
   id: string;
   appId: string;
   userId: string;

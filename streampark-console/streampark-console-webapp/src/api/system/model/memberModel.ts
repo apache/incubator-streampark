@@ -29,14 +29,8 @@ export interface MemberListRecord {
   createTimeTo?: string;
 }
 export interface AddMemberParams {
-  teamId: string;
   userName: string;
   roleId: number;
-}
-
-export interface TeamMemberResp {
-  id: string;
-  teamName: string;
 }
 
 export interface UpdateMemberParams extends AddMemberParams {
