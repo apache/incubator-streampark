@@ -43,7 +43,12 @@
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RuleObject } from 'ant-design-vue/lib/form';
   import { StoreValue } from 'ant-design-vue/lib/form/interface';
-  import { fetchAddMember, fetchCandidateUsers, fetchCheckUserName, fetchUpdateMember } from '/@/api/system/member';
+  import {
+    fetchAddMember,
+    fetchCandidateUsers,
+    fetchCheckUserName,
+    fetchUpdateMember,
+  } from '/@/api/system/member';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
 
   const { t } = useI18n();
@@ -108,7 +113,7 @@
           labelField: 'username',
           valueField: 'username',
           showSearch: true,
-          optionFilterGroup: "username",
+          optionFilterGroup: 'username',
         },
         itemProps: getItemProp.value,
         rules: unref(isUpdate)

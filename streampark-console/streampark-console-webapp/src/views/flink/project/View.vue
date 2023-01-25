@@ -136,7 +136,7 @@
         getList({
           ...queryParams,
           pageNum: pageInfo.currentPage,
-          pageSize: pageInfo.pageSize
+          pageSize: pageInfo.pageSize,
         }).then((res) => {
           loading.value = false;
           pageInfo.total = Number(res.total);
