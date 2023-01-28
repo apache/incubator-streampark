@@ -212,4 +212,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       Utils.close(kubeClient)
     }
   }
+
+  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+    super.doTriggerSavepoint(request, flinkConfig)
+  }
 }

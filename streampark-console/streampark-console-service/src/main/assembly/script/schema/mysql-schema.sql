@@ -212,7 +212,7 @@ create table `t_flink_savepoint` (
   `app_id` bigint not null,
   `chk_id` bigint default null,
   `type` tinyint default null,
-  `path` varchar(255) collate utf8mb4_general_ci default null,
+  `path` varchar(1024) collate utf8mb4_general_ci default null,
   `latest` tinyint not null default 1,
   `trigger_time` datetime default null,
   `create_time` datetime not null default current_timestamp comment 'create time',

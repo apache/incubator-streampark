@@ -29,7 +29,7 @@ import org.apache.flink.configuration._
 
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.FlinkSubmitTrait
-import org.apache.streampark.flink.client.bean.{CancelRequest, CancelResponse, SubmitRequest, SubmitResponse}
+import org.apache.streampark.flink.client.bean.{CancelRequest, CancelResponse, TriggerSavepointRequest, SavepointRequestTrait, SavepointResponse, SubmitRequest, SubmitResponse}
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 
 /**
@@ -49,34 +49,46 @@ object RemoteSubmit extends FlinkSubmitTrait {
 
   }
 
-  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
-    flinkConfig
-      .safeSet(DeploymentOptions.TARGET, cancelRequest.executionMode.getName)
-      .safeSet(RestOptions.ADDRESS, cancelRequest.properties.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet[JavaInt](RestOptions.PORT, cancelRequest.properties.get(RestOptions.PORT.key()).toString.toInt)
-    logInfo(
-      s"""
-         |------------------------------------------------------------------
-         |Effective submit configuration: $flinkConfig
-         |------------------------------------------------------------------
-         |""".stripMargin)
+  override def doCancel(request: CancelRequest, flinkConfig: Configuration): CancelResponse = {
+    executeClientAction(request, flinkConfig, (jobID, clusterClient) => {
+      CancelResponse(super.cancelJob(request, jobID, clusterClient))
+    })
+  }
 
-    val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
+  private[this] def executeClientAction[O, R <: SavepointRequestTrait](request: R,
+                              flinkConfig: Configuration,
+                              actFunc: (JobID, ClusterClient[_]) => O): O = {
     var client: ClusterClient[StandaloneClusterId] = null
+    var standAloneDescriptor: (StandaloneClusterId, StandaloneClusterDescriptor) = null
     try {
+      flinkConfig
+        .safeSet(DeploymentOptions.TARGET, request.executionMode.getName)
+        .safeSet(RestOptions.ADDRESS, request.properties.get(RestOptions.ADDRESS.key()).toString)
+        .safeSet[JavaInt](RestOptions.PORT, request.properties.get(RestOptions.PORT.key()).toString.toInt)
+      logInfo(
+        s"""
+           |------------------------------------------------------------------
+           |Effective submit configuration: $flinkConfig
+           |------------------------------------------------------------------
+           |""".stripMargin)
+      standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
       client = standAloneDescriptor._2.retrieve(standAloneDescriptor._1).getClusterClient
-      val jobID = JobID.fromHexString(cancelRequest.jobId)
-      val actionResult = super.cancelJob(cancelRequest, jobID, client)
-      CancelResponse(actionResult)
+      actFunc(JobID.fromHexString(request.jobId), client)
     } catch {
       case e: Exception =>
-        logError(s"stop flink standalone job fail")
+        logError(s"Do ${request.getClass.getSimpleName} for flink standalone job fail")
         e.printStackTrace()
         throw e
     } finally {
       if (client != null) client.close()
       if (standAloneDescriptor != null) standAloneDescriptor._2.close()
     }
+  }
+
+  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
+    executeClientAction(request, flinkConfig, (jobID, clusterClient) => {
+      SavepointResponse(super.triggerSavepoint(request, jobID, clusterClient))
+    })
   }
 
   /**

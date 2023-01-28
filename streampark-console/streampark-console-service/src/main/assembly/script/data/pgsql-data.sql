@@ -113,6 +113,7 @@ insert into "public"."t_menu" values (100066, 100015, 'view', null, null, 'app:v
 insert into "public"."t_menu" values (100067, 100053, 'view', NULL, NULL, 'variable:view', NULL, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (100068, 100033, 'view', null, null, 'setting:view', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (100069, 100053, 'depend view', null, null, 'variable:depend_apps', null, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (100070, 100015, 'savepoint trigger', null, null, 'savepoint:trigger', null, '1', '1', null, now(), now());
 
 -- ----------------------------
 -- Records of t_role

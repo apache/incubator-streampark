@@ -146,7 +146,7 @@ public class FlinkK8sChangeEventListener {
     CheckPoints checkPoint = new CheckPoints();
     checkPoint.setLatest(latest);
 
-    checkpointProcessor.process(event.trackId().appId(), checkPoint);
+    checkpointProcessor.process(event.trackId().appId(), event.trackId().jobId(), checkPoint);
   }
 
   private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {

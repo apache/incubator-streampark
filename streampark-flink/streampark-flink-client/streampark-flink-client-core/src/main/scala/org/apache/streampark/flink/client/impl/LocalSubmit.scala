@@ -65,6 +65,10 @@ object LocalSubmit extends FlinkSubmitTrait {
     }
   }
 
+  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
+    RemoteSubmit.doTriggerSavepoint(request, flinkConfig)
+  }
+
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     RemoteSubmit.doCancel(cancelRequest, flinkConfig)
   }

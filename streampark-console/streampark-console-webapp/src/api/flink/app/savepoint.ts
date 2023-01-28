@@ -20,6 +20,7 @@ enum SAVE_POINT_API {
   LATEST = '/flink/savepoint/latest',
   HISTORY = '/flink/savepoint/history',
   DELETE = '/flink/savepoint/delete',
+  TRIGGER = '/flink/savepoint/trigger',
 }
 
 export function fetchLatest(data: Recordable) {
@@ -38,4 +39,12 @@ export function fetchRemoveSavePoint(data: { id: string }): Promise<boolean> {
     url: SAVE_POINT_API.DELETE,
     data,
   });
+}
+
+/**
+ * Trigger a savepoint manually.
+ * @param data app id & optional savepoint path.
+ */
+export function trigger(data: { appId: string | number,  savepointPath: string | null}) {
+  return defHttp.post({ url: SAVE_POINT_API.TRIGGER, data });
 }

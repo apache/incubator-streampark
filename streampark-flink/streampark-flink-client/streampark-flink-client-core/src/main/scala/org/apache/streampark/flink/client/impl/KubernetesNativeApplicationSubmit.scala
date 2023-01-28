@@ -88,4 +88,8 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     super.doCancel(cancelRequest, flinkConfig)
   }
 
+  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConf: Configuration): SavepointResponse = {
+    flinkConf.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+    super.doTriggerSavepoint(request, flinkConf)
+  }
 }

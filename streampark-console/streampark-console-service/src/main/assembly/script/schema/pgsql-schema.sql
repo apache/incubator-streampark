@@ -453,7 +453,7 @@ create table "public"."t_flink_savepoint" (
   "app_id" int8 not null,
   "chk_id" int8,
   "type" int2,
-  "path" varchar(255) collate "pg_catalog"."default",
+  "path" varchar(1024) collate "pg_catalog"."default",
   "latest" boolean not null default true,
   "trigger_time" timestamp(6),
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)

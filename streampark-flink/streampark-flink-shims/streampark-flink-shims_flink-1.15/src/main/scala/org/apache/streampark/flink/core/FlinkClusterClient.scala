@@ -24,6 +24,10 @@ import org.apache.flink.core.execution.SavepointFormatType
 
 class FlinkClusterClient[T](clusterClient: ClusterClient[T]) extends FlinkClientTrait[T](clusterClient) {
 
+  override def triggerSavepoint(jobID: JobID, savepointDir: String): CompletableFuture[String] = {
+    clusterClient.triggerSavepoint(jobID, savepointDir, SavepointFormatType.DEFAULT)
+  }
+
   override def cancelWithSavepoint(jobID: JobID, savepointDirectory: String): CompletableFuture[String] = {
     clusterClient.cancelWithSavepoint(jobID, savepointDirectory, SavepointFormatType.DEFAULT)
   }

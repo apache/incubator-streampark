@@ -36,6 +36,19 @@ object FlinkClientHandler {
     }
   }
 
+  def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {
+    savepointRequest.executionMode match {
+      case ExecutionMode.LOCAL => LocalSubmit.triggerSavepoint(savepointRequest)
+      case ExecutionMode.REMOTE => RemoteSubmit.triggerSavepoint(savepointRequest)
+      case ExecutionMode.YARN_APPLICATION => YarnApplicationSubmit.triggerSavepoint(savepointRequest)
+      case ExecutionMode.YARN_SESSION => YarnSessionSubmit.triggerSavepoint(savepointRequest)
+      case ExecutionMode.YARN_PER_JOB | ExecutionMode.YARN_SESSION => YarnPerJobSubmit.triggerSavepoint(savepointRequest)
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.triggerSavepoint(savepointRequest)
+      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.triggerSavepoint(savepointRequest)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${savepointRequest.executionMode} Submit ")
+    }
+  }
+
   def cancel(cancelRequest: CancelRequest): CancelResponse = {
     cancelRequest.executionMode match {
       case ExecutionMode.LOCAL => LocalSubmit.cancel(cancelRequest)

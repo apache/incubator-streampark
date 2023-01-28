@@ -36,6 +36,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     starting: new Map(),
     stopping: new Map(),
     launch: new Map(),
+    savepointing: new Map(),
   };
 
   /* check */

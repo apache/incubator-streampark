@@ -190,7 +190,7 @@ create table if not exists `t_flink_savepoint` (
   `app_id` bigint not null,
   `chk_id` bigint default null,
   `type` tinyint default null,
-  `path` varchar(255)  default null,
+  `path` varchar(1024)  default null,
   `latest` tinyint not null default 1,
   `trigger_time` datetime default null,
   `create_time` datetime not null default current_timestamp comment 'create time',
