@@ -114,10 +114,6 @@
       }
     }
 
-    .form-title {
-      font-family: Poppins, sans-serif !important;
-    }
-
     .text-left {
       .ant-btn {
         padding: 0px;
