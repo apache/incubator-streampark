@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.service;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
+import org.apache.streampark.console.system.entity.User;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -35,6 +36,8 @@ public interface MemberService extends IService<Member> {
   void deleteByTeamId(Long teamId);
 
   IPage<Member> findUsers(Member member, RestRequest request);
+
+  List<User> findCandidateUsers(Long teamId);
 
   List<Team> findUserTeams(Long userId);
 

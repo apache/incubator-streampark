@@ -21,16 +21,10 @@ import { BasicTableParams } from '../model/baseModel';
 import { TeamListRecord, TeamParam } from './model/teamModel';
 
 enum Api {
-  TeamListByUser = '/team/listByUser',
   POST = '/team/post',
   UPDATE = '/team/update',
   LIST = '/team/list',
-  CHECK_NAME = '/team/check/name',
   DELETE = '/team/delete',
-}
-
-export function getTeamListByUser(params?) {
-  return defHttp.post({ url: Api.TeamListByUser, params });
 }
 
 /**
@@ -60,8 +54,8 @@ export function fetchTeamUpdate(data: TeamParam): Promise<boolean | undefined> {
 }
 /**
  * delete organization
- * @param {String} id organization id
  * @returns {Promise<AxiosResponse<Result>>}
+ * @param params
  */
 export function fetchTeamDelete(params: { id: string }): Promise<AxiosResponse<Result>> {
   return defHttp.delete(

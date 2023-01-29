@@ -83,6 +83,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
+  public List<User> findCandidateUsers(Long teamId) {
+    return baseMapper.findUsersNotInTeam(teamId);
+  }
+
+  @Override
   public List<Team> findUserTeams(Long userId) {
     return teamService.findUserTeams(userId);
   }

@@ -20,25 +20,25 @@
       title=""
       trigger="click"
       :overlayClassName="`${prefixCls}__overlay`"
-      v-model:visible="noticyVisible"
+      v-model:visible="notifyVisible"
     >
       <Badge :count="count" :numberStyle="numberStyle" :offset="[-5, 10]">
         <BellOutlined />
       </Badge>
       <template #content>
-        <Tabs v-model:activeKey="noticyType">
+        <Tabs v-model:activeKey="notifyType">
           <template v-for="item in listData" :key="item.key">
             <TabPane>
               <template #tab>
                 {{ item.name }}
                 <span v-if="item.list.length !== 0">({{ item.list.length }})</span>
               </template>
-              <Spin :spinning="noticyLoading">
+              <Spin :spinning="notifyLoading">
                 <NoticeList
-                  :noticyType="item.key"
+                  :notifyType="item.key"
                   :list="item.list"
-                  @noticy-reload="getNoticyList"
-                  @noticy-click="handleNoticyInfo"
+                  @notify-reload="getNotifyList"
+                  @notify-click="handleNotifyInfo"
                 />
               </Spin>
             </TabPane>
@@ -56,7 +56,7 @@
   import NoticeList from './NoticeList.vue';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { fetchNotify, fetchNotifyDelete } from '/@/api/system/notify';
-  import { NoticyItem } from '/@/api/system/model/notifyModel';
+  import { NotifyItem } from '/@/api/system/model/notifyModel';
   import { useWebSocket } from '@vueuse/core';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -66,24 +66,24 @@
   export interface TabItem {
     key: number;
     name: string;
-    list: NoticyItem[];
+    list: NotifyItem[];
   }
 
   export default defineComponent({
-    name: 'Noticy',
+    name: 'Notify',
     components: { Popover, BellOutlined, Tabs, TabPane: Tabs.TabPane, Badge, NoticeList, Spin },
     setup() {
       const { prefixCls } = useDesign('header-notify');
       const userStore = useUserStoreWithOut();
       const { createMessage, createConfirm } = useMessage();
-      const noticyType = ref(1);
+      const notifyType = ref(1);
       const currentPage = ref(1);
-      const noticyVisible = ref(false);
+      const notifyVisible = ref(false);
       const listData = ref<TabItem[]>([
         { key: 1, name: t('routes.basic.notice.exception'), list: [] },
         { key: 2, name: t('routes.basic.notice.message'), list: [] },
       ]);
-      const noticyLoading = ref(false);
+      const notifyLoading = ref(false);
       const count = computed(() => {
         let count = 0;
         for (let i = 0; i < unref(listData).length; i++) {
@@ -92,10 +92,10 @@
         return count;
       });
       /* View notification messages */
-      async function handleNoticyInfo(record: NoticyItem) {
-        noticyVisible.value = false;
+      async function handleNotifyInfo(record: NotifyItem) {
+        notifyVisible.value = false;
         createConfirm({
-          iconType: unref(noticyType) == 1 ? 'error' : 'info',
+          iconType: unref(notifyType) == 1 ? 'error' : 'info',
           title: record.title,
           content: h('div', {}, record.context),
           okText: t('common.delText'),
@@ -107,29 +107,29 @@
       /* delete */
       async function handleDelete(id: string) {
         try {
-          noticyLoading.value = true;
+          notifyLoading.value = true;
           await fetchNotifyDelete(id);
-          getNoticyList(unref(noticyType));
+          getNotifyList(unref(notifyType));
         } catch (error) {
           console.error(error);
         } finally {
-          noticyLoading.value = false;
+          notifyLoading.value = false;
         }
       }
       /* Get a list of notifications */
-      async function getNoticyList(type: number) {
+      async function getNotifyList(type: number) {
         try {
-          noticyLoading.value = true;
+          notifyLoading.value = true;
           const res = await fetchNotify({ type, pageNum: 1, pageSize: 40 });
-          handleNoticyMessage(type, res.records);
+          handleNotifyMessage(type, res.records);
         } catch (error) {
           console.error(error);
         } finally {
-          noticyLoading.value = false;
+          notifyLoading.value = false;
         }
       }
       /* Process notification message data */
-      function handleNoticyMessage(type: number, data: NoticyItem[]) {
+      function handleNotifyMessage(type: number, data: NotifyItem[]) {
         /* The abnormal alarm */
         if (type === 1) {
           listData.value[0].list = [...data];
@@ -150,33 +150,33 @@
           },
         },
       });
-      watch([data, currentPage], ([newData]: [NoticyItem], [newPage]) => {
+      watch([data, currentPage], ([newData]: [NotifyItem], [newPage]) => {
         if (newData && isObject(newData)) {
           /* The abnormal alarm */
-          if (unref(noticyType) === 1) {
+          if (unref(notifyType) === 1) {
             listData.value[0].list.push(newData);
           } else {
             listData.value[1].list.push(newData);
           }
-          handleNoticyInfo(newData);
+          handleNotifyInfo(newData);
         }
         if (newPage) {
-          getNoticyList(unref(noticyType));
+          getNotifyList(unref(notifyType));
         }
       });
-      getNoticyList(1);
-      getNoticyList(2);
+      getNotifyList(1);
+      getNotifyList(2);
       return {
         prefixCls,
         listData,
-        noticyType,
+        notifyType,
         count,
-        handleNoticyInfo,
-        noticyVisible,
+        handleNotifyInfo,
+        notifyVisible,
         currentPage,
         numberStyle: {},
-        noticyLoading,
-        getNoticyList,
+        notifyLoading,
+        getNotifyList,
         handleDelete,
       };
     },

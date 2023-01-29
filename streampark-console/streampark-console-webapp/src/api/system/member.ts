@@ -19,6 +19,7 @@ import { defHttp } from '/@/utils/http/axios';
 import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
 import { AddMemberParams, MemberListRecord, UpdateMemberParams } from './model/memberModel';
+import { UserListItem } from '/@/api/base/model/systemModel';
 
 enum MEMBER_API {
   POST = '/member/post',
@@ -27,7 +28,20 @@ enum MEMBER_API {
   TEAMS = '/member/teams',
   CHECK_NAME = '/user/check/name',
   DELETE = '/member/delete',
+  CANDIDATE_USERS = '/member/candidateUsers',
 }
+
+/**
+ * get candidate users add to the target team
+ * @param params
+ * @returns
+ */
+export function fetchCandidateUsers(params?: {
+  teamId: string | number;
+}): Promise<Array<UserListItem>> {
+  return defHttp.post({ url: MEMBER_API.CANDIDATE_USERS, params });
+}
+
 /**
  * get member list
  * @param params
@@ -39,7 +53,6 @@ export function fetchMemberList(data: BasicTableParams): Promise<MemberListRecor
 
 /**
  * add member
- * @param {String} teamId organization id
  * @param {String} userName username
  * @param {Number} roleId role id
  * @returns {Promise<boolean>}
