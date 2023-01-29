@@ -100,6 +100,7 @@
         componentProps: {
           options: props.roleOptions,
           fieldNames: { label: 'roleName', value: 'roleId' },
+          placeholder: t('system.member.roleRequire'),
         },
         rules: [{ required: true, message: t('system.member.roleRequire') }],
       },
