@@ -141,7 +141,6 @@
               });
             }
             mvnPom.exclusions = pomExclusion;
-            console.log(mvnPom)
             dependency.pom[id] = mvnPom;
           }
         } else {
@@ -228,8 +227,9 @@
   }
   function handleRemovePom(pom: Recordable) {
     console.log(pom)
-    console.log(dependency.pom)
     const id = pom.classifier != null ? pom.groupId + '_' + pom.artifactId + '_' + pom.classifier : pom.groupId + '_' + pom.artifactId;
+    console.log(id)
+    console.log(dependency)
     delete dependency.pom[id];
     handleUpdateDependency();
   }
@@ -244,7 +244,7 @@
     dependencyRecords.value = dataSource.pom || [];
     uploadJars.value = dataSource.jar || [];
     dataSource.pom?.map((pomRecord: DependencyType) => {
-      const id = pomRecord.groupId + '_' + pomRecord.artifactId;
+      const id = pomRecord.classifier != null ? pomRecord.groupId + '_' + pomRecord.artifactId + '_' + pomRecord.classifier : pomRecord.groupId + '_' + pomRecord.artifactId;
       dependency.pom[id] = pomRecord;
     });
     dataSource.jar?.map((fileName: string) => {
@@ -323,9 +323,19 @@
       @click="handleEditPom(dept)"
     >
       <template #message>
-        <Space @click="handleEditPom(dept)" class="tag-dependency-pom">
+        <Space @click="handleEditPom(dept)" class="tag-dependency-pom" v-if="dept.classifier">
           <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
-          {{ dept.artifactId }}-{{ dept.version }}.jar
+            {{ dept.artifactId }}-{{ dept.version }}-{{ dept.classifier }}.jar
+          <Icon
+            :size="12"
+            icon="ant-design:close-outlined"
+            class="icon-close cursor-pointer"
+            @click.stop="handleRemovePom(dept)"
+          />
+        </Space>
+        <Space @click="handleEditPom(dept)" class="tag-dependency-pom" v-else>
+          <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
+            {{ dept.artifactId }}-{{ dept.version }}.jar
           <Icon
             :size="12"
             icon="ant-design:close-outlined"
