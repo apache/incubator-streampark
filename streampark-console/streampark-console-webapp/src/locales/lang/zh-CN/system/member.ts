@@ -29,11 +29,6 @@ export default {
     createTime: '创建时间',
     modifyTime: '修改时间',
   },
-  checkUserName: {
-    maxLen: '用户名不应超过 20 个字符',
-    minLen: '用户名不应少于 4 个字符',
-    noExist: '抱歉，用户名不存在',
-    empty: '用户名不能为空',
-  },
+  userNameRequire: '请选择用户',
   roleRequire: '请选择角色',
 };

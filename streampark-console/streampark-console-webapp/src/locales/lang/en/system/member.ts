@@ -29,11 +29,6 @@ export default {
     createTime: 'Create Time',
     modifyTime: 'Modify Time',
   },
-  checkUserName: {
-    maxLen: 'User name should not be longer than 20 characters',
-    minLen: 'User name should not be less than 4 characters',
-    noExist: "Sorry, the user name doesn't exists",
-    empty: 'User name cannot be empty',
-  },
+  userNameRequire: 'please select a user name',
   roleRequire: 'please select role',
 };
