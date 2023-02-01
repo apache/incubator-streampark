@@ -359,7 +359,7 @@ start() {
   -Xloggc:${APP_HOME}/logs/gc.log
   """
 
-  eval $NOHUP "\"$_RUNJAVA\"" "$JAVA_OPTS" \
+  eval $NOHUP "\"$_RUNJAVA\"" $JAVA_OPTS \
     -classpath "\"$APP_CLASSPATH\"" \
     -Dapp.home="\"${APP_HOME}\"" \
     -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
