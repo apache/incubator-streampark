@@ -581,7 +581,7 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://mvnrepository.com/artifact/org.wildfly.client/wildfly-client-config/1.0.1.Final Apache-2.0
     https://mvnrepository.com/artifact/org.wildfly.common/wildfly-common/1.5.4.Final Apache-2.0
     https://mvnrepository.com/artifact/org.javassist/javassist/3.24.0-GA Apache-2.0
-    https://github.com/apache/maven-wrapper Apache-2.0
+    https://maven.apache.org/wrapper Apache-2.0
     https://github.com/less/less.js Apache-2.0
 
 

@@ -208,14 +208,6 @@ else
   fi
 fi
 
-#check java exists.
-$RUNJAVA >/dev/null 2>&1
-
-if [[ $? -ne 1 ]];then
-  echo_r "ERROR: java is not install,please install java first!"
-  exit 1;
-fi
-
 # Add on extra jar files to CLASSPATH
 # shellcheck disable=SC2236
 if [[ ! -z "$CLASSPATH" ]] ; then
@@ -351,7 +343,7 @@ start() {
   PARAM_CLI="org.apache.streampark.flink.core.conf.ParameterCli"
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
-  vmOption=`$RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
+  vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
 
   JAVA_OPTS="""
   $vmOption
@@ -367,7 +359,7 @@ start() {
   -Xloggc:${APP_HOME}/logs/gc.log
   """
 
-  eval $NOHUP "\"$RUNJAVA\"" $JAVA_OPTS \
+  eval $NOHUP "\"$_RUNJAVA\"" "$JAVA_OPTS" \
     -classpath "\"$APP_CLASSPATH\"" \
     -Dapp.home="\"${APP_HOME}\"" \
     -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
