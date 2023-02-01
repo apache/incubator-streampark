@@ -24,75 +24,6 @@ import scala.collection.mutable
 
 object FileUtils extends org.apache.commons.io.FileUtils {
 
-  lazy val fileTypes: Map[String, String] = {
-    val maps = new util.HashMap[String, String]()
-    maps.put("FFD8FF", "jpg")
-    maps.put("89504E47", "png")
-    maps.put("47494638", "gif")
-    maps.put("49492A00227105008037", "tif")
-    maps.put("424D228C010000000000", "bmp")
-    maps.put("424D8240090000000000", "bmp")
-    maps.put("424D8E1B030000000000", "bmp")
-    maps.put("41433130313500000000", "dwg")
-
-    maps.put("68746D6C3E", "html")
-    maps.put("48544D4C207B0D0A0942", "css")
-    maps.put("696B2E71623D696B2E71", "js")
-    maps.put("7B5C727466315C616E73", "rtf")
-
-    maps.put("38425053000100000000", "psd")
-    maps.put("44656C69766572792D646174653A", "eml")
-    maps.put("D0CF11E0A1B11AE10000", "doc")
-
-    maps.put("D0CF11E0A1B11AE10000", "vsd")
-    maps.put("5374616E64617264204A", "mdb")
-    maps.put("252150532D41646F6265", "ps")
-    maps.put("255044462D312E", "pdf")
-    maps.put("75736167", "txt")
-
-    maps.put("2E524D46000000120001", "rmvb")
-    maps.put("464C5601050000000900", "flv")
-    maps.put("00000020667479706D70", "mp4")
-    maps.put("49443303000000002176", "mp3")
-    maps.put("000001B", "mpg")
-    maps.put("3026B2758E66CF11A6D9", "wmv")
-    maps.put("57415645", "wav")
-    maps.put("41564920", "avi")
-
-    maps.put("4D546864", "mid")
-    maps.put("504B0304", "zip")
-    maps.put("52617221", "rar")
-    maps.put("235468697320636F6E66", "ini")
-    maps.put("504B03040A000000", "jar")
-    maps.put("504B030414000808", "jar")
-    maps.put("4D5A9000030000000400", "exe")
-
-    maps.put("3C25402070616765206C", "jsp")
-    maps.put("4D616E69666573742D56", "mf")
-    maps.put("3C3F786D6C", "xml")
-    maps.put("494E5345525420494E54", "sql")
-    maps.put("7061636B616765207765", "java")
-    maps.put("406563686F206F66660D", "bat")
-    maps.put("1F8B0800000000000000", "gz")
-    maps.put("6C6F67346A2E726F6F74", "properties")
-    maps.put("CAFEBABE0000002E0041", "class")
-    maps.put("49545346030000006000", "chm")
-    maps.put("04000000010000001300", "mxp")
-    maps.put("504B0304140006000800", "docx")
-    maps.put("D0CF11E0A1B11AE10000", "wps")
-    maps.put("6431303A637265617465", "torrent")
-
-    maps.put("6D6F6F76", "mov")
-    maps.put("FF575043", "wpd")
-    maps.put("CFAD12FEC5FD746F", "dbx")
-    maps.put("2142444E", "pst")
-    maps.put("AC9EBD8F", "qdf")
-    maps.put("E3828596", "pwl")
-    maps.put("2E7261FD", "ram")
-    maps.put("2E524D46", "rm")
-    maps.toMap
-  }
-
   private[this] def bytesToHexString(src: Array[Byte]): String = {
     val stringBuilder = new mutable.StringBuilder
     if (src == null || src.length <= 0) return null
@@ -107,30 +38,28 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     stringBuilder.toString
   }
 
-  def getFileType(input: InputStream): String = {
+  def isJarFileType(input: InputStream): Boolean = {
     if (input == null) {
       throw new RuntimeException("The inputStream can not be null")
     }
-    var headerHex = Utils.tryWithResource(input) { in =>
+    val headerHex = Utils.tryWithResource(input) { in =>
       val b = new Array[Byte](8)
       in.read(b, 0, b.length)
       bytesToHexString(b)
     }
-    while (headerHex.length > 6) {
-      fileTypes.get(headerHex) match {
-        case Some(t) => return t
-        case None =>
-          headerHex = headerHex.dropRight(1)
-      }
-    }
-    null
+    val jarFileTypes: mutable.Seq[String] = mutable.Seq(
+      "504B03040A000000",
+      "504B03040A000008",
+      "504B030414000808"
+    )
+    jarFileTypes.contains(headerHex)
   }
 
-  def getFileType(file: File): String = {
+  def isJarFileType(file: File): Boolean = {
     if (!file.exists || !file.isFile) {
       throw new RuntimeException("The file does not exist or the path is a directory")
     }
-    getFileType(new FileInputStream(file))
+    isJarFileType(new FileInputStream(file))
   }
 
   def createTempDir(): File = {
