@@ -17,15 +17,15 @@
 package org.apache.streampark.common.util
 
 import java.io._
-import java.util.{HashMap => JavaMap, LinkedHashMap => JavaLinkedMap, Properties, Scanner}
+import java.util.{Properties, Scanner, HashMap => JavaMap, LinkedHashMap => JavaLinkedMap}
 import java.util.concurrent.atomic.AtomicInteger
-
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{Map => MutableMap}
-
 import com.typesafe.config.ConfigFactory
 import org.yaml.snakeyaml.Yaml
+
+import scala.collection.mutable
 
 object PropertiesUtils extends Logger {
 
@@ -34,7 +34,7 @@ object PropertiesUtils extends Logger {
     require(file.exists(), s"[StreamPark] readFile: file $file does not exist")
     require(file.isFile, s"[StreamPark] readFile: file $file is not a normal file")
     val scanner = new Scanner(file)
-    val buffer = new StringBuilder
+    val buffer = new mutable.StringBuilder
     while (scanner.hasNextLine) {
       buffer.append(scanner.nextLine()).append("\r\n")
     }
