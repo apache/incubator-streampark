@@ -114,6 +114,10 @@ insert into "public"."t_menu" values (100067, 100053, 'view', NULL, NULL, 'varia
 insert into "public"."t_menu" values (100068, 100033, 'view', null, null, 'setting:view', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (100069, 100053, 'depend view', null, null, 'variable:depend_apps', null, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (100070, 100015, 'savepoint trigger', null, null, 'savepoint:trigger', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (100071, 100033, 'link view', null, null, 'externalLink:view', null, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (100072, 100033, 'link create', null, null, 'externalLink:create', null, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (100073, 100033, 'link update', null, null, 'externalLink:update', null, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (100074, 100033, 'link delete', null, null, 'externalLink:delete', null, '1', '1', NULL, now(), now());
 
 -- ----------------------------
 -- Records of t_role
@@ -184,6 +188,10 @@ insert into "public"."t_role_menu" values (100057, 100001, 100069);
 insert into "public"."t_role_menu" values (100058, 100002, 100057);
 insert into "public"."t_role_menu" values (100059, 100002, 100058);
 insert into "public"."t_role_menu" values (100060, 100002, 100069);
+insert into "public"."t_role_menu" values (100061, 100002, 100071);
+insert into "public"."t_role_menu" values (100062, 100002, 100072);
+insert into "public"."t_role_menu" values (100063, 100002, 100073);
+insert into "public"."t_role_menu" values (100064, 100002, 100074);
 
 -- ----------------------------
 -- Records of t_setting
