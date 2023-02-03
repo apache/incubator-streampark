@@ -65,6 +65,7 @@ header:
 dependency:
   files:
     - pom.xml
+    - package.json
   licenses:
     - name: asm:asm
       license: BSD-2.0

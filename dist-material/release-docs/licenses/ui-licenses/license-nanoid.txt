@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2020 kazuya kawaguchi
+Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
