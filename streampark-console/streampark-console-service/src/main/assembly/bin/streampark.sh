@@ -357,6 +357,7 @@ start() {
   -XX:CMSInitiatingOccupancyFraction=70
   -XX:ThreadStackSize=512
   -Xloggc:${APP_HOME}/logs/gc.log
+  $DEBUG_OPTS
   """
 
   eval $NOHUP "\"$_RUNJAVA\"" $JAVA_OPTS \
@@ -394,6 +395,17 @@ start() {
    else
       echo_r "StreamPark start failed."
    fi
+}
+
+debug() {
+  if [ ! -n "$DEBUG_PORT" ]; then
+    echo_r "If start with debug mode,Please fill in the debug port like: bash streampark.sh debug 10002 "
+  else
+    DEBUG_OPTS="""
+    -Xdebug  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$DEBUG_PORT
+    """
+    start
+  fi
 }
 
 # shellcheck disable=SC2120
@@ -546,6 +558,10 @@ restart() {
 main() {
   print_logo
   case "$1" in
+    "debug")
+        DEBUG_PORT=$2
+        debug
+        ;;
     "start")
         start
         ;;
@@ -565,6 +581,7 @@ main() {
         echo_w "  start \$conf               Start StreamPark with application config."
         echo_w "  stop n -force             Stop StreamPark, wait up to n seconds and then use kill -KILL if still running"
         echo_w "  status                    StreamPark status"
+        echo_w "  debug                     StreamPark start with debug mode,start debug mode, like: bash streampark.sh debug 10002"
         echo_w "  restart \$conf             restart StreamPark with application config."
         exit 0
         ;;
