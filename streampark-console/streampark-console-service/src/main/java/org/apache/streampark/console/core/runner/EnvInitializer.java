@@ -70,8 +70,21 @@ public class EnvInitializer implements ApplicationRunner {
           "^streampark-flink-shims_flink-(1.12|1.13|1.14|1.15|1.16)_(2.11|2.12)-(.*).jar$",
           Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+  // We introduced it for https://github.com/apache/incubator-streampark/issues/2014
+  private boolean shouldSkip() {
+    // Use try ... catch to avoid NPE or AIOB.
+    try {
+      return "test".equals(context.getEnvironment().getActiveProfiles()[0]);
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
   @Override
   public void run(ApplicationArguments args) throws Exception {
+    if (shouldSkip()) {
+      return;
+    }
     String appHome = WebUtils.getAppHome();
     if (appHome == null) {
       throw new ExceptionInInitializerError(
