@@ -39,7 +39,7 @@ object FlinkClient extends Logger {
 
   private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
 
-  private[this] val FLINK_CLIENTS_CLASS_NAME = "org.apache.streampark.flink.client.FlinkClients"
+  private[this] val FLINK_CLIENT_HANDLER_CLASS_NAME = "org.apache.streampark.flink.client.FlinkClientHandler"
 
   private[this] val SUBMIT_REQUEST_CLASS_NAME = "org.apache.streampark.flink.client.bean.SubmitRequest"
 
@@ -53,7 +53,7 @@ object FlinkClient extends Logger {
     FlinkShimsProxy.proxy(
       submitRequest.flinkVersion,
       (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENTS_CLASS_NAME)
+        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
         val requestClass = classLoader.loadClass(SUBMIT_REQUEST_CLASS_NAME)
         val method = submitClass.getDeclaredMethod("submit", requestClass)
         method.setAccessible(true)
@@ -66,7 +66,7 @@ object FlinkClient extends Logger {
     FlinkShimsProxy.proxy(
       stopRequest.flinkVersion,
       (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENTS_CLASS_NAME)
+        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
         val requestClass = classLoader.loadClass(CANCEL_REQUEST_CLASS_NAME)
         val method = submitClass.getDeclaredMethod("cancel", requestClass)
         method.setAccessible(true)
@@ -82,7 +82,7 @@ object FlinkClient extends Logger {
     FlinkShimsProxy.proxy(
       deployRequest.flinkVersion,
       (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENTS_CLASS_NAME)
+        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
         val requestClass = classLoader.loadClass(DEPLOY_REQUEST_CLASS_NAME)
         val method = submitClass.getDeclaredMethod("deploy", requestClass)
         method.setAccessible(true)
@@ -95,7 +95,7 @@ object FlinkClient extends Logger {
     FlinkShimsProxy.proxy(
       shutDownRequest.flinkVersion,
       (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENTS_CLASS_NAME)
+        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
         val requestClass = classLoader.loadClass(SHUTDOWN_REQUEST_CLASS_NAME)
         val method = submitClass.getDeclaredMethod("shutdown", requestClass)
         method.setAccessible(true)

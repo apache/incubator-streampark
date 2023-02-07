@@ -21,7 +21,7 @@ import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.impl._
 
-object FlinkClients {
+object FlinkClientHandler {
 
   def submit(submitInfo: SubmitRequest): SubmitResponse = {
     submitInfo.executionMode match {
@@ -32,7 +32,7 @@ object FlinkClients {
       case ExecutionMode.YARN_PER_JOB => YarnPerJobSubmit.submit(submitInfo)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.submit(submitInfo)
       case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.submit(submitInfo)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${submitInfo.executionMode} Submit ")
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${submitInfo.executionMode} submit ")
     }
   }
 
@@ -45,7 +45,7 @@ object FlinkClients {
       case ExecutionMode.YARN_PER_JOB | ExecutionMode.YARN_SESSION => YarnPerJobSubmit.cancel(cancelRequest)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.cancel(cancelRequest)
       case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.cancel(cancelRequest)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${cancelRequest.executionMode} Submit ")
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${cancelRequest.executionMode} cancel ")
     }
   }
 
@@ -53,7 +53,7 @@ object FlinkClients {
     deployRequest.executionMode match {
       case ExecutionMode.YARN_SESSION => YarnSessionSubmit.deploy(deployRequest)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.deploy(deployRequest)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${deployRequest.executionMode} Submit ")
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${deployRequest.executionMode} deploy cluster ")
     }
   }
 
@@ -61,7 +61,7 @@ object FlinkClients {
     shutDownRequest.executionMode match {
       case ExecutionMode.YARN_SESSION => YarnSessionSubmit.shutdown(shutDownRequest)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.shutdown(shutDownRequest)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${shutDownRequest.executionMode} Submit ")
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${shutDownRequest.executionMode} shutdown cluster ")
     }
   }
 }
