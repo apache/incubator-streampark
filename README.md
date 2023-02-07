@@ -28,7 +28,6 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg?style=for-the-badge&label=license)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![stars](https://img.shields.io/github/stars/apache/streampark?style=for-the-badge&label=stars)](https://github.com/apache/incubator-streampark/stargazers)
-[![forks](https://img.shields.io/github/forks/apache/streampark?style=for-the-badge&label=forks)](https://github.com/apache/incubator-streampark/network/members)
 [![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg?style=for-the-badge&label=release)](https://github.com/apache/incubator-streampark/releases)
 [![total downloads](https://img.shields.io/github/downloads/apache/streampark/total.svg?style=for-the-badge&label=downloads)](https://streampark.apache.org/download)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/streampark.svg?style=for-the-badge&label=Follow&logo=twitter)](https://twitter.com/ASFStreamPark)
