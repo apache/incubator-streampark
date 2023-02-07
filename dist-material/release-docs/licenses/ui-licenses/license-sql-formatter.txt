@@ -1,8 +1,7 @@
 The MIT License (MIT)
 
 Copyright (c) 2016-2020 ZeroTurnaround LLC
-Copyright (c) 2020-2021 George Leslie-Waksman and other contributors
-Copyright (c) 2021-Present inferrinizzard and other contributors
+Copyright (c) 2020-present George Leslie-Waksman and other contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
