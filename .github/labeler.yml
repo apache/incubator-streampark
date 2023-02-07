@@ -54,11 +54,11 @@ SPARK:
 
 KUBERNETES:
   - "streampark-flink/streampark-flink-kubernetes/**/*"
-  - "streampark-flink-submit/**/Kubernetes*.scala"
+  - "streampark-flink-client/**/Kubernetes*.scala"
 
 YARN:
   - "streampark-common/**/Yarn*.scala"
-  - "streampark-flink-submit/**/Yarn*.scala"
+  - "streampark-flink-client/**/Yarn*.scala"
 
 WINDOWS:
   - "**/*.cmd"

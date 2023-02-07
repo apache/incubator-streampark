@@ -78,6 +78,12 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.flink.client.FlinkClient;
+import org.apache.streampark.flink.client.bean.CancelRequest;
+import org.apache.streampark.flink.client.bean.CancelResponse;
+import org.apache.streampark.flink.client.bean.KubernetesSubmitParam;
+import org.apache.streampark.flink.client.bean.SubmitRequest;
+import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.IngressController;
@@ -87,12 +93,6 @@ import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
-import org.apache.streampark.flink.submit.FlinkSubmitter;
-import org.apache.streampark.flink.submit.bean.CancelRequest;
-import org.apache.streampark.flink.submit.bean.CancelResponse;
-import org.apache.streampark.flink.submit.bean.KubernetesSubmitParam;
-import org.apache.streampark.flink.submit.bean.SubmitRequest;
-import org.apache.streampark.flink.submit.bean.SubmitResponse;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -1233,7 +1233,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             properties);
 
     CompletableFuture<CancelResponse> cancelFuture =
-        CompletableFuture.supplyAsync(() -> FlinkSubmitter.cancel(cancelRequest), executorService);
+        CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
 
     cancelFutureMap.put(application.getId(), cancelFuture);
 
@@ -1528,7 +1528,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter);
 
     CompletableFuture<SubmitResponse> future =
-        CompletableFuture.supplyAsync(() -> FlinkSubmitter.submit(submitRequest), executorService);
+        CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
 
     startFutureMap.put(application.getId(), future);
 
@@ -1651,7 +1651,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     Map<String, String> dynamicProperties =
-        FlinkSubmitter.extractDynamicPropertiesAsJava(application.getDynamicProperties());
+        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties());
     properties.putAll(dynamicProperties);
     ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
     if (resolveOrder != null) {
@@ -1691,7 +1691,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
     String savepointPath =
-        FlinkSubmitter.extractDynamicPropertiesAsJava(application.getDynamicProperties())
+        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties())
             .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
     // Application conf configuration has the second priority. If it is a streampark|flinksql type
