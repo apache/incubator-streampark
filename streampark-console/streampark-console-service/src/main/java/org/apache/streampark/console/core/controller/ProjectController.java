@@ -133,7 +133,8 @@ public class ProjectController {
   }
 
   @PostMapping("select")
-  public RestResponse select() {
-    return RestResponse.success().data(projectService.list());
+  public RestResponse select(@RequestParam Long teamId) {
+    List<Project> list = projectService.findByTeamId(teamId);
+    return RestResponse.success().data(list);
   }
 }
