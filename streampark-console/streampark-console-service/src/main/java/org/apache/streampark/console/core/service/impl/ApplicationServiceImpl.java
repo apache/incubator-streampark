@@ -34,7 +34,6 @@ import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -79,6 +78,12 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.flink.client.FlinkClient;
+import org.apache.streampark.flink.client.bean.CancelRequest;
+import org.apache.streampark.flink.client.bean.CancelResponse;
+import org.apache.streampark.flink.client.bean.KubernetesSubmitParam;
+import org.apache.streampark.flink.client.bean.SubmitRequest;
+import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.IngressController;
@@ -88,12 +93,6 @@ import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
-import org.apache.streampark.flink.submit.FlinkSubmitter;
-import org.apache.streampark.flink.submit.bean.CancelRequest;
-import org.apache.streampark.flink.submit.bean.CancelResponse;
-import org.apache.streampark.flink.submit.bean.KubernetesSubmitParam;
-import org.apache.streampark.flink.submit.bean.SubmitRequest;
-import org.apache.streampark.flink.submit.bean.SubmitResponse;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -370,52 +369,37 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     Application application = getById(paramApp.getId());
 
-    if (application.getExecutionMode() == null) {
-      if (application.getId().equals(Constant.FLINK_SAMPLE_APP_ID)) {
-        flinkSqlService.removeApp(application.getId());
-        removeById(application.getId());
-        return true;
-      } else {
-        throw new ApiAlertException("job is invalid, executionMode is null");
-      }
+    // 1) remove flink sql
+    flinkSqlService.removeApp(application.getId());
+
+    // 2) remove log
+    applicationLogService.removeApp(application.getId());
+
+    // 3) remove config
+    configService.removeApp(application.getId());
+
+    // 4) remove effective
+    effectiveService.removeApp(application.getId());
+
+    // remove related hdfs
+    // 5) remove backup
+    backUpService.removeApp(application);
+
+    // 6) remove savepoint
+    savePointService.removeApp(application);
+
+    // 7) remove BuildPipeline
+    appBuildPipeService.removeApp(application.getId());
+
+    // 8) remove app
+    removeApp(application);
+
+    if (isKubernetesApp(paramApp)) {
+      k8SFlinkTrackMonitor.unWatching(toTrackId(application));
     } else {
-      try {
-        // 1) remove flink sql
-        flinkSqlService.removeApp(application.getId());
-
-        // 2) remove log
-        applicationLogService.removeApp(application.getId());
-
-        // 3) remove config
-        configService.removeApp(application.getId());
-
-        // 4) remove effective
-        effectiveService.removeApp(application.getId());
-
-        // remove related hdfs
-        // 5) remove backup
-        backUpService.removeApp(application);
-
-        // 6) remove savepoint
-        savePointService.removeApp(application);
-
-        // 7) remove BuildPipeline
-        appBuildPipeService.removeApp(application.getId());
-
-        // 8) remove app
-        removeApp(application);
-
-        if (isKubernetesApp(paramApp)) {
-          k8SFlinkTrackMonitor.unWatching(toTrackId(application));
-        } else {
-          FlinkRESTAPIWatcher.unWatching(paramApp.getId());
-        }
-        return true;
-      } catch (Exception e) {
-        log.error(e.getMessage(), e);
-        throw e;
-      }
+      FlinkRESTAPIWatcher.unWatching(paramApp.getId());
     }
+    return true;
   }
 
   @Override
@@ -470,10 +454,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   private void removeApp(Application application) {
     Long appId = application.getId();
     removeById(appId);
-    application
-        .getFsOperator()
-        .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
     try {
+      application
+          .getFsOperator()
+          .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
       // try to delete yarn-application, and leave no trouble.
       String path =
           Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
@@ -1249,7 +1233,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             properties);
 
     CompletableFuture<CancelResponse> cancelFuture =
-        CompletableFuture.supplyAsync(() -> FlinkSubmitter.cancel(cancelRequest), executorService);
+        CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
 
     cancelFutureMap.put(application.getId(), cancelFuture);
 
@@ -1544,7 +1528,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter);
 
     CompletableFuture<SubmitResponse> future =
-        CompletableFuture.supplyAsync(() -> FlinkSubmitter.submit(submitRequest), executorService);
+        CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
 
     startFutureMap.put(application.getId(), future);
 
@@ -1667,7 +1651,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     Map<String, String> dynamicProperties =
-        FlinkSubmitter.extractDynamicPropertiesAsJava(application.getDynamicProperties());
+        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties());
     properties.putAll(dynamicProperties);
     ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
     if (resolveOrder != null) {
@@ -1707,7 +1691,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
     String savepointPath =
-        FlinkSubmitter.extractDynamicPropertiesAsJava(application.getDynamicProperties())
+        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties())
             .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
     // Application conf configuration has the second priority. If it is a streampark|flinksql type

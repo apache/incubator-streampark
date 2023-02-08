@@ -46,6 +46,12 @@
         limit 1
     </select>
 
+    <select id="selectByTeamId" resultType="org.apache.streampark.console.core.entity.Project" parameterType="java.lang.Long">
+        select *
+        from t_flink_project
+        where team_id = #{teamId}
+    </select>
+
     <update id="updateBuildState" parameterType="java.util.Map">
         update t_flink_project
         set build_state = #{state}
