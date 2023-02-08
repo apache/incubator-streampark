@@ -1361,6 +1361,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     final Application application = getById(appParam.getId());
 
     AssertUtils.state(application != null);
+    application.setAllowNonRestored(appParam.getAllowNonRestored());
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
     if (flinkEnv == null) {
