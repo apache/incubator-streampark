@@ -34,7 +34,7 @@
         <module>streampark-flink-connector</module>
         <module>streampark-flink-sqlclient</module>
         <module>streampark-flink-udf</module>
-        <module>streampark-flink-submit</module>
+        <module>streampark-flink-client</module>
         <module>streampark-flink-proxy</module>
         <module>streampark-flink-packer</module>
         <module>streampark-flink-kubernetes</module>

@@ -32,12 +32,12 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
-import org.apache.streampark.flink.submit.FlinkSubmitter;
-import org.apache.streampark.flink.submit.bean.DeployRequest;
-import org.apache.streampark.flink.submit.bean.DeployResponse;
-import org.apache.streampark.flink.submit.bean.KubernetesDeployParam;
-import org.apache.streampark.flink.submit.bean.ShutDownRequest;
-import org.apache.streampark.flink.submit.bean.ShutDownResponse;
+import org.apache.streampark.flink.client.FlinkClient;
+import org.apache.streampark.flink.client.bean.DeployRequest;
+import org.apache.streampark.flink.client.bean.DeployResponse;
+import org.apache.streampark.flink.client.bean.KubernetesDeployParam;
+import org.apache.streampark.flink.client.bean.ShutDownRequest;
+import org.apache.streampark.flink.client.bean.ShutDownResponse;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -167,7 +167,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
               kubernetesDeployParam);
       log.info("deploy cluster request " + deployRequest);
       Future<DeployResponse> future =
-          executorService.submit(() -> FlinkSubmitter.deploy(deployRequest));
+          executorService.submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
       if (deployResponse != null) {
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
@@ -284,7 +284,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     try {
       Future<ShutDownResponse> future =
-          executorService.submit(() -> FlinkSubmitter.shutdown(stopRequest));
+          executorService.submit(() -> FlinkClient.shutdown(stopRequest));
       ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
       if (shutDownResponse != null) {
         flinkCluster.setAddress(null);

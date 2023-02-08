@@ -349,7 +349,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-submit-api_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-client-api_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -524,7 +524,7 @@
                                 <!-- flink-submit-core -->
                                 <dependency>
                                     <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-submit-core_${scala.binary.version}</artifactId>
+                                    <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
                                     <version>${project.version}</version>
                                     <outputDirectory>${project.build.directory}/lib</outputDirectory>
                                 </dependency>
@@ -604,7 +604,7 @@
                                 <!-- flink-submit-core -->
                                 <dependency>
                                     <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-submit-core_${scala.binary.version}</artifactId>
+                                    <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
                                     <version>${project.version}</version>
                                     <outputDirectory>${project.build.directory}/lib</outputDirectory>
                                 </dependency>
