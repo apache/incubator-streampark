@@ -1367,6 +1367,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       throw new ApiAlertException("[StreamPark] can no found flink version");
     }
 
+    application.setAllowNonRestored(appParam.getAllowNonRestored());
+
     // if manually started, clear the restart flag
     if (!auto) {
       application.setRestartCount(0);
