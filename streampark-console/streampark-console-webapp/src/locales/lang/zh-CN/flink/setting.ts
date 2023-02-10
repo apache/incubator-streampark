@@ -20,6 +20,7 @@ export default {
     alertSetting: '告警设置',
     flinkHome: 'Flink版本',
     flinkCluster: 'Flink集群',
+    externalLink: '外部链接 ',
   },
   systemSettingItems: {
     mavenSetting: {
@@ -178,6 +179,28 @@ export default {
     view: {
       clusterId: '集群ID',
     },
+  },
+  externalLink: {
+    externalLinkSetting: '外部链接',
+    form: {
+      name: '名字',
+      namePlaceholder: '请输入link的名称',
+      nameIsRequired: '名称是必填',
+      linkUrl: '链接',
+      linkUrlPlaceholder: '请输入链接',
+      linkUrlIsRequired: '链接是必填',
+      imageUrl: '徽章URL地址',
+      imageUrlPlaceholder: '请输入徽章URL的地址',
+      imageUrlIsRequired: '徽章URL是必填',
+    },
+    operateMessage: {
+      createLinkSuccessful: '成功新建外部链接!',
+      createLinkFailed: '创建外部链接失败!',
+      updateLinkSuccessful: '成功更新外部链接!',
+      updateLinkFailed: '更新外部链接失败!',
+      operationFailed: '操作失败',
+    },
+    confDeleteTitle: '请确认删除该条记录',
   },
   env: {
     conf: 'Flink 配置',
