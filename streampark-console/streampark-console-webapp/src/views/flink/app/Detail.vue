@@ -18,6 +18,8 @@
   import { defineComponent } from 'vue';
   import { AppStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { fetchAppExternalLink } from '/@/api/flink/setting/externalLink';
+  import { ExternalLink } from '/@/api/flink/setting/types/externalLink.type';
   export default defineComponent({
     name: 'ApplicationDetail',
   });
@@ -28,10 +30,10 @@
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchBackUps, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app/app';
-  import { onUnmounted, reactive, h, unref, ref } from 'vue';
+  import { onUnmounted, reactive, h, unref, ref, onMounted } from 'vue';
   import { useIntervalFn, useClipboard } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app/app.type';
-  import { Tooltip, Divider } from 'ant-design-vue';
+  import { Tooltip, Divider, Space } from 'ant-design-vue';
   import { handleView } from './utils';
   import { Button } from '/@/components/Button';
   import { getDescSchema } from './data/detail.data';
@@ -55,6 +57,7 @@
   const { t } = useI18n();
 
   const yarn = ref('');
+  const externalLinks = ref<ExternalLink[]>([]);
   const app = reactive<Partial<AppListRecord>>({});
   const detailTabs = reactive({
     showConf: false,
@@ -218,6 +221,15 @@
     window.open(res);
   }
 
+  async function getExternalLinks() {
+    const { data: links } = await fetchAppExternalLink({ appId: route.query.appId as string });
+    externalLinks.value = links.data;
+  }
+
+  onMounted(() => {
+    getExternalLinks();
+  });
+
   onUnmounted(() => {
     pause();
   });
@@ -226,6 +238,13 @@
   <PageWrapper content-full-height content-background contentClass="p-24px">
     <div class="mb-15px">
       <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
+      <Space class="-mt-8px">
+        <div v-for="link in externalLinks" :key="link.id">
+          <a :href="link.renderedLinkUrl" target="_blank">
+            <img :src="link.imageUrl" :preview="false" />
+          </a>
+        </div>
+      </Space>
       <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">
         <Icon icon="ant-design:arrow-left-outlined" />
       </a-button>
