@@ -24,6 +24,7 @@ enum EXTERNAL_LINK_API {
   CREATE = '/flink/externalLink/create',
   UPDATE = '/flink/externalLink/update',
   DELETE = '/flink/externalLink/delete',
+  RENDER = '/flink/externalLink/render',
 }
 /**
  * Get external link settings
@@ -64,4 +65,10 @@ export function fetchExternalLinkDelete(id: string): Promise<AxiosResponse<Resul
     { url: EXTERNAL_LINK_API.DELETE, data: { id } },
     { isReturnNativeResponse: true },
   );
+}
+
+export function fetchAppExternalLink(data: {
+  appId: string;
+}): Promise<AxiosResponse<Result<ExternalLink[]>>> {
+  return defHttp.post({ url: EXTERNAL_LINK_API.RENDER, data }, { isReturnNativeResponse: true });
 }
