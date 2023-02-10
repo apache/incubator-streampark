@@ -27,6 +27,7 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.metrics.flink.Overview;
+import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.client.FlinkClient;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
@@ -125,9 +126,7 @@ public class FlinkCluster implements Serializable {
     Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
     if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
       map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
-      if (StringUtils.isNotEmpty(this.yarnQueue)) {
-        map.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.yarnQueue);
-      }
+      YarnQueueLabelExpression.addQueueLabelExprInto(this.yarnQueue, map);
     }
     map.entrySet().removeIf(entry -> entry.getValue() == null);
     return map;
