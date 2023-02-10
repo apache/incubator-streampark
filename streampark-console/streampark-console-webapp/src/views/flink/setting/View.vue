@@ -42,6 +42,11 @@
             <FlinkClusterSetting />
           </Card>
         </TabPane>
+        <TabPane :tab="t('flink.setting.settingTab.externalLink')" key="externalLink">
+          <Card :bordered="false" class="system-setting">
+            <ExternalLinkSetting />
+          </Card>
+        </TabPane>
       </Tabs>
     </div>
   </PageWrapper>
@@ -54,6 +59,7 @@
   import AlertSetting from './components/AlertSetting.vue';
   import FlinkEnvSetting from './components/FlinkEnvSetting.vue';
   import FlinkClusterSetting from './components/FlinkClusterSetting.vue';
+  import ExternalLinkSetting from './components/ExternalLinkSetting.vue';
   import { useRoute } from 'vue-router';
   import { useI18n } from '/@/hooks/web/useI18n';
 

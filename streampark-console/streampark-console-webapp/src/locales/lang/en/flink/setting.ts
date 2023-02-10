@@ -20,6 +20,7 @@ export default {
     alertSetting: 'Alert Setting',
     flinkHome: 'Flink Home',
     flinkCluster: 'Flink Cluster',
+    externalLink: 'External Link',
   },
   systemSettingItems: {
     mavenSetting: {
@@ -181,6 +182,28 @@ export default {
     view: {
       clusterId: 'ClusterId',
     },
+  },
+  externalLink: {
+    externalLinkSetting: 'External Link',
+    form: {
+      name: 'Name',
+      namePlaceholder: 'Please enter link name',
+      nameIsRequired: 'Name is required',
+      linkUrl: 'Link',
+      linkUrlPlaceholder: 'Please enter link url',
+      linkUrlIsRequired: 'Link is required',
+      imageUrl: 'Badge Image URL',
+      imageUrlPlaceholder: 'Please enter image url',
+      imageUrlIsRequired: 'Image url is required',
+    },
+    operateMessage: {
+      createLinkSuccessful: 'Successfully create external link!',
+      createLinkFailed: 'Create external link failed!',
+      updateLinkSuccessful: 'Successfully update external link!',
+      updateLinkFailed: 'Update external link failed!',
+      operationFailed: 'Operation failed',
+    },
+    confDeleteTitle: 'Are you sure delete this link record',
   },
   env: {
     conf: 'Flink Conf',
