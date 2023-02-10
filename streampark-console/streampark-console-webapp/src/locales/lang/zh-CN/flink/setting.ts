@@ -146,7 +146,7 @@ export default {
       clusterName: '请输入集群名称',
       executionMode: '请选择执行模式',
       versionId: '请选择Flink版本',
-      yarnQueue: '请选择Yarn队列',
+      yarnQueue: '请输入Yarn队列, 如 {queue} 或 {queue}@{label1},{label2}',
       addressRemoteMode: '请输入Flink 集群JobManager URL访问地址',
       addressNoRemoteMode: '请输入集群地址，例如：http://host:port',
       yarnSessionClusterId: '请输入Yarn Session模式集群ID',
