@@ -48,6 +48,7 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -114,6 +115,8 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationService applicationService;
 
+  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+
   @Autowired private ApplicationConfigService applicationConfigService;
 
   private final ExecutorService executorService =
@@ -164,6 +167,10 @@ public class AppBuildPipeServiceImpl
 
             app.setLaunch(LaunchState.LAUNCHING.get());
             applicationService.updateLaunch(app);
+
+            if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
+              flinkRESTAPIWatcher.init();
+            }
 
             // 1) checkEnv
             applicationService.checkEnv(app);
@@ -272,6 +279,9 @@ public class AppBuildPipeServiceImpl
               app.setBuild(true);
             }
             applicationService.updateLaunch(app);
+            if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
+              flinkRESTAPIWatcher.init();
+            }
           }
         });
     // save docker resolve progress detail to cache, only for flink-k8s application mode.

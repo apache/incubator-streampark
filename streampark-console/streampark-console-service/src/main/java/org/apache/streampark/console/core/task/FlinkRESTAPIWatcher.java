@@ -753,4 +753,8 @@ public class FlinkRESTAPIWatcher {
     }
     return JacksonUtils.read(result, clazz);
   }
+
+  public boolean isWatchingApp(Long id) {
+    return WATCHING_APPS.containsKey(id);
+  }
 }

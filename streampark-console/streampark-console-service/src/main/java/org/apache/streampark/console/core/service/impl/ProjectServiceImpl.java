@@ -39,6 +39,7 @@ import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
+import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -78,6 +79,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     implements ProjectService {
 
   @Autowired private ApplicationService applicationService;
+
+  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
@@ -195,8 +198,33 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   public void build(Long id) throws Exception {
     Project project = getById(id);
     this.baseMapper.updateBuildState(project.getId(), BuildState.BUILDING.get());
+    String logPath = getBuildLogPath(id);
     ProjectBuildTask projectBuildTask =
-        new ProjectBuildTask(getBuildLogPath(id), project, baseMapper, applicationService);
+        new ProjectBuildTask(
+            logPath,
+            project,
+            buildState -> {
+              baseMapper.updateBuildState(id, buildState.get());
+              if (buildState == BuildState.SUCCESSFUL) {
+                baseMapper.updateBuildTime(id);
+              }
+              flinkRESTAPIWatcher.init();
+            },
+            fileLogger -> {
+              List<Application> applications =
+                  this.applicationService.getByProjectId(project.getId());
+              applications.forEach(
+                  (app) -> {
+                    fileLogger.info(
+                        "update deploy by project: {}, appName:{}",
+                        project.getName(),
+                        app.getJobName());
+                    app.setLaunch(LaunchState.NEED_LAUNCH.get());
+                    app.setBuild(true);
+                    this.applicationService.updateLaunch(app);
+                  });
+              flinkRESTAPIWatcher.init();
+            });
     CompletableFuture<Void> buildTask =
         CompletableFuture.runAsync(projectBuildTask, executorService);
     // TODO May need to define parameters to set the build timeout in the future.

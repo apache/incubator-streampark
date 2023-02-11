@@ -67,7 +67,6 @@ public class ProjectController {
     return RestResponse.success().data(projectService.getById(id));
   }
 
-  @AppUpdated
   @PostMapping("build")
   @RequiresPermissions("project:build")
   public RestResponse build(Long id) throws Exception {
