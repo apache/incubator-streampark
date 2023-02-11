@@ -76,6 +76,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -131,6 +132,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -145,6 +147,7 @@ import java.util.stream.Collectors;
 import static org.apache.streampark.common.enums.StorageType.LFS;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
+import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.checkQueueLabelIfNeed;
 
 @Slf4j
 @Service
@@ -698,6 +701,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.setOptionState(OptionState.NONE.getValue());
     appParam.setCreateTime(new Date());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
+    checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
       String jarPath =
@@ -813,6 +817,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Transactional(rollbackFor = {Exception.class})
   public boolean update(Application appParam) {
     try {
+      checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
       Application application = getById(appParam.getId());
       application.setLaunch(LaunchState.NEED_LAUNCH.get());
       if (application.isUploadJob()) {
@@ -1115,13 +1120,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
 
-    if (!application.getHotParamsMap().isEmpty()) {
-      if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
-        if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
-          application.setYarnQueue(
-              application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
-        }
-      }
+    Map<String, Object> hotParamsMap = application.getHotParamsMap();
+    if (!hotParamsMap.isEmpty()
+        && ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())
+        && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
+      String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
+      String labelExpr =
+          Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
+              .map(Object::toString)
+              .orElse(null);
+      application.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
     }
     return application;
   }
@@ -1622,8 +1630,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
       String yarnQueue =
           (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
+      String yarnLabelExpr =
+          (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_NODE_LABEL());
       if (yarnQueue != null) {
         properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
+      }
+      if (yarnLabelExpr != null) {
+        properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yarnLabelExpr);
       }
       if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
