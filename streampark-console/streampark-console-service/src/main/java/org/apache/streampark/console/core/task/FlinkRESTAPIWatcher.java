@@ -151,7 +151,8 @@ public class FlinkRESTAPIWatcher {
           ThreadUtils.threadFactory("flink-restapi-watching-executor"));
 
   @PostConstruct
-  public void initialization() {
+  public void init() {
+    WATCHING_APPS.clear();
     LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
     queryWrapper
         .eq(Application::getTracking, 1)

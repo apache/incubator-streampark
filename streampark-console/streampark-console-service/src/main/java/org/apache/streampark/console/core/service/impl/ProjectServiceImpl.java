@@ -187,6 +187,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
+  public List<Project> findByTeamId(Long teamId) {
+    return this.baseMapper.selectByTeamId(teamId);
+  }
+
+  @Override
   public void build(Long id) throws Exception {
     Project project = getById(id);
     this.baseMapper.updateBuildState(project.getId(), BuildState.BUILDING.get());

@@ -40,6 +40,8 @@ public interface ProjectService extends IService<Project> {
 
   Boolean existsByTeamId(Long teamId);
 
+  List<Project> findByTeamId(Long teamId);
+
   void build(Long id) throws Exception;
 
   RestResponse getBuildLog(Long id, Long startOffset);
