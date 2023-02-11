@@ -207,7 +207,7 @@ export default {
     alertTemplatePlaceholder: '告警模板',
     totalMemoryOptionsPlaceholder: '请选择要设置的资源参数',
     tmPlaceholder: '请选择要设置的资源参数',
-    yarnQueuePlaceholder: '请输入yarn队列名称',
+    yarnQueuePlaceholder: '请输入yarn队列名称, 如 {queue} 或 {queue}@{label1},{label2}',
     descriptionPlaceholder: '请输入此应用程序的描述',
     kubernetesNamespacePlaceholder: '请输入K8S命名空间, 如: default',
     kubernetesClusterIdPlaceholder: '请选择K8S ClusterId',

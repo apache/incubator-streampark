@@ -212,7 +212,7 @@ export default {
     alertTemplatePlaceholder: 'Alert Template',
     totalMemoryOptionsPlaceholder: 'Please select the resource parameters to set',
     tmPlaceholder: 'Please select the resource parameters to set',
-    yarnQueuePlaceholder: 'Please enter yarn queue',
+    yarnQueuePlaceholder: 'Please enter yarn queue in format {queue} or {queue}@{label1},{label2}',
     descriptionPlaceholder: 'Please enter description for this application',
     kubernetesNamespacePlaceholder: 'Please enter kubernetes Namespace, e.g: default',
     kubernetesClusterIdPlaceholder: 'Please enter Kubernetes clusterId',
