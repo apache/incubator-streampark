@@ -39,6 +39,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
@@ -151,12 +152,13 @@ public class FlinkRESTAPIWatcher {
           ThreadUtils.threadFactory("flink-restapi-watching-executor"));
 
   @PostConstruct
-  public void initialization() {
-    LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-    queryWrapper
-        .eq(Application::getTracking, 1)
-        .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
-    List<Application> applications = applicationService.list(queryWrapper);
+  public void init() {
+    WATCHING_APPS.clear();
+    List<Application> applications =
+        applicationService.list(
+            new LambdaQueryWrapper<Application>()
+                .eq(Application::getTracking, 1)
+                .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode()));
     applications.forEach((app) -> WATCHING_APPS.put(app.getId(), app));
   }
 
@@ -377,15 +379,22 @@ public class FlinkRESTAPIWatcher {
      NEED_RESTART_AFTER_DEPLOY (Need to rollback after deploy)
     */
     if (OptionState.STARTING.equals(optionState)) {
-      switch (LaunchState.of(application.getLaunch())) {
+      Application latestApp = WATCHING_APPS.get(application.getId());
+      LaunchState launchState = latestApp.getLaunchState();
+      switch (launchState) {
         case NEED_RESTART:
         case NEED_ROLLBACK:
-          application.setLaunch(LaunchState.DONE.get());
+          LambdaUpdateWrapper<Application> updateWrapper =
+              new LambdaUpdateWrapper<Application>()
+                  .eq(Application::getId, application.getId())
+                  .set(Application::getLaunch, LaunchState.DONE.get());
+          applicationService.update(updateWrapper);
           break;
         default:
           break;
       }
     }
+
     // The current state is running, and there is a current task in the savePointCache,
     // indicating that the task is doing savepoint
     if (SAVEPOINT_CACHE.getIfPresent(application.getId()) != null) {
@@ -751,5 +760,9 @@ public class FlinkRESTAPIWatcher {
       return null;
     }
     return JacksonUtils.read(result, clazz);
+  }
+
+  public boolean isWatchingApp(Long id) {
+    return WATCHING_APPS.containsKey(id);
   }
 }

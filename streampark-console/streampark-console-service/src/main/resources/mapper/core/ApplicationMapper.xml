@@ -191,9 +191,6 @@
             <if test="application.tracking != null">
                 tracking=#{application.tracking},
             </if>
-            <if test="application.launch != null">
-                launch=#{application.launch},
-            </if>
             <if test="application.optionState != null">
                 option_state=#{application.optionState},
             </if>
