@@ -42,17 +42,11 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     if (input == null) {
       throw new RuntimeException("The inputStream can not be null")
     }
-    val headerHex = Utils.tryWithResource(input) { in =>
-      val b = new Array[Byte](8)
+    Utils.tryWithResource(input) { in =>
+      val b = new Array[Byte](4)
       in.read(b, 0, b.length)
       bytesToHexString(b)
-    }
-    val jarFileTypes: mutable.Seq[String] = mutable.Seq(
-      "504B03040A000000",
-      "504B03040A000008",
-      "504B030414000808"
-    )
-    jarFileTypes.contains(headerHex)
+    } == "504B0304"
   }
 
   def isJarFileType(file: File): Boolean = {
