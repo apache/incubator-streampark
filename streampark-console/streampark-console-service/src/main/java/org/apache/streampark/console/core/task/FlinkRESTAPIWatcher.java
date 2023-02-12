@@ -39,6 +39,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
@@ -383,7 +384,11 @@ public class FlinkRESTAPIWatcher {
       switch (launchState) {
         case NEED_RESTART:
         case NEED_ROLLBACK:
-          latestApp.setLaunch(LaunchState.DONE.get());
+          LambdaUpdateWrapper<Application> updateWrapper =
+              new LambdaUpdateWrapper<Application>()
+                  .eq(Application::getId, application.getId())
+                  .set(Application::getLaunch, LaunchState.DONE.get());
+          applicationService.update(updateWrapper);
           break;
         default:
           break;
@@ -417,8 +422,6 @@ public class FlinkRESTAPIWatcher {
     } else {
       WATCHING_APPS.put(application.getId(), application);
     }
-    Application latest = WATCHING_APPS.get(application.getId());
-    application.setLaunch(latest.getLaunch());
     applicationService.persistMetrics(application);
   }
 
