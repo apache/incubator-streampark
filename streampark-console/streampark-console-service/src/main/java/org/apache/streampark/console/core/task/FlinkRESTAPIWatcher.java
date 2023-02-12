@@ -153,11 +153,11 @@ public class FlinkRESTAPIWatcher {
   @PostConstruct
   public void init() {
     WATCHING_APPS.clear();
-    LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-    queryWrapper
-        .eq(Application::getTracking, 1)
-        .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
-    List<Application> applications = applicationService.list(queryWrapper);
+    List<Application> applications =
+        applicationService.list(
+            new LambdaQueryWrapper<Application>()
+                .eq(Application::getTracking, 1)
+                .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode()));
     applications.forEach((app) -> WATCHING_APPS.put(app.getId(), app));
   }
 

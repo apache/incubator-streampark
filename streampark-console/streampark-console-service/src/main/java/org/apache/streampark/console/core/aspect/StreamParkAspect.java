@@ -48,17 +48,11 @@ public class StreamParkAspect {
       "execution(public"
           + " org.apache.streampark.console.base.domain.RestResponse"
           + " org.apache.streampark.console.*.controller.*.*(..))")
-  public void response() {}
-
-  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.AppUpdated)")
-  public void appUpdated() {}
-
-  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.ApiAccess)")
   public void apiAccess() {}
 
   @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
-  @Around(value = "response()")
-  public RestResponse response(ProceedingJoinPoint joinPoint) throws Throwable {
+  @Around(value = "apiAccess()")
+  public RestResponse apiAccess(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
     log.debug("restResponse aspect, method:{}", methodSignature.getName());
     Boolean isApi =
@@ -71,6 +65,9 @@ public class StreamParkAspect {
     }
     return (RestResponse) joinPoint.proceed();
   }
+
+  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.AppUpdated)")
+  public void appUpdated() {}
 
   @Around("appUpdated()")
   public Object appUpdated(ProceedingJoinPoint joinPoint) throws Throwable {
