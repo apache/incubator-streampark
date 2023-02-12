@@ -377,16 +377,20 @@ public class FlinkRESTAPIWatcher {
      NEED_RESTART_AFTER_ROLLBACK (Need to restart after rollback)
      NEED_RESTART_AFTER_DEPLOY (Need to rollback after deploy)
     */
+    Application latestApp = WATCHING_APPS.get(application.getId());
+    LaunchState latestLaunch = latestApp.getLaunchState();
     if (OptionState.STARTING.equals(optionState)) {
       switch (LaunchState.of(application.getLaunch())) {
         case NEED_RESTART:
         case NEED_ROLLBACK:
-          application.setLaunch(LaunchState.DONE.get());
+          latestLaunch = LaunchState.DONE;
           break;
         default:
           break;
       }
     }
+    application.setLaunch(latestLaunch.get());
+
     // The current state is running, and there is a current task in the savePointCache,
     // indicating that the task is doing savepoint
     if (SAVEPOINT_CACHE.getIfPresent(application.getId()) != null) {
