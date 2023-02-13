@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.enums.UserType;
@@ -129,7 +129,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
                 () ->
                     new IllegalArgumentException(
                         String.format("Team id [id=%s] not found", team.getId())));
-    AssertUtils.isTrue(
+    Utils.required(
         oldTeam.getTeamName().equals(team.getTeamName()), "Team name cannot be changed.");
     oldTeam.setDescription(team.getDescription());
     oldTeam.setModifyTime(new Date());

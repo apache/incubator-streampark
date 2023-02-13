@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.alert.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.core.bean.AlertConfigWithParams;
@@ -84,7 +84,7 @@ public class AlertServiceImpl implements AlertService {
                   try {
                     Class<? extends AlertNotifyService> notifyServiceClass =
                         getAlertServiceImpl(alertType);
-                    AssertUtils.state(notifyServiceClass != null);
+                    Utils.required(notifyServiceClass != null);
                     boolean alertRes =
                         SpringContextUtils.getBean(notifyServiceClass)
                             .doAlert(params, alertTemplate);

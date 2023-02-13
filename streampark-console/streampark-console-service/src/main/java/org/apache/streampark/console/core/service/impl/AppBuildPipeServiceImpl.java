@@ -23,10 +23,10 @@ import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
@@ -146,7 +146,7 @@ public class AppBuildPipeServiceImpl
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
     if (app.isFlinkSqlJob()) {
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
-      AssertUtils.state(flinkSql != null);
+      Utils.required(flinkSql != null);
       app.setDependency(flinkSql.getDependency());
     }
 
@@ -210,7 +210,7 @@ public class AppBuildPipeServiceImpl
                 // copy jar to local upload dir
                 for (String jar : app.getDependencyObject().getJar()) {
                   File localJar = new File(WebUtils.getAppTempDir(), jar);
-                  AssertUtils.state(localJar.exists());
+                  Utils.required(localJar.exists());
                   String localUploads = Workspace.local().APP_UPLOADS();
                   String uploadJar = localUploads.concat("/").concat(jar);
                   checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploads);

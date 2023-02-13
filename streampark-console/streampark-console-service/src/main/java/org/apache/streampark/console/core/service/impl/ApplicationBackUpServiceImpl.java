@@ -18,8 +18,8 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -190,7 +190,7 @@ public class ApplicationBackUpServiceImpl
   @Override
   public void rollbackFlinkSql(Application application, FlinkSql sql) {
     ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
-    AssertUtils.state(backUp != null);
+    Utils.required(backUp != null);
     // rollback config and sql
     effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
     effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());

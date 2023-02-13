@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.base.interceptor;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.FileUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 
 import org.springframework.stereotype.Component;
@@ -43,7 +43,7 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
       Map<String, MultipartFile> files = multipartRequest.getFileMap();
       for (String file : files.keySet()) {
         MultipartFile multipartFile = multipartRequest.getFile(file);
-        AssertUtils.state(multipartFile != null);
+        Utils.required(multipartFile != null);
         boolean fileType = FileUtils.isJarFileType(multipartFile.getInputStream());
         if (!fileType) {
           throw new ApiAlertException("illegal file type, Only standard jar files supported");

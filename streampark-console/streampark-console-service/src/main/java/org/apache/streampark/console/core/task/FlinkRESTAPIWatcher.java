@@ -18,9 +18,9 @@
 package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.Application;
@@ -207,7 +207,7 @@ public class FlinkRESTAPIWatcher {
             final OptionState optionState = OPTIONING.get(key);
             try {
               // query status from flink rest api
-              AssertUtils.state(application.getId() != null);
+              Utils.required(application.getId() != null);
               getFromFlinkRestApi(application, stopFrom);
             } catch (Exception flinkException) {
               // query status from yarn rest api

@@ -30,9 +30,20 @@ object Utils {
 
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
+  def notNull(obj: Any, message: String): Unit = {
+    if (obj == null) {
+      throw new IllegalArgumentException(message)
+    }
+  }
+
+  def notNull(obj: Any): Unit = {
+    notNull(obj, "this argument is required; it must not be null")
+  }
+
   def notEmpty(elem: Any): Boolean = {
     elem match {
       case null => false
+      case x if x.isInstanceOf[Array] => elem.asInstanceOf[Array[_]].nonEmpty
       case x if x.isInstanceOf[CharSequence] => elem.toString.trim.nonEmpty
       case x if x.isInstanceOf[Traversable[_]] => x.asInstanceOf[Traversable[_]].nonEmpty
       case x if x.isInstanceOf[Iterable[_]] => x.asInstanceOf[Iterable[_]].nonEmpty
@@ -44,13 +55,19 @@ object Utils {
 
   def isEmpty(elem: Any): Boolean = !notEmpty(elem)
 
-  def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
-
-  def require(requirement: Boolean, message: String): Unit = {
-    if (!requirement) {
-      throw new IllegalArgumentException(s"requirement failed: $message")
+  def required(expression: Boolean): Unit = {
+    if (!expression) {
+      throw new IllegalArgumentException
     }
   }
+
+  def required(expression: Boolean, errorMessage: Any): Unit = {
+    if (!expression) {
+      throw new IllegalArgumentException(s"requirement failed: ${errorMessage.toString}")
+    }
+  }
+
+  def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
   @throws[IOException]
   def checkJarFile(jar: URL): Unit = {
