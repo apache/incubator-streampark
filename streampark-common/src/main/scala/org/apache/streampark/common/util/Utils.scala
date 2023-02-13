@@ -30,7 +30,7 @@ object Utils {
 
   def notNull(obj: Any, message: String): Unit = {
     if (obj == null) {
-      throw new IllegalArgumentException(message)
+      throw new NullPointerException(message)
     }
   }
 
