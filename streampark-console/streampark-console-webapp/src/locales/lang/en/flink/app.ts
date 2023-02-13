@@ -212,7 +212,7 @@ export default {
     alertTemplatePlaceholder: 'Alert Template',
     totalMemoryOptionsPlaceholder: 'Please select the resource parameters to set',
     tmPlaceholder: 'Please select the resource parameters to set',
-    yarnQueuePlaceholder: 'Please enter yarn queue in format {queue} or {queue}@{label1},{label2}',
+    yarnQueuePlaceholder: 'Please enter yarn queue',
     descriptionPlaceholder: 'Please enter description for this application',
     kubernetesNamespacePlaceholder: 'Please enter kubernetes Namespace, e.g: default',
     kubernetesClusterIdPlaceholder: 'Please enter Kubernetes clusterId',
@@ -242,5 +242,6 @@ export default {
       'Explicitly configuring both "total process memory" and "total Flink memory" is not recommended. It may lead to deployment failures due to potential memory configuration conflicts. Configuring other memory components also requires caution as it can produce further configuration conflicts, The easiest way is to set "total process memory"',
     dynamicProperties:
       'It works the same as -D$property=$value in CLI mode, Allows specifying multiple generic configuration options. The available options can be found from',
+    yarnQueue: 'It\'s used to quickly specify not only "yarn.application.name" but also "yarn.application.node-label". For example, "queue1" represents the value of "yarn.application.name" is "queue1", but "queue1@label1,label2" represents that the value of "yarn.application.name" is "queue1" and the value of "yarn.application.node-label" is "label1,label2". The queue and label are joined by "@".',
   },
 };

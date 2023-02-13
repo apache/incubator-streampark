@@ -231,6 +231,28 @@ export const renderOptionsItems = (
   });
 };
 
+/* render Yarn Queue */
+export const renderYarnQueue = ({ model, field }: RenderCallbackParams) => {
+  return (
+    <div>
+      <Input
+        name="yarnQueue"
+        placeholder={t('flink.app.addAppTips.yarnQueuePlaceholder')}
+        value={model[field]}
+        onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
+      />
+      <p class="conf-desc mt-10px">
+        <span class="note-info">
+          <Tag color="#2db7f5" class="tag-note">
+            {t('flink.app.noteInfo.note')}
+          </Tag>
+          {t('flink.app.noteInfo.yarnQueue')}
+        </span>
+      </p>
+    </div>
+  );
+};
+
 /* render memory option */
 export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) => {
   return (
