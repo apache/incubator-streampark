@@ -151,7 +151,7 @@ object Utils {
   }
 
   def stringifyException(e: Throwable): String = {
-    if (e == null)  "(null)" else {
+    if (e == null) "(null)" else {
       try {
         val stm = new StringWriter
         val wrt = new PrintWriter(stm)
@@ -162,7 +162,6 @@ object Utils {
         case _: Throwable => e.getClass.getName + " (error while printing stack trace)"
       }
     }
-
   }
 
 }
