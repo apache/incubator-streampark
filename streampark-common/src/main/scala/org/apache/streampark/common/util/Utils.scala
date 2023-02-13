@@ -43,7 +43,7 @@ object Utils {
   def notEmpty(elem: Any): Boolean = {
     elem match {
       case null => false
-      case x if x.isInstanceOf[Array] => elem.asInstanceOf[Array[_]].nonEmpty
+      case x if x.isInstanceOf[Array[_]] => elem.asInstanceOf[Array[_]].nonEmpty
       case x if x.isInstanceOf[CharSequence] => elem.toString.trim.nonEmpty
       case x if x.isInstanceOf[Traversable[_]] => x.asInstanceOf[Traversable[_]].nonEmpty
       case x if x.isInstanceOf[Iterable[_]] => x.asInstanceOf[Iterable[_]].nonEmpty
