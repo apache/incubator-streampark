@@ -578,7 +578,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
     Application application = getById(id);
-    Utils.required(application != null);
+    Utils.required(
+        application != null,
+        String.format("The application id=%s cannot be find in the database.", id));
     if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
       CompletableFuture<String> future =
           CompletableFuture.supplyAsync(
@@ -1345,7 +1347,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public void starting(Application appParam) {
     Application application = getById(appParam.getId());
-    Utils.required(application != null);
+    Utils.required(
+        application != null,
+        String.format("The application id=%s cannot be find in the database.", appParam.getId()));
     application.setState(FlinkAppState.STARTING.getValue());
     application.setOptionTime(new Date());
     updateById(application);
@@ -1388,7 +1392,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     ApplicationConfig applicationConfig = configService.getEffective(application.getId());
     ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
-    Utils.required(executionMode != null);
+    Utils.required(executionMode != null, "executionMode cannot be null");
     if (application.isCustomCodeJob()) {
       if (application.isUploadJob()) {
         appConf =
