@@ -27,7 +27,6 @@ import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FlinkUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -433,7 +432,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
       return true;
     } catch (Exception e) {
-      log.error(ExceptionUtils.stringifyException(e));
+      log.error(Utils.stringifyException(e));
       throw new ApiDetailException(e);
     }
   }
@@ -1283,7 +1282,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 log.setAppId(application.getId());
                 log.setYarnAppId(application.getClusterId());
                 log.setOptionTime(new Date());
-                String exception = ExceptionUtils.stringifyException(e);
+                String exception = Utils.stringifyException(e);
                 log.setException(exception);
                 log.setSuccess(false);
                 applicationLogService.save(log);
@@ -1582,7 +1581,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               if (e.getCause() instanceof CancellationException) {
                 updateToStopped(application);
               } else {
-                String exception = ExceptionUtils.stringifyException(e);
+                String exception = Utils.stringifyException(e);
                 applicationLog.setException(exception);
                 applicationLog.setSuccess(false);
                 applicationLogService.save(applicationLog);

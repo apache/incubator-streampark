@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkEnv;
@@ -199,8 +198,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
             }
             return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result);
           } catch (Throwable e) {
-            log.error(
-                "verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
+            log.error("verifySql invocationTargetException: {}", Utils.stringifyException(e));
           }
           return null;
         });

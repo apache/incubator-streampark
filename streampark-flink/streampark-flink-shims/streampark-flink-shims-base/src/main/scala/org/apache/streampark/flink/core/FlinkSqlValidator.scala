@@ -17,7 +17,6 @@
 package org.apache.streampark.flink.core
 
 import scala.util.{Failure, Try}
-
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
 import org.apache.calcite.sql.parser.SqlParser.Config
@@ -28,9 +27,8 @@ import org.apache.flink.table.api.{SqlDialect, TableConfig}
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.config.TableConfigOptions
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
-
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
-import org.apache.streampark.common.util.{ExceptionUtils, Logger}
+import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.flink.core.SqlCommand._
 
 object FlinkSqlValidator extends Logger {
@@ -95,7 +93,7 @@ object FlinkSqlValidator extends Logger {
             }
           } match {
             case Failure(e) =>
-              val exception = ExceptionUtils.stringifyException(e)
+              val exception = Utils.stringifyException(e)
               val causedBy = exception.drop(exception.indexOf("Caused by:"))
               val cleanUpError = exception.replaceAll("[\r\n]", "")
               if (SYNTAX_ERROR_REGEXP.findAllMatchIn(cleanUpError).nonEmpty) {

@@ -16,14 +16,12 @@
  */
 package org.apache.streampark.common.util
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException}
+import java.io.{BufferedInputStream, File, FileInputStream, IOException, PrintWriter, StringWriter}
 import java.net.URL
-import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
+import java.util.{Properties, UUID, jar, Collection => JavaCollection, Map => JavaMap}
 import java.util.jar.{JarFile, JarInputStream}
-
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
-
 import org.apache.commons.lang3.StringUtils
 
 object Utils {
@@ -150,6 +148,21 @@ object Utils {
       result = 31 * result + hash
     }
     result
+  }
+
+  def stringifyException(e: Throwable): String = {
+    if (e == null)  "(null)" else {
+      try {
+        val stm = new StringWriter
+        val wrt = new PrintWriter(stm)
+        e.printStackTrace(wrt)
+        wrt.close()
+        stm.toString
+      } catch {
+        case _: Throwable => e.getClass.getName + " (error while printing stack trace)"
+      }
+    }
+
   }
 
 }

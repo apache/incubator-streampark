@@ -23,7 +23,6 @@ import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
@@ -271,7 +270,7 @@ public class AppBuildPipeServiceImpl
                       commonService.getUserId(),
                       app.getId(),
                       app.getJobName().concat(" launch failed"),
-                      ExceptionUtils.stringifyException(snapshot.error().exception()),
+                      Utils.stringifyException(snapshot.error().exception()),
                       NoticeType.EXCEPTION);
               messageService.push(message);
               app.setLaunch(LaunchState.FAILED.get());
