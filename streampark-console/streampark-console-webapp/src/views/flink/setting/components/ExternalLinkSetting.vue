@@ -88,7 +88,7 @@
   const APopconfirm = Popconfirm;
 </script>
 <template>
-  <div v-auth="'project:create'" style="margin-bottom: 20px">
+  <div v-auth="'externalLink:create'" style="margin-bottom: 20px">
     <a-button type="dashed" style="width: 100%; margin-top: 20px" @click="openLinkModal(true, {})">
       <plus-outlined />
       {{ t('common.add') }}
@@ -101,15 +101,20 @@
       </template>
       <template v-else-if="column.key === 'action'">
         <span>
-          <a-button type="link" @click="handleEditExternalLink(record)">{{
-            t('common.edit')
-          }}</a-button>
+          <a-button
+            v-auth="'externalLink:update'"
+            type="link"
+            @click="handleEditExternalLink(record)"
+            >{{ t('common.edit') }}</a-button
+          >
           <a-popconfirm
             :title="t('flink.setting.externalLink.confDeleteTitle')"
             @confirm="handleDeleteExternalLink(record.id)"
             placement="topRight"
           >
-            <a-button danger type="text">{{ t('common.delText') }}</a-button>
+            <a-button v-auth="'externalLink:delete'" danger type="text">{{
+              t('common.delText')
+            }}</a-button>
           </a-popconfirm>
         </span>
       </template>
