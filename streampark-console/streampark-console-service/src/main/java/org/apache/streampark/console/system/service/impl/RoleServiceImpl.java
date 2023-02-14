@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.system.entity.Role;
@@ -86,7 +86,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 () ->
                     new IllegalArgumentException(String.format("Role id [%s] not found", roleId)));
     List<Long> userIdsByRoleId = memberService.findUserIdsByRoleId(roleId);
-    AssertUtils.isTrue(
+    Utils.required(
         userIdsByRoleId == null || userIdsByRoleId.isEmpty(),
         String.format(
             "There are some users are bound to role %s , please unbind it first.",

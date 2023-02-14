@@ -19,9 +19,7 @@ package org.apache.streampark.flink.client.`trait`
 
 import java.lang.{Boolean => JavaBool}
 import java.lang.reflect.Method
-
 import scala.util.Try
-
 import org.apache.flink.client.deployment.{ClusterDescriptor, ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClientProvider
 import org.apache.flink.configuration.Configuration
@@ -30,8 +28,7 @@ import org.apache.flink.util.FlinkException
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.yarn.api.records.ApplicationId
-
-import org.apache.streampark.common.util.ExceptionUtils
+import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 
 /**
@@ -57,7 +54,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       CancelResponse(savepointDir)
     }.recover {
       case e => throw new FlinkException(
-          s"[StreamPark] Triggering a savepoint for the job ${cancelRequest.jobId} failed. detail: ${ExceptionUtils.stringifyException(e)}");
+          s"[StreamPark] Triggering a savepoint for the job ${cancelRequest.jobId} failed. detail: ${Utils.stringifyException(e)}");
     }.get
   }
 

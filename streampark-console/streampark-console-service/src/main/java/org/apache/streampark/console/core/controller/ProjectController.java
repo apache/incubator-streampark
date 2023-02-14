@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.AppUpdated;
@@ -50,7 +50,7 @@ public class ProjectController {
   @PostMapping("create")
   @RequiresPermissions("project:create")
   public RestResponse create(Project project) {
-    AssertUtils.checkArgument(project.getTeamId() != null, "The teamId cannot be null");
+    Utils.required(project.getTeamId() != null, "The teamId cannot be null");
     return projectService.create(project);
   }
 

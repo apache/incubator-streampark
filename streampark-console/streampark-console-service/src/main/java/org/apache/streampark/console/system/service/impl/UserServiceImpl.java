@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -74,7 +74,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     page.setSize(request.getPageSize());
     IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
 
-    AssertUtils.state(resPage != null);
+    Utils.required(resPage != null);
     if (resPage.getTotal() == 0) {
       resPage.setRecords(Collections.emptyList());
     }
@@ -189,7 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void setLastTeam(Long teamId, Long userId) {
     User user = getById(userId);
-    AssertUtils.checkArgument(user != null);
+    Utils.required(user != null);
     user.setLastTeamId(teamId);
     this.baseMapper.updateById(user);
   }
@@ -197,7 +197,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void clearLastTeam(Long userId, Long teamId) {
     User user = getById(userId);
-    AssertUtils.checkArgument(user != null);
+    Utils.required(user != null);
     if (!teamId.equals(user.getLastTeamId())) {
       return;
     }
@@ -238,7 +238,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
    */
   @Override
   public Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token) {
-    AssertUtils.checkNotNull(user);
     Map<String, Object> userInfo = new HashMap<>(8);
 
     // 1) token & expire

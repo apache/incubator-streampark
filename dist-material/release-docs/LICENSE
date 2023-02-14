@@ -584,8 +584,6 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://maven.apache.org/wrapper Apache-2.0
     mvnw files from https://github.com/apache/maven-wrapper Apache 2.0
     streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath.sh from https://github.com/apache/tomcat
-    streampark-common/src/main/scala/org/apache/streampark/common/util/ExceptionUtils.scala from https://github.com/apache/flink
-    streampark-common/src/main/scala/org/apache/streampark/common/util/AssertUtils.scala from https://github.com/spring-projects/spring-framework
 
 
 ========================================================================
