@@ -238,7 +238,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
    */
   @Override
   public Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token) {
-    Utils.notNull(user);
     Map<String, Object> userInfo = new HashMap<>(8);
 
     // 1) token & expire
