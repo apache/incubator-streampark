@@ -28,14 +28,17 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.CheckPointType;
 import org.apache.streampark.console.core.mapper.SavePointMapper;
+import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.flink.client.FlinkClient;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,6 +51,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     implements SavePointService {
 
   @Autowired private FlinkEnvService flinkEnvService;
+
+  @Autowired private ApplicationService applicationService;
 
   @Override
   public void expire(Long appId) {
@@ -67,10 +72,60 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private void expire(SavePoint entity) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
-    Utils.required(flinkEnv != null);
-    int cpThreshold =
-        Integer.parseInt(
-            flinkEnv.convertFlinkYamlAsMap().getOrDefault("state.checkpoints.num-retained", "5"));
+    Application application = applicationService.getById(entity.getAppId());
+    Utils.notNull(flinkEnv);
+    Utils.notNull(application);
+
+    String numRetainedFromDynamicProp =
+        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties())
+            .get(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key());
+
+    int cpThreshold = 0;
+    if (numRetainedFromDynamicProp != null) {
+      try {
+        cpThreshold = Integer.parseInt(numRetainedFromDynamicProp.trim());
+        if (cpThreshold <= 0) {
+          log.warn(
+              "this value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be gt 0");
+          cpThreshold = 0;
+        }
+      } catch (NumberFormatException e) {
+        log.warn(
+            "this value of dynamicProperties key: state.checkpoints.num-retained invalid, must be number");
+      }
+    }
+
+    if (cpThreshold == 0) {
+      String flinkConfNumRetained =
+          flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key());
+
+      int defaultCpNumRetained = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.defaultValue();
+
+      if (flinkConfNumRetained != null) {
+        try {
+          cpThreshold = Integer.parseInt(flinkConfNumRetained.trim());
+          if (cpThreshold <= 0) {
+            log.warn(
+                "the value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be gt 0, default value: {} will be use",
+                defaultCpNumRetained);
+            cpThreshold = defaultCpNumRetained;
+          }
+        } catch (NumberFormatException e) {
+          log.warn(
+              "the value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be use",
+              flinkEnv.getFlinkHome(),
+              flinkConfNumRetained);
+          cpThreshold = defaultCpNumRetained;
+        }
+      } else {
+        log.info(
+            "the application: {} is not set {} in dynamicProperties or value is invalid, and flink-conf.yaml is the same problem of flink env: {}, default value: {} will be use.",
+            application.getJobName(),
+            CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key(),
+            flinkEnv.getFlinkHome(),
+            CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.defaultValue());
+      }
+    }
 
     if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
       cpThreshold = cpThreshold - 1;
