@@ -126,7 +126,7 @@ public class FlinkCluster implements Serializable {
     Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
     if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
       map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
-      YarnQueueLabelExpression.addQueueLabelExprInto(this.yarnQueue, map);
+      map.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
     }
     map.entrySet().removeIf(entry -> entry.getValue() == null);
     return map;

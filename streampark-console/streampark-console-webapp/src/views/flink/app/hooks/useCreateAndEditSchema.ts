@@ -467,7 +467,7 @@ export const useCreateAndEditSchema = (
         field: 'yarnQueue',
         label: t('flink.app.yarnQueue'),
         component: 'Input',
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION || values.executionMode == ExecModeEnum.YARN_PER_JOB,
         render: renderYarnQueue
       },
       {

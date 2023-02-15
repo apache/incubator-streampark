@@ -20,11 +20,14 @@ package org.apache.streampark.console.core.utils;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.enums.ExecutionMode;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -32,16 +35,16 @@ import java.util.regex.Pattern;
 /** Util class for parsing and checking Yarn queue & Label */
 public class YarnQueueLabelExpression {
 
-  public static final String AT = "@";
+  private static final String AT = "@";
 
-  public static final String REGEX = "[a-zA-Z0-9_\\-]+";
+  private static final String REGEX = "[a-zA-Z0-9_\\-]+";
 
-  public static final String ERR_HINTS = "Yarn queue label format is invalid.";
+  @VisibleForTesting public static final String ERR_HINTS = "Yarn queue label format is invalid.";
 
-  public static final Pattern QUEUE_LABEL_PATTERN =
+  private static final Pattern QUEUE_LABEL_PATTERN =
       Pattern.compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
 
-  public static final String QUEUE_LABEL_FORMAT = "%s" + AT + "%s";
+  private static final String QUEUE_LABEL_FORMAT = "%s" + AT + "%s";
 
   private final String queue;
   private @Nullable final String labelExpression;
@@ -86,10 +89,10 @@ public class YarnQueueLabelExpression {
    * @param queueLabel queueLabel expression.
    */
   public static void checkQueueLabelIfNeed(int executionMode, String queueLabel) {
-    if ((ExecutionMode.YARN_SESSION == ExecutionMode.of(executionMode)
-            || ExecutionMode.YARN_APPLICATION == ExecutionMode.of(executionMode))
-        && !YarnQueueLabelExpression.isValid(queueLabel, true)) {
-      throw new IllegalArgumentException(ERR_HINTS);
+    if (ExecutionMode.isYarnMode(executionMode)) {
+      if (!YarnQueueLabelExpression.isValid(queueLabel, true)) {
+        throw new IllegalArgumentException(ERR_HINTS);
+      }
     }
   }
 
@@ -115,21 +118,16 @@ public class YarnQueueLabelExpression {
     throw new IllegalArgumentException(ERR_HINTS);
   }
 
-  /**
-   * Add the queue and label expression into the map as the specified configuration items. For
-   * {@link ConfigConst#KEY_YARN_APP_QUEUE} & {@link ConfigConst#KEY_YARN_APP_NODE_LABEL()}.
-   *
-   * @param queueLabelExp queue and label expression
-   * @param map the target properties.
-   */
-  public static <V> void addQueueLabelExprInto(String queueLabelExp, @Nonnull Map<String, V> map) {
+  public static Map<String, String> getQueueLabelMap(String queueLabelExp) {
     if (StringUtils.isEmpty(queueLabelExp)) {
-      return;
+      return Collections.emptyMap();
     }
     YarnQueueLabelExpression yarnQueueLabelExpression = of(queueLabelExp);
+    Map<String, String> map = new HashMap<>(2);
     yarnQueueLabelExpression
         .getLabelExpression()
-        .ifPresent(labelExp -> map.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), (V) labelExp));
-    map.put(ConfigConst.KEY_YARN_APP_QUEUE(), (V) yarnQueueLabelExpression.queue);
+        .ifPresent(labelExp -> map.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), labelExp));
+    map.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueueLabelExpression.queue);
+    return map;
   }
 }

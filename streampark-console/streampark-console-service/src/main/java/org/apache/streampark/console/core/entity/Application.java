@@ -597,12 +597,16 @@ public class Application implements Serializable {
   public void updateHotParams(Application appParam) {
     ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
     Map<String, String> hotParams = new HashMap<>(0);
-    if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
-      YarnQueueLabelExpression.addQueueLabelExprInto(appParam.getYarnQueue(), hotParams);
+    if (needFillYarnQueueLabel(executionModeEnum)) {
+      hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
     }
     if (!hotParams.isEmpty()) {
       this.setHotParams(JacksonUtils.write(hotParams));
     }
+  }
+
+  private boolean needFillYarnQueueLabel(ExecutionMode mode) {
+    return ExecutionMode.YARN_PER_JOB.equals(mode) || ExecutionMode.YARN_APPLICATION.equals(mode);
   }
 
   @Data
