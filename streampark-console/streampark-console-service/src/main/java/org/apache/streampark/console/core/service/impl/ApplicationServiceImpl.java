@@ -1636,16 +1636,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
-
-      String yarnQueue =
-          (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
-      String yarnLabelExpr =
-          (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_NODE_LABEL());
-      Optional.ofNullable(yarnQueue)
-          .ifPresent(yq -> properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yq));
-      Optional.ofNullable(yarnLabelExpr)
-          .ifPresent(yLabel -> properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yLabel));
-
       if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         Utils.required(
@@ -1655,6 +1645,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     + "the cluster has been deleted. Please contact the Admin.",
                 application.getFlinkClusterId()));
         properties.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
+      } else {
+        String yarnQueue =
+            (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
+        String yarnLabelExpr =
+            (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_NODE_LABEL());
+        Optional.ofNullable(yarnQueue)
+            .ifPresent(yq -> properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yq));
+        Optional.ofNullable(yarnLabelExpr)
+            .ifPresent(yLabel -> properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yLabel));
       }
     } else if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
       properties.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
