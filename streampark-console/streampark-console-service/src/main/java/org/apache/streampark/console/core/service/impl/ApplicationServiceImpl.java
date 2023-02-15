@@ -1120,10 +1120,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
 
+    fillBackYarnQueue(application);
+
+    return application;
+  }
+
+  private void fillBackYarnQueue(Application application) {
+    if (!(ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()
+        || ExecutionMode.YARN_PER_JOB == application.getExecutionModeEnum())) {
+      return;
+    }
+
     Map<String, Object> hotParamsMap = application.getHotParamsMap();
-    if (!hotParamsMap.isEmpty()
-        && ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())
-        && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
+    if (!hotParamsMap.isEmpty() && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
       String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
       String labelExpr =
           Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
@@ -1131,7 +1140,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               .orElse(null);
       application.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
     }
-    return application;
   }
 
   @Override
@@ -1628,16 +1636,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
+
       String yarnQueue =
           (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
       String yarnLabelExpr =
           (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_NODE_LABEL());
-      if (yarnQueue != null) {
-        properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
-      }
-      if (yarnLabelExpr != null) {
-        properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yarnLabelExpr);
-      }
+      Optional.ofNullable(yarnQueue)
+          .ifPresent(yq -> properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yq));
+      Optional.ofNullable(yarnLabelExpr)
+          .ifPresent(yLabel -> properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yLabel));
+
       if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         Utils.required(
