@@ -97,11 +97,6 @@ trait FlinkSubmitTrait extends Logger {
       .safeSet(ApplicationConfiguration.APPLICATION_ARGS, extractProgramArgs(submitRequest))
       .safeSet(PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID, submitRequest.jobId)
 
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
-    // state.checkpoints.num-retained
-    val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
-    flinkConfig.safeSet(retainedOption, flinkDefaultConfiguration.get(retainedOption))
-
     // set savepoint parameter
     if (submitRequest.savePoint != null) {
       flinkConfig.safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
