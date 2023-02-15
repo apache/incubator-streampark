@@ -67,7 +67,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private void expire(SavePoint entity) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
-    Utils.required(flinkEnv != null);
+    Utils.notNull(flinkEnv);
     int cpThreshold =
         Integer.parseInt(
             flinkEnv.convertFlinkYamlAsMap().getOrDefault("state.checkpoints.num-retained", "5"));

@@ -50,7 +50,7 @@ public class ProjectController {
   @PostMapping("create")
   @RequiresPermissions("project:create")
   public RestResponse create(Project project) {
-    Utils.required(project.getTeamId() != null, "The teamId cannot be null");
+    Utils.notNull(project.getTeamId(), "The teamId cannot be null");
     return projectService.create(project);
   }
 

@@ -116,7 +116,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   public boolean update(Project projectParam) {
     try {
       Project project = getById(projectParam.getId());
-      Utils.required(project != null);
+      Utils.notNull(project);
       Utils.required(
           project.getTeamId().equals(projectParam.getTeamId()), "TeamId cannot be changed.");
       project.setName(projectParam.getName());
@@ -162,7 +162,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Transactional(rollbackFor = {Exception.class})
   public boolean delete(Long id) {
     Project project = getById(id);
-    Utils.required(project != null);
+    Utils.notNull(project);
     LambdaQueryWrapper<Application> queryWrapper =
         new LambdaQueryWrapper<Application>().eq(Application::getProjectId, id);
     long count = applicationService.count(queryWrapper);
@@ -234,7 +234,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public List<String> modules(Long id) {
     Project project = getById(id);
-    Utils.required(project != null);
+    Utils.notNull(project);
     BuildState buildState = BuildState.of(project.getBuildState());
     if (BuildState.SUCCESSFUL.equals(buildState)) {
       File appHome = project.getDistHome();
@@ -309,7 +309,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       }
       List<Map<String, Object>> list = new ArrayList<>();
       File[] files = unzipFile.listFiles(x -> "conf".equals(x.getName()));
-      Utils.required(files != null);
+      Utils.notNull(files);
       for (File item : files) {
         eachFile(item, list, true);
       }

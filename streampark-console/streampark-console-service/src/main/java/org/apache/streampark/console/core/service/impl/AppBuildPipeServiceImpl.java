@@ -145,7 +145,7 @@ public class AppBuildPipeServiceImpl
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
     if (app.isFlinkSqlJob()) {
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
-      Utils.required(flinkSql != null);
+      Utils.notNull(flinkSql);
       app.setDependency(flinkSql.getDependency());
     }
 
