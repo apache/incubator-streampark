@@ -76,18 +76,20 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     Utils.notNull(flinkEnv);
     Utils.notNull(application);
 
+    String numRetainedKey = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key();
     String numRetainedFromDynamicProp =
         FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties())
-            .get(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key());
+            .get(numRetainedKey);
 
     int cpThreshold = 0;
     if (numRetainedFromDynamicProp != null) {
       try {
-        cpThreshold = Integer.parseInt(numRetainedFromDynamicProp.trim());
-        if (cpThreshold <= 0) {
+        int value = Integer.parseInt(numRetainedFromDynamicProp.trim());
+        if (value > 0) {
+          cpThreshold = value;
+        } else {
           log.warn(
               "this value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be gt 0");
-          cpThreshold = 0;
         }
       } catch (NumberFormatException e) {
         log.warn(
@@ -96,34 +98,33 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     if (cpThreshold == 0) {
-      String flinkConfNumRetained =
-          flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key());
-
-      int defaultCpNumRetained = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.defaultValue();
-
+      String flinkConfNumRetained = flinkEnv.convertFlinkYamlAsMap().get(numRetainedKey);
+      int numRetainedDefaultValue = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.defaultValue();
       if (flinkConfNumRetained != null) {
         try {
-          cpThreshold = Integer.parseInt(flinkConfNumRetained.trim());
-          if (cpThreshold <= 0) {
+          int value = Integer.parseInt(flinkConfNumRetained.trim());
+          if (value > 0) {
+            cpThreshold = value;
+          } else {
+            cpThreshold = numRetainedDefaultValue;
             log.warn(
                 "the value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be gt 0, default value: {} will be use",
-                defaultCpNumRetained);
-            cpThreshold = defaultCpNumRetained;
+                numRetainedDefaultValue);
           }
         } catch (NumberFormatException e) {
+          cpThreshold = numRetainedDefaultValue;
           log.warn(
               "the value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be use",
               flinkEnv.getFlinkHome(),
               flinkConfNumRetained);
-          cpThreshold = defaultCpNumRetained;
         }
       } else {
         log.info(
             "the application: {} is not set {} in dynamicProperties or value is invalid, and flink-conf.yaml is the same problem of flink env: {}, default value: {} will be use.",
             application.getJobName(),
-            CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key(),
+            numRetainedKey,
             flinkEnv.getFlinkHome(),
-            CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.defaultValue());
+            numRetainedDefaultValue);
       }
     }
 
