@@ -119,6 +119,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               flinkConfNumRetained);
         }
       } else {
+        cpThreshold = numRetainedDefaultValue;
         log.info(
             "the application: {} is not set {} in dynamicProperties or value is invalid, and flink-conf.yaml is the same problem of flink env: {}, default value: {} will be use.",
             application.getJobName(),
