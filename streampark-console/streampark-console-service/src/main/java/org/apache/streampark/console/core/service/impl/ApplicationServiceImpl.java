@@ -76,6 +76,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -131,6 +132,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -145,6 +147,7 @@ import java.util.stream.Collectors;
 import static org.apache.streampark.common.enums.StorageType.LFS;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
+import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.checkQueueLabelIfNeed;
 
 @Slf4j
 @Service
@@ -698,6 +701,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.setOptionState(OptionState.NONE.getValue());
     appParam.setCreateTime(new Date());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
+    checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
       String jarPath =
@@ -813,6 +817,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Transactional(rollbackFor = {Exception.class})
   public boolean update(Application appParam) {
     try {
+      checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
       Application application = getById(appParam.getId());
       application.setLaunch(LaunchState.NEED_LAUNCH.get());
       if (application.isUploadJob()) {
@@ -1115,15 +1120,26 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
 
-    if (!application.getHotParamsMap().isEmpty()) {
-      if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
-        if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
-          application.setYarnQueue(
-              application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
-        }
-      }
-    }
+    setYarnQueue(application);
+
     return application;
+  }
+
+  private void setYarnQueue(Application application) {
+    if (!(ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()
+        || ExecutionMode.YARN_PER_JOB == application.getExecutionModeEnum())) {
+      return;
+    }
+
+    Map<String, Object> hotParamsMap = application.getHotParamsMap();
+    if (!hotParamsMap.isEmpty() && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
+      String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
+      String labelExpr =
+          Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
+              .map(Object::toString)
+              .orElse(null);
+      application.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
+    }
   }
 
   @Override
@@ -1620,11 +1636,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
-      String yarnQueue =
-          (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
-      if (yarnQueue != null) {
-        properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
-      }
       if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         Utils.required(
@@ -1634,6 +1645,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     + "the cluster has been deleted. Please contact the Admin.",
                 application.getFlinkClusterId()));
         properties.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
+      } else {
+        String yarnQueue =
+            (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
+        String yarnLabelExpr =
+            (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_NODE_LABEL());
+        Optional.ofNullable(yarnQueue)
+            .ifPresent(yq -> properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yq));
+        Optional.ofNullable(yarnLabelExpr)
+            .ifPresent(yLabel -> properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yLabel));
       }
     } else if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
       properties.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), "Always");

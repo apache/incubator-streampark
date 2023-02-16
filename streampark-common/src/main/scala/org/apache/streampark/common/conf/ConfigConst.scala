@@ -124,6 +124,8 @@ object ConfigConst {
 
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
+  val KEY_YARN_APP_NODE_LABEL = "yarn.application.node-label"
+
   val KEY_K8S_IMAGE_PULL_POLICY = "kubernetes.container.image.pull-policy"
 
   // ---table---

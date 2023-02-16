@@ -235,5 +235,6 @@ export default {
       '不建议同时配置 "total process memory" 和 "total Flink memory"。 由于潜在的内存配置冲突，它可能会导致部署失败。 配置其他内存组件也需要谨慎，因为它会产生进一步的配置冲突，最简单的方法是设置"total process memory"',
     dynamicProperties:
       '动态Properties: 与flink run命令行模式下的 -D$property=$value 的作用相同，允许指定多个参数。 更多可以设置的参数请查阅',
+    yarnQueue: '此输入不仅支持快速设置 "yarn.application.name" 还支持设置 "yarn.application.node-label"。例如，输入 "queue1" 表示 "yarn.application.name" 的值为 "queue1"，而输入 "queue1@label1,label2" 则表示 "yarn.application.name" 设置为 "queue1" 且 "yarn.application.node-label" 设置为 "label1,label2"。Queue 和 label 之间使用 "@" 分隔。',
   },
 };

@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
@@ -36,6 +35,7 @@ import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.enums.ResourceFrom;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
+import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
@@ -597,14 +597,16 @@ public class Application implements Serializable {
   public void updateHotParams(Application appParam) {
     ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
     Map<String, String> hotParams = new HashMap<>(0);
-    if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
-      if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
-        hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
-      }
+    if (needFillYarnQueueLabel(executionModeEnum)) {
+      hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
     }
     if (!hotParams.isEmpty()) {
       this.setHotParams(JacksonUtils.write(hotParams));
     }
+  }
+
+  private boolean needFillYarnQueueLabel(ExecutionMode mode) {
+    return ExecutionMode.YARN_PER_JOB.equals(mode) || ExecutionMode.YARN_APPLICATION.equals(mode);
   }
 
   @Data
