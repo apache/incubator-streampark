@@ -451,7 +451,7 @@ public final class CommonUtils implements Serializable {
   }
 
   public static <T> T[] arrayRemoveElements(T[] array, T... elem) {
-    Utils.required(array != null);
+    Utils.notNull(array);
     List<T> arrayList = new ArrayList<>(0);
     Collections.addAll(arrayList, array);
     if (isEmpty(elem)) {

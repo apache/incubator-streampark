@@ -43,7 +43,7 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
       Map<String, MultipartFile> files = multipartRequest.getFileMap();
       for (String file : files.keySet()) {
         MultipartFile multipartFile = multipartRequest.getFile(file);
-        Utils.required(multipartFile != null);
+        Utils.notNull(multipartFile);
         boolean fileType = FileUtils.isJarFileType(multipartFile.getInputStream());
         if (!fileType) {
           throw new ApiAlertException("illegal file type, Only standard jar files supported");

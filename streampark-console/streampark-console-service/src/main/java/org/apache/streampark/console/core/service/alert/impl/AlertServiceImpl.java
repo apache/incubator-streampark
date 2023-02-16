@@ -84,7 +84,7 @@ public class AlertServiceImpl implements AlertService {
                   try {
                     Class<? extends AlertNotifyService> notifyServiceClass =
                         getAlertServiceImpl(alertType);
-                    Utils.required(notifyServiceClass != null);
+                    Utils.notNull(notifyServiceClass);
                     boolean alertRes =
                         SpringContextUtils.getBean(notifyServiceClass)
                             .doAlert(params, alertTemplate);

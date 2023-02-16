@@ -75,7 +75,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public IPage<Member> findUsers(Member member, RestRequest request) {
-    Utils.required(member.getTeamId() != null, "The team id is required.");
+    Utils.notNull(member.getTeamId(), "The team id is required.");
     Page<Member> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
@@ -102,7 +102,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   private Member findByUserId(Long teamId, Long userId) {
-    Utils.required(teamId != null, "The team id is required.");
+    Utils.notNull(teamId, "The team id is required.");
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>()
             .eq(Member::getTeamId, teamId)

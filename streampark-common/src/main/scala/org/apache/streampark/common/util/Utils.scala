@@ -35,7 +35,7 @@ object Utils {
   }
 
   def notNull(obj: Any): Unit = {
-    notNull(obj, "this argument is required; it must not be null")
+    notNull(obj, "this argument must not be null")
   }
 
   def notEmpty(elem: Any): Boolean = {
