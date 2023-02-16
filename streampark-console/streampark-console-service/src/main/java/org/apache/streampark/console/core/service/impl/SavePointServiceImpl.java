@@ -91,6 +91,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Autowired private ApplicationLogService applicationLogService;
 
+  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,
@@ -282,6 +284,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     application.setOptionState(OptionState.SAVEPOINTING.getValue());
     application.setOptionTime(new Date());
     this.applicationService.updateById(application);
+    flinkRESTAPIWatcher.init();
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
 
@@ -325,7 +328,9 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               log.error("Trigger savepoint for flink job failed.", e);
               ApplicationLog log = new ApplicationLog();
               log.setAppId(application.getId());
-              log.setYarnAppId(application.getClusterId());
+              if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+                log.setYarnAppId(application.getClusterId());
+              }
               log.setOptionTime(new Date());
               String exception = Utils.stringifyException(e);
               log.setException(exception);
@@ -339,6 +344,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               application.setOptionState(OptionState.NONE.getValue());
               application.setOptionTime(new Date());
               applicationService.update(application);
+              flinkRESTAPIWatcher.init();
             });
   }
 
@@ -362,11 +368,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     Map<String, Object> properties = new HashMap<>();
 
     if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
-      Utils.required(
-          cluster != null,
+      Utils.notNull(
+          cluster,
           String.format(
-              "The clusterId=%s cannot be find, maybe the clusterId is wrong or "
-                  + "the cluster has been deleted. Please contact the Admin.",
+              "The clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
               application.getFlinkClusterId()));
       URI activeAddress = cluster.getRemoteURI();
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
@@ -380,11 +385,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       return application.getClusterId();
     } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
       if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-        Utils.required(
-            cluster != null,
+        Utils.notNull(
+            cluster,
             String.format(
-                "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or "
-                    + "the cluster has been deleted. Please contact the Admin.",
+                "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
                 application.getFlinkClusterId()));
         return cluster.getClusterId();
       } else {
