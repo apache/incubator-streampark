@@ -1120,12 +1120,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
 
-    fillBackYarnQueue(application);
+    setYarnQueue(application);
 
     return application;
   }
 
-  private void fillBackYarnQueue(Application application) {
+  private void setYarnQueue(Application application) {
     if (!(ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()
         || ExecutionMode.YARN_PER_JOB == application.getExecutionModeEnum())) {
       return;
