@@ -27,10 +27,8 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Data
 public class CheckPoints implements Serializable {
@@ -107,9 +105,7 @@ public class CheckPoints implements Serializable {
       if (Objects.nonNull(savepoint)) {
         checkPoints.add(savepoint);
       }
-      return checkPoints.stream()
-          .sorted(Comparator.comparingLong(chk -> chk.id))
-          .collect(Collectors.toList());
+      return checkPoints;
     }
   }
 }

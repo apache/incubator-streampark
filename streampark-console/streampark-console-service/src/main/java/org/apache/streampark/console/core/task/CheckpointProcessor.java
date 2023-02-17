@@ -66,29 +66,32 @@ public class CheckpointProcessor {
 
   @Autowired private SavePointService savePointService;
 
-  public void process(Long appId, String jobID, @Nonnull CheckPoints checkPoints) {
-    checkPoints.getLatestCheckpoint().forEach(checkPoint -> process(appId, jobID, checkPoint));
+  public void process(Application application, @Nonnull CheckPoints checkPoints) {
+    checkPoints.getLatestCheckpoint().forEach(checkPoint -> process(application, checkPoint));
   }
 
-  private void process(Long appId, String jobID, @Nonnull CheckPoints.CheckPoint checkPoint) {
-    Application application = applicationService.getById(appId);
+  private void process(Application application, @Nonnull CheckPoints.CheckPoint checkPoint) {
+    String jobID = application.getJobId();
+    Long appId = application.getId();
     CheckPointStatus status = checkPoint.getCheckPointStatus();
 
     if (CheckPointStatus.COMPLETED.equals(status)) {
-      String cacheId = getCacheIdForCheckpoint(appId, application.getJobId());
+      String cacheId = getCacheIdForCheckpoint(appId, jobID);
       Long latestChkId = getLatestCheckpointedId(appId, cacheId);
       if (shouldStoreAsSavepoint(appId, jobID, checkPoint)) {
         savepointedCache.put(
             getCacheIdForSavepoint(appId, jobID, checkPoint.getId()), DEFAULT_FLAG_BYTE);
         saveSavepoint(
-            checkPoint, application, latestChkId == null || checkPoint.getId() > latestChkId);
+            checkPoint,
+            application.getId(),
+            latestChkId == null || checkPoint.getId() > latestChkId);
         return;
       }
       if (shouldStoreAsCheckpoint(checkPoint, latestChkId)) {
         checkPointCache.put(cacheId, checkPoint.getId());
-        saveSavepoint(checkPoint, application, true);
+        saveSavepoint(checkPoint, application.getId(), true);
       }
-    } else if (shouldProcessFailedTrigger(checkPoint, application, status)) {
+    } else if (shouldProcessFailedTrigger(checkPoint, application.cpFailedTrigger(), status)) {
       Counter counter = checkPointFailedCache.get(appId);
       if (counter == null) {
         checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
@@ -156,16 +159,15 @@ public class CheckpointProcessor {
   }
 
   private boolean shouldProcessFailedTrigger(
-      CheckPoints.CheckPoint checkPoint, Application application, CheckPointStatus status) {
+      CheckPoints.CheckPoint checkPoint, boolean cpFailedTrigger, CheckPointStatus status) {
     return CheckPointStatus.FAILED.equals(status)
         && !checkPoint.getIsSavepoint()
-        && application.cpFailedTrigger();
+        && cpFailedTrigger;
   }
 
-  private void saveSavepoint(
-      CheckPoints.CheckPoint checkPoint, Application application, boolean asLatest) {
+  private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Long appId, boolean asLatest) {
     SavePoint savePoint = new SavePoint();
-    savePoint.setAppId(application.getId());
+    savePoint.setAppId(appId);
     savePoint.setChkId(checkPoint.getId());
     savePoint.setLatest(asLatest);
     savePoint.setType(checkPoint.getCheckPointType().get());
