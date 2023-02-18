@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ThreadUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
@@ -131,12 +131,8 @@ public class ApplicationBackUpServiceImpl
     // restore)
     fsOperator.delete(application.getAppHome());
 
-    try {
-      // copy backup files to a valid dir
-      fsOperator.copyDir(backParam.getPath(), application.getAppHome());
-    } catch (Exception e) {
-      throw e;
-    }
+    // copy backup files to a valid dir
+    fsOperator.copyDir(backParam.getPath(), application.getAppHome());
 
     // update restart status
     try {
@@ -190,7 +186,8 @@ public class ApplicationBackUpServiceImpl
   @Override
   public void rollbackFlinkSql(Application application, FlinkSql sql) {
     ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
-    Utils.notNull(backUp);
+    ApiAlertException.throwIfNull(
+        backUp, "Application backup can't be null. Rollback flink sql failed.");
     // rollback config and sql
     effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
     effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());

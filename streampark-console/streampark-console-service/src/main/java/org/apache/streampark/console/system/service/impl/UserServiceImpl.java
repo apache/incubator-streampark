@@ -138,14 +138,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Transactional(rollbackFor = Exception.class)
   public void updatePassword(User userParam) {
     User user = getById(userParam.getUserId());
-    if (user == null) {
-      throw new ApiAlertException("update password failed, user is null");
-    }
+    ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
 
     String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
-    if (!StringUtils.equals(user.getPassword(), saltPassword)) {
-      throw new ApiAlertException("update password failed, old password error");
-    }
+    ApiAlertException.throwIfFalse(
+        StringUtils.equals(user.getPassword(), saltPassword),
+        "Old password error. Update password failed.");
 
     String salt = ShaHashUtils.getRandomSalt();
     String password = ShaHashUtils.encrypt(salt, userParam.getPassword());

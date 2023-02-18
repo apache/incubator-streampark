@@ -75,7 +75,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public IPage<Member> findUsers(Member member, RestRequest request) {
-    Utils.notNull(member.getTeamId(), "The team id is required.");
+    ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
     Page<Member> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
@@ -102,7 +102,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   private Member findByUserId(Long teamId, Long userId) {
-    Utils.notNull(teamId, "The team id is required.");
+    ApiAlertException.throwIfNull(teamId, "The team id is required.");
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>()
             .eq(Member::getTeamId, teamId)
@@ -137,7 +137,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 () ->
                     new ApiAlertException(
                         String.format("The teamId [%s] not found", member.getTeamId())));
-    Utils.required(
+    ApiAlertException.throwIfFalse(
         findByUserId(member.getTeamId(), user.getUserId()) == null,
         String.format(
             "The user [%s] has been added the team [%s], please don't add it again.",

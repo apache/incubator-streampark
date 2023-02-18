@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -62,9 +63,9 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   @Override
   public void update(FlinkEnv version) throws IOException {
     FlinkEnv flinkEnv = super.getById(version.getId());
-    if (flinkEnv == null) {
-      throw new RuntimeException("flink home message lost, please check database status!");
-    }
+    ApiAlertException.throwIfNull(
+        flinkEnv,
+        "Flink home message lost, update flink env failed, please check database status!");
     flinkEnv.setDescription(version.getDescription());
     flinkEnv.setFlinkName(version.getFlinkName());
     if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
