@@ -24,13 +24,9 @@ body:
     attributes:
       value: |
         Please make sure what you are reporting is indeed a bug with reproducible steps.
-        For better global communication, Please write in English.
-        ---
-        请确保您所报告的确实是具有可重现步骤的错误。为了更好的交流，请用英文书写。
+        For better global communication, Please write in English. (请确保您所报告的确实是具有可重现步骤的错误。为了更好的交流，请用英文书写)
 
-        If you feel the description in English is not clear, then you can append description in Chinese, thanks!
-        ---
-        如果您觉得英文描述不清楚，可以附加中文描述，谢谢！
+        If you feel the description in English is not clear, then you can append description in Chinese, thanks! (如果您觉得英文描述不清楚，可以附加中文描述，谢谢)
 
   - type: checkboxes
     attributes:
