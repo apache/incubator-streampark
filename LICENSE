@@ -206,6 +206,14 @@
 Apache 2.0 licenses
 ========================================================================
 
+The following file are provided under the Apache 2.0 License.
+
+streampark-console/streampark-console-webapp/package.json
+streampark-console/streampark-console-webapp/tsconfig.json
+streampark-console/streampark-console-webapp/public/favicon.ico
+streampark-console/streampark-console-webapp/src/assets/*
+
+
 The following components are provided under the Apache License. See project link for details.
 The text of each license is the standard Apache 2.0 license.
 
