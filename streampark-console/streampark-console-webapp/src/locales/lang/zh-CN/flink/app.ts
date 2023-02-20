@@ -129,7 +129,12 @@ export default {
     fullScreen: '全屏',
     exit: '退出',
     successful: '验证成功',
-    compareFlinkSQL: '比较 Flink SQL',
+    compare: '比较',
+    version: '版本',
+    compareFlinkSQL: '选择比对版本',
+    compareVersionPlaceholder: '请选择要比较的sql版本',
+    effectiveVersion: '当前生效版本',
+    candidateVersion: '候选比对版本',
   },
   editStreamPark: {
     success: '更新成功',

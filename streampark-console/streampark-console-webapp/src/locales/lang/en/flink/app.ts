@@ -131,7 +131,12 @@ export default {
     fullScreen: 'Full Screen',
     exit: 'Exit',
     successful: 'Verification success',
+    compare: 'Compare',
+    version: 'Version',
     compareFlinkSQL: 'Compare Flink SQL',
+    compareVersionPlaceholder: 'Please select the sql version to compare',
+    effectiveVersion: 'effective',
+    candidateVersion: 'candidate',
   },
   editStreamPark: {
     success: 'update successful',
