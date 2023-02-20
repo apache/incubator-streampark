@@ -100,7 +100,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
           60L,
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-trigger-savepoint-executor"),
+          ThreadUtils.threadFactory("trigger-savepoint-executor"),
           new ThreadPoolExecutor.AbortPolicy());
 
   @Override
