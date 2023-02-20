@@ -299,7 +299,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     TriggerSavepointRequest request =
         new TriggerSavepointRequest(
             flinkEnv.getFlinkVersion(),
-            ExecutionMode.of(application.getExecutionMode()),
+            application.getExecutionModeEnum(),
             clusterId,
             application.getJobId(),
             customSavepoint,
