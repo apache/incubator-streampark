@@ -133,7 +133,10 @@ public class Application implements Serializable {
   private String module;
 
   private String options;
+
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String hotParams;
+
   private Integer resolveOrder;
   private Integer executionMode;
   private String dynamicProperties;
@@ -595,6 +598,9 @@ public class Application implements Serializable {
 
   @SneakyThrows
   public void updateHotParams(Application appParam) {
+    if (appParam != this) {
+      this.hotParams = null;
+    }
     ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
     Map<String, String> hotParams = new HashMap<>(0);
     if (needFillYarnQueueLabel(executionModeEnum)) {
