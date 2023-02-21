@@ -468,7 +468,7 @@ export const useCreateAndEditSchema = (
         label: t('flink.app.yarnQueue'),
         component: 'Input',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION || values.executionMode == ExecModeEnum.YARN_PER_JOB,
-        render: renderYarnQueue
+        render: (renderCallbackParams) => renderYarnQueue(renderCallbackParams)
       },
       {
         field: 'podTemplate',
