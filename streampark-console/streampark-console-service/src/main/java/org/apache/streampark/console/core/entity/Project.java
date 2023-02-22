@@ -204,7 +204,7 @@ public class Project implements Serializable {
       cmdBuffer.append(this.buildArgs.trim());
     }
 
-    Setting setting = SettingService.SETTINGS.get(CommonConfig.MAVEN_SETTINGS_PATH());
+    Setting setting = SettingService.SETTINGS.get(SettingService.KEY_MAVEN_SETTINGS);
     if (setting != null) {
       cmdBuffer.append(" --settings ").append(setting.getSettingValue());
     }
