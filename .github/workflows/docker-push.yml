@@ -22,9 +22,11 @@ on:
     - cron: '0 10 * * *'
   push:
     branches:
-      - '**'
+      - dev
+      - release-*
     tags:
-      - 'v*.*.*'
+      - v*
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -32,16 +34,17 @@ concurrency:
 jobs:
   build_image:
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'apache/incubator-streampark' }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Java and Scala
         uses: olafurpg/setup-scala@v13
         with:
-            java-version: adopt@1.8
+          java-version: adopt@1.8
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '16'
 
