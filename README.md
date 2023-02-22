@@ -16,15 +16,15 @@
   ~
   -->
 
-<h1 style="text-align: center">
+<h1 align="center">
    <img src="https://streampark.apache.org/image/logo_name.png" 
    alt="StreamPark Logo" title="Apache StreamPark Logo" width="600"/>
   <br>
 </h1>
 
-<h3 style="text-align: center">A magical framework that makes stream processing easier!</h3>
+<h3 align="center">A magical framework that makes stream processing easier!</h3>
 
-<div style="text-align: center">
+<div align="center">
 
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg?style=for-the-badge&label=license)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![stars](https://img.shields.io/github/stars/apache/streampark?style=for-the-badge&label=stars)](https://github.com/apache/incubator-streampark/stargazers)
