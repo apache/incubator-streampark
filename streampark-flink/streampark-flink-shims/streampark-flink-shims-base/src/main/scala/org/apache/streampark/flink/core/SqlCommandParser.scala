@@ -174,6 +174,19 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   /**
    * <pre>
+   * WITH <with_item_definition> [ , ... ]
+   * SELECT ... FROM ...;
+   *
+   * <with_item_defintion>:
+   * with_item_name (column_name[, ...n]) AS ( <select_query> )
+   * </pre>
+   */
+  case object WITH extends SqlCommand(
+  "with",
+  "(with.+as.+\\(\\s*SELECT.+\\))")
+
+  /**
+   * <pre>
    * CREATE DATABASE [IF NOT EXISTS] [catalog_name.]db_name<br>
    * [COMMENT database_comment]<br>
    * WITH (key1=val1, key2=val2, ...)<br>
