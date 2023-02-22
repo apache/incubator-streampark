@@ -20,12 +20,11 @@ package org.apache.streampark.flink.packer.maven
 import java.io.File
 import java.util
 import javax.annotation.{Nonnull, Nullable}
-
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
-
 import com.google.common.collect.Lists
+import org.apache.maven.plugins.shade.filter.Filter
 import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
 import org.apache.maven.plugins.shade.resource.{ManifestResourceTransformer, ResourceTransformer, ServicesResourceTransformer}
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
@@ -41,7 +40,6 @@ import org.eclipse.aether.spi.connector.transport.TransporterFactory
 import org.eclipse.aether.transport.file.FileTransporterFactory
 import org.eclipse.aether.transport.http.HttpTransporterFactory
 import org.eclipse.aether.util.repository.AuthenticationBuilder
-
 import org.apache.streampark.common.conf.{InternalConfigHolder, Workspace}
 import org.apache.streampark.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
 import org.apache.streampark.common.util.{Logger, Utils}
@@ -99,7 +97,6 @@ object MavenTool extends Logger {
       val req = new ShadeRequest
       req.setJars(jarSet)
       req.setUberJar(uberJar)
-      req.setFilters(Lists.newArrayList())
 
       val transformer = ArrayBuffer[ResourceTransformer]()
       // ref https://ci.apache.org/projects/flink/flink-docs-master/docs/connectors/table/overview/#transform-table-connectorformat-resources
@@ -110,6 +107,8 @@ object MavenTool extends Logger {
         transformer += manifest
       }
       req.setResourceTransformers(transformer.toList)
+      // issue: https://github.com/apache/incubator-streampark/issues/2350
+      req.setFilters(List(new ShadeFilter))
       req.setRelocators(Lists.newArrayList())
       req
     }
@@ -208,6 +207,22 @@ object MavenTool extends Logger {
     val repoSystem = newRepoSystem()
     val session = newSession(repoSystem)
     (repoSystem, session)
+  }
+
+  class ShadeFilter extends Filter {
+    override def canFilter(jar: File): Boolean = true
+
+    override def isFiltered(name: String): Boolean = {
+      if (name.startsWith("META-INF/")) {
+        if (name.endsWith(".SF") || name.endsWith(".DSA") || name.endsWith(".RSA")) {
+          logInfo(s"shade ignore file: $name")
+          return true
+        }
+      }
+      false
+    }
+
+    override def finished(): Unit = {}
   }
 
 }
