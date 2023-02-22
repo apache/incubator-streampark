@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
