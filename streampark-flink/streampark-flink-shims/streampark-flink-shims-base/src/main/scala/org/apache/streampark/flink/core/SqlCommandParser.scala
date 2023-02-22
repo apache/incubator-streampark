@@ -182,8 +182,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    * </pre>
    */
   case object WITH extends SqlCommand(
-  "with",
-  "(with.+as.+\\(\\s*SELECT.+\\))")
+      "with",
+      "(WITH.+AS.+\\(\\s*SELECT.+\\))")
 
   /**
    * <pre>
