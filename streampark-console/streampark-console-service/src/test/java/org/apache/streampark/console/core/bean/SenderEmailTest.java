@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.commons.mail;
+package org.apache.streampark.console.core.bean;
 
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertTemplate;
-import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 
 import freemarker.template.Template;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,14 +35,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-class SendEmailTest {
+class SenderEmailTest {
 
   private Template template;
 
   private SenderEmail senderEmail;
 
   @BeforeEach
-  void initConfig() throws Exception {
+  void initConfig() {
     this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
     senderEmail = new SenderEmail();
     senderEmail.setFrom("****@domain.com");
@@ -77,7 +77,7 @@ class SendEmailTest {
       mail.setStatus(appState.name());
 
       StringWriter writer = new StringWriter();
-      Map<String, AlertTemplate> out = new HashMap<String, AlertTemplate>();
+      Map<String, AlertTemplate> out = new HashMap<>();
       out.put("mail", mail);
 
       template.process(out, writer);
