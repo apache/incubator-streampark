@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -204,7 +203,7 @@ public class Project implements Serializable {
       cmdBuffer.append(this.buildArgs.trim());
     }
 
-    Setting setting = SettingService.SETTINGS.get(CommonConfig.MAVEN_SETTINGS_PATH());
+    Setting setting = SettingService.SETTINGS.get(SettingService.KEY_MAVEN_SETTINGS);
     if (setting != null) {
       cmdBuffer.append(" --settings ").append(setting.getSettingValue());
     }
