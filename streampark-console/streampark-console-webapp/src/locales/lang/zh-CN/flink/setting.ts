@@ -183,15 +183,16 @@ export default {
   externalLink: {
     externalLinkSetting: '外部链接',
     form: {
-      name: '名字',
-      namePlaceholder: '请输入link的名称',
-      nameIsRequired: '名称是必填',
+      badgeLabel: '徽章标签',
+      badgeLabelPlaceholder: '请输入标签的名称',
+      badgeName: '徽章名字',
+      badgeNamePlaceholder: '请输入徽章名字',
+      badgeNameIsRequired: '徽章名字是必填',
+      badgeColor: '徽章颜色',
+      badgeColorIsRequired: '徽章颜色是必选',
       linkUrl: '链接',
       linkUrlPlaceholder: '请输入链接',
       linkUrlIsRequired: '链接是必填',
-      imageUrl: '徽章URL地址',
-      imageUrlPlaceholder: '请输入徽章URL的地址',
-      imageUrlIsRequired: '徽章URL是必填',
     },
     operateMessage: {
       createLinkSuccessful: '成功新建外部链接!',

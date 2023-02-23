@@ -46,6 +46,7 @@
   import DetailTab from './components/AppDetail/DetailTab.vue';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
+  import ExternalLinkBadge from '../setting/components/ExternalLinkBadge.vue';
 
   const route = useRoute();
   const router = useRouter();
@@ -240,9 +241,12 @@
       <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
       <Space class="-mt-8px">
         <div v-for="link in externalLinks" :key="link.id">
-          <a :href="link.renderedLinkUrl" target="_blank">
-            <img :src="link.imageUrl" :preview="false" />
-          </a>
+          <ExternalLinkBadge
+            :label="link.badgeLabel"
+            :redirect="link.renderedLinkUrl"
+            :color="link.badgeColor"
+            :message="link.badgeName"
+          />
         </div>
       </Space>
       <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">

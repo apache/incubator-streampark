@@ -32,7 +32,8 @@
   import { ColumnsType } from 'ant-design-vue/lib/table';
   import { useModal } from '/@/components/Modal';
   import ExternalLinkModal from './ExternalLinkModal.vue';
-  import { Table, Image, Popconfirm } from 'ant-design-vue';
+  import ExternalLinkBadge from './ExternalLinkBadge.vue';
+  import { Table, Popconfirm } from 'ant-design-vue';
   import { fetchExternalLink, fetchExternalLinkDelete } from '/@/api/flink/setting/externalLink';
 
   const [registerLinkModal, { openModal: openLinkModal }] = useModal();
@@ -72,8 +73,8 @@
     openLinkModal(true, item);
   }
   const columns: ColumnsType<ExternalLink> = [
-    { key: 'imageUrl', dataIndex: 'imageUrl' },
-    { key: 'name', dataIndex: 'name' },
+    { key: 'badgeColor', dataIndex: 'badgeColor' },
+    { key: 'badgeName', dataIndex: 'badgeName' },
     { key: 'linkUrl', dataIndex: 'linkUrl', ellipsis: true },
     {
       key: 'action',
@@ -84,7 +85,6 @@
   ];
 
   const ATable = Table;
-  const AImage = Image;
   const APopconfirm = Popconfirm;
 </script>
 <template>
@@ -96,8 +96,13 @@
   </div>
   <a-table :showHeader="false" :data-source="externalLinks" :columns="columns" :pagination="false">
     <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'imageUrl'">
-        <a-image :width="100" :src="record.imageUrl" :preview="false" />
+      <template v-if="column.key === 'badgeColor'">
+        <ExternalLinkBadge
+          :color="record.badgeColor"
+          :label="record.badgeLabel"
+          :redirect="record.linkUrl"
+          :message="record.badgeName"
+        />
       </template>
       <template v-else-if="column.key === 'action'">
         <span>

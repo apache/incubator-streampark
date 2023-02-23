@@ -14,7 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -34,6 +33,7 @@
     fetchExternalLinkCreate,
     fetchExternalLinkUpdate,
   } from '/@/api/flink/setting/externalLink';
+  import ExternalLinkBadge from './ExternalLinkBadge.vue';
   import { h, ref } from 'vue';
 
   const emit = defineEmits(['reload', 'register']);
@@ -44,17 +44,49 @@
     labelWidth: 120,
     schemas: [
       {
-        field: 'name',
-        label: t('flink.setting.externalLink.form.name'),
+        field: 'badgeName',
+        label: t('flink.setting.externalLink.form.badgeName'),
         component: 'Input',
         componentProps: {
-          placeholder: t('flink.setting.externalLink.form.namePlaceholder'),
+          placeholder: t('flink.setting.externalLink.form.badgeNamePlaceholder'),
           allowClear: true,
         },
         rules: [
           {
             required: true,
-            message: t('flink.setting.externalLink.form.nameIsRequired'),
+            message: t('flink.setting.externalLink.form.badgeNameIsRequired'),
+          },
+        ],
+      },
+      {
+        field: 'badgeLabel',
+        label: t('flink.setting.externalLink.form.badgeLabel'),
+        component: 'Input',
+        componentProps: {
+          placeholder: t('flink.setting.externalLink.form.badgeLabelPlaceholder'),
+          allowClear: true,
+        },
+      },
+      {
+        field: 'badgeColor',
+        label: t('flink.setting.externalLink.form.badgeColor'),
+        component: 'Input',
+        componentProps: {
+          type: 'color',
+          style: {
+            width: '100px',
+          },
+        },
+        afterItem: ({ model, field }) =>
+          h(ExternalLinkBadge, {
+            label: model['badgeLabel'],
+            message: model['badgeName'],
+            color: model[field],
+          }),
+        rules: [
+          {
+            required: true,
+            message: t('flink.setting.externalLink.form.badgeColorIsRequired'),
           },
         ],
       },
@@ -76,21 +108,6 @@
           {
             required: true,
             message: t('flink.setting.externalLink.form.linkUrlIsRequired'),
-          },
-        ],
-      },
-      {
-        field: 'imageUrl',
-        label: t('flink.setting.externalLink.form.imageUrl'),
-        component: 'Input',
-        componentProps: {
-          placeholder: t('flink.setting.externalLink.form.imageUrlPlaceholder'),
-          allowClear: true,
-        },
-        rules: [
-          {
-            required: true,
-            message: t('flink.setting.externalLink.form.imageUrlIsRequired'),
           },
         ],
       },
@@ -119,8 +136,9 @@
       if (externalLinkId.value) {
         const { data } = await fetchExternalLinkUpdate({
           id: externalLinkId.value,
-          name: formValue.name,
-          imageUrl: formValue.imageUrl,
+          badgeName: formValue.badgeName,
+          badgeColor: formValue.badgeColor,
+          badgeLabel: formValue.badgeLabel,
           linkUrl: formValue.linkUrl,
         });
         if (data.code === ResultEnum.SUCCESS) {
