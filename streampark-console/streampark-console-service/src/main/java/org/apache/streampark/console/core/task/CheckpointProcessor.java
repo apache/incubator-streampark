@@ -48,37 +48,15 @@ public class CheckpointProcessor {
   private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
   private static final Integer SAVEPOINT_CACHE_HOUR = 1;
 
-  /** Util class for checkpoint key. */
-  @Data
-  public static class CheckPointKey {
-    private Long appId;
-    private String jobId;
-    private Long checkId;
-
-    public CheckPointKey(Long appId, String jobId, Long checkId) {
-      this.appId = appId;
-      this.jobId = jobId;
-      this.checkId = checkId;
-    }
-
-    /** Get savepoint cache id. */
-    public String getSavePointId() {
-      return String.format("%s_%s_%s", appId, jobId, checkId);
-    }
-
-    /** Get checkpoint cache id. */
-    public String getCheckPointId() {
-      return String.format("%s_%s", appId, jobId);
-    }
-  }
-
   private final Cache<String, Long> checkPointCache =
       Caffeine.newBuilder().expireAfterAccess(1, TimeUnit.DAYS).build();
 
   /**
-   * Cache to store the savepoint if be stored in the db. Use the {appId}_{jobID}_{chkId} as the
-   * cache key to save the trace of the savepoint. And try best to make sure the every savepoint
-   * would be stored into DB.
+   * Cache to store the savepoint if be stored in the db. Use the {appId}_{jobID}_{chkId} from
+   * {@link CheckPointKey#getSavePointId()} as the cache key to save the trace of the savepoint. And
+   * try best to make sure the every savepoint would be stored into DB. Especially for the case
+   * 'maxConcurrent of Checkpoint' > 1: 1. savepoint(n-1) is completed after completed
+   * checkpoint(n); 2. savepoint(n-1) is completed after completed savepoint(n).
    */
   private final Cache<String, Byte> savepointedCache =
       Caffeine.newBuilder().expireAfterWrite(SAVEPOINT_CACHE_HOUR, TimeUnit.HOURS).build();
@@ -157,6 +135,8 @@ public class CheckpointProcessor {
       return false;
     }
     return savepointedCache.getIfPresent(checkPointKey.getSavePointId()) == null
+        // If the savepoint triggered before SAVEPOINT_CACHE_HOUR span, we'll see it as out-of-time
+        // savepoint and ignore it.
         && checkPoint.getTriggerTimestamp()
             >= System.currentTimeMillis() - TimeUnit.HOURS.toMillis(SAVEPOINT_CACHE_HOUR);
   }
@@ -209,6 +189,30 @@ public class CheckpointProcessor {
 
     public long getDuration(Long currentTimestamp) {
       return (currentTimestamp - this.timestamp) / 1000 / 60;
+    }
+  }
+
+  /** Util class for checkpoint key. */
+  @Data
+  public static class CheckPointKey {
+    private Long appId;
+    private String jobId;
+    private Long checkId;
+
+    public CheckPointKey(Long appId, String jobId, Long checkId) {
+      this.appId = appId;
+      this.jobId = jobId;
+      this.checkId = checkId;
+    }
+
+    /** Get savepoint cache id, see {@link #savepointedCache}. */
+    public String getSavePointId() {
+      return String.format("%s_%s_%s", appId, jobId, checkId);
+    }
+
+    /** Get checkpoint cache id. */
+    public String getCheckPointId() {
+      return String.format("%s_%s", appId, jobId);
     }
   }
 }
