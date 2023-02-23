@@ -28,8 +28,12 @@ import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.Data;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
 
 import java.util.Date;
 import java.util.Map;
@@ -41,8 +45,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class CheckpointProcessor {
 
+  private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
+  private static final Integer SAVEPOINT_CACHE_HOUR = 1;
+
   private final Cache<String, Long> checkPointCache =
       Caffeine.newBuilder().expireAfterAccess(1, TimeUnit.DAYS).build();
+
+  /**
+   * Cache to store the savepoint if be stored in the db. Use the {appId}_{jobID}_{chkId} from
+   * {@link CheckPointKey#getSavePointId()} as the cache key to save the trace of the savepoint. And
+   * try best to make sure the every savepoint would be stored into DB. Especially for the case
+   * 'maxConcurrent of Checkpoint' > 1: 1. savepoint(n-1) is completed after completed
+   * checkpoint(n); 2. savepoint(n-1) is completed after completed savepoint(n).
+   */
+  private final Cache<String, Byte> savepointedCache =
+      Caffeine.newBuilder().expireAfterWrite(SAVEPOINT_CACHE_HOUR, TimeUnit.HOURS).build();
 
   private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
@@ -52,30 +69,29 @@ public class CheckpointProcessor {
 
   @Autowired private SavePointService savePointService;
 
-  public void process(Long appId, CheckPoints checkPoints) {
-    CheckPoints.Latest latest = checkPoints.getLatest();
-    if (latest == null || latest.getCompleted() == null) {
-      return;
-    }
-    CheckPoints.CheckPoint checkPoint = latest.getCompleted();
-    Application application = applicationService.getById(appId);
+  public void process(Application application, @Nonnull CheckPoints checkPoints) {
+    checkPoints.getLatestCheckpoint().forEach(checkPoint -> process(application, checkPoint));
+  }
+
+  private void process(Application application, @Nonnull CheckPoints.CheckPoint checkPoint) {
+    String jobID = application.getJobId();
+    Long appId = application.getId();
     CheckPointStatus status = checkPoint.getCheckPointStatus();
+    CheckPointKey checkPointKey = new CheckPointKey(appId, jobID, checkPoint.getId());
 
     if (CheckPointStatus.COMPLETED.equals(status)) {
-      String cacheId = appId + "_" + application.getJobId();
-      Long latestId =
-          checkPointCache.get(
-              cacheId,
-              key -> {
-                SavePoint savePoint = savePointService.getLatest(appId);
-                return Optional.ofNullable(savePoint).map(SavePoint::getChkId).orElse(null);
-              });
-
-      if (latestId == null || latestId < checkPoint.getId()) {
-        saveSavepoint(checkPoint, application);
-        checkPointCache.put(cacheId, checkPoint.getId());
+      if (shouldStoreAsSavepoint(checkPointKey, checkPoint)) {
+        savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
+        saveSavepoint(checkPoint, application.getId());
+        return;
       }
-    } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
+
+      Long latestChkId = getLatestCheckpointedId(appId, checkPointKey.getCheckPointId());
+      if (shouldStoreAsCheckpoint(checkPoint, latestChkId)) {
+        checkPointCache.put(checkPointKey.getCheckPointId(), checkPoint.getId());
+        saveSavepoint(checkPoint, application.getId());
+      }
+    } else if (shouldProcessFailedTrigger(checkPoint, application.cpFailedTrigger(), status)) {
       Counter counter = checkPointFailedCache.get(appId);
       if (counter == null) {
         checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
@@ -108,9 +124,43 @@ public class CheckpointProcessor {
     }
   }
 
-  private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Application application) {
+  private static boolean shouldStoreAsCheckpoint(
+      @Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
+    return !checkPoint.getIsSavepoint() && (latestId == null || latestId < checkPoint.getId());
+  }
+
+  private boolean shouldStoreAsSavepoint(
+      CheckPointKey checkPointKey, @Nonnull CheckPoints.CheckPoint checkPoint) {
+    if (!checkPoint.getIsSavepoint()) {
+      return false;
+    }
+    return savepointedCache.getIfPresent(checkPointKey.getSavePointId()) == null
+        // If the savepoint triggered before SAVEPOINT_CACHE_HOUR span, we'll see it as out-of-time
+        // savepoint and ignore it.
+        && checkPoint.getTriggerTimestamp()
+            >= System.currentTimeMillis() - TimeUnit.HOURS.toMillis(SAVEPOINT_CACHE_HOUR);
+  }
+
+  @Nullable
+  private Long getLatestCheckpointedId(Long appId, String cacheId) {
+    return checkPointCache.get(
+        cacheId,
+        key -> {
+          SavePoint savePoint = savePointService.getLatest(appId);
+          return Optional.ofNullable(savePoint).map(SavePoint::getChkId).orElse(null);
+        });
+  }
+
+  private boolean shouldProcessFailedTrigger(
+      CheckPoints.CheckPoint checkPoint, boolean cpFailedTrigger, CheckPointStatus status) {
+    return CheckPointStatus.FAILED.equals(status)
+        && !checkPoint.getIsSavepoint()
+        && cpFailedTrigger;
+  }
+
+  private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Long appId) {
     SavePoint savePoint = new SavePoint();
-    savePoint.setAppId(application.getId());
+    savePoint.setAppId(appId);
     savePoint.setChkId(checkPoint.getId());
     savePoint.setLatest(true);
     savePoint.setType(checkPoint.getCheckPointType().get());
@@ -139,6 +189,30 @@ public class CheckpointProcessor {
 
     public long getDuration(Long currentTimestamp) {
       return (currentTimestamp - this.timestamp) / 1000 / 60;
+    }
+  }
+
+  /** Util class for checkpoint key. */
+  @Data
+  public static class CheckPointKey {
+    private Long appId;
+    private String jobId;
+    private Long checkId;
+
+    public CheckPointKey(Long appId, String jobId, Long checkId) {
+      this.appId = appId;
+      this.jobId = jobId;
+      this.checkId = checkId;
+    }
+
+    /** Get savepoint cache id, see {@link #savepointedCache}. */
+    public String getSavePointId() {
+      return String.format("%s_%s_%s", appId, jobId, checkId);
+    }
+
+    /** Get checkpoint cache id. */
+    public String getCheckPointId() {
+      return String.format("%s_%s", appId, jobId);
     }
   }
 }

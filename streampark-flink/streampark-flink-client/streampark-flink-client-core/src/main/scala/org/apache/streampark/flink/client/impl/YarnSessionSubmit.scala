@@ -135,9 +135,11 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     }
   }
 
-  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
+  private[this] def executeClientAction[O, R <: SavepointRequestTrait](request: R,
+                                                                       flinkConfig: Configuration,
+                                                                       actFunc: (JobID, ClusterClient[_]) => O): O = {
     flinkConfig
-      .safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.clusterId)
+      .safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(
       s"""
@@ -152,17 +154,29 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       client = clusterDescriptor.retrieve(yarnClusterDescriptor._1).getClusterClient
-      val jobID = JobID.fromHexString(cancelRequest.jobId)
-      val actionResult = super.cancelJob(cancelRequest, jobID, client)
-      CancelResponse(actionResult)
+      actFunc(JobID.fromHexString(request.jobId), client)
     } catch {
       case e: Exception =>
-        logError(s"stop flink yarn session job fail")
+        logError(s"${request.getClass.getSimpleName} for flink yarn session job fail")
         e.printStackTrace()
         throw e
     } finally {
       Utils.close(client, clusterDescriptor)
     }
+  }
+
+  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
+    executeClientAction(cancelRequest, flinkConfig, (jobID, clusterClient) => {
+      val actionResult = super.cancelJob(cancelRequest, jobID, clusterClient)
+      CancelResponse(actionResult)
+    })
+  }
+
+  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
+    executeClientAction(request, flinkConfig, (jobID, clusterClient) => {
+      val actionResult = super.triggerSavepoint(request, jobID, clusterClient)
+      SavepointResponse(actionResult)
+    })
   }
 
   def deploy(deployRequest: DeployRequest): DeployResponse = {

@@ -27,7 +27,6 @@ import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.FlinkUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
@@ -105,7 +104,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
-import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
@@ -1197,7 +1195,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (appParam.getSavePointed()) {
       customSavepoint = appParam.getSavePoint();
       if (StringUtils.isBlank(customSavepoint)) {
-        customSavepoint = getSavePointPath(appParam);
+        customSavepoint = savePointService.getSavePointPath(appParam);
       }
     }
 
@@ -1246,6 +1244,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.getK8sNamespace(),
             properties);
 
+    final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
         CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
 
@@ -1260,13 +1259,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String savePointDir = cancelResponse.savePointDir();
                 log.info("savePoint path: {}", savePointDir);
                 SavePoint savePoint = new SavePoint();
-                Date now = new Date();
                 savePoint.setPath(savePointDir);
                 savePoint.setAppId(application.getId());
                 savePoint.setLatest(true);
                 savePoint.setType(CheckPointType.SAVEPOINT.get());
-                savePoint.setTriggerTime(now);
-                savePoint.setCreateTime(now);
+                savePoint.setCreateTime(new Date());
+                savePoint.setTriggerTime(triggerTime);
                 savePointService.save(savePoint);
               }
               if (isKubernetesApp(application)) {
@@ -1319,7 +1317,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   public String checkSavepointPath(Application appParam) throws Exception {
     String savepointPath = appParam.getSavePoint();
     if (StringUtils.isBlank(savepointPath)) {
-      savepointPath = getSavePointPath(appParam);
+      savepointPath = savePointService.getSavePointPath(appParam);
     }
 
     if (StringUtils.isNotBlank(savepointPath)) {
@@ -1705,59 +1703,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
     }
     return false;
-  }
-
-  private String getSavePointPath(Application appParam) throws Exception {
-    Application application = getById(appParam.getId());
-
-    // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
-    String savepointPath =
-        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties())
-            .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
-
-    // Application conf configuration has the second priority. If it is a streampark|flinksql type
-    // task,
-    // see if Application conf is configured when the task is defined, if checkpoints are configured
-    // and enabled,
-    // read `state.savepoints.dir`
-    if (StringUtils.isBlank(savepointPath)) {
-      if (application.isStreamParkJob() || application.isFlinkSqlJob()) {
-        ApplicationConfig applicationConfig = configService.getEffective(application.getId());
-        if (applicationConfig != null) {
-          Map<String, String> map = applicationConfig.readConfig();
-          if (FlinkUtils.isCheckpointEnabled(map)) {
-            savepointPath = map.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
-          }
-        }
-      }
-    }
-
-    // 3) If the savepoint is not obtained above, try to obtain the savepoint path according to the
-    // deployment type (remote|on yarn)
-    if (StringUtils.isBlank(savepointPath)) {
-      // 3.1) At the remote mode, request the flink webui interface to get the savepoint path
-      if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
-        FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-        Utils.notNull(
-            cluster,
-            String.format(
-                "The clusterId=%s cannot be find, maybe the clusterId is wrong or "
-                    + "the cluster has been deleted. Please contact the Admin.",
-                application.getFlinkClusterId()));
-        Map<String, String> config = cluster.getFlinkConfig();
-        if (!config.isEmpty()) {
-          savepointPath = config.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
-        }
-      } else {
-        // 3.2) At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound
-        // flink
-        FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
-        savepointPath =
-            flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
-      }
-    }
-
-    return savepointPath;
   }
 
   private String getSavePointed(Application appParam) {

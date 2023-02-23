@@ -36,6 +36,7 @@
   import { useDrawer } from '/@/components/Drawer';
   import { useModal } from '/@/components/Modal';
 
+  import SavepointApplicationModal from "./components/AppView/SavepointApplicationModal.vue";
   import StartApplicationModal from './components/AppView/StartApplicationModal.vue';
   import StopApplicationModal from './components/AppView/StopApplicationModal.vue';
   import LogModal from './components/AppView/LogModal.vue';
@@ -48,6 +49,7 @@
     starting: new Map(),
     stopping: new Map(),
     launch: new Map(),
+    savepointing: new Map(),
   };
 
   const appDashboardRef = ref<any>();
@@ -57,6 +59,7 @@
 
   const [registerStartModal, { openModal: openStartModal }] = useModal();
   const [registerStopModal, { openModal: openStopModal }] = useModal();
+  const [registerSavepointModal, { openModal: openSavepointModal }] = useModal();
   const [registerLogModal, { openModal: openLogModal }] = useModal();
   const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
 
@@ -103,6 +106,11 @@
               optionApps.launch.delete(x.id);
             }
           }
+          if (optionApps.savepointing.get(x.id)) {
+            if (timestamp - optionApps.savepointing.get(x.id) > 2000) {
+              optionApps.savepointing.delete(x.id);
+            }
+          }
         }
       });
       return dataSource;
@@ -121,6 +129,7 @@
   const { getTableActions, getActionDropdown, formConfig } = useAppTableAction(
     openStartModal,
     openStopModal,
+    openSavepointModal,
     openLogModal,
     openBuildDrawer,
     handlePageDataReload,
@@ -146,7 +155,7 @@
 
   /* Update options data */
   function handleOptionApp(data: {
-    type: 'starting' | 'stopping' | 'launch';
+    type: 'starting' | 'stopping' | 'launch' | 'savepointing';
     key: any;
     value: any;
   }) {
@@ -253,6 +262,7 @@
     </BasicTable>
     <StartApplicationModal @register="registerStartModal" @update-option="handleOptionApp" />
     <StopApplicationModal @register="registerStopModal" @update-option="handleOptionApp" />
+    <SavepointApplicationModal @register="registerSavepointModal" @update-option="handleOptionApp" />
     <LogModal @register="registerLogModal" />
     <BuildDrawer @register="registerBuildDrawer" />
   </PageWrapper>

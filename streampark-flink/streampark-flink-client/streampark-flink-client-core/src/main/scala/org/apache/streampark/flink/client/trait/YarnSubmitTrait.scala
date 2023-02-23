@@ -17,11 +17,13 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.flink.api.common.JobID
+
 import java.lang.{Boolean => JavaBool}
 import java.lang.reflect.Method
 import scala.util.Try
 import org.apache.flink.client.deployment.{ClusterDescriptor, ClusterSpecification, DefaultClusterClientServiceLoader}
-import org.apache.flink.client.program.ClusterClientProvider
+import org.apache.flink.client.program.{ClusterClient, ClusterClientProvider}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.jobgraph.JobGraph
 import org.apache.flink.util.FlinkException
@@ -36,10 +38,11 @@ import org.apache.streampark.flink.client.bean._
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
 
-  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
-    val jobID = getJobID(cancelRequest.jobId)
+  private[this] def executeClientAction[R <: SavepointRequestTrait, O](request: R, flinkConf: Configuration,
+                                                         actionFunc: (JobID, ClusterClient[_]) => O): O = {
+    val jobID = getJobID(request.jobId)
     val clusterClient = {
-      flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.clusterId)
+      flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
       val clusterClientFactory = new YarnClusterClientFactory
       val applicationId = clusterClientFactory.getClusterId(flinkConf)
       if (applicationId == null) {
@@ -50,12 +53,24 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
     Try {
-      val savepointDir = super.cancelJob(cancelRequest, jobID, clusterClient)
-      CancelResponse(savepointDir)
+      actionFunc(jobID, clusterClient)
     }.recover {
       case e => throw new FlinkException(
-          s"[StreamPark] Triggering a savepoint for the job ${cancelRequest.jobId} failed. detail: ${Utils.stringifyException(e)}");
+        s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
+          s"detail: ${Utils.stringifyException(e)}");
     }.get
+  }
+
+  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConf: Configuration): SavepointResponse = {
+    executeClientAction(request, flinkConf, (jid, client) => {
+            SavepointResponse(super.triggerSavepoint(request, jid, client))
+    })
+  }
+
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    executeClientAction(cancelRequest, flinkConf, (jid, client) => {
+      CancelResponse(super.cancelJob(cancelRequest, jid, client))
+    })
   }
 
   private lazy val deployInternalMethod: Method = {

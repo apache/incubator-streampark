@@ -49,6 +49,8 @@ object FlinkClient extends Logger {
 
   private[this] val SHUTDOWN_REQUEST_CLASS_NAME = "org.apache.streampark.flink.client.bean.ShutDownRequest"
 
+  private[this] val SAVEPOINT_REQUEST_CLASS_NAME = "org.apache.streampark.flink.client.bean.TriggerSavepointRequest"
+
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     FlinkShimsProxy.proxy(
       submitRequest.flinkVersion,
@@ -59,6 +61,22 @@ object FlinkClient extends Logger {
         method.setAccessible(true)
         val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
         FlinkShimsProxy.getObject[SubmitResponse](this.getClass.getClassLoader, obj)
+      })
+  }
+
+  def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {
+    FlinkShimsProxy.proxy(
+      savepointRequest.flinkVersion,
+      (classLoader: ClassLoader) => {
+        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
+        val requestClass = classLoader.loadClass(SAVEPOINT_REQUEST_CLASS_NAME)
+        val method = submitClass.getDeclaredMethod("triggerSavepoint", requestClass)
+        method.setAccessible(true)
+        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, savepointRequest))
+        if (obj == null) null
+        else {
+          FlinkShimsProxy.getObject[SavepointResponse](this.getClass.getClassLoader, obj)
+        }
       })
   }
 

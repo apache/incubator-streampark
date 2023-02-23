@@ -117,7 +117,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
-    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
     super.doCancel(cancelRequest, flinkConfig)
   }
 
@@ -211,5 +211,10 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     } finally {
       Utils.close(kubeClient)
     }
+  }
+
+  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
+    super.doTriggerSavepoint(request, flinkConfig)
   }
 }

@@ -15,21 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.client.bean
+-- ISSUE-2192 DDL & DML Start
 
-import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
+alter table `t_flink_savepoint` modify column `path`  varchar(1024) collate utf8mb4_general_ci default null;
 
-import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
-import org.apache.streampark.common.enums.ExecutionMode
+insert into `t_menu` values (100070, 100015, 'savepoint trigger', null, null, 'savepoint:trigger', null, '1', 1, null, now(), now());
 
-case class CancelRequest(
-    flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
-    clusterId: String,
-    jobId: String,
-    override val withSavepoint: Boolean,
-    withDrain: Boolean,
-    savepointPath: String,
-    override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-    @Nullable properties: JavaMap[String, Any]) extends SavepointRequestTrait {}
+-- ISSUE-2192 DDL & DML End

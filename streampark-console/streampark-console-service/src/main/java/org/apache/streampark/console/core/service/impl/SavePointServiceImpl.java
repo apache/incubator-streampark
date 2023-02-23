@@ -17,32 +17,63 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.CompletableFutureUtils;
+import org.apache.streampark.common.util.FlinkUtils;
+import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.ApplicationConfig;
+import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.CheckPointType;
+import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.mapper.SavePointMapper;
+import org.apache.streampark.console.core.service.ApplicationConfigService;
+import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
+import org.apache.streampark.flink.client.bean.SavepointResponse;
+import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.configuration.RestOptions;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Nullable;
+
+import java.net.URI;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -53,6 +84,24 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   @Autowired private FlinkEnvService flinkEnvService;
 
   @Autowired private ApplicationService applicationService;
+
+  @Autowired private ApplicationConfigService configService;
+
+  @Autowired private FlinkClusterService flinkClusterService;
+
+  @Autowired private ApplicationLogService applicationLogService;
+
+  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+
+  private final ExecutorService executorService =
+      new ThreadPoolExecutor(
+          Runtime.getRuntime().availableProcessors() * 5,
+          Runtime.getRuntime().availableProcessors() * 10,
+          60L,
+          TimeUnit.SECONDS,
+          new LinkedBlockingQueue<>(1024),
+          ThreadUtils.threadFactory("trigger-savepoint-executor"),
+          new ThreadPoolExecutor.AbortPolicy());
 
   @Override
   public void expire(Long appId) {
@@ -169,6 +218,184 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             .eq(SavePoint::getAppId, id)
             .eq(SavePoint::getLatest, true);
     return this.getOne(queryWrapper);
+  }
+
+  @Override
+  public String getSavePointPath(Application appParam) throws Exception {
+    Application application = applicationService.getById(appParam.getId());
+
+    // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
+    String savepointPath =
+        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties())
+            .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+
+    // Application conf configuration has the second priority. If it is a streampark|flinksql type
+    // task,
+    // see if Application conf is configured when the task is defined, if checkpoints are configured
+    // and enabled,
+    // read `state.savepoints.dir`
+    if (StringUtils.isBlank(savepointPath)) {
+      if (application.isStreamParkJob() || application.isFlinkSqlJob()) {
+        ApplicationConfig applicationConfig = configService.getEffective(application.getId());
+        if (applicationConfig != null) {
+          Map<String, String> map = applicationConfig.readConfig();
+          if (FlinkUtils.isCheckpointEnabled(map)) {
+            savepointPath = map.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+          }
+        }
+      }
+    }
+
+    // 3) If the savepoint is not obtained above, try to obtain the savepoint path according to the
+    // deployment type (remote|on yarn)
+    if (StringUtils.isBlank(savepointPath)) {
+      // 3.1) At the remote mode, request the flink webui interface to get the savepoint path
+      if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+        FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+        Utils.notNull(
+            cluster,
+            String.format(
+                "The clusterId=%s cannot be find, maybe the clusterId is wrong or "
+                    + "the cluster has been deleted. Please contact the Admin.",
+                application.getFlinkClusterId()));
+        Map<String, String> config = cluster.getFlinkConfig();
+        if (!config.isEmpty()) {
+          savepointPath = config.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+        }
+      } else {
+        // 3.2) At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound
+        // flink
+        FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
+        savepointPath =
+            flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+      }
+    }
+
+    return savepointPath;
+  }
+
+  @Override
+  public void trigger(Long appId, @Nullable String savepointPath) {
+    log.info("Start to trigger savepoint for app {}", appId);
+    Application application = applicationService.getById(appId);
+
+    FlinkRESTAPIWatcher.addSavepoint(application.getId());
+
+    application.setOptionState(OptionState.SAVEPOINTING.getValue());
+    application.setOptionTime(new Date());
+    this.applicationService.updateById(application);
+    flinkRESTAPIWatcher.init();
+
+    FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
+
+    // infer savepoint
+    String customSavepoint = this.getFinalSavepointDir(savepointPath, application);
+
+    FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+    String clusterId = getClusterId(application, cluster);
+
+    Map<String, Object> properties = this.tryGetRestProps(application, cluster);
+
+    TriggerSavepointRequest request =
+        new TriggerSavepointRequest(
+            flinkEnv.getFlinkVersion(),
+            application.getExecutionModeEnum(),
+            clusterId,
+            application.getJobId(),
+            customSavepoint,
+            application.getK8sNamespace(),
+            properties);
+
+    CompletableFuture<SavepointResponse> savepointFuture =
+        CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
+
+    handleSavepointResponseFuture(application, savepointFuture);
+  }
+
+  private void handleSavepointResponseFuture(
+      Application application, CompletableFuture<SavepointResponse> savepointFuture) {
+    CompletableFutureUtils.runTimeout(
+            savepointFuture,
+            10L,
+            TimeUnit.MINUTES,
+            savepointResponse -> {
+              if (savepointResponse != null && savepointResponse.savePointDir() != null) {
+                String savePointDir = savepointResponse.savePointDir();
+                log.info("Request savepoint successful, savepointDir: {}", savePointDir);
+              }
+            },
+            e -> {
+              log.error("Trigger savepoint for flink job failed.", e);
+              ApplicationLog log = new ApplicationLog();
+              log.setAppId(application.getId());
+              if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+                log.setYarnAppId(application.getClusterId());
+              }
+              log.setOptionTime(new Date());
+              String exception = Utils.stringifyException(e);
+              log.setException(exception);
+              if (!(e instanceof TimeoutException)) {
+                log.setSuccess(false);
+              }
+              applicationLogService.save(log);
+            })
+        .whenComplete(
+            (t, e) -> {
+              application.setOptionState(OptionState.NONE.getValue());
+              application.setOptionTime(new Date());
+              applicationService.update(application);
+              flinkRESTAPIWatcher.init();
+            });
+  }
+
+  private String getFinalSavepointDir(@Nullable String savepointPath, Application application) {
+    String result = savepointPath;
+    if (StringUtils.isEmpty(savepointPath)) {
+      try {
+        result = this.getSavePointPath(application);
+      } catch (Exception e) {
+        throw new ApiAlertException(
+            "Error in getting savepoint path for triggering savepoint for app "
+                + application.getId(),
+            e);
+      }
+    }
+    return result;
+  }
+
+  @NotNull
+  private Map<String, Object> tryGetRestProps(Application application, FlinkCluster cluster) {
+    Map<String, Object> properties = new HashMap<>();
+
+    if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+      Utils.notNull(
+          cluster,
+          String.format(
+              "The clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
+              application.getFlinkClusterId()));
+      URI activeAddress = cluster.getRemoteURI();
+      properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
+      properties.put(RestOptions.PORT.key(), activeAddress.getPort());
+    }
+    return properties;
+  }
+
+  private String getClusterId(Application application, FlinkCluster cluster) {
+    if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+      return application.getClusterId();
+    } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+        Utils.notNull(
+            cluster,
+            String.format(
+                "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
+                application.getFlinkClusterId()));
+        return cluster.getClusterId();
+      } else {
+        return application.getAppId();
+      }
+    }
+    return null;
   }
 
   @Override

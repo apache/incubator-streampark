@@ -18,18 +18,18 @@
 package org.apache.streampark.flink.client.bean
 
 import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
 
 import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
 import org.apache.streampark.common.enums.ExecutionMode
 
-case class CancelRequest(
-    flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
-    clusterId: String,
-    jobId: String,
-    override val withSavepoint: Boolean,
-    withDrain: Boolean,
-    savepointPath: String,
-    override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-    @Nullable properties: JavaMap[String, Any]) extends SavepointRequestTrait {}
+import javax.annotation.Nullable
+
+/** Trigger savepoint request. */
+case class TriggerSavepointRequest(flinkVersion: FlinkVersion,
+  executionMode: ExecutionMode,
+  clusterId: String,
+  jobId: String,
+  savepointPath: String,
+  override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
+  @Nullable properties: JavaMap[String, Any]) extends SavepointRequestTrait {
+}

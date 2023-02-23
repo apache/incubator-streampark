@@ -80,14 +80,24 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
   @throws[Exception]
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
+    executeClientAction(cancelRequest, flinkConfig, (jobId, clusterClient) => {
+      val actionResult = super.cancelJob(cancelRequest, jobId, clusterClient)
+      IngressController.deleteIngress(cancelRequest.clusterId, cancelRequest.kubernetesNamespace)
+      CancelResponse(actionResult)
+    })
+  }
 
+  private[this] def executeClientAction[O, R <: SavepointRequestTrait](request: R,
+                                                                flinkConfig: Configuration,
+                                                                actFunc: (JobID, ClusterClient[_]) => O): O = {
+    val hints = s"[flink-submit] execute ${request.getClass.getSimpleName} for flink job failed,"
     require(
-      StringUtils.isNotBlank(cancelRequest.clusterId),
-      s"[flink-submit] stop flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}")
+      StringUtils.isNotBlank(request.clusterId),
+      s"${hints}, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}")
 
     flinkConfig
-      .safeSet(KubernetesConfigOptions.CLUSTER_ID, cancelRequest.clusterId)
-      .safeSet(KubernetesConfigOptions.NAMESPACE, cancelRequest.kubernetesNamespace)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, request.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, request.kubernetesNamespace)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
@@ -95,18 +105,25 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
-      val jobID = JobID.fromHexString(cancelRequest.jobId)
-      val actionResult = super.cancelJob(cancelRequest, jobID, client)
-      IngressController.deleteIngress(cancelRequest.clusterId, cancelRequest.kubernetesNamespace)
-      CancelResponse(actionResult)
+      actFunc(JobID.fromHexString(request.jobId), client)
     } catch {
       case e: Exception =>
-        logger.error(s"[flink-submit] stop flink job failed, mode=${flinkConfig.get(DeploymentOptions.TARGET)}, cancelRequest=${cancelRequest}")
+        logger.error(s"${hints} mode=${flinkConfig.get(DeploymentOptions.TARGET)}, request=${request}")
         throw e
     } finally {
       if (client != null) client.close()
       if (clusterDescriptor != null) clusterDescriptor.close()
     }
+  }
+
+  @throws[Exception]
+  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
+
+    executeClientAction(request, flinkConfig, (jobId, clusterClient) => {
+      val actionResult = super.triggerSavepoint(request.asInstanceOf, jobId, clusterClient)
+      IngressController.deleteIngress(request.clusterId, request.kubernetesNamespace)
+      SavepointResponse(actionResult)
+    })
   }
 
   // noinspection DuplicatedCode
