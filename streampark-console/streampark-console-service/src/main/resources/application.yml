@@ -131,3 +131,9 @@ ldap:
     email-attribute: mail
     # action when ldap user is not exist (supported types: CREATE,DENY)
     not-exist-action: CREATE
+
+alert:
+  proxy:
+    # lark alert proxy,default https://open.feishu.cn
+    lark:
+      url: https://open.feishu.cn
