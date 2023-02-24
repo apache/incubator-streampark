@@ -75,6 +75,8 @@ streampark:
   proxy:
     # knox process address https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
     yarn-url:
+    # lark alert proxy,default https://open.feishu.cn
+    lark-url:
   yarn:
       # default sample, or kerberos
     http-auth: sample
@@ -131,9 +133,3 @@ ldap:
     email-attribute: mail
     # action when ldap user is not exist (supported types: CREATE,DENY)
     not-exist-action: CREATE
-
-alert:
-  proxy:
-    # lark alert proxy,default https://open.feishu.cn
-    lark:
-      url: https://open.feishu.cn

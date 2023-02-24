@@ -54,7 +54,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
   private final RestTemplate alertRestTemplate;
   private final ObjectMapper mapper;
 
-  @Value("${alert.proxy.lark.url:https://open.feishu.cn}")
+  @Value("${streampark.proxy.lark-url:https://open.feishu.cn}")
   private String larkProxyUrl;
 
   public LarkAlertNotifyServiceImpl(RestTemplate alertRestTemplate, ObjectMapper mapper) {
