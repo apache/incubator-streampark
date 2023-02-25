@@ -22,3 +22,7 @@ alter table `t_flink_savepoint` modify column `path`  varchar(1024) collate utf8
 insert into `t_menu` values (100070, 100015, 'savepoint trigger', null, null, 'savepoint:trigger', null, '1', 1, null, now(), now());
 
 -- ISSUE-2192 DDL & DML End
+
+alter table `t_flink_app` change column `launch` `release` tinyint default 1;
+update `t_menu` set `menu_name`='release',`perms` = 'app:release' where menu_id = 100025;
+

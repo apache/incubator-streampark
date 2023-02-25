@@ -24,7 +24,7 @@ export default {
   duration: '运行时长',
   modifiedTime: '修改时间',
   runStatus: '运行状态',
-  launchBuild: '发布状态',
+  releaseBuild: '发布状态',
   jobType: '作业类型',
   developmentMode: '作业模式',
   executionMode: '执行模式',
@@ -64,11 +64,11 @@ export default {
   status: '运行状态',
   startTime: '启动时间',
   endTime: '结束时间',
-  launch: {
-    launchTitle: '该应用程序的当前启动正在进行中.',
-    launchDesc: '您确定要强制进行另一次构建吗',
-    launchFail: '发布作业失败',
-    launching: '当前作业正在发布中',
+  release: {
+    releaseTitle: '该应用程序的当前启动正在进行中.',
+    releaseDesc: '您确定要强制进行另一次构建吗',
+    releaseFail: '发布作业失败',
+    releasing: '当前作业正在发布中',
   },
   detail: {
     detailTitle: '作业详情',
@@ -145,8 +145,8 @@ export default {
   },
   operation: {
     edit: '编辑作业',
-    launch: '发布作业',
-    launchDetail: '发布详情',
+    release: '发布作业',
+    releaseDetail: '发布详情',
     start: '启动作业',
     cancel: '取消作业',
     savepoint: '触发 Savepoint',

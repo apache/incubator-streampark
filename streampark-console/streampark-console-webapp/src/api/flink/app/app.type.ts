@@ -57,7 +57,7 @@ export interface AppListRecord {
   flinkImage?: string;
   k8sNamespace: string;
   state: number;
-  launch: number;
+  release: number;
   build: boolean;
   restartSize: number;
   restartCount?: number;

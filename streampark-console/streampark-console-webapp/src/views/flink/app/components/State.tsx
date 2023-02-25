@@ -18,7 +18,7 @@
 import { defineComponent, toRefs, unref } from 'vue';
 import { Tag, Tooltip } from 'ant-design-vue';
 import './State.less';
-import { AppStateEnum, LaunchStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
+import { AppStateEnum, ReleaseStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 
 /*  state map*/
 const stateMap = {
@@ -74,9 +74,9 @@ const stateMap = {
 };
 /*  option state map*/
 const optionStateMap = {
-  [OptionStateEnum.LAUNCHING]: {
+  [OptionStateEnum.RELEASING]: {
     color: '#1ABBDC',
-    title: 'LAUNCHING',
+    title: 'RELEASING',
     class: 'status-processing-deploying',
   },
   [OptionStateEnum.CANCELLING]: {
@@ -96,19 +96,19 @@ const optionStateMap = {
   },
 };
 
-/* launch state map*/
-const launchStateMap = {
-  [LaunchStateEnum.DONE]: { color: '#52c41a', title: 'DONE' },
-  [LaunchStateEnum.NEED_LAUNCH]: { color: '#fa8c16', title: 'WAITING' },
-  [LaunchStateEnum.LAUNCHING]: {
+/* release state map*/
+const releaseStateMap = {
+  [ReleaseStateEnum.DONE]: { color: '#52c41a', title: 'DONE' },
+  [ReleaseStateEnum.NEED_RELEASE]: { color: '#fa8c16', title: 'WAITING' },
+  [ReleaseStateEnum.RELEASING]: {
     color: '#52c41a',
-    title: 'LAUNCHING',
+    title: 'RELEASING',
     class: 'status-processing-deploying',
   },
-  [LaunchStateEnum.NEED_RESTART]: { color: '#fa8c16', title: 'PENDING' },
-  [LaunchStateEnum.NEED_ROLLBACK]: { color: '#fa8c16', title: 'WAITING' },
+  [ReleaseStateEnum.NEED_RESTART]: { color: '#fa8c16', title: 'PENDING' },
+  [ReleaseStateEnum.NEED_ROLLBACK]: { color: '#fa8c16', title: 'WAITING' },
 };
-launchStateMap[-1] = { color: '#f5222d', title: 'FAILED' };
+releaseStateMap[-1] = { color: '#f5222d', title: 'FAILED' };
 
 /* build state map*/
 const buildStatusMap = {
@@ -128,7 +128,7 @@ const overviewMap = {
   canceling: { color: '#faad14', title: 'CANCELING' },
   created: { color: '#2f54eb', title: 'CREATED' },
   deploying: { color: '#eb2f96', title: 'RECONCILING' },
-  reconciling: { color: '#13c2c2', title: 'LAUNCHING' },
+  reconciling: { color: '#13c2c2', title: 'RELEASING' },
   scheduled: { color: '#722ed1', title: 'SCHEDULED' },
 };
 
@@ -202,8 +202,8 @@ export default defineComponent({
         return <span>{renderState()}</span>;
       }
 
-      if (unref(option) === 'launch') {
-        return <span class="app_state">{renderTag(launchStateMap, unref(data).launch)}</span>;
+      if (unref(option) === 'release') {
+        return <span class="app_state">{renderTag(releaseStateMap, unref(data).release)}</span>;
       }
 
       if (unref(option) === 'build') {

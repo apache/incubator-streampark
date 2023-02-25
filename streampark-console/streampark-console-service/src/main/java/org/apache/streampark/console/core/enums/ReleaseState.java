@@ -20,20 +20,20 @@ package org.apache.streampark.console.core.enums;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public enum LaunchState implements Serializable {
+public enum ReleaseState implements Serializable {
 
-  /** launch failed */
+  /** release failed */
   FAILED(-1),
-  /** launch done */
+  /** release done */
   DONE(0),
 
-  /** need relaunch after modify task */
-  NEED_LAUNCH(1),
+  /** need release after modify task */
+  NEED_RELEASE(1),
 
-  /** launching */
-  LAUNCHING(2),
+  /** releasing */
+  RELEASING(2),
 
-  /** launch complete, need restart */
+  /** release complete, need restart */
   NEED_RESTART(3),
 
   /** need rollback */
@@ -47,7 +47,7 @@ public enum LaunchState implements Serializable {
 
   private final int value;
 
-  LaunchState(int value) {
+  ReleaseState(int value) {
     this.value = value;
   }
 
@@ -55,7 +55,7 @@ public enum LaunchState implements Serializable {
     return this.value;
   }
 
-  public static LaunchState of(Integer state) {
+  public static ReleaseState of(Integer state) {
     return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
   }
 }

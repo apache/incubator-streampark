@@ -60,7 +60,7 @@ public class ApplicationBuildPipelineController {
   @Autowired private FlinkSqlService flinkSqlService;
 
   /**
-   * Launch application building pipeline.
+   * Release application building pipeline.
    *
    * @param appId application id
    * @param forceBuild forced start pipeline or not
@@ -68,8 +68,8 @@ public class ApplicationBuildPipelineController {
    */
   @ApiAccess
   @ApiOperation(
-      value = "Launch application",
-      notes = "Launch application",
+      value = "Release application",
+      notes = "Release application",
       tags = ApiDocConstant.FLINK_APP_OP_TAG,
       consumes = "application/x-www-form-urlencoded")
   @ApiImplicitParams({

@@ -25,8 +25,8 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.enums.OptionState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.enums.StopFrom;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
@@ -378,14 +378,14 @@ public class FlinkRESTAPIWatcher {
     */
     if (OptionState.STARTING.equals(optionState)) {
       Application latestApp = WATCHING_APPS.get(application.getId());
-      LaunchState launchState = latestApp.getLaunchState();
-      switch (launchState) {
+      ReleaseState releaseState = latestApp.getReleaseState();
+      switch (releaseState) {
         case NEED_RESTART:
         case NEED_ROLLBACK:
           LambdaUpdateWrapper<Application> updateWrapper =
               new LambdaUpdateWrapper<Application>()
                   .eq(Application::getId, application.getId())
-                  .set(Application::getLaunch, LaunchState.DONE.get());
+                  .set(Application::getRelease, ReleaseState.DONE.get());
           applicationService.update(updateWrapper);
           break;
         default:

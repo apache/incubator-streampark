@@ -53,7 +53,7 @@
         <result column="cp_failure_action" jdbcType="INTEGER" property="cpFailureAction"/>
         <result column="restart_size" jdbcType="INTEGER" property="restartSize"/>
         <result column="restart_count" jdbcType="INTEGER" property="restartCount"/>
-        <result column="launch" jdbcType="INTEGER" property="launch"/>
+        <result column="release" jdbcType="INTEGER" property="release"/>
         <result column="build" jdbcType="BOOLEAN" property="build"/>
         <result column="resolve_order" jdbcType="INTEGER" property="resolveOrder"/>
         <result column="total_tm" jdbcType="INTEGER" property="totalTM"/>

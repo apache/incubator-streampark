@@ -28,7 +28,7 @@ import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.EffectiveType;
-import org.apache.streampark.console.core.enums.LaunchState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ApplicationBackUpMapper;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
@@ -144,7 +144,7 @@ public class ApplicationBackUpServiceImpl
           new UpdateWrapper<Application>()
               .lambda()
               .eq(Application::getId, application.getId())
-              .set(Application::getLaunch, LaunchState.NEED_RESTART.get()));
+              .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
     } catch (Exception e) {
       throw e;
     }

@@ -42,17 +42,17 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
   final Consumer<BuildState> stateUpdateConsumer;
 
-  final Consumer<Logger> notifyLaunchConsumer;
+  final Consumer<Logger> notifyReleaseConsumer;
 
   public ProjectBuildTask(
       String logPath,
       Project project,
       Consumer<BuildState> stateUpdateConsumer,
-      Consumer<Logger> notifyLaunchConsumer) {
+      Consumer<Logger> notifyReleaseConsumer) {
     super(logPath, true);
     this.project = project;
     this.stateUpdateConsumer = stateUpdateConsumer;
-    this.notifyLaunchConsumer = notifyLaunchConsumer;
+    this.notifyReleaseConsumer = notifyReleaseConsumer;
   }
 
   @Override
@@ -73,7 +73,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     }
     stateUpdateConsumer.accept(BuildState.SUCCESSFUL);
     this.deploy(project);
-    notifyLaunchConsumer.accept(fileLogger);
+    notifyReleaseConsumer.accept(fileLogger);
   }
 
   @Override
