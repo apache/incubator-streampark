@@ -111,7 +111,7 @@ export const useAppTableAction = (
         ifShow:
           record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
         auth: 'savepoint:trigger',
-        icon: 'ant-design:database-outlined',
+        icon: 'ant-design:camera-outlined',
         onClick: handleSavepoint.bind(null, record),
       },
       {
