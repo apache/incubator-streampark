@@ -23,6 +23,8 @@ insert into `t_menu` values (100070, 100015, 'savepoint trigger', null, null, 's
 
 -- ISSUE-2192 DDL & DML End
 
+
+-- ISSUE-2366 DDL & DML Start
 alter table `t_flink_app` change column `launch` `release` tinyint default 1;
 update `t_menu` set `menu_name`='release',`perms` = 'app:release' where menu_id = 100025;
-
+-- ISSUE-2366 DDL & DML End
