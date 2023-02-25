@@ -1236,13 +1236,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         new CancelRequest(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
+            properties,
             clusterId,
             application.getJobId(),
             appParam.getSavePointed(),
             appParam.getDrain(),
             customSavepoint,
-            application.getK8sNamespace(),
-            properties);
+            application.getK8sNamespace());
 
     final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
@@ -1527,16 +1527,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     SubmitRequest submitRequest =
         new SubmitRequest(
             flinkEnv.getFlinkVersion(),
+            ExecutionMode.of(application.getExecutionMode()),
+            getProperties(application),
             flinkEnv.getFlinkConf(),
             DevelopmentMode.of(application.getJobType()),
-            ExecutionMode.of(application.getExecutionMode()),
             application.getId(),
             jobId,
             application.getJobName(),
             appConf,
             application.getApplicationType(),
             getSavePointed(appParam),
-            getProperties(application),
             applicationArgs,
             buildResult,
             kubernetesSubmitParam,

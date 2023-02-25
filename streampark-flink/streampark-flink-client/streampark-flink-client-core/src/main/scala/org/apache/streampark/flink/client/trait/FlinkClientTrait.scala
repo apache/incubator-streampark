@@ -50,7 +50,7 @@ import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 import org.apache.streampark.flink.client.bean._
 
-trait FlinkSubmitTrait extends Logger {
+trait FlinkClientTrait extends Logger {
 
   private[client] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
   private[client] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")

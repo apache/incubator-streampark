@@ -164,9 +164,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       DeployRequest deployRequest =
           new DeployRequest(
               flinkEnv.getFlinkVersion(),
-              flinkCluster.getClusterId(),
               executionModeEnum,
               flinkCluster.getProperties(),
+              flinkCluster.getClusterId(),
               kubernetesDeployParam);
       log.info("deploy cluster request " + deployRequest);
       Future<DeployResponse> future =
@@ -282,9 +282,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         new ShutDownRequest(
             flinkEnv.getFlinkVersion(),
             executionModeEnum,
+            flinkCluster.getProperties(),
             clusterId,
-            kubernetesDeployParam,
-            flinkCluster.getProperties());
+            kubernetesDeployParam);
 
     try {
       Future<ShutDownResponse> future =

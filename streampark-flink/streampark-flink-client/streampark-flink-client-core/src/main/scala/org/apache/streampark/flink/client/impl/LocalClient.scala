@@ -26,10 +26,10 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.client.`trait`.FlinkSubmitTrait
+import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean._
 
-object LocalSubmit extends FlinkSubmitTrait {
+object LocalClient extends FlinkClientTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig.safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
@@ -66,11 +66,11 @@ object LocalSubmit extends FlinkSubmitTrait {
   }
 
   override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
-    RemoteSubmit.doTriggerSavepoint(request, flinkConfig)
+    RemoteClient.doTriggerSavepoint(request, flinkConfig)
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
-    RemoteSubmit.doCancel(cancelRequest, flinkConfig)
+    RemoteClient.doCancel(cancelRequest, flinkConfig)
   }
 
   private[this] def createLocalCluster(flinkConfig: Configuration) = {

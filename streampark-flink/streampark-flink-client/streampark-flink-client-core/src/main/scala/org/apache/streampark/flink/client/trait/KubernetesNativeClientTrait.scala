@@ -17,10 +17,8 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import java.io.File
 import javax.annotation.Nonnull
 
-import scala.collection.mutable
 import scala.language.postfixOps
 
 import org.apache.commons.lang3.StringUtils
@@ -40,9 +38,7 @@ import org.apache.streampark.flink.client.bean._
 /**
  * kubernetes native mode submit
  */
-trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
-
-  private[client] val fatJarCached = new mutable.HashMap[String, File]()
+trait KubernetesNativeClientTrait extends FlinkClientTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     // extract from submitRequest
@@ -88,9 +84,9 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   private[this] def executeClientAction[O, R <: SavepointRequestTrait](request: R,
-                                                                flinkConfig: Configuration,
-                                                                actFunc: (JobID, ClusterClient[_]) => O): O = {
-    val hints = s"[flink-submit] execute ${request.getClass.getSimpleName} for flink job failed,"
+                                                                       flinkConfig: Configuration,
+                                                                       actFunc: (JobID, ClusterClient[_]) => O): O = {
+    val hints = s"[flink-client] execute ${request.getClass.getSimpleName} for flink job failed,"
     require(
       StringUtils.isNotBlank(request.clusterId),
       s"${hints}, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}")
@@ -108,7 +104,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       actFunc(JobID.fromHexString(request.jobId), client)
     } catch {
       case e: Exception =>
-        logger.error(s"${hints} mode=${flinkConfig.get(DeploymentOptions.TARGET)}, request=${request}")
+        logger.error(s"$hints mode=${flinkConfig.get(DeploymentOptions.TARGET)}, request=${request}")
         throw e
     } finally {
       if (client != null) client.close()

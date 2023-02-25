@@ -17,17 +17,14 @@
 package org.apache.streampark.flink.core
 
 import java.io.File
-
-import scala.collection.{mutable, Map}
+import scala.collection.{Map, mutable}
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
-
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{Configuration, PipelineOptions}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableConfig, TableEnvironment}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
-
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.enums.{ApiType, PlannerType, TableMode}
 import org.apache.streampark.common.enums.ApiType.ApiType
@@ -193,20 +190,39 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     val parameter = configuration.parameter
     val plannerType = Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER))).getOrElse(PlannerType.blink)
 
+
     try {
       plannerType match {
         case PlannerType.blink =>
-          logInfo("blinkPlanner will be use.")
-          builder.useBlinkPlanner()
+          val useBlinkPlanner = builder.getClass.getDeclaredMethod("useBlinkPlanner", null)
+          if (useBlinkPlanner == null) {
+            logInfo("useBlinkPlanner deprecated")
+          } else {
+            useBlinkPlanner.setAccessible(true)
+            useBlinkPlanner.invoke(builder, null)
+            logInfo("blinkPlanner will be use.")
+          }
         case PlannerType.old =>
-          logInfo("oldPlanner will be use.")
-          builder.useOldPlanner()
+          val useOldPlanner = builder.getClass.getDeclaredMethod("useOldPlanner", null)
+          if (useOldPlanner == null) {
+            logInfo("useOldPlanner deprecated")
+          } else {
+            useOldPlanner.setAccessible(true)
+            useOldPlanner.invoke(builder, null)
+            logInfo("useOldPlanner will be use.")
+          }
         case PlannerType.any =>
-          logInfo("anyPlanner will be use.")
-          builder.useAnyPlanner()
+          val useAnyPlanner = builder.getClass.getDeclaredMethod("useAnyPlanner", null)
+          if (useAnyPlanner == null) {
+            logInfo("useAnyPlanner deprecated")
+          } else {
+            logInfo("useAnyPlanner will be use.")
+            useAnyPlanner.setAccessible(true)
+            useAnyPlanner.invoke(builder, null)
+          }
       }
     } catch {
-      case e: IncompatibleClassChangeError =>
+      case _: IncompatibleClassChangeError =>
     }
 
     val mode = Try(TableMode.withName(parameter.get(KEY_FLINK_TABLE_MODE))).getOrElse(tableMode)

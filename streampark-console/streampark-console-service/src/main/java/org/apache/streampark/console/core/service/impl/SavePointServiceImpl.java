@@ -300,11 +300,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         new TriggerSavepointRequest(
             flinkEnv.getFlinkVersion(),
             application.getExecutionModeEnum(),
+            properties,
             clusterId,
             application.getJobId(),
             customSavepoint,
-            application.getK8sNamespace(),
-            properties);
+            application.getK8sNamespace());
 
     CompletableFuture<SavepointResponse> savepointFuture =
         CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);

@@ -21,12 +21,9 @@ import java.util
 import java.util.{Map => JavaMap}
 import java.util.regex.Pattern
 import javax.annotation.Nonnull
-
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-
 import org.apache.commons.lang3.StringUtils
-
 import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.flink.proxy.FlinkShimsProxy
 import org.apache.streampark.flink.client.bean._
@@ -41,85 +38,47 @@ object FlinkClient extends Logger {
 
   private[this] val FLINK_CLIENT_HANDLER_CLASS_NAME = "org.apache.streampark.flink.client.FlinkClientHandler"
 
-  private[this] val SUBMIT_REQUEST_CLASS_NAME = "org.apache.streampark.flink.client.bean.SubmitRequest"
+  private[this] val SUBMIT_REQUEST = "org.apache.streampark.flink.client.bean.SubmitRequest" -> "submit"
 
-  private[this] val DEPLOY_REQUEST_CLASS_NAME = "org.apache.streampark.flink.client.bean.DeployRequest"
+  private[this] val DEPLOY_REQUEST = "org.apache.streampark.flink.client.bean.DeployRequest" -> "deploy"
 
-  private[this] val CANCEL_REQUEST_CLASS_NAME = "org.apache.streampark.flink.client.bean.CancelRequest"
+  private[this] val CANCEL_REQUEST = "org.apache.streampark.flink.client.bean.CancelRequest" -> "cancel"
 
-  private[this] val SHUTDOWN_REQUEST_CLASS_NAME = "org.apache.streampark.flink.client.bean.ShutDownRequest"
+  private[this] val SHUTDOWN_REQUEST = "org.apache.streampark.flink.client.bean.ShutDownRequest" -> "shutdown"
 
-  private[this] val SAVEPOINT_REQUEST_CLASS_NAME = "org.apache.streampark.flink.client.bean.TriggerSavepointRequest"
+  private[this] val SAVEPOINT_REQUEST = "org.apache.streampark.flink.client.bean.TriggerSavepointRequest" -> "triggerSavepoint"
 
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
-    FlinkShimsProxy.proxy(
-      submitRequest.flinkVersion,
-      (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
-        val requestClass = classLoader.loadClass(SUBMIT_REQUEST_CLASS_NAME)
-        val method = submitClass.getDeclaredMethod("submit", requestClass)
-        method.setAccessible(true)
-        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
-        FlinkShimsProxy.getObject[SubmitResponse](this.getClass.getClassLoader, obj)
-      })
-  }
-
-  def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {
-    FlinkShimsProxy.proxy(
-      savepointRequest.flinkVersion,
-      (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
-        val requestClass = classLoader.loadClass(SAVEPOINT_REQUEST_CLASS_NAME)
-        val method = submitClass.getDeclaredMethod("triggerSavepoint", requestClass)
-        method.setAccessible(true)
-        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, savepointRequest))
-        if (obj == null) null
-        else {
-          FlinkShimsProxy.getObject[SavepointResponse](this.getClass.getClassLoader, obj)
-        }
-      })
+    proxy[SubmitResponse](submitRequest, SUBMIT_REQUEST)
   }
 
   def cancel(stopRequest: CancelRequest): CancelResponse = {
-    FlinkShimsProxy.proxy(
-      stopRequest.flinkVersion,
-      (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
-        val requestClass = classLoader.loadClass(CANCEL_REQUEST_CLASS_NAME)
-        val method = submitClass.getDeclaredMethod("cancel", requestClass)
-        method.setAccessible(true)
-        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
-        if (obj == null) null;
-        else {
-          FlinkShimsProxy.getObject[CancelResponse](this.getClass.getClassLoader, obj)
-        }
-      })
+    proxy[CancelResponse](stopRequest, CANCEL_REQUEST)
   }
 
   def deploy(deployRequest: DeployRequest): DeployResponse = {
-    FlinkShimsProxy.proxy(
-      deployRequest.flinkVersion,
-      (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
-        val requestClass = classLoader.loadClass(DEPLOY_REQUEST_CLASS_NAME)
-        val method = submitClass.getDeclaredMethod("deploy", requestClass)
-        method.setAccessible(true)
-        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, deployRequest))
-        FlinkShimsProxy.getObject[DeployResponse](this.getClass.getClassLoader, obj)
-      })
+    proxy[DeployResponse](deployRequest, DEPLOY_REQUEST)
   }
 
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
-    FlinkShimsProxy.proxy(
-      shutDownRequest.flinkVersion,
-      (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
-        val requestClass = classLoader.loadClass(SHUTDOWN_REQUEST_CLASS_NAME)
-        val method = submitClass.getDeclaredMethod("shutdown", requestClass)
-        method.setAccessible(true)
-        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, shutDownRequest))
-        FlinkShimsProxy.getObject[ShutDownResponse](this.getClass.getClassLoader, obj)
-      })
+    proxy[ShutDownResponse](shutDownRequest, SHUTDOWN_REQUEST)
+  }
+
+  def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {
+    proxy[SavepointResponse](savepointRequest, SAVEPOINT_REQUEST)
+  }
+
+  private[this] def proxy[T](request: Request, requestBody: (String, String)): T = {
+    FlinkShimsProxy.proxy(request.flinkVersion, (classLoader: ClassLoader) => {
+      val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
+      val requestClass = classLoader.loadClass(requestBody._1)
+      val method = submitClass.getDeclaredMethod(requestBody._2, requestClass)
+      method.setAccessible(true)
+      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, request))
+      if (obj == null) null.asInstanceOf[T] else {
+        FlinkShimsProxy.getObject[T](this.getClass.getClassLoader, obj)
+      }
+    })
   }
 
   /**

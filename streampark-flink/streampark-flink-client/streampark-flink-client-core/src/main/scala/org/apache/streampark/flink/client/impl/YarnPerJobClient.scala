@@ -32,13 +32,13 @@ import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import org.apache.streampark.common.util.{FlinkUtils, Utils}
-import org.apache.streampark.flink.client.`trait`.YarnSubmitTrait
+import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
 /**
  * yarn PerJob mode submit
  */
-object YarnPerJobSubmit extends YarnSubmitTrait {
+object YarnPerJobClient extends YarnClientTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     // execution.target
