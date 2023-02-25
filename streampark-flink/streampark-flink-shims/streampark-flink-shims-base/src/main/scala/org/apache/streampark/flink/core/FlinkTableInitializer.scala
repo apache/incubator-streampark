@@ -190,7 +190,6 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     val parameter = configuration.parameter
     val plannerType = Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER))).getOrElse(PlannerType.blink)
 
-
     try {
       plannerType match {
         case PlannerType.blink =>
@@ -199,7 +198,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
             logInfo("useBlinkPlanner deprecated")
           } else {
             useBlinkPlanner.setAccessible(true)
-            useBlinkPlanner.invoke(builder, null)
+            useBlinkPlanner.invoke(builder)
             logInfo("blinkPlanner will be use.")
           }
         case PlannerType.old =>
@@ -208,7 +207,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
             logInfo("useOldPlanner deprecated")
           } else {
             useOldPlanner.setAccessible(true)
-            useOldPlanner.invoke(builder, null)
+            useOldPlanner.invoke(builder)
             logInfo("useOldPlanner will be use.")
           }
         case PlannerType.any =>
@@ -218,7 +217,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           } else {
             logInfo("useAnyPlanner will be use.")
             useAnyPlanner.setAccessible(true)
-            useAnyPlanner.invoke(builder, null)
+            useAnyPlanner.invoke(builder)
           }
       }
     } catch {
