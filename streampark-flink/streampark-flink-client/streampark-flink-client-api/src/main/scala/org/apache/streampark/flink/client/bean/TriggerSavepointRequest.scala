@@ -25,11 +25,10 @@ import org.apache.streampark.common.enums.ExecutionMode
 import javax.annotation.Nullable
 
 /** Trigger savepoint request. */
-case class TriggerSavepointRequest(override val flinkVersion: FlinkVersion,
-                                   override val executionMode: ExecutionMode,
-                                   @Nullable override val properties: JavaMap[String, Any],
+case class TriggerSavepointRequest(flinkVersion: FlinkVersion,
+                                   executionMode: ExecutionMode,
+                                   @Nullable properties: JavaMap[String, Any],
                                    clusterId: String,
                                    jobId: String,
                                    savepointPath: String,
-                                   override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE)
-  extends Request(flinkVersion, executionMode, properties) with SavepointRequestTrait
+                                   override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE) extends SavepointRequestTrait

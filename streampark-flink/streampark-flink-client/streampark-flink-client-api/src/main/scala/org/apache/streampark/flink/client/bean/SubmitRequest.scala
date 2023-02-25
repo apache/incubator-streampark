@@ -41,9 +41,9 @@ import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResp
  */
 case class KubernetesSubmitParam(clusterId: String, kubernetesNamespace: String, @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
 
-case class SubmitRequest(override val flinkVersion: FlinkVersion,
-                         override val executionMode: ExecutionMode,
-                         override val properties: JavaMap[String, Any],
+case class SubmitRequest(flinkVersion: FlinkVersion,
+                         executionMode: ExecutionMode,
+                         properties: JavaMap[String, Any],
                          flinkYaml: String,
                          developmentMode: DevelopmentMode,
                          id: Long,
@@ -55,7 +55,7 @@ case class SubmitRequest(override val flinkVersion: FlinkVersion,
                          args: String,
                          @Nullable buildResult: BuildResult,
                          @Nullable k8sSubmitParam: KubernetesSubmitParam,
-                         @Nullable extraParameter: JavaMap[String, Any]) extends Request(flinkVersion, executionMode, properties) {
+                         @Nullable extraParameter: JavaMap[String, Any]) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_PROPERTY_PREFIX)
 
