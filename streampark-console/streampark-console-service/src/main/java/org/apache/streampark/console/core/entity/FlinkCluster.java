@@ -23,12 +23,12 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
+import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
-import org.apache.streampark.flink.client.FlinkClient;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -201,7 +201,7 @@ public class FlinkCluster implements Serializable {
   public Map<String, Object> getProperties() {
     Map<String, Object> map = new HashMap<>();
     Map<String, String> dynamicProperties =
-        FlinkClient.extractDynamicPropertiesAsJava(this.getDynamicProperties());
+        PropertiesUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
     map.putAll(this.getOptionMap());
     map.putAll(dynamicProperties);
     ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());

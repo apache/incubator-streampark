@@ -17,24 +17,13 @@
 
 package org.apache.streampark.flink.client
 
-import java.util
-import java.util.{Map => JavaMap}
-import java.util.regex.Pattern
-import javax.annotation.Nonnull
-import scala.collection.JavaConverters._
-import scala.collection.mutable
-import org.apache.commons.lang3.StringUtils
-import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.proxy.FlinkShimsProxy
 import org.apache.streampark.flink.client.bean._
 
+import scala.reflect.ClassTag
+
 object FlinkClient extends Logger {
-
-  private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
-
-  private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']"
-
-  private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
 
   private[this] val FLINK_CLIENT_HANDLER_CLASS_NAME = "org.apache.streampark.flink.client.FlinkClientHandler"
 
@@ -68,7 +57,7 @@ object FlinkClient extends Logger {
     proxy[SavepointResponse](savepointRequest, SAVEPOINT_REQUEST)
   }
 
-  private[this] def proxy[T](request: Request, requestBody: (String, String)): T = {
+  private[this] def proxy[T: ClassTag](request: Request, requestBody: (String, String)): T = {
     FlinkShimsProxy.proxy(request.flinkVersion, (classLoader: ClassLoader) => {
       val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
       val requestClass = classLoader.loadClass(requestBody._1)
@@ -80,40 +69,5 @@ object FlinkClient extends Logger {
       }
     })
   }
-
-  /**
-   * extract flink configuration from application.properties
-   */
-  @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
-    if (StringUtils.isEmpty(properties)) Map.empty[String, String]
-    else {
-      val map = mutable.Map[String, String]()
-      val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
-      simple.split("\\s?-D") match {
-        case d if Utils.notEmpty(d) =>
-          d.foreach(x => {
-            if (x.nonEmpty) {
-              val p = PROPERTY_PATTERN.matcher(x.trim)
-              if (p.matches) {
-                map += p.group(1).trim -> p.group(2).trim
-              }
-            }
-          })
-        case _ =>
-      }
-      val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)
-      while (matcher.find()) {
-        val opts = matcher.group()
-        val index = opts.indexOf("=")
-        val key = opts.substring(2, index).trim
-        val value = opts.substring(index + 1).trim.replaceAll("(^[\"|']|[\"|']$)", "")
-        map += key -> value
-      }
-      map.toMap
-    }
-  }
-
-  @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] =
-    new util.HashMap[String, String](extractDynamicProperties(properties).asJava)
 
 }

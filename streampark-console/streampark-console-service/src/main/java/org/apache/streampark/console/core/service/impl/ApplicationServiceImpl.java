@@ -25,12 +25,7 @@ import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
-import org.apache.streampark.common.util.CompletableFutureUtils;
-import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.HadoopUtils;
-import org.apache.streampark.common.util.ThreadUtils;
-import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.common.util.YarnUtils;
+import org.apache.streampark.common.util.*;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -1670,7 +1665,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     Map<String, String> dynamicProperties =
-        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties());
+        PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties());
     properties.putAll(dynamicProperties);
     ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
     if (resolveOrder != null) {

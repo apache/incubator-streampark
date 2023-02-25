@@ -18,10 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.common.util.CompletableFutureUtils;
-import org.apache.streampark.common.util.FlinkUtils;
-import org.apache.streampark.common.util.ThreadUtils;
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.*;
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -127,7 +124,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     String numRetainedKey = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key();
     String numRetainedFromDynamicProp =
-        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties())
+        PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
             .get(numRetainedKey);
 
     int cpThreshold = 0;
@@ -226,7 +223,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
     String savepointPath =
-        FlinkClient.extractDynamicPropertiesAsJava(application.getDynamicProperties())
+        PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
             .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
     // Application conf configuration has the second priority. If it is a streampark|flinksql type
