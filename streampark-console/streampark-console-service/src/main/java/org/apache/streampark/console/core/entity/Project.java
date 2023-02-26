@@ -197,18 +197,18 @@ public class Project implements Serializable {
       }
     }
 
-    StringBuffer cmdBuffer = new StringBuffer(mvn).append(" clean package -DskipTests ");
+    StringBuilder cmdBuilder = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
     if (StringUtils.isNotEmpty(this.buildArgs)) {
-      cmdBuffer.append(this.buildArgs.trim());
+      cmdBuilder.append(this.buildArgs.trim());
     }
 
     Setting setting = SettingService.SETTINGS.get(SettingService.KEY_MAVEN_SETTINGS);
-    if (setting != null) {
-      cmdBuffer.append(" --settings ").append(setting.getSettingValue());
+    if (setting != null && setting.getSettingValue() != null) {
+      cmdBuilder.append(" --settings ").append(setting.getSettingValue());
     }
 
-    return cmdBuffer.toString();
+    return cmdBuilder.toString();
   }
 
   @JsonIgnore
