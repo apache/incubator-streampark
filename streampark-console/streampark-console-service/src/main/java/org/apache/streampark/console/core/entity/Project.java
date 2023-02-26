@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -24,7 +26,6 @@ import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
-import org.apache.streampark.console.core.service.SettingService;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -197,18 +198,18 @@ public class Project implements Serializable {
       }
     }
 
-    StringBuilder cmdBuilder = new StringBuilder(mvn).append(" clean package -DskipTests ");
+    StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
     if (StringUtils.isNotEmpty(this.buildArgs)) {
-      cmdBuilder.append(this.buildArgs.trim());
+      cmdBuffer.append(this.buildArgs.trim());
     }
 
-    Setting setting = SettingService.SETTINGS.get(SettingService.KEY_MAVEN_SETTINGS);
-    if (setting != null && setting.getSettingValue() != null) {
-      cmdBuilder.append(" --settings ").append(setting.getSettingValue());
+    String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
+    if (StringUtils.isNotEmpty(setting)) {
+      cmdBuffer.append(" --settings ").append(setting);
     }
 
-    return cmdBuilder.toString();
+    return cmdBuffer.toString();
   }
 
   @JsonIgnore
