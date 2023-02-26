@@ -54,7 +54,7 @@ class ApplicationServiceTest {
     app.setVersionId(1L);
     app.setK8sNamespace("default");
     app.setState(0);
-    app.setLaunch(2);
+    app.setRelease(2);
     app.setBuild(true);
     app.setRestartSize(0);
     app.setOptionState(0);
@@ -77,7 +77,7 @@ class ApplicationServiceTest {
     app.setDrain(false);
     app.setAllowNonRestored(false);
 
-    Assertions.assertDoesNotThrow(() -> applicationService.updateLaunch(app));
+    Assertions.assertDoesNotThrow(() -> applicationService.updateRelease(app));
   }
 
   @Test

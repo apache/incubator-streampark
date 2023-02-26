@@ -24,7 +24,7 @@ export default {
   duration: 'Duration',
   modifiedTime: 'Modified Time',
   runStatus: 'Run Status',
-  launchBuild: 'Launch Status',
+  releaseBuild: 'Release Status',
   jobType: 'Job Type',
   developmentMode: 'Development Mode',
   executionMode: 'Execution Mode',
@@ -65,11 +65,11 @@ export default {
   status: 'Run Status',
   startTime: 'Start Time',
   endTime: 'End Time',
-  launch: {
-    launchTitle: 'The current launch of the application is in progress.',
-    launchDesc: 'are you sure you want to force another build',
-    launchFail: 'launch application failed,',
-    launching: 'Current Application is launching',
+  release: {
+    releaseTitle: 'The current release of the application is in progress.',
+    releaseDesc: 'are you sure you want to force another build',
+    releaseFail: 'release application failed,',
+    releasing: 'Current Application is releasing',
   },
   detail: {
     detailTitle: 'Application Info',
@@ -106,7 +106,7 @@ export default {
     },
   },
   view: {
-    buildTitle: 'Application Launching Progress',
+    buildTitle: 'Application releasing Progress',
     stepTitle: 'Steps Detail',
     errorLog: 'Error Log',
     errorSummary: 'Error Summary',
@@ -147,8 +147,8 @@ export default {
   },
   operation: {
     edit: 'Edit Application',
-    launch: 'Launch Application',
-    launchDetail: 'Launching Progress Detail',
+    release: 'Release Application',
+    releaseDetail: 'Releasing Progress Detail',
     start: 'Start Application',
     cancel: 'Cancel Application',
     savepoint: 'Trigger Savepoint',

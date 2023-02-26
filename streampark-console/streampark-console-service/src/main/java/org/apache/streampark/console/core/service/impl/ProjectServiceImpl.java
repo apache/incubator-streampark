@@ -35,7 +35,7 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
 import org.apache.streampark.console.core.enums.GitCredential;
-import org.apache.streampark.console.core.enums.LaunchState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
@@ -145,8 +145,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     "update deploy by project: {}, appName:{}",
                     project.getName(),
                     app.getJobName());
-                app.setLaunch(LaunchState.NEED_CHECK.get());
-                applicationService.updateLaunch(app);
+                app.setRelease(ReleaseState.NEED_CHECK.get());
+                applicationService.updateRelease(app);
               });
         }
       }
@@ -219,9 +219,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         "update deploy by project: {}, appName:{}",
                         project.getName(),
                         app.getJobName());
-                    app.setLaunch(LaunchState.NEED_LAUNCH.get());
+                    app.setRelease(ReleaseState.NEED_RELEASE.get());
                     app.setBuild(true);
-                    this.applicationService.updateLaunch(app);
+                    this.applicationService.updateRelease(app);
                   });
               flinkRESTAPIWatcher.init();
             });

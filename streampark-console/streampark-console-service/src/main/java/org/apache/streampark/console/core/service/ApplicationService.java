@@ -86,7 +86,7 @@ public interface ApplicationService extends IService<Application> {
 
   boolean checkAlter(Application application);
 
-  void updateLaunch(Application application);
+  void updateRelease(Application application);
 
   List<Application> getByProjectId(Long id);
 

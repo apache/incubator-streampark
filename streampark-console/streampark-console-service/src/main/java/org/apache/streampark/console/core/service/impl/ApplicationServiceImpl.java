@@ -54,8 +54,8 @@ import org.apache.streampark.console.core.enums.ChangedType;
 import org.apache.streampark.console.core.enums.CheckPointType;
 import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.enums.OptionState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ApplicationMapper;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.runner.EnvInitializer;
@@ -352,9 +352,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
     updateWrapper.eq(Application::getId, application.getId());
     if (application.isFlinkSqlJob()) {
-      updateWrapper.set(Application::getLaunch, LaunchState.FAILED.get());
+      updateWrapper.set(Application::getRelease, ReleaseState.FAILED.get());
     } else {
-      updateWrapper.set(Application::getLaunch, LaunchState.NEED_LAUNCH.get());
+      updateWrapper.set(Application::getRelease, ReleaseState.NEED_RELEASE.get());
     }
     if (!application.isRunning()) {
       updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
@@ -694,7 +694,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     Utils.notNull(appParam.getTeamId(), "The teamId cannot be null");
     appParam.setUserId(commonService.getUserId());
     appParam.setState(FlinkAppState.ADDED.getValue());
-    appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
+    appParam.setRelease(ReleaseState.NEED_RELEASE.get());
     appParam.setOptionState(OptionState.NONE.getValue());
     appParam.setCreateTime(new Date());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
@@ -773,7 +773,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
     newApp.setUserId(commonService.getUserId());
     newApp.setState(FlinkAppState.ADDED.getValue());
-    newApp.setLaunch(LaunchState.NEED_LAUNCH.get());
+    newApp.setRelease(ReleaseState.NEED_RELEASE.get());
     newApp.setOptionState(OptionState.NONE.getValue());
     newApp.setCreateTime(new Date());
     newApp.setHotParams(oldApp.getHotParams());
@@ -816,7 +816,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     try {
       checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
       Application application = getById(appParam.getId());
-      application.setLaunch(LaunchState.NEED_LAUNCH.get());
+      application.setRelease(ReleaseState.NEED_RELEASE.get());
       if (application.isUploadJob()) {
         if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
           application.setBuild(true);
@@ -857,7 +857,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
 
       appParam.setJobType(application.getJobType());
-      // changes to the following parameters need to be re-launched to take effect
+      // changes to the following parameters need to be re-release to take effect
       application.setJobName(appParam.getJobName());
       application.setVersionId(appParam.getVersionId());
       application.setArgs(appParam.getArgs());
@@ -981,7 +981,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           // sql and dependency not changed, but version changed, means that rollback to the version
           CandidateType type = CandidateType.HISTORY;
           flinkSqlService.setCandidate(type, appParam.getId(), appParam.getSqlId());
-          application.setLaunch(LaunchState.NEED_ROLLBACK.get());
+          application.setRelease(ReleaseState.NEED_ROLLBACK.get());
           application.setBuild(true);
         }
       }
@@ -990,10 +990,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public void updateLaunch(Application application) {
+  public void updateRelease(Application application) {
     LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
     updateWrapper.eq(Application::getId, application.getId());
-    updateWrapper.set(Application::getLaunch, application.getLaunch());
+    updateWrapper.set(Application::getRelease, application.getRelease());
     updateWrapper.set(Application::getBuild, application.getBuild());
     if (application.getOptionState() != null) {
       updateWrapper.set(Application::getOptionState, application.getOptionState());
@@ -1018,9 +1018,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
       updateWrapper.eq(Application::getId, application.getId());
       if (application.isRunning()) {
-        updateWrapper.set(Application::getLaunch, LaunchState.NEED_RESTART.get());
+        updateWrapper.set(Application::getRelease, ReleaseState.NEED_RESTART.get());
       } else {
-        updateWrapper.set(Application::getLaunch, LaunchState.DONE.get());
+        updateWrapper.set(Application::getRelease, ReleaseState.DONE.get());
         updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
       }
       this.update(updateWrapper);
@@ -1070,8 +1070,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Override
   public void clean(Application appParam) {
-    appParam.setLaunch(LaunchState.DONE.get());
-    this.updateLaunch(appParam);
+    appParam.setRelease(ReleaseState.DONE.get());
+    this.updateRelease(appParam);
   }
 
   @Override
@@ -1577,7 +1577,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               application.setStartTime(new Date());
               application.setEndTime(null);
               if (isKubernetesApp(application)) {
-                application.setLaunch(LaunchState.DONE.get());
+                application.setRelease(ReleaseState.DONE.get());
               }
               updateById(application);
 

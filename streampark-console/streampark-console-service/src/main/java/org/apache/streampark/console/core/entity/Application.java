@@ -32,7 +32,7 @@ import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.LaunchState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.enums.ResourceFrom;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
@@ -111,8 +111,9 @@ public class Application implements Serializable {
   private String k8sNamespace = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE();
 
   private Integer state;
-  /** task launch status */
-  private Integer launch;
+  /** task release status */
+  @TableField("`release`")
+  private Integer release;
 
   /** determine if a task needs to be built */
   private Boolean build;
@@ -313,13 +314,8 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
-  public LaunchState getLaunchState() {
-    return LaunchState.of(state);
-  }
-
-  @JsonIgnore
-  public void setLaunchState(LaunchState launchState) {
-    this.launch = launchState.get();
+  public ReleaseState getReleaseState() {
+    return ReleaseState.of(release);
   }
 
   @JsonIgnore
@@ -468,7 +464,7 @@ public class Application implements Serializable {
 
   @JsonIgnore
   public boolean isNeedRollback() {
-    return LaunchState.NEED_ROLLBACK.get() == this.getLaunch();
+    return ReleaseState.NEED_ROLLBACK.get() == this.getRelease();
   }
 
   @JsonIgnore

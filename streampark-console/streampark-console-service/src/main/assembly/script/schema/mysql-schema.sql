@@ -88,7 +88,7 @@ create table `t_flink_app` (
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   `option_time` datetime default null,
-  `launch` tinyint default 1,
+  `release` tinyint default 1,
   `build` tinyint default 1,
   `start_time` datetime default null,
   `end_time` datetime default null,

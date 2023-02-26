@@ -233,7 +233,7 @@ create table "public"."t_flink_app" (
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "option_time" timestamp(6),
-  "launch" int2 default 1,
+  "release" int2 default 1,
   "build" boolean default true,
   "start_time" timestamp(6),
   "end_time" timestamp(6),

@@ -73,7 +73,7 @@ insert into `t_menu` values (100021, 100015, 'edit streampark', '/flink/app/edit
 insert into `t_menu` values (100022, 100014, 'build', null, null, 'project:build', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100023, 100014, 'delete', null, null, 'project:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100024, 100015, 'mapping', null, null, 'app:mapping', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100025, 100015, 'launch', null, null, 'app:launch', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100025, 100015, 'release', null, null, 'app:release', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100026, 100015, 'start', null, null, 'app:start', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100027, 100015, 'clean', null, null, 'app:clean', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100028, 100015, 'cancel', null, null, 'app:cancel', null, '1', 1, null, now(), now());

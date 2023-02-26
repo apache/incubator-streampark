@@ -34,9 +34,9 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.enums.CandidateType;
-import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.enums.NoticeType;
 import org.apache.streampark.console.core.enums.OptionState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -164,8 +164,8 @@ public class AppBuildPipeServiceImpl
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
 
-            app.setLaunch(LaunchState.LAUNCHING.get());
-            applicationService.updateLaunch(app);
+            app.setRelease(ReleaseState.RELEASING.get());
+            applicationService.updateRelease(app);
 
             if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
               flinkRESTAPIWatcher.init();
@@ -235,10 +235,10 @@ public class AppBuildPipeServiceImpl
             if (result.pass()) {
               // running job ...
               if (app.isRunning()) {
-                app.setLaunch(LaunchState.NEED_RESTART.get());
+                app.setRelease(ReleaseState.NEED_RESTART.get());
               } else {
                 app.setOptionState(OptionState.NONE.getValue());
-                app.setLaunch(LaunchState.DONE.get());
+                app.setRelease(ReleaseState.DONE.get());
                 // If the current task is not running, or the task has just been added, directly set
                 // the candidate version to the official version
                 if (app.isFlinkSqlJob()) {
@@ -269,15 +269,15 @@ public class AppBuildPipeServiceImpl
                   new Message(
                       commonService.getUserId(),
                       app.getId(),
-                      app.getJobName().concat(" launch failed"),
+                      app.getJobName().concat(" release failed"),
                       Utils.stringifyException(snapshot.error().exception()),
                       NoticeType.EXCEPTION);
               messageService.push(message);
-              app.setLaunch(LaunchState.FAILED.get());
+              app.setRelease(ReleaseState.FAILED.get());
               app.setOptionState(OptionState.NONE.getValue());
               app.setBuild(true);
             }
-            applicationService.updateLaunch(app);
+            applicationService.updateRelease(app);
             if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
               flinkRESTAPIWatcher.init();
             }
@@ -305,14 +305,14 @@ public class AppBuildPipeServiceImpl
                 }
               });
     }
-    // save pipeline instance snapshot to db before launch it.
+    // save pipeline instance snapshot to db before release it.
     AppBuildPipeline buildPipeline =
         AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
     boolean saved = saveEntity(buildPipeline);
     DOCKER_PULL_PG_SNAPSHOTS.invalidate(app.getId());
     DOCKER_BUILD_PG_SNAPSHOTS.invalidate(app.getId());
     DOCKER_PUSH_PG_SNAPSHOTS.invalidate(app.getId());
-    // async launch pipeline
+    // async release pipeline
     executorService.submit((Runnable) pipeline::launch);
     return saved;
   }

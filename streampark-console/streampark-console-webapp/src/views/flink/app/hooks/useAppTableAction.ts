@@ -26,7 +26,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import {
   AppTypeEnum,
   ExecModeEnum,
-  LaunchStateEnum,
+  ReleaseStateEnum,
   OptionStateEnum,
   AppStateEnum,
   JobTypeEnum,
@@ -52,7 +52,7 @@ export const useAppTableAction = (
   const { createMessage } = useMessage();
   const { hasPermission } = usePermission();
   const {
-    handleCheckLaunchApp,
+    handleCheckReleaseApp,
     handleAppCheckStart,
     handleCanStop,
     handleForcedStop,
@@ -71,23 +71,23 @@ export const useAppTableAction = (
         onClick: handleEdit.bind(null, record, currentPageNo),
       },
       {
-        tooltip: { title: t('flink.app.operation.launch') },
+        tooltip: { title: t('flink.app.operation.release') },
         ifShow:
           [
-            LaunchStateEnum.FAILED,
-            LaunchStateEnum.NEED_LAUNCH,
-            LaunchStateEnum.NEED_ROLLBACK,
-          ].includes(record.launch) && record['optionState'] == OptionStateEnum.NONE,
-        auth: 'app:launch',
+            ReleaseStateEnum.FAILED,
+            ReleaseStateEnum.NEED_RELEASE,
+            ReleaseStateEnum.NEED_ROLLBACK,
+          ].includes(record.release) && record['optionState'] == OptionStateEnum.NONE,
+        auth: 'app:release',
         icon: 'ant-design:cloud-upload-outlined',
-        onClick: handleCheckLaunchApp.bind(null, record),
+        onClick: handleCheckReleaseApp.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.operation.launchDetail') },
+        tooltip: { title: t('flink.app.operation.releaseDetail') },
         ifShow:
-          [LaunchStateEnum.FAILED, LaunchStateEnum.LAUNCHING].includes(record.launch) ||
-          record['optionState'] == OptionStateEnum.LAUNCHING,
-        auth: 'app:launch',
+          [ReleaseStateEnum.FAILED, ReleaseStateEnum.RELEASING].includes(record.release) ||
+          record['optionState'] == OptionStateEnum.RELEASING,
+        auth: 'app:release',
         icon: 'ant-design:container-outlined',
         onClick: () => openBuildDrawer(true, { appId: record.id }),
       },
