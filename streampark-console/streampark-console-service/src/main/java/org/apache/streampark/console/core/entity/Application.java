@@ -112,6 +112,7 @@ public class Application implements Serializable {
 
   private Integer state;
   /** task release status */
+  @TableField("`release`")
   private Integer release;
 
   /** determine if a task needs to be built */
