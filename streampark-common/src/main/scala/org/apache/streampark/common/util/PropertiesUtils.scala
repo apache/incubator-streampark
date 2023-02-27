@@ -23,11 +23,20 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{Map => MutableMap}
 import com.typesafe.config.ConfigFactory
+import org.apache.commons.lang3.StringUtils
 import org.yaml.snakeyaml.Yaml
 
+import java.util.regex.Pattern
+import javax.annotation.Nonnull
 import scala.collection.mutable
 
 object PropertiesUtils extends Logger {
+
+  private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
+
+  private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']"
+
+  private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
 
   def readFile(filename: String): String = {
     val file = new File(filename)
@@ -229,5 +238,39 @@ object PropertiesUtils extends Logger {
     }
     flinkConf
   }
+
+  /**
+   * extract flink configuration from application.properties
+   */
+  @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String] else {
+      val map = mutable.Map[String, String]()
+      val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
+      simple.split("\\s?-D") match {
+        case d if Utils.notEmpty(d) =>
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              val p = PROPERTY_PATTERN.matcher(x.trim)
+              if (p.matches) {
+                map += p.group(1).trim -> p.group(2).trim
+              }
+            }
+          })
+        case _ =>
+      }
+      val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)
+      while (matcher.find()) {
+        val opts = matcher.group()
+        val index = opts.indexOf("=")
+        val key = opts.substring(2, index).trim
+        val value = opts.substring(index + 1).trim.replaceAll("(^[\"|']|[\"|']$)", "")
+        map += key -> value
+      }
+      map.toMap
+    }
+  }
+
+  @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] =
+    new JavaMap[String, String](extractDynamicProperties(properties).asJava)
 
 }

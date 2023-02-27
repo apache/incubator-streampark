@@ -28,13 +28,13 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
-import org.apache.streampark.flink.client.`trait`.KubernetesNativeSubmitTrait
+import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
 
 /**
  * kubernetes native application mode submit
  */
-object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
+object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
 
   @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {

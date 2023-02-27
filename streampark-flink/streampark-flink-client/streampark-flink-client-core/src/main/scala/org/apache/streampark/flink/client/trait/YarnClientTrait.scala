@@ -36,7 +36,7 @@ import org.apache.streampark.flink.client.bean._
 /**
  * yarn application mode submit
  */
-trait YarnSubmitTrait extends FlinkSubmitTrait {
+trait YarnClientTrait extends FlinkClientTrait {
 
   private[this] def executeClientAction[R <: SavepointRequestTrait, O](request: R, flinkConf: Configuration,
                                                          actionFunc: (JobID, ClusterClient[_]) => O): O = {

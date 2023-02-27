@@ -28,14 +28,14 @@ import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.client.`trait`.FlinkSubmitTrait
+import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean.{CancelRequest, CancelResponse, TriggerSavepointRequest, SavepointRequestTrait, SavepointResponse, SubmitRequest, SubmitResponse}
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 
 /**
  * Submit Job to Remote Cluster
  */
-object RemoteSubmit extends FlinkSubmitTrait {
+object RemoteClient extends FlinkClientTrait {
 
   /**
    * @param submitRequest

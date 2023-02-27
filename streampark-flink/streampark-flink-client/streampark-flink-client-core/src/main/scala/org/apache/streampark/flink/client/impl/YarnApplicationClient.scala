@@ -37,13 +37,13 @@ import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.util.{HdfsUtils, Utils}
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
-import org.apache.streampark.flink.client.`trait`.YarnSubmitTrait
+import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
 /**
  * yarn application mode submit
  */
-object YarnApplicationSubmit extends YarnSubmitTrait {
+object YarnApplicationClient extends YarnClientTrait {
 
   private[this] lazy val workspace = Workspace.remote
 

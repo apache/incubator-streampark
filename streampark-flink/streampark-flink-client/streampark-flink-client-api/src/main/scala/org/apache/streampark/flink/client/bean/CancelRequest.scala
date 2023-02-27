@@ -23,13 +23,12 @@ import javax.annotation.Nullable
 import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
 import org.apache.streampark.common.enums.ExecutionMode
 
-case class CancelRequest(
-    flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
-    clusterId: String,
-    jobId: String,
-    override val withSavepoint: Boolean,
-    withDrain: Boolean,
-    savepointPath: String,
-    override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-    @Nullable properties: JavaMap[String, Any]) extends SavepointRequestTrait {}
+case class CancelRequest(flinkVersion: FlinkVersion,
+                         executionMode: ExecutionMode,
+                         @Nullable properties: JavaMap[String, Any],
+                         clusterId: String,
+                         jobId: String,
+                         override val withSavepoint: Boolean,
+                         withDrain: Boolean,
+                         savepointPath: String,
+                         override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE) extends SavepointRequestTrait

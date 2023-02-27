@@ -28,12 +28,11 @@ import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
 import org.apache.streampark.common.util.FlinkUtils
 
-case class DeployRequest(
-    flinkVersion: FlinkVersion,
-    clusterId: String,
-    executionMode: ExecutionMode,
-    properties: JavaMap[String, Any],
-    @Nullable k8sDeployParam: KubernetesDeployParam) {
+case class DeployRequest(flinkVersion: FlinkVersion,
+                         executionMode: ExecutionMode,
+                         properties: JavaMap[String, Any],
+                         clusterId: String,
+                         @Nullable k8sDeployParam: KubernetesDeployParam) {
 
   private[client] lazy val hdfsWorkspace = {
 
@@ -60,10 +59,9 @@ case class DeployRequest(
   }
 }
 
-case class KubernetesDeployParam(
-    clusterId: String,
-    kubernetesNamespace: String = KubernetesConfigOptions.NAMESPACE.defaultValue(),
-    kubeConf: String = "~/.kube/config",
-    serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
-    flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
-    @Nullable flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.ClusterIP)
+case class KubernetesDeployParam(clusterId: String,
+                                 kubernetesNamespace: String = KubernetesConfigOptions.NAMESPACE.defaultValue(),
+                                 kubeConf: String = "~/.kube/config",
+                                 serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
+                                 flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
+                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.ClusterIP)

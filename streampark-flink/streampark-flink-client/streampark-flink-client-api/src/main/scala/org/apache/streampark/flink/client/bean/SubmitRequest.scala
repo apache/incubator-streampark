@@ -41,22 +41,21 @@ import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResp
  */
 case class KubernetesSubmitParam(clusterId: String, kubernetesNamespace: String, @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
 
-case class SubmitRequest(
-    flinkVersion: FlinkVersion,
-    flinkYaml: String,
-    developmentMode: DevelopmentMode,
-    executionMode: ExecutionMode,
-    id: Long,
-    jobId: String,
-    appName: String,
-    appConf: String,
-    applicationType: ApplicationType,
-    savePoint: String,
-    properties: JavaMap[String, Any],
-    args: String,
-    @Nullable buildResult: BuildResult,
-    @Nullable k8sSubmitParam: KubernetesSubmitParam,
-    @Nullable extraParameter: JavaMap[String, Any]) {
+case class SubmitRequest(flinkVersion: FlinkVersion,
+                         executionMode: ExecutionMode,
+                         properties: JavaMap[String, Any],
+                         flinkYaml: String,
+                         developmentMode: DevelopmentMode,
+                         id: Long,
+                         jobId: String,
+                         appName: String,
+                         appConf: String,
+                         applicationType: ApplicationType,
+                         savePoint: String,
+                         args: String,
+                         @Nullable buildResult: BuildResult,
+                         @Nullable k8sSubmitParam: KubernetesSubmitParam,
+                         @Nullable extraParameter: JavaMap[String, Any]) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_PROPERTY_PREFIX)
 
@@ -128,8 +127,8 @@ case class SubmitRequest(
         prefix match {
           case "" | null => map
           case other => map
-              .filter(_._1.startsWith(other)).filter(_._2.nonEmpty)
-              .map(x => x._1.drop(other.length) -> x._2)
+            .filter(_._1.startsWith(other)).filter(_._2.nonEmpty)
+            .map(x => x._1.drop(other.length) -> x._2)
         }
       }
     }
@@ -193,13 +192,11 @@ case class SubmitRequest(
  * @param flinkPlugins
  * @param appJars
  * @param appPlugins
- * #TODO: className provisional
  */
-case class HdfsWorkspace(
-    flinkName: String,
-    flinkHome: String,
-    flinkDistJar: String,
-    flinkLib: String,
-    flinkPlugins: String,
-    appJars: String,
-    appPlugins: String)
+case class HdfsWorkspace(flinkName: String,
+                         flinkHome: String,
+                         flinkDistJar: String,
+                         flinkLib: String,
+                         flinkPlugins: String,
+                         appJars: String,
+                         appPlugins: String)

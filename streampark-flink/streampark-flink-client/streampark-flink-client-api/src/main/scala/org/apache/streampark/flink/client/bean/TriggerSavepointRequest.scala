@@ -26,10 +26,9 @@ import javax.annotation.Nullable
 
 /** Trigger savepoint request. */
 case class TriggerSavepointRequest(flinkVersion: FlinkVersion,
-  executionMode: ExecutionMode,
-  clusterId: String,
-  jobId: String,
-  savepointPath: String,
-  override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-  @Nullable properties: JavaMap[String, Any]) extends SavepointRequestTrait {
-}
+                                   executionMode: ExecutionMode,
+                                   @Nullable properties: JavaMap[String, Any],
+                                   clusterId: String,
+                                   jobId: String,
+                                   savepointPath: String,
+                                   override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE) extends SavepointRequestTrait

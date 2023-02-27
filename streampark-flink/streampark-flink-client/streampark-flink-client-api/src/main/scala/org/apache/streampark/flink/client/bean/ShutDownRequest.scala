@@ -23,9 +23,8 @@ import javax.annotation.Nullable
 import org.apache.streampark.common.conf.FlinkVersion
 import org.apache.streampark.common.enums.ExecutionMode
 
-case class ShutDownRequest(
-    flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
-    clusterId: String,
-    @Nullable kubernetesDeployParam: KubernetesDeployParam,
-    @Nullable properties: JavaMap[String, Any])
+case class ShutDownRequest(flinkVersion: FlinkVersion,
+                           executionMode: ExecutionMode,
+                           @Nullable properties: JavaMap[String, Any],
+                           clusterId: String,
+                           @Nullable kubernetesDeployParam: KubernetesDeployParam)

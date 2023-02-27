@@ -34,13 +34,13 @@ import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
 import org.apache.hadoop.yarn.util.ConverterUtils
 
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.client.`trait`.YarnSubmitTrait
+import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
 /**
  * Submit Job to YARN Session Cluster
  */
-object YarnSessionSubmit extends YarnSubmitTrait {
+object YarnSessionClient extends YarnClientTrait {
 
   /**
    * @param submitRequest
