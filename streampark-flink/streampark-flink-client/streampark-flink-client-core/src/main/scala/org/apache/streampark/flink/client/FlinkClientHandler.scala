@@ -18,63 +18,48 @@
 package org.apache.streampark.flink.client
 
 import org.apache.streampark.common.enums.ExecutionMode
+import org.apache.streampark.common.enums.ExecutionMode._
+import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.impl._
 
 object FlinkClientHandler {
 
-  def submit(submitInfo: SubmitRequest): SubmitResponse = {
-    submitInfo.executionMode match {
-      case ExecutionMode.LOCAL => LocalClient.submit(submitInfo)
-      case ExecutionMode.REMOTE => RemoteClient.submit(submitInfo)
-      case ExecutionMode.YARN_APPLICATION => YarnApplicationClient.submit(submitInfo)
-      case ExecutionMode.YARN_SESSION => YarnSessionClient.submit(submitInfo)
-      case ExecutionMode.YARN_PER_JOB => YarnPerJobClient.submit(submitInfo)
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.submit(submitInfo)
-      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationClient.submit(submitInfo)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${submitInfo.executionMode} submit ")
+  private[this] val clients: Map[ExecutionMode, FlinkClientTrait] = Map(
+    LOCAL -> LocalClient,
+    REMOTE -> RemoteClient,
+    YARN_APPLICATION -> YarnApplicationClient,
+    YARN_SESSION -> YarnSessionClient,
+    YARN_PER_JOB -> YarnPerJobClient,
+    KUBERNETES_NATIVE_SESSION -> KubernetesNativeSessionClient,
+    KUBERNETES_NATIVE_APPLICATION -> KubernetesNativeApplicationClient
+  )
+
+  def submit(request: SubmitRequest): SubmitResponse = {
+    clients(request.executionMode).submit(request)
+  }
+
+  def cancel(request: CancelRequest): CancelResponse = {
+    clients(request.executionMode).cancel(request)
+  }
+
+  def triggerSavepoint(request: TriggerSavepointRequest): SavepointResponse = {
+    clients(request.executionMode).triggerSavepoint(request)
+  }
+
+  def deploy(request: DeployRequest): DeployResponse = {
+    request.executionMode match {
+      case YARN_SESSION => YarnSessionClient.deploy(request)
+      case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.deploy(request)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} deploy cluster ")
     }
   }
 
-  def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {
-    savepointRequest.executionMode match {
-      case ExecutionMode.LOCAL => LocalClient.triggerSavepoint(savepointRequest)
-      case ExecutionMode.REMOTE => RemoteClient.triggerSavepoint(savepointRequest)
-      case ExecutionMode.YARN_APPLICATION => YarnApplicationClient.triggerSavepoint(savepointRequest)
-      case ExecutionMode.YARN_SESSION => YarnSessionClient.triggerSavepoint(savepointRequest)
-      case ExecutionMode.YARN_PER_JOB | ExecutionMode.YARN_SESSION => YarnPerJobClient.triggerSavepoint(savepointRequest)
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.triggerSavepoint(savepointRequest)
-      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationClient.triggerSavepoint(savepointRequest)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${savepointRequest.executionMode} Submit ")
-    }
-  }
-
-  def cancel(cancelRequest: CancelRequest): CancelResponse = {
-    cancelRequest.executionMode match {
-      case ExecutionMode.LOCAL => LocalClient.cancel(cancelRequest)
-      case ExecutionMode.REMOTE => RemoteClient.cancel(cancelRequest)
-      case ExecutionMode.YARN_APPLICATION => YarnApplicationClient.cancel(cancelRequest)
-      case ExecutionMode.YARN_SESSION => YarnSessionClient.cancel(cancelRequest)
-      case ExecutionMode.YARN_PER_JOB | ExecutionMode.YARN_SESSION => YarnPerJobClient.cancel(cancelRequest)
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.cancel(cancelRequest)
-      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationClient.cancel(cancelRequest)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${cancelRequest.executionMode} cancel ")
-    }
-  }
-
-  def deploy(deployRequest: DeployRequest): DeployResponse = {
-    deployRequest.executionMode match {
-      case ExecutionMode.YARN_SESSION => YarnSessionClient.deploy(deployRequest)
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.deploy(deployRequest)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${deployRequest.executionMode} deploy cluster ")
-    }
-  }
-
-  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
-    shutDownRequest.executionMode match {
-      case ExecutionMode.YARN_SESSION => YarnSessionClient.shutdown(shutDownRequest)
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.shutdown(shutDownRequest)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${shutDownRequest.executionMode} shutdown cluster ")
+  def shutdown(request: ShutDownRequest): ShutDownResponse = {
+    request.executionMode match {
+      case YARN_SESSION => YarnSessionClient.shutdown(request)
+      case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.shutdown(request)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} shutdown cluster ")
     }
   }
 }

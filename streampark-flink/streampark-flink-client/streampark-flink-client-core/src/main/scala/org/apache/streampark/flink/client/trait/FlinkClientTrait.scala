@@ -190,10 +190,10 @@ trait FlinkClientTrait extends Logger {
   def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse
 
   def trySubmit(
-      submitRequest: SubmitRequest,
-      flinkConfig: Configuration,
-      jarFile: File)(restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse)(jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse)
-      : SubmitResponse = {
+                 submitRequest: SubmitRequest,
+                 flinkConfig: Configuration,
+                 jarFile: File)(restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse)(jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse)
+  : SubmitResponse = {
     // Prioritize using Rest API submit while using JobGraph submit plan as backup
     Try {
       logInfo(s"[flink-submit] Attempting to submit in Rest API Submit Plan.")
@@ -490,28 +490,26 @@ trait FlinkClientTrait extends Logger {
   }
 
   private def tryGetSavepointPathIfNeed(request: SavepointRequestTrait): String = {
-    val savePointDir = {
-      if (!request.withSavepoint) null
-      else {
-        if (StringUtils.isNotEmpty(request.savepointPath)) {
-          request.savepointPath
-        } else {
-          val configDir = getOptionFromDefaultFlinkConfig[String](
-            request.flinkVersion.flinkHome,
-            ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-              .stringType()
-              .defaultValue {
-                if (request.executionMode == ExecutionMode.YARN_APPLICATION) {
-                  Workspace.remote.APP_SAVEPOINTS
-                } else null
-              })
-          if (StringUtils.isEmpty(configDir)) {
-            throw new FlinkException(s"[StreamPark] executionMode: ${request.executionMode.getName}, savePoint path is null or invalid.")
-          } else configDir
-        }
+    if (!request.withSavepoint) null else {
+      if (StringUtils.isNotEmpty(request.savepointPath)) {
+        request.savepointPath
+      } else {
+        val configDir = getOptionFromDefaultFlinkConfig[String](
+          request.flinkVersion.flinkHome,
+          ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
+            .stringType()
+            .defaultValue {
+              if (request.executionMode == ExecutionMode.YARN_APPLICATION) {
+                Workspace.remote.APP_SAVEPOINTS
+              } else null
+            })
+
+        if (StringUtils.isEmpty(configDir)) {
+          throw new FlinkException(s"[StreamPark] executionMode: ${request.executionMode.getName}, savePoint path is null or invalid.")
+        } else configDir
+
       }
     }
-    savePointDir
   }
 
   private[client] def triggerSavepoint(savepointRequest: TriggerSavepointRequest, jobID: JobID, client: ClusterClient[_]): String = {
