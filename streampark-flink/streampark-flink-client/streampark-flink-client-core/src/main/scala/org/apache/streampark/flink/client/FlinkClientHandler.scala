@@ -36,15 +36,24 @@ object FlinkClientHandler {
   )
 
   def submit(request: SubmitRequest): SubmitResponse = {
-    clients(request.executionMode).submit(request)
+    clients.get(request.executionMode) match {
+      case Some(client) => client.submit(request)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} submit ")
+    }
   }
 
   def cancel(request: CancelRequest): CancelResponse = {
-    clients(request.executionMode).cancel(request)
+    clients.get(request.executionMode) match {
+      case Some(client) => client.cancel(request)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} cancel ")
+    }
   }
 
   def triggerSavepoint(request: TriggerSavepointRequest): SavepointResponse = {
-    clients(request.executionMode).triggerSavepoint(request)
+    clients.get(request.executionMode) match {
+      case Some(client) => client.triggerSavepoint(request)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} triggerSavepoint ")
+    }
   }
 
   def deploy(request: DeployRequest): DeployResponse = {
@@ -62,4 +71,5 @@ object FlinkClientHandler {
       case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} shutdown cluster ")
     }
   }
+
 }
