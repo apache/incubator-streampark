@@ -20,14 +20,12 @@ package org.apache.streampark.flink.client.`trait`
 import java.io.File
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 import java.util.concurrent.TimeUnit
-
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
-
 import com.google.common.collect.Lists
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.commons.collections.MapUtils
@@ -41,7 +39,6 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
-
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
@@ -49,6 +46,8 @@ import org.apache.streampark.common.util.{DeflaterUtils, Logger}
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 import org.apache.streampark.flink.client.bean._
+
+import scala.annotation.tailrec
 
 trait FlinkClientTrait extends Logger {
 
@@ -376,13 +375,13 @@ trait FlinkClientTrait extends Logger {
     if (StringUtils.isNotEmpty(submitRequest.args)) {
       val multiLineChar = "\"\"\""
       val array = submitRequest.args.split("\\s+")
-      if (array.filter(_.startsWith(multiLineChar)).isEmpty) {
+      if (!array.exists(_.startsWith(multiLineChar))) {
         array.foreach(programArgs +=)
       } else {
         val argsArray = new ArrayBuffer[String]()
         val tempBuffer = new ArrayBuffer[String]()
 
-        def processElement(index: Int, multiLine: Boolean): Unit = {
+        @tailrec def processElement(index: Int, multiLine: Boolean): Unit = {
           if (index == array.length) {
             if (tempBuffer.nonEmpty) {
               argsArray += tempBuffer.mkString(" ")
@@ -396,17 +395,17 @@ trait FlinkClientTrait extends Logger {
             if (!multiLine) {
               if (elem.startsWith(multiLineChar)) {
                 tempBuffer += elem.drop(3)
-                processElement(next, true)
+                processElement(next, multiLine = true)
               } else {
                 argsArray += elem
-                processElement(next, false)
+                processElement(next, multiLine = false)
               }
             } else {
               if (elem.endsWith(multiLineChar)) {
                 tempBuffer += elem.dropRight(3)
                 argsArray += tempBuffer.mkString(" ")
                 tempBuffer.clear()
-                processElement(next, false)
+                processElement(next, multiLine = false)
               } else {
                 tempBuffer += elem
                 processElement(next, multiLine)
@@ -414,11 +413,11 @@ trait FlinkClientTrait extends Logger {
             }
           } else {
             tempBuffer += elem
-            processElement(next, false)
+            processElement(next, multiLine = false)
           }
         }
 
-        processElement(0, false)
+        processElement(0, multiLine = false)
         argsArray.foreach(x => programArgs += x.trim)
       }
     }
