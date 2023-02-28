@@ -46,7 +46,6 @@ enum APP_API {
   ROLLBACK = '/flink/app/rollback',
   REVOKE = '/flink/app/revoke',
   OPTION_LOG = '/flink/app/optionlog',
-  DOWN_LOG = '/flink/app/downlog',
   CHECK_JAR = '/flink/app/checkjar',
   VERIFY_SCHEMA = '/flink/app/verifySchema',
   CHECK_SAVEPOINT_PATH = '/flink/app/checkSavepointPath',

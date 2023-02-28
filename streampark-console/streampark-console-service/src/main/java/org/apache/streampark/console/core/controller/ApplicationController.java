@@ -377,12 +377,6 @@ public class ApplicationController {
     return RestResponse.success(uploadPath);
   }
 
-  @PostMapping("downlog")
-  public RestResponse downlog(Long id) {
-    applicationService.tailMvnDownloading(id);
-    return RestResponse.success();
-  }
-
   @PostMapping("verifySchema")
   public RestResponse verifySchema(String path) {
     final URI uri = URI.create(path);

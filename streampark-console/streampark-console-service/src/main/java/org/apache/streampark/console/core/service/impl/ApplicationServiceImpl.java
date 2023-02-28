@@ -153,10 +153,6 @@ import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements ApplicationService {
 
-  private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
-
-  private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
-
   private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
   private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
@@ -294,13 +290,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     map.put("runningJob", runningJob);
 
     return map;
-  }
-
-  @Override
-  public void tailMvnDownloading(Long id) {
-    this.tailOutMap.put(id, id);
-    // the first time, will be read from the beginning of the buffer. Only once
-    this.tailBeginning.put(id, true);
   }
 
   @Override
