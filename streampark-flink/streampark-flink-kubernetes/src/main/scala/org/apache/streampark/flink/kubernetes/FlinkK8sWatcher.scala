@@ -104,7 +104,7 @@ trait FlinkK8sWatcher extends Logger with AutoCloseable {
   /**
    * get flink cluster metrics aggregation
    */
-  def getAccClusterMetrics: FlinkMetricCV
+  def getAccGroupMetrics(groupId: String = null): FlinkMetricCV
 
   /**
    * get flink cluster metrics

@@ -18,11 +18,8 @@
 package org.apache.streampark.flink.kubernetes
 
 import java.util.concurrent.TimeUnit
-
 import scala.collection.JavaConversions._
-
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
-
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.model._
 
@@ -87,18 +84,16 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
   /**
    * collect the aggregation of flink metrics that in tracking
    */
-  def collectAccMetric(): FlinkMetricCV = {
+  def collectAccGroupMetric(groupId: String): FlinkMetricCV = {
     // get cluster metrics that in tracking
     getActiveWatchingIds() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
-        flinkMetrics.getAll(for (elem <- k) yield {
-          ClusterKey.of(elem)
-        }) match {
+        flinkMetrics.getAll(for (elem <- k) yield ClusterKey.of(elem))
+        match {
           case m if m.isEmpty => FlinkMetricCV.empty
           case m =>
-            // aggregate metrics
-            m.values.fold(FlinkMetricCV.empty)((x, y) => x + y)
+            m.values.filter(x => groupId == null || groupId == x.groupId).fold(FlinkMetricCV.empty)((x, y) => x + y)
         }
     }
   }

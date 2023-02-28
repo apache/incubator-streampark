@@ -268,19 +268,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     // merge metrics from flink kubernetes cluster
-    FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccClusterMetrics();
-    totalJmMemory += k8sMetric.totalJmMemory();
-    totalTmMemory += k8sMetric.totalTmMemory();
-    totalTm += k8sMetric.totalTm();
-    totalSlot += k8sMetric.totalSlot();
-    availableSlot += k8sMetric.availableSlot();
-    runningJob += k8sMetric.runningJob();
-    overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
-    overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
-    overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
-    overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
-    overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
+    FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
+    if (k8sMetric != null) {
+      totalJmMemory += k8sMetric.totalJmMemory();
+      totalTmMemory += k8sMetric.totalTmMemory();
+      totalTm += k8sMetric.totalTm();
+      totalSlot += k8sMetric.totalSlot();
+      availableSlot += k8sMetric.availableSlot();
+      runningJob += k8sMetric.runningJob();
+      overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
+      overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
+      overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
+      overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
+      overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
+    }
 
+    // result json
     Map<String, Serializable> map = new HashMap<>(8);
     map.put("task", overview);
     map.put("jmMemory", totalJmMemory);

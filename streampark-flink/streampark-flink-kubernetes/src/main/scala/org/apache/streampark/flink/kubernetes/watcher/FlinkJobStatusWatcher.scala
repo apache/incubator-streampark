@@ -158,8 +158,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     val appId = trackId.appId
     val jobId = trackId.jobId
 
-    val rsMap = touchSessionAllJob(clusterId, namespace, appId).toMap
-    val id = TrackId.onSession(namespace, clusterId, appId, jobId)
+    val rsMap = touchSessionAllJob(clusterId, namespace, appId, trackId.groupId).toMap
+    val id = TrackId.onSession(namespace, clusterId, appId, jobId, trackId.groupId)
     val jobState = rsMap.get(id).filter(_.jobState != FlinkJobState.SILENT).getOrElse {
       val preCache = watchController.jobStatuses.get(id)
       val state = inferSilentOrLostFromPreCache(preCache)
@@ -182,7 +182,11 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
-  protected[kubernetes] def touchSessionAllJob(@Nonnull clusterId: String, @Nonnull namespace: String, @Nonnull appId: Long): Array[(TrackId, JobStatusCV)] = {
+  protected[kubernetes] def touchSessionAllJob(@Nonnull clusterId: String,
+                                               @Nonnull namespace: String,
+                                               @Nonnull appId: Long,
+                                               @Nonnull groupId: String
+                                              ): Array[(TrackId, JobStatusCV)] = {
     lazy val defaultResult = Array.empty[(TrackId, JobStatusCV)]
     val pollEmitTime = System.currentTimeMillis
     val jobDetails = listJobsDetails(ClusterKey(SESSION, namespace, clusterId)).getOrElse(return defaultResult).jobs
@@ -190,7 +194,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       defaultResult
     } else {
       jobDetails.map { d =>
-        TrackId.onSession(namespace, clusterId, appId, d.jid) -> d.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
+        TrackId.onSession(namespace, clusterId, appId, d.jid, groupId) -> d.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
       }
     }
   }

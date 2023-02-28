@@ -81,15 +81,14 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
 
   override def getAllJobStatus: Map[CacheKey, JobStatusCV] = watchController.jobStatuses.asMap()
 
-  override def getAccClusterMetrics: FlinkMetricCV = watchController.collectAccMetric()
+  override def getAccGroupMetrics(groupId: String): FlinkMetricCV = watchController.collectAccGroupMetric(groupId)
 
   override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(watchController.flinkMetrics.get(clusterKey))
 
   override def getAllWatchingIds: Set[TrackId] = watchController.getAllWatchingIds()
 
   override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
-    if (!trackId.isLegal) false;
-    else {
+    if (!trackId.isLegal) false; else {
       val nonLost = (state: FlinkJobState.Value) => state != FlinkJobState.LOST || state != FlinkJobState.SILENT
       trackId.executeMode match {
         case SESSION =>
