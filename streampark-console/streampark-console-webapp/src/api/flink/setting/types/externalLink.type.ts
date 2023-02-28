@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 export interface ExternalLink {
-  id: string;
   badgeName: string;
   badgeLabel: string;
   badgeColor: string;
   linkUrl: string;
+  id?: string;
   modifyTime?: number;
   renderedLinkUrl?: string;
   createTime?: string;
