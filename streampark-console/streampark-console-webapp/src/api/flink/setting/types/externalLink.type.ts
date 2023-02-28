@@ -16,8 +16,9 @@
  */
 export interface ExternalLink {
   id: string;
-  name: string;
-  imageUrl: string;
+  badgeName: string;
+  badgeLabel: string;
+  badgeColor: string;
   linkUrl: string;
   modifyTime?: number;
   renderedLinkUrl?: string;

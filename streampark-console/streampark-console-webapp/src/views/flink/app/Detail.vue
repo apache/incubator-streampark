@@ -30,7 +30,7 @@
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchBackUps, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app/app';
-  import { onUnmounted, reactive, h, unref, ref, onMounted } from 'vue';
+  import { onUnmounted, reactive, h, unref, ref, onMounted, computed } from 'vue';
   import { useIntervalFn, useClipboard } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';
@@ -46,6 +46,7 @@
   import DetailTab from './components/AppDetail/DetailTab.vue';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
+  import ExternalLinkBadge from '../setting/components/ExternalLinkBadge.vue';
 
   const route = useRoute();
   const router = useRouter();
@@ -233,6 +234,10 @@
   onUnmounted(() => {
     pause();
   });
+
+  const appNotRunning = computed(
+    () => app.state !== AppStateEnum.RUNNING || (yarn.value === null && app.flinkRestUrl === null),
+  );
 </script>
 <template>
   <PageWrapper content-full-height content-background contentClass="p-24px">
@@ -240,9 +245,13 @@
       <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
       <Space class="-mt-8px">
         <div v-for="link in externalLinks" :key="link.id">
-          <a :href="link.renderedLinkUrl" target="_blank">
-            <img :src="link.imageUrl" :preview="false" />
-          </a>
+          <ExternalLinkBadge
+            :label="link.badgeLabel"
+            :redirect="link.renderedLinkUrl"
+            :color="link.badgeColor"
+            :message="link.badgeName"
+            :disabled="appNotRunning"
+          />
         </div>
       </Space>
       <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">
@@ -251,9 +260,7 @@
       <a-button
         type="danger"
         @click="handleFlinkView"
-        :disabled="
-          app.state !== AppStateEnum.RUNNING || (yarn === null && app.flinkRestUrl === null)
-        "
+        :disabled="appNotRunning"
         class="float-right -mt-8px mr-20px"
       >
         <Icon icon="ant-design:cloud-outlined" />

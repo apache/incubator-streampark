@@ -186,15 +186,17 @@ export default {
   externalLink: {
     externalLinkSetting: 'External Link',
     form: {
-      name: 'Name',
-      namePlaceholder: 'Please enter link name',
-      nameIsRequired: 'Name is required',
+      badgeLabel: 'Label',
+      badgeLabelPlaceholder: 'Please enter label',
+      badgeName: 'Name',
+      badgeNamePlaceholder: 'Please enter name',
+      badgeNameIsRequired: 'Name is required',
+      badgeColor: 'Color',
+      badgeColorIsRequired: 'Color is required',
+      badgePreview: 'Preview',
       linkUrl: 'Link',
       linkUrlPlaceholder: 'Please enter link url',
       linkUrlIsRequired: 'Link is required',
-      imageUrl: 'Badge Image URL',
-      imageUrlPlaceholder: 'Please enter image url',
-      imageUrlIsRequired: 'Image url is required',
     },
     operateMessage: {
       createLinkSuccessful: 'Successfully create external link!',
