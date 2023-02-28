@@ -26,7 +26,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import {
   AppTypeEnum,
   ExecModeEnum,
-  LaunchStateEnum,
+  ReleaseStateEnum,
   OptionStateEnum,
   AppStateEnum,
   JobTypeEnum,
@@ -38,6 +38,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 export const useAppTableAction = (
   openStartModal: Fn,
   openStopModal: Fn,
+  openSavepointModal: Fn,
   openLogModal: Fn,
   openBuildDrawer: Fn,
   handlePageDataReload: Fn,
@@ -51,7 +52,7 @@ export const useAppTableAction = (
   const { createMessage } = useMessage();
   const { hasPermission } = usePermission();
   const {
-    handleCheckLaunchApp,
+    handleCheckReleaseApp,
     handleAppCheckStart,
     handleCanStop,
     handleForcedStop,
@@ -61,32 +62,32 @@ export const useAppTableAction = (
   } = useFlinkApplication(openStartModal);
 
   /* Operation button */
-  function getTableActions(record: AppListRecord, currentPgaeNo: any): ActionItem[] {
+  function getTableActions(record: AppListRecord, currentPageNo: any): ActionItem[] {
     return [
       {
         tooltip: { title: t('flink.app.operation.edit') },
         auth: 'app:update',
         icon: 'clarity:note-edit-line',
-        onClick: handleEdit.bind(null, record, currentPgaeNo),
+        onClick: handleEdit.bind(null, record, currentPageNo),
       },
       {
-        tooltip: { title: t('flink.app.operation.launch') },
+        tooltip: { title: t('flink.app.operation.release') },
         ifShow:
           [
-            LaunchStateEnum.FAILED,
-            LaunchStateEnum.NEED_LAUNCH,
-            LaunchStateEnum.NEED_ROLLBACK,
-          ].includes(record.launch) && record['optionState'] == OptionStateEnum.NONE,
-        auth: 'app:launch',
+            ReleaseStateEnum.FAILED,
+            ReleaseStateEnum.NEED_RELEASE,
+            ReleaseStateEnum.NEED_ROLLBACK,
+          ].includes(record.release) && record['optionState'] == OptionStateEnum.NONE,
+        auth: 'app:release',
         icon: 'ant-design:cloud-upload-outlined',
-        onClick: handleCheckLaunchApp.bind(null, record),
+        onClick: handleCheckReleaseApp.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.operation.launchDetail') },
+        tooltip: { title: t('flink.app.operation.releaseDetail') },
         ifShow:
-          [LaunchStateEnum.FAILED, LaunchStateEnum.LAUNCHING].includes(record.launch) ||
-          record['optionState'] == OptionStateEnum.LAUNCHING,
-        auth: 'app:launch',
+          [ReleaseStateEnum.FAILED, ReleaseStateEnum.RELEASING].includes(record.release) ||
+          record['optionState'] == OptionStateEnum.RELEASING,
+        auth: 'app:release',
         icon: 'ant-design:container-outlined',
         onClick: () => openBuildDrawer(true, { appId: record.id }),
       },
@@ -104,6 +105,14 @@ export const useAppTableAction = (
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
+      },
+      {
+        tooltip: { title: t('flink.app.operation.savepoint') },
+        ifShow:
+          record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
+        auth: 'savepoint:trigger',
+        icon: 'ant-design:camera-outlined',
+        onClick: handleSavepoint.bind(null, record),
       },
       {
         tooltip: { title: t('flink.app.operation.detail') },
@@ -147,6 +156,12 @@ export const useAppTableAction = (
   function handleDetail(app: AppListRecord) {
     flinkAppStore.setApplicationId(app.id);
     router.push({ path: '/flink/app/detail', query: { appId: app.id } });
+  }
+  // click savepoint for application
+  function handleSavepoint(app: AppListRecord) {
+    if (!optionApps.savepointing.get(app.id) || app['optionState'] == OptionStateEnum.NONE) {
+      openSavepointModal(true, { application: app });
+    }
   }
   // click stop application
   function handleCancel(app: AppListRecord) {

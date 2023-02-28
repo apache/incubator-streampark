@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.connector.jdbc.sink;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ConfigUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.flink.connector.function.TransformFunction;
 import org.apache.streampark.flink.connector.jdbc.internal.JdbcSinkFunction;
 import org.apache.streampark.flink.core.scala.StreamingContext;
@@ -55,7 +55,7 @@ public class JdbcJavaSink<T> {
     }
 
     public DataStreamSink<T> sink(DataStream<T> dataStream) {
-        AssertUtils.notNull(sqlFunc);
+        Utils.notNull(sqlFunc, "transformFunction can not be null");
         this.jdbc = this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter().toMap(), alias) : this.jdbc;
         JdbcSinkFunction<T> sinkFun = new JdbcSinkFunction<>(this.jdbc, this.sqlFunc);
         return dataStream.addSink(sinkFun);

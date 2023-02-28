@@ -17,17 +17,14 @@
 package org.apache.streampark.flink.core
 
 import java.io.File
-
-import scala.collection.{mutable, Map}
+import scala.collection.{Map, mutable}
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
-
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{Configuration, PipelineOptions}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableConfig, TableEnvironment}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
-
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.enums.{ApiType, PlannerType, TableMode}
 import org.apache.streampark.common.enums.ApiType.ApiType
@@ -67,9 +64,9 @@ private[flink] object FlinkTableInitializer {
   }
 
   def initialize(
-      args: Array[String],
-      configStream: (StreamExecutionEnvironment, ParameterTool) => Unit,
-      configTable: (TableConfig, ParameterTool) => Unit): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+                  args: Array[String],
+                  configStream: (StreamExecutionEnvironment, ParameterTool) => Unit,
+                  configTable: (TableConfig, ParameterTool) => Unit): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -191,22 +188,34 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
   def initEnvironment(tableMode: TableMode): Unit = {
     val builder = EnvironmentSettings.newInstance()
     val parameter = configuration.parameter
-    val plannerType = Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER))).getOrElse(PlannerType.blink)
-
-    try {
-      plannerType match {
-        case PlannerType.blink =>
+    Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER))).getOrElse(PlannerType.blink) match {
+      case PlannerType.blink =>
+        val useBlinkPlanner = Try(builder.getClass.getDeclaredMethod("useBlinkPlanner")).getOrElse(null)
+        if (useBlinkPlanner == null) {
+          logWarn("useBlinkPlanner deprecated")
+        } else {
+          useBlinkPlanner.setAccessible(true)
+          useBlinkPlanner.invoke(builder)
           logInfo("blinkPlanner will be use.")
-          builder.useBlinkPlanner()
-        case PlannerType.old =>
-          logInfo("oldPlanner will be use.")
-          builder.useOldPlanner()
-        case PlannerType.any =>
-          logInfo("anyPlanner will be use.")
-          builder.useAnyPlanner()
-      }
-    } catch {
-      case e: IncompatibleClassChangeError =>
+        }
+      case PlannerType.old =>
+        val useOldPlanner = Try(builder.getClass.getDeclaredMethod("useOldPlanner")).getOrElse(null)
+        if (useOldPlanner == null) {
+          logWarn("useOldPlanner deprecated")
+        } else {
+          useOldPlanner.setAccessible(true)
+          useOldPlanner.invoke(builder)
+          logInfo("useOldPlanner will be use.")
+        }
+      case PlannerType.any =>
+        val useAnyPlanner = Try(builder.getClass.getDeclaredMethod("useAnyPlanner")).getOrElse(null)
+        if (useAnyPlanner == null) {
+          logWarn("useAnyPlanner deprecated")
+        } else {
+          logInfo("useAnyPlanner will be use.")
+          useAnyPlanner.setAccessible(true)
+          useAnyPlanner.invoke(builder)
+        }
     }
 
     val mode = Try(TableMode.withName(parameter.get(KEY_FLINK_TABLE_MODE))).getOrElse(tableMode)

@@ -32,12 +32,12 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
-import org.apache.streampark.flink.submit.FlinkSubmitter;
-import org.apache.streampark.flink.submit.bean.DeployRequest;
-import org.apache.streampark.flink.submit.bean.DeployResponse;
-import org.apache.streampark.flink.submit.bean.KubernetesDeployParam;
-import org.apache.streampark.flink.submit.bean.ShutDownRequest;
-import org.apache.streampark.flink.submit.bean.ShutDownResponse;
+import org.apache.streampark.flink.client.FlinkClient;
+import org.apache.streampark.flink.client.bean.DeployRequest;
+import org.apache.streampark.flink.client.bean.DeployResponse;
+import org.apache.streampark.flink.client.bean.KubernetesDeployParam;
+import org.apache.streampark.flink.client.bean.ShutDownRequest;
+import org.apache.streampark.flink.client.bean.ShutDownResponse;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +54,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.checkQueueLabelIfNeed;
 
 @Slf4j
 @Service
@@ -124,6 +126,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Override
   public Boolean create(FlinkCluster flinkCluster) {
     flinkCluster.setUserId(commonService.getUserId());
+    checkQueueLabelIfNeed(flinkCluster.getExecutionMode(), flinkCluster.getYarnQueue());
     flinkCluster.setCreateTime(new Date());
     if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
       flinkCluster.setClusterState(ClusterState.STARTED.getValue());
@@ -161,13 +164,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       DeployRequest deployRequest =
           new DeployRequest(
               flinkEnv.getFlinkVersion(),
-              flinkCluster.getClusterId(),
               executionModeEnum,
               flinkCluster.getProperties(),
+              flinkCluster.getClusterId(),
               kubernetesDeployParam);
       log.info("deploy cluster request " + deployRequest);
       Future<DeployResponse> future =
-          executorService.submit(() -> FlinkSubmitter.deploy(deployRequest));
+          executorService.submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
       if (deployResponse != null) {
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
@@ -195,6 +198,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Override
   public void update(FlinkCluster cluster) {
+    checkQueueLabelIfNeed(cluster.getExecutionMode(), cluster.getYarnQueue());
     FlinkCluster flinkCluster = getById(cluster.getId());
     flinkCluster.setClusterName(cluster.getClusterName());
     flinkCluster.setDescription(cluster.getDescription());
@@ -278,13 +282,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         new ShutDownRequest(
             flinkEnv.getFlinkVersion(),
             executionModeEnum,
+            flinkCluster.getProperties(),
             clusterId,
-            kubernetesDeployParam,
-            flinkCluster.getProperties());
+            kubernetesDeployParam);
 
     try {
       Future<ShutDownResponse> future =
-          executorService.submit(() -> FlinkSubmitter.shutdown(stopRequest));
+          executorService.submit(() -> FlinkClient.shutdown(stopRequest));
       ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
       if (shutDownResponse != null) {
         flinkCluster.setAddress(null);

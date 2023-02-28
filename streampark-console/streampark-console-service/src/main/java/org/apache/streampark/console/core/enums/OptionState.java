@@ -27,8 +27,8 @@ public enum OptionState implements Serializable {
 
   /** Application which is currently action: none. */
   NONE(0),
-  /** Application which is currently action: deploying. */
-  LAUNCHING(1),
+  /** Application which is currently action: releasing. */
+  RELEASING(1),
   /** Application which is currently action: cancelling. */
   CANCELLING(2),
 

@@ -182,7 +182,7 @@ export interface BasicTableProps<T = any> {
   fetchSetting?: Partial<FetchSetting>;
   // Request the interface now
   immediate?: boolean;
-  // When the search form is launched, whether to display the table if there is no data
+  // When the search form is released, whether to display the table if there is no data
   emptyDataIsShowTable?: boolean;
   // Additional request parameters
   searchInfo?: Recordable;

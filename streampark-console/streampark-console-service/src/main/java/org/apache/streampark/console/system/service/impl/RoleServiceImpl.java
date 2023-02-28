@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.RoleMenu;
 import org.apache.streampark.console.system.mapper.RoleMapper;
@@ -84,12 +84,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         Optional.ofNullable(this.getById(roleId))
             .orElseThrow(
                 () ->
-                    new IllegalArgumentException(String.format("Role id [%s] not found", roleId)));
+                    new ApiAlertException(
+                        String.format("Role id [%s] not found. Delete role failed.", roleId)));
     List<Long> userIdsByRoleId = memberService.findUserIdsByRoleId(roleId);
-    AssertUtils.isTrue(
+    ApiAlertException.throwIfFalse(
         userIdsByRoleId == null || userIdsByRoleId.isEmpty(),
         String.format(
-            "There are some users are bound to role %s , please unbind it first.",
+            "There are some users of role %s, delete role failed, please unbind it first.",
             role.getRoleName()));
     this.removeById(roleId);
     this.roleMenuService.deleteByRoleId(roleId);

@@ -53,7 +53,7 @@ public class JWTUtil {
     } catch (TokenExpiredException e) {
       throw new AuthenticationException(e.getMessage());
     } catch (Exception e) {
-      log.info("token is invalid:{} , e:{}", e.getMessage(), e.getClass());
+      log.error("token is invalid:{} , e:{}", e.getMessage(), e.getClass());
       return false;
     }
   }
@@ -64,7 +64,7 @@ public class JWTUtil {
       DecodedJWT jwt = JWT.decode(token);
       return jwt.getClaim("userName").asString();
     } catch (JWTDecodeException e) {
-      log.info("error：{}", e.getMessage());
+      log.error("error：{}", e.getMessage());
       return null;
     }
   }
@@ -74,7 +74,7 @@ public class JWTUtil {
       DecodedJWT jwt = JWT.decode(token);
       return jwt.getClaim("userId").asLong();
     } catch (JWTDecodeException e) {
-      log.info("error：{}", e.getMessage());
+      log.error("error：{}", e.getMessage());
       return null;
     }
   }
@@ -110,7 +110,7 @@ public class JWTUtil {
           .withExpiresAt(date)
           .sign(algorithm);
     } catch (Exception e) {
-      log.info("error：{}", e);
+      log.error("error：{}", e);
       return null;
     }
   }

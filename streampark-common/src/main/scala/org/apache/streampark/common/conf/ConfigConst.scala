@@ -124,6 +124,8 @@ object ConfigConst {
 
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
+  val KEY_YARN_APP_NODE_LABEL = "yarn.application.node-label"
+
   val KEY_K8S_IMAGE_PULL_POLICY = "kubernetes.container.image.pull-policy"
 
   // ---table---
@@ -222,7 +224,7 @@ object ConfigConst {
     println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ")
     println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ")
     println("                                       /_/                        \n\n")
-    println("    Version:  2.0.0                                                   ")
+    println("    Version:  2.1.0-SNAPSHOT                                          ")
     println("    WebSite:  https://streampark.apache.org                           ")
     println("    GitHub :  https://github.com/apache/incubator-streampark                    ")
     println(s"    Info   :  $info                                 ")

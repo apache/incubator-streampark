@@ -66,7 +66,7 @@
 </script>
 
 <script setup lang="ts" name="member">
-  import { computed, defineComponent, onMounted, ref, unref } from 'vue';
+  import { computed, onMounted, ref, unref } from 'vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RoleListItem } from '/@/api/base/model/systemModel';
   import { useGo } from '/@/hooks/web/usePage';

@@ -20,12 +20,16 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
+import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.SavePointService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Nullable;
 
 @Slf4j
 @Validated
@@ -63,5 +69,27 @@ public class SavePointController {
     Application application = applicationService.getById(savePoint.getAppId());
     Boolean deleted = savePointService.delete(id, application);
     return RestResponse.success(deleted);
+  }
+
+  @ApiAccess
+  @ApiOperation(value = "Trigger savepoint for specified application by id.")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        name = "appId",
+        value = "application id",
+        required = true,
+        paramType = "query",
+        dataTypeClass = Long.class),
+    @ApiImplicitParam(
+        name = "savepointPath",
+        value = "specified savepoint path",
+        paramType = "query",
+        dataTypeClass = String.class)
+  })
+  @PostMapping("trigger")
+  @RequiresPermissions("savepoint:trigger")
+  public RestResponse trigger(Long appId, @Nullable String savepointPath) {
+    savePointService.trigger(appId, savepointPath);
+    return RestResponse.success(true);
   }
 }

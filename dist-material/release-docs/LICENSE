@@ -581,7 +581,9 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://mvnrepository.com/artifact/org.wildfly.client/wildfly-client-config/1.0.1.Final Apache-2.0
     https://mvnrepository.com/artifact/org.wildfly.common/wildfly-common/1.5.4.Final Apache-2.0
     https://mvnrepository.com/artifact/org.javassist/javassist/3.24.0-GA Apache-2.0
-    https://github.com/less/less.js Apache-2.0
+    https://maven.apache.org/wrapper Apache-2.0
+    mvnw files from https://github.com/apache/maven-wrapper Apache 2.0
+    streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath.sh from https://github.com/apache/tomcat
 
 
 ========================================================================
@@ -608,7 +610,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java/2.5.0 BSD-2.0
     https://mvnrepository.com/artifact/org.codehaus.woodstox/stax2-api/4.2.1 BSD-2.0
     https://mvnrepository.com/artifact/xmlenc/xmlenc/0.52 BSD-2.0
-    https://github.com/motdotla/dotenv BSD-2.0
 
 
 ========================================================================
@@ -632,7 +633,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.ow2.asm/asm-util/8.0 BSD-3-Clause
     https://mvnrepository.com/artifact/org.codehaus.janino/commons-compiler/3.0.11 BSD-3-Clause
     https://mvnrepository.com/artifact/org.codehaus.janino/janino/3.0.11 BSD-3-Clause
-    https://github.com/ljharb/qs BSD-3-Clause
 
 
 ========================================================================
@@ -728,42 +728,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.slf4j/slf4j-api/1.7.30 MIT
     https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.24 MIT
     https://mvnrepository.com/artifact/com.auth0/java-jwt/4.0.0 MIT
-    https://github.com/vueComponent/ant-design-vue MIT
-    https://github.com/axios/axios MIT
-    https://github.com/brix/crypto-js MIT
-    https://github.com/iamkun/dayjs MIT
-    https://github.com/eslint/eslint MIT
-    https://github.com/prettier/eslint-config-prettier MIT
-    https://github.com/prettier/eslint-plugin-prettier MIT
-    https://github.com/vuejs/eslint-plugin-vue MIT
-    https://github.com/esbuild-kit/tsx MIT
-    https://github.com/emarschner/iconify MIT
-    https://github.com/lodash/lodash MIT
-    https://github.com/microsoft/monaco-editor MIT
-    https://github.com/rstacruz/nprogress MIT
-    https://github.com/pillarjs/path-to-regexp MIT
-    https://github.com/Aaronius/penpal MIT
-    https://github.com/postcss/postcss MIT
-    https://github.com/que-etc/resize-observer-polyfill MIT
-    https://github.com/rollup/rollup MIT
-    https://github.com/SortableJS/Sortable MIT
-    https://github.com/sql-formatter-org/sql-formatter MIT
-    https://github.com/sweetalert2/sweetalert2 MIT
-    https://github.com/terser/terser MIT
-    https://github.com/vitejs/vue MIT
-    https://github.com/vitejs/vite MIT
-    https://github.com/vbenjs/vite-plugin-svg-icons MIT
-    https://github.com/vuejs/vue-eslint-parser MIT
-    https://github.com/intlify/vue-i18n-next MIT
-    https://github.com/vuejs/pinia MIT
-    https://github.com/vuejs/router MIT
-    https://github.com/johnsoncodehk/volar MIT
-    https://github.com/hudochenkov/stylelint-order MIT
-    https://github.com/stylelint/stylelint MIT
-    https://github.com/okonet/lint-staged MIT
-    https://github.com/jprichardson/node-fs-extra MIT
-    https://github.com/ota-meshi/postcss-html MIT
-    https://github.com/shellscape/postcss-less MIT
 
 
 ========================================================================
@@ -774,11 +738,3 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/aopalliance/aopalliance/1.0 Public Domain
 
-
-========================================================================
-ISC License (ISC)
-========================================================================
-The following components are provided under the ISC. See project link for details.
-The text of each license is also included in licenses/LICENSE-[project].txt.
-
-    https://github.com/alexeyraspopov/picocolors ISC

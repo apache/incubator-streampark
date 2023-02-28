@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -26,8 +25,8 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.LaunchState;
 import org.apache.streampark.console.core.enums.OptionState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.enums.StopFrom;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
@@ -39,6 +38,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
@@ -151,12 +151,13 @@ public class FlinkRESTAPIWatcher {
           ThreadUtils.threadFactory("flink-restapi-watching-executor"));
 
   @PostConstruct
-  public void initialization() {
-    LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-    queryWrapper
-        .eq(Application::getTracking, 1)
-        .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
-    List<Application> applications = applicationService.list(queryWrapper);
+  public void init() {
+    WATCHING_APPS.clear();
+    List<Application> applications =
+        applicationService.list(
+            new LambdaQueryWrapper<Application>()
+                .eq(Application::getTracking, 1)
+                .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode()));
     applications.forEach((app) -> WATCHING_APPS.put(app.getId(), app));
   }
 
@@ -205,7 +206,6 @@ public class FlinkRESTAPIWatcher {
             final OptionState optionState = OPTIONING.get(key);
             try {
               // query status from flink rest api
-              AssertUtils.state(application.getId() != null);
               getFromFlinkRestApi(application, stopFrom);
             } catch (Exception flinkException) {
               // query status from yarn rest api
@@ -266,9 +266,6 @@ public class FlinkRESTAPIWatcher {
   private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
     FlinkCluster flinkCluster = getFlinkCluster(application);
     JobsOverview jobsOverview = httpJobsOverview(application, flinkCluster);
-    if (jobsOverview == null) {
-      return;
-    }
     Optional<JobsOverview.Job> optional;
     ExecutionMode execMode = application.getExecutionModeEnum();
     if (ExecutionMode.YARN_APPLICATION.equals(execMode)
@@ -357,7 +354,7 @@ public class FlinkRESTAPIWatcher {
     FlinkCluster flinkCluster = getFlinkCluster(application);
     CheckPoints checkPoints = httpCheckpoints(application, flinkCluster);
     if (checkPoints != null) {
-      checkpointProcessor.process(application.getId(), checkPoints);
+      checkpointProcessor.process(application, checkPoints);
     }
   }
 
@@ -380,15 +377,22 @@ public class FlinkRESTAPIWatcher {
      NEED_RESTART_AFTER_DEPLOY (Need to rollback after deploy)
     */
     if (OptionState.STARTING.equals(optionState)) {
-      switch (LaunchState.of(application.getLaunch())) {
+      Application latestApp = WATCHING_APPS.get(application.getId());
+      ReleaseState releaseState = latestApp.getReleaseState();
+      switch (releaseState) {
         case NEED_RESTART:
         case NEED_ROLLBACK:
-          application.setLaunch(LaunchState.DONE.get());
+          LambdaUpdateWrapper<Application> updateWrapper =
+              new LambdaUpdateWrapper<Application>()
+                  .eq(Application::getId, application.getId())
+                  .set(Application::getRelease, ReleaseState.DONE.get());
+          applicationService.update(updateWrapper);
           break;
         default:
           break;
       }
     }
+
     // The current state is running, and there is a current task in the savePointCache,
     // indicating that the task is doing savepoint
     if (SAVEPOINT_CACHE.getIfPresent(application.getId()) != null) {
@@ -754,5 +758,9 @@ public class FlinkRESTAPIWatcher {
       return null;
     }
     return JacksonUtils.read(result, clazz);
+  }
+
+  public boolean isWatchingApp(Long id) {
+    return WATCHING_APPS.containsKey(id);
   }
 }

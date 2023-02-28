@@ -16,6 +16,7 @@
  */
 export default {
   addVariable: '添加变量',
+  variableInfoTitle: '变量详情',
   modifyVariable: '修改变量',
   deleteVariable: '删除变量',
   deletePopConfirm: '你确定要删除这个变量?',
@@ -30,6 +31,10 @@ export default {
     variableValuePlaceholder: '输入变量值',
     descriptionPlaceholder: '输入描述',
     depend: 'application 依赖',
+    createUser: '创建者',
+    createTime: '创建时间',
+    modifyTime: '修改时间',
+    description: '描述',
   },
   form: {
     descriptionMessage: '超过 100 个字符的最大长度限制',

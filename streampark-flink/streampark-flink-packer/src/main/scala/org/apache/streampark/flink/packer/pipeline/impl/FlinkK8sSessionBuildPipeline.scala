@@ -18,8 +18,6 @@
 package org.apache.streampark.flink.packer.pipeline.impl
 
 import org.apache.streampark.common.fs.LfsOperator
-import org.apache.streampark.common.util.DateUtils
-import org.apache.streampark.common.util.DateUtils.fullCompact
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 

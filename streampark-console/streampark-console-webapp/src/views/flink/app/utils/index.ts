@@ -22,7 +22,7 @@ import {
   AppStateEnum,
   ConfigTypeEnum,
   ExecModeEnum,
-  LaunchStateEnum,
+  ReleaseStateEnum,
   OptionStateEnum,
   PipelineStepEnum,
 } from '/@/enums/flinkEnum';
@@ -144,20 +144,20 @@ export function handleIsStart(app: Recordable, optionApps: Recordable) {
   /**
    * Deployment failed FAILED(-1),
    * Done DONE(0),
-   * After the task is modified, NEED_LAUNCH(1) needs to be reissued,
-   * Online LAUNCHING(2),
+   * After the task is modified, NEED_RELEASE(1) needs to be reissued,
+   * Online releasing(2),
    * After going online, you need to restart NEED_RESTART(3),
    * Need to rollback NEED_ROLLBACK(4),
    * When the project changes, the task needs to be checked (whether the jar needs to be re-selected) NEED_CHECK(5),
    * The posted task has been revoked REVOKED(10);
    */
 
-  const launch = [LaunchStateEnum.DONE, LaunchStateEnum.NEED_RESTART].includes(app.launch);
+  const release = [ReleaseStateEnum.DONE, ReleaseStateEnum.NEED_RESTART].includes(app.release);
 
   const optionState =
     !optionApps.starting.get(app.id) || app['optionState'] === OptionStateEnum.NONE || false;
 
-  return status && launch && optionState;
+  return status && release && optionState;
 }
 
 export function handleYarnQueue(values: Recordable) {

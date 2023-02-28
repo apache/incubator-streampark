@@ -71,9 +71,14 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       this.update(entity, queryWrapper);
 
       String settingKey = setting.getSettingKey();
+      if (CommonConfig.MAVEN_SETTINGS_PATH().key().equals(settingKey)) {
+        InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), value);
+      }
+
       if (CommonConfig.MAVEN_REMOTE_URL().key().equals(settingKey)) {
         InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), value);
       }
+
       if (CommonConfig.MAVEN_AUTH_USER().key().equals(settingKey)) {
         InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), value);
       }
@@ -82,9 +87,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       }
 
       Optional<Setting> optional = Optional.ofNullable(SETTINGS.get(setting.getSettingKey()));
-      if (optional.isPresent()) {
-        optional.get().setSettingValue(value);
-      }
+      optional.ifPresent(x -> x.setSettingValue(value));
       return true;
     } catch (Exception e) {
       return false;

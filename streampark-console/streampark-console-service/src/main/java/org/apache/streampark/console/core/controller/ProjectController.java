@@ -17,9 +17,10 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
 import org.apache.streampark.console.core.service.ProjectService;
@@ -49,10 +50,12 @@ public class ProjectController {
   @PostMapping("create")
   @RequiresPermissions("project:create")
   public RestResponse create(Project project) {
-    AssertUtils.checkArgument(project.getTeamId() != null, "The teamId cannot be null");
+    ApiAlertException.throwIfNull(
+        project.getTeamId(), "The teamId can't be null. Create team failed.");
     return projectService.create(project);
   }
 
+  @AppUpdated
   @PostMapping("update")
   @RequiresPermissions("project:update")
   public RestResponse update(Project project) {
@@ -133,7 +136,8 @@ public class ProjectController {
   }
 
   @PostMapping("select")
-  public RestResponse select() {
-    return RestResponse.success().data(projectService.list());
+  public RestResponse select(@RequestParam Long teamId) {
+    List<Project> list = projectService.findByTeamId(teamId);
+    return RestResponse.success().data(list);
   }
 }

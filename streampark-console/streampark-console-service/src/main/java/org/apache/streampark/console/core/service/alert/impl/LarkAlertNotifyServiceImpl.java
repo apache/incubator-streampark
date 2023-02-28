@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.util.Base64;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -52,6 +53,9 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
   private Template template;
   private final RestTemplate alertRestTemplate;
   private final ObjectMapper mapper;
+
+  @Value("${streampark.proxy.lark-url:https://open.feishu.cn}")
+  private String larkProxyUrl;
 
   public LarkAlertNotifyServiceImpl(RestTemplate alertRestTemplate, ObjectMapper mapper) {
     this.alertRestTemplate = alertRestTemplate;
@@ -130,8 +134,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
    * @return the webhook
    */
   private String getWebhook(AlertLarkParams params) {
-    String url =
-        String.format("https://open.feishu.cn/open-apis/bot/v2/hook/%s", params.getToken());
+    String url = String.format(larkProxyUrl + "/open-apis/bot/v2/hook/%s", params.getToken());
     if (log.isDebugEnabled()) {
       log.debug("The alarm robot url of Lark is {}", url);
     }

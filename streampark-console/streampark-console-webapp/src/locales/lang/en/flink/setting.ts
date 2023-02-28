@@ -148,7 +148,6 @@ export default {
       clusterName: 'Please enter cluster name',
       executionMode: 'Please enter cluster name',
       versionId: 'please select Flink Version',
-      yarnQueue: 'Please enter yarn queue',
       addressRemoteMode: 'Please enter jobManager URL',
       addressNoRemoteMode: 'Please enter cluster address,  e.g: http://host:port',
       yarnSessionClusterId: 'Please enter Yarn Session cluster',

@@ -24,6 +24,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
+import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
@@ -128,6 +129,7 @@ public class ApplicationController {
         : RestResponse.success(true).data(data);
   }
 
+  @AppUpdated
   @PostMapping("update")
   @RequiresPermissions("app:update")
   public RestResponse update(Application app) {
@@ -177,6 +179,7 @@ public class ApplicationController {
     return RestResponse.success(applicationList);
   }
 
+  @AppUpdated
   @PostMapping("mapping")
   @RequiresPermissions("app:mapping")
   public RestResponse mapping(Application app) {
@@ -184,8 +187,9 @@ public class ApplicationController {
     return RestResponse.success(flag);
   }
 
+  @AppUpdated
   @PostMapping("revoke")
-  @RequiresPermissions("app:launch")
+  @RequiresPermissions("app:release")
   public RestResponse revoke(Application app) {
     applicationService.revoke(app);
     return RestResponse.success();
@@ -278,6 +282,7 @@ public class ApplicationController {
     return RestResponse.success();
   }
 
+  @AppUpdated
   @ApiAccess
   @PostMapping("clean")
   @RequiresPermissions("app:clean")

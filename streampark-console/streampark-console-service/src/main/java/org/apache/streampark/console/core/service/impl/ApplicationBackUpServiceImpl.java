@@ -18,9 +18,9 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
@@ -28,7 +28,7 @@ import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.EffectiveType;
-import org.apache.streampark.console.core.enums.LaunchState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ApplicationBackUpMapper;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
@@ -131,12 +131,8 @@ public class ApplicationBackUpServiceImpl
     // restore)
     fsOperator.delete(application.getAppHome());
 
-    try {
-      // copy backup files to a valid dir
-      fsOperator.copyDir(backParam.getPath(), application.getAppHome());
-    } catch (Exception e) {
-      throw e;
-    }
+    // copy backup files to a valid dir
+    fsOperator.copyDir(backParam.getPath(), application.getAppHome());
 
     // update restart status
     try {
@@ -144,7 +140,7 @@ public class ApplicationBackUpServiceImpl
           new UpdateWrapper<Application>()
               .lambda()
               .eq(Application::getId, application.getId())
-              .set(Application::getLaunch, LaunchState.NEED_RESTART.get()));
+              .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
     } catch (Exception e) {
       throw e;
     }
@@ -190,7 +186,8 @@ public class ApplicationBackUpServiceImpl
   @Override
   public void rollbackFlinkSql(Application application, FlinkSql sql) {
     ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
-    AssertUtils.state(backUp != null);
+    ApiAlertException.throwIfNull(
+        backUp, "Application backup can't be null. Rollback flink sql failed.");
     // rollback config and sql
     effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
     effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());

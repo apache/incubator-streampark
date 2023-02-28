@@ -24,6 +24,10 @@ import org.apache.flink.client.program.ClusterClient
 
 abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
 
+  def triggerSavepoint(jobID: JobID, savepointDir: String): CompletableFuture[String] = {
+    clusterClient.triggerSavepoint(jobID, savepointDir)
+  }
+
   def cancelWithSavepoint(jobID: JobID, s: String): CompletableFuture[String] = {
     clusterClient.cancelWithSavepoint(jobID, s)
   }

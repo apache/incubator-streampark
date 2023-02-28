@@ -42,9 +42,9 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.service.Contact;
-import springfox.documentation.service.HttpAuthenticationScheme;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContextBuilder;
@@ -69,8 +69,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
         .enable(swaggerEnabled)
         .apiInfo(apiInfo())
         .securitySchemes(
-            Collections.singletonList(
-                HttpAuthenticationScheme.JWT_BEARER_BUILDER.name("BearerToken").build()))
+            Collections.singletonList(new ApiKey("Authorization", "Authorization", "header")))
         .securityContexts(
             Collections.singletonList(
                 new SecurityContextBuilder()
@@ -78,7 +77,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                         Collections.singletonList(
                             SecurityReference.builder()
                                 .scopes(new AuthorizationScope[0])
-                                .reference("BearerToken")
+                                .reference("Authorization")
                                 .build()))
                     .operationSelector(s -> true)
                     .build()))
@@ -95,7 +94,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
         .contact(
             new Contact(
                 "Apache StreamPark", "https://streampark.apache.org/", "dev@streampark.apache.org"))
-        .version("2.0.0")
+        .version("2.1.0-SNAPSHOT")
         .license("Apache-2.0 license")
         .build();
   }

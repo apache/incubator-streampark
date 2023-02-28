@@ -43,16 +43,16 @@ export enum ExecModeEnum {
   KUBERNETES_APPLICATION = 6,
 }
 
-export enum LaunchStateEnum {
-  /** launch failed */
+export enum ReleaseStateEnum {
+  /** release failed */
   FAILED = -1,
-  /** launch done */
+  /** release done */
   DONE = 0,
-  /** need relaunch after modify task */
-  NEED_LAUNCH = 1,
-  /** launching */
-  LAUNCHING = 2,
-  /** launch complete, need restart */
+  /** need release after modify task */
+  NEED_RELEASE = 1,
+  /** releasing */
+  RELEASING = 2,
+  /** release complete, need restart */
   NEED_RESTART = 3,
   /** need rollback */
   NEED_ROLLBACK = 4,
@@ -66,7 +66,7 @@ export enum OptionStateEnum {
   /** Application which is currently action: none. */
   NONE = 0,
   /** Application which is currently action: deploying. */
-  LAUNCHING = 1,
+  RELEASING = 1,
   /** Application which is currently action: cancelling. */
   CANCELLING = 2,
   /** Application which is currently action: starting. */
