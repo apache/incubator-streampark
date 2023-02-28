@@ -87,13 +87,12 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
   def collectAccGroupMetric(groupId: String): FlinkMetricCV = {
     // get cluster metrics that in tracking
     getActiveWatchingIds() match {
-      case k if k.isEmpty => FlinkMetricCV.empty
+      case k if k.isEmpty => FlinkMetricCV.empty(groupId)
       case k =>
         flinkMetrics.getAll(for (elem <- k) yield ClusterKey.of(elem))
         match {
-          case m if m.isEmpty => FlinkMetricCV.empty
-          case m =>
-            m.values.filter(x => groupId == null || groupId == x.groupId).fold(FlinkMetricCV.empty)((x, y) => x + y)
+          case m if m.isEmpty => FlinkMetricCV.empty(groupId)
+          case m => m.values.fold(FlinkMetricCV.empty(groupId))((x, y) => x + y)
         }
     }
   }

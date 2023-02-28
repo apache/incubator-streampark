@@ -70,5 +70,5 @@ case class FlinkMetricCV(
 }
 
 object FlinkMetricCV {
-  def empty: FlinkMetricCV = FlinkMetricCV(pollAckTime = System.currentTimeMillis)
+  def empty(groupId: String = null): FlinkMetricCV = FlinkMetricCV(groupId = groupId, pollAckTime = System.currentTimeMillis)
 }
