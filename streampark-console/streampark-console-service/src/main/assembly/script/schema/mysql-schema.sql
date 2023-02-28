@@ -492,5 +492,18 @@ create table `t_alert_config` (
   index `inx_alert_user` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
+-- ----------------------------
+-- Table of t_external_link
+-- ----------------------------
+drop table if exists `t_external_link`;
+CREATE TABLE `t_external_link` (
+  `id` bigint not null auto_increment primary key,
+  `badge_label` varchar(100) collate utf8mb4_general_ci default null,
+  `badge_name` varchar(100) collate utf8mb4_general_ci default null,
+  `badge_color` varchar(100) collate utf8mb4_general_ci default null,
+  `link_url` varchar(1000) collate utf8mb4_general_ci default null,
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
+  `modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'modify time'
+) engine = innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 set foreign_key_checks = 1;
