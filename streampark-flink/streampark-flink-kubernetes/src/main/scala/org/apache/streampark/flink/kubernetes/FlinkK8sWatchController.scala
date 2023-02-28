@@ -60,8 +60,7 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
    * determines whether the specified TrackId is in the trace
    */
   def isInWatching(trackId: TrackId): Boolean = {
-    if (!trackId.isLegal) false;
-    else {
+    if (!trackId.isLegal) false; else {
       trackIds.get(trackId) != null
     }
   }
@@ -86,13 +85,14 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
    */
   def collectAccGroupMetric(groupId: String): FlinkMetricCV = {
     // get cluster metrics that in tracking
+    val empty = FlinkMetricCV.empty(groupId)
     getActiveWatchingIds() match {
-      case k if k.isEmpty => FlinkMetricCV.empty(groupId)
+      case k if k.isEmpty => empty
       case k =>
         flinkMetrics.getAll(for (elem <- k) yield ClusterKey.of(elem))
         match {
-          case m if m.isEmpty => FlinkMetricCV.empty(groupId)
-          case m => m.values.fold(FlinkMetricCV.empty(groupId))((x, y) => x + y)
+          case m if m.isEmpty => empty
+          case m => m.values.fold(empty)((x, y) => x + y)
         }
     }
   }
