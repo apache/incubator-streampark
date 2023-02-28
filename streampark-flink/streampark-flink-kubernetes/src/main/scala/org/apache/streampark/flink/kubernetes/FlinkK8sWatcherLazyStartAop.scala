@@ -62,9 +62,9 @@ trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
     super.getAllJobStatus
   }
 
-  abstract override def getAccClusterMetrics: FlinkMetricCV = {
+  abstract override def getAccGroupMetrics(groupId: String): FlinkMetricCV = {
     // behavior of getting cluster metrics will not trigger a delayed start
-    super.getAccClusterMetrics
+    super.getAccGroupMetrics(groupId)
   }
 
   abstract override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = {

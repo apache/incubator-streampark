@@ -21,47 +21,54 @@ package org.apache.streampark.flink.kubernetes.model
  * flink cluster metric info
  */
 case class FlinkMetricCV(
-    totalJmMemory: Integer = 0,
-    totalTmMemory: Integer = 0,
-    totalTm: Integer = 0,
-    totalSlot: Integer = 0,
-    availableSlot: Integer = 0,
-    runningJob: Integer = 0,
-    finishedJob: Integer = 0,
-    cancelledJob: Integer = 0,
-    failedJob: Integer = 0,
-    pollAckTime: Long) {
+                          groupId: String = null,
+                          totalJmMemory: Integer = 0,
+                          totalTmMemory: Integer = 0,
+                          totalTm: Integer = 0,
+                          totalSlot: Integer = 0,
+                          availableSlot: Integer = 0,
+                          runningJob: Integer = 0,
+                          finishedJob: Integer = 0,
+                          cancelledJob: Integer = 0,
+                          failedJob: Integer = 0,
+                          pollAckTime: Long) {
 
   def +(another: FlinkMetricCV): FlinkMetricCV = {
-    this.copy(
-      totalJmMemory + another.totalJmMemory,
-      totalTmMemory + another.totalTmMemory,
-      totalTm + another.totalTm,
-      totalSlot + another.totalSlot,
-      availableSlot + another.availableSlot,
-      runningJob + another.runningJob,
-      finishedJob + another.finishedJob,
-      cancelledJob + another.cancelledJob,
-      failedJob + another.failedJob,
-      pollAckTime = math.max(pollAckTime, another.pollAckTime))
+    if (another == null) this else {
+      if (this.groupId == null || this.groupId == another.groupId) {
+        this.copy(
+          groupId = this.groupId,
+          totalJmMemory + another.totalJmMemory,
+          totalTmMemory + another.totalTmMemory,
+          totalTm + another.totalTm,
+          totalSlot + another.totalSlot,
+          availableSlot + another.availableSlot,
+          runningJob + another.runningJob,
+          finishedJob + another.finishedJob,
+          cancelledJob + another.cancelledJob,
+          failedJob + another.failedJob,
+          pollAckTime = math.max(pollAckTime, another.pollAckTime))
+      } else this
+    }
   }
 
   def totalJob(): Integer = runningJob + finishedJob + cancelledJob + failedJob
 
   def equalsPayload(another: FlinkMetricCV): Boolean = {
-    totalJmMemory == another.totalTmMemory &&
-    totalTmMemory == another.totalTmMemory &&
-    totalTm == another.totalTm &&
-    totalSlot == another.totalSlot &&
-    availableSlot == another.availableSlot &&
-    runningJob == another.runningJob &&
-    finishedJob == another.finishedJob &&
-    cancelledJob == another.cancelledJob &&
-    failedJob == another.failedJob
+    groupId == another.groupId &&
+      totalJmMemory == another.totalTmMemory &&
+      totalTmMemory == another.totalTmMemory &&
+      totalTm == another.totalTm &&
+      totalSlot == another.totalSlot &&
+      availableSlot == another.availableSlot &&
+      runningJob == another.runningJob &&
+      finishedJob == another.finishedJob &&
+      cancelledJob == another.cancelledJob &&
+      failedJob == another.failedJob
   }
 
 }
 
 object FlinkMetricCV {
-  def empty: FlinkMetricCV = FlinkMetricCV(pollAckTime = System.currentTimeMillis)
+  def empty(groupId: String = null): FlinkMetricCV = FlinkMetricCV(groupId = groupId, pollAckTime = System.currentTimeMillis)
 }

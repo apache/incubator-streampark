@@ -144,6 +144,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
       val tmMemStr = flinkJmConfigs.getOrElse(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key, "0b")
       val jmMemStr = flinkJmConfigs.getOrElse(JobManagerOptions.TOTAL_PROCESS_MEMORY.key, "0b")
       FlinkMetricCV(
+        groupId = id.groupId,
         totalJmMemory = MemorySize.parse(jmMemStr).getMebiBytes,
         totalTmMemory = MemorySize.parse(tmMemStr).getMebiBytes * flinkOverview.taskManagers,
         totalTm = flinkOverview.taskManagers,
