@@ -80,7 +80,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
       getSubject(request, response).login(jwtToken);
       return true;
     } catch (Exception e) {
-      log.info(e.getMessage());
+      log.error("Error in executeLogin, token {}, jwtToken {}", token, jwtToken, e);
       return false;
     }
   }

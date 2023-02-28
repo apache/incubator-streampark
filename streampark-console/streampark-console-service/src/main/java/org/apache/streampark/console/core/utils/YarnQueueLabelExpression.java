@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.utils;
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -90,32 +91,26 @@ public class YarnQueueLabelExpression {
    */
   public static void checkQueueLabelIfNeed(int executionMode, String queueLabel) {
     if (ExecutionMode.isYarnMode(executionMode)) {
-      if (!YarnQueueLabelExpression.isValid(queueLabel, true)) {
-        throw new IllegalArgumentException(ERR_HINTS);
-      }
+      ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_HINTS);
     }
   }
 
   // Visible for test.
   public static YarnQueueLabelExpression of(@Nonnull String queueLabelExpr) {
-    if (isValid(queueLabelExpr, false)) {
-      String[] strs = queueLabelExpr.split(AT);
-      if (strs.length == 2) {
-        return new YarnQueueLabelExpression(strs[0], strs[1]);
-      }
-      return new YarnQueueLabelExpression(strs[0], null);
+    ApiAlertException.throwIfFalse(isValid(queueLabelExpr, false), ERR_HINTS);
+    String[] strs = queueLabelExpr.split(AT);
+    if (strs.length == 2) {
+      return new YarnQueueLabelExpression(strs[0], strs[1]);
     }
-    throw new IllegalArgumentException(ERR_HINTS);
+    return new YarnQueueLabelExpression(strs[0], null);
   }
 
   public static YarnQueueLabelExpression of(
       @Nonnull String queue, @Nullable String labelExpression) {
     YarnQueueLabelExpression queueLabelExpression =
         new YarnQueueLabelExpression(queue, labelExpression);
-    if (isValid(queueLabelExpression.toString(), false)) {
-      return queueLabelExpression;
-    }
-    throw new IllegalArgumentException(ERR_HINTS);
+    ApiAlertException.throwIfFalse(isValid(queueLabelExpression.toString(), false), ERR_HINTS);
+    return queueLabelExpression;
   }
 
   public static Map<String, String> getQueueLabelMap(String queueLabelExp) {

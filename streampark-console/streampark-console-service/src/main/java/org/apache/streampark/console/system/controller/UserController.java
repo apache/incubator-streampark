@@ -171,12 +171,10 @@ public class UserController {
   public RestResponse setTeam(Long teamId) {
     Team team = teamService.getById(teamId);
     if (team == null) {
-      return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
+      return RestResponse.fail("TeamId is invalid, set team failed.", ResponseCode.CODE_FAIL_ALERT);
     }
     User user = commonService.getCurrentUser();
-    if (user == null) {
-      throw new ApiAlertException("current login user is null, set team failed");
-    }
+    ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
     // 1) set the latest team
     userService.setLastTeam(teamId, user.getUserId());
 
