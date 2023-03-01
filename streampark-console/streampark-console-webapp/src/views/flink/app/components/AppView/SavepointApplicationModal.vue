@@ -26,7 +26,7 @@
   import { BasicForm, useForm } from '/@/components/Form';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { fetchCheckSavepointPath } from "/@/api/flink/app/app";
+  import { fetchCheckSavepointPath } from '/@/api/flink/app/app';
   import { trigger } from '/@/api/flink/app/savepoint';
   const emit = defineEmits(['register', 'updateOption']);
   const app = reactive<Recordable>({});
@@ -52,8 +52,8 @@
           allowClear: true,
         },
         required: false,
-        show: true
-      }
+        show: true,
+      },
     ],
     colon: true,
     showActionButtonGroup: false,
@@ -90,7 +90,6 @@
         });
         if (data.data) {
           await handleSavepointAction(savepointReq);
-
         } else {
           createErrorSwal(data.message);
         }
@@ -100,8 +99,10 @@
     }
   }
 
-  async function handleSavepointAction(
-    savepointTriggerReq: { appId: string | number,  savepointPath: string | null}) {
+  async function handleSavepointAction(savepointTriggerReq: {
+    appId: string | number;
+    savepointPath: string | null;
+  }) {
     await trigger(savepointTriggerReq);
     Swal.fire({
       icon: 'success',
