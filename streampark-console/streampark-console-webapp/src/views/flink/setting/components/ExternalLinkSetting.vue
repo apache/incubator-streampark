@@ -97,6 +97,7 @@
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'badgeColor'">
         <ExternalLinkBadge
+          :openLink="false"
           :color="record.badgeColor"
           :label="record.badgeLabel"
           :redirect="record.linkUrl"

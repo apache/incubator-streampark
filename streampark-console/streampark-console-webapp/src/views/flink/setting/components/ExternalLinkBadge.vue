@@ -33,13 +33,16 @@
     color?: string;
     redirect?: string;
     disabled?: boolean;
+    openLink?: boolean;
     onBadgeClick?: () => void;
   }
   const props = defineProps<ExternalLinkBadgeProps>();
   const hasLabel = computed(() => !!props.label);
   const isClickable = computed(() => !!props.redirect && !props.disabled);
   function handleClick() {
-    props.onBadgeClick?.() ?? (isClickable.value && window.open(props.redirect, '_blank'));
+    if (props.openLink) {
+      props.onBadgeClick?.() ?? (isClickable.value && window.open(props.redirect, '_blank'));
+    }
   }
 </script>
 <style lang="less">
