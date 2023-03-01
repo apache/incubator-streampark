@@ -45,7 +45,7 @@
         <TabPane
           :tab="t('flink.setting.settingTab.externalLink')"
           key="externalLink"
-          v-auth="'externalLink:view'"
+          v-if="hasPermission('externalLink:view')"
         >
           <Card :bordered="false" class="system-setting">
             <ExternalLinkSetting />
@@ -66,10 +66,12 @@
   import ExternalLinkSetting from './components/ExternalLinkSetting.vue';
   import { useRoute } from 'vue-router';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { usePermission } from '/@/hooks/web/usePermission';
 
   const { t } = useI18n();
   const TabPane = Tabs.TabPane;
   const route = useRoute();
+  const { hasPermission } = usePermission();
 
   const activeKey = ref<string>((route?.query?.activeKey as string) || 'system');
 </script>
