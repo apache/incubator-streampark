@@ -35,7 +35,11 @@
           checkable
           toolbar
           :title="t('system.role.assignment')"
-        />
+        >
+          <template #title="{ text }">
+            {{ handleTreeTitle(text) }}
+          </template>
+        </BasicTree>
       </template>
     </BasicForm>
   </BasicDrawer>
@@ -180,6 +184,12 @@
       function handleTreeCheck(checkedKeys: string[], e: any) {
         selectedKeysAndHalfCheckedKeys.value = [...checkedKeys, ...e.halfCheckedKeys];
       }
+      function handleTreeTitle(text: string) {
+        if (/^\w+\.\w+$/.test(text)) {
+          return t(`menu.${text}`);
+        }
+        return text;
+      }
       return {
         t,
         formSchemas,
@@ -189,6 +199,7 @@
         handleSubmit,
         treeData,
         handleTreeCheck,
+        handleTreeTitle,
       };
     },
   });

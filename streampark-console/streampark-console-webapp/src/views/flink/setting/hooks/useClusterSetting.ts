@@ -154,7 +154,7 @@ export const useClusterSetting = () => {
         label: t('flink.setting.cluster.form.yarnQueue'),
         component: 'Input',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
-        render: renderYarnQueue
+        render: renderYarnQueue,
       },
       {
         field: 'clusterId',

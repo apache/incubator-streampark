@@ -45,6 +45,6 @@ export function fetchRemoveSavePoint(data: { id: string }): Promise<boolean> {
  * Trigger a savepoint manually.
  * @param data app id & optional savepoint path.
  */
-export function trigger(data: { appId: string | number,  savepointPath: string | null}) {
+export function trigger(data: { appId: string | number; savepointPath: string | null }) {
   return defHttp.post({ url: SAVE_POINT_API.TRIGGER, data });
 }
