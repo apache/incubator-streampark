@@ -29,3 +29,34 @@ alter table "public"."t_flink_app" rename "launch" to "release";
 update "public"."t_menu" set "menu_name"='release',"perms" = 'app:release' where "menu_id" = 100025;
 -- ISSUE-2366 DDL & DML End
 
+
+-- Issue-2191/2215 Start
+drop table if exists "public"."t_external_link";
+drop sequence if exists "public"."streampark_t_external_link_id_seq";
+-- ----------------------------
+-- table structure for t_external_link
+-- ----------------------------
+create sequence "public"."streampark_t_external_link_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+
+create table "public"."t_external_link" (
+  "id" int8 not null default nextval('streampark_t_external_link_id_seq'::regclass),
+  "badge_label" varchar(100) collate "pg_catalog"."default",
+  "badge_name" varchar(100) collate "pg_catalog"."default",
+  "badge_color" varchar(100) collate "pg_catalog"."default",
+  "link_url" varchar(1000) collate "pg_catalog"."default",
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone))
+;
+alter table "public"."t_external_link" add constraint "t_external_link_pkey" primary key ("id");
+
+insert into "public"."t_menu" values (100071, 100033, 'link view', null, null, 'externalLink:view', null, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (100072, 100033, 'link create', null, null, 'externalLink:create', null, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (100073, 100033, 'link update', null, null, 'externalLink:update', null, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (100074, 100033, 'link delete', null, null, 'externalLink:delete', null, '1', '1', NULL, now(), now());
+
+insert into "public"."t_role_menu" values (100061, 100002, 100071);
+insert into "public"."t_role_menu" values (100062, 100002, 100072);
+insert into "public"."t_role_menu" values (100063, 100002, 100073);
+insert into "public"."t_role_menu" values (100064, 100002, 100074);
+-- Issue-2191/2215 End

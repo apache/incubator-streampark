@@ -47,7 +47,7 @@ object KubernetesWatcherHelper {
     new Timer().scheduleAtFixedRate(
       () =>
         println(s"[flink-k8s][agg-metric]-${System.currentTimeMillis} => " +
-          s"${k8sWatcher.getAccClusterMetrics}"),
+          s"${k8sWatcher.getAccGroupMetrics()}"),
       0,
       1500)
 
