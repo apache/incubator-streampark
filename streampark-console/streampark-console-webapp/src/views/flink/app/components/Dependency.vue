@@ -226,10 +226,7 @@
     handleUpdateDependency();
   }
   function handleRemovePom(pom: Recordable) {
-    console.log(pom)
     const id = pom.classifier != null ? pom.groupId + '_' + pom.artifactId + '_' + pom.classifier : pom.groupId + '_' + pom.artifactId;
-    console.log(id)
-    console.log(dependency)
     delete dependency.pom[id];
     handleUpdateDependency();
   }
@@ -243,6 +240,8 @@
   function setDefaultValue(dataSource: { pom?: DependencyType[]; jar?: string[] }) {
     dependencyRecords.value = dataSource.pom || [];
     uploadJars.value = dataSource.jar || [];
+    dependency.pom = {}
+    dependency.jar = {}
     dataSource.pom?.map((pomRecord: DependencyType) => {
       const id = pomRecord.classifier != null ? pomRecord.groupId + '_' + pomRecord.artifactId + '_' + pomRecord.classifier : pomRecord.groupId + '_' + pomRecord.artifactId;
       dependency.pom[id] = pomRecord;
