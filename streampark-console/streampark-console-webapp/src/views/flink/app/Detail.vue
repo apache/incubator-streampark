@@ -250,6 +250,7 @@
             :redirect="link.renderedLinkUrl"
             :color="link.badgeColor"
             :message="link.badgeName"
+            :openLink="true"
             :disabled="appNotRunning"
           />
         </div>
