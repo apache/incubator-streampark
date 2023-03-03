@@ -374,9 +374,9 @@ const options = [
     min: 0,
     max: 102400,
     step: 1,
-    defaultValue: 128,
+    defaultValue: null,
     validator: (_rule, value, callback) => {
-      if (value === undefined || value === null) {
+      if (!value) {
         callback(new Error('managed.size is required or you can delete this option'));
       } else {
         callback();
