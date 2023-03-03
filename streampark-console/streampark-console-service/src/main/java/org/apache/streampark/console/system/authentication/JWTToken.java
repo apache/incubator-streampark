@@ -17,8 +17,9 @@
 
 package org.apache.streampark.console.system.authentication;
 
-import lombok.Data;
 import org.apache.shiro.authc.AuthenticationToken;
+
+import lombok.Data;
 
 /** JSON Web Token */
 @Data

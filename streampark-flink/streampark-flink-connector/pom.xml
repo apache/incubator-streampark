@@ -25,12 +25,8 @@
     </parent>
 
     <artifactId>streampark-flink-connector</artifactId>
-    <name>StreamPark : Flink Connector</name>
     <packaging>pom</packaging>
-
-    <properties>
-        <async.client.version>2.12.3</async.client.version>
-    </properties>
+    <name>StreamPark : Flink Connector</name>
 
     <modules>
         <module>streampark-flink-connector-base</module>
@@ -44,6 +40,10 @@
         <module>streampark-flink-connector-kafka</module>
         <module>streampark-flink-connector-mongo</module>
     </modules>
+
+    <properties>
+        <async.client.version>2.12.3</async.client.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>

@@ -25,8 +25,9 @@ import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

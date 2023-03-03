@@ -19,8 +19,9 @@ package org.apache.streampark.console.base.config;
 
 import org.apache.streampark.common.util.DateUtils;
 
-import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 import org.apache.commons.lang3.StringUtils;
+
+import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 
 import java.time.LocalDateTime;
 

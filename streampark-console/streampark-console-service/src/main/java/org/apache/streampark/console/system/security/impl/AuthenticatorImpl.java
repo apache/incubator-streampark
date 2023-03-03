@@ -25,6 +25,7 @@ import org.apache.streampark.console.system.security.impl.ldap.LdapService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.lang3.StringUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
