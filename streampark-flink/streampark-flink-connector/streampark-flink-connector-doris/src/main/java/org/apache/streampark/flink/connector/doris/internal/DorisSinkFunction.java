@@ -23,7 +23,6 @@ import org.apache.streampark.flink.connector.doris.bean.DorisSinkBufferEntry;
 import org.apache.streampark.flink.connector.doris.bean.DorisSinkRowDataWithMeta;
 import org.apache.streampark.flink.core.scala.StreamingContext;
 
-import com.google.common.base.Strings;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeHint;
@@ -35,6 +34,8 @@ import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

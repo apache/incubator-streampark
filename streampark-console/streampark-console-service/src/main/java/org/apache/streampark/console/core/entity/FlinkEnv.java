@@ -22,12 +22,13 @@ import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 
+import org.apache.commons.io.FileUtils;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.Serializable;

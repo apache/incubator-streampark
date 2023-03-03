@@ -20,10 +20,11 @@ package org.apache.streampark.console.base.util;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitCredential;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LsRemoteCommand;

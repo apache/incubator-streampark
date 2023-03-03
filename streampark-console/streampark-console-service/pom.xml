@@ -391,6 +391,46 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-Dfile.encoding=utf-8</argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/resources/static</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${project.build.directory}/../${frontend.project.name}/dist</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
     <profiles>
         <!-- build with webapp -->
         <profile>
@@ -446,10 +486,10 @@
                         <executions>
                             <execution>
                                 <id>copy static</id>
-                                <phase>generate-resources</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
                                 </goals>
+                                <phase>generate-resources</phase>
                                 <configuration>
                                     <outputDirectory>src/main/resources/static</outputDirectory>
                                     <overwrite>true</overwrite>
@@ -474,14 +514,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <version>3.0.2</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                         <configuration>
                             <excludeTransitive>false</excludeTransitive>
                             <stripVersion>false</stripVersion>
@@ -530,6 +562,14 @@
                                 </dependency>
                             </artifactItems>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
                     </plugin>
 
                     <plugin>
@@ -539,10 +579,10 @@
                         <executions>
                             <execution>
                                 <id>dist</id>
-                                <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
+                                <phase>package</phase>
                                 <configuration>
                                     <tarLongFileMode>gnu</tarLongFileMode>
                                     <appendAssemblyId>false</appendAssemblyId>
@@ -568,14 +608,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <version>3.0.2</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                         <configuration>
                             <excludeTransitive>false</excludeTransitive>
                             <stripVersion>false</stripVersion>
@@ -610,6 +642,14 @@
                                 </dependency>
                             </artifactItems>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
                     </plugin>
 
                     <plugin>
@@ -619,10 +659,10 @@
                         <executions>
                             <execution>
                                 <id>dist</id>
-                                <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
+                                <phase>package</phase>
                                 <configuration>
                                     <tarLongFileMode>gnu</tarLongFileMode>
                                     <appendAssemblyId>false</appendAssemblyId>
@@ -650,16 +690,13 @@
                         <executions>
                             <execution>
                                 <id>dist</id>
-                                <phase>package</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
+                                <phase>package</phase>
                                 <configuration>
                                     <target>
-                                        <copy
-                                            file="${project.build.directory}/apache-streampark_${scala.binary.version}-${project.version}-incubating-bin.tar.gz"
-                                            tofile="${project.basedir}/../../dist/apache-streampark_${scala.binary.version}-${project.version}-incubating-bin.tar.gz"
-                                            overwrite="true" />
+                                        <copy file="${project.build.directory}/apache-streampark_${scala.binary.version}-${project.version}-incubating-bin.tar.gz" overwrite="true" tofile="${project.basedir}/../../dist/apache-streampark_${scala.binary.version}-${project.version}-incubating-bin.tar.gz" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -677,45 +714,5 @@
         </profile>
 
     </profiles>
-
-    <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>-Dfile.encoding=utf-8</argLine>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>src/main/resources/static</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${project.build.directory}/../${frontend.project.name}/dist</directory>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
-        </plugins>
-    </build>
 
 </project>

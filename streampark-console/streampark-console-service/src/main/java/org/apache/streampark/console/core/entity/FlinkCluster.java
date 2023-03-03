@@ -30,6 +30,10 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.configuration.CoreOptions;
+import org.apache.http.client.config.RequestConfig;
+
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -41,9 +45,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.configuration.CoreOptions;
-import org.apache.http.client.config.RequestConfig;
 
 import java.io.Serializable;
 import java.net.URI;

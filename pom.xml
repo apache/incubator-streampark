@@ -815,8 +815,23 @@
                                 <style>GOOGLE</style>
                             </googleJavaFormat>
                             <importOrder>
-                                <order>org.apache.streampark,org.apache.streampark.shaded,,javax,java,scala,\#</order>
+                                <order>org.apache.streampark,org.apache.streampark.shaded,org.apache,,javax,java,scala,\#</order>
                             </importOrder>
+                            <replaceRegex>
+                                <name>Remove wildcard imports</name>
+                                <searchRegex>import\s+(static)*\s*[^\*\s]+\*;(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
+                            <replaceRegex>
+                                <name>Block powermock</name>
+                                <searchRegex>import\s+org\.powermock\.[^\*\s]*(|\*);(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
+                            <replaceRegex>
+                                <name>Block jUnit4 imports</name>
+                                <searchRegex>import\s+org\.junit\.[^jupiter][^\*\s]*(|\*);(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
                             <removeUnusedImports />
                         </java>
                     </configuration>

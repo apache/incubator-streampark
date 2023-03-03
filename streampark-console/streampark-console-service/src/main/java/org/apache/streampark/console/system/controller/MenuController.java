@@ -23,9 +23,10 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.service.MenuService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;

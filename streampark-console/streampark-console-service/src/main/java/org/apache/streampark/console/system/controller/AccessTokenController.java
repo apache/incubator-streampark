@@ -26,8 +26,9 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;

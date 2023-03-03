@@ -21,6 +21,7 @@ import org.apache.streampark.console.StreamParkConsoleBootstrap;
 import org.apache.streampark.console.core.entity.Application;
 
 import org.apache.http.entity.ContentType;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

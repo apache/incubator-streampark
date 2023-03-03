@@ -24,10 +24,11 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;

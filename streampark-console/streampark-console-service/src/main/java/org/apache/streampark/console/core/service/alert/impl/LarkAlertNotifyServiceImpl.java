@@ -25,11 +25,12 @@ import org.apache.streampark.console.core.bean.AlertLarkRobotResponse;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
+import org.apache.commons.net.util.Base64;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.net.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;

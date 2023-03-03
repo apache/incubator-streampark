@@ -22,12 +22,13 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.ExternalLink;
 import org.apache.streampark.console.core.service.ExternalLinkService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;

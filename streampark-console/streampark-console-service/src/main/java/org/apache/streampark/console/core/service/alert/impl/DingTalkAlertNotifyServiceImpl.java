@@ -25,10 +25,11 @@ import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.bean.RobotResponse;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
-import freemarker.template.Template;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.net.util.Base64;
+
+import freemarker.template.Template;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

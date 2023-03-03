@@ -25,6 +25,7 @@ import org.apache.streampark.flink.connector.doris.bean.LoadStatusFailedExceptio
 
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.metrics.Counter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
