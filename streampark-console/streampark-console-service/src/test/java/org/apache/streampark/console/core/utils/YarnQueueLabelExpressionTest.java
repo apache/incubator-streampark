@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.utils;
 
+import org.apache.streampark.console.base.exception.ApiAlertException;
+
 import org.junit.jupiter.api.Test;
 
 import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.ERR_HINTS;
@@ -60,7 +62,7 @@ class YarnQueueLabelExpressionTest {
     assertThat(YarnQueueLabelExpression.of("a").getLabelExpression()).isEmpty();
     assertThat(YarnQueueLabelExpression.of("a").getQueue()).isEqualTo("a");
     assertThatThrownBy(() -> YarnQueueLabelExpression.of("a@"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ApiAlertException.class)
         .hasMessageContaining(ERR_HINTS);
   }
 }

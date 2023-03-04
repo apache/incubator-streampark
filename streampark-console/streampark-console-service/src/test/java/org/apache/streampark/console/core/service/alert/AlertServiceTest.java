@@ -29,12 +29,14 @@ import org.apache.streampark.console.core.service.alert.impl.WeComAlertNotifySer
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
 import java.util.TimeZone;
 
+@Disabled("These test cases can't be runnable due to external service is not available.")
 class AlertServiceTest {
   AlertTemplate alertTemplate;
   AlertConfigWithParams params = new AlertConfigWithParams();

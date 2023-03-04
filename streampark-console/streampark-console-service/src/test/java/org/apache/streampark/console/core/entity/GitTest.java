@@ -21,6 +21,7 @@ import org.apache.streampark.console.core.enums.GitAuthorizedError;
 import org.apache.streampark.console.core.enums.GitCredential;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -35,12 +36,14 @@ class GitTest {
     project.setGitCredential(GitCredential.HTTPS.getValue());
   }
 
+  @Disabled("This test case can't be runnable due to external service is not available.")
   @Test
   void getBranchs() {
     List<String> branches = project.getAllBranches();
     branches.forEach(System.out::println);
   }
 
+  @Disabled("This test case can't be runnable due to external service is not available.")
   @Test
   void auth() {
     GitAuthorizedError error = project.gitCheck();

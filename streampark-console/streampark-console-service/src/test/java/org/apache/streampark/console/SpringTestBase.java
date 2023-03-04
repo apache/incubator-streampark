@@ -75,5 +75,4 @@ public abstract class SpringTestBase {
         CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
         localWorkspace.toAbsolutePath());
   }
-
 }
