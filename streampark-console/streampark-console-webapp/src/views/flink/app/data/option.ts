@@ -371,7 +371,7 @@ const options = [
     unit: 'mb',
     group: 'taskmanager-memory',
     type: 'number',
-    min: 0,
+    min: 128,
     max: 102400,
     step: 1,
     defaultValue: null,
