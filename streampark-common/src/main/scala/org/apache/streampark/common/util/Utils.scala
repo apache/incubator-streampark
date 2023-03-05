@@ -16,7 +16,23 @@
  */
 package org.apache.streampark.common.util
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException, PrintWriter, StringWriter}
+import java.io.{
+  BufferedInputStream,
+  File,
+  FileInputStream,
+  IOException,
+  PrintWriter,
+  StringWriter
+}
+import java.lang.{
+  Boolean => JavaBool,
+  Double => JavaDouble,
+  Float => JavaFloat,
+  Integer => JavaInt,
+  Long => JavaLong,
+  Short => JavaShort,
+  Byte => JavaByte
+}
 import java.net.URL
 import java.util.{Properties, UUID, jar, Collection => JavaCollection, Map => JavaMap}
 import java.util.jar.{JarFile, JarInputStream}
@@ -160,6 +176,32 @@ object Utils {
         stm.toString
       } catch {
         case _: Throwable => e.getClass.getName + " (error while printing stack trace)"
+      }
+    }
+  }
+
+  implicit class StringCasts(v: String) {
+    def cast[T](classType: Class[_]): T = {
+      Utils.required(classType.isPrimitive, "target class must be a primitive type")
+      classType match {
+        case c if c == classOf[String] => v.asInstanceOf[T]
+        case c if c == classOf[Byte] => v.toByte.asInstanceOf[T]
+        case c if c == classOf[Int] => v.toInt.asInstanceOf[T]
+        case c if c == classOf[Long] => v.toLong.asInstanceOf[T]
+        case c if c == classOf[Float] => v.toFloat.asInstanceOf[T]
+        case c if c == classOf[Double] => v.toDouble.asInstanceOf[T]
+        case c if c == classOf[Short] => v.toShort.asInstanceOf[T]
+        case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
+        case c if c == classOf[String] => v.asInstanceOf[T]
+        case c if c == classOf[JavaByte] => v.toByte.asInstanceOf[T]
+        case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaFloat] => JavaFloat.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaDouble] => JavaDouble.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaShort] => JavaShort.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaBool] => JavaBool.valueOf(v).asInstanceOf[T]
+        case _ =>
+          throw new IllegalArgumentException(s"Unsupported type: $classType")
       }
     }
   }
