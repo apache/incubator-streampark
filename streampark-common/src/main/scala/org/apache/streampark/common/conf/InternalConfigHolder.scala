@@ -17,14 +17,13 @@
 
 package org.apache.streampark.common.conf
 
-import java.lang.{Boolean => JavaBool, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong}
+import org.apache.streampark.common.util.Utils.StringCasts
+
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.{Nonnull, Nullable}
-
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
-
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 
 /**
@@ -80,7 +79,7 @@ object InternalConfigHolder extends Logger {
     confData.get(conf.key) match {
       case null =>
         SystemPropertyUtils.get(conf.key) match {
-          case v if v != null => Converter.convert[T](v, conf.classType)
+          case v if v != null => v.cast[T](conf.classType)
           case _ => conf.defaultValue.asInstanceOf[T]
         }
       case v: T => v
@@ -109,7 +108,7 @@ object InternalConfigHolder extends Logger {
           case null =>
             val config = getConfig(key)
             SystemPropertyUtils.get(key) match {
-              case v if v != null => Converter.convert[T](v, config.classType)
+              case v if v != null => v.cast[T](config.classType)
               case _ => throw new IllegalArgumentException(s"config key has not been registered: $key")
             }
           case conf: InternalOption => conf.defaultValue.asInstanceOf[T]
@@ -174,25 +173,4 @@ object InternalConfigHolder extends Logger {
           "\n  ")}""".stripMargin)
   }
 
-}
-
-object Converter {
-
-  def convert[T](v: String, classType: Class[_]): T = {
-    classType match {
-      case c if c == classOf[Int] => v.toInt.asInstanceOf[T]
-      case c if c == classOf[Long] => v.toLong.asInstanceOf[T]
-      case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
-      case c if c == classOf[Float] => v.toFloat.asInstanceOf[T]
-      case c if c == classOf[Double] => v.toDouble.asInstanceOf[T]
-      case c if c == classOf[String] => v.asInstanceOf[T]
-      case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[JavaBool] => JavaBool.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[JavaFloat] => JavaFloat.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[JavaDouble] => JavaDouble.valueOf(v).asInstanceOf[T]
-      case _ =>
-        throw new IllegalArgumentException(s"Unsupported type: $classType")
-    }
-  }
 }
