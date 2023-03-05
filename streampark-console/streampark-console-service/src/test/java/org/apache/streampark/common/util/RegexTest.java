@@ -84,6 +84,7 @@ class RegexTest {
     System.out.println(urlClassLoader);
   }
 
+  @Disabled("This test case can't be runnable due to the environment is not available.")
   @Test
   void flinkVersion() {
     final Pattern flinkVersionPattern = Pattern.compile("^Version: (.*), Commit ID: (.*)$");
