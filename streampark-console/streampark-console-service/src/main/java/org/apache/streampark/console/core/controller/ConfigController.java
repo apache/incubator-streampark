@@ -71,6 +71,7 @@ public class ConfigController {
   }
 
   @PostMapping("delete")
+  @RequiresPermissions("conf:delete")
   public RestResponse delete(Long id) {
     Boolean deleted = applicationConfigService.removeById(id);
     return RestResponse.success(deleted);
