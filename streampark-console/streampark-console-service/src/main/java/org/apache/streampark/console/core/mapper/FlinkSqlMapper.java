@@ -22,8 +22,6 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.ibatis.annotations.Param;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 
@@ -34,6 +32,4 @@ public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
   Integer getLatestVersion(@Param("appId") Long appId);
 
   List<FlinkSql> getByTeamId(@Param("teamId") Long teamId);
-
-  IPage<FlinkSql> pageByAppId(Page<FlinkSql> page, @Param("appId") Long appId);
 }

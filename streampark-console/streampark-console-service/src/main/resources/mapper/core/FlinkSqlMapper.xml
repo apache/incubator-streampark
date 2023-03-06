@@ -49,8 +49,4 @@
         and a.team_id = #{teamId}
     </select>
 
-    <select id="pageByAppId" resultType="org.apache.streampark.console.core.entity.FlinkSql" parameterType="java.lang.Long">
-        select * from t_flink_sql
-        where app_id=#{appId}
-    </select>
 </mapper>

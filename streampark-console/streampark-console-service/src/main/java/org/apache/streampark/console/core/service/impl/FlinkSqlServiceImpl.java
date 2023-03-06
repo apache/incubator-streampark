@@ -217,7 +217,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   public IPage<FlinkSql> page(Long appId, RestRequest request) {
     Page<FlinkSql> page =
         new MybatisPager<FlinkSql>().getPage(request, "version", Constant.ORDER_DESC);
-    IPage<FlinkSql> sqlList = this.baseMapper.pageByAppId(page, appId);
+    LambdaQueryWrapper<FlinkSql> queryWrapper =
+        new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
+    IPage<FlinkSql> sqlList = this.baseMapper.selectPage(page, queryWrapper);
     FlinkSql effectiveSql = baseMapper.getEffective(appId);
     if (effectiveSql != null) {
       for (FlinkSql sql : sqlList.getRecords()) {

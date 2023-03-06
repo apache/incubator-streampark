@@ -27,6 +27,8 @@ import org.apache.streampark.console.core.service.SqlCompleteService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +90,7 @@ public class FlinkSqlController {
   }
 
   @PostMapping("delete")
+  @RequiresPermissions("sql:delete")
   public RestResponse delete(Long id) {
     Boolean deleted = flinkSqlService.removeById(id);
     return RestResponse.success(deleted);
