@@ -34,16 +34,16 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.Resource;
 
 import java.util.Set;
 
 /** Implementation of ShiroRealm, including two modules: authentication and authorization */
 public class ShiroRealm extends AuthorizingRealm {
 
-  @Autowired private UserService userService;
+  @Resource private UserService userService;
 
-  @Autowired private AccessTokenService accessTokenService;
+  @Resource private AccessTokenService accessTokenService;
 
   @Override
   public boolean supports(AuthenticationToken token) {

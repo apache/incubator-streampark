@@ -22,12 +22,13 @@ import org.apache.streampark.console.core.entity.Variable;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.Resource;
 
 /** org.apache.streampark.console.core.service.VariableServiceTest */
 class VariableServiceTest extends SpringTestBase {
 
-  @Autowired private VariableService variableService;
+  @Resource private VariableService variableService;
 
   /** Test whether the variable will be replaced normally */
   @Test

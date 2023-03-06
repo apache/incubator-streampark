@@ -33,7 +33,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 
 import java.util.Date;
@@ -55,9 +55,9 @@ import java.util.TimeZone;
 @RequestMapping("/flink/alert")
 public class AlertController {
 
-  @Autowired private AlertConfigService alertConfigService;
+  @Resource private AlertConfigService alertConfigService;
 
-  @Autowired private AlertService alertService;
+  @Resource private AlertService alertService;
 
   @ApiOperation(value = "Create alert config")
   @PostMapping(value = "/add")

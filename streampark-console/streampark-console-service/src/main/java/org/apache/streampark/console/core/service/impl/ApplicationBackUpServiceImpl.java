@@ -42,10 +42,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -59,13 +60,13 @@ public class ApplicationBackUpServiceImpl
     extends ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp>
     implements ApplicationBackUpService {
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private ApplicationConfigService configService;
+  @Resource private ApplicationConfigService configService;
 
-  @Autowired private EffectiveService effectiveService;
+  @Resource private EffectiveService effectiveService;
 
-  @Autowired private FlinkSqlService flinkSqlService;
+  @Resource private FlinkSqlService flinkSqlService;
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(

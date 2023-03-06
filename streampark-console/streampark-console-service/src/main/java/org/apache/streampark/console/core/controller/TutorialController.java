@@ -22,11 +22,12 @@ import org.apache.streampark.console.core.entity.Tutorial;
 import org.apache.streampark.console.core.service.TutorialService;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 import java.io.IOException;
 
@@ -36,7 +37,7 @@ import java.io.IOException;
 @RequestMapping("tutorial")
 public class TutorialController {
 
-  @Autowired private TutorialService tutorialService;
+  @Resource private TutorialService tutorialService;
 
   @PostMapping("get")
   public RestResponse get(String name) throws IOException {

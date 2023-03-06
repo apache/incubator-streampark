@@ -38,10 +38,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,11 +64,11 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
   private static final String PLACEHOLDER_END = "}";
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private FlinkSqlService flinkSqlService;
+  @Resource private FlinkSqlService flinkSqlService;
 
-  @Autowired private CommonService commonService;
+  @Resource private CommonService commonService;
 
   @Override
   @Transactional(rollbackFor = Exception.class)

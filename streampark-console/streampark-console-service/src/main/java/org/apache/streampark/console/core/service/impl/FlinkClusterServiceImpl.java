@@ -44,10 +44,11 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
@@ -74,11 +75,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
           ThreadUtils.threadFactory("streampark-cluster-executor"),
           new ThreadPoolExecutor.AbortPolicy());
 
-  @Autowired private FlinkEnvService flinkEnvService;
+  @Resource private FlinkEnvService flinkEnvService;
 
-  @Autowired private CommonService commonService;
+  @Resource private CommonService commonService;
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
   @Override
   public ResponseResult check(FlinkCluster cluster) {

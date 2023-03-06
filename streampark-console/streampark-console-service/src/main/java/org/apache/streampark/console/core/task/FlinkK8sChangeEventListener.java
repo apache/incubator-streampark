@@ -37,9 +37,10 @@ import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
 import com.google.common.eventbus.Subscribe;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
@@ -56,11 +57,11 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8
 @Component
 public class FlinkK8sChangeEventListener {
 
-  @Lazy @Autowired private ApplicationService applicationService;
+  @Lazy @Resource private ApplicationService applicationService;
 
-  @Lazy @Autowired private AlertService alertService;
+  @Lazy @Resource private AlertService alertService;
 
-  @Lazy @Autowired private CheckpointProcessor checkpointProcessor;
+  @Lazy @Resource private CheckpointProcessor checkpointProcessor;
 
   private final ExecutorService executor =
       new ThreadPoolExecutor(

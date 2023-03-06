@@ -33,12 +33,12 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
@@ -49,11 +49,11 @@ import java.util.Map;
 @RequestMapping("passport")
 public class PassportController {
 
-  @Autowired private UserService userService;
+  @Resource private UserService userService;
 
-  @Autowired private ShiroProperties properties;
+  @Resource private ShiroProperties properties;
 
-  @Autowired private Authenticator authenticator;
+  @Resource private Authenticator authenticator;
 
   @PostMapping("signin")
   public RestResponse signin(

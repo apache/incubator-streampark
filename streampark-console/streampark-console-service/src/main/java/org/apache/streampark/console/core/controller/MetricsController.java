@@ -25,11 +25,12 @@ import org.apache.streampark.console.core.service.MessageService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 @Slf4j
 @Validated
@@ -37,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("metrics")
 public class MetricsController {
 
-  @Autowired private MessageService messageService;
+  @Resource private MessageService messageService;
 
   @PostMapping("notice")
   public RestResponse notice(Integer type, RestRequest request) {

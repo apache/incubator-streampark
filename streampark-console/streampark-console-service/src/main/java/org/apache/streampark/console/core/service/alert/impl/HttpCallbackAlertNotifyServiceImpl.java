@@ -28,7 +28,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,15 +40,17 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Resource;
+
 import java.util.Map;
 
 @Slf4j
 @Service
 @Lazy
 public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
-  @Autowired private RestTemplate alertRestTemplate;
+  @Resource private RestTemplate alertRestTemplate;
 
-  @Autowired private ObjectMapper mapper;
+  @Resource private ObjectMapper mapper;
 
   @Override
   public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate)

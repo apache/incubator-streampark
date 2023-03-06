@@ -28,7 +28,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
@@ -47,7 +47,7 @@ import java.util.List;
 @RequestMapping("member")
 public class MemberController {
 
-  @Autowired private MemberService memberService;
+  @Resource private MemberService memberService;
 
   @PostMapping("list")
   public RestResponse memberList(RestRequest restRequest, Member member) {

@@ -37,11 +37,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,11 +55,11 @@ import java.util.Optional;
 @RequestMapping("flink/pipe")
 public class ApplicationBuildPipelineController {
 
-  @Autowired private AppBuildPipeService appBuildPipeService;
+  @Resource private AppBuildPipeService appBuildPipeService;
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private FlinkSqlService flinkSqlService;
+  @Resource private FlinkSqlService flinkSqlService;
 
   /**
    * Release application building pipeline.

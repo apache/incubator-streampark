@@ -44,13 +44,14 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.annotation.Resource;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,13 +69,13 @@ import java.util.stream.Collectors;
 @RequestMapping("flink/app")
 public class ApplicationController {
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private ApplicationBackUpService backUpService;
+  @Resource private ApplicationBackUpService backUpService;
 
-  @Autowired private ApplicationLogService applicationLogService;
+  @Resource private ApplicationLogService applicationLogService;
 
-  @Autowired private AppBuildPipeService appBuildPipeService;
+  @Resource private AppBuildPipeService appBuildPipeService;
 
   @ApiAccess
   @PostMapping("get")

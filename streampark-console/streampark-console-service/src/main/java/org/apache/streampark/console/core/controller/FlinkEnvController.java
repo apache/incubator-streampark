@@ -23,11 +23,12 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ import java.util.List;
 @RequestMapping("flink/env")
 public class FlinkEnvController {
 
-  @Autowired private FlinkEnvService flinkEnvService;
+  @Resource private FlinkEnvService flinkEnvService;
 
   @PostMapping("list")
   public RestResponse list() {

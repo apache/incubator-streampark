@@ -26,15 +26,16 @@ import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 import java.util.Date;
 
 @Component
 public class AuthenticatorImpl implements Authenticator {
-  @Autowired private UserService usersService;
-  @Autowired private LdapService ldapService;
+  @Resource private UserService usersService;
+  @Resource private LdapService ldapService;
 
   @Override
   public User authenticate(String username, String password) {

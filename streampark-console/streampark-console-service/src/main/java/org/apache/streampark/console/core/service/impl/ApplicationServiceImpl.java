@@ -111,13 +111,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import java.io.File;
 import java.io.IOException;
@@ -174,37 +174,37 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^\\S+(\\s\\S+)*$");
 
-  @Autowired private ProjectService projectService;
+  @Resource private ProjectService projectService;
 
-  @Autowired private ApplicationBackUpService backUpService;
+  @Resource private ApplicationBackUpService backUpService;
 
-  @Autowired private ApplicationConfigService configService;
+  @Resource private ApplicationConfigService configService;
 
-  @Autowired private ApplicationLogService applicationLogService;
+  @Resource private ApplicationLogService applicationLogService;
 
-  @Autowired private FlinkEnvService flinkEnvService;
+  @Resource private FlinkEnvService flinkEnvService;
 
-  @Autowired private FlinkSqlService flinkSqlService;
+  @Resource private FlinkSqlService flinkSqlService;
 
-  @Autowired private SavePointService savePointService;
+  @Resource private SavePointService savePointService;
 
-  @Autowired private EffectiveService effectiveService;
+  @Resource private EffectiveService effectiveService;
 
-  @Autowired private SettingService settingService;
+  @Resource private SettingService settingService;
 
-  @Autowired private CommonService commonService;
+  @Resource private CommonService commonService;
 
-  @Autowired private EnvInitializer envInitializer;
+  @Resource private EnvInitializer envInitializer;
 
-  @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
+  @Resource private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
-  @Autowired private AppBuildPipeService appBuildPipeService;
+  @Resource private AppBuildPipeService appBuildPipeService;
 
-  @Autowired private FlinkClusterService flinkClusterService;
+  @Resource private FlinkClusterService flinkClusterService;
 
-  @Autowired private VariableService variableService;
+  @Resource private VariableService variableService;
 
-  @Autowired private LogClientService logClient;
+  @Resource private LogClientService logClient;
 
   @PostConstruct
   public void resetOptionState() {

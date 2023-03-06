@@ -28,12 +28,12 @@ import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
@@ -47,11 +47,11 @@ import java.util.List;
 @RequestMapping("flink/sql")
 public class FlinkSqlController {
 
-  @Autowired private FlinkSqlService flinkSqlService;
+  @Resource private FlinkSqlService flinkSqlService;
 
-  @Autowired private VariableService variableService;
+  @Resource private VariableService variableService;
 
-  @Autowired private SqlCompleteService sqlComplete;
+  @Resource private SqlCompleteService sqlComplete;
 
   @PostMapping("verify")
   public RestResponse verify(String sql, Long versionId, Long teamId) {

@@ -34,10 +34,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,9 +54,9 @@ import java.util.stream.Collectors;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
-  @Autowired private UserService userService;
+  @Resource private UserService userService;
 
-  @Autowired private RoleMenuServie roleMenuServie;
+  @Resource private RoleMenuServie roleMenuServie;
 
   @Override
   public List<String> findUserPermissions(Long userId, Long teamId) {

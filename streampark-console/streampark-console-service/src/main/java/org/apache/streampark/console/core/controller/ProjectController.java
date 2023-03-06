@@ -29,12 +29,13 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +47,7 @@ import java.util.Map;
 @RequestMapping("flink/project")
 public class ProjectController {
 
-  @Autowired private ProjectService projectService;
+  @Resource private ProjectService projectService;
 
   @PostMapping("create")
   @RequiresPermissions("project:create")

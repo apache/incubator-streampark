@@ -33,13 +33,14 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -59,9 +60,9 @@ import static org.apache.streampark.common.enums.StorageType.LFS;
 @Component
 public class EnvInitializer implements ApplicationRunner {
 
-  @Autowired private ApplicationContext context;
+  @Resource private ApplicationContext context;
 
-  @Autowired private SettingService settingService;
+  @Resource private SettingService settingService;
 
   private final Set<StorageType> initialized = new HashSet<>(2);
 

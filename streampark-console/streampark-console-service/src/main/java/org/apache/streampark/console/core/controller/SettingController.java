@@ -26,11 +26,12 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ import java.util.List;
 @RequestMapping("flink/setting")
 public class SettingController {
 
-  @Autowired private SettingService settingService;
+  @Resource private SettingService settingService;
 
   @PostMapping("all")
   @RequiresPermissions("setting:view")

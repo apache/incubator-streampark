@@ -26,7 +26,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +33,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
@@ -43,7 +43,7 @@ import javax.validation.constraints.NotBlank;
 @RequestMapping("team")
 public class TeamController {
 
-  @Autowired private TeamService teamService;
+  @Resource private TeamService teamService;
 
   @PostMapping("list")
   public RestResponse teamList(RestRequest restRequest, Team team) {

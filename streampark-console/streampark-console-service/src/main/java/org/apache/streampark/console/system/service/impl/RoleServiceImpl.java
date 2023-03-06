@@ -36,10 +36,11 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -51,11 +52,11 @@ import java.util.Optional;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
 
-  @Autowired private RoleMenuMapper roleMenuMapper;
+  @Resource private RoleMenuMapper roleMenuMapper;
 
-  @Autowired private MemberService memberService;
+  @Resource private MemberService memberService;
 
-  @Autowired private RoleMenuServie roleMenuService;
+  @Resource private RoleMenuServie roleMenuService;
 
   @Override
   public IPage<Role> findRoles(Role role, RestRequest request) {

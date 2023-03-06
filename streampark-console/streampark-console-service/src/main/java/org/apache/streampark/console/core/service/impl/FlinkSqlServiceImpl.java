@@ -37,10 +37,11 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -51,11 +52,11 @@ import java.util.List;
 public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     implements FlinkSqlService {
 
-  @Autowired private EffectiveService effectiveService;
+  @Resource private EffectiveService effectiveService;
 
-  @Autowired private ApplicationBackUpService backUpService;
+  @Resource private ApplicationBackUpService backUpService;
 
-  @Autowired private FlinkEnvService flinkEnvService;
+  @Resource private FlinkEnvService flinkEnvService;
 
   private static final String FLINKSQL_VALIDATOR_CLASS =
       "org.apache.streampark.flink.core.FlinkSqlValidator";

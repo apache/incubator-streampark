@@ -33,13 +33,13 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
+import javax.annotation.Resource;
 
 @Slf4j
 @Validated
@@ -47,9 +47,9 @@ import javax.annotation.Nullable;
 @RequestMapping("flink/savepoint")
 public class SavePointController {
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private SavePointService savePointService;
+  @Resource private SavePointService savePointService;
 
   @PostMapping("latest")
   public RestResponse latest(Long appId) {

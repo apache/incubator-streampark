@@ -31,12 +31,12 @@ import org.apache.commons.collections.CollectionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Resource;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,9 +58,9 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8
 @Configuration
 public class FlinkK8sWatcherWrapper {
 
-  @Lazy @Autowired private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
+  @Lazy @Resource private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
 
-  @Lazy @Autowired private ApplicationService applicationService;
+  @Lazy @Resource private ApplicationService applicationService;
 
   /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
   @Bean(destroyMethod = "close")

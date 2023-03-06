@@ -38,12 +38,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.util.Base64;
 import java.util.Date;
@@ -59,9 +59,9 @@ public class ApplicationConfigServiceImpl
 
   private String flinkConfTemplate = null;
 
-  @Autowired private ResourceLoader resourceLoader;
+  @Resource private ResourceLoader resourceLoader;
 
-  @Autowired private EffectiveService effectiveService;
+  @Resource private EffectiveService effectiveService;
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
@@ -230,7 +230,8 @@ public class ApplicationConfigServiceImpl
   public synchronized String readTemplate() {
     if (flinkConfTemplate == null) {
       try {
-        Resource resource = resourceLoader.getResource("classpath:flink-application.conf");
+        org.springframework.core.io.Resource resource =
+            resourceLoader.getResource("classpath:flink-application.conf");
         Scanner scanner = new Scanner(resource.getInputStream());
         StringBuilder stringBuffer = new StringBuilder();
         while (scanner.hasNextLine()) {

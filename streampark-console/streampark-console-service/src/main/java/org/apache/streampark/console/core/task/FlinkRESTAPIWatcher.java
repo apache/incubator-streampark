@@ -45,12 +45,12 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -70,15 +70,15 @@ import java.util.stream.Collectors;
 @Component
 public class FlinkRESTAPIWatcher {
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private AlertService alertService;
+  @Resource private AlertService alertService;
 
-  @Autowired private CheckpointProcessor checkpointProcessor;
+  @Resource private CheckpointProcessor checkpointProcessor;
 
-  @Autowired private FlinkClusterService flinkClusterService;
+  @Resource private FlinkClusterService flinkClusterService;
 
-  @Autowired private SavePointService savePointService;
+  @Resource private SavePointService savePointService;
 
   // track interval  every 5 seconds
   private static final long WATCHING_INTERVAL = 1000L * 5;

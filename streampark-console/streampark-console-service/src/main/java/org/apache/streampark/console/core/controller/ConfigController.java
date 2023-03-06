@@ -29,11 +29,12 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ import java.util.Map;
 @RequestMapping("flink/conf")
 public class ConfigController {
 
-  @Autowired private ApplicationConfigService applicationConfigService;
+  @Resource private ApplicationConfigService applicationConfigService;
 
   @PostMapping("get")
   public RestResponse get(Long id) {

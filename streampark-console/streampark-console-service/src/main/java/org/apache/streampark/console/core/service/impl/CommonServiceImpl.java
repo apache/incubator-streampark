@@ -27,8 +27,9 @@ import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.shiro.SecurityUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 import java.io.File;
 import java.util.Arrays;
@@ -41,7 +42,7 @@ public class CommonServiceImpl implements CommonService {
 
   private String sqlClientJar = null;
 
-  @Autowired private UserService userService;
+  @Resource private UserService userService;
 
   @Override
   public User getCurrentUser() {

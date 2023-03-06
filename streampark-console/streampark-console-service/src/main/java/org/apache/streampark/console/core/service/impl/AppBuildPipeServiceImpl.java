@@ -76,12 +76,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Resource;
 
 import java.io.File;
 import java.util.Collections;
@@ -101,23 +101,23 @@ public class AppBuildPipeServiceImpl
     extends ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline>
     implements AppBuildPipeService {
 
-  @Autowired private FlinkEnvService flinkEnvService;
+  @Resource private FlinkEnvService flinkEnvService;
 
-  @Autowired private FlinkSqlService flinkSqlService;
+  @Resource private FlinkSqlService flinkSqlService;
 
-  @Autowired private ApplicationBackUpService backUpService;
+  @Resource private ApplicationBackUpService backUpService;
 
-  @Autowired private CommonService commonService;
+  @Resource private CommonService commonService;
 
-  @Autowired private SettingService settingService;
+  @Resource private SettingService settingService;
 
-  @Autowired private MessageService messageService;
+  @Resource private MessageService messageService;
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Resource private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
 
-  @Autowired private ApplicationConfigService applicationConfigService;
+  @Resource private ApplicationConfigService applicationConfigService;
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(

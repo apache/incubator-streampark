@@ -59,12 +59,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
+import javax.annotation.Resource;
 
 import java.net.URI;
 import java.util.Date;
@@ -83,17 +83,17 @@ import java.util.concurrent.TimeoutException;
 public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint>
     implements SavePointService {
 
-  @Autowired private FlinkEnvService flinkEnvService;
+  @Resource private FlinkEnvService flinkEnvService;
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private ApplicationConfigService configService;
+  @Resource private ApplicationConfigService configService;
 
-  @Autowired private FlinkClusterService flinkClusterService;
+  @Resource private FlinkClusterService flinkClusterService;
 
-  @Autowired private ApplicationLogService applicationLogService;
+  @Resource private ApplicationLogService applicationLogService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Resource private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(

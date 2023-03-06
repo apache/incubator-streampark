@@ -33,10 +33,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -48,11 +49,11 @@ import java.util.stream.Collectors;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> implements MemberService {
 
-  @Autowired private UserService userService;
+  @Resource private UserService userService;
 
-  @Autowired private RoleService roleService;
+  @Resource private RoleService roleService;
 
-  @Autowired private TeamService teamService;
+  @Resource private TeamService teamService;
 
   @Override
   @Transactional

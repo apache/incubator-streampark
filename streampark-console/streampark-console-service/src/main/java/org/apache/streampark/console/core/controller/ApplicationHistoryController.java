@@ -25,11 +25,12 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ import java.util.List;
 @RequestMapping("flink/history")
 public class ApplicationHistoryController {
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
   @PostMapping("uploadJars")
   @RequiresPermissions("app:create")

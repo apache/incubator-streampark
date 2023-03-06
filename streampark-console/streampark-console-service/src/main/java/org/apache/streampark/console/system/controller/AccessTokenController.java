@@ -29,12 +29,12 @@ import org.apache.streampark.console.system.service.AccessTokenService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -42,9 +42,9 @@ import javax.validation.constraints.NotNull;
 @RequestMapping("token")
 public class AccessTokenController {
 
-  @Autowired private AccessTokenService accessTokenService;
+  @Resource private AccessTokenService accessTokenService;
 
-  @Autowired private CommonService commonService;
+  @Resource private CommonService commonService;
 
   /** generate token string */
   @PostMapping(value = "create")

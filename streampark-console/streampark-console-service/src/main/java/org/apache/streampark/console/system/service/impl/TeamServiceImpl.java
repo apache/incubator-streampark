@@ -36,10 +36,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import java.util.Date;
 import java.util.List;
@@ -50,17 +51,17 @@ import java.util.Optional;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements TeamService {
 
-  @Autowired private UserService userService;
+  @Resource private UserService userService;
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
-  @Autowired private ProjectService projectService;
+  @Resource private ProjectService projectService;
 
-  @Autowired private MemberService memberService;
+  @Resource private MemberService memberService;
 
-  @Autowired private VariableService variableService;
+  @Resource private VariableService variableService;
 
-  @Autowired private CommonService commonService;
+  @Resource private CommonService commonService;
 
   @Override
   public IPage<Team> findTeams(Team team, RestRequest request) {

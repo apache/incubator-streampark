@@ -28,11 +28,12 @@ import org.apache.streampark.console.core.service.ExternalLinkService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.PropertyPlaceholderHelper;
+
+import javax.annotation.Resource;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -44,11 +45,11 @@ import java.util.List;
 public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, ExternalLink>
     implements ExternalLinkService {
 
-  @Autowired private ApplicationService applicationService;
+  @Resource private ApplicationService applicationService;
 
   @Override
   public void create(ExternalLink externalLink) {
-    if (!this.check(externalLink)) {
+    if (this.check(externalLink)) {
       return;
     }
     externalLink.setCreateTime(new Date());
@@ -59,7 +60,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
 
   @Override
   public void update(ExternalLink externalLink) {
-    if (!this.check(externalLink)) {
+    if (this.check(externalLink)) {
       return;
     }
     externalLink.setModifyTime(new Date());
@@ -106,7 +107,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     }
     ExternalLink result = this.getOne(queryWrapper);
     if (result == null) {
-      return true;
+      return false;
     }
     Utils.required(
         !result.getBadgeName().equals(params.getBadgeName()),
@@ -114,6 +115,6 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     Utils.required(
         !result.getLinkUrl().equals(params.getLinkUrl()),
         String.format("The linkUrl: %s is already existing.", result.getLinkUrl()));
-    return false;
+    return true;
   }
 }
