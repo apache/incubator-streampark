@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.entity.Application;
@@ -26,6 +27,7 @@ import org.apache.streampark.console.core.service.SqlCompleteService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +79,18 @@ public class FlinkSqlController {
     } else {
       return RestResponse.success(true);
     }
+  }
+
+  @PostMapping("list")
+  public RestResponse list(Long appId, RestRequest request) {
+    IPage<FlinkSql> page = flinkSqlService.page(appId, request);
+    return RestResponse.success(page);
+  }
+
+  @PostMapping("delete")
+  public RestResponse delete(Long id) {
+    Boolean deleted = flinkSqlService.removeById(id);
+    return RestResponse.success(deleted);
   }
 
   @PostMapping("get")
