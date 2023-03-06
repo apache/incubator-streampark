@@ -74,6 +74,7 @@ export default {
     detailTitle: '作业详情',
     flinkWebUi: 'Flink原生引擎界面',
     compareConfig: '比较配置',
+    compareFlinkSql: '比较 Flink SQL',
     candidate: '侯选',
     compare: '比较',
     compareSelectTips: '请选择目标板本',
@@ -86,7 +87,9 @@ export default {
     invalidAccessToken: '访问令牌无效，请联系管理员。',
     detailTab: {
       configDetail: '查看日志详情',
+      sqlDetail: '查看 SQL 详情',
       confDeleteTitle: '您确定要删除此记录吗',
+      sqlDeleteTitle: '您确定要删除此 SQL 吗',
       copyPath: '复制路径',
       pointDeleteTitle: '您确定要删除?',
       copySuccess: '已成功复制到剪贴板',

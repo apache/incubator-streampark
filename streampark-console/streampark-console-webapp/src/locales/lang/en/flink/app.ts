@@ -75,6 +75,7 @@ export default {
     detailTitle: 'Application Info',
     flinkWebUi: 'Flink Web UI',
     compareConfig: 'Compare Config',
+    compareFlinkSql: 'Compare Flink SQL',
     candidate: 'Candidate',
     compare: 'Compare',
     compareSelectTips: 'Please select the target version',
@@ -88,7 +89,9 @@ export default {
     invalidAccessToken: 'access token is invalid,please contact the administrator.',
     detailTab: {
       configDetail: 'View Config Detail',
+      sqlDetail: 'View SQL Detail',
       confDeleteTitle: 'Are you sure delete this record',
+      sqlDeleteTitle: 'Are you sure delete this sql',
       copyPath: 'Copy Path',
       pointDeleteTitle: 'Are you sure delete?',
       copySuccess: 'copied to clipboard successfully',
