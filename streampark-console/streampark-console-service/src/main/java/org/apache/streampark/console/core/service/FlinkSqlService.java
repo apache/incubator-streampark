@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.CandidateType;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -51,4 +53,6 @@ public interface FlinkSqlService extends IService<FlinkSql> {
   FlinkSqlValidationResult verifySql(String sql, Long versionId);
 
   List<FlinkSql> getByTeamId(Long teamId);
+
+  IPage<FlinkSql> page(Long appId, RestRequest request);
 }

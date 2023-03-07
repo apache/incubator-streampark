@@ -57,5 +57,11 @@ insert into `t_role_menu` values (100063, 100002, 100073);
 insert into `t_role_menu` values (100064, 100002, 100074);
 -- Issue-2191/2215 DDL & DML End
 
+-- ISSUE-2401 Start
+insert into `t_menu` values (100075, 100015, 'sql delete', null, null, 'sql:delete', null, '1', 1, null, now(), now());
+insert into `t_role_menu` values (100065, 100001, 100075);
+insert into `t_role_menu` values (100066, 100002, 100075);
+-- ISSUE-2401 End
+
 set foreign_key_checks = 1;
 

@@ -122,7 +122,7 @@ insert into `t_menu` values (100071, 100033, 'link view', null, null, 'externalL
 insert into `t_menu` values (100072, 100033, 'link create', null, null, 'externalLink:create', null, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100073, 100033, 'link update', null, null, 'externalLink:update', null, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100074, 100033, 'link delete', null, null, 'externalLink:delete', null, '1', 1, NULL, now(), now());
-
+insert into `t_menu` values (100075, 100015, 'sql delete', null, null, 'sql:delete', null, '1', 1, null, now(), now());
 
 -- ----------------------------
 -- Records of t_role
@@ -197,7 +197,8 @@ insert into `t_role_menu` values (100061, 100002, 100071);
 insert into `t_role_menu` values (100062, 100002, 100072);
 insert into `t_role_menu` values (100063, 100002, 100073);
 insert into `t_role_menu` values (100064, 100002, 100074);
-
+insert into `t_role_menu` values (100065, 100001, 100075);
+insert into `t_role_menu` values (100066, 100002, 100075);
 
 -- ----------------------------
 -- Records of t_setting

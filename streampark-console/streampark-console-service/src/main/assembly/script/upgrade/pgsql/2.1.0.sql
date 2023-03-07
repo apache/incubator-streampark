@@ -60,3 +60,9 @@ insert into "public"."t_role_menu" values (100062, 100002, 100072);
 insert into "public"."t_role_menu" values (100063, 100002, 100073);
 insert into "public"."t_role_menu" values (100064, 100002, 100074);
 -- Issue-2191/2215 End
+
+-- ISSUE-2401 Start
+insert into "public"."t_menu" values (100075, 100015, 'sql delete', null, null, 'sql:delete', null, '1', '1', null, now(), now());
+insert into "public"."t_role_menu" values (100065, 100001, 100075);
+insert into "public"."t_role_menu" values (100066, 100002, 100075);
+-- ISSUE-2401 End
