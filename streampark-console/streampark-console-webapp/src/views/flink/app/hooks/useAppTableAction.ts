@@ -33,7 +33,7 @@ import {
 } from '/@/enums/flinkEnum';
 import { usePermission } from '/@/hooks/web/usePermission';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { isFunction } from '/@/utils/is';
+import { isFunction, isObject } from '/@/utils/is';
 
 // Create form configurations and operation functions in the application table
 export const useAppTableAction = (
@@ -195,13 +195,20 @@ export const useAppTableAction = (
       actionIsShow(item),
     );
     const actions = tableAction.splice(0, 3).map((item: ActionItem) => {
-      delete item.label;
+      if (item.label) {
+        item.tooltip = {
+          title: item.label,
+        };
+        delete item.label;
+      }
       return item;
     });
-    console.log(actions, tableAction);
     return {
       actions,
-      dropDownActions: tableAction,
+      dropDownActions: tableAction.map((item: ActionItem) => {
+        if (!item.label && isObject(item.tooltip)) item.label = item.tooltip?.title || '';
+        return item;
+      }),
     };
   }
   /* Click to edit */
