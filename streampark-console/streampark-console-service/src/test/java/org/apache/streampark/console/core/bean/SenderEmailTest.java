@@ -27,6 +27,7 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 
 import freemarker.template.Template;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+@Slf4j
 class SenderEmailTest {
 
   private Template template;
@@ -57,7 +59,7 @@ class SenderEmailTest {
 
   @Test
   @Disabled("This test case can't be runnable due to the email service is not available.")
-  void alert() {
+  void testAlert() {
     Application application = new Application();
     application.setStartTime(new Date());
     application.setJobName("Test My Job");
@@ -85,7 +87,7 @@ class SenderEmailTest {
 
       template.process(out, writer);
       String html = writer.toString();
-      System.out.println(html);
+      log.info(html);
       writer.close();
 
       String subject =

@@ -80,7 +80,7 @@ class AlertServiceTest {
   }
 
   @Test
-  void dingTalkAlertTest() throws Exception {
+  void testDingTalkAlert() throws Exception {
     DingTalkAlertNotifyServiceImpl notifyService = new DingTalkAlertNotifyServiceImpl(restTemplate);
 
     notifyService.loadTemplateFile();
@@ -96,7 +96,7 @@ class AlertServiceTest {
   }
 
   @Test
-  void weComAlertTest() throws Exception {
+  void testWeComAlert() throws Exception {
     WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate);
     notifyService.loadTemplateFile();
 
@@ -110,7 +110,7 @@ class AlertServiceTest {
   }
 
   @Test
-  void larkAlertTest() {
+  void testLarkAlert() {
     LarkAlertNotifyServiceImpl notifyService = new LarkAlertNotifyServiceImpl(restTemplate, mapper);
     notifyService.loadTemplateFile();
 
