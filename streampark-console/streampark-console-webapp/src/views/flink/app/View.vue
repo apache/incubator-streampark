@@ -123,10 +123,14 @@
     showTableSetting: true,
     useSearchForm: true,
     tableSetting: { fullScreen: true, redo: false },
-    actionColumn: { dataIndex: 'operation', title: t('component.table.operation'), width: 180 },
+    actionColumn: {
+      dataIndex: 'operation',
+      title: t('component.table.operation'),
+      width: 180,
+    },
   });
 
-  const { getTableActions, getActionDropdown, formConfig } = useAppTableAction(
+  const { getTableActions, formConfig } = useAppTableAction(
     openStartModal,
     openStopModal,
     openSavepointModal,
@@ -253,10 +257,7 @@
           />
         </template>
         <template v-if="column.dataIndex === 'operation'">
-          <TableAction
-            :actions="getTableActions(record, currentTablePage)"
-            :dropDownActions="getActionDropdown(record)"
-          />
+          <TableAction v-bind="getTableActions(record, currentTablePage)" />
         </template>
       </template>
     </BasicTable>
