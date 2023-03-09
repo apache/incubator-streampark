@@ -17,8 +17,22 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-public interface YarnQueueService extends IService<YarnQueue> {}
+public interface YarnQueueService extends IService<YarnQueue> {
+
+  IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest restRequest);
+
+  ResponseResult<String> checkYarnQueue(YarnQueue yarnQueue);
+
+  boolean createYarnQueue(YarnQueue yarnQueue);
+
+  void updateYarnQueue(YarnQueue yarnQueue);
+
+  void deleteYarnQueue(YarnQueue yarnQueue);
+}

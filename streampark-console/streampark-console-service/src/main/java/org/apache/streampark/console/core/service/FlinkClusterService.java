@@ -17,10 +17,14 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface FlinkClusterService extends IService<FlinkCluster> {
 
@@ -39,4 +43,6 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
   Boolean existsByClusterId(String clusterId, Long id);
 
   Boolean existsByClusterName(String clusterName, Long id);
+
+  List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes);
 }

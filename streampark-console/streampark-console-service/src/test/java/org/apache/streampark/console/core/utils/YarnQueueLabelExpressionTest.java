@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 
 import org.junit.jupiter.api.Test;
 
-import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.ERR_HINTS;
+import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
 import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.isValid;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,6 +63,6 @@ class YarnQueueLabelExpressionTest {
     assertThat(YarnQueueLabelExpression.of("a").getQueue()).isEqualTo("a");
     assertThatThrownBy(() -> YarnQueueLabelExpression.of("a@"))
         .isInstanceOf(ApiAlertException.class)
-        .hasMessageContaining(ERR_HINTS);
+        .hasMessageContaining(ERR_FORMAT_HINTS);
   }
 }

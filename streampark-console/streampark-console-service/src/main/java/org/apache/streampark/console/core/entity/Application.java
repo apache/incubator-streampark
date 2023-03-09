@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
@@ -65,6 +66,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.enums.FlinkAppState.of;
@@ -287,6 +289,23 @@ public class Application implements Serializable {
     this.state = state;
     FlinkAppState appState = of(this.state);
     this.tracking = shouldTracking(appState);
+  }
+
+  public void setYarnQueueByHotParams() {
+    if (!(ExecutionMode.YARN_APPLICATION == this.getExecutionModeEnum()
+        || ExecutionMode.YARN_PER_JOB == this.getExecutionModeEnum())) {
+      return;
+    }
+
+    Map<String, Object> hotParamsMap = this.getHotParamsMap();
+    if (!hotParamsMap.isEmpty() && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
+      String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
+      String labelExpr =
+          Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
+              .map(Object::toString)
+              .orElse(null);
+      this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
+    }
   }
 
   /**

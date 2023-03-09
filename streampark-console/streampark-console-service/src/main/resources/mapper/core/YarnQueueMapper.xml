@@ -25,4 +25,25 @@
         <result column="create_time" jdbcType="DATE" property="createTime"/>
         <result column="modify_time" jdbcType="DATE" property="modifyTime"/>
     </resultMap>
+
+    <select id="findQueues" resultType="org.apache.streampark.console.core.entity.YarnQueue">
+        select * from t_yarn_queue
+        <where>
+            <if test="yarnQueue.teamId != null">
+                team_id = #{yarnQueue.teamId}
+            </if>
+            <if test="yarnQueue.queueLabel != null and yarnQueue.queueLabel != ''">
+                and queue_label like '%${yarnQueue.queueLabel}%'
+            </if>
+            <if test="yarnQueue.createTimeFrom != null and yarnQueue.createTimeFrom !=''">
+                and create_time &gt; #{yarnQueue.createTimeFrom}
+            </if>
+            <if test="yarnQueue.createTimeTo!= null and yarnQueue.createTimeTo !=''">
+                and create_time &lt; #{yarnQueue.createTimeTo}
+            </if>
+        </where>
+        <if test="yarnQueue.sortField != null and yarnQueue.sortField != ''">
+            order by ${yarnQueue.sortField} ${yarnQueue.sortOrder}
+        </if>
+    </select>
 </mapper>

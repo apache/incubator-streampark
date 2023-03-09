@@ -41,7 +41,9 @@ public class YarnQueueLabelExpression {
 
   private static final String REGEX = "[a-zA-Z0-9_\\-]+";
 
-  @VisibleForTesting public static final String ERR_HINTS = "Yarn queue label format is invalid.";
+  @VisibleForTesting
+  public static final String ERR_FORMAT_HINTS =
+      "Yarn queue label format should be in format {queue} or {queue}@{label1,label2}";
 
   private static final Pattern QUEUE_LABEL_PATTERN =
       Pattern.compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
@@ -92,13 +94,13 @@ public class YarnQueueLabelExpression {
    */
   public static void checkQueueLabelIfNeed(int executionMode, String queueLabel) {
     if (ExecutionMode.isYarnMode(executionMode)) {
-      ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_HINTS);
+      ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
     }
   }
 
   // Visible for test.
   public static YarnQueueLabelExpression of(@Nonnull String queueLabelExpr) {
-    ApiAlertException.throwIfFalse(isValid(queueLabelExpr, false), ERR_HINTS);
+    ApiAlertException.throwIfFalse(isValid(queueLabelExpr, false), ERR_FORMAT_HINTS);
     String[] strs = queueLabelExpr.split(AT);
     if (strs.length == 2) {
       return new YarnQueueLabelExpression(strs[0], strs[1]);
@@ -110,7 +112,8 @@ public class YarnQueueLabelExpression {
       @Nonnull String queue, @Nullable String labelExpression) {
     YarnQueueLabelExpression queueLabelExpression =
         new YarnQueueLabelExpression(queue, labelExpression);
-    ApiAlertException.throwIfFalse(isValid(queueLabelExpression.toString(), false), ERR_HINTS);
+    ApiAlertException.throwIfFalse(
+        isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS);
     return queueLabelExpression;
   }
 
