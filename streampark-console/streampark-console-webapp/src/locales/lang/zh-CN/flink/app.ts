@@ -88,8 +88,9 @@ export default {
     detailTab: {
       configDetail: '查看日志详情',
       sqlDetail: '查看 SQL 详情',
-      confDeleteTitle: '您确定要删除此记录吗',
-      sqlDeleteTitle: '您确定要删除此 SQL 吗',
+      confDeleteTitle: '您确定要删除此记录吗?',
+      sqlDeleteTitle: '您确定要删除此 SQL 吗?',
+      confBackupTitle: '您确定要删除该备份吗?',
       copyPath: '复制路径',
       pointDeleteTitle: '您确定要删除?',
       copySuccess: '已成功复制到剪贴板',
