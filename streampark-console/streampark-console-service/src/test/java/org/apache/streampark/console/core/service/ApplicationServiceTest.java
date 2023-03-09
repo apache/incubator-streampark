@@ -36,13 +36,15 @@ import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.util.Date;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /** org.apache.streampark.console.core.service.ApplicationServiceTest. */
 class ApplicationServiceTest extends SpringTestBase {
 
   @Autowired private ApplicationService applicationService;
 
   @Test
-  void revokeTest() {
+  void testRevoke() {
     Date now = new Date();
     Application app = new Application();
     app.setId(100001L);
@@ -80,7 +82,7 @@ class ApplicationServiceTest extends SpringTestBase {
 
   @Test
   @Disabled("We couldn't do integration test with external services or components.")
-  void start() throws Exception {
+  void testStart() throws Exception {
     Application application = new Application();
     application.setId(1304056220683497473L);
     application.setRestart(false);
@@ -91,7 +93,7 @@ class ApplicationServiceTest extends SpringTestBase {
   }
 
   @Test
-  void uploadTest(@TempDir Path tempDir) throws Exception {
+  void testUpload(@TempDir Path tempDir) throws Exception {
     // specify the file path
     File fileToStoreUploadFile =
         new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
@@ -99,7 +101,7 @@ class ApplicationServiceTest extends SpringTestBase {
 
     File fileToUpload = new File(tempDir.toFile().getAbsolutePath() + "/fileToUpload.jar");
     FileUtils.createFile(fileToUpload.getAbsolutePath());
-    System.out.println(fileToUpload.exists());
+    assertThat(fileToUpload).exists();
     MultipartFile mulFile =
         new MockMultipartFile(
             "test", // fileName (eg: streampark.jar)

@@ -32,7 +32,7 @@ import java.util.UUID;
 class JWTTest extends SpringTestBase {
 
   @Test
-  void getExpireTime() {
+  void testExpireTime() {
     String userName = "black";
     String secret = UUID.randomUUID().toString();
     String expireTime = AccessToken.DEFAULT_EXPIRE_TIME;

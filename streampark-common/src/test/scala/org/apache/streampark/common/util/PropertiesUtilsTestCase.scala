@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.streampark.common.fs
+package org.apache.streampark.common.util
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.streampark.common.util.PropertiesUtils
 import org.junit.jupiter.api.{Assertions, Test}
 
 import scala.collection.mutable.ArrayBuffer
