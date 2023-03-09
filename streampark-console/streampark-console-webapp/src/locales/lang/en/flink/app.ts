@@ -90,8 +90,9 @@ export default {
     detailTab: {
       configDetail: 'View Config Detail',
       sqlDetail: 'View SQL Detail',
-      confDeleteTitle: 'Are you sure delete this record',
-      sqlDeleteTitle: 'Are you sure delete this sql',
+      confDeleteTitle: 'Are you sure delete this record?',
+      sqlDeleteTitle: 'Are you sure delete this sql?',
+      confBackupTitle: 'Are you sure delete this backup?',
       copyPath: 'Copy Path',
       pointDeleteTitle: 'Are you sure delete?',
       copySuccess: 'copied to clipboard successfully',

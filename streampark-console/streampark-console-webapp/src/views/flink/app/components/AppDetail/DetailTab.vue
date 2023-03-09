@@ -42,7 +42,7 @@
   import { fetchGetVer, fetchListVer, fetchRemoveConf } from '/@/api/flink/config';
   import { fetchRemoveSavePoint, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 
-  import { fetchBackUps, fetchOptionLog } from '/@/api/flink/app/app';
+  import { fetchBackUps, fetchOptionLog, fetchRemoveBackup } from '/@/api/flink/app/app';
   import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';
   import CompareModal from './CompareModal.vue';
@@ -130,7 +130,7 @@
     ...tableCommonConf,
   });
 
-  const [registerBackupTable] = useTable({
+  const [registerBackupTable, { reload: reloadBackup }] = useTable({
     api: fetchBackUps,
     columns: getBackupColumns(),
     ...tableCommonConf,
@@ -279,10 +279,28 @@
       },
     ];
   }
+
+  function getBackupAction(record: Recordable): ActionItem[] {
+    return [{
+      popConfirm: {
+        title: t('flink.app.detail.detailTab.confBackupTitle'),
+          confirm: handleDeleteBackup.bind(null, record),
+      },
+      auth: 'app:delete',
+      type: 'link',
+      icon: 'ant-design:delete-outlined',
+      color: 'error'
+    }]
+  }
   /* delete savePoint */
   async function handleDeleteSavePoint(record: Recordable) {
     await fetchRemoveSavePoint({ id: record.id });
     reloadSavePoint();
+  }
+
+  async function handleDeleteBackup(record: Recordable) {
+    await fetchRemoveBackup(record.id);
+    reloadBackup();
   }
 
   /* copy path */
@@ -401,6 +419,9 @@
               <a-button type="primary" shape="circle" size="small">
                 {{ record.version }}
               </a-button>
+            </template>
+            <template v-if="column.dataIndex == 'operation'">
+              <TableAction :actions="getBackupAction(record)" />
             </template>
           </template>
         </BasicTable>
