@@ -66,3 +66,43 @@ insert into "public"."t_menu" values (100075, 100015, 'sql delete', null, null, 
 insert into "public"."t_role_menu" values (100065, 100001, 100075);
 insert into "public"."t_role_menu" values (100066, 100002, 100075);
 -- ISSUE-2401 End
+
+-- Issue-2324 Start --
+insert into "public"."t_menu" values (100076, 100033, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (100077, 100033, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (100078, 100033, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', '0', null, now(), now());
+
+insert into "public"."t_role_menu" values (100067, 100002, 100076);
+insert into "public"."t_role_menu" values (100068, 100002, 100077);
+insert into "public"."t_role_menu" values (100069, 100002, 100078);
+
+drop table if exists "public"."t_yarn_queue";
+
+drop sequence if exists "public"."streampark_t_yarn_queue_id_seq";
+
+-- ----------------------------
+-- table structure for t_yarn_queue
+-- ----------------------------
+create sequence "public"."streampark_t_yarn_queue_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+
+create table "public"."t_yarn_queue" (
+    "id" int8 not null default nextval('streampark_t_yarn_queue_id_seq'::regclass),
+    `team_id` int8 not null comment 'team id',
+    "queue_label" varchar(255) not null collate "pg_catalog"."default",
+    "description" varchar(512) collate "pg_catalog"."default",
+    "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+    "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+)
+;
+comment on column "public"."t_yarn_queue"."id" is 'queue id';
+comment on column "public"."t_yarn_queue"."team_id" is 'team id';
+comment on column "public"."t_yarn_queue"."queue_label" is 'queue label expression';
+comment on column "public"."t_yarn_queue"."description" is 'description of the queue';
+comment on column "public"."t_yarn_queue"."create_time" is 'create time';
+comment on column "public"."t_yarn_queue"."modify_time" is 'modify time';
+
+alter table "public"."t_yarn_queue" add constraint "t_yarn_queue_pkey" primary key ("id");
+alter table "public"."t_yarn_queue" add constraint "unique_team_id_queue_label" unique("team_id", "queue_label");
+
+-- Issue-2324 End --

@@ -123,6 +123,9 @@ insert into `t_menu` values (100072, 100033, 'link create', null, null, 'externa
 insert into `t_menu` values (100073, 100033, 'link update', null, null, 'externalLink:update', null, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100074, 100033, 'link delete', null, null, 'externalLink:delete', null, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100075, 100015, 'sql delete', null, null, 'sql:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100076, 100033, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', 0, null, now(), now());
+insert into `t_menu` values (100077, 100033, 'update yarn queue', null, null, 'yarnQueue:update', '', '1', 0, null, now(), now());
+insert into `t_menu` values (100078, 100033, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', 0, null, now(), now());
 
 -- ----------------------------
 -- Records of t_role
@@ -199,6 +202,9 @@ insert into `t_role_menu` values (100063, 100002, 100073);
 insert into `t_role_menu` values (100064, 100002, 100074);
 insert into `t_role_menu` values (100065, 100001, 100075);
 insert into `t_role_menu` values (100066, 100002, 100075);
+insert into `t_role_menu` values (100067, 100002, 100076);
+insert into `t_role_menu` values (100068, 100002, 100077);
+insert into `t_role_menu` values (100069, 100002, 100078);
 
 -- ----------------------------
 -- Records of t_setting
