@@ -21,6 +21,7 @@ export default {
     flinkHome: 'Flink版本',
     flinkCluster: 'Flink集群',
     externalLink: '扩展链接 ',
+    yarnQueue: 'Yarn 队列',
   },
   systemSettingItems: {
     mavenSetting: {
@@ -112,6 +113,26 @@ export default {
       updateAlertConfigSuccessfull: '告警配置更新成功!',
     },
     delete: '是否确定删除此警报 ?',
+  },
+  yarnQueue: {
+    tableTitle: 'Yarn Queue 列表',
+    createQueue: '创建队列',
+    success: '成功',
+    modifyYarnQueue: '编辑队列',
+    deleteYarnQueue: '删除队列',
+    deleteConfirm: '确定要删除此队列?',
+    descriptionMessage: '超过了512个字符的最大长度限制',
+    yarnQueueLabelExpression: "Yarn 队列{'@'}标签",
+    placeholder: {
+      yarnQueueLabelExpression: "请输入队列，如 {queue} 或 {{queue}@{lab,...}}",
+      description: '请输入描述',
+    },
+    checkResult: {
+      emptyHint: '队列标签不能为空',
+      invalidFormatHint: '队列标签格式错误',
+      existedHint: '该队列标签已经存在于当前 Team',
+    },
+    noteInfo: 'Queue label 信息。例如，输入 "queue1" 表示队列名字，而输入 "queue1{\'@\'}label1,label2" 则表示队列名字为 "queue1" 且队列标签设置为 "label1" 和 "label2"。',
   },
   cluster: {
     detail: '查看集群详情',
