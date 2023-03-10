@@ -182,7 +182,6 @@ object Utils {
 
   implicit class StringCasts(v: String) {
     def cast[T](classType: Class[_]): T = {
-      Utils.required(classType.isPrimitive, "target class must be a primitive type")
       classType match {
         case c if c == classOf[String] => v.asInstanceOf[T]
         case c if c == classOf[Byte] => v.toByte.asInstanceOf[T]
