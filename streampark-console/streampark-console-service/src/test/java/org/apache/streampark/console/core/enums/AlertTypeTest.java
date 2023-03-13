@@ -22,16 +22,18 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class AlertTypeTest {
   @Test
-  void decodeTest() {
+  void testDecode() {
     List<AlertType> notifyTypes = AlertType.decode(5);
-    System.out.println(notifyTypes);
+    assertThat(notifyTypes).containsExactly(AlertType.EMAIL, AlertType.WE_COM);
   }
 
   @Test
-  void encodeTest() {
+  void testEncode() {
     int level = AlertType.encode(Arrays.asList(AlertType.DING_TALK, AlertType.EMAIL));
-    System.out.println(level);
+    assertThat(level).isEqualTo(3);
   }
 }

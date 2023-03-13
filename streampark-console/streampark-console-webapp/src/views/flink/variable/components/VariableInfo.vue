@@ -83,7 +83,10 @@
       field: 'variableCode',
     },
     {
-      label: generatedLabelIcon('ant-design:down-circle-outlined', t('flink.variable.table.variableValue')),
+      label: generatedLabelIcon(
+        'ant-design:down-circle-outlined',
+        t('flink.variable.table.variableValue'),
+      ),
       field: 'variableValue',
       render(value, data) {
         const renderIcon = () => {
@@ -110,7 +113,10 @@
       field: 'creatorName',
     },
     {
-      label: generatedLabelIcon(`ant-design:clock-circle-outlined`, t('flink.variable.table.createTime')),
+      label: generatedLabelIcon(
+        `ant-design:clock-circle-outlined`,
+        t('flink.variable.table.createTime'),
+      ),
       field: 'createTime',
     },
     {
@@ -118,7 +124,10 @@
       field: 'modifyTime',
     },
     {
-      label: generatedLabelIcon('ant-design:message-outlined', t('flink.variable.table.description')),
+      label: generatedLabelIcon(
+        'ant-design:message-outlined',
+        t('flink.variable.table.description'),
+      ),
       field: 'description',
     },
   ];

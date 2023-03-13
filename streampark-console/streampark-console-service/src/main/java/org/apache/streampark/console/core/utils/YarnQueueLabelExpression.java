@@ -21,8 +21,9 @@ import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

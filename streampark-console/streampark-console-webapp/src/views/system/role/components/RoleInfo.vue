@@ -36,7 +36,11 @@
         v-model:checkedKeys="checkedKeys"
         v-if="menuTreeData.length > 0"
         :tree-data="menuTreeData"
-      />
+      >
+        <template #title="{ text }">
+          {{ handleTreeTitle(text) }}
+        </template>
+      </Tree>
     </p>
   </BasicDrawer>
 </template>
@@ -123,5 +127,11 @@
   ];
   function handleSubmit() {
     closeDrawer();
+  }
+  function handleTreeTitle(text: string) {
+    if (/^\w+\.\w+$/.test(text)) {
+      return t(`menu.${text}`);
+    }
+    return text;
   }
 </script>

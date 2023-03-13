@@ -17,22 +17,15 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.StreamParkConsoleBootstrap;
+import org.apache.streampark.console.SpringTestBase;
 import org.apache.streampark.console.core.entity.Variable;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /** org.apache.streampark.console.core.service.VariableServiceTest */
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(
-    classes = StreamParkConsoleBootstrap.class,
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class VariableServiceTest {
+class VariableServiceTest extends SpringTestBase {
 
   @Autowired private VariableService variableService;
 

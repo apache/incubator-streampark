@@ -87,6 +87,11 @@ export function fetchAppRecord(data): Promise<AppListResponse> {
 export function fetchAppRemove(id: string): Promise<boolean> {
   return defHttp.post({ url: APP_API.DELETE, data: { id } });
 }
+
+export function fetchRemoveBackup(id: string): Promise<boolean> {
+  return defHttp.post({ url: APP_API.DELETE_BAK, data: { id } });
+}
+
 /**
  * get yarn address
  * @returns {Promise<string>}

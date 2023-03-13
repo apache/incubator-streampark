@@ -22,9 +22,10 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;

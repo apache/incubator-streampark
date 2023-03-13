@@ -21,9 +21,10 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.service.ApplicationService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;

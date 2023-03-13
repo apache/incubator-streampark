@@ -20,6 +20,8 @@ import { defHttp } from '/@/utils/http/axios';
 enum FLINK_SQL_API {
   VERIFY = '/flink/sql/verify',
   GET = '/flink/sql/get',
+  LIST = '/flink/sql/list',
+  DELETE = '/flink/sql/delete',
   HISTORY = '/flink/sql/history',
 }
 
@@ -30,6 +32,20 @@ export function fetchFlinkSqlVerify(data): Promise<AxiosResponse<any>> {
 export function fetchFlinkSql(data) {
   return defHttp.post({
     url: FLINK_SQL_API.GET,
+    data,
+  });
+}
+
+export function fetchFlinkSqlList(data) {
+  return defHttp.post({
+    url: FLINK_SQL_API.LIST,
+    data,
+  });
+}
+
+export function fetchRemoveFlinkSql(data: { id: string }): Promise<boolean> {
+  return defHttp.post({
+    url: FLINK_SQL_API.DELETE,
     data,
   });
 }

@@ -74,6 +74,7 @@ export default {
     detailTitle: '作业详情',
     flinkWebUi: 'Flink原生引擎界面',
     compareConfig: '比较配置',
+    compareFlinkSql: '比较 Flink SQL',
     candidate: '侯选',
     compare: '比较',
     compareSelectTips: '请选择目标板本',
@@ -85,8 +86,11 @@ export default {
     nullAccessToken: '访问令牌为空，请联系管理员添加.',
     invalidAccessToken: '访问令牌无效，请联系管理员。',
     detailTab: {
-      configDetail: '查看日志详情',
-      confDeleteTitle: '您确定要删除此记录吗',
+      configDetail: '查看配置详情',
+      sqlDetail: '查看 SQL 详情',
+      confDeleteTitle: '您确定要删除此记录吗?',
+      sqlDeleteTitle: '您确定要删除此 SQL 吗?',
+      confBackupTitle: '您确定要删除该备份吗?',
       copyPath: '复制路径',
       pointDeleteTitle: '您确定要删除?',
       copySuccess: '已成功复制到剪贴板',
@@ -242,6 +246,7 @@ export default {
       '不建议同时配置 "total process memory" 和 "total Flink memory"。 由于潜在的内存配置冲突，它可能会导致部署失败。 配置其他内存组件也需要谨慎，因为它会产生进一步的配置冲突，最简单的方法是设置"total process memory"',
     dynamicProperties:
       '动态Properties: 与flink run命令行模式下的 -D$property=$value 的作用相同，允许指定多个参数。 更多可以设置的参数请查阅',
-    yarnQueue: '此输入不仅支持快速设置 "yarn.application.name" 还支持设置 "yarn.application.node-label"。例如，输入 "queue1" 表示 "yarn.application.name" 的值为 "queue1"，而输入 "queue1@label1,label2" 则表示 "yarn.application.name" 设置为 "queue1" 且 "yarn.application.node-label" 设置为 "label1,label2"。Queue 和 label 之间使用 "@" 分隔。',
+    yarnQueue:
+      '此输入不仅支持快速设置 "yarn.application.name" 还支持设置 "yarn.application.node-label"。例如，输入 "queue1" 表示 "yarn.application.name" 的值为 "queue1"，而输入 "queue1{\'@\'}label1,label2" 则表示 "yarn.application.name" 设置为 "queue1" 且 "yarn.application.node-label" 设置为 "label1,label2"。Queue 和 label 之间使用 {\'@\'} 分隔。',
   },
 };

@@ -26,7 +26,7 @@ import {
   renderIsSetConfig,
   renderOptionsItems,
   renderTotalMemory,
-  renderYarnQueue
+  renderYarnQueue,
 } from './useFlinkRender';
 
 import { fetchCheckName } from '/@/api/flink/app/app';
@@ -467,8 +467,10 @@ export const useCreateAndEditSchema = (
         field: 'yarnQueue',
         label: t('flink.app.yarnQueue'),
         component: 'Input',
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION || values.executionMode == ExecModeEnum.YARN_PER_JOB,
-        render: (renderCallbackParams) => renderYarnQueue(renderCallbackParams)
+        ifShow: ({ values }) =>
+          values.executionMode == ExecModeEnum.YARN_APPLICATION ||
+          values.executionMode == ExecModeEnum.YARN_PER_JOB,
+        render: (renderCallbackParams) => renderYarnQueue(renderCallbackParams),
       },
       {
         field: 'podTemplate',

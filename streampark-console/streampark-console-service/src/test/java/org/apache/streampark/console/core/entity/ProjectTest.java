@@ -20,12 +20,15 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
 import org.apache.streampark.console.core.enums.GitCredential;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-class GitTest {
+@Slf4j
+class ProjectTest {
 
   private final Project project = new Project();
 
@@ -35,15 +38,17 @@ class GitTest {
     project.setGitCredential(GitCredential.HTTPS.getValue());
   }
 
+  @Disabled("This test case can't be runnable due to external service is not available.")
   @Test
-  void getBranchs() {
+  void testGitBranches() {
     List<String> branches = project.getAllBranches();
     branches.forEach(System.out::println);
   }
 
+  @Disabled("This test case can't be runnable due to external service is not available.")
   @Test
-  void auth() {
+  void testGitCheckAuth() {
     GitAuthorizedError error = project.gitCheck();
-    System.out.println(error);
+    log.error("{}", error);
   }
 }

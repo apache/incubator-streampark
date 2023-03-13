@@ -58,7 +58,7 @@
 * Support catalog、olap、streaming-warehouse etc.
 * ...
 
-![](https://user-images.githubusercontent.com/13284744/142746864-d807d728-423f-41c3-b90d-45ce2c21936b.png)
+![](https://streampark.apache.org/image/sqlide.png)
 
 ## 🔨 How to Build
 

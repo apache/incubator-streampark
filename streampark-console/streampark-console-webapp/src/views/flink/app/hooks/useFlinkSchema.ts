@@ -39,7 +39,7 @@ import {
   renderOptionsItems,
   getAlertSvgIcon,
   renderIsSetConfig,
-  renderYarnQueue
+  renderYarnQueue,
 } from './useFlinkRender';
 import Icon from '/@/components/Icon';
 import { Alert } from 'ant-design-vue';
@@ -340,8 +340,10 @@ export const useFlinkSchema = (editModel?: string) => {
       field: 'yarnQueue',
       label: t('flink.app.yarnQueue'),
       component: 'Input',
-      ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_APPLICATION || values.executionMode == ExecModeEnum.YARN_PER_JOB,
-      render: renderYarnQueue
+      ifShow: ({ values }) =>
+        values.executionMode == ExecModeEnum.YARN_APPLICATION ||
+        values.executionMode == ExecModeEnum.YARN_PER_JOB,
+      render: renderYarnQueue,
     },
     {
       field: 'podTemplate',

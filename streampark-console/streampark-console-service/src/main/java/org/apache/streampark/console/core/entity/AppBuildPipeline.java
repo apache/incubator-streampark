@@ -27,6 +27,8 @@ import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 import org.apache.streampark.flink.packer.pipeline.PipelineStepStatus;
 import org.apache.streampark.flink.packer.pipeline.PipelineType;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -39,7 +41,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

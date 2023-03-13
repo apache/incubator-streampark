@@ -16,8 +16,9 @@
  */
 package org.apache.streampark.common.conf
 
-import java.util.Properties
+import org.apache.streampark.common.util.Utils.StringCasts
 
+import java.util.Properties
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -40,12 +41,12 @@ case class ConfigOption[T](key: String, defaultValue: T = null, required: Boolea
       if (required) {
         prop.get(fullKey) match {
           case null => throw error("is require")
-          case v => Converter.convert[T](v.toString, classType)
+          case v => v.toString.cast[T](classType)
         }
       } else {
         prop.getProperty(fullKey) match {
           case null => defaultValue
-          case v => Converter.convert[T](v, classType)
+          case v => v.cast[T](classType)
         }
       }
     case _ =>
@@ -57,7 +58,7 @@ case class ConfigOption[T](key: String, defaultValue: T = null, required: Boolea
       } else {
         Try(handle(fullKey)) match {
           case Success(v) => v
-          case Failure(e) => defaultValue
+          case Failure(_) => defaultValue
         }
       }
   }
