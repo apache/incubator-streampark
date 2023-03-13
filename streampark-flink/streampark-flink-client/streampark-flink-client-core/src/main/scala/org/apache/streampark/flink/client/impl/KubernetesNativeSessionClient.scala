@@ -71,7 +71,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         .getOrElse(throw new Exception(s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
       // submit job via rest api
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
-      SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId)
+      SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId, jmRestUrl)
     } match {
       case Success(s) => s
       case Failure(e) =>
@@ -100,7 +100,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val submitResult = client.submitJob(jobGraph)
       val jobId = submitResult.get().toString
-      val result = SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId)
+      val result = SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
       logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId: $jobId")
       result
     } catch {
