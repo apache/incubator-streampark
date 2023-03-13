@@ -86,7 +86,7 @@ export default {
     nullAccessToken: '访问令牌为空，请联系管理员添加.',
     invalidAccessToken: '访问令牌无效，请联系管理员。',
     detailTab: {
-      configDetail: '查看日志详情',
+      configDetail: '查看配置详情',
       sqlDetail: '查看 SQL 详情',
       confDeleteTitle: '您确定要删除此记录吗?',
       sqlDeleteTitle: '您确定要删除此 SQL 吗?',
