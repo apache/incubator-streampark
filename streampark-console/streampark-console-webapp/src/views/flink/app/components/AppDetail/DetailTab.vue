@@ -273,9 +273,10 @@
           title: t('flink.app.detail.detailTab.pointDeleteTitle'),
           confirm: handleDeleteSavePoint.bind(null, record),
         },
-        shape: 'circle',
+        auth: 'app:delete',
+        type: 'link',
         icon: 'ant-design:delete-outlined',
-        type: 'danger' as any,
+        color: 'error'
       },
     ];
   }
