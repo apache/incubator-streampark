@@ -19,46 +19,23 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-public enum ApplicationType implements Serializable {
-    /**
-     * StreamPark Flink
-     */
-    STREAMPARK_FLINK(1, "StreamPark Flink"),
-    /**
-     * Apache Flink
-     */
-    APACHE_FLINK(2, "Apache Flink"),
-    /**
-     * StreamPark Spark
-     */
-    STREAMPARK_SPARK(3, "StreamPark Spark"),
-    /**
-     * Apache Spark
-     */
-    APACHE_SPARK(4, "Apache Spark");
+public enum Semantic implements Serializable {
 
-    private final int type;
-    private final String name;
+  /** */
+  EXACTLY_ONCE,
 
-    ApplicationType(int type, String name) {
-        this.type = type;
-        this.name = name;
+  /** */
+  AT_LEAST_ONCE,
+
+  /** */
+  NONE;
+
+  public static Semantic of(String name) {
+    for (Semantic semantic : Semantic.values()) {
+      if (name.equals(semantic.name())) {
+        return semantic;
+      }
     }
-
-    public int getType() {
-        return type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public static ApplicationType of(int type) {
-        for (ApplicationType appType : ApplicationType.values()) {
-            if (appType.getType() == type) {
-                return appType;
-            }
-        }
-        return null;
-    }
+    return null;
+  }
 }

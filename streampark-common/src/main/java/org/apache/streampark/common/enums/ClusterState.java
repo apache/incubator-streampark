@@ -19,49 +19,34 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-/**
- * kubernetes.rest-service.exposed.type
- */
-public enum FlinkK8sRestExposedType implements Serializable {
+/** @since: 1.2.3 */
+public enum ClusterState implements Serializable {
+  /** The cluster was just created but not started */
+  CREATED(0),
+  /** cluster started */
+  STARTED(1),
+  /** cluster stopped */
+  STOPED(2),
 
-    /**
-     * LoadBalancer
-     */
-    LoadBalancer("LoadBalancer", 0),
+  /** cluster lost */
+  LOST(3);
 
-    /**
-     * ClusterIP
-     */
-    ClusterIP("ClusterIP", 1),
+  private final Integer value;
 
-    /**
-     * NodePort
-     */
-    NodePort("NodePort", 2);
+  ClusterState(Integer value) {
+    this.value = value;
+  }
 
-    private final String name;
-
-    private final Integer value;
-
-    FlinkK8sRestExposedType(String name, Integer value) {
-        this.name = name;
-        this.value = value;
+  public static ClusterState of(Integer value) {
+    for (ClusterState clusterState : values()) {
+      if (clusterState.value.equals(value)) {
+        return clusterState;
+      }
     }
+    return null;
+  }
 
-    public static FlinkK8sRestExposedType of(Integer value) {
-        for (FlinkK8sRestExposedType order : values()) {
-            if (order.value.equals(value)) {
-                return order;
-            }
-        }
-        return null;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
+  public Integer getValue() {
+    return value;
+  }
 }
