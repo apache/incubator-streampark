@@ -19,44 +19,33 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-public enum FlinkSqlValidationFailedType implements Serializable {
-    /**
-     * Basic test failed (such as null, etc.)
-     */
-    VERIFY_FAILED(1),
-    /**
-     * syntax error
-     */
-    SYNTAX_ERROR(2),
-    /**
-     * unsupported dialect
-     */
-    UNSUPPORTED_DIALECT(3),
-    /**
-     * unsupported sql command
-     */
-    UNSUPPORTED_SQL(4),
-    /**
-     * Not at the end of ";"
-     */
-    ENDS_WITH(5);
+public enum DevelopmentMode implements Serializable {
 
-    private final int value;
+  /** custom code */
+  CUSTOMCODE("Custom Code", 1),
 
-    FlinkSqlValidationFailedType(int value) {
-        this.value = value;
+  /** Flink SQL */
+  FLINKSQL("Flink SQL", 2);
+
+  private final String mode;
+
+  private final Integer value;
+
+  DevelopmentMode(String mode, Integer value) {
+    this.mode = mode;
+    this.value = value;
+  }
+
+  public static DevelopmentMode of(Integer value) {
+    for (DevelopmentMode mode : values()) {
+      if (mode.value.equals(value)) {
+        return mode;
+      }
     }
+    return null;
+  }
 
-    public static FlinkSqlValidationFailedType of(Integer value) {
-        for (FlinkSqlValidationFailedType type : values()) {
-            if (type.value == value) {
-                return type;
-            }
-        }
-        return null;
-    }
-
-    public int getValue() {
-        return value;
-    }
+  public Integer getValue() {
+    return value;
+  }
 }

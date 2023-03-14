@@ -19,39 +19,36 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-public enum DevelopmentMode implements Serializable {
+/** classloader.resolve-order */
+public enum ResolveOrder implements Serializable {
+  /** parent-first */
+  PARENT_FIRST("parent-first", 0),
+  /** child-first */
+  CHILD_FIRST("child-first", 1);
 
-    /**
-     * custom code
-     */
-    CUSTOMCODE("Custom Code", 1),
+  private final String name;
 
-    /**
-     * Flink SQL
-     */
-    FLINKSQL("Flink SQL", 2);
+  private final Integer value;
 
+  ResolveOrder(String name, Integer value) {
+    this.name = name;
+    this.value = value;
+  }
 
-    private final String mode;
-
-    private final Integer value;
-
-    DevelopmentMode(String mode, Integer value) {
-        this.mode = mode;
-        this.value = value;
+  public static ResolveOrder of(Integer value) {
+    for (ResolveOrder order : values()) {
+      if (order.value.equals(value)) {
+        return order;
+      }
     }
+    return null;
+  }
 
-    public static DevelopmentMode of(Integer value) {
-        for (DevelopmentMode mode : values()) {
-            if (mode.value.equals(value)) {
-                return mode;
-            }
-        }
-        return null;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public Integer getValue() {
-        return value;
-    }
-
+  public Integer getValue() {
+    return value;
+  }
 }
