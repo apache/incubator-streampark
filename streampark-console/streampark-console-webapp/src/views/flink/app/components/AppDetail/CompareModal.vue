@@ -140,14 +140,6 @@
               <Tag color="green" style="margin-left: 10px" size="small" v-if="ver.effective">
                 Effective
               </Tag>
-              <Tag
-                color="cyan"
-                class="ml-5px"
-                size="small"
-                v-if="[CandidateTypeEnum.NEW, CandidateTypeEnum.HISTORY].includes(ver.candidate)"
-              >
-                {{ t('flink.app.detail.candidate') }}
-              </Tag>
             </div>
           </SelectOption>
         </Select>
