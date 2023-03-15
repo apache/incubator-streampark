@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.system.entity.Member;
@@ -75,11 +75,16 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public IPage<Member> findUsers(Member member, RestRequest request) {
-    AssertUtils.isTrue(member.getTeamId() != null, "The team id is required.");
+    ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
     Page<Member> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
     return baseMapper.findUsers(page, member);
+  }
+
+  @Override
+  public List<User> findCandidateUsers(Long teamId) {
+    return baseMapper.findUsersNotInTeam(teamId);
   }
 
   @Override
@@ -97,7 +102,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   private Member findByUserId(Long teamId, Long userId) {
-    AssertUtils.isTrue(teamId != null, "The team id is required.");
+    ApiAlertException.throwIfNull(teamId, "The team id is required.");
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>()
             .eq(Member::getTeamId, teamId)
@@ -132,7 +137,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 () ->
                     new ApiAlertException(
                         String.format("The teamId [%s] not found", member.getTeamId())));
-    AssertUtils.isTrue(
+    ApiAlertException.throwIfFalse(
         findByUserId(member.getTeamId(), user.getUserId()) == null,
         String.format(
             "The user [%s] has been added the team [%s], please don't add it again.",
@@ -165,10 +170,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 () ->
                     new ApiAlertException(
                         String.format("The member [id=%s] not found", member.getId())));
-    AssertUtils.isTrue(
-        oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
-    AssertUtils.isTrue(
-        oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
+    Utils.required(oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
+    Utils.required(oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
     Optional.ofNullable(roleService.getById(member.getRoleId()))
         .orElseThrow(
             () ->

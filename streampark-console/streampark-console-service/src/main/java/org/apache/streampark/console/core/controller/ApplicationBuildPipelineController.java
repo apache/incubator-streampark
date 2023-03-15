@@ -30,12 +30,13 @@ import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineType;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,7 +61,7 @@ public class ApplicationBuildPipelineController {
   @Autowired private FlinkSqlService flinkSqlService;
 
   /**
-   * Launch application building pipeline.
+   * Release application building pipeline.
    *
    * @param appId application id
    * @param forceBuild forced start pipeline or not
@@ -68,8 +69,8 @@ public class ApplicationBuildPipelineController {
    */
   @ApiAccess
   @ApiOperation(
-      value = "Launch application",
-      notes = "Launch application",
+      value = "Release application",
+      notes = "Release application",
       tags = ApiDocConstant.FLINK_APP_OP_TAG,
       consumes = "application/x-www-form-urlencoded")
   @ApiImplicitParams({
@@ -92,7 +93,7 @@ public class ApplicationBuildPipelineController {
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
     try {
       Application app = applicationService.getById(appId);
-      Boolean envOk = applicationService.checkEnv(app);
+      boolean envOk = applicationService.checkEnv(app);
       if (!envOk) {
         throw new ApiAlertException(
             "Check flink env failed, please check the flink version of this job");

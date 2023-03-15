@@ -25,13 +25,15 @@
 </template>
 
 <script lang="ts">
+  import { defineComponent } from 'vue';
+
   export default defineComponent({
     name: 'MemberDrawer',
   });
 </script>
 
 <script setup lang="ts" name="MemberDrawer">
-  import { defineComponent, ref, computed, unref } from 'vue';
+  import { ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
@@ -39,9 +41,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { RoleListItem } from '/@/api/base/model/systemModel';
   import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { RuleObject } from 'ant-design-vue/lib/form';
-  import { StoreValue } from 'ant-design-vue/lib/form/interface';
-  import { fetchAddMember, fetchCheckUserName, fetchUpdateMember } from '/@/api/system/member';
+  import { fetchAddMember, fetchCandidateUsers, fetchUpdateMember } from '/@/api/system/member';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
 
   const { t } = useI18n();
@@ -57,54 +57,41 @@
   });
 
   const isUpdate = ref(false);
-  const editParams: { userId: Nullable<number>; id: Nullable<number>; teamId: Nullable<number> } = {
+  const editParams: {
+    userId: Nullable<number>;
+    id: Nullable<number>;
+    teamId: Nullable<number>;
+  } = {
     userId: null,
     id: null,
     teamId: null,
   };
 
-  async function checkUserName(_rule: RuleObject, value: StoreValue) {
-    if (value) {
-      if (value.length > 20) {
-        setValidateStatus('error');
-        setHelp(t('system.member.checkUserName.maxLen'));
-        return Promise.reject();
-      } else if (value.length < 4) {
-        setValidateStatus('error');
-        setHelp(t('system.member.checkUserName.minLen'));
-        return Promise.reject();
-      } else {
-        setValidateStatus('validating');
-        const res = await fetchCheckUserName({
-          username: value,
-        });
-        if (res) {
-          setValidateStatus('error');
-          setHelp(t('system.member.checkUserName.noExist'));
-          return Promise.reject();
-        } else {
-          setValidateStatus('success');
-          setHelp('');
-          return Promise.resolve();
-        }
-      }
-    } else {
-      setValidateStatus('error');
-      setHelp(t('system.member.checkUserName.empty'));
-      return Promise.reject();
-    }
-  }
   const getMemberFormSchema = computed((): FormSchema[] => {
     return [
       {
         field: 'userName',
         label: t('system.member.table.userName'),
-        component: 'Input',
-        componentProps: { disabled: unref(isUpdate) },
+        component: 'ApiSelect',
+        componentProps: {
+          disabled: unref(isUpdate),
+          api: fetchCandidateUsers,
+          labelField: 'username',
+          valueField: 'username',
+          showSearch: true,
+          optionFilterGroup: 'username',
+          placeholder: t('system.member.userNameRequire'),
+        },
         itemProps: getItemProp.value,
         rules: unref(isUpdate)
           ? []
-          : [{ required: true, validator: checkUserName, trigger: 'blur' }],
+          : [
+              {
+                required: true,
+                message: t('system.member.userNameRequire'),
+                trigger: 'blur',
+              },
+            ],
       },
       {
         field: 'roleId',
@@ -113,6 +100,7 @@
         componentProps: {
           options: props.roleOptions,
           fieldNames: { label: 'roleName', value: 'roleId' },
+          placeholder: t('system.member.roleRequire'),
         },
         rules: [{ required: true, message: t('system.member.roleRequire') }],
       },
@@ -161,7 +149,7 @@
       setDrawerProps({ confirmLoading: true });
       await (isUpdate.value
         ? fetchUpdateMember({ ...editParams, ...values })
-        : fetchAddMember({ teamId: userStore.getTeamId, ...values }));
+        : fetchAddMember({ ...values }));
       closeDrawer();
       emit('success', isUpdate.value);
     } catch (e) {

@@ -20,13 +20,10 @@ package org.apache.streampark.console.core.task;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.GitUtils;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
-import org.apache.streampark.console.core.enums.LaunchState;
-import org.apache.streampark.console.core.mapper.ProjectMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
 
+import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -36,25 +33,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 @Slf4j
 public class ProjectBuildTask extends AbstractLogFileTask {
 
   final Project project;
 
-  final ProjectMapper baseMapper;
+  final Consumer<BuildState> stateUpdateConsumer;
 
-  final ApplicationService applicationService;
+  final Consumer<Logger> notifyReleaseConsumer;
 
   public ProjectBuildTask(
       String logPath,
       Project project,
-      ProjectMapper baseMapper,
-      ApplicationService applicationService) {
+      Consumer<BuildState> stateUpdateConsumer,
+      Consumer<Logger> notifyReleaseConsumer) {
     super(logPath, true);
     this.project = project;
-    this.baseMapper = baseMapper;
-    this.applicationService = applicationService;
+    this.stateUpdateConsumer = stateUpdateConsumer;
+    this.notifyReleaseConsumer = notifyReleaseConsumer;
   }
 
   @Override
@@ -64,33 +62,23 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     boolean cloneSuccess = cloneSourceCode(project);
     if (!cloneSuccess) {
       fileLogger.error("[StreamPark] clone or pull error.");
-      this.baseMapper.updateBuildState(project.getId(), BuildState.FAILED.get());
+      stateUpdateConsumer.accept(BuildState.FAILED);
       return;
     }
     boolean build = projectBuild(project);
     if (!build) {
-      this.baseMapper.updateBuildState(project.getId(), BuildState.FAILED.get());
+      stateUpdateConsumer.accept(BuildState.FAILED);
       fileLogger.error("build error, project name: {} ", project.getName());
       return;
     }
-    this.baseMapper.updateBuildState(project.getId(), BuildState.SUCCESSFUL.get());
-    this.baseMapper.updateBuildTime(project.getId());
+    stateUpdateConsumer.accept(BuildState.SUCCESSFUL);
     this.deploy(project);
-    List<Application> applications = this.applicationService.getByProjectId(project.getId());
-
-    applications.forEach(
-        (app) -> {
-          fileLogger.info(
-              "update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-          app.setLaunch(LaunchState.NEED_LAUNCH.get());
-          app.setBuild(true);
-          this.applicationService.updateLaunch(app);
-        });
+    notifyReleaseConsumer.accept(fileLogger);
   }
 
   @Override
   protected void processException(Throwable t) {
-    this.baseMapper.updateBuildState(project.getId(), BuildState.FAILED.get());
+    stateUpdateConsumer.accept(BuildState.FAILED);
     fileLogger.error("Build error, project name: {}", project.getName(), t);
   }
 

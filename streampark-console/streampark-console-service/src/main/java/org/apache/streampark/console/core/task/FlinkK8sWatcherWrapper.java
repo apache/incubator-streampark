@@ -27,9 +27,10 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -123,10 +124,18 @@ public class FlinkK8sWatcherWrapper {
       Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
       if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
         return TrackId.onApplication(
-            app.getK8sNamespace(), app.getClusterId(), app.getId(), app.getJobId());
+            app.getK8sNamespace(),
+            app.getClusterId(),
+            app.getId(),
+            app.getJobId(),
+            app.getTeamId().toString());
       } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
         return TrackId.onSession(
-            app.getK8sNamespace(), app.getClusterId(), app.getId(), app.getJobId());
+            app.getK8sNamespace(),
+            app.getClusterId(),
+            app.getId(),
+            app.getJobId(),
+            app.getTeamId().toString());
       } else {
         throw new IllegalArgumentException(
             "Illegal K8sExecuteMode, mode=" + app.getExecutionMode());

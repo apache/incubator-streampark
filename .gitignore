@@ -42,3 +42,4 @@ hs_err_pid*
 *.tar.gz
 *.rar
 *Spec-output/
+**/node

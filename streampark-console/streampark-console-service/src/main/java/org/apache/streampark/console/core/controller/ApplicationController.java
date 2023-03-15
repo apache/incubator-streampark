@@ -24,6 +24,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
+import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
@@ -35,13 +36,14 @@ import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -128,6 +130,7 @@ public class ApplicationController {
         : RestResponse.success(true).data(data);
   }
 
+  @AppUpdated
   @PostMapping("update")
   @RequiresPermissions("app:update")
   public RestResponse update(Application app) {
@@ -177,6 +180,7 @@ public class ApplicationController {
     return RestResponse.success(applicationList);
   }
 
+  @AppUpdated
   @PostMapping("mapping")
   @RequiresPermissions("app:mapping")
   public RestResponse mapping(Application app) {
@@ -184,8 +188,9 @@ public class ApplicationController {
     return RestResponse.success(flag);
   }
 
+  @AppUpdated
   @PostMapping("revoke")
-  @RequiresPermissions("app:launch")
+  @RequiresPermissions("app:release")
   public RestResponse revoke(Application app) {
     applicationService.revoke(app);
     return RestResponse.success();
@@ -278,6 +283,7 @@ public class ApplicationController {
     return RestResponse.success();
   }
 
+  @AppUpdated
   @ApiAccess
   @PostMapping("clean")
   @RequiresPermissions("app:clean")
@@ -343,6 +349,7 @@ public class ApplicationController {
   }
 
   @PostMapping("delete")
+  @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
     Boolean deleted = applicationService.delete(app);
     return RestResponse.success(deleted);
@@ -370,12 +377,6 @@ public class ApplicationController {
   public RestResponse upload(MultipartFile file) throws Exception {
     String uploadPath = applicationService.upload(file);
     return RestResponse.success(uploadPath);
-  }
-
-  @PostMapping("downlog")
-  public RestResponse downlog(Long id) {
-    applicationService.tailMvnDownloading(id);
-    return RestResponse.success();
   }
 
   @PostMapping("verifySchema")

@@ -26,6 +26,7 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.shiro.SecurityUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,9 +63,8 @@ public class CommonServiceImpl implements CommonService {
   public String getSqlClientJar(FlinkEnv flinkEnv) {
     if (sqlClientJar == null) {
       File localClient = WebUtils.getAppClientDir();
-      if (!localClient.exists()) {
-        throw new ApiAlertException("[StreamPark] " + localClient + " no exists. please check.");
-      }
+      ApiAlertException.throwIfFalse(
+          localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
       List<String> jars =
           Arrays.stream(Objects.requireNonNull(localClient.list()))
               .filter(
@@ -74,7 +74,7 @@ public class CommonServiceImpl implements CommonService {
               .collect(Collectors.toList());
       if (jars.isEmpty()) {
         throw new ApiAlertException(
-            "[StreamPark] can no found streampark-flink-sqlclient jar in " + localClient);
+            "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
       }
       if (jars.size() > 1) {
         throw new ApiAlertException(

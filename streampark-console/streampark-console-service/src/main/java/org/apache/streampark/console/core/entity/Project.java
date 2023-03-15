@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -25,7 +26,9 @@ import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
-import org.apache.streampark.console.core.service.SettingService;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -35,8 +38,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.Constants;
 
 import java.io.File;
@@ -198,15 +199,15 @@ public class Project implements Serializable {
       }
     }
 
-    StringBuffer cmdBuffer = new StringBuffer(mvn).append(" clean package -DskipTests ");
+    StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
     if (StringUtils.isNotEmpty(this.buildArgs)) {
       cmdBuffer.append(this.buildArgs.trim());
     }
 
-    Setting setting = SettingService.SETTINGS.get(CommonConfig.MAVEN_SETTINGS_PATH());
-    if (setting != null) {
-      cmdBuffer.append(" --settings ").append(setting.getSettingValue());
+    String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
+    if (StringUtils.isNotEmpty(setting)) {
+      cmdBuffer.append(" --settings ").append(setting);
     }
 
     return cmdBuffer.toString();

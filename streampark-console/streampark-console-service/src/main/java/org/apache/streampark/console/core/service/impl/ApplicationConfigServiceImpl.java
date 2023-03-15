@@ -209,7 +209,9 @@ public class ApplicationConfigServiceImpl
   public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
     Page<ApplicationConfig> page =
         new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
-    return this.baseMapper.pageByAppId(page, config.getAppId());
+    IPage<ApplicationConfig> configList = this.baseMapper.pageByAppId(page, config.getAppId());
+    fillEffectiveField(config.getAppId(), configList.getRecords());
+    return configList;
   }
 
   @Override
@@ -220,16 +222,7 @@ public class ApplicationConfigServiceImpl
             .orderByDesc(ApplicationConfig::getVersion);
 
     List<ApplicationConfig> configList = this.baseMapper.selectList(queryWrapper);
-    ApplicationConfig effective = getEffective(application.getId());
-
-    if (effective != null) {
-      for (ApplicationConfig config : configList) {
-        if (config.getId().equals(effective.getId())) {
-          config.setEffective(true);
-          break;
-        }
-      }
-    }
+    fillEffectiveField(application.getId(), configList);
     return configList;
   }
 
@@ -258,5 +251,18 @@ public class ApplicationConfigServiceImpl
   public void removeApp(Long appId) {
     baseMapper.delete(
         new LambdaQueryWrapper<ApplicationConfig>().eq(ApplicationConfig::getAppId, appId));
+  }
+
+  private void fillEffectiveField(Long id, List<ApplicationConfig> configList) {
+    ApplicationConfig effective = getEffective(id);
+
+    if (effective != null) {
+      for (ApplicationConfig config : configList) {
+        if (config.getId().equals(effective.getId())) {
+          config.setEffective(true);
+          break;
+        }
+      }
+    }
   }
 }

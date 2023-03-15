@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -44,9 +43,8 @@ public class LogClientService {
           lines.forEach(line -> builder.append(line).append("\r\n"));
           return builder.toString();
         }
-      } else {
-        throw new FileNotFoundException("file path: " + path + " not exists ");
       }
+      return null;
     } catch (Exception e) {
       throw new ApiDetailException("roll view log error: " + e);
     }

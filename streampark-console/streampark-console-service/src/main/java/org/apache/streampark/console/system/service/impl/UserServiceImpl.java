@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -29,13 +29,14 @@ import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.UserService;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -74,7 +75,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     page.setSize(request.getPageSize());
     IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
 
-    AssertUtils.state(resPage != null);
+    Utils.notNull(resPage);
     if (resPage.getTotal() == 0) {
       resPage.setRecords(Collections.emptyList());
     }
@@ -138,14 +139,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Transactional(rollbackFor = Exception.class)
   public void updatePassword(User userParam) {
     User user = getById(userParam.getUserId());
-    if (user == null) {
-      throw new ApiAlertException("update password failed, user is null");
-    }
+    ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
 
     String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
-    if (!StringUtils.equals(user.getPassword(), saltPassword)) {
-      throw new ApiAlertException("update password failed, old password error");
-    }
+    ApiAlertException.throwIfFalse(
+        StringUtils.equals(user.getPassword(), saltPassword),
+        "Old password error. Update password failed.");
 
     String salt = ShaHashUtils.getRandomSalt();
     String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
@@ -189,7 +188,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void setLastTeam(Long teamId, Long userId) {
     User user = getById(userId);
-    AssertUtils.checkArgument(user != null);
+    Utils.notNull(user);
     user.setLastTeamId(teamId);
     this.baseMapper.updateById(user);
   }
@@ -197,7 +196,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void clearLastTeam(Long userId, Long teamId) {
     User user = getById(userId);
-    AssertUtils.checkArgument(user != null);
+    Utils.notNull(user);
     if (!teamId.equals(user.getLastTeamId())) {
       return;
     }
@@ -238,7 +237,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
    */
   @Override
   public Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token) {
-    AssertUtils.checkNotNull(user);
     Map<String, Object> userInfo = new HashMap<>(8);
 
     // 1) token & expire

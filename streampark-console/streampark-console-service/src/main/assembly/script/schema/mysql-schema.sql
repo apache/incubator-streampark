@@ -88,7 +88,7 @@ create table `t_flink_app` (
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   `option_time` datetime default null,
-  `launch` tinyint default 1,
+  `release` tinyint default 1,
   `build` tinyint default 1,
   `start_time` datetime default null,
   `end_time` datetime default null,
@@ -212,7 +212,7 @@ create table `t_flink_savepoint` (
   `app_id` bigint not null,
   `chk_id` bigint default null,
   `type` tinyint default null,
-  `path` varchar(255) collate utf8mb4_general_ci default null,
+  `path` varchar(1024) collate utf8mb4_general_ci default null,
   `latest` tinyint not null default 1,
   `trigger_time` datetime default null,
   `create_time` datetime not null default current_timestamp comment 'create time',
@@ -492,5 +492,32 @@ create table `t_alert_config` (
   index `inx_alert_user` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
+-- ----------------------------
+-- Table of t_external_link
+-- ----------------------------
+drop table if exists `t_external_link`;
+CREATE TABLE `t_external_link` (
+  `id` bigint not null auto_increment primary key,
+  `badge_label` varchar(100) collate utf8mb4_general_ci default null,
+  `badge_name` varchar(100) collate utf8mb4_general_ci default null,
+  `badge_color` varchar(100) collate utf8mb4_general_ci default null,
+  `link_url` varchar(1000) collate utf8mb4_general_ci default null,
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
+  `modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'modify time'
+) engine = innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+-- ----------------------------
+-- table structure for t_yarn_queue
+-- ----------------------------
+drop table if exists `t_yarn_queue`;
+create table `t_yarn_queue` (
+  `id` bigint not null primary key auto_increment comment 'queue id',
+  `team_id` bigint not null comment 'team id',
+  `queue_label` varchar(255) collate utf8mb4_general_ci not null comment 'queue label expression',
+  `description` varchar(512) collate utf8mb4_general_ci default null comment 'description of the queue label',
+  `create_time` datetime not null default current_timestamp comment 'create time',
+  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+   unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree
+) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
 set foreign_key_checks = 1;

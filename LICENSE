@@ -199,3 +199,23 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+
+========================================================================
+Apache 2.0 licenses
+========================================================================
+
+The following file are provided under the Apache 2.0 License.
+
+streampark-console/streampark-console-webapp/package.json
+streampark-console/streampark-console-webapp/tsconfig.json
+streampark-console/streampark-console-webapp/public/favicon.ico
+streampark-console/streampark-console-webapp/src/assets/*
+
+
+The following components are provided under the Apache License. See project link for details.
+The text of each license is the standard Apache 2.0 license.
+
+mvnw files from https://github.com/apache/maven-wrapper Apache 2.0
+streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath.sh from https://github.com/apache/tomcat

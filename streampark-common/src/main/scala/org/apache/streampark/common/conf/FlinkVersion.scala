@@ -36,7 +36,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
 
   private[this] lazy val FLINK_VERSION_PATTERN = Pattern.compile("^Version: (.*), Commit ID: (.*)$")
 
-  private[this] lazy val FLINK_SCALA_VERSION_PATTERN = Pattern.compile("^flink-dist_(.*)-(.*).jar$")
+  private[this] lazy val FLINK_SCALA_VERSION_PATTERN = Pattern.compile("^flink-dist_(.*)-[0-9].*.jar$")
 
   lazy val scalaVersion: String = {
     val matcher = FLINK_SCALA_VERSION_PATTERN.matcher(flinkDistJar.getName)

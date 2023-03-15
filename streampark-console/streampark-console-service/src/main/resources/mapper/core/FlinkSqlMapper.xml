@@ -48,4 +48,5 @@
         where s.app_id = a.id
         and a.team_id = #{teamId}
     </select>
+
 </mapper>

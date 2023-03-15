@@ -20,7 +20,7 @@ import {
   AppStateEnum,
   ExecModeEnum,
   FailoverStrategyEnum,
-  LaunchStateEnum,
+  ReleaseStateEnum,
 } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
@@ -62,7 +62,7 @@ export const getAppColumns = (): BasicColumn[] => [
       { text: t('flink.app.runStatusOptions.terminated'), value: String(AppStateEnum.TERMINATED) },
     ],
   },
-  { title: t('flink.app.launchBuild'), dataIndex: 'launch', width: 220 },
+  { title: t('flink.app.releaseBuild'), dataIndex: 'release', width: 220 },
 ];
 
 /* Get diff editor configuration */
@@ -131,10 +131,10 @@ export const cpTriggerAction = [
   { label: 'restart', value: FailoverStrategyEnum.RESTART },
 ];
 
-export const launchTitleMap = {
-  [LaunchStateEnum.FAILED]: 'launch failed',
-  [LaunchStateEnum.NEED_LAUNCH]: 'current job need relaunch',
-  [LaunchStateEnum.LAUNCHING]: 'launching',
-  [LaunchStateEnum.NEED_RESTART]: 'launch finished,need restart',
-  [LaunchStateEnum.NEED_ROLLBACK]: 'application is rollbacked,need relaunch',
+export const releaseTitleMap = {
+  [ReleaseStateEnum.FAILED]: 'release failed',
+  [ReleaseStateEnum.NEED_RELEASE]: 'current job need release',
+  [ReleaseStateEnum.RELEASING]: 'releasing',
+  [ReleaseStateEnum.NEED_RESTART]: 'release finished,need restart',
+  [ReleaseStateEnum.NEED_ROLLBACK]: 'application is rollbacked,need release',
 };

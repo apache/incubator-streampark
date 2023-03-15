@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
@@ -33,12 +32,15 @@ import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.LaunchState;
+import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.enums.ResourceFrom;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
+import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -51,7 +53,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 
@@ -111,8 +112,9 @@ public class Application implements Serializable {
   private String k8sNamespace = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE();
 
   private Integer state;
-  /** task launch status */
-  private Integer launch;
+  /** task release status */
+  @TableField("`release`")
+  private Integer release;
 
   /** determine if a task needs to be built */
   private Boolean build;
@@ -133,7 +135,10 @@ public class Application implements Serializable {
   private String module;
 
   private String options;
+
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String hotParams;
+
   private Integer resolveOrder;
   private Integer executionMode;
   private String dynamicProperties;
@@ -310,13 +315,8 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
-  public LaunchState getLaunchState() {
-    return LaunchState.of(state);
-  }
-
-  @JsonIgnore
-  public void setLaunchState(LaunchState launchState) {
-    this.launch = launchState.get();
+  public ReleaseState getReleaseState() {
+    return ReleaseState.of(release);
   }
 
   @JsonIgnore
@@ -465,7 +465,7 @@ public class Application implements Serializable {
 
   @JsonIgnore
   public boolean isNeedRollback() {
-    return LaunchState.NEED_ROLLBACK.get() == this.getLaunch();
+    return ReleaseState.NEED_ROLLBACK.get() == this.getRelease();
   }
 
   @JsonIgnore
@@ -595,16 +595,21 @@ public class Application implements Serializable {
 
   @SneakyThrows
   public void updateHotParams(Application appParam) {
+    if (appParam != this) {
+      this.hotParams = null;
+    }
     ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
     Map<String, String> hotParams = new HashMap<>(0);
-    if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
-      if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
-        hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
-      }
+    if (needFillYarnQueueLabel(executionModeEnum)) {
+      hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
     }
     if (!hotParams.isEmpty()) {
       this.setHotParams(JacksonUtils.write(hotParams));
     }
+  }
+
+  private boolean needFillYarnQueueLabel(ExecutionMode mode) {
+    return ExecutionMode.YARN_PER_JOB.equals(mode) || ExecutionMode.YARN_APPLICATION.equals(mode);
   }
 
   @Data

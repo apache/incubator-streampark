@@ -17,9 +17,11 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.console.base.domain.Constant;
+import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
@@ -35,6 +37,7 @@ import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -170,11 +173,11 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
   public void rollback(Application application) {
     FlinkSql sql = getCandidate(application.getId(), CandidateType.HISTORY);
-    AssertUtils.state(sql != null);
+    Utils.notNull(sql);
     try {
       // check and backup current job
       FlinkSql effectiveSql = getEffective(application.getId(), false);
-      AssertUtils.state(effectiveSql != null);
+      Utils.notNull(effectiveSql);
       // rollback history sql
       backUpService.rollbackFlinkSql(application, sql);
     } catch (Exception e) {
@@ -199,8 +202,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
             }
             return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result);
           } catch (Throwable e) {
-            log.error(
-                "verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
+            log.error("verifySql invocationTargetException: {}", Utils.stringifyException(e));
           }
           return null;
         });
@@ -209,5 +211,24 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   @Override
   public List<FlinkSql> getByTeamId(Long teamId) {
     return this.baseMapper.getByTeamId(teamId);
+  }
+
+  @Override
+  public IPage<FlinkSql> page(Long appId, RestRequest request) {
+    Page<FlinkSql> page =
+        new MybatisPager<FlinkSql>().getPage(request, "version", Constant.ORDER_DESC);
+    LambdaQueryWrapper<FlinkSql> queryWrapper =
+        new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
+    IPage<FlinkSql> sqlList = this.baseMapper.selectPage(page, queryWrapper);
+    FlinkSql effectiveSql = baseMapper.getEffective(appId);
+    if (effectiveSql != null) {
+      for (FlinkSql sql : sqlList.getRecords()) {
+        if (sql.getId().equals(effectiveSql.getId())) {
+          sql.setEffective(true);
+          break;
+        }
+      }
+    }
+    return sqlList;
   }
 }

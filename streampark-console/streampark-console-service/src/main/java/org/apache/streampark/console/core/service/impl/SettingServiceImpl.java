@@ -24,10 +24,11 @@ import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.mapper.SettingMapper;
 import org.apache.streampark.console.core.service.SettingService;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
@@ -71,9 +72,14 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       this.update(entity, queryWrapper);
 
       String settingKey = setting.getSettingKey();
+      if (CommonConfig.MAVEN_SETTINGS_PATH().key().equals(settingKey)) {
+        InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), value);
+      }
+
       if (CommonConfig.MAVEN_REMOTE_URL().key().equals(settingKey)) {
         InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), value);
       }
+
       if (CommonConfig.MAVEN_AUTH_USER().key().equals(settingKey)) {
         InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), value);
       }
@@ -82,9 +88,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       }
 
       Optional<Setting> optional = Optional.ofNullable(SETTINGS.get(setting.getSettingKey()));
-      if (optional.isPresent()) {
-        optional.get().setSettingValue(value);
-      }
+      optional.ifPresent(x -> x.setSettingValue(value));
       return true;
     } catch (Exception e) {
       return false;

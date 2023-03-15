@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.Utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanMap;
@@ -451,7 +451,7 @@ public final class CommonUtils implements Serializable {
   }
 
   public static <T> T[] arrayRemoveElements(T[] array, T... elem) {
-    AssertUtils.notNull(array);
+    Utils.notNull(array);
     List<T> arrayList = new ArrayList<>(0);
     Collections.addAll(arrayList, array);
     if (isEmpty(elem)) {
@@ -464,7 +464,7 @@ public final class CommonUtils implements Serializable {
   }
 
   public static <T> T[] arrayRemoveIndex(T[] array, int... index) {
-    AssertUtils.notNull(array);
+    Utils.notNull(array);
     for (int j : index) {
       if (j < 0 || j > array.length - 1) {
         throw new IndexOutOfBoundsException("index error.@" + j);
@@ -481,7 +481,7 @@ public final class CommonUtils implements Serializable {
   }
 
   public static <T> T[] arrayInsertIndex(T[] array, int index, T t) {
-    AssertUtils.notNull(array);
+    Utils.notNull(array);
     List<T> arrayList = new ArrayList<T>(array.length + 1);
     if (index == 0) {
       arrayList.add(t);

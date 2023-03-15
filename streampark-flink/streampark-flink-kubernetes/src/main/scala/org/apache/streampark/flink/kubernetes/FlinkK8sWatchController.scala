@@ -18,11 +18,8 @@
 package org.apache.streampark.flink.kubernetes
 
 import java.util.concurrent.TimeUnit
-
 import scala.collection.JavaConversions._
-
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
-
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.model._
 
@@ -63,8 +60,7 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
    * determines whether the specified TrackId is in the trace
    */
   def isInWatching(trackId: TrackId): Boolean = {
-    if (!trackId.isLegal) false;
-    else {
+    if (!trackId.isLegal) false; else {
       trackIds.get(trackId) != null
     }
   }
@@ -87,18 +83,16 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
   /**
    * collect the aggregation of flink metrics that in tracking
    */
-  def collectAccMetric(): FlinkMetricCV = {
+  def collectAccGroupMetric(groupId: String): FlinkMetricCV = {
     // get cluster metrics that in tracking
+    val empty = FlinkMetricCV.empty(groupId)
     getActiveWatchingIds() match {
-      case k if k.isEmpty => FlinkMetricCV.empty
+      case k if k.isEmpty => empty
       case k =>
-        flinkMetrics.getAll(for (elem <- k) yield {
-          ClusterKey.of(elem)
-        }) match {
-          case m if m.isEmpty => FlinkMetricCV.empty
-          case m =>
-            // aggregate metrics
-            m.values.fold(FlinkMetricCV.empty)((x, y) => x + y)
+        flinkMetrics.getAll(for (elem <- k) yield ClusterKey.of(elem))
+        match {
+          case m if m.isEmpty => empty
+          case m => m.values.fold(empty)((x, y) => x + y)
         }
     }
   }

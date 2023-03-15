@@ -24,7 +24,7 @@
   >
     <template #title>
       <Icon icon="ant-design:code-outlined" />
-      Variable Info
+      {{ t('flink.variable.variableInfoTitle') }}
     </template>
     <Description class="variable-desc" :column="1" :data="variableInfo" :schema="roleColumn" />
   </BasicDrawer>
@@ -42,6 +42,7 @@
   import { useDrawerInner, BasicDrawer } from '/@/components/Drawer';
   import { fetchVariableInfo } from '/@/api/flink/variable';
   import { usePermission } from '/@/hooks/web/usePermission';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   const variableInfo = ref<Recordable>({});
   const showVariableDetail = ref(false);
@@ -50,6 +51,7 @@
   const [registerDrawer, { closeDrawer }] = useDrawerInner((data: Recordable) => {
     data && onReceiveModalData(data);
   });
+  const { t } = useI18n();
 
   function onReceiveModalData(data) {
     realVariable = '';
@@ -77,11 +79,14 @@
   const { hasPermission } = usePermission();
   const roleColumn: DescItem[] = [
     {
-      label: generatedLabelIcon('ant-design:code-outlined', 'Variable Code'),
+      label: generatedLabelIcon('ant-design:code-outlined', t('flink.variable.table.variableCode')),
       field: 'variableCode',
     },
     {
-      label: generatedLabelIcon('ant-design:down-circle-outlined', 'Variable Value'),
+      label: generatedLabelIcon(
+        'ant-design:down-circle-outlined',
+        t('flink.variable.table.variableValue'),
+      ),
       field: 'variableValue',
       render(value, data) {
         const renderIcon = () => {
@@ -104,19 +109,25 @@
       },
     },
     {
-      label: generatedLabelIcon(`ant-design:user-outlined`, 'Create User'),
+      label: generatedLabelIcon(`ant-design:user-outlined`, t('flink.variable.table.createUser')),
       field: 'creatorName',
     },
     {
-      label: generatedLabelIcon(`ant-design:clock-circle-outlined`, 'Create Time'),
+      label: generatedLabelIcon(
+        `ant-design:clock-circle-outlined`,
+        t('flink.variable.table.createTime'),
+      ),
       field: 'createTime',
     },
     {
-      label: generatedLabelIcon('ant-design:mail-outlined', 'Modify Time'),
+      label: generatedLabelIcon('ant-design:mail-outlined', t('flink.variable.table.modifyTime')),
       field: 'modifyTime',
     },
     {
-      label: generatedLabelIcon('ant-design:message-outlined', 'Description'),
+      label: generatedLabelIcon(
+        'ant-design:message-outlined',
+        t('flink.variable.table.description'),
+      ),
       field: 'description',
     },
   ];

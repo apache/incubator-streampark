@@ -71,8 +71,6 @@ public interface ApplicationService extends IService<Application> {
 
   Map<String, Serializable> dashboard(Long teamId);
 
-  void tailMvnDownloading(Long id);
-
   String upload(MultipartFile file) throws Exception;
 
   /** set the latest to Effective, it will really become the current effective */
@@ -86,7 +84,7 @@ public interface ApplicationService extends IService<Application> {
 
   boolean checkAlter(Application application);
 
-  void updateLaunch(Application application);
+  void updateRelease(Application application);
 
   List<Application> getByProjectId(Long id);
 

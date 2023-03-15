@@ -17,10 +17,11 @@
 
 package org.apache.streampark.console.base.util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

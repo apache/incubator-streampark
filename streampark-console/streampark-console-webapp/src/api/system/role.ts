@@ -18,16 +18,12 @@ import { defHttp } from '/@/utils/http/axios';
 import { RoleParam } from './model/roleModel';
 
 enum Api {
-  RoleUserList = '/role/listByUser',
   AddRole = '/role/post',
   UpdateRole = '/role/update',
   DeleteRole = '/role/delete',
   CHECK_NAME = '/role/check/name',
 }
 
-export function getRoleListByUser(params?) {
-  return defHttp.post({ url: Api.RoleUserList, params });
-}
 /**
  *
  * @param {RoleParam} data role param
@@ -56,8 +52,8 @@ export function fetchRoleDelete({ roleId }: { roleId: string }): Promise<boolean
 }
 /**
  * Check if the role name exists
- * @param params
  * @returns {Promise<boolean>}
+ * @param data
  */
 export function fetchCheckName(data: { roleName: string }): Promise<boolean> {
   return defHttp.post({ url: Api.CHECK_NAME, data });

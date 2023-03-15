@@ -46,7 +46,6 @@ enum APP_API {
   ROLLBACK = '/flink/app/rollback',
   REVOKE = '/flink/app/revoke',
   OPTION_LOG = '/flink/app/optionlog',
-  DOWN_LOG = '/flink/app/downlog',
   CHECK_JAR = '/flink/app/checkjar',
   VERIFY_SCHEMA = '/flink/app/verifySchema',
   CHECK_SAVEPOINT_PATH = '/flink/app/checkSavepointPath',
@@ -88,6 +87,11 @@ export function fetchAppRecord(data): Promise<AppListResponse> {
 export function fetchAppRemove(id: string): Promise<boolean> {
   return defHttp.post({ url: APP_API.DELETE, data: { id } });
 }
+
+export function fetchRemoveBackup(id: string): Promise<boolean> {
+  return defHttp.post({ url: APP_API.DELETE_BAK, data: { id } });
+}
+
 /**
  * get yarn address
  * @returns {Promise<string>}

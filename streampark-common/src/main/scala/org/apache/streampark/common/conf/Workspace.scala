@@ -17,8 +17,8 @@
 package org.apache.streampark.common.conf
 
 import java.net.URI
-
 import org.apache.streampark.common.enums.StorageType
+import org.apache.streampark.common.util.Utils.StringCasts
 import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
 
 object Workspace {
@@ -72,8 +72,8 @@ case class Workspace(storageType: StorageType) {
     (s, v) match {
       case (null, null) => d
       case (null, b) => b
-      case (a, null) => Converter.convert(a, option.classType).asInstanceOf[T]
-      case (a, b) => if (b == d) Converter.convert(a, option.classType).asInstanceOf[T] else b
+      case (a, null) => a.cast[T](option.classType)
+      case (a, b) => if (b == d) a.cast[T](option.classType) else b
     }
   }
 

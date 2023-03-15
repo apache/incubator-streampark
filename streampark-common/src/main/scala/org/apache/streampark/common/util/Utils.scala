@@ -16,23 +16,48 @@
  */
 package org.apache.streampark.common.util
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException}
+import java.io.{
+  BufferedInputStream,
+  File,
+  FileInputStream,
+  IOException,
+  PrintWriter,
+  StringWriter
+}
+import java.lang.{
+  Boolean => JavaBool,
+  Double => JavaDouble,
+  Float => JavaFloat,
+  Integer => JavaInt,
+  Long => JavaLong,
+  Short => JavaShort,
+  Byte => JavaByte
+}
 import java.net.URL
-import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
+import java.util.{Properties, UUID, jar, Collection => JavaCollection, Map => JavaMap}
 import java.util.jar.{JarFile, JarInputStream}
-
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
-
 import org.apache.commons.lang3.StringUtils
 
 object Utils {
 
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
+  def notNull(obj: Any, message: String): Unit = {
+    if (obj == null) {
+      throw new NullPointerException(message)
+    }
+  }
+
+  def notNull(obj: Any): Unit = {
+    notNull(obj, "this argument must not be null")
+  }
+
   def notEmpty(elem: Any): Boolean = {
     elem match {
       case null => false
+      case x if x.isInstanceOf[Array[_]] => elem.asInstanceOf[Array[_]].nonEmpty
       case x if x.isInstanceOf[CharSequence] => elem.toString.trim.nonEmpty
       case x if x.isInstanceOf[Traversable[_]] => x.asInstanceOf[Traversable[_]].nonEmpty
       case x if x.isInstanceOf[Iterable[_]] => x.asInstanceOf[Iterable[_]].nonEmpty
@@ -44,13 +69,19 @@ object Utils {
 
   def isEmpty(elem: Any): Boolean = !notEmpty(elem)
 
-  def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
-
-  def require(requirement: Boolean, message: String): Unit = {
-    if (!requirement) {
-      throw new IllegalArgumentException(s"requirement failed: $message")
+  def required(expression: Boolean): Unit = {
+    if (!expression) {
+      throw new IllegalArgumentException
     }
   }
+
+  def required(expression: Boolean, errorMessage: Any): Unit = {
+    if (!expression) {
+      throw new IllegalArgumentException(s"requirement failed: ${errorMessage.toString}")
+    }
+  }
+
+  def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
   @throws[IOException]
   def checkJarFile(jar: URL): Unit = {
@@ -133,6 +164,45 @@ object Utils {
       result = 31 * result + hash
     }
     result
+  }
+
+  def stringifyException(e: Throwable): String = {
+    if (e == null) "(null)" else {
+      try {
+        val stm = new StringWriter
+        val wrt = new PrintWriter(stm)
+        e.printStackTrace(wrt)
+        wrt.close()
+        stm.toString
+      } catch {
+        case _: Throwable => e.getClass.getName + " (error while printing stack trace)"
+      }
+    }
+  }
+
+  implicit class StringCasts(v: String) {
+    def cast[T](classType: Class[_]): T = {
+      classType match {
+        case c if c == classOf[String] => v.asInstanceOf[T]
+        case c if c == classOf[Byte] => v.toByte.asInstanceOf[T]
+        case c if c == classOf[Int] => v.toInt.asInstanceOf[T]
+        case c if c == classOf[Long] => v.toLong.asInstanceOf[T]
+        case c if c == classOf[Float] => v.toFloat.asInstanceOf[T]
+        case c if c == classOf[Double] => v.toDouble.asInstanceOf[T]
+        case c if c == classOf[Short] => v.toShort.asInstanceOf[T]
+        case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
+        case c if c == classOf[String] => v.asInstanceOf[T]
+        case c if c == classOf[JavaByte] => v.toByte.asInstanceOf[T]
+        case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaFloat] => JavaFloat.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaDouble] => JavaDouble.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaShort] => JavaShort.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaBool] => JavaBool.valueOf(v).asInstanceOf[T]
+        case _ =>
+          throw new IllegalArgumentException(s"Unsupported type: $classType")
+      }
+    }
   }
 
 }

@@ -29,8 +29,8 @@ export default {
   form: {
     userName: '用户名',
     required: '用户名为必填项',
-    min: '用户名长度不能少于 4 个字符',
-    max: '超过 8 个字符的最大长度限制',
+    min: '用户名长度不能少于 2 个字符',
+    max: '超过 20 个字符的最大长度限制',
     exist: '抱歉，用户名已存在',
     nickName: '昵称',
     userType: '用户类型',

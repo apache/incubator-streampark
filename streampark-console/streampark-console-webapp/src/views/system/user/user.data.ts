@@ -88,11 +88,11 @@ export const formSchema = (formType: string): FormSchema[] => {
       component: 'Input',
       rules: [
         { required: isCreate, message: t('system.user.form.required') },
-        { min: 4, message: t('system.user.form.min') },
+        { min: 2, message: t('system.user.form.min') },
         { max: 20, message: t('system.user.form.max') },
         {
           validator: async (_, value) => {
-            if (!isCreate || !value || value.length < 4 || value.length > 20) {
+            if (!isCreate || !value || value.length < 2 || value.length > 20) {
               return Promise.resolve();
             }
             const res = await checkUserName({ username: value });

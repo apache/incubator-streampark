@@ -26,18 +26,20 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import {
   AppTypeEnum,
   ExecModeEnum,
-  LaunchStateEnum,
+  ReleaseStateEnum,
   OptionStateEnum,
   AppStateEnum,
   JobTypeEnum,
 } from '/@/enums/flinkEnum';
 import { usePermission } from '/@/hooks/web/usePermission';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { isFunction, isObject } from '/@/utils/is';
 
 // Create form configurations and operation functions in the application table
 export const useAppTableAction = (
   openStartModal: Fn,
   openStopModal: Fn,
+  openSavepointModal: Fn,
   openLogModal: Fn,
   openBuildDrawer: Fn,
   handlePageDataReload: Fn,
@@ -51,7 +53,7 @@ export const useAppTableAction = (
   const { createMessage } = useMessage();
   const { hasPermission } = usePermission();
   const {
-    handleCheckLaunchApp,
+    handleCheckReleaseApp,
     handleAppCheckStart,
     handleCanStop,
     handleForcedStop,
@@ -59,34 +61,33 @@ export const useAppTableAction = (
     handleMapping,
     users,
   } = useFlinkApplication(openStartModal);
-
-  /* Operation button */
-  function getTableActions(record: AppListRecord, currentPgaeNo: any): ActionItem[] {
+  /* Operation button list */
+  function getActionList(record: AppListRecord, currentPageNo: number): ActionItem[] {
     return [
       {
         tooltip: { title: t('flink.app.operation.edit') },
         auth: 'app:update',
         icon: 'clarity:note-edit-line',
-        onClick: handleEdit.bind(null, record, currentPgaeNo),
+        onClick: handleEdit.bind(null, record, currentPageNo),
       },
       {
-        tooltip: { title: t('flink.app.operation.launch') },
+        tooltip: { title: t('flink.app.operation.release') },
         ifShow:
           [
-            LaunchStateEnum.FAILED,
-            LaunchStateEnum.NEED_LAUNCH,
-            LaunchStateEnum.NEED_ROLLBACK,
-          ].includes(record.launch) && record['optionState'] == OptionStateEnum.NONE,
-        auth: 'app:launch',
+            ReleaseStateEnum.FAILED,
+            ReleaseStateEnum.NEED_RELEASE,
+            ReleaseStateEnum.NEED_ROLLBACK,
+          ].includes(record.release) && record['optionState'] == OptionStateEnum.NONE,
+        auth: 'app:release',
         icon: 'ant-design:cloud-upload-outlined',
-        onClick: handleCheckLaunchApp.bind(null, record),
+        onClick: handleCheckReleaseApp.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.operation.launchDetail') },
+        tooltip: { title: t('flink.app.operation.releaseDetail') },
         ifShow:
-          [LaunchStateEnum.FAILED, LaunchStateEnum.LAUNCHING].includes(record.launch) ||
-          record['optionState'] == OptionStateEnum.LAUNCHING,
-        auth: 'app:launch',
+          [ReleaseStateEnum.FAILED, ReleaseStateEnum.RELEASING].includes(record.release) ||
+          record['optionState'] == OptionStateEnum.RELEASING,
+        auth: 'app:release',
         icon: 'ant-design:container-outlined',
         onClick: () => openBuildDrawer(true, { appId: record.id }),
       },
@@ -104,6 +105,14 @@ export const useAppTableAction = (
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
+      },
+      {
+        tooltip: { title: t('flink.app.operation.savepoint') },
+        ifShow:
+          record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
+        auth: 'savepoint:trigger',
+        icon: 'ant-design:camera-outlined',
+        onClick: handleSavepoint.bind(null, record),
       },
       {
         tooltip: { title: t('flink.app.operation.detail') },
@@ -127,36 +136,6 @@ export const useAppTableAction = (
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleForcedStop.bind(null, record),
       },
-    ];
-  }
-  /* Click to edit */
-  function handleEdit(app: AppListRecord, currentPageNo: number) {
-    // Record the current page number
-    sessionStorage.setItem('appPageNo', String(currentPageNo || 1));
-    flinkAppStore.setApplicationId(app.id);
-    if (app.appType == AppTypeEnum.STREAMPARK_FLINK) {
-      // jobType( 1 custom code 2: flinkSQL)
-      router.push({ path: '/flink/app/edit_streampark', query: { appId: app.id } });
-    } else if (app.appType == AppTypeEnum.APACHE_FLINK) {
-      //Apache Flink
-      router.push({ path: '/flink/app/edit_flink', query: { appId: app.id } });
-    }
-  }
-
-  /* Click for details */
-  function handleDetail(app: AppListRecord) {
-    flinkAppStore.setApplicationId(app.id);
-    router.push({ path: '/flink/app/detail', query: { appId: app.id } });
-  }
-  // click stop application
-  function handleCancel(app: AppListRecord) {
-    if (!optionApps.stopping.get(app.id) || app['optionState'] == OptionStateEnum.NONE) {
-      openStopModal(true, { application: app });
-    }
-  }
-  /* pull down button */
-  function getActionDropdown(record: AppListRecord): ActionItem[] {
-    return [
       {
         label: t('flink.app.operation.copy'),
         auth: 'app:copy',
@@ -198,6 +177,70 @@ export const useAppTableAction = (
         color: 'error',
       },
     ];
+  }
+  /** action button is show */
+  function actionIsShow(tableActionItem: ActionItem): boolean | undefined {
+    const { auth, ifShow } = tableActionItem;
+    let flag = isFunction(ifShow) ? ifShow(tableActionItem) : ifShow;
+    /** Judgment auth when not set or allowed to display */
+    if ((flag || flag === undefined) && auth) flag = hasPermission(auth);
+    return flag;
+  }
+
+  function getTableActions(
+    record: AppListRecord,
+    currentPageNo: any,
+  ): { actions: ActionItem[]; dropDownActions: ActionItem[] } {
+    const tableAction = getActionList(record, currentPageNo).filter((item: ActionItem) =>
+      actionIsShow(item),
+    );
+    const actions = tableAction.splice(0, 3).map((item: ActionItem) => {
+      if (item.label) {
+        item.tooltip = {
+          title: item.label,
+        };
+        delete item.label;
+      }
+      return item;
+    });
+    return {
+      actions,
+      dropDownActions: tableAction.map((item: ActionItem) => {
+        if (!item.label && isObject(item.tooltip)) item.label = item.tooltip?.title || '';
+        return item;
+      }),
+    };
+  }
+  /* Click to edit */
+  function handleEdit(app: AppListRecord, currentPageNo: number) {
+    // Record the current page number
+    sessionStorage.setItem('appPageNo', String(currentPageNo || 1));
+    flinkAppStore.setApplicationId(app.id);
+    if (app.appType == AppTypeEnum.STREAMPARK_FLINK) {
+      // jobType( 1 custom code 2: flinkSQL)
+      router.push({ path: '/flink/app/edit_streampark', query: { appId: app.id } });
+    } else if (app.appType == AppTypeEnum.APACHE_FLINK) {
+      //Apache Flink
+      router.push({ path: '/flink/app/edit_flink', query: { appId: app.id } });
+    }
+  }
+
+  /* Click for details */
+  function handleDetail(app: AppListRecord) {
+    flinkAppStore.setApplicationId(app.id);
+    router.push({ path: '/flink/app/detail', query: { appId: app.id } });
+  }
+  // click savepoint for application
+  function handleSavepoint(app: AppListRecord) {
+    if (!optionApps.savepointing.get(app.id) || app['optionState'] == OptionStateEnum.NONE) {
+      openSavepointModal(true, { application: app });
+    }
+  }
+  // click stop application
+  function handleCancel(app: AppListRecord) {
+    if (!optionApps.stopping.get(app.id) || app['optionState'] == OptionStateEnum.NONE) {
+      openStopModal(true, { application: app });
+    }
   }
 
   /* Click to delete */
@@ -307,5 +350,5 @@ export const useAppTableAction = (
   onMounted(() => {
     handleInitTagsOptions();
   });
-  return { getTableActions, getActionDropdown, formConfig };
+  return { getTableActions, formConfig };
 };

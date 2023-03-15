@@ -20,12 +20,13 @@ package org.apache.streampark.console.core.bean;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.AlertConfig;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;

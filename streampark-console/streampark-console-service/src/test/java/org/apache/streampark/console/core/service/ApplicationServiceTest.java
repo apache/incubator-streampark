@@ -17,34 +17,34 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.StreamParkConsoleBootstrap;
+import org.apache.streampark.console.SpringTestBase;
 import org.apache.streampark.console.core.entity.Application;
 
 import org.apache.http.entity.ContentType;
+
+import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.Path;
 import java.util.Date;
 
-/** org.apache.streampark.console.core.service.ApplicationServiceTest */
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(
-    classes = StreamParkConsoleBootstrap.class,
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ApplicationServiceTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+/** org.apache.streampark.console.core.service.ApplicationServiceTest. */
+class ApplicationServiceTest extends SpringTestBase {
 
   @Autowired private ApplicationService applicationService;
 
   @Test
-  void revokeTest() {
+  void testRevoke() {
     Date now = new Date();
     Application app = new Application();
     app.setId(100001L);
@@ -54,7 +54,7 @@ class ApplicationServiceTest {
     app.setVersionId(1L);
     app.setK8sNamespace("default");
     app.setState(0);
-    app.setLaunch(2);
+    app.setRelease(2);
     app.setBuild(true);
     app.setRestartSize(0);
     app.setOptionState(0);
@@ -77,11 +77,12 @@ class ApplicationServiceTest {
     app.setDrain(false);
     app.setAllowNonRestored(false);
 
-    Assertions.assertDoesNotThrow(() -> applicationService.updateLaunch(app));
+    Assertions.assertDoesNotThrow(() -> applicationService.updateRelease(app));
   }
 
   @Test
-  void start() throws Exception {
+  @Disabled("We couldn't do integration test with external services or components.")
+  void testStart() throws Exception {
     Application application = new Application();
     application.setId(1304056220683497473L);
     application.setRestart(false);
@@ -92,14 +93,22 @@ class ApplicationServiceTest {
   }
 
   @Test
-  void uploadTest() throws Exception {
-    File file = new File(""); // specify the file path
+  void testUpload(@TempDir Path tempDir) throws Exception {
+    // specify the file path
+    File fileToStoreUploadFile =
+        new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
+    FileUtils.createFile(fileToStoreUploadFile.getAbsolutePath());
+
+    File fileToUpload = new File(tempDir.toFile().getAbsolutePath() + "/fileToUpload.jar");
+    FileUtils.createFile(fileToUpload.getAbsolutePath());
+    assertThat(fileToUpload).exists();
     MultipartFile mulFile =
         new MockMultipartFile(
-            "", // fileName (eg: streampark.jar)
-            "", // originalFilename (eg: path + fileName = /tmp/file/streampark.jar)
+            "test", // fileName (eg: streampark.jar)
+            fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
+            // /tmp/file/streampark.jar)
             ContentType.APPLICATION_OCTET_STREAM.toString(),
-            new FileInputStream(file));
+            new FileInputStream(fileToStoreUploadFile));
     applicationService.upload(mulFile);
   }
 }

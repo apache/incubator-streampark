@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.enums.UserType;
@@ -81,11 +80,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   @Override
   public void createTeam(Team team) {
     Team existedTeam = findByName(team.getTeamName());
-    if (existedTeam != null) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Team name [%s] was found, please rename and try again.", team.getTeamName()));
-    }
+    ApiAlertException.throwIfFalse(
+        existedTeam == null,
+        String.format(
+            "Team name [%s] exists already. Create team failed. Please rename and try again.",
+            team.getTeamName()));
     team.setId(null);
     team.setCreateTime(new Date());
     team.setModifyTime(team.getCreateTime());
@@ -129,8 +128,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
                 () ->
                     new IllegalArgumentException(
                         String.format("Team id [id=%s] not found", team.getId())));
-    AssertUtils.isTrue(
-        oldTeam.getTeamName().equals(team.getTeamName()), "Team name cannot be changed.");
+    ApiAlertException.throwIfFalse(
+        oldTeam.getTeamName().equals(team.getTeamName()),
+        "Team name can't be changed. Update team failed.");
     oldTeam.setDescription(team.getDescription());
     oldTeam.setModifyTime(new Date());
     updateById(oldTeam);
@@ -141,9 +141,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     User user =
         Optional.ofNullable(userService.getById(userId))
             .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        String.format("The userId [%s] not found", userId)));
+                () -> new ApiAlertException(String.format("The userId [%s] not found.", userId)));
     // Admin has the permission for all teams.
     if (UserType.ADMIN.equals(user.getUserType())) {
       return this.list();

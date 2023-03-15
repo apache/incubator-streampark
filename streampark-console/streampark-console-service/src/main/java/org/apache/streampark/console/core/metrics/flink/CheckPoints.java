@@ -20,11 +20,15 @@ package org.apache.streampark.console.core.metrics.flink;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.CheckPointType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class CheckPoints implements Serializable {
@@ -32,6 +36,14 @@ public class CheckPoints implements Serializable {
   private List<CheckPoint> history;
 
   private Latest latest;
+
+  @JsonIgnore
+  public List<CheckPoint> getLatestCheckpoint() {
+    if (Objects.isNull(latest)) {
+      return Collections.emptyList();
+    }
+    return latest.getLatestCheckpoint();
+  }
 
   @Data
   public static class CheckPoint implements Serializable {
@@ -82,5 +94,18 @@ public class CheckPoints implements Serializable {
   @Data
   public static class Latest implements Serializable {
     private CheckPoint completed;
+    private CheckPoint savepoint;
+
+    @JsonIgnore
+    public List<CheckPoint> getLatestCheckpoint() {
+      List<CheckPoint> checkPoints = new ArrayList<>();
+      if (Objects.nonNull(completed)) {
+        checkPoints.add(completed);
+      }
+      if (Objects.nonNull(savepoint)) {
+        checkPoints.add(savepoint);
+      }
+      return checkPoints;
+    }
   }
 }

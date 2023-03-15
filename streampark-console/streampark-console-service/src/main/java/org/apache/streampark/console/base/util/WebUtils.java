@@ -19,9 +19,10 @@ package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.common.conf.ConfigConst;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.stream.IntStream;

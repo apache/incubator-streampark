@@ -20,6 +20,7 @@ export default {
     alertSetting: 'Alert Setting',
     flinkHome: 'Flink Home',
     flinkCluster: 'Flink Cluster',
+    externalLink: 'External Link',
   },
   systemSettingItems: {
     mavenSetting: {
@@ -148,7 +149,6 @@ export default {
       clusterName: 'Please enter cluster name',
       executionMode: 'Please enter cluster name',
       versionId: 'please select Flink Version',
-      yarnQueue: 'Please enter yarn queue',
       addressRemoteMode: 'Please enter jobManager URL',
       addressNoRemoteMode: 'Please enter cluster address,  e.g: http://host:port',
       yarnSessionClusterId: 'Please enter Yarn Session cluster',
@@ -182,6 +182,30 @@ export default {
     view: {
       clusterId: 'ClusterId',
     },
+  },
+  externalLink: {
+    externalLinkSetting: 'External Link',
+    form: {
+      badgeLabel: 'Label',
+      badgeLabelPlaceholder: 'Please enter label',
+      badgeName: 'Name',
+      badgeNamePlaceholder: 'Please enter name',
+      badgeNameIsRequired: 'Name is required',
+      badgeColor: 'Color',
+      badgeColorIsRequired: 'Color is required',
+      badgePreview: 'Preview',
+      linkUrl: 'Link',
+      linkUrlPlaceholder: 'Please enter link url',
+      linkUrlIsRequired: 'Link is required',
+    },
+    operateMessage: {
+      createLinkSuccessful: 'Successfully create external link!',
+      createLinkFailed: 'Create external link failed!',
+      updateLinkSuccessful: 'Successfully update external link!',
+      updateLinkFailed: 'Update external link failed!',
+      operationFailed: 'Operation failed',
+    },
+    confDeleteTitle: 'Are you sure delete this link record',
   },
   env: {
     conf: 'Flink Conf',

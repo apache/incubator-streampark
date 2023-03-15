@@ -45,8 +45,8 @@ export function fetchTokenCreate(data: TokenCreateParam) {
 
 /**
  * change token status
- * @param {String} tokenId
  * @returns {Promise<boolean>}
+ * @param data
  */
 export function fetTokenStatusToggle(data: { tokenId: string }) {
   return defHttp.post<boolean>({ url: Api.ToggleTokenStatus, data });
@@ -54,8 +54,8 @@ export function fetTokenStatusToggle(data: { tokenId: string }) {
 
 /**
  * delete token
- * @param {string} tokenId
  * @returns {Promise<boolean>}
+ * @param data
  */
 export function fetchTokenDelete(data?: { tokenId: string }) {
   return defHttp.delete<boolean>({ url: Api.DeleteToken, data });

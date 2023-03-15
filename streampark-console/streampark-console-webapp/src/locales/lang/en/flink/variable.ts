@@ -16,6 +16,7 @@
  */
 export default {
   addVariable: 'Add Variable',
+  variableInfoTitle: 'Variable Info',
   modifyVariable: 'Modify Variable',
   deleteVariable: 'Delete Variable',
   deletePopConfirm: 'Are you sure delete this variable ?',
@@ -30,6 +31,10 @@ export default {
     variableValuePlaceholder: 'Please enter Variable Value',
     descriptionPlaceholder: 'Please enter description to search',
     depend: 'depend apps',
+    createUser: 'Create User',
+    createTime: 'Create Time',
+    modifyTime: 'Modify Time',
+    description: 'Description',
   },
   form: {
     descriptionMessage: 'exceeds maximum length limit of 100 characters',

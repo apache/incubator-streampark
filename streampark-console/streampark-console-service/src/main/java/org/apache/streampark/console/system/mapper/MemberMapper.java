@@ -18,11 +18,15 @@
 package org.apache.streampark.console.system.mapper;
 
 import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.User;
+
+import org.apache.ibatis.annotations.Param;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface MemberMapper extends BaseMapper<Member> {
 
@@ -43,4 +47,6 @@ public interface MemberMapper extends BaseMapper<Member> {
   Boolean deleteByRoleId(@Param("roleId") Long roleId);
 
   IPage<Member> findUsers(Page<Member> page, @Param("member") Member member);
+
+  List<User> findUsersNotInTeam(@Param("teamId") Long teamId);
 }

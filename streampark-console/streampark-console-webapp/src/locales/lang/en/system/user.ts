@@ -29,7 +29,7 @@ export default {
   form: {
     userName: 'User Name',
     required: 'username is required',
-    min: 'username length cannot be less than 4 characters',
+    min: 'username length cannot be less than 2 characters',
     max: 'exceeds maximum length limit of 20 characters',
     exist: 'Sorry the username already exists',
     nickName: 'Nick Name',

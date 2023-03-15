@@ -19,10 +19,13 @@ package org.apache.streampark.console.core.mapper;
 
 import org.apache.streampark.console.core.entity.Project;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface ProjectMapper extends BaseMapper<Project> {
 
@@ -33,4 +36,6 @@ public interface ProjectMapper extends BaseMapper<Project> {
   IPage<Project> page(Page<Project> page, @Param("project") Project project);
 
   Boolean existsByTeamId(@Param("teamId") Long teamId);
+
+  List<Project> selectByTeamId(@Param("teamId") Long teamId);
 }

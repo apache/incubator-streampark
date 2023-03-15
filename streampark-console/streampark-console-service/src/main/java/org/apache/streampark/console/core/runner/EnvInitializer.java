@@ -24,14 +24,15 @@ import org.apache.streampark.common.conf.InternalOption;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.SettingService;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -44,8 +45,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,7 +63,7 @@ public class EnvInitializer implements ApplicationRunner {
 
   @Autowired private SettingService settingService;
 
-  private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
+  private final Set<StorageType> initialized = new HashSet<>(2);
 
   private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
@@ -71,6 +74,12 @@ public class EnvInitializer implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) throws Exception {
+    Optional<String> profile =
+        Arrays.stream(context.getEnvironment().getActiveProfiles()).findFirst();
+    if ("test".equals(profile.orElse(null))) {
+      return;
+    }
+
     String appHome = WebUtils.getAppHome();
     if (appHome == null) {
       throw new ExceptionInInitializerError(
@@ -98,7 +107,7 @@ public class EnvInitializer implements ApplicationRunner {
         .forEach(
             key -> {
               InternalOption config = InternalConfigHolder.getConfig(key);
-              AssertUtils.state(config != null);
+              Utils.notNull(config);
               InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 
@@ -131,110 +140,110 @@ public class EnvInitializer implements ApplicationRunner {
     SystemPropertyUtils.set(key, value);
   }
 
-  /** @param storageType */
   public synchronized void storageInitialize(StorageType storageType) {
+
+    if (initialized.contains(storageType)) {
+      return;
+    }
 
     final String mkdirLog = "storage initialize, now mkdir [{}] starting ...";
 
-    if (initialized.get(storageType) == null) {
-      FsOperator fsOperator = FsOperator.of(storageType);
-      Workspace workspace = Workspace.of(storageType);
+    FsOperator fsOperator = FsOperator.of(storageType);
+    Workspace workspace = Workspace.of(storageType);
 
-      // 1. prepare workspace dir
-      if (storageType.equals(LFS)) {
-        String localDist = Workspace.APP_LOCAL_DIST();
-        if (!fsOperator.exists(localDist)) {
-          log.info(mkdirLog, localDist);
-          fsOperator.mkdirs(localDist);
-        }
+    // 1. prepare workspace dir
+    if (storageType.equals(LFS)) {
+      String localDist = Workspace.APP_LOCAL_DIST();
+      if (!fsOperator.exists(localDist)) {
+        log.info(mkdirLog, localDist);
+        fsOperator.mkdirs(localDist);
       }
-
-      String appUploads = workspace.APP_UPLOADS();
-      if (!fsOperator.exists(appUploads)) {
-        log.info(mkdirLog, appUploads);
-        fsOperator.mkdirs(appUploads);
-      }
-
-      String appWorkspace = workspace.APP_WORKSPACE();
-      if (!fsOperator.exists(appWorkspace)) {
-        log.info(mkdirLog, appWorkspace);
-        fsOperator.mkdirs(appWorkspace);
-      }
-
-      String appBackups = workspace.APP_BACKUPS();
-      if (!fsOperator.exists(appBackups)) {
-        log.info(mkdirLog, appBackups);
-        fsOperator.mkdirs(appBackups);
-      }
-
-      String appSavePoints = workspace.APP_SAVEPOINTS();
-      if (!fsOperator.exists(appSavePoints)) {
-        log.info(mkdirLog, appSavePoints);
-        fsOperator.mkdirs(appSavePoints);
-      }
-
-      String appJars = workspace.APP_JARS();
-      if (!fsOperator.exists(appJars)) {
-        log.info(mkdirLog, appJars);
-        fsOperator.mkdirs(appJars);
-      }
-
-      // 2. upload jar.
-      // 2.1) upload client jar
-      File client = WebUtils.getAppClientDir();
-      AssertUtils.checkArgument(
-          client.exists() && client.listFiles().length > 0,
-          client.getAbsolutePath().concat(" is not exists or empty directory "));
-
-      String appClient = workspace.APP_CLIENT();
-      fsOperator.mkCleanDirs(appClient);
-
-      for (File file : client.listFiles(fileFilter)) {
-        log.info("load client:{} to {}", file.getName(), appClient);
-        fsOperator.upload(file.getAbsolutePath(), appClient);
-      }
-
-      // 2.2) upload plugin jar.
-      String appPlugins = workspace.APP_PLUGINS();
-      fsOperator.mkCleanDirs(appPlugins);
-
-      File plugins = WebUtils.getAppPluginsDir();
-      for (File file : plugins.listFiles(fileFilter)) {
-        log.info("load plugin:{} to {}", file.getName(), appPlugins);
-        fsOperator.upload(file.getAbsolutePath(), appPlugins);
-      }
-
-      // 2.3) upload shims jar
-      File[] shims =
-          WebUtils.getAppLibDir()
-              .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
-
-      AssertUtils.checkArgument(
-          shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
-
-      String appShims = workspace.APP_SHIMS();
-      fsOperator.delete(appShims);
-
-      for (File file : shims) {
-        Matcher matcher = PATTERN_FLINK_SHIMS_JAR.matcher(file.getName());
-        if (matcher.matches()) {
-          String version = matcher.group(1);
-          String shimsPath = appShims.concat("/flink-").concat(version);
-          fsOperator.mkdirs(shimsPath);
-          log.info("load shims:{} to {}", file.getName(), shimsPath);
-          fsOperator.upload(file.getAbsolutePath(), shimsPath);
-        }
-      }
-
-      // 2.4) create maven local repository dir
-
-      String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
-      if (FsOperator.lfs().exists(localMavenRepo)) {
-        FsOperator.lfs().mkdirs(localMavenRepo);
-      }
-
-      initialized.put(storageType, Boolean.TRUE);
     }
+
+    String appUploads = workspace.APP_UPLOADS();
+    if (!fsOperator.exists(appUploads)) {
+      log.info(mkdirLog, appUploads);
+      fsOperator.mkdirs(appUploads);
+    }
+
+    String appWorkspace = workspace.APP_WORKSPACE();
+    if (!fsOperator.exists(appWorkspace)) {
+      log.info(mkdirLog, appWorkspace);
+      fsOperator.mkdirs(appWorkspace);
+    }
+
+    String appBackups = workspace.APP_BACKUPS();
+    if (!fsOperator.exists(appBackups)) {
+      log.info(mkdirLog, appBackups);
+      fsOperator.mkdirs(appBackups);
+    }
+
+    String appSavePoints = workspace.APP_SAVEPOINTS();
+    if (!fsOperator.exists(appSavePoints)) {
+      log.info(mkdirLog, appSavePoints);
+      fsOperator.mkdirs(appSavePoints);
+    }
+
+    String appJars = workspace.APP_JARS();
+    if (!fsOperator.exists(appJars)) {
+      log.info(mkdirLog, appJars);
+      fsOperator.mkdirs(appJars);
+    }
+
+    // 2. upload jar.
+    // 2.1) upload client jar
+    File client = WebUtils.getAppClientDir();
+    Utils.required(
+        client.exists() && client.listFiles().length > 0,
+        client.getAbsolutePath().concat(" is not exists or empty directory "));
+
+    String appClient = workspace.APP_CLIENT();
+    fsOperator.mkCleanDirs(appClient);
+
+    for (File file : client.listFiles(fileFilter)) {
+      log.info("load client:{} to {}", file.getName(), appClient);
+      fsOperator.upload(file.getAbsolutePath(), appClient);
+    }
+
+    // 2.2) upload plugin jar.
+    String appPlugins = workspace.APP_PLUGINS();
+    fsOperator.mkCleanDirs(appPlugins);
+
+    File plugins = WebUtils.getAppPluginsDir();
+    for (File file : plugins.listFiles(fileFilter)) {
+      log.info("load plugin:{} to {}", file.getName(), appPlugins);
+      fsOperator.upload(file.getAbsolutePath(), appPlugins);
+    }
+
+    // 2.3) upload shims jar
+    File[] shims =
+        WebUtils.getAppLibDir()
+            .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
+
+    Utils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
+
+    String appShims = workspace.APP_SHIMS();
+    fsOperator.delete(appShims);
+
+    for (File file : shims) {
+      Matcher matcher = PATTERN_FLINK_SHIMS_JAR.matcher(file.getName());
+      if (matcher.matches()) {
+        String version = matcher.group(1);
+        String shimsPath = appShims.concat("/flink-").concat(version);
+        fsOperator.mkdirs(shimsPath);
+        log.info("load shims:{} to {}", file.getName(), shimsPath);
+        fsOperator.upload(file.getAbsolutePath(), shimsPath);
+      }
+    }
+
+    // 2.4) create maven local repository dir
+
+    String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
+    if (FsOperator.lfs().exists(localMavenRepo)) {
+      FsOperator.lfs().mkdirs(localMavenRepo);
+    }
+
+    initialized.add(storageType);
   }
 
   public void checkFlinkEnv(StorageType storageType, FlinkEnv flinkEnv) throws IOException {

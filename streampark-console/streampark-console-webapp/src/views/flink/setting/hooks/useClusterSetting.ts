@@ -24,6 +24,7 @@ import {
   renderInputDropdown,
   renderOptionsItems,
   renderTotalMemory,
+  renderYarnQueue,
 } from '../../app/hooks/useFlinkRender';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
 import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
@@ -153,9 +154,7 @@ export const useClusterSetting = () => {
         label: t('flink.setting.cluster.form.yarnQueue'),
         component: 'Input',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
-        componentProps: {
-          placeholder: t('flink.setting.cluster.placeholder.yarnQueue'),
-        },
+        render: renderYarnQueue,
       },
       {
         field: 'clusterId',

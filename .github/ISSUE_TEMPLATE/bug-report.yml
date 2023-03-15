@@ -24,9 +24,9 @@ body:
     attributes:
       value: |
         Please make sure what you are reporting is indeed a bug with reproducible steps.
-        For better global communication, Please write in English.
+        For better global communication, Please write in English. (请确保您所报告的问题是描述清晰,有可重现步骤的。为了更好的交流，请用英文书写)
 
-        If you feel the description in English is not clear, then you can append description in Chinese, thanks!
+        If you feel the description in English is not clear, then you can append description in Chinese, thanks! (如果您觉得英文描述不清楚，可以附加中文描述，谢谢)
 
   - type: checkboxes
     attributes:
@@ -42,10 +42,20 @@ body:
 
   - type: textarea
     attributes:
-      label: What happened
-      description: Describe what happened.
+      label: Java Version
+      description: Provide Java Version.
       placeholder: >
-        Please provide the context in which the problem occurred and explain what happened
+        Please provide the version of Java.
+    validations:
+      required: false
+
+  - type: dropdown
+    attributes:
+      label: Scala Version
+      description: Provide Scala version.
+      options:
+        - 2.11.x
+        - 2.12.x
     validations:
       required: true
 
@@ -60,15 +70,6 @@ body:
 
   - type: textarea
     attributes:
-      label: Java Version
-      description: Provide Java Version.
-      placeholder: >
-        Please provide the version of Java.
-    validations:
-      required: false
-
-  - type: textarea
-    attributes:
       label: Flink Version
       description: Provide Flink Version.
       placeholder: >
@@ -76,12 +77,26 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    attributes:
+      label: deploy mode
+      description: Which mode deploy the flink job?
+      options:
+        - yarn-application
+        - yarn-session
+        - yarn-perjob
+        - remote
+        - kubernetes-application
+        - kubernetes-session
+    validations:
+      required: false
+
   - type: textarea
     attributes:
-      label: Scala Version of Flink
-      description: Provide Scala Version of Flink.
+      label: What happened
+      description: Describe what happened.
       placeholder: >
-        Please provide the Scala Version of Flink.
+        Please provide the context in which the problem occurred and explain what happened
     validations:
       required: true
 
@@ -93,7 +108,7 @@ body:
         Please provide the error exception here.
       render: log
     validations:
-      required: true
+      required: false
 
   - type: textarea
     attributes:
@@ -112,7 +127,7 @@ body:
         especially if you already have a good understanding of how to implement the fix.
         StreamPark is a totally community-driven project and we love to bring new contributors in.
       options:
-        - label: Yes I am willing to submit a PR!
+        - label: Yes I am willing to submit a PR!(您是否要贡献这个PR?)
 
   - type: checkboxes
     attributes:

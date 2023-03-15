@@ -26,7 +26,7 @@
 
     <groupId>org.apache.streampark</groupId>
     <artifactId>streampark</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>StreamPark Project Parent POM</name>
 
@@ -141,6 +141,8 @@
         <httpclient.version>4.5.13</httpclient.version>
         <lombok.version>1.18.24</lombok.version>
         <jupiter.version>5.9.1</jupiter.version>
+        <mockito.version>3.4.6</mockito.version>
+        <assertj.version>3.23.1</assertj.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -598,6 +600,13 @@
                 <scope>test</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+
         </dependencies>
 
     </dependencyManagement>
@@ -815,8 +824,23 @@
                                 <style>GOOGLE</style>
                             </googleJavaFormat>
                             <importOrder>
-                                <order>org.apache.streampark,org.apache.streampark.shaded,,javax,java,scala,\#</order>
+                                <order>org.apache.streampark,org.apache.streampark.shaded,org.apache,,javax,java,scala,\#</order>
                             </importOrder>
+                            <replaceRegex>
+                                <name>Remove wildcard imports</name>
+                                <searchRegex>import\s+(static)*\s*[^\*\s]+\*;(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
+                            <replaceRegex>
+                                <name>Block powermock</name>
+                                <searchRegex>import\s+org\.powermock\.[^\*\s]*(|\*);(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
+                            <replaceRegex>
+                                <name>Block jUnit4 imports</name>
+                                <searchRegex>import\s+org\.junit\.[^jupiter][^\*\s]*(|\*);(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
                             <removeUnusedImports />
                         </java>
                     </configuration>

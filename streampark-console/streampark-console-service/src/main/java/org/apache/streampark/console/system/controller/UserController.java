@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
@@ -28,12 +29,13 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -170,11 +172,10 @@ public class UserController {
   public RestResponse setTeam(Long teamId) {
     Team team = teamService.getById(teamId);
     if (team == null) {
-      return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
+      return RestResponse.fail("TeamId is invalid, set team failed.", ResponseCode.CODE_FAIL_ALERT);
     }
-
     User user = commonService.getCurrentUser();
-
+    ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
     // 1) set the latest team
     userService.setLastTeam(teamId, user.getUserId());
 

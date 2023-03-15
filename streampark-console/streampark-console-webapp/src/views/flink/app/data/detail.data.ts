@@ -111,6 +111,13 @@ export const getConfColumns = (): BasicColumn[] => [
   { title: 'Modify Time', dataIndex: 'createTime' },
 ];
 
+export const getFlinkSqlColumns = (): BasicColumn[] => [
+  { title: 'Version', dataIndex: 'version' },
+  { title: 'Effective', dataIndex: 'effective' },
+  { title: 'Candidate', dataIndex: 'candidate' },
+  { title: 'Modify Time', dataIndex: 'createTime' },
+];
+
 export const getSavePointColumns = (): BasicColumn[] => [
   { title: 'Path', dataIndex: 'path' },
   { title: 'Trigger Time', dataIndex: 'triggerTime', width: 250 },
