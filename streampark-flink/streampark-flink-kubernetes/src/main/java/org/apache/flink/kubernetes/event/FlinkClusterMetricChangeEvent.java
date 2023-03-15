@@ -21,20 +21,20 @@ import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
 public class FlinkClusterMetricChangeEvent implements BuildInEvent {
-    private final TrackId trackId;
+  private final TrackId trackId;
 
-    private final FlinkMetricCV metrics;
+  private final FlinkMetricCV metrics;
 
-    public FlinkClusterMetricChangeEvent(TrackId trackId, FlinkMetricCV metrics) {
-        this.trackId = trackId;
-        this.metrics = metrics;
-    }
+  public FlinkClusterMetricChangeEvent(TrackId trackId, FlinkMetricCV metrics) {
+    this.trackId = trackId;
+    this.metrics = metrics;
+  }
 
-    public TrackId getTrackId() {
-        return trackId;
-    }
+  public TrackId getTrackId() {
+    return trackId;
+  }
 
-    public FlinkMetricCV getMetrics() {
-        return metrics;
-    }
+  public FlinkMetricCV getMetrics() {
+    return metrics;
+  }
 }

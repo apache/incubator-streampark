@@ -20,24 +20,22 @@ package org.apache.flink.kubernetes.event;
 import org.apache.streampark.flink.kubernetes.model.CheckpointCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
-/**
- * held internally by K8sFlinkMonitor.
- */
+/** held internally by K8sFlinkMonitor. */
 public class FlinkJobCheckpointChangeEvent implements BuildInEvent {
-    private final TrackId trackId;
+  private final TrackId trackId;
 
-    private final CheckpointCV checkpoint;
+  private final CheckpointCV checkpoint;
 
-    public FlinkJobCheckpointChangeEvent(TrackId trackId, CheckpointCV checkpoint) {
-        this.trackId = trackId;
-        this.checkpoint = checkpoint;
-    }
+  public FlinkJobCheckpointChangeEvent(TrackId trackId, CheckpointCV checkpoint) {
+    this.trackId = trackId;
+    this.checkpoint = checkpoint;
+  }
 
-    public TrackId getTrackId() {
-        return trackId;
-    }
+  public TrackId getTrackId() {
+    return trackId;
+  }
 
-    public CheckpointCV getCheckpoint() {
-        return checkpoint;
-    }
+  public CheckpointCV getCheckpoint() {
+    return checkpoint;
+  }
 }

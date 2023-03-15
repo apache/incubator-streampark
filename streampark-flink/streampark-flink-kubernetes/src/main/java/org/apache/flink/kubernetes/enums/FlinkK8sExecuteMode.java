@@ -20,40 +20,39 @@ package org.apache.flink.kubernetes.enums;
 import org.apache.streampark.common.enums.ExecutionMode;
 
 public enum FlinkK8sExecuteMode {
+  SESSION("kubernetes-session"),
+  APPLICATION("kubernetes-application");
 
-    SESSION("kubernetes-session"),
-    APPLICATION("kubernetes-application");
+  private final String value;
 
-    private final String value;
+  FlinkK8sExecuteMode(String value) {
+    this.value = value;
+  }
 
-    FlinkK8sExecuteMode(String value) {
-        this.value = value;
+  public String getValue() {
+    return value;
+  }
+
+  public static FlinkK8sExecuteMode of(ExecutionMode mode) {
+    switch (mode) {
+      case KUBERNETES_NATIVE_SESSION:
+        return SESSION;
+      case KUBERNETES_NATIVE_APPLICATION:
+        return APPLICATION;
+      default:
+        throw new IllegalStateException("Illegal ExecutionMode " + mode.getName());
     }
+  }
 
-    public String getValue() {
-        return value;
+  public static ExecutionMode toExecutionMode(FlinkK8sExecuteMode mode) {
+    switch (mode) {
+      case SESSION:
+        return ExecutionMode.KUBERNETES_NATIVE_SESSION;
+      case APPLICATION:
+        return ExecutionMode.KUBERNETES_NATIVE_APPLICATION;
+      default:
+        // never got in there
+        throw new IllegalStateException("Illegal K8sExecuteMode " + mode);
     }
-
-    public static FlinkK8sExecuteMode of(ExecutionMode mode) {
-        switch (mode) {
-            case KUBERNETES_NATIVE_SESSION:
-                return SESSION;
-            case KUBERNETES_NATIVE_APPLICATION:
-                return APPLICATION;
-            default:
-                throw new IllegalStateException("Illegal ExecutionMode " + mode.getName());
-        }
-    }
-
-    public static ExecutionMode toExecutionMode(FlinkK8sExecuteMode mode) {
-        switch (mode) {
-            case SESSION:
-                return ExecutionMode.KUBERNETES_NATIVE_SESSION;
-            case APPLICATION:
-                return ExecutionMode.KUBERNETES_NATIVE_APPLICATION;
-            default:
-                // never got in there
-                throw new IllegalStateException("Illegal K8sExecuteMode " + mode);
-        }
-    }
+  }
 }

@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.task;
 
-import org.apache.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -28,6 +27,7 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.flink.kubernetes.enums.FlinkJobState;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;

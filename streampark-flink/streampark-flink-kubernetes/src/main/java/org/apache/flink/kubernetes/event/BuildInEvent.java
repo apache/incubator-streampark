@@ -17,5 +17,4 @@
 
 package org.apache.flink.kubernetes.event;
 
-public interface BuildInEvent {
-}
+public interface BuildInEvent {}
