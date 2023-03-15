@@ -125,29 +125,9 @@ object HadoopUtils extends Logger {
       val hadoopConfDir = new File(confDir)
       val confName = List("hdfs-default.xml", "core-site.xml", "hdfs-site.xml", "yarn-site.xml")
       val files = hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
-      val conf = new Configuration()
+      val conf = new HadoopConfiguration()
       if (CollectionUtils.isNotEmpty(files)) {
         files.foreach(x => conf.addResource(new Path(x.getAbsolutePath)))
-        // HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
-        // detail: https://issues.apache.org/jira/browse/HDFS-12920
-        val rewriteNames = List(
-          "dfs.blockreport.initialDelay",
-          "dfs.datanode.directoryscan.interval",
-          "dfs.heartbeat.interval",
-          "dfs.namenode.decommission.interval",
-          "dfs.namenode.replication.interval",
-          "dfs.namenode.checkpoint.period",
-          "dfs.namenode.checkpoint.check.period",
-          "dfs.client.datanode-restart.timeout",
-          "dfs.ha.log-roll.period",
-          "dfs.ha.tail-edits.period",
-          "dfs.datanode.bp-ready.timeout")
-        rewriteNames.foreach(n => {
-          Option(conf.get(n)) match {
-            case Some(v) if v.matches("\\d+s$") => conf.set(n, v.dropRight(1))
-            case _ =>
-          }
-        })
       }
       configurationCache.put(confDir, conf)
     }
@@ -289,5 +269,60 @@ object HadoopUtils extends Logger {
     val destPath = new Path(tmpDir.getAbsolutePath + "/" + sourcePath.getName)
     fs.copyToLocalFile(sourcePath, destPath)
     new File(destPath.toString).getAbsolutePath
+  }
+
+  private class HadoopConfiguration extends Configuration {
+
+    private lazy val rewriteNames = List(
+      "dfs.blockreport.initialDelay",
+      "dfs.datanode.directoryscan.interval",
+      "dfs.heartbeat.interval",
+      "dfs.namenode.decommission.interval",
+      "dfs.namenode.replication.interval",
+      "dfs.namenode.checkpoint.period",
+      "dfs.namenode.checkpoint.check.period",
+      "dfs.client.datanode-restart.timeout",
+      "dfs.ha.log-roll.period",
+      "dfs.ha.tail-edits.period",
+      "dfs.datanode.bp-ready.timeout")
+
+    private def getHexDigits(value: String): String = {
+      var negative = false
+      var str = value
+      var hexString: String = null
+      if (value.startsWith("-")) {
+        negative = true
+        str = value.substring(1)
+      }
+      if (str.startsWith("0x") || str.startsWith("0X")) {
+        hexString = str.substring(2)
+        if (negative) hexString = "-" + hexString
+        return hexString
+      }
+      null
+    }
+
+    // HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
+    // detail: https://issues.apache.org/jira/browse/HDFS-12920
+    private def getSafeValue(name: String): String = {
+      val value = getTrimmed(name)
+      if (rewriteNames.contains(name) && name.matches("\\d+s$")) {
+        return value.dropRight(1)
+      }
+      value
+    }
+
+    override def getLong(name: String, defaultValue: Long): Long = {
+      val valueString = getSafeValue(name)
+      valueString match {
+        case null => defaultValue
+        case v =>
+          val hexString = getHexDigits(v)
+          if (hexString != null) {
+            return java.lang.Long.parseLong(hexString, 16)
+          }
+          java.lang.Long.parseLong(valueString)
+      }
+    }
   }
 }
