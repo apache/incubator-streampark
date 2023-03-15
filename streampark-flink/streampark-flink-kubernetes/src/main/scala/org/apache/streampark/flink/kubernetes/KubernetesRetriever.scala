@@ -33,7 +33,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.common.util.Utils.tryWithResource
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 object KubernetesRetriever extends Logger {

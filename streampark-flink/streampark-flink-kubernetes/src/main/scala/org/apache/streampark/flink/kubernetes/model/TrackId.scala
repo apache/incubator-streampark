@@ -20,7 +20,6 @@ package org.apache.streampark.flink.kubernetes.model
 import scala.util.Try
 
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
 /**
  * tracking identifier for flink on kubernetes

@@ -22,7 +22,6 @@ import javax.annotation.Nullable
 import org.apache.flink.annotation.Public
 
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.event.BuildInEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
 
 /**

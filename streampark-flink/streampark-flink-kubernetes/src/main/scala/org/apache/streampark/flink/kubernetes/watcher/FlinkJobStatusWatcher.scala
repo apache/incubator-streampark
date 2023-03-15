@@ -22,29 +22,24 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
-
 import scala.collection.JavaConversions._
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.concurrent.duration.DurationLong
 import scala.language.{implicitConversions, postfixOps}
 import scala.util.{Failure, Success, Try}
-
 import com.google.common.base.Charsets
 import com.google.common.io.Files
 import org.apache.flink.core.fs.Path
+import org.apache.flink.kubernetes.enums.FlinkJobState
 import org.apache.flink.runtime.history.FsJobArchivist
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JNothing, JNull}
 import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
-
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, IngressController, JobStatusWatcherConfig, KubernetesRetriever}
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
-import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.model._
 
@@ -320,7 +315,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
 object FlinkJobStatusWatcher {
 
-  private val effectEndStates: Seq[FlinkJobState.Value] = FlinkJobState.endingStates.filter(_ != FlinkJobState.LOST)
+  private val effectEndStates: Seq[FlinkJobState] = FlinkJobState.ENDING_STATES.filter(_ != FlinkJobState.LOST)
 
   /**
    * infer flink job state before persistence.
@@ -329,7 +324,7 @@ object FlinkJobStatusWatcher {
    * @param current  current flink job state
    * @param previous previous flink job state from persistent storage
    */
-  def inferFlinkJobStateFromPersist(current: FlinkJobState.Value, previous: FlinkJobState.Value): FlinkJobState.Value = {
+  def inferFlinkJobStateFromPersist(current: FlinkJobState, previous: FlinkJobState): FlinkJobState = {
     current match {
       case FlinkJobState.LOST => if (effectEndStates.contains(current)) previous else FlinkJobState.TERMINATED
       case FlinkJobState.POS_TERMINATED | FlinkJobState.TERMINATED => previous match {

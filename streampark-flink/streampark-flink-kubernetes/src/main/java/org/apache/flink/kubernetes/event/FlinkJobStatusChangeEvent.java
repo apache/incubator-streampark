@@ -15,11 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.event
+package org.apache.flink.kubernetes.event;
 
-import org.apache.streampark.flink.kubernetes.model.{JobStatusCV, TrackId}
+import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
+import org.apache.streampark.flink.kubernetes.model.TrackId;
 
 /**
  * Notification of flink job state changes from k8s clusters.
  */
-case class FlinkJobStatusChangeEvent(trackId: TrackId, jobStatus: JobStatusCV) extends BuildInEvent
+public class FlinkJobStatusChangeEvent implements BuildInEvent {
+    private final TrackId trackId;
+
+    private final JobStatusCV jobStatus;
+
+    public FlinkJobStatusChangeEvent(TrackId trackId, JobStatusCV jobStatus) {
+        this.trackId = trackId;
+        this.jobStatus = jobStatus;
+    }
+
+    public TrackId getTrackId() {
+        return trackId;
+    }
+
+    public JobStatusCV getJobStatus() {
+        return jobStatus;
+    }
+}

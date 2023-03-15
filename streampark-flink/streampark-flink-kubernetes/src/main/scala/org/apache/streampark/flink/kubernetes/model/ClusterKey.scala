@@ -17,8 +17,6 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
-
 /**
  * flink cluster identifier on kubernetes
  */

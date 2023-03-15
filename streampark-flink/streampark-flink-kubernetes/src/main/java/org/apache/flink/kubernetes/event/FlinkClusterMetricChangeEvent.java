@@ -15,6 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.event
+package org.apache.flink.kubernetes.event;
 
-trait BuildInEvent {}
+import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
+import org.apache.streampark.flink.kubernetes.model.TrackId;
+
+public class FlinkClusterMetricChangeEvent implements BuildInEvent {
+    private final TrackId trackId;
+
+    private final FlinkMetricCV metrics;
+
+    public FlinkClusterMetricChangeEvent(TrackId trackId, FlinkMetricCV metrics) {
+        this.trackId = trackId;
+        this.metrics = metrics;
+    }
+
+    public TrackId getTrackId() {
+        return trackId;
+    }
+
+    public FlinkMetricCV getMetrics() {
+        return metrics;
+    }
+}

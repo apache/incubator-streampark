@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.flink.kubernetes.event.BuildInEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
 
 /**

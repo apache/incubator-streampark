@@ -34,7 +34,6 @@ import org.json4s.jackson.JsonMethods.parse
 
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, KubernetesRetriever, MetricWatcherConfig}
-import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, TrackId}
 
 @ThreadSafe

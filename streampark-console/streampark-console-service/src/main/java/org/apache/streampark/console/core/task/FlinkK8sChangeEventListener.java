@@ -26,7 +26,6 @@ import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.flink.kubernetes.IngressController;
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent;
@@ -35,6 +34,8 @@ import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.kubernetes.watcher.FlinkJobStatusWatcher;
+
+import org.apache.flink.kubernetes.enums.FlinkJobState;
 
 import com.google.common.eventbus.Subscribe;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import scala.Enumeration;
 
 import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.fromK8sFlinkJobState;
 import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
@@ -151,7 +150,7 @@ public class FlinkK8sChangeEventListener {
 
   private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {
     // infer the final flink job state
-    Enumeration.Value state =
+    FlinkJobState state =
         FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
             jobStatus.jobState(), toK8sFlinkJobState(FlinkAppState.of(app.getState())));
 

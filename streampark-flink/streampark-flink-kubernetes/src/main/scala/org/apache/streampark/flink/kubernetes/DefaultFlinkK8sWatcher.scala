@@ -20,10 +20,6 @@ package org.apache.streampark.flink.kubernetes
 import javax.annotation.Nullable
 
 import com.google.common.eventbus.Subscribe
-
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
-import org.apache.streampark.flink.kubernetes.event.{BuildInEvent, FlinkJobStateEvent, FlinkJobStatusChangeEvent}
 import org.apache.streampark.flink.kubernetes.model._
 import org.apache.streampark.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 

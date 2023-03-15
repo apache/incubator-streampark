@@ -17,13 +17,11 @@
 
 package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
+import org.apache.flink.kubernetes.enums.FlinkJobState;
 
 import lombok.Getter;
 
 import java.io.Serializable;
-
-import scala.Enumeration;
 
 @Getter
 public enum FlinkAppState implements Serializable {
@@ -135,8 +133,8 @@ public enum FlinkAppState implements Serializable {
   /** type conversion bridging */
   public static class Bridge {
     /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */
-    public static FlinkAppState fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
-      if (FlinkJobState.K8S_INITIALIZING().equals(flinkJobState)) {
+    public static FlinkAppState fromK8sFlinkJobState(FlinkJobState flinkJobState) {
+      if (FlinkJobState.K8S_INITIALIZING.equals(flinkJobState)) {
         return INITIALIZING;
       } else {
         return of(flinkJobState.toString());
@@ -144,7 +142,7 @@ public enum FlinkAppState implements Serializable {
     }
 
     /** covert to org.apache.streampark.flink.k8s.enums.FlinkJobState */
-    public static Enumeration.Value toK8sFlinkJobState(FlinkAppState flinkAppState) {
+    public static FlinkJobState toK8sFlinkJobState(FlinkAppState flinkAppState) {
       return FlinkJobState.of(flinkAppState.name());
     }
   }
