@@ -71,7 +71,7 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
         .getClusterClient
 
       val clusterId = clusterClient.getClusterId
-      val result = SubmitResponse(clusterId, flinkConfig.toMap, submitRequest.jobId)
+      val result = SubmitResponse(clusterId, flinkConfig.toMap, submitRequest.jobId, clusterClient.getWebInterfaceURL)
       logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
       result
     } catch {

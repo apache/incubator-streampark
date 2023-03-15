@@ -19,42 +19,34 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-/**
- * classloader.resolve-order
- */
-public enum ResolveOrder implements Serializable {
-    /**
-     * parent-first
-     */
-    PARENT_FIRST("parent-first", 0),
-    /**
-     * child-first
-     */
-    CHILD_FIRST("child-first", 1);
+public enum FlinkSqlValidationFailedType implements Serializable {
+  /** Basic test failed (such as null, etc.) */
+  VERIFY_FAILED(1),
+  /** syntax error */
+  SYNTAX_ERROR(2),
+  /** unsupported dialect */
+  UNSUPPORTED_DIALECT(3),
+  /** unsupported sql command */
+  UNSUPPORTED_SQL(4),
+  /** Not at the end of ";" */
+  ENDS_WITH(5);
 
-    private final String name;
+  private final int value;
 
-    private final Integer value;
+  FlinkSqlValidationFailedType(int value) {
+    this.value = value;
+  }
 
-    ResolveOrder(String name, Integer value) {
-        this.name = name;
-        this.value = value;
+  public static FlinkSqlValidationFailedType of(Integer value) {
+    for (FlinkSqlValidationFailedType type : values()) {
+      if (type.value == value) {
+        return type;
+      }
     }
+    return null;
+  }
 
-    public static ResolveOrder of(Integer value) {
-        for (ResolveOrder order : values()) {
-            if (order.value.equals(value)) {
-                return order;
-            }
-        }
-        return null;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
+  public int getValue() {
+    return value;
+  }
 }

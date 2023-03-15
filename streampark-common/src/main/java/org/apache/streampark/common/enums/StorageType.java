@@ -23,36 +23,31 @@ import java.io.Serializable;
 
 public enum StorageType implements Serializable {
 
-    /**
-     * hdfs
-     */
-    HDFS("hdfs"),
+  /** hdfs */
+  HDFS("hdfs"),
 
-    /**
-     * local File system
-     */
-    LFS("lfs");
+  /** local File system */
+  LFS("lfs");
 
-    private final String identifier;
+  private final String identifier;
 
-    StorageType(String identifier) {
-        this.identifier = identifier;
+  StorageType(String identifier) {
+    this.identifier = identifier;
+  }
+
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  public static StorageType of(String identifier) {
+    if (StringUtils.isEmpty(identifier)) {
+      return LFS;
     }
-
-    public String getIdentifier() {
-        return identifier;
+    for (StorageType type : values()) {
+      if (type.identifier.equals(identifier)) {
+        return type;
+      }
     }
-
-    public static StorageType of(String identifier) {
-        if (StringUtils.isEmpty(identifier)) {
-            return LFS;
-        }
-        for (StorageType type : values()) {
-            if (type.identifier.equals(identifier)) {
-                return type;
-            }
-        }
-        return LFS;
-    }
-
+    return LFS;
+  }
 }

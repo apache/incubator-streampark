@@ -108,7 +108,7 @@ object RemoteClient extends FlinkClientTrait {
       client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
       logInfo(s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
-      SubmitResponse(null, flinkConfig.toMap, jobId)
+      SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
     } match {
       case Success(s) => s
       case Failure(e) =>
@@ -135,7 +135,7 @@ object RemoteClient extends FlinkClientTrait {
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString
       logInfo(s"${submitRequest.executionMode} mode submit by jobGraph, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
-      val result = SubmitResponse(null, flinkConfig.toMap, jobId)
+      val result = SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
       result
     } catch {
       case e: Exception =>

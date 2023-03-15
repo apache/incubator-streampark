@@ -1386,8 +1386,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       if (!application.isNeedRestartOnFailed()) {
         return;
       }
+      appParam.setSavePointed(true);
       application.setRestartCount(application.getRestartCount() + 1);
-      application.setSavePointed(true);
     }
 
     String appConf;
