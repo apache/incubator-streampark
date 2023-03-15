@@ -307,7 +307,7 @@ object HadoopUtils extends Logger {
     private def getSafeValue(name: String): String = {
       val value = getTrimmed(name)
       if (rewriteNames.contains(name)) {
-        return value.replaceFirst("\\s+s$", "")
+        return value.replaceFirst("s$", "")
       }
       value
     }
