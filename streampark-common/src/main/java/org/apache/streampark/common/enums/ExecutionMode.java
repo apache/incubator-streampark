@@ -118,4 +118,8 @@ public enum ExecutionMode implements Serializable {
   public static boolean isRemoteMode(ExecutionMode mode) {
     return REMOTE.equals(mode);
   }
+
+  public static boolean isLocalMode(ExecutionMode mode) {
+    return LOCAL.equals(mode);
+  }
 }

@@ -560,6 +560,7 @@ public class Application implements Serializable {
       case KUBERNETES_NATIVE_SESSION:
       case KUBERNETES_NATIVE_APPLICATION:
       case REMOTE:
+      case LOCAL:
         return StorageType.LFS;
       default:
         throw new UnsupportedOperationException("Unsupported ".concat(executionMode.getName()));

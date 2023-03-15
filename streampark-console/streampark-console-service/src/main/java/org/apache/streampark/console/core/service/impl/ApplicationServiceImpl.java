@@ -1112,6 +1112,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           && application.getStartTime().getTime() > 0) {
         application.setDuration(now - application.getStartTime().getTime());
       }
+      // add flink web url info for local-mode
+    } else if (ExecutionMode.isLocalMode(application.getExecutionModeEnum())) {
+      application.setFlinkRestUrl(application.getJobManagerUrl());
     }
 
     setYarnQueue(application);
@@ -1226,6 +1229,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       URI activeAddress = cluster.getRemoteURI();
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
+    } else if (ExecutionMode.isLocalMode(application.getExecutionModeEnum())) {
+      String jobManagerUrl = application.getJobManagerUrl();
+      URI uri = new URI(jobManagerUrl);
+      properties.put(RestOptions.ADDRESS.key(), uri.getHost());
+      properties.put(RestOptions.PORT.key(), uri.getPort());
     }
 
     CancelRequest cancelRequest =

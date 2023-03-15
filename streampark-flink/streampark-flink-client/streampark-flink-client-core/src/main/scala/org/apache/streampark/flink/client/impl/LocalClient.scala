@@ -17,17 +17,21 @@
 
 package org.apache.streampark.flink.client.impl
 
-import java.lang.{Integer => JavaInt}
+import org.apache.flink.api.common.JobID
 
+import java.lang.{Integer => JavaInt}
 import org.apache.flink.client.deployment.executors.RemoteExecutor
 import org.apache.flink.client.program.{ClusterClient, MiniClusterClient, PackagedProgram}
 import org.apache.flink.client.program.MiniClusterClient.MiniClusterId
 import org.apache.flink.configuration._
+import org.apache.flink.runtime.jobmaster.JobResult
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
-
+import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean._
+
+import java.util.function.Consumer
 
 object LocalClient extends FlinkClientTrait {
 
@@ -44,14 +48,15 @@ object LocalClient extends FlinkClientTrait {
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[MiniClusterId] = null
+    var jobId: JobID = null
     try {
       // build JobGraph
       val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
       packageProgram = packageProgramJobGraph._1
       val jobGraph = packageProgramJobGraph._2
       client = createLocalCluster(flinkConfig)
-      val jobId = client.submitJob(jobGraph).get().toString
-      SubmitResponse(jobId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+      jobId = client.submitJob(jobGraph).get()
+      SubmitResponse(jobId.toString, flinkConfig.toMap, jobId.toString, client.getWebInterfaceURL)
     } catch {
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
@@ -61,16 +66,44 @@ object LocalClient extends FlinkClientTrait {
       if (submitRequest.safePackageProgram) {
         Utils.close(packageProgram)
       }
-      Utils.close(client)
+      client.requestJobResult(jobId).thenAccept(
+        new Consumer[JobResult] {
+          override def accept(t: JobResult): Unit = {
+            client.shutDownCluster()
+            Utils.close(client)
+          }
+        }
+      );
     }
   }
 
   override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
-    RemoteClient.doTriggerSavepoint(request, flinkConfig)
+    // This is a workaround, here we use ClusterClient of StandaloneCluster instead of MiniClusterClient. Because there is no good way to
+    // retrieve MiniClusterClient for specific local job, for multi local job management, then we have to maintain the mapping between local
+    // job and MiniClusterClient. With the aid of Standalone ClusterClient, we can get rid of this step.
+    val requestAdapter = TriggerSavepointRequest(
+      request.flinkVersion,
+      ExecutionMode.REMOTE,
+      request.properties,
+      request.clusterId,
+      request.jobId,
+      request.savepointPath,
+      request.kubernetesNamespace)
+    RemoteClient.doTriggerSavepoint(requestAdapter, flinkConfig)
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
-    RemoteClient.doCancel(cancelRequest, flinkConfig)
+    val requestAdapter = CancelRequest(
+      cancelRequest.flinkVersion,
+      ExecutionMode.REMOTE,
+      cancelRequest.properties,
+      cancelRequest.clusterId,
+      cancelRequest.jobId,
+      cancelRequest.withSavepoint,
+      cancelRequest.withDrain,
+      cancelRequest.savepointPath,
+      cancelRequest.kubernetesNamespace)
+    RemoteClient.doCancel(requestAdapter, flinkConfig)
   }
 
   private[this] def createLocalCluster(flinkConfig: Configuration) = {

@@ -346,6 +346,7 @@ public class AppBuildPipeServiceImpl
       case YARN_PER_JOB:
       case YARN_SESSION:
       case REMOTE:
+      case LOCAL:
         FlinkRemotePerJobBuildRequest buildRequest =
             new FlinkRemotePerJobBuildRequest(
                 app.getJobName(),

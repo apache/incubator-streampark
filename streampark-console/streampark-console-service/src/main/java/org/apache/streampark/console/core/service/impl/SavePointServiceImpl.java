@@ -67,6 +67,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -297,6 +298,19 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     String clusterId = getClusterId(application, cluster);
 
     Map<String, Object> properties = this.tryGetRestProps(application, cluster);
+
+    if (ExecutionMode.isLocalMode(application.getExecutionModeEnum())) {
+      String jobManagerUrl = application.getJobManagerUrl();
+      URI uri = null;
+      try {
+        uri = new URI(jobManagerUrl);
+        properties.put(RestOptions.ADDRESS.key(), uri.getHost());
+        properties.put(RestOptions.PORT.key(), uri.getPort());
+      } catch (URISyntaxException e) {
+        log.error("Trigger savepoint for flink job failed.", e);
+        throw new ApiAlertException(e);
+      }
+    }
 
     TriggerSavepointRequest request =
         new TriggerSavepointRequest(

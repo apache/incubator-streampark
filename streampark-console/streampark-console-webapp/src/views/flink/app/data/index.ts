@@ -110,6 +110,7 @@ export const k8sRestExposedType = [
 ];
 
 export const executionModes = [
+  { label: 'local (for testing only, not recommended for production environment)', value: ExecModeEnum.LOCAL, disabled: false },
   { label: 'remote', value: ExecModeEnum.REMOTE, disabled: false },
   { label: 'yarn application', value: ExecModeEnum.YARN_APPLICATION, disabled: false },
   { label: 'yarn session', value: ExecModeEnum.YARN_SESSION, disabled: false },

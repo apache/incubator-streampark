@@ -656,6 +656,10 @@ public class FlinkRESTAPIWatcher {
         FLINK_CLUSTER_MAP.put(application.getFlinkClusterId(), flinkCluster);
       }
       return flinkCluster;
+    } else if (ExecutionMode.isLocalMode(application.getExecutionModeEnum())) {
+      FlinkCluster flinkCluster = new FlinkCluster();
+      flinkCluster.setAddress(application.getJobManagerUrl());
+      return flinkCluster;
     }
     return null;
   }
@@ -701,7 +705,8 @@ public class FlinkRESTAPIWatcher {
       }
       return yarnRestRequest(reqURL, JobsOverview.class);
     } else if (ExecutionMode.REMOTE.equals(execMode)
-        || ExecutionMode.YARN_SESSION.equals(execMode)) {
+        || ExecutionMode.YARN_SESSION.equals(execMode)
+        || ExecutionMode.LOCAL.equals(execMode)) {
       if (application.getJobId() != null) {
         String remoteUrl = flinkCluster.getAddress() + "/" + flinkUrl;
         JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
@@ -734,7 +739,8 @@ public class FlinkRESTAPIWatcher {
       }
       return yarnRestRequest(reqURL, CheckPoints.class);
     } else if (ExecutionMode.REMOTE.equals(execMode)
-        || ExecutionMode.YARN_SESSION.equals(execMode)) {
+        || ExecutionMode.YARN_SESSION.equals(execMode)
+        || ExecutionMode.LOCAL.equals(execMode)) {
       if (application.getJobId() != null) {
         String remoteUrl =
             flinkCluster.getAddress() + "/" + String.format(flinkUrl, application.getJobId());

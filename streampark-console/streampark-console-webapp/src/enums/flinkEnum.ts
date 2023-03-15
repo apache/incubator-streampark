@@ -29,6 +29,8 @@ export enum BuildStateEnum {
 }
 /* ExecutionMode  */
 export enum ExecModeEnum {
+  /** LOCAL */
+  LOCAL = 0,
   /** remote (standalone) */
   REMOTE = 1,
   /** yarn per-job (deprecated, please use yarn-application mode) */
