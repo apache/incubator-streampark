@@ -306,8 +306,8 @@ object HadoopUtils extends Logger {
     // detail: https://issues.apache.org/jira/browse/HDFS-12920
     private def getSafeValue(name: String): String = {
       val value = getTrimmed(name)
-      if (rewriteNames.contains(name) && name.matches("\\d+s$")) {
-        return value.dropRight(1)
+      if (rewriteNames.contains(name)) {
+        return value.replaceFirst("\\s+s$", "")
       }
       value
     }
