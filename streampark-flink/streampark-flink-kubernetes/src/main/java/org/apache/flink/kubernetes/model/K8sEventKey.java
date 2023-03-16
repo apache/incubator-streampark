@@ -15,6 +15,24 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.model
+package org.apache.flink.kubernetes.model;
 
-case class K8sEventKey(namespace: String, clusterId: String)
+public class K8sEventKey {
+
+  private final String namespace;
+
+  private final String clusterId;
+
+  public K8sEventKey(String namespace, String clusterId) {
+    this.namespace = namespace;
+    this.clusterId = clusterId;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public String getClusterId() {
+    return clusterId;
+  }
+}

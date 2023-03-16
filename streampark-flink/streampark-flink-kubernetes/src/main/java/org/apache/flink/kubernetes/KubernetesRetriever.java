@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 public class KubernetesRetriever {
 
-  // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
+  // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT
   public static final long FLINK_CLIENT_TIMEOUT_SEC = 30L;
   // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
   public static final long FLINK_REST_AWAIT_TIMEOUT_SEC = 10L;
@@ -78,7 +78,6 @@ public class KubernetesRetriever {
     }
     ClusterClientFactory<String> clusterClientFactory =
         DEFAULT_CLUSTER_CLIENT_SERVICE_LOADER.getClusterClientFactory(flinkConfig);
-    // TODO: Is or not need release resource?
     KubernetesClusterDescriptor clusterDescriptor =
         (KubernetesClusterDescriptor) clusterClientFactory.createClusterDescriptor(flinkConfig);
     ClusterClient<String> clusterClient =

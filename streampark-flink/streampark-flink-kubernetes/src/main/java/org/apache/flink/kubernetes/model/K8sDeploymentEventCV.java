@@ -15,14 +15,34 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.model
+package org.apache.flink.kubernetes.model;
 
-import io.fabric8.kubernetes.api.model.apps.Deployment
-import io.fabric8.kubernetes.client.Watcher.Action
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.client.Watcher.Action;
 
-/**
- * @param action      event action
- * @param event       event content
- * @param pollAckTime polling ack time
- */
-case class K8sDeploymentEventCV(action: Action, event: Deployment, pollAckTime: Long)
+public class K8sDeploymentEventCV {
+
+  private final Action action;
+
+  private final Deployment event;
+
+  private final long pollAckTime;
+
+  public K8sDeploymentEventCV(Action action, Deployment event, long pollAckTime) {
+    this.action = action;
+    this.event = event;
+    this.pollAckTime = pollAckTime;
+  }
+
+  public Action getAction() {
+    return action;
+  }
+
+  public Deployment getEvent() {
+    return event;
+  }
+
+  public long getPollAckTime() {
+    return pollAckTime;
+  }
+}
