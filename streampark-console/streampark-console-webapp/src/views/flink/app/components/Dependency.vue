@@ -116,7 +116,7 @@
             }
           }
           if (invalidArtifact.length === 0) {
-            const id = classifier != null ? groupId + '_' + artifactId + '_' + classifier : groupId + '_' + artifactId;
+            const id = getId(groupId, artifactId, classifier);
             const mvnPom: Recordable = {
               groupId: groupId,
               artifactId: artifactId,
@@ -226,7 +226,7 @@
     handleUpdateDependency();
   }
   function handleRemovePom(pom: Recordable) {
-    const id = pom.classifier != null ? pom.groupId + '_' + pom.artifactId + '_' + pom.classifier : pom.groupId + '_' + pom.artifactId;
+    const id = getId(pom.groupId, pom.artifactId, pom.classifier);
     delete dependency.pom[id];
     handleUpdateDependency();
   }
@@ -258,6 +258,11 @@
     delete dependency.jar[item];
     handleUpdateDependency();
   }
+
+  function getId(groupId: string, artifactId: string, classifier: string) {
+    return classifier != null ? groupId + '_' + artifactId + '_' + classifier : groupId + '_' + artifactId;
+  }
+
   onMounted(() => {
     handleReloadHistoryUploads();
   });
