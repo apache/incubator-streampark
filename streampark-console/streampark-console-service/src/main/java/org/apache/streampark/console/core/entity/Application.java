@@ -712,7 +712,11 @@ public class Application implements Serializable {
 
     @Override
     public String toString() {
-      return groupId + ":" + artifactId + ":" + version
+      return groupId
+          + ":"
+          + artifactId
+          + ":"
+          + version
           + (StringUtils.isEmpty(classifier) ? "" : ":" + classifier);
     }
 
