@@ -107,7 +107,6 @@ export const getConfColumns = (): BasicColumn[] => [
   { title: 'Version', dataIndex: 'version' },
   { title: 'Conf Format', dataIndex: 'format' },
   { title: 'Effective', dataIndex: 'effective' },
-  { title: 'Candidate', dataIndex: 'candidate' },
   { title: 'Modify Time', dataIndex: 'createTime' },
 ];
 
