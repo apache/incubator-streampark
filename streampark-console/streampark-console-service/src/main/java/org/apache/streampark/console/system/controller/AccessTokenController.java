@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.system.controller;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
@@ -34,6 +33,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -145,7 +145,7 @@ public class AccessTokenController {
   /**
    * TODO after remove
    *
-   * copy cURL, hardcode now, there is no need for configuration here, because there are several
+   * <p>copy cURL, hardcode now, there is no need for configuration here, because there are several
    * fixed interfaces
    */
   @PostMapping(value = "curl")
