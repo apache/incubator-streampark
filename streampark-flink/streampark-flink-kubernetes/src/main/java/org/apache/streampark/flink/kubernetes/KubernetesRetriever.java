@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes;
-
-import org.apache.streampark.flink.kubernetes.IngressController;
+package org.apache.streampark.flink.kubernetes;
 
 import org.apache.flink.client.cli.ClientOptions;
 import org.apache.flink.client.deployment.ClusterClientFactory;
@@ -26,9 +24,10 @@ import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.kubernetes.KubernetesClusterDescriptor;
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
-import org.apache.flink.kubernetes.enums.FlinkK8sExecuteMode;
-import org.apache.flink.kubernetes.model.ClusterKey;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import org.apache.streampark.flink.kubernetes.model.ClusterKey;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;

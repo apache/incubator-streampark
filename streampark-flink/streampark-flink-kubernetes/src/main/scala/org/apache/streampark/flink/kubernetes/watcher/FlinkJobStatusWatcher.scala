@@ -30,8 +30,6 @@ import scala.util.{Failure, Success, Try}
 import com.google.common.base.Charsets
 import com.google.common.io.Files
 import org.apache.flink.core.fs.Path
-import org.apache.flink.kubernetes.KubernetesRetriever
-import org.apache.flink.kubernetes.enums.FlinkJobState
 import org.apache.flink.runtime.history.FsJobArchivist
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
@@ -40,6 +38,7 @@ import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, IngressController, JobStatusWatcherConfig, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.model._

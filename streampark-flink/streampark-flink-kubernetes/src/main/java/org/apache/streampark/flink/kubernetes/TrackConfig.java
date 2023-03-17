@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes;
+package org.apache.streampark.flink.kubernetes;
 
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.K8sFlinkConfig;

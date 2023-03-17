@@ -15,34 +15,24 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.model;
+package org.apache.streampark.flink.kubernetes.model;
 
-import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.client.Watcher.Action;
+public class K8sEventKey {
 
-public class K8sDeploymentEventCV {
+  private final String namespace;
 
-  private final Action action;
+  private final String clusterId;
 
-  private final Deployment event;
-
-  private final long pollAckTime;
-
-  public K8sDeploymentEventCV(Action action, Deployment event, long pollAckTime) {
-    this.action = action;
-    this.event = event;
-    this.pollAckTime = pollAckTime;
+  public K8sEventKey(String namespace, String clusterId) {
+    this.namespace = namespace;
+    this.clusterId = clusterId;
   }
 
-  public Action getAction() {
-    return action;
+  public String getNamespace() {
+    return namespace;
   }
 
-  public Deployment getEvent() {
-    return event;
-  }
-
-  public long getPollAckTime() {
-    return pollAckTime;
+  public String getClusterId() {
+    return clusterId;
   }
 }

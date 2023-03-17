@@ -15,26 +15,34 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.event;
+package org.apache.streampark.flink.kubernetes.model;
 
-import org.apache.flink.kubernetes.model.FlinkMetricCV;
-import org.apache.flink.kubernetes.model.TrackId;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.client.Watcher.Action;
 
-public class FlinkClusterMetricChangeEvent implements BuildInEvent {
-  private final TrackId trackId;
+public class K8sDeploymentEventCV {
 
-  private final FlinkMetricCV metrics;
+  private final Action action;
 
-  public FlinkClusterMetricChangeEvent(TrackId trackId, FlinkMetricCV metrics) {
-    this.trackId = trackId;
-    this.metrics = metrics;
+  private final Deployment event;
+
+  private final long pollAckTime;
+
+  public K8sDeploymentEventCV(Action action, Deployment event, long pollAckTime) {
+    this.action = action;
+    this.event = event;
+    this.pollAckTime = pollAckTime;
   }
 
-  public TrackId getTrackId() {
-    return trackId;
+  public Action getAction() {
+    return action;
   }
 
-  public FlinkMetricCV getMetrics() {
-    return metrics;
+  public Deployment getEvent() {
+    return event;
+  }
+
+  public long getPollAckTime() {
+    return pollAckTime;
   }
 }

@@ -15,6 +15,50 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.event;
+package org.apache.streampark.flink.kubernetes.watcher;
 
-public interface BuildInEvent {}
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public interface FlinkWatcher extends AutoCloseable {
+
+  AtomicBoolean started = new AtomicBoolean(false);
+
+  default void start() {
+    synchronized (this) {
+      if (!started.getAndSet(true)) {
+        doStart();
+      }
+    }
+  }
+
+  default void stop() {
+    synchronized (this) {
+      if (started.getAndSet(false)) {
+        doStop();
+      }
+    }
+  }
+
+  @Override
+  default void close() throws Exception {
+    if (started.get()) {
+      doStop();
+    }
+    doClose();
+  }
+
+  default void restart() {
+    synchronized (this) {
+      stop();
+      start();
+    }
+  }
+
+  void doStart();
+
+  void doStop();
+
+  void doClose();
+
+  void doWatch();
+}

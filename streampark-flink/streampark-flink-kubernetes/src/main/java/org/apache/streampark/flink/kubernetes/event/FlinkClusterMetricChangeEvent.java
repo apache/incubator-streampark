@@ -15,19 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.watcher;
+package org.apache.streampark.flink.kubernetes.event;
 
-public class FlinkCheckpointWatcher implements FlinkWatcher {
+import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
+import org.apache.streampark.flink.kubernetes.model.TrackId;
 
-  @Override
-  public void doStart() {}
+public class FlinkClusterMetricChangeEvent implements BuildInEvent {
+  private final TrackId trackId;
 
-  @Override
-  public void doStop() {}
+  private final FlinkMetricCV metrics;
 
-  @Override
-  public void doClose() {}
+  public FlinkClusterMetricChangeEvent(TrackId trackId, FlinkMetricCV metrics) {
+    this.trackId = trackId;
+    this.metrics = metrics;
+  }
 
-  @Override
-  public void doWatch() {}
+  public TrackId getTrackId() {
+    return trackId;
+  }
+
+  public FlinkMetricCV getMetrics() {
+    return metrics;
+  }
 }

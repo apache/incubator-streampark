@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.model;
+package org.apache.streampark.flink.kubernetes.model;
 
 public class CheckpointCV {
   private final long id;

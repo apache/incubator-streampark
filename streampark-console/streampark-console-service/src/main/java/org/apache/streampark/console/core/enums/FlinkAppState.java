@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.enums;
 
-import org.apache.flink.kubernetes.enums.FlinkJobState;
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 
 import lombok.Getter;
 

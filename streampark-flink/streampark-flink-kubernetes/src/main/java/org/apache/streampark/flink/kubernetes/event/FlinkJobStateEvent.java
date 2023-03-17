@@ -15,24 +15,36 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.model;
+package org.apache.streampark.flink.kubernetes.event;
 
-public class K8sEventKey {
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
+import org.apache.streampark.flink.kubernetes.model.TrackId;
 
-  private final String namespace;
+/**
+ * Notification of expecting changes to flink job state cache held internally by K8sFlinkMonitor.
+ */
+public class FlinkJobStateEvent implements BuildInEvent {
+  private final TrackId trackId;
 
-  private final String clusterId;
+  private final FlinkJobState jobState;
 
-  public K8sEventKey(String namespace, String clusterId) {
-    this.namespace = namespace;
-    this.clusterId = clusterId;
+  private final long pollTime;
+
+  public FlinkJobStateEvent(TrackId trackId, FlinkJobState jobState, long pollTime) {
+    this.trackId = trackId;
+    this.jobState = jobState;
+    this.pollTime = pollTime;
   }
 
-  public String getNamespace() {
-    return namespace;
+  public TrackId getTrackId() {
+    return trackId;
   }
 
-  public String getClusterId() {
-    return clusterId;
+  public FlinkJobState getJobState() {
+    return jobState;
+  }
+
+  public long getPollTime() {
+    return pollTime;
   }
 }

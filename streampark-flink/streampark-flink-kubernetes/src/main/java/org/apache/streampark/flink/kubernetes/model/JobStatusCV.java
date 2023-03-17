@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.model;
+package org.apache.streampark.flink.kubernetes.model;
 
-import org.apache.flink.kubernetes.enums.FlinkJobState;
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 
 public class JobStatusCV {
   private final FlinkJobState jobState;

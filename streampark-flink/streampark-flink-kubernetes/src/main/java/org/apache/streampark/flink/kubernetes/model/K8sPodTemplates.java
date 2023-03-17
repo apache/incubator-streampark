@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.model;
+package org.apache.streampark.flink.kubernetes.model;
 
 import org.apache.commons.lang3.StringUtils;
 

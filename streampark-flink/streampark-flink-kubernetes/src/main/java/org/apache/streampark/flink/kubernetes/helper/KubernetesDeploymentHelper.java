@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.helper;
+package org.apache.streampark.flink.kubernetes.helper;
 
 import org.apache.streampark.common.util.SystemPropertyUtils;
 
 import org.apache.curator.shaded.com.google.common.base.Charsets;
-import org.apache.flink.kubernetes.KubernetesRetriever;
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 
 import com.google.common.io.Files;
 import io.fabric8.kubernetes.api.model.Pod;

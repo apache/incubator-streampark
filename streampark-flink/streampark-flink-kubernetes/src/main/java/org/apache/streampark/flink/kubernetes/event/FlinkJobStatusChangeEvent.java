@@ -15,50 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.watcher;
+package org.apache.streampark.flink.kubernetes.event;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
+import org.apache.streampark.flink.kubernetes.model.TrackId;
 
-public interface FlinkWatcher extends AutoCloseable {
+/** Notification of flink job state changes from k8s clusters. */
+public class FlinkJobStatusChangeEvent implements BuildInEvent {
+  private final TrackId trackId;
 
-  AtomicBoolean started = new AtomicBoolean(false);
+  private final JobStatusCV jobStatus;
 
-  default void start() {
-    synchronized (this) {
-      if (!started.getAndSet(true)) {
-        doStart();
-      }
-    }
+  public FlinkJobStatusChangeEvent(TrackId trackId, JobStatusCV jobStatus) {
+    this.trackId = trackId;
+    this.jobStatus = jobStatus;
   }
 
-  default void stop() {
-    synchronized (this) {
-      if (started.getAndSet(false)) {
-        doStop();
-      }
-    }
+  public TrackId getTrackId() {
+    return trackId;
   }
 
-  @Override
-  default void close() throws Exception {
-    if (started.get()) {
-      doStop();
-    }
-    doClose();
+  public JobStatusCV getJobStatus() {
+    return jobStatus;
   }
-
-  default void restart() {
-    synchronized (this) {
-      stop();
-      start();
-    }
-  }
-
-  void doStart();
-
-  void doStop();
-
-  void doClose();
-
-  void doWatch();
 }

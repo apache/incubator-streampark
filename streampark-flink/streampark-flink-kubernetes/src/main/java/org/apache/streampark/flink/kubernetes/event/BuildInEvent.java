@@ -15,36 +15,6 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.event;
+package org.apache.streampark.flink.kubernetes.event;
 
-import org.apache.flink.kubernetes.enums.FlinkJobState;
-import org.apache.flink.kubernetes.model.TrackId;
-
-/**
- * Notification of expecting changes to flink job state cache held internally by K8sFlinkMonitor.
- */
-public class FlinkJobStateEvent implements BuildInEvent {
-  private final TrackId trackId;
-
-  private final FlinkJobState jobState;
-
-  private final long pollTime;
-
-  public FlinkJobStateEvent(TrackId trackId, FlinkJobState jobState, long pollTime) {
-    this.trackId = trackId;
-    this.jobState = jobState;
-    this.pollTime = pollTime;
-  }
-
-  public TrackId getTrackId() {
-    return trackId;
-  }
-
-  public FlinkJobState getJobState() {
-    return jobState;
-  }
-
-  public long getPollTime() {
-    return pollTime;
-  }
-}
+public interface BuildInEvent {}

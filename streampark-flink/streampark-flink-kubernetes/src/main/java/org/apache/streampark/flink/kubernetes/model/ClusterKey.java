@@ -15,27 +15,37 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.event;
+package org.apache.streampark.flink.kubernetes.model;
 
-import org.apache.flink.kubernetes.model.JobStatusCV;
-import org.apache.flink.kubernetes.model.TrackId;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 
-/** Notification of flink job state changes from k8s clusters. */
-public class FlinkJobStatusChangeEvent implements BuildInEvent {
-  private final TrackId trackId;
+public class ClusterKey {
+  private final FlinkK8sExecuteMode executeMode;
 
-  private final JobStatusCV jobStatus;
+  private final String clusterId;
 
-  public FlinkJobStatusChangeEvent(TrackId trackId, JobStatusCV jobStatus) {
-    this.trackId = trackId;
-    this.jobStatus = jobStatus;
+  private String namespace = "default";
+
+  public ClusterKey(FlinkK8sExecuteMode executeMode, String clusterId, String namespace) {
+    this.executeMode = executeMode;
+    this.clusterId = clusterId;
+    this.namespace = namespace;
   }
 
-  public TrackId getTrackId() {
-    return trackId;
+  public ClusterKey(FlinkK8sExecuteMode executeMode, String clusterId) {
+    this.executeMode = executeMode;
+    this.clusterId = clusterId;
   }
 
-  public JobStatusCV getJobStatus() {
-    return jobStatus;
+  public FlinkK8sExecuteMode getExecuteMode() {
+    return executeMode;
+  }
+
+  public String getClusterId() {
+    return clusterId;
+  }
+
+  public String getNamespace() {
+    return namespace;
   }
 }

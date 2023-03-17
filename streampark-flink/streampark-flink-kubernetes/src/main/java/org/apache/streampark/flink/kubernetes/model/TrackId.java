@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.model;
+package org.apache.streampark.flink.kubernetes.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 
 import java.util.Objects;
 

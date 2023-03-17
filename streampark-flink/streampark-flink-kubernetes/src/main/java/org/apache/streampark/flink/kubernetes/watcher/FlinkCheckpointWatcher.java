@@ -15,37 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.model;
+package org.apache.streampark.flink.kubernetes.watcher;
 
-import org.apache.flink.kubernetes.enums.FlinkK8sExecuteMode;
+public class FlinkCheckpointWatcher implements FlinkWatcher {
 
-public class ClusterKey {
-  private final FlinkK8sExecuteMode executeMode;
+  @Override
+  public void doStart() {}
 
-  private final String clusterId;
+  @Override
+  public void doStop() {}
 
-  private String namespace = "default";
+  @Override
+  public void doClose() {}
 
-  public ClusterKey(FlinkK8sExecuteMode executeMode, String clusterId, String namespace) {
-    this.executeMode = executeMode;
-    this.clusterId = clusterId;
-    this.namespace = namespace;
-  }
-
-  public ClusterKey(FlinkK8sExecuteMode executeMode, String clusterId) {
-    this.executeMode = executeMode;
-    this.clusterId = clusterId;
-  }
-
-  public FlinkK8sExecuteMode getExecuteMode() {
-    return executeMode;
-  }
-
-  public String getClusterId() {
-    return clusterId;
-  }
-
-  public String getNamespace() {
-    return namespace;
-  }
+  @Override
+  public void doWatch() {}
 }
