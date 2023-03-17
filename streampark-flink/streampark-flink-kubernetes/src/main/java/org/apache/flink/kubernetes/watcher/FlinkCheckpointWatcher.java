@@ -15,27 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.event;
+package org.apache.flink.kubernetes.watcher;
 
-import org.apache.flink.kubernetes.model.CheckpointCV;
-import org.apache.flink.kubernetes.model.TrackId;
+public class FlinkCheckpointWatcher implements FlinkWatcher {
 
-/** held internally by K8sFlinkMonitor. */
-public class FlinkJobCheckpointChangeEvent implements BuildInEvent {
-  private final TrackId trackId;
+  @Override
+  public void doStart() {}
 
-  private final CheckpointCV checkpoint;
+  @Override
+  public void doStop() {}
 
-  public FlinkJobCheckpointChangeEvent(TrackId trackId, CheckpointCV checkpoint) {
-    this.trackId = trackId;
-    this.checkpoint = checkpoint;
-  }
+  @Override
+  public void doClose() {}
 
-  public TrackId getTrackId() {
-    return trackId;
-  }
-
-  public CheckpointCV getCheckpoint() {
-    return checkpoint;
-  }
+  @Override
+  public void doWatch() {}
 }

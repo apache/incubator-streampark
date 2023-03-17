@@ -17,9 +17,8 @@
 
 package org.apache.flink.kubernetes.event;
 
-import org.apache.streampark.flink.kubernetes.model.TrackId;
-
 import org.apache.flink.kubernetes.enums.FlinkJobState;
+import org.apache.flink.kubernetes.model.TrackId;
 
 /**
  * Notification of expecting changes to flink job state cache held internally by K8sFlinkMonitor.

@@ -30,6 +30,7 @@ import scala.util.{Failure, Success, Try}
 import com.google.common.base.Charsets
 import com.google.common.io.Files
 import org.apache.flink.core.fs.Path
+import org.apache.flink.kubernetes.KubernetesRetriever
 import org.apache.flink.kubernetes.enums.FlinkJobState
 import org.apache.flink.runtime.history.FsJobArchivist
 import org.apache.hc.client5.http.fluent.Request

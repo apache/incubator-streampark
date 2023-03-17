@@ -17,8 +17,8 @@
 
 package org.apache.flink.kubernetes.event;
 
-import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
-import org.apache.streampark.flink.kubernetes.model.TrackId;
+import org.apache.flink.kubernetes.model.FlinkMetricCV;
+import org.apache.flink.kubernetes.model.TrackId;
 
 public class FlinkClusterMetricChangeEvent implements BuildInEvent {
   private final TrackId trackId;

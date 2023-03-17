@@ -15,27 +15,50 @@
  * limitations under the License.
  */
 
-package org.apache.flink.kubernetes.event;
+package org.apache.flink.kubernetes.watcher;
 
-import org.apache.flink.kubernetes.model.CheckpointCV;
-import org.apache.flink.kubernetes.model.TrackId;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-/** held internally by K8sFlinkMonitor. */
-public class FlinkJobCheckpointChangeEvent implements BuildInEvent {
-  private final TrackId trackId;
+public interface FlinkWatcher extends AutoCloseable {
 
-  private final CheckpointCV checkpoint;
+  AtomicBoolean started = new AtomicBoolean(false);
 
-  public FlinkJobCheckpointChangeEvent(TrackId trackId, CheckpointCV checkpoint) {
-    this.trackId = trackId;
-    this.checkpoint = checkpoint;
+  default void start() {
+    synchronized (this) {
+      if (!started.getAndSet(true)) {
+        doStart();
+      }
+    }
   }
 
-  public TrackId getTrackId() {
-    return trackId;
+  default void stop() {
+    synchronized (this) {
+      if (started.getAndSet(false)) {
+        doStop();
+      }
+    }
   }
 
-  public CheckpointCV getCheckpoint() {
-    return checkpoint;
+  @Override
+  default void close() throws Exception {
+    if (started.get()) {
+      doStop();
+    }
+    doClose();
   }
+
+  default void restart() {
+    synchronized (this) {
+      stop();
+      start();
+    }
+  }
+
+  void doStart();
+
+  void doStop();
+
+  void doClose();
+
+  void doWatch();
 }

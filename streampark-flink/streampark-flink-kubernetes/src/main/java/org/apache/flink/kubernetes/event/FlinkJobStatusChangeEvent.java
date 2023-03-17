@@ -17,8 +17,8 @@
 
 package org.apache.flink.kubernetes.event;
 
-import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
-import org.apache.streampark.flink.kubernetes.model.TrackId;
+import org.apache.flink.kubernetes.model.JobStatusCV;
+import org.apache.flink.kubernetes.model.TrackId;
 
 /** Notification of flink job state changes from k8s clusters. */
 public class FlinkJobStatusChangeEvent implements BuildInEvent {
