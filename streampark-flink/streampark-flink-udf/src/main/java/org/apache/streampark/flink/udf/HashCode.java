@@ -15,36 +15,24 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.udf
+package org.apache.streampark.flink.udf;
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import org.apache.flink.table.functions.ScalarFunction;
 
-import org.apache.flink.table.functions.ScalarFunction
+public class HashCode extends ScalarFunction {
 
-class HashCode(val factor: Int = 12) extends ScalarFunction {
-  def eval(s: String): Int = s match {
-    case null => 0
-    case x => x.hashCode() * factor
+  private Integer factor = 12;
+
+  public HashCode() {}
+
+  public HashCode(Integer factor) {
+    this.factor = factor;
   }
-}
 
-class DateFormat(val format: String = "yyyy-MM-dd HH:mm:ss") extends ScalarFunction {
-  var sf: SimpleDateFormat = _
-
-  def eval(time: Long): String = {
-    if (sf == null) {
-      sf = new SimpleDateFormat(format)
+  public Integer eval(String s) {
+    if (s == null) {
+      return 0;
     }
-    sf.format(new Date(time))
-  }
-}
-
-class Length extends ScalarFunction {
-  def eval(str: String): Int = {
-    str match {
-      case null => 0
-      case x => x.length
-    }
+    return s.hashCode() * factor;
   }
 }
