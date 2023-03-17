@@ -23,44 +23,46 @@ import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 
-@ApiModel(value = "AlertConfig")
+@Schema(name = "AlertConfig")
 @Data
 @Slf4j
 public class AlertConfigWithParams implements Serializable {
 
-  @ApiModelProperty(name = "id", value = "id")
+  @Schema(example = "1")
   private Long id;
 
-  @ApiModelProperty(name = "userId", value = "user id")
+  @Schema(example = "100000")
   private Long userId;
 
-  @ApiModelProperty(name = "alertName", value = "alert name")
+  @Schema(example = "test-alert")
   private String alertName;
 
-  @ApiModelProperty(name = "alertType", value = "alert type")
+  @Schema(
+      example = "1",
+      description =
+          "base type, email 1, dink-talk 2, we-com 4, http callback 8, lark 16, also choose a combination, e.g. 3 means email + dink-talk")
   private Integer alertType;
 
-  @ApiModelProperty(name = "emailParams", value = "email alert params")
+  @Schema(description = "email alert parameters")
   private AlertEmailParams emailParams;
 
-  @ApiModelProperty(name = "dingTalkParams", value = "ding-talk alert params")
+  @Schema(description = "ding-talk alert parameters")
   private AlertDingTalkParams dingTalkParams;
 
-  @ApiModelProperty(name = "weComParams", value = "we-com alert params")
+  @Schema(description = "we-com alert parameters")
   private AlertWeComParams weComParams;
 
-  @ApiModelProperty(name = "httpCallbackParams", value = "http callback alert params")
+  @Schema(description = "http callback alert parameters")
   private AlertHttpCallbackParams httpCallbackParams;
 
-  @ApiModelProperty(name = "larkParams", value = "lark alert params")
+  @Schema(description = "lark alert parameters")
   private AlertLarkParams larkParams;
 
   public static AlertConfigWithParams of(AlertConfig config) {

@@ -23,7 +23,7 @@ import org.apache.streampark.console.core.service.ApplicationService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -34,9 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
-@Api(
-    tags = "[flink history] related operations",
-    consumes = "Content-Type=application/x-www-form-urlencoded")
+@Tag(name = "FLINK_APPLICATION_HISTORY_TAG")
 @Slf4j
 @Validated
 @RestController

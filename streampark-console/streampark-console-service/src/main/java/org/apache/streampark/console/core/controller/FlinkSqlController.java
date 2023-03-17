@@ -30,7 +30,7 @@ import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -42,9 +42,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
-@Api(
-    tags = "[flink sql] related operations",
-    consumes = "Content-Type=application/x-www-form-urlencoded")
+@Tag(name = "FLINK_SQL_TAG")
 @Slf4j
 @Validated
 @RestController

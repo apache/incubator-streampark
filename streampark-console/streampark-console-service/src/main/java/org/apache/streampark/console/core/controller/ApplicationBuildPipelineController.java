@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
@@ -32,10 +31,11 @@ import org.apache.streampark.flink.packer.pipeline.PipelineType;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Api(tags = {"FLINK_APPLICATION_BUILD_PIPELINE_TAG"})
+@Tag(name = "FLINK_APPLICATION_BUILD_PIPELINE_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -67,27 +67,17 @@ public class ApplicationBuildPipelineController {
    * @param forceBuild forced start pipeline or not
    * @return Whether the pipeline was successfully started
    */
-  @ApiAccess
-  @ApiOperation(
-      value = "Release application",
-      notes = "Release application",
-      tags = ApiDocConstant.FLINK_APP_OP_TAG,
-      consumes = "application/x-www-form-urlencoded")
-  @ApiImplicitParams({
-    @ApiImplicitParam(
-        name = "appId",
-        value = "APP_ID",
-        required = true,
-        paramType = "query",
-        dataTypeClass = Long.class),
-    @ApiImplicitParam(
+  @Operation(summary = "Release application")
+  @Parameters({
+    @Parameter(name = "appId", description = "app id", required = true, example = "100000"),
+    @Parameter(
         name = "forceBuild",
-        value = "FORCE_BUILD",
+        description = "force build",
         required = true,
-        paramType = "query",
-        dataTypeClass = Boolean.class,
-        defaultValue = "false"),
+        example = "false",
+        schema = @Schema(defaultValue = "false", implementation = boolean.class))
   })
+  @ApiAccess
   @PostMapping(value = "build", consumes = "application/x-www-form-urlencoded")
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {

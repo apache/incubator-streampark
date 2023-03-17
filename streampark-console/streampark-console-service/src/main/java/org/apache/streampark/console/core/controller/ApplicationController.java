@@ -39,10 +39,11 @@ import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -50,7 +51,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Api(tags = {"FLINK_APPLICATION_TAG"})
+@Tag(name = "FLINK_APPLICATION_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -92,36 +92,22 @@ public class ApplicationController {
     return RestResponse.success(saved);
   }
 
-  @ApiAccess
-  @ApiOperation(
-      value = "Copy application from the exist app",
-      tags = ApiDocConstant.FLINK_APP_OP_TAG,
-      consumes = "application/x-www-form-urlencoded")
-  @ApiImplicitParams({
-    @ApiImplicitParam(
+  @Operation(
+      summary = "Copy application",
+      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
+  @Parameters({
+    @Parameter(
         name = "id",
-        value = "copy target app id",
+        description = "copied target app id",
         required = true,
-        paramType = "query",
-        dataTypeClass = Long.class),
-    @ApiImplicitParam(
-        name = "jobName",
-        value = "name of the copied application",
-        required = true,
-        paramType = "query",
-        dataTypeClass = String.class,
-        defaultValue = ""),
-    @ApiImplicitParam(
-        name = "args",
-        value = "commit parameters after copying",
-        required = false,
-        paramType = "query",
-        dataTypeClass = String.class,
-        defaultValue = "")
+        example = "100000"),
+    @Parameter(name = "jobName", description = "new application name", example = "copy-app"),
+    @Parameter(name = "args", description = "new application args")
   })
+  @ApiAccess
   @PostMapping(value = "copy", consumes = "application/x-www-form-urlencoded")
   @RequiresPermissions("app:copy")
-  public RestResponse copy(@ApiIgnore Application app) throws IOException {
+  public RestResponse copy(@Parameter(hidden = true) Application app) throws IOException {
     Long id = applicationService.copy(app);
     Map<String, String> data = new HashMap<>();
     data.put("id", Long.toString(id));
@@ -196,43 +182,36 @@ public class ApplicationController {
     return RestResponse.success();
   }
 
-  @ApiAccess
-  @ApiOperation(
-      value = "Start application",
-      tags = ApiDocConstant.FLINK_APP_OP_TAG,
-      consumes = "application/x-www-form-urlencoded")
-  @ApiImplicitParams({
-    @ApiImplicitParam(
+  @Operation(
+      summary = "Start application",
+      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
+  @Parameters({
+    @Parameter(
         name = "id",
-        value = "app Id",
+        description = "start app id",
         required = true,
-        paramType = "query",
-        dataTypeClass = Long.class),
-    @ApiImplicitParam(
+        example = "100000",
+        schema = @Schema(implementation = Long.class)),
+    @Parameter(
         name = "savePointed",
-        value = "restored app from the savepoint or latest checkpoint",
+        description = "restored app from the savepoint or latest checkpoint",
         required = true,
-        paramType = "query",
-        dataTypeClass = Boolean.class,
-        defaultValue = "false"),
-    @ApiImplicitParam(
+        schema = @Schema(implementation = boolean.class, defaultValue = "false")),
+    @Parameter(
         name = "savePoint",
-        value = "savepoint or checkpoint path",
+        description = "savepoint or checkpoint path",
         required = true,
-        paramType = "query",
-        dataTypeClass = String.class,
-        defaultValue = ""),
-    @ApiImplicitParam(
+        schema = @Schema(implementation = String.class)),
+    @Parameter(
         name = "allowNonRestored",
-        value = "ignore savepoint then cannot be restored",
+        description = "ignore savepoint if cannot be restored",
         required = true,
-        paramType = "query",
-        dataTypeClass = Boolean.class,
-        defaultValue = "false")
+        schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
+  @ApiAccess
   @PostMapping(value = "start", consumes = "application/x-www-form-urlencoded")
   @RequiresPermissions("app:start")
-  public RestResponse start(@ApiIgnore Application app) {
+  public RestResponse start(@Parameter(hidden = true) Application app) {
     try {
       applicationService.checkEnv(app);
       applicationService.starting(app);
@@ -243,42 +222,37 @@ public class ApplicationController {
     }
   }
 
+  @Operation(
+      summary = "Cancel application",
+      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
   @ApiAccess
-  @ApiOperation(
-      value = "Cancel application",
-      tags = ApiDocConstant.FLINK_APP_OP_TAG,
-      consumes = "application/x-www-form-urlencoded")
-  @ApiImplicitParams({
-    @ApiImplicitParam(
+  @Parameters({
+    @Parameter(
         name = "id",
-        value = "app id",
+        description = "cancel app id",
         required = true,
-        paramType = "query",
-        dataTypeClass = Long.class),
-    @ApiImplicitParam(
+        example = "100000",
+        schema = @Schema(implementation = Long.class)),
+    @Parameter(
         name = "savePointed",
-        value = "whether trigger savepoint before taking stopping",
+        description = "trigger savepoint before taking stopping",
         required = true,
-        paramType = "query",
-        dataTypeClass = Boolean.class,
-        defaultValue = "false"),
-    @ApiImplicitParam(
+        schema = @Schema(implementation = boolean.class, defaultValue = "false")),
+    @Parameter(
         name = "savePoint",
-        value = "savepoint path",
-        paramType = "query",
-        dataTypeClass = String.class,
-        defaultValue = "hdfs:///tm/xxx"),
-    @ApiImplicitParam(
+        description = "savepoint path",
+        example = "hdfs:///savepoint/100000",
+        schema = @Schema(implementation = String.class)),
+    @Parameter(
         name = "drain",
-        value = "send max watermark before canceling",
+        description = "send max watermark before canceling",
         required = true,
-        paramType = "query",
-        dataTypeClass = Boolean.class,
-        defaultValue = "false")
+        example = "false",
+        schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @PostMapping(value = "cancel", consumes = "application/x-www-form-urlencoded")
   @RequiresPermissions("app:cancel")
-  public RestResponse cancel(@ApiIgnore Application app) throws Exception {
+  public RestResponse cancel(@Parameter(hidden = true) Application app) throws Exception {
     applicationService.cancel(app);
     return RestResponse.success();
   }
@@ -411,11 +385,26 @@ public class ApplicationController {
     }
   }
 
-  @ApiOperation(value = "Read flink on k8s deploy log")
-  @ApiImplicitParams({
-    @ApiImplicitParam(name = "id", value = "app id"),
-    @ApiImplicitParam(name = "offset", value = "number of log lines offset"),
-    @ApiImplicitParam(name = "limit", value = "number of log lines loaded at once")
+  @Operation(summary = "Read flink on k8s deploy log")
+  @Parameters({
+    @Parameter(
+        name = "id",
+        description = "app id",
+        required = true,
+        example = "100000",
+        schema = @Schema(implementation = Long.class)),
+    @Parameter(
+        name = "offset",
+        description = "number of log lines offset",
+        required = true,
+        example = "0",
+        schema = @Schema(implementation = int.class)),
+    @Parameter(
+        name = "limit",
+        description = "number of log lines loaded at once",
+        required = true,
+        example = "100",
+        schema = @Schema(implementation = int.class)),
   })
   @PostMapping(value = "k8sStartLog")
   public RestResponse k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {

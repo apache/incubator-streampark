@@ -24,10 +24,10 @@ import org.apache.streampark.console.core.service.ExternalLinkService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -42,7 +42,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
-@Api(tags = {"FLINK_EXTERNAL_LINK_TAG"})
+@Tag(name = "FLINK_EXTERNAL_LINK_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -51,7 +51,7 @@ public class ExternalLinkController {
 
   @Autowired private ExternalLinkService externalLinkService;
 
-  @ApiOperation(value = "List externalLink")
+  @Operation(summary = "List external link")
   @PostMapping("/list")
   @RequiresPermissions("externalLink:view")
   public RestResponse list() {
@@ -59,15 +59,8 @@ public class ExternalLinkController {
     return RestResponse.success(externalLink);
   }
 
-  @ApiOperation(value = "Render externalLink by appId")
-  @ApiImplicitParams({
-    @ApiImplicitParam(
-        name = "appId",
-        value = "application id",
-        required = true,
-        paramType = "query",
-        dataTypeClass = Long.class)
-  })
+  @Operation(summary = "Render external link", description = "Render external link by app id")
+  @Parameters({@Parameter(name = "appId", required = true, example = "100000")})
   @PostMapping("/render")
   public RestResponse render(
       @NotNull(message = "The flink app id cannot be null") @RequestParam("appId") Long appId) {
@@ -75,7 +68,7 @@ public class ExternalLinkController {
     return RestResponse.success(renderedExternalLink);
   }
 
-  @ApiOperation(value = "Create externalLink")
+  @Operation(summary = "Create external link")
   @PostMapping("/create")
   @RequiresPermissions("externalLink:create")
   public RestResponse create(@Valid ExternalLink externalLink) {
@@ -83,7 +76,7 @@ public class ExternalLinkController {
     return RestResponse.success();
   }
 
-  @ApiOperation(value = "Update externalLink")
+  @Operation(summary = "Update external link")
   @PostMapping("/update")
   @RequiresPermissions("externalLink:update")
   public RestResponse update(@Valid ExternalLink externalLink) {
@@ -92,15 +85,8 @@ public class ExternalLinkController {
     return RestResponse.success();
   }
 
-  @ApiOperation(value = "Delete externalLink")
-  @ApiImplicitParams({
-    @ApiImplicitParam(
-        name = "id",
-        value = "external link id",
-        required = true,
-        paramType = "query",
-        dataTypeClass = Long.class)
-  })
+  @Operation(summary = "Delete external link")
+  @Parameters({@Parameter(name = "appId", required = true, example = "100000")})
   @DeleteMapping("/delete")
   @RequiresPermissions("externalLink:delete")
   public RestResponse delete(
