@@ -65,7 +65,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     if (StringUtils.isEmpty(expireTime)) {
       expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
     }
-
     Long ttl = DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault());
     String token =
         WebUtils.encryptToken(
