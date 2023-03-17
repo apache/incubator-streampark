@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
@@ -67,7 +68,9 @@ public class ApplicationBuildPipelineController {
    * @param forceBuild forced start pipeline or not
    * @return Whether the pipeline was successfully started
    */
-  @Operation(summary = "Release application")
+  @Operation(
+      summary = "Release application",
+      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
   @Parameters({
     @Parameter(name = "appId", description = "app id", required = true, example = "100000"),
     @Parameter(

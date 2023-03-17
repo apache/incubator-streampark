@@ -38,12 +38,14 @@ public class AccessTokenServiceTest extends SpringTestBase {
   @Autowired private UserService userService;
 
   @Test
-  void testGenerateToken() throws Exception {
+  void testCrudToken() throws Exception {
     Long mockUserId = 100000L;
     String expireTime = "9999-01-01 00:00:00";
     RestResponse restResponse = accessTokenService.generateToken(mockUserId, expireTime, "");
     Assertions.assertNotNull(restResponse);
     Assertions.assertInstanceOf(AccessToken.class, restResponse.get("data"));
+
+    // verify
     AccessToken accessToken = (AccessToken) restResponse.get("data");
     LOG.info(accessToken.getToken());
     JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(accessToken.getToken()));
@@ -54,5 +56,19 @@ public class AccessTokenServiceTest extends SpringTestBase {
     User user = userService.findByName(username);
     Assertions.assertNotNull(user);
     Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getPassword()));
+
+    // toggle
+    Long tokenId = accessToken.getId();
+    RestResponse toggleTokenResp = accessTokenService.toggleToken(tokenId);
+    Assertions.assertNotNull(toggleTokenResp);
+    Assertions.assertTrue((Boolean) toggleTokenResp.get("data"));
+
+    // get
+    AccessToken afterToggle = accessTokenService.getByUserId(mockUserId);
+    Assertions.assertNotNull(afterToggle);
+    Assertions.assertEquals(AccessToken.STATUS_DISABLE, afterToggle.getStatus());
+
+    // delete
+    Assertions.assertTrue(accessTokenService.deleteToken(tokenId));
   }
 }
