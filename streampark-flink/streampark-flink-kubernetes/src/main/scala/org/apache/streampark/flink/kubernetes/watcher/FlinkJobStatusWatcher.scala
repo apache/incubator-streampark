@@ -38,6 +38,7 @@ import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.kubernetes.TrackConfig.JobStatusWatcherConfig
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, IngressController, JobStatusWatcherConfig, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper

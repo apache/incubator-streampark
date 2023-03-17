@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
+import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.concurrent.ThreadSafe
@@ -31,7 +32,7 @@ import org.json4s.JsonAST.JNothing
 import org.json4s.jackson.JsonMethods.parse
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.TrackConfig.MetricWatcherConfig
-import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, KubernetesRetriever, MetricWatcherConfig}
+import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
 
 @ThreadSafe
@@ -109,7 +110,7 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
       // call flink rest overview api
       val checkpoint: Checkpoint = Try(
         Checkpoint.as(
-          Request.get(s"$flinkJmRestUrl/jobs/${trackId.jobId}/checkpoints")
+          Request.get(s"$flinkJmRestUrl/jobs/${trackId.getJobId}/checkpoints")
             .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
             .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
             .execute.returnContent.asString(StandardCharsets.UTF_8)) match {

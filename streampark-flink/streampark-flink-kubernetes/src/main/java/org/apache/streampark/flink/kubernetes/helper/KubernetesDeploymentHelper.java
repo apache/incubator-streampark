@@ -18,9 +18,9 @@
 package org.apache.streampark.flink.kubernetes.helper;
 
 import org.apache.streampark.common.util.SystemPropertyUtils;
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 
 import org.apache.curator.shaded.com.google.common.base.Charsets;
-import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 
 import com.google.common.io.Files;
 import io.fabric8.kubernetes.api.model.Pod;

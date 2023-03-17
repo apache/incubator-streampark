@@ -17,8 +17,9 @@
 
 package org.apache.streampark.flink.kubernetes.model;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 

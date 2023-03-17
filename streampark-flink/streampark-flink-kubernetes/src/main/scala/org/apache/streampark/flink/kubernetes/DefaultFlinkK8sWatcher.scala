@@ -18,8 +18,8 @@
 package org.apache.streampark.flink.kubernetes
 
 import javax.annotation.Nullable
-
 import com.google.common.eventbus.Subscribe
+import org.apache.streampark.flink.kubernetes.TrackConfig.FlinkTrackConfig
 import org.apache.streampark.flink.kubernetes.model._
 import org.apache.streampark.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
