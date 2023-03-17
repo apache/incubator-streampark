@@ -46,7 +46,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -70,7 +69,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     Long ttl = DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault());
     String token =
         WebUtils.encryptToken(
-            JWTUtil.sign(user.getUserId(), user.getUsername(), UUID.randomUUID().toString(), ttl));
+            JWTUtil.sign(user.getUserId(), user.getUsername(), user.getPassword(), ttl));
     JWTToken jwtToken = new JWTToken(token, expireTime);
 
     AccessToken accessToken = new AccessToken();

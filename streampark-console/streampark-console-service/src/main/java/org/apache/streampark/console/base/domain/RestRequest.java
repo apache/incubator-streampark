@@ -19,9 +19,11 @@ package org.apache.streampark.console.base.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.springdoc.api.annotations.ParameterObject;
 
 import java.io.Serializable;
 
+@ParameterObject
 @Data
 public class RestRequest implements Serializable {
 

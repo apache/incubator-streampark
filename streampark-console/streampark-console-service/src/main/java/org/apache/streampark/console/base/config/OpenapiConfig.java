@@ -17,18 +17,23 @@
 
 package org.apache.streampark.console.base.config;
 
+import org.apache.http.HttpHeaders;
+
 import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.GroupedOpenApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Collections;
 
 @EnableKnife4j
 @Configuration
@@ -52,20 +57,23 @@ public class OpenapiConfig implements WebMvcConfigurer {
         .components(
             new Components()
                 .addSecuritySchemes(
-                    "AccessToken",
+                    HttpHeaders.AUTHORIZATION,
                     new SecurityScheme()
                         .type(SecurityScheme.Type.APIKEY)
-                        .name("Authorization")
-                        .in(SecurityScheme.In.HEADER)));
+                        .name(HttpHeaders.AUTHORIZATION)
+                        .in(SecurityScheme.In.HEADER)))
+        .security(
+            Collections.singletonList(
+                new SecurityRequirement().addList(HttpHeaders.AUTHORIZATION)));
   }
 
   @Bean
-  public GroupedOpenApi publicApi1() {
+  public GroupedOpenApi publicApiV1() {
     return GroupedOpenApi.builder().group("v1").pathsToExclude("/v2/**").build();
   }
 
   @Bean
-  public GroupedOpenApi publicApi2() {
+  public GroupedOpenApi publicApiV2() {
     return GroupedOpenApi.builder().group("v2").pathsToMatch("/v2/**").build();
   }
 }
