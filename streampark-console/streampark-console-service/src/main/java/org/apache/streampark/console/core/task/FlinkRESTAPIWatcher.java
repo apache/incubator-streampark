@@ -568,7 +568,7 @@ public class FlinkRESTAPIWatcher {
     }
   }
 
-  private void cleanSavepoint(Application application) {
+  public void cleanSavepoint(Application application) {
     SAVEPOINT_CACHE.invalidate(application.getId());
     application.setOptionState(OptionState.NONE.getValue());
   }
