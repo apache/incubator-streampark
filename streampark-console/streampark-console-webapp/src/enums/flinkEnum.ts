@@ -96,7 +96,7 @@ export enum AppStateEnum {
   CANCELLING = 8,
   /** Job has been cancelled. */
   CANCELED = 9,
-  /** All of the job's tasks have successfully finished. */
+  /** All the job's tasks have successfully finished. */
   FINISHED = 10,
   /** The job has been suspended which means that it has been stopped but not been removed from a potential HA job store. */
   SUSPENDED = 11,
@@ -115,9 +115,9 @@ export enum AppStateEnum {
    * A complete loss of flink job tracking translates into LOST state.
    */
   SILENT = 17,
-  /** Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED */
+  /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED */
   TERMINATED = 18,
-  /** Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED */
+  /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED */
   POS_TERMINATED = 19,
   /** job SUCCEEDED on yarn */
   SUCCEEDED = 20,
