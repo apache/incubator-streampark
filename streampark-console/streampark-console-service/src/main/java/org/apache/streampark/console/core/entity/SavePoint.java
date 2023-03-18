@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.console.core.enums.CheckPointType;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -43,7 +45,7 @@ public class SavePoint {
    * 1) checkPoint <br>
    * 2) savePoint
    */
-  private Integer type;
+  private CheckPointType type;
 
   private String path;
 

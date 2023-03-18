@@ -288,7 +288,7 @@ class YarnQueueServiceTest extends SpringTestBase {
     cluster.setClusterName(name);
     cluster.setYarnQueue(yarnQueue);
     cluster.setVersionId(versionId);
-    cluster.setExecutionMode(ExecutionMode.YARN_SESSION.getMode());
+    cluster.setExecutionMode(ExecutionMode.YARN_SESSION);
     return cluster;
   }
 
@@ -298,7 +298,7 @@ class YarnQueueServiceTest extends SpringTestBase {
     application.setYarnQueue(yarnQueue);
     application.setTeamId(teamId);
     application.setJobName(name);
-    application.setExecutionMode(executionMode.getMode());
+    application.setExecutionMode(executionMode);
     application.doSetHotParams();
     return application;
   }

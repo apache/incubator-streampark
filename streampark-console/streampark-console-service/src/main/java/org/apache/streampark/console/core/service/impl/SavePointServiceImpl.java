@@ -181,7 +181,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       }
     }
 
-    if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
+    if (CheckPointType.CHECKPOINT.equals(entity.getType())) {
       cpThreshold = cpThreshold - 1;
     }
 
@@ -291,7 +291,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     FlinkRESTAPIWatcher.addSavepoint(application.getId());
 
-    application.setOptionState(OptionState.SAVEPOINTING.getValue());
+    application.setOptionState(OptionState.SAVEPOINTING);
     application.setOptionTime(new Date());
     this.applicationService.updateById(application);
     flinkRESTAPIWatcher.init();
@@ -309,7 +309,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     TriggerSavepointRequest request =
         new TriggerSavepointRequest(
             flinkEnv.getFlinkVersion(),
-            application.getExecutionModeEnum(),
+            application.getExecutionMode(),
             properties,
             clusterId,
             application.getJobId(),
@@ -348,7 +348,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         .whenComplete(
             (t, e) -> {
               applicationLogService.save(applicationLog);
-              application.setOptionState(OptionState.NONE.getValue());
+              application.setOptionState(OptionState.NONE);
               application.setOptionTime(new Date());
               applicationService.update(application);
               flinkRESTAPIWatcher.init();
@@ -374,7 +374,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   private Map<String, Object> tryGetRestProps(Application application, FlinkCluster cluster) {
     Map<String, Object> properties = new HashMap<>();
 
-    if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+    if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
       Utils.notNull(
           cluster,
           String.format(
@@ -391,7 +391,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       return application.getClusterId();
     } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionMode())) {
         Utils.notNull(
             cluster,
             String.format(

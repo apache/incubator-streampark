@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
 
 /** @since: 1.2.3 */
@@ -31,19 +34,10 @@ public enum ClusterState implements Serializable {
   /** cluster lost */
   LOST(3);
 
-  private final Integer value;
+  @JsonValue @EnumValue private final Integer value;
 
   ClusterState(Integer value) {
     this.value = value;
-  }
-
-  public static ClusterState of(Integer value) {
-    for (ClusterState clusterState : values()) {
-      if (clusterState.value.equals(value)) {
-        return clusterState;
-      }
-    }
-    return null;
   }
 
   public Integer getValue() {

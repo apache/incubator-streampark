@@ -123,7 +123,7 @@ public class ApplicationBackUpServiceImpl
         new UpdateWrapper<Application>()
             .lambda()
             .eq(Application::getId, application.getId())
-            .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
+            .set(Application::getRelease, ReleaseState.NEED_RESTART));
   }
 
   @Override

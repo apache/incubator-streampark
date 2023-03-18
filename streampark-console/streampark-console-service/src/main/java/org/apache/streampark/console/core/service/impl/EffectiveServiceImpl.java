@@ -43,7 +43,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
     LambdaQueryWrapper<Effective> queryWrapper =
         new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
-            .eq(Effective::getTargetType, effectiveType.getType());
+            .eq(Effective::getTargetType, effectiveType);
     baseMapper.delete(queryWrapper);
   }
 
@@ -52,7 +52,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
     LambdaQueryWrapper<Effective> queryWrapper =
         new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
-            .eq(Effective::getTargetType, effectiveType.getType());
+            .eq(Effective::getTargetType, effectiveType);
     return this.getOne(queryWrapper);
   }
 
@@ -61,12 +61,12 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
     LambdaQueryWrapper<Effective> queryWrapper =
         new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
-            .eq(Effective::getTargetType, type.getType());
+            .eq(Effective::getTargetType, type);
     long count = count(queryWrapper);
     if (count == 0) {
       Effective effective = new Effective();
       effective.setAppId(appId);
-      effective.setTargetType(type.getType());
+      effective.setTargetType(type);
       effective.setTargetId(id);
       effective.setCreateTime(new Date());
       save(effective);
@@ -74,7 +74,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
       update(
           new LambdaUpdateWrapper<Effective>()
               .eq(Effective::getAppId, appId)
-              .eq(Effective::getTargetType, type.getType())
+              .eq(Effective::getTargetType, type)
               .set(Effective::getTargetId, id));
     }
   }

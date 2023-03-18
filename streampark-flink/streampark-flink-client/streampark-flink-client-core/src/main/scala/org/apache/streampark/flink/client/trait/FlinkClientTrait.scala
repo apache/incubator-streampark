@@ -41,7 +41,7 @@ import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
+import org.apache.streampark.common.enums.{ApplicationType, JobType, ExecutionMode}
 import org.apache.streampark.common.util.{DeflaterUtils, Logger}
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -430,7 +430,7 @@ trait FlinkClientTrait extends Logger {
       programArgs += PARAM_KEY_FLINK_PARALLELISM
       programArgs += getParallelism(submitRequest).toString
       submitRequest.developmentMode match {
-        case DevelopmentMode.FLINK_SQL =>
+        case JobType.FLINK_SQL =>
           programArgs += PARAM_KEY_FLINK_SQL
           programArgs += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {

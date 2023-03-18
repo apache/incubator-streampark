@@ -109,12 +109,12 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     this.update(
         new LambdaUpdateWrapper<FlinkSql>()
             .eq(FlinkSql::getAppId, appId)
-            .set(FlinkSql::getCandidate, CandidateType.NONE.get()));
+            .set(FlinkSql::getCandidate, CandidateType.NONE));
 
     this.update(
         new LambdaUpdateWrapper<FlinkSql>()
             .eq(FlinkSql::getId, sqlId)
-            .set(FlinkSql::getCandidate, candidateType.get()));
+            .set(FlinkSql::getCandidate, candidateType));
   }
 
   @Override
@@ -142,9 +142,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     LambdaQueryWrapper<FlinkSql> queryWrapper =
         new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
     if (candidateType == null) {
-      queryWrapper.gt(FlinkSql::getCandidate, CandidateType.NONE.get());
+      queryWrapper.gt(FlinkSql::getCandidate, CandidateType.NONE);
     } else {
-      queryWrapper.eq(FlinkSql::getCandidate, candidateType.get());
+      queryWrapper.eq(FlinkSql::getCandidate, candidateType);
     }
     return baseMapper.selectOne(queryWrapper);
   }
@@ -159,7 +159,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     this.update(
         new LambdaUpdateWrapper<FlinkSql>()
             .eq(FlinkSql::getId, id)
-            .set(FlinkSql::getCandidate, CandidateType.NONE.get()));
+            .set(FlinkSql::getCandidate, CandidateType.NONE));
   }
 
   @Override

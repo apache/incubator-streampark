@@ -72,7 +72,7 @@ public class AppBuildPipeline {
   private Integer pipeTypeCode;
 
   @TableField(value = "pipe_status")
-  private Integer pipeStatusCode;
+  private PipelineStatus pipeStatusCode;
 
   private Integer curStep;
 
@@ -106,15 +106,9 @@ public class AppBuildPipeline {
     return this;
   }
 
-  @Nonnull
-  @JsonIgnore
-  public PipelineStatus getPipelineStatus() {
-    return PipelineStatus.of(pipeStatusCode);
-  }
-
   @JsonIgnore
   public AppBuildPipeline setPipeStatus(@Nonnull PipelineStatus pipeStatus) {
-    this.pipeStatusCode = pipeStatus.getCode();
+    this.pipeStatusCode = pipeStatus;
     return this;
   }
 
@@ -278,7 +272,7 @@ public class AppBuildPipeline {
   public static class View {
     private Long appId;
     private Integer pipeType;
-    private Integer pipeStatus;
+    private PipelineStatus pipeStatus;
     private Integer curStep;
     private Integer totalStep;
     private Double percent;

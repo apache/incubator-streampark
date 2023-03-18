@@ -219,15 +219,15 @@ public class FlinkRESTAPIWatcher {
                 */
                 if (optionState == null || !optionState.equals(OptionState.STARTING)) {
                   // non-mapping
-                  if (application.getState() != FlinkAppState.MAPPING.getValue()) {
+                  if (application.getState() != FlinkAppState.MAPPING) {
                     log.error(
                         "FlinkRESTAPIWatcher getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
                     if (StopFrom.NONE.equals(stopFrom)) {
                       savePointService.expire(application.getId());
-                      application.setState(FlinkAppState.LOST.getValue());
+                      application.setState(FlinkAppState.LOST);
                       alertService.alert(application, FlinkAppState.LOST);
                     } else {
-                      application.setState(FlinkAppState.CANCELED.getValue());
+                      application.setState(FlinkAppState.CANCELED);
                     }
                   }
                   /*
@@ -239,10 +239,10 @@ public class FlinkRESTAPIWatcher {
                   cleanSavepoint(application);
                   cleanOptioning(optionState, key);
                   doPersistMetrics(application, true);
-                  FlinkAppState appState = FlinkAppState.of(application.getState());
+                  FlinkAppState appState = application.getState();
                   if (appState.equals(FlinkAppState.FAILED)
                       || appState.equals(FlinkAppState.LOST)) {
-                    alertService.alert(application, FlinkAppState.of(application.getState()));
+                    alertService.alert(application, application.getState());
                     if (appState.equals(FlinkAppState.FAILED)) {
                       try {
                         applicationService.start(application, true);
@@ -268,7 +268,7 @@ public class FlinkRESTAPIWatcher {
     FlinkCluster flinkCluster = getFlinkCluster(application);
     JobsOverview jobsOverview = httpJobsOverview(application, flinkCluster);
     Optional<JobsOverview.Job> optional;
-    ExecutionMode execMode = application.getExecutionModeEnum();
+    ExecutionMode execMode = application.getExecutionMode();
     if (ExecutionMode.YARN_APPLICATION.equals(execMode)
         || ExecutionMode.YARN_PER_JOB.equals(execMode)) {
       optional =
@@ -379,14 +379,14 @@ public class FlinkRESTAPIWatcher {
     */
     if (OptionState.STARTING.equals(optionState)) {
       Application latestApp = WATCHING_APPS.get(application.getId());
-      ReleaseState releaseState = latestApp.getReleaseState();
+      ReleaseState releaseState = latestApp.getRelease();
       switch (releaseState) {
         case NEED_RESTART:
         case NEED_ROLLBACK:
           LambdaUpdateWrapper<Application> updateWrapper =
               new LambdaUpdateWrapper<Application>()
                   .eq(Application::getId, application.getId())
-                  .set(Application::getRelease, ReleaseState.DONE.get());
+                  .set(Application::getRelease, ReleaseState.DONE);
           applicationService.update(updateWrapper);
           break;
         default:
@@ -397,11 +397,11 @@ public class FlinkRESTAPIWatcher {
     // The current state is running, and there is a current task in the savePointCache,
     // indicating that the task is doing savepoint
     if (SAVEPOINT_CACHE.getIfPresent(application.getId()) != null) {
-      application.setOptionState(OptionState.SAVEPOINTING.getValue());
+      application.setOptionState(OptionState.SAVEPOINTING);
     } else {
-      application.setOptionState(OptionState.NONE.getValue());
+      application.setOptionState(OptionState.NONE);
     }
-    application.setState(currentState.getValue());
+    application.setState(currentState);
     doPersistMetrics(application, false);
     cleanOptioning(optionState, application.getId());
   }
@@ -442,7 +442,7 @@ public class FlinkRESTAPIWatcher {
       case CANCELLING:
         CANCELING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
         cleanSavepoint(application);
-        application.setState(currentState.getValue());
+        application.setState(currentState);
         doPersistMetrics(application, false);
         break;
       case CANCELED:
@@ -450,7 +450,7 @@ public class FlinkRESTAPIWatcher {
             "FlinkRESTAPIWatcher getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!",
             currentState.name());
         cleanSavepoint(application);
-        application.setState(currentState.getValue());
+        application.setState(currentState);
         if (StopFrom.NONE.equals(stopFrom) || applicationService.checkAlter(application)) {
           if (StopFrom.NONE.equals(stopFrom)) {
             log.info(
@@ -467,7 +467,7 @@ public class FlinkRESTAPIWatcher {
       case FAILED:
         cleanSavepoint(application);
         STOP_FROM_MAP.remove(application.getId());
-        application.setState(FlinkAppState.FAILED.getValue());
+        application.setState(FlinkAppState.FAILED);
         doPersistMetrics(application, true);
         alertService.alert(application, FlinkAppState.FAILED);
         applicationService.start(application, true);
@@ -479,7 +479,7 @@ public class FlinkRESTAPIWatcher {
         STARTING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
         break;
       default:
-        application.setState(currentState.getValue());
+        application.setState(currentState);
         doPersistMetrics(application, false);
     }
   }
@@ -508,7 +508,7 @@ public class FlinkRESTAPIWatcher {
             "FlinkRESTAPIWatcher query previous state was canceling and stopFrom NotFound,savePoint expired!");
         savePointService.expire(application.getId());
       }
-      application.setState(FlinkAppState.CANCELED.getValue());
+      application.setState(FlinkAppState.CANCELED);
       cleanSavepoint(application);
       cleanOptioning(optionState, application.getId());
       doPersistMetrics(application, true);
@@ -516,7 +516,7 @@ public class FlinkRESTAPIWatcher {
       // query the status from the yarn rest Api
       YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
       if (yarnAppInfo == null) {
-        if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
+        if (!ExecutionMode.REMOTE.equals(application.getExecutionMode())) {
           throw new RuntimeException("FlinkRESTAPIWatcher getFromYarnRestApi failed ");
         }
       } else {
@@ -539,7 +539,7 @@ public class FlinkRESTAPIWatcher {
           if (FlinkAppState.SUCCEEDED.equals(flinkAppState)) {
             flinkAppState = FlinkAppState.FINISHED;
           }
-          application.setState(flinkAppState.getValue());
+          application.setState(flinkAppState);
           cleanOptioning(optionState, application.getId());
           doPersistMetrics(application, true);
           if (flinkAppState.equals(FlinkAppState.FAILED)
@@ -553,7 +553,7 @@ public class FlinkRESTAPIWatcher {
             }
           }
         } catch (Exception e) {
-          if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
+          if (!ExecutionMode.REMOTE.equals(application.getExecutionMode())) {
             throw new RuntimeException("FlinkRESTAPIWatcher getFromYarnRestApi error,", e);
           }
         }
@@ -570,7 +570,7 @@ public class FlinkRESTAPIWatcher {
 
   public void cleanSavepoint(Application application) {
     SAVEPOINT_CACHE.invalidate(application.getId());
-    application.setOptionState(OptionState.NONE.getValue());
+    application.setOptionState(OptionState.NONE);
   }
 
   /** set current option state */
@@ -648,8 +648,8 @@ public class FlinkRESTAPIWatcher {
   }
 
   private FlinkCluster getFlinkCluster(Application application) {
-    if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())
-        || ExecutionMode.isSessionMode(application.getExecutionModeEnum())) {
+    if (ExecutionMode.isRemoteMode(application.getExecutionMode())
+        || ExecutionMode.isSessionMode(application.getExecutionMode())) {
       FlinkCluster flinkCluster = FLINK_CLUSTER_MAP.get(application.getFlinkClusterId());
       if (flinkCluster == null) {
         flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -669,8 +669,8 @@ public class FlinkRESTAPIWatcher {
       throws IOException {
     String appId = application.getAppId();
     if (appId != null) {
-      if (application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)
-          || application.getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
+      if (application.getExecutionMode().equals(ExecutionMode.YARN_APPLICATION)
+          || application.getExecutionMode().equals(ExecutionMode.YARN_PER_JOB)) {
         String reqURL;
         if (StringUtils.isEmpty(application.getJobManagerUrl())) {
           String format = "proxy/%s/overview";
@@ -688,7 +688,7 @@ public class FlinkRESTAPIWatcher {
   private JobsOverview httpJobsOverview(Application application, FlinkCluster flinkCluster)
       throws Exception {
     final String flinkUrl = "jobs/overview";
-    ExecutionMode execMode = application.getExecutionModeEnum();
+    ExecutionMode execMode = application.getExecutionMode();
     if (ExecutionMode.YARN_PER_JOB.equals(execMode)
         || ExecutionMode.YARN_APPLICATION.equals(execMode)) {
       String reqURL;
@@ -721,7 +721,7 @@ public class FlinkRESTAPIWatcher {
   private CheckPoints httpCheckpoints(Application application, FlinkCluster flinkCluster)
       throws IOException {
     final String flinkUrl = "jobs/%s/checkpoints";
-    ExecutionMode execMode = application.getExecutionModeEnum();
+    ExecutionMode execMode = application.getExecutionMode();
     if (ExecutionMode.YARN_PER_JOB.equals(execMode)
         || ExecutionMode.YARN_APPLICATION.equals(execMode)) {
       String reqURL;

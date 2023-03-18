@@ -17,10 +17,11 @@
 
 package org.apache.streampark.console.core.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 @Getter
 public enum OptionState implements Serializable {
@@ -38,13 +39,9 @@ public enum OptionState implements Serializable {
   /** Application which is currently action: savepointing. */
   SAVEPOINTING(4);
 
-  private final int value;
+  @JsonValue @EnumValue private final int value;
 
   OptionState(int value) {
     this.value = value;
-  }
-
-  public static OptionState of(Integer state) {
-    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
   }
 }

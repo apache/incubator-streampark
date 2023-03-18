@@ -34,7 +34,7 @@ import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.enums.JobType
 import org.apache.streampark.common.util.{HdfsUtils, Utils}
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
@@ -66,7 +66,7 @@ object YarnApplicationClient extends YarnClientTrait {
         submitRequest.hdfsWorkspace.appJars,
         submitRequest.hdfsWorkspace.appPlugins)
       submitRequest.developmentMode match {
-        case DevelopmentMode.FLINK_SQL =>
+        case JobType.FLINK_SQL =>
           val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
           version match {
             case Array(1, 12, _) => array += s"${workspace.APP_SHIMS}/flink-1.12"

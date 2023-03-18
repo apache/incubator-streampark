@@ -159,7 +159,7 @@ public class ApplicationController {
             .peek(
                 e -> {
                   if (pipeStates.containsKey(e.getId())) {
-                    e.setBuildStatus(pipeStates.get(e.getId()).getCode());
+                    e.setBuildStatus(pipeStates.get(e.getId()));
                   }
                 })
             .peek(
@@ -168,10 +168,10 @@ public class ApplicationController {
                       new AppControl()
                           .setAllowBuild(
                               e.getBuildStatus() == null
-                                  || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
+                                  || !PipelineStatus.running.equals(e.getBuildStatus()))
                           .setAllowStart(
                               !e.shouldBeTrack()
-                                  && PipelineStatus.success.getCode().equals(e.getBuildStatus()))
+                                  && PipelineStatus.success.equals(e.getBuildStatus()))
                           .setAllowStop(e.isRunning());
                   e.setAppControl(appControl);
                 })

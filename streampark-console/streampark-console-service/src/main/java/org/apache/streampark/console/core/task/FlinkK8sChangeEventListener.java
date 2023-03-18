@@ -91,7 +91,7 @@ public class FlinkK8sChangeEventListener {
     applicationService.persistMetrics(app);
 
     // email alerts when necessary
-    FlinkAppState state = FlinkAppState.of(app.getState());
+    FlinkAppState state = app.getState();
     if (FlinkAppState.FAILED.equals(state)
         || FlinkAppState.LOST.equals(state)
         || FlinkAppState.RESTARTING.equals(state)
@@ -153,7 +153,7 @@ public class FlinkK8sChangeEventListener {
     // infer the final flink job state
     Enumeration.Value state =
         FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-            jobStatus.jobState(), toK8sFlinkJobState(FlinkAppState.of(app.getState())));
+            jobStatus.jobState(), toK8sFlinkJobState(app.getState()));
 
     // corrective start-time / end-time / duration
     long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;
@@ -172,7 +172,7 @@ public class FlinkK8sChangeEventListener {
       }
     }
 
-    app.setState(fromK8sFlinkJobState(state).getValue());
+    app.setState(fromK8sFlinkJobState(state));
     app.setJobId(jobStatus.jobId());
     app.setTotalTask(jobStatus.taskTotal());
 
@@ -181,6 +181,6 @@ public class FlinkK8sChangeEventListener {
     app.setDuration(duration > 0 ? duration : 0);
     // when a flink job status change event can be received, it means
     // that the operation command sent by streampark has been completed.
-    app.setOptionState(OptionState.NONE.getValue());
+    app.setOptionState(OptionState.NONE);
   }
 }

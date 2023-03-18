@@ -111,7 +111,7 @@ public class FlinkK8sWatcherWrapper {
     }
     // filter out the application that should be tracking
     return k8sApplication.stream()
-        .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum())))
+        .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getState())))
         .map(Bridge::toTrackId)
         .collect(Collectors.toList());
   }
@@ -121,7 +121,7 @@ public class FlinkK8sWatcherWrapper {
 
     // covert Application to TrackId
     public static TrackId toTrackId(@Nonnull Application app) {
-      Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
+      Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionMode());
       if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
         return TrackId.onApplication(
             app.getK8sNamespace(),

@@ -25,6 +25,7 @@ import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.BuildState;
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
 
 import org.apache.commons.io.FileUtils;
@@ -87,7 +88,7 @@ public class Project implements Serializable {
    * Build status: -2: Changed, need to rebuild -1: Not built 0: Building 1: Build successful 2:
    * Build failed
    */
-  private Integer buildState;
+  private BuildState buildState;
 
   /** 1) flink 2) spark */
   private Integer type;

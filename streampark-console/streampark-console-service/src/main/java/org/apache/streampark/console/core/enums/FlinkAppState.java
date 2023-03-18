@@ -19,6 +19,8 @@ package org.apache.streampark.console.core.enums;
 
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -97,19 +99,10 @@ public enum FlinkAppState implements Serializable {
   /** has killed in Yarn */
   KILLED(-9);
 
-  private final int value;
+  @JsonValue @EnumValue private final int value;
 
   FlinkAppState(int value) {
     this.value = value;
-  }
-
-  public static FlinkAppState of(Integer state) {
-    for (FlinkAppState appState : values()) {
-      if (appState.value == state) {
-        return appState;
-      }
-    }
-    return FlinkAppState.OTHER;
   }
 
   public static FlinkAppState of(String name) {
@@ -121,8 +114,7 @@ public enum FlinkAppState implements Serializable {
     return FlinkAppState.OTHER;
   }
 
-  public static boolean isEndState(Integer appState) {
-    FlinkAppState flinkAppState = FlinkAppState.of(appState);
+  public static boolean isEndState(FlinkAppState flinkAppState) {
     return FlinkAppState.CANCELED == flinkAppState
         || FlinkAppState.FAILED == flinkAppState
         || FlinkAppState.KILLED == flinkAppState

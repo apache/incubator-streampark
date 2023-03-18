@@ -142,7 +142,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
               .in(
                   Application::getId,
                   applications.stream().map(Application::getId).collect(Collectors.toList()))
-              .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
+              .set(Application::getRelease, ReleaseState.NEED_RESTART));
     }
   }
 

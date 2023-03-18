@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
 
 /** kubernetes.rest-service.exposed.type */
@@ -33,20 +36,11 @@ public enum FlinkK8sRestExposedType implements Serializable {
 
   private final String name;
 
-  private final Integer value;
+  @EnumValue @JsonValue private final Integer value;
 
   FlinkK8sRestExposedType(String name, Integer value) {
     this.name = name;
     this.value = value;
-  }
-
-  public static FlinkK8sRestExposedType of(Integer value) {
-    for (FlinkK8sRestExposedType order : values()) {
-      if (order.value.equals(value)) {
-        return order;
-      }
-    }
-    return null;
   }
 
   public String getName() {

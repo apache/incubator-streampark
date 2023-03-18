@@ -17,8 +17,15 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.common.enums.ApplicationType;
+import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.JobType;
 import org.apache.streampark.console.SpringTestBase;
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.enums.FlinkAppState;
+import org.apache.streampark.console.core.enums.OptionState;
+import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.ResourceFrom;
 
 import org.apache.http.entity.ContentType;
 
@@ -48,28 +55,28 @@ class ApplicationServiceTest extends SpringTestBase {
     Date now = new Date();
     Application app = new Application();
     app.setId(100001L);
-    app.setJobType(1);
+    app.setJobType(JobType.CUSTOM_CODE);
     app.setUserId(100000L);
     app.setJobName("socket-test");
     app.setVersionId(1L);
     app.setK8sNamespace("default");
-    app.setState(0);
-    app.setRelease(2);
+    app.setState(FlinkAppState.ADDED);
+    app.setRelease(ReleaseState.RELEASING);
     app.setBuild(true);
     app.setRestartSize(0);
-    app.setOptionState(0);
+    app.setOptionState(OptionState.NONE);
     app.setArgs("--hostname hadoop001 --port 8111");
     app.setOptions("{\"taskmanager.numberOfTaskSlots\":1,\"parallelism.default\":1}");
     app.setResolveOrder(0);
-    app.setExecutionMode(4);
-    app.setAppType(2);
+    app.setExecutionMode(ExecutionMode.YARN_APPLICATION);
+    app.setAppType(ApplicationType.APACHE_FLINK);
     app.setTracking(0);
     app.setJar("SocketWindowWordCount.jar");
     app.setJarCheckSum(1553115525L);
     app.setMainClass("org.apache.flink.streaming.examples.socket.SocketWindowWordCount");
     app.setCreateTime(now);
     app.setModifyTime(now);
-    app.setResourceFrom(2);
+    app.setResourceFrom(ResourceFrom.UPLOAD);
     app.setK8sHadoopIntegration(false);
     app.setBackUp(false);
     app.setRestart(false);

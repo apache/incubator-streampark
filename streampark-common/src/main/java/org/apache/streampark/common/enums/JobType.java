@@ -17,9 +17,12 @@
 
 package org.apache.streampark.common.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
 
-public enum DevelopmentMode implements Serializable {
+public enum JobType implements Serializable {
 
   /** custom code */
   CUSTOM_CODE("Custom Code", 1),
@@ -29,20 +32,11 @@ public enum DevelopmentMode implements Serializable {
 
   private final String mode;
 
-  private final Integer value;
+  @JsonValue @EnumValue private final Integer value;
 
-  DevelopmentMode(String mode, Integer value) {
+  JobType(String mode, Integer value) {
     this.mode = mode;
     this.value = value;
-  }
-
-  public static DevelopmentMode of(Integer value) {
-    for (DevelopmentMode mode : values()) {
-      if (mode.value.equals(value)) {
-        return mode;
-      }
-    }
-    return null;
   }
 
   public Integer getValue() {
