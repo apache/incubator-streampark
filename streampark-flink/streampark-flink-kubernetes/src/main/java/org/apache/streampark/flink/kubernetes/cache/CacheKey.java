@@ -15,27 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes;
+package org.apache.streampark.flink.kubernetes.cache;
 
-import org.apache.streampark.flink.kubernetes.TrackConfig.FlinkTrackConfig;
+import java.io.Serializable;
 
-public class DefaultFlinkK8sWatcher extends FlinkK8sWatcher {
-  private FlinkTrackConfig conf = FlinkTrackConfig.defaultConf();
+public class CacheKey implements Serializable {
+  private final long key;
 
-  private final FlinkK8sWatchController flinkK8sWatchController =
-      FlinkK8sWatchController.getInstance();
-
-  private final ChangeEventBus eventBus = new ChangeEventBus();
-
-  public DefaultFlinkK8sWatcher(FlinkTrackConfig conf) {
-    this.conf = conf;
+  public CacheKey(long key) {
+    this.key = key;
   }
 
-  public FlinkTrackConfig getConf() {
-    return conf;
+  public long getKey() {
+    return key;
   }
 
-  public void setConf(FlinkTrackConfig conf) {
-    this.conf = conf;
+  public static CacheKey of(long key) {
+    return new CacheKey(key);
   }
 }

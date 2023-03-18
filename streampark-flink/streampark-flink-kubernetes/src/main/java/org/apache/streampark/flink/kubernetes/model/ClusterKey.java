@@ -26,6 +26,10 @@ public class ClusterKey {
 
   private String namespace = "default";
 
+  public static ClusterKey of(TrackId trackId) {
+    return new ClusterKey(trackId.getExecuteMode(), trackId.getClusterId(), trackId.getNamespace());
+  }
+
   public ClusterKey(FlinkK8sExecuteMode executeMode, String clusterId, String namespace) {
     this.executeMode = executeMode;
     this.clusterId = clusterId;

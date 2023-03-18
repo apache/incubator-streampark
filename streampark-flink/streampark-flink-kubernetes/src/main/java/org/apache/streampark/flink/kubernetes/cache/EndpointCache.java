@@ -15,27 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes;
+package org.apache.streampark.flink.kubernetes.cache;
 
-import org.apache.streampark.flink.kubernetes.TrackConfig.FlinkTrackConfig;
+import org.apache.streampark.flink.kubernetes.model.ClusterKey;
 
-public class DefaultFlinkK8sWatcher extends FlinkK8sWatcher {
-  private FlinkTrackConfig conf = FlinkTrackConfig.defaultConf();
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
-  private final FlinkK8sWatchController flinkK8sWatchController =
-      FlinkK8sWatchController.getInstance();
+import java.util.concurrent.TimeUnit;
 
-  private final ChangeEventBus eventBus = new ChangeEventBus();
+public class EndpointCache {
 
-  public DefaultFlinkK8sWatcher(FlinkTrackConfig conf) {
-    this.conf = conf;
+  private final Cache<ClusterKey, String> cache =
+      Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build();
+
+  private EndpointCache() {}
+
+  public static EndpointCache getInstance() {
+    return new EndpointCache();
   }
 
-  public FlinkTrackConfig getConf() {
-    return conf;
+  public void invalidate(ClusterKey clusterKey) {
+    cache.invalidate(clusterKey);
   }
 
-  public void setConf(FlinkTrackConfig conf) {
-    this.conf = conf;
+  public void put(ClusterKey clusterKey, String value) {
+    cache.put(clusterKey, value);
+  }
+
+  public String get(ClusterKey clusterKey) {
+    return cache.getIfPresent(clusterKey);
   }
 }

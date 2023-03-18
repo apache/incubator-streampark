@@ -104,4 +104,8 @@ public class TrackId {
         return false;
     }
   }
+
+  public boolean isActive() {
+    return isLegal() && StringUtils.isNotBlank(jobId);
+  }
 }
