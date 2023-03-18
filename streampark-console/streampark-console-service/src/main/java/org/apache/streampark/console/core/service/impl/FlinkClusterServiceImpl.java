@@ -42,6 +42,7 @@ import org.apache.streampark.flink.client.bean.ShutDownResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +50,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.checkQueueLabelIfNeed;
 
@@ -317,6 +321,18 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Override
   public Boolean existsByClusterName(String clusterName, Long id) {
     return this.baseMapper.existsByClusterName(clusterName, id);
+  }
+
+  @Override
+  public List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes) {
+    return getBaseMapper()
+        .selectList(
+            new LambdaQueryWrapper<FlinkCluster>()
+                .in(
+                    FlinkCluster::getExecutionMode,
+                    executionModes.stream()
+                        .map(ExecutionMode::getMode)
+                        .collect(Collectors.toSet())));
   }
 
   @Override

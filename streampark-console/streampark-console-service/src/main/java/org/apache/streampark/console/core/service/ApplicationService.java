@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.Application;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -89,6 +91,9 @@ public interface ApplicationService extends IService<Application> {
   List<Application> getByProjectId(Long id);
 
   List<Application> getByTeamId(Long teamId);
+
+  List<Application> getByTeamIdAndExecutionModes(
+      Long teamId, Collection<ExecutionMode> executionModes);
 
   boolean checkBuildAndUpdate(Application app);
 
