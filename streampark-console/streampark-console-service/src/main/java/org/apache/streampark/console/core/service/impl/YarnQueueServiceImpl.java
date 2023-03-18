@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.ResponseResult;
@@ -39,7 +40,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-import io.fabric8.kubernetes.client.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,9 +72,8 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
   @Override
   public IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest request) {
-    Utils.checkNotNull(yarnQueue, "Yarn queue query params mustn't be null.");
-    Utils.checkNotNull(
-        yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
+    Utils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
+    Utils.notNull(yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
     Page<YarnQueue> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
@@ -89,8 +88,8 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   @Override
   public ResponseResult<String> checkYarnQueue(YarnQueue yarnQueue) {
 
-    Utils.checkNotNull(yarnQueue, "Yarn queue mustn't be empty.");
-    Utils.checkNotNull(yarnQueue.getTeamId(), "Team id mustn't be null.");
+    Utils.notNull(yarnQueue, "Yarn queue mustn't be empty.");
+    Utils.notNull(yarnQueue.getTeamId(), "Team id mustn't be null.");
 
     ResponseResult<String> responseResult = new ResponseResult<>();
 
@@ -172,8 +171,8 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
   @VisibleForTesting
   public YarnQueue getYarnQueueByIdWithPreconditions(YarnQueue yarnQueue) {
-    Utils.checkNotNull(yarnQueue, "Yarn queue mustn't be null.");
-    Utils.checkNotNull(yarnQueue.getId(), "Yarn queue id mustn't be null.");
+    Utils.notNull(yarnQueue, "Yarn queue mustn't be null.");
+    Utils.notNull(yarnQueue.getId(), "Yarn queue id mustn't be null.");
     YarnQueue queueFromDB = getById(yarnQueue.getId());
     ApiAlertException.throwIfNull(queueFromDB, "The queue doesn't exist.");
     return queueFromDB;
