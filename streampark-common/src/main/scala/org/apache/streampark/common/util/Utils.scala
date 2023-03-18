@@ -21,7 +21,8 @@ import org.apache.commons.lang3.StringUtils
 import java.io.{BufferedInputStream, File, FileInputStream, IOException, PrintWriter, StringWriter}
 import java.lang.{Boolean => JavaBool, Byte => JavaByte, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 import java.net.URL
-import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
+import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Optional, Properties, UUID}
+import java.util.function.{Function => JFunction}
 import java.util.jar.{JarFile, JarInputStream}
 
 import scala.collection.JavaConversions._
@@ -120,6 +121,20 @@ object Utils {
       if (handle != null) {
         handle.close()
       }
+    }
+  }
+
+  /*
+   * Mimicking the try-with-resource syntax of Java-8+
+   */
+  def usingAdaptive[R, T <: AutoCloseable](handle: T)(handler: Handler[T, R])(implicit
+      excFunc: JFunction[Throwable, R] = null): R = {
+    try {
+      handler.apply(handle)
+    } catch {
+      case e: Throwable if excFunc != null => excFunc.apply(e)
+    } finally {
+      Optional.ofNullable(handle).ifPresent((t: T) => { t.close() })
     }
   }
 
