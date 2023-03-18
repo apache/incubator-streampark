@@ -712,12 +712,7 @@ public class Application implements Serializable {
 
     @Override
     public String toString() {
-      return groupId
-          + ":"
-          + artifactId
-          + ":"
-          + version
-          + (StringUtils.isEmpty(classifier) ? "" : ":" + classifier);
+      return groupId + ":" + artifactId + ":" + version + getClassifier(":");
     }
 
     @JsonIgnore
@@ -727,8 +722,12 @@ public class Application implements Serializable {
           + getArtifactId()
           + "-"
           + getVersion()
-          + (StringUtils.isEmpty(getClassifier()) ? "" : "_" + getClassifier())
+          + getClassifier("_")
           + ".jar";
+    }
+
+    private String getClassifier(String joiner) {
+      return StringUtils.isEmpty(classifier) ? "" : joiner + classifier;
     }
   }
 }

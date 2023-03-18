@@ -116,7 +116,6 @@
             }
           }
           if (invalidArtifact.length === 0) {
-            const id = getId(groupId, artifactId, classifier);
             const mvnPom: Recordable = {
               groupId: groupId,
               artifactId: artifactId,
@@ -125,6 +124,7 @@
             if (classifier != null) {
               mvnPom.classifier = classifier;
             }
+            const id = getId(mvnPom);
             const pomExclusion = {};
             if (exclusion != null) {
               const exclusions = exclusion.split('<exclusion>');
@@ -226,7 +226,7 @@
     handleUpdateDependency();
   }
   function handleRemovePom(pom: Recordable) {
-    const id = getId(pom.groupId, pom.artifactId, pom.classifier);
+    const id = getId(pom);
     delete dependency.pom[id];
     handleUpdateDependency();
   }
@@ -243,7 +243,7 @@
     dependency.pom = {}
     dependency.jar = {}
     dataSource.pom?.map((pomRecord: DependencyType) => {
-      const id = pomRecord.classifier != null ? pomRecord.groupId + '_' + pomRecord.artifactId + '_' + pomRecord.classifier : pomRecord.groupId + '_' + pomRecord.artifactId;
+      const id = getId(pomRecord);
       dependency.pom[id] = pomRecord;
     });
     dataSource.jar?.map((fileName: string) => {
@@ -259,8 +259,11 @@
     handleUpdateDependency();
   }
 
-  function getId(groupId: string, artifactId: string, classifier: string) {
-    return classifier != null ? groupId + '_' + artifactId + '_' + classifier : groupId + '_' + artifactId;
+  function getId(pom) {
+    if (pom.classifier != null ) {
+      return pom.groupId + '_' + pom.artifactId + '_' + pom.classifier
+    }
+    return pom.groupId + '_' + pom.artifactId;
   }
 
   onMounted(() => {
