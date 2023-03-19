@@ -46,4 +46,19 @@
             order by ${yarnQueue.sortField} ${yarnQueue.sortOrder}
         </if>
     </select>
+
+    <select id="existsByQueueLabel" resultType="java.lang.Boolean" parameterType="org.apache.streampark.console.core.entity.YarnQueue">
+        select count(1)
+        from t_yarn_queue
+        <where>
+            team_id = #{yarnQueue.teamId}
+            and
+            queue_label = #{yarnQueue.queueLabel}
+            <if test="yarnQueue.id != null">
+                and id &lt;&gt; #{yarnQueue.id}
+            </if>
+        </where>
+        limit 1
+    </select>
+
 </mapper>

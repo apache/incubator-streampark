@@ -34,7 +34,6 @@ import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -65,8 +64,6 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
       "The queue label existed already. Try on a new queue label, please.";
   public static final String QUEUE_EMPTY_HINT = "Yarn queue label mustn't be empty.";
   public static final String QUEUE_AVAILABLE_HINT = "The queue label is available.";
-  public static final String NO_NEED_UPDATE_HINT = "Same data need not to update.";
-
   @Autowired private ApplicationService applicationService;
   @Autowired private FlinkClusterService flinkClusterService;
 
@@ -105,12 +102,9 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
       responseResult.setMsg(ERR_FORMAT_HINTS);
       return responseResult;
     }
-    boolean existed =
-        getBaseMapper()
-            .exists(
-                new LambdaQueryWrapper<YarnQueue>()
-                    .eq(YarnQueue::getTeamId, yarnQueue.getTeamId())
-                    .eq(YarnQueue::getQueueLabel, yarnQueue.getQueueLabel()));
+
+    boolean existed = this.baseMapper.existsByQueueLabel(yarnQueue);
+
     if (existed) {
       responseResult.setStatus(1);
       responseResult.setMsg(QUEUE_EXISTED_IN_TEAM_HINT);
@@ -132,16 +126,21 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public void updateYarnQueue(YarnQueue yarnQueue) {
 
     YarnQueue queueFromDB = getYarnQueueByIdWithPreconditions(yarnQueue);
+
+    // 1) no data to update
     if (StringUtils.equals(yarnQueue.getQueueLabel(), queueFromDB.getQueueLabel())
         && StringUtils.equals(yarnQueue.getDescription(), queueFromDB.getDescription())) {
-      throw new ApiAlertException(NO_NEED_UPDATE_HINT);
+      return;
     }
+
+    // 2 update description
     if (StringUtils.equals(yarnQueue.getQueueLabel(), queueFromDB.getQueueLabel())) {
       queueFromDB.setDescription(yarnQueue.getDescription());
       updateById(queueFromDB);
       return;
     }
 
+    // 3 update yarnQueue
     ApiAlertException.throwIfFalse(
         YarnQueueLabelExpression.isValid(yarnQueue.getQueueLabel()), ERR_FORMAT_HINTS);
 
