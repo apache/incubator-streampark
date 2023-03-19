@@ -222,22 +222,19 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
             .collect(Collectors.toMap(Application::getId, application -> application));
 
     // Get applications that depend on this variable in application args
-    if (applications != null) {
-      for (Application app : applications) {
-        if (isDepend(variable.getVariableCode(), app.getArgs())) {
-          dependApplications.add(app);
-        }
+    for (Application app : applications) {
+      if (isDepend(variable.getVariableCode(), app.getArgs())) {
+        dependApplications.add(app);
       }
     }
+
     // Get the application that depends on this variable in flink sql
     List<FlinkSql> flinkSqls = flinkSqlService.getByTeamId(variable.getTeamId());
-    if (flinkSqls != null) {
-      for (FlinkSql flinkSql : flinkSqls) {
-        if (isDepend(variable.getVariableCode(), DeflaterUtils.unzipString(flinkSql.getSql()))) {
-          Application app = applicationMap.get(flinkSql.getAppId());
-          if (!dependApplications.contains(app)) {
-            dependApplications.add(applicationMap.get(flinkSql.getAppId()));
-          }
+    for (FlinkSql flinkSql : flinkSqls) {
+      if (isDepend(variable.getVariableCode(), DeflaterUtils.unzipString(flinkSql.getSql()))) {
+        Application app = applicationMap.get(flinkSql.getAppId());
+        if (!dependApplications.contains(app)) {
+          dependApplications.add(applicationMap.get(flinkSql.getAppId()));
         }
       }
     }
