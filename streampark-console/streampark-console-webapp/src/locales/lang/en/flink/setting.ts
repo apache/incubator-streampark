@@ -21,6 +21,7 @@ export default {
     flinkHome: 'Flink Home',
     flinkCluster: 'Flink Cluster',
     externalLink: 'External Link',
+    yarnQueue: 'Yarn Queue',
   },
   systemSettingItems: {
     mavenSetting: {
@@ -113,6 +114,26 @@ export default {
       updateAlertConfigSuccessfull: 'Update AlertConfig successful!',
     },
     delete: 'Are you sure delete this alert conf ?',
+  },
+  yarnQueue: {
+    tableTitle: 'Yarn Queue List',
+    createQueue: 'Create Yarn Queue',
+    success: 'Success',
+    descriptionMessage: 'exceeds maximum length limit of 512 characters',
+    modifyYarnQueue: 'Edit Yarn Queue',
+    deleteYarnQueue: 'Delete Yarn Queue',
+    deleteConfirm: 'Are you sure to delete this queue ?',
+    yarnQueueLabelExpression: "Queue{'@'}Label",
+    placeholder: {
+      yarnQueueLabelExpression: 'Please input queue label like {queue} or {queue}@{lab1,...}',
+      description: 'Please input the description of the queue.'
+    },
+    checkResult: {
+      emptyHint: 'Queue label can not be empty.',
+      invalidFormatHint: 'Invalid queue label format',
+      existedHint: 'The queue label existed in the current team',
+    },
+    noteInfo: 'Queue label. eg. "queue1" represents queue name, "queue1{\'@\'}label1,label2" represents that queue name is "queue1" and label(s) of the queue is "label1" & "label2"',
   },
   cluster: {
     detail: 'View Cluster Detail',
