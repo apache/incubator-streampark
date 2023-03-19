@@ -70,4 +70,6 @@ public interface VariableService extends IService<Variable> {
   String replaceVariable(Long teamId, String mixed);
 
   IPage<Application> dependAppsPage(Variable variable, RestRequest request);
+
+  void updateVariable(Variable variable);
 }
