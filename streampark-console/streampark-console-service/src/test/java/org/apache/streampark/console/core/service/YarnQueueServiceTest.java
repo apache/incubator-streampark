@@ -119,6 +119,20 @@ class YarnQueueServiceTest extends SpringTestBase {
     // Test for existed
     yarnQueue.setQueueLabel("queue1@label1");
     yarnQueueService.save(yarnQueue);
+
+    // QueueLabel not updated
+    yarnQueue.setQueueLabel("queue1@label1");
+    result = yarnQueueService.checkYarnQueue(yarnQueue);
+    assertThat(result.getStatus()).isEqualTo(0);
+
+    // QueueLabel updated
+    yarnQueue.setQueueLabel("queue2@label1");
+    result = yarnQueueService.checkYarnQueue(yarnQueue);
+    assertThat(result.getStatus()).isEqualTo(0);
+
+    // new record but same QueueLabel
+    yarnQueue.setId(null);
+    yarnQueue.setQueueLabel("queue1@label1");
     result = yarnQueueService.checkYarnQueue(yarnQueue);
     assertThat(result.getStatus()).isEqualTo(1);
     assertThat(result.getMsg()).isEqualTo(YarnQueueServiceImpl.QUEUE_EXISTED_IN_TEAM_HINT);
