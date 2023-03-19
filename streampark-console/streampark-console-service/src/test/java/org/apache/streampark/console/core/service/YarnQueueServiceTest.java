@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl.NO_NEED_UPDATE_HINT;
 import static org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl.QUEUE_EMPTY_HINT;
 import static org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl.QUEUE_USED_FORMAT;
 import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
@@ -143,10 +142,6 @@ class YarnQueueServiceTest extends SpringTestBase {
     YarnQueue yarnQueue = mockYarnQueue(1L, "queue1");
     yarnQueue.setId(queueId);
     yarnQueueService.save(yarnQueue);
-
-    assertThatThrownBy(() -> yarnQueueService.updateYarnQueue(yarnQueue))
-        .isInstanceOf(ApiAlertException.class)
-        .hasMessage(NO_NEED_UPDATE_HINT);
 
     // Test for only change description
     yarnQueue.setDescription("mocked desc");
