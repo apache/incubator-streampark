@@ -22,21 +22,25 @@ import org.apache.flink.table.functions.ScalarFunction;
 public class FetchMillisecond extends ScalarFunction {
 
   /**
-   * 获取当前系统毫秒值
+   * Get current milliseconds.
    *
-   * @return 当前系统毫秒值
+   * @return Current milliseconds on the system.
    */
   public Long eval() {
     return System.currentTimeMillis();
   }
 
   /**
-   * 是否为确定值<br>
-   * 返回true：表示该函数只在flink planner阶段执行一次，然后将执行结果返回发送给runtime，为固定值。<br>
-   * 返回false：表示该函数是在运行期间执行，每行数据都会调用一次该函数，为不确定值。<br>
-   * 注意：该函数默认返回ture，一般不需要重写该函数！！！
+   * Whether is a determined value.<br>
+   * return true: It represents that the function will be executed once at the stage of flink
+   * planner, then it will send the executed result back to <code>runtime</code>, it's a determined
+   * value.<br>
+   * return false: It represents that the function will be executed when the engine processed a row
+   * in the running stage. It's not a determined value.<br>
+   * Note: The function will return <code>true</code> by default, so the function need not be
+   * overwrite in general.
    *
-   * @return 是否为确定值
+   * @return <code>true</code> if it's a determined value else <code>false</code>.
    */
   @Override
   public boolean isDeterministic() {

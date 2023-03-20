@@ -58,7 +58,7 @@ public enum FlinkAppState implements Serializable {
   /** Job has been cancelled. */
   CANCELED(9),
 
-  /** All of the job's tasks have successfully finished. */
+  /** All the job's tasks have successfully finished. */
   FINISHED(10),
 
   /**
@@ -86,10 +86,10 @@ public enum FlinkAppState implements Serializable {
    */
   SILENT(17),
 
-  /** Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED */
+  /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED */
   TERMINATED(18),
 
-  /** Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED */
+  /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED */
   POS_TERMINATED(19),
 
   /** job SUCCEEDED on yarn */

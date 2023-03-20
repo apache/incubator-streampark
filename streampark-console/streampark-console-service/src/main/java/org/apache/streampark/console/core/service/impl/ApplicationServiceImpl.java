@@ -76,7 +76,6 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
-import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -103,9 +102,11 @@ import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -117,6 +118,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 
 import java.io.File;
@@ -126,6 +128,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -1009,6 +1012,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public List<Application> getByTeamIdAndExecutionModes(
+      Long teamId, @Nonnull Collection<ExecutionMode> executionModes) {
+    return getBaseMapper()
+        .selectList(
+            new LambdaQueryWrapper<Application>()
+                .eq((SFunction<Application, Long>) Application::getTeamId, teamId)
+                .in(
+                    Application::getExecutionMode,
+                    executionModes.stream()
+                        .map(ExecutionMode::getMode)
+                        .collect(Collectors.toSet())));
+  }
+
+  @Override
   public boolean checkBuildAndUpdate(Application application) {
     boolean build = application.getBuild();
     if (!build) {
@@ -1114,26 +1131,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
 
-    setYarnQueue(application);
+    application.setYarnQueueByHotParams();
 
     return application;
-  }
-
-  private void setYarnQueue(Application application) {
-    if (!(ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()
-        || ExecutionMode.YARN_PER_JOB == application.getExecutionModeEnum())) {
-      return;
-    }
-
-    Map<String, Object> hotParamsMap = application.getHotParamsMap();
-    if (!hotParamsMap.isEmpty() && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
-      String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
-      String labelExpr =
-          Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
-              .map(Object::toString)
-              .orElse(null);
-      application.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
-    }
   }
 
   @Override

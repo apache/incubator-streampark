@@ -17,32 +17,22 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.bean.ResponseResult;
-import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.entity.YarnQueue;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.Collection;
-import java.util.List;
+public interface YarnQueueService extends IService<YarnQueue> {
 
-public interface FlinkClusterService extends IService<FlinkCluster> {
+  IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest restRequest);
 
-  ResponseResult check(FlinkCluster flinkCluster);
+  ResponseResult<String> checkYarnQueue(YarnQueue yarnQueue);
 
-  Boolean create(FlinkCluster flinkCluster);
+  boolean createYarnQueue(YarnQueue yarnQueue);
 
-  void delete(FlinkCluster flinkCluster);
+  void updateYarnQueue(YarnQueue yarnQueue);
 
-  void update(FlinkCluster flinkCluster);
-
-  void start(FlinkCluster flinkCluster);
-
-  void shutdown(FlinkCluster flinkCluster);
-
-  Boolean existsByClusterId(String clusterId, Long id);
-
-  Boolean existsByClusterName(String clusterName, Long id);
-
-  List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes);
+  void deleteYarnQueue(YarnQueue yarnQueue);
 }

@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.service.VariableService;
@@ -100,17 +99,7 @@ public class VariableController {
   @PutMapping("update")
   @RequiresPermissions("variable:update")
   public RestResponse updateVariable(@Valid Variable variable) {
-    if (variable.getId() == null) {
-      throw new ApiAlertException("Sorry, the variable id cannot be null.");
-    }
-    Variable findVariable = this.variableService.getById(variable.getId());
-    if (findVariable == null) {
-      throw new ApiAlertException("Sorry, the variable does not exist.");
-    }
-    if (!findVariable.getVariableCode().equals(variable.getVariableCode())) {
-      throw new ApiAlertException("Sorry, the variable code cannot be updated.");
-    }
-    this.variableService.updateById(variable);
+    variableService.updateVariable(variable);
     return RestResponse.success();
   }
 

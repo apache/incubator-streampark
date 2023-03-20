@@ -51,6 +51,11 @@
             <ExternalLinkSetting />
           </Card>
         </TabPane>
+        <TabPane :tab="t('flink.setting.settingTab.yarnQueue')" key="yarn_queue">
+          <Card :bordered="false" class="system-setting">
+            <YarnQueue />
+          </Card>
+        </TabPane>
       </Tabs>
     </div>
   </PageWrapper>
@@ -64,6 +69,7 @@
   import FlinkEnvSetting from './components/FlinkEnvSetting.vue';
   import FlinkClusterSetting from './components/FlinkClusterSetting.vue';
   import ExternalLinkSetting from './components/ExternalLinkSetting.vue';
+  import YarnQueue from '/@/views/flink/setting/components/YarnQueue.vue';
   import { useRoute } from 'vue-router';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { usePermission } from '/@/hooks/web/usePermission';

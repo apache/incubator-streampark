@@ -30,7 +30,7 @@ object FlinkJobState extends Enumeration {
   SILENT,
   // flink job has terminated positively (maybe FINISHED or CANCELED)
   POS_TERMINATED,
-  // flink job has terminated (maybe FINISHED, CACNELED or FAILED)
+  // flink job has terminated (maybe FINISHED, CANCELED or FAILED)
   TERMINATED,
   // lost track of flink job completely.
   LOST,
