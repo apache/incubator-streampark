@@ -268,6 +268,7 @@ running() {
         if [ $? -eq 0 ]; then
           return 1
         else
+          rm -f "$APP_PID" >/dev/null 2>&1
           return 0
         fi
     else
