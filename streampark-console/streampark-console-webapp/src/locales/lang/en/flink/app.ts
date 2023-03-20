@@ -93,6 +93,7 @@ export default {
       confDeleteTitle: 'Are you sure delete this record?',
       sqlDeleteTitle: 'Are you sure delete this sql?',
       confBackupTitle: 'Are you sure delete this backup?',
+      operationLogDeleteTitle: 'Are you sure delete this operation log?',
       copyPath: 'Copy Path',
       pointDeleteTitle: 'Are you sure delete?',
       copySuccess: 'copied to clipboard successfully',

@@ -42,7 +42,12 @@
   import { fetchGetVer, fetchListVer, fetchRemoveConf } from '/@/api/flink/config';
   import { fetchRemoveSavePoint, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 
-  import { fetchBackUps, fetchOptionLog, fetchRemoveBackup } from '/@/api/flink/app/app';
+  import {
+    fetchBackUps,
+    fetchOptionLog,
+    fetchRemoveBackup,
+    fetchDeleteOperationLog,
+  } from '/@/api/flink/app/app';
   import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';
   import CompareModal from './CompareModal.vue';
@@ -136,7 +141,7 @@
     ...tableCommonConf,
   });
 
-  const [registerLogsTable] = useTable({
+  const [registerLogsTable, { reload: reloadOperationLog }] = useTable({
     api: fetchOptionLog,
     columns: getOptionLogColumns(),
     ...tableCommonConf,
@@ -293,6 +298,31 @@
       color: 'error'
     }]
   }
+
+  function getOperationLogAction(record: Recordable): ActionItem[] {
+    return [
+      {
+        tooltip: { title: t('flink.app.detail.detailTab.exception') },
+        auth: 'app:detail',
+        shape: 'circle',
+        type: 'default',
+        ifShow: !record.success,
+        icon: 'ant-design:eye-outlined',
+        onClick: handleException.bind(null, record),
+      },
+      {
+        popConfirm: {
+          title: t('flink.app.detail.detailTab.operationLogDeleteTitle'),
+          confirm: handleDeleteOperationLog.bind(null, record),
+        },
+        auth: 'app:delete',
+        type: 'link',
+        icon: 'ant-design:delete-outlined',
+        color: 'error',
+      },
+    ];
+  }
+
   /* delete savePoint */
   async function handleDeleteSavePoint(record: Recordable) {
     await fetchRemoveSavePoint({ id: record.id });
@@ -302,6 +332,11 @@
   async function handleDeleteBackup(record: Recordable) {
     await fetchRemoveBackup(record.id);
     reloadBackup();
+  }
+
+  async function handleDeleteOperationLog(record: Recordable) {
+    await fetchDeleteOperationLog(record.id);
+    reloadOperationLog();
   }
 
   /* copy path */
@@ -430,6 +465,12 @@
       <TabPane key="6" tab="Option Logs" v-if="tabConf.showOptionLog">
         <BasicTable @register="registerLogsTable">
           <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex == 'optionName'">
+              <Tag color="#52c41a" v-if="record.optionName == 0"> Release </Tag>
+              <Tag color="#2db7f5" v-if="record.optionName == 1"> Start </Tag>
+              <Tag color="#108ee9" v-if="record.optionName == 2"> Savepoint </Tag>
+              <Tag color="#0C7EF2" v-if="record.optionName == 3"> Cancel </Tag>
+            </template>
             <template v-if="column.dataIndex == 'yarnAppId'">
               <a-button type="link" @click="handleView(app as any, '')">
                 {{ record.yarnAppId }}
@@ -449,19 +490,7 @@
               <Tag class="start-state" color="#f5222d" v-else> FAILED </Tag>
             </template>
             <template v-if="column.dataIndex == 'operation'">
-              <TableAction
-                :actions="[
-                  {
-                    tooltip: { title: t('flink.app.detail.detailTab.exception') },
-                    auth: 'app:detail',
-                    shape: 'circle',
-                    type: 'default',
-                    ifShow: !record.success,
-                    icon: 'ant-design:eye-outlined',
-                    onClick: handleException.bind(null, record),
-                  },
-                ]"
-              />
+              <TableAction :actions="getOperationLogAction(record)" />
             </template>
           </template>
         </BasicTable>

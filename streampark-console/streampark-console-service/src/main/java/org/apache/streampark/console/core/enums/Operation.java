@@ -15,19 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.service;
+package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.entity.ApplicationLog;
+import lombok.Getter;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
+import java.io.Serializable;
+import java.util.Arrays;
 
-public interface ApplicationLogService extends IService<ApplicationLog> {
+@Getter
+public enum Operation implements Serializable {
+  RELEASE(0),
+  START(1),
+  SAVEPOINT(2),
+  CANCEL(3);
 
-  IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request);
+  private final int value;
 
-  void removeApp(Long appId);
+  Operation(int value) {
+    this.value = value;
+  }
 
-  Boolean delete(ApplicationLog applicationLog);
+  public static Operation of(Integer option) {
+    return Arrays.stream(values()).filter((x) -> x.value == option).findFirst().orElse(null);
+  }
 }

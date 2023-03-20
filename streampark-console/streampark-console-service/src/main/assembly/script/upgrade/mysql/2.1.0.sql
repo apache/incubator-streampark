@@ -90,4 +90,6 @@ create table `t_yarn_queue` (
 
 -- Issue-2324 End --
 
+alter table `t_flink_log` add column `option_name` tinyint default null;
+
 set foreign_key_checks = 1;

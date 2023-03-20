@@ -26,6 +26,7 @@
         <result column="success" jdbcType="INTEGER" property="success"/>
         <result column="exception" jdbcType="LONGVARCHAR" property="exception"/>
         <result column="option_time" jdbcType="DATE" property="optionTime"/>
+        <result column="option_name" jdbcType="INTEGER" property="optionName"/>
     </resultMap>
 
 </mapper>

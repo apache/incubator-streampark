@@ -407,7 +407,8 @@ create table "public"."t_flink_log" (
   "job_manager_url" varchar(255) collate "pg_catalog"."default",
   "success" int2,
   "exception" text collate "pg_catalog"."default",
-  "option_time" timestamp(6)
+  "option_time" timestamp(6),
+  "option_name" int2
 )
 ;
 alter table "public"."t_flink_log" add constraint "t_flink_log_pkey" primary key ("id");
