@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotBlank;
@@ -76,7 +77,9 @@ public class AccessTokenController {
   @PostMapping(value = "create")
   @RequiresPermissions("token:add")
   public RestResponse createToken(
-      @NotBlank(message = "{required}") Long userId, String expireTime, String description)
+      @NotBlank(message = "{required}") Long userId,
+      String expireTime,
+      @RequestParam(required = false) String description)
       throws InternalException {
     return accessTokenService.generateToken(userId, expireTime, description);
   }
