@@ -22,7 +22,7 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
-import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
+import org.apache.streampark.flink.kubernetes.TrackConfig.FlinkTrackConfig;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
@@ -121,15 +121,15 @@ public class FlinkK8sWatcherWrapper {
 
     // covert Application to TrackId
     public static TrackId toTrackId(@Nonnull Application app) {
-      Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
-      if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
+        FlinkK8sExecuteMode mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
+      if (FlinkK8sExecuteMode.APPLICATION.equals(mode)) {
         return TrackId.onApplication(
             app.getK8sNamespace(),
             app.getClusterId(),
             app.getId(),
             app.getJobId(),
             app.getTeamId().toString());
-      } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
+      } else if (FlinkK8sExecuteMode.SESSION.equals(mode)) {
         return TrackId.onSession(
             app.getK8sNamespace(),
             app.getClusterId(),

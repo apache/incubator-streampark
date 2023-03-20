@@ -46,8 +46,31 @@ public class TrackId {
     this.groupId = groupId;
   }
 
+  public TrackId(
+      FlinkK8sExecuteMode executeMode,
+      String namespace,
+      String clusterId,
+      long appId,
+      String jobId,
+      String groupId) {
+    this.executeMode = executeMode;
+    this.clusterId = clusterId;
+    this.appId = appId;
+    this.jobId = jobId;
+    this.groupId = groupId;
+    this.namespace = namespace;
+  }
+
   public FlinkK8sExecuteMode getExecuteMode() {
     return executeMode;
+  }
+
+  public TrackId copy(String jobId) {
+      return new TrackId(executeMode, namespace, clusterId, appId, jobId, groupId);
+  }
+
+  public ClusterKey toClusterKey() {
+      return new ClusterKey(executeMode, namespace, clusterId);
   }
 
   public String getClusterId() {

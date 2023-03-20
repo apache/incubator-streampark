@@ -45,6 +45,27 @@ public class JobStatusCV {
     this.pollAckTime = pollAckTime;
   }
 
+  public JobStatusCV(
+      FlinkJobState jobState,
+      String jobId,
+      long pollEmitTime,
+      long pollAckTime,
+      String jobName,
+      long jobStartTime,
+      long jobEndTime,
+      long duration,
+      int taskTotal) {
+    this.jobState = jobState;
+    this.jobId = jobId;
+    this.pollEmitTime = pollEmitTime;
+    this.pollAckTime = pollAckTime;
+    this.jobName = jobName;
+    this.jobStartTime = jobStartTime;
+    this.jobEndTime = jobEndTime;
+    this.duration = duration;
+    this.taskTotal = taskTotal;
+  }
+
   public FlinkJobState getJobState() {
     return jobState;
   }
