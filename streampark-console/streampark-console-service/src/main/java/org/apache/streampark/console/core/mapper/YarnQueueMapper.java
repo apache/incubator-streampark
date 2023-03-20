@@ -28,4 +28,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 /** Yarn queue mapper definition. */
 public interface YarnQueueMapper extends BaseMapper<YarnQueue> {
   IPage<YarnQueue> findQueues(Page<YarnQueue> page, @Param("yarnQueue") YarnQueue yarnQueue);
+
+  boolean existsByQueueLabel(@Param("yarnQueue") YarnQueue yarnQueue);
 }
