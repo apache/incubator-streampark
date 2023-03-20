@@ -32,6 +32,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,9 +103,17 @@ public class AccessTokenController {
 
   /** query token list */
   @Operation(summary = "List tokens")
+  @Parameters({
+    @Parameter(
+        name = "userId",
+        in = ParameterIn.QUERY,
+        description = "user id",
+        schema = @Schema(implementation = Long.class))
+  })
   @PostMapping(value = "list")
   @RequiresPermissions("token:view")
-  public RestResponse tokensList(RestRequest restRequest, AccessToken accessToken) {
+  public RestResponse tokensList(
+      RestRequest restRequest, @Parameter(hidden = true) AccessToken accessToken) {
     IPage<AccessToken> accessTokens = accessTokenService.findAccessTokens(accessToken, restRequest);
     return RestResponse.success(accessTokens);
   }

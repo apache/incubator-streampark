@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
@@ -27,6 +28,7 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
 import org.apache.streampark.console.system.service.UserService;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,16 @@ public class AccessTokenServiceTest extends SpringTestBase {
     User user = userService.findByName(username);
     Assertions.assertNotNull(user);
     Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getPassword()));
+
+    // list
+    AccessToken mockToken1 = new AccessToken();
+    mockToken1.setUserId(100000L);
+    IPage<AccessToken> tokens1 = accessTokenService.findAccessTokens(mockToken1, new RestRequest());
+    Assertions.assertEquals(1, tokens1.getRecords().size());
+    AccessToken mockToken2 = new AccessToken();
+    mockToken2.setUserId(100001L);
+    IPage<AccessToken> tokens2 = accessTokenService.findAccessTokens(mockToken2, new RestRequest());
+    Assertions.assertTrue(tokens2.getRecords().isEmpty());
 
     // toggle
     Long tokenId = accessToken.getId();

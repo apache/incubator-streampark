@@ -44,7 +44,7 @@
         from t_access_token t1 join t_user t2 on t1.user_id = t2.user_id
         <where>
             <if test="accessToken.userId != null and accessToken.userId != ''">
-                and t1.user_id = accessToken.userId
+                and t1.user_id = #{accessToken.userId}
             </if>
         </where>
     </select>
