@@ -82,6 +82,10 @@ management:
     ldap:
       enabled: false
 
+openapi:
+  streampark-v2:
+    base-path: v2
+
 streampark:
   proxy:
     # knox process address https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn

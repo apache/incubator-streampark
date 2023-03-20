@@ -41,6 +41,8 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
 
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <openapi.generator.version>6.2.1</openapi.generator.version>
         <knife4j-openapi3.version>4.0.0</knife4j-openapi3.version>
         <springdoc-openapi-ui.version>1.6.9</springdoc-openapi-ui.version>
         <commons-compress.version>1.21</commons-compress.version>
@@ -69,6 +71,20 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- mapstruct -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+
+        <!-- openapi -->
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-console-openapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!--scala-->
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -409,6 +425,20 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
 
             <plugin>

@@ -30,6 +30,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>streampark-console-openapi</module>
         <module>streampark-console-service</module>
     </modules>
 

@@ -44,7 +44,8 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(
+    value = {"org.apache.streampark.console.core", "org.apache.streampark.console.system"})
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 

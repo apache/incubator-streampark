@@ -523,6 +523,7 @@
                         </resourceIncludes>
                         <resourceExcludes>
                             **/.asf.yaml,
+                            **/streampark_rest_*.yaml,
                             **/.github/**
                         </resourceExcludes>
                         <excludes>

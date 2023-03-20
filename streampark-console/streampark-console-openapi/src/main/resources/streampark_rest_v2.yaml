@@ -1,0 +1,3217 @@
+openapi: 3.0.3
+info:
+  title: Apache StreamPark Api Docs
+  description: Apache StreamPark Api Docs
+  contact:
+    name: Apache StreamPark
+    url: 'https://streampark.apache.org/'
+    email: dev@streampark.apache.org
+  license:
+    name: Apache-2.0 license
+  version: 2.1.0-SNAPSHOT
+servers:
+  - url: 'http://localhost:10000/v2'
+    description: Apache StreamPark v2 API
+security:
+  - Authorization: [ ]
+tags:
+  - name: 'ALERT_TAG'
+  - name: 'APPLICATION_TAG'
+paths:
+  # alert controller
+  /alert_configs:
+    # TODO /flink/alert/list & /listWithOutPage
+    get:
+      summary: List alert configs
+      operationId: ListAlertConfig
+      tags:
+        - ALERT_TAG
+      parameters:
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/FilterUserId'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAlertConfig'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+    # TODO /flink/alert/add
+    post:
+      summary: Create a alert config
+      operationId: CreateAlertConfig
+      tags:
+        - ALERT_TAG
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAlertConfigRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlinkApplication'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /alert_configs/{config_id}:
+    parameters:
+      - $ref: '#/components/parameters/AlertConfigId'
+
+    # TODO /flink/alert/get
+    get:
+      summary: Get a alert config
+      operationId: GetAlertConfig
+      tags:
+        - ALERT_TAG
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertConfigInfo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+    # TODO /flink/alert/update
+    put:
+      summary: Update a alert config
+      operationId: UpdateAlertConfig
+      tags:
+        - ALERT_TAG
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAlertConfigRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertConfigInfo'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+    # TODO /flink/alert/delete
+    delete:
+      summary: Delete a alert config
+      operationId: DeleteAlertConfig
+      tags:
+        - ALERT_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+          
+  /alert_configs/{config_id}/test_send:
+    # TODO /flink/alert/send
+    post:
+      summary: Test a alert config send
+      operationId: TestAlertConfigSend
+      tags:
+        - ALERT_TAG
+      parameters:
+        - $ref: '#/components/parameters/AlertConfigId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # application controller
+  /flink_applications:
+    # TODO /flink/app/list
+    get:
+      summary: List flink applications
+      operationId: ListFlinkApplication
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/FilterTeamId'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListFlinkApplication'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+    # TODO /flink/app/create
+    post:
+      summary: Create a flink application
+      operationId: CreateFlinkApplication
+      tags:
+        - APPLICATION_TAG
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFlinkApplicationRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlinkApplication'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # TODO /flink/app/copy
+  /flink_applications/{application_id}/copy:
+    post:
+      summary: Copy a flink application
+      operationId: CopyFlinkApplication
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlinkApplication'
+
+  # TODO /flink/app/dashboard
+  /flink_applications/dashboard:
+    get:
+      summary: Get flink applications dashboard
+      operationId: GetApplicationsDashboard
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/TeamId'
+      responses:
+        '200':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /flink_applications/{application_id}:
+    parameters:
+      - $ref: '#/components/parameters/FlinkApplicationId'
+
+    get:
+      summary: Get a flink application
+      operationId: GetFlinkApplication
+      tags:
+        - APPLICATION_TAG
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlinkApplication'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+    # TODO /flink/app/update
+    put:
+      summary: Update a flink application
+      operationId: UpdateFlinkApplication
+      tags:
+        - APPLICATION_TAG
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlinkApplication'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+    # TODO /flink/app/delete
+    delete:
+      summary: Delete a flink application
+      operationId: DeleteFlinkApplication
+      tags:
+        - APPLICATION_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/mapping
+  /flink_applications/{application_id}/mapping:
+    post:
+      summary: Mapping a flink application
+      operationId: MappingApplication
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/revoke
+  /flink_applications/{application_id}/revoke:
+    post:
+      summary: Revoke a flink application
+      operationId: RevokeApplication
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/start
+  /flink_applications/{application_id}/start:
+    post:
+      summary: Start a flink application
+      operationId: StartApplication
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/cancel
+  /flink_applications/{application_id}/cancel:
+    post:
+      summary: Cancel a flink application
+      operationId: CancelApplication
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/forceStop
+  /flink_applications/{application_id}/force_stop:
+    post:
+      summary: Force stop a flink application
+      operationId: ForceStopApplication
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/yarn
+  /flink_applications/{application_id}/yarn_proxy:
+    get:
+      summary: Get a flink application yarn proxy address
+      operationId: GetApplicationYarnProxy
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/name
+  /flink_applications/{application_id}/yarn_name:
+    get:
+      summary: Get a flink application yarn name
+      operationId: GetApplicationYarnName
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/checkName
+  /flink_applications/{application_id}/check:
+    get:
+      summary: Check a flink application
+      operationId: CheckFlinkApplication
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/readConf
+  /flink_applications/{application_id}/conf:
+    get:
+      summary: Get a flink application conf
+      operationId: GetApplicationConf
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/main
+  /flink_applications/{application_id}/main_class:
+    get:
+      summary: Get main class of specific flink application
+      operationId: GetApplicationMainClass
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/backups
+  /flink_applications/backups:
+    get:
+      summary: List flink application backups
+      operationId: ListApplicationBackups
+      tags:
+        - APPLICATION_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/optionlog
+  /flink_applications/{application_id}/option_logs:
+    get:
+      summary: Get a flink application operation logs
+      operationId: GetApplicationOperationLogs
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/deleteOperationLog
+  /flink_applications/{application_id}/option_logs/{operation_id}:
+    delete:
+      summary: Delete flink application operation log
+      operationId: DeleteApplicationOperationLog
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+        - $ref: '#/components/parameters/OperationLogId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/deletebak
+  /flink_applications/{application_id}/backups/{backup_id}:
+    delete:
+      summary: Delete flink application backup
+      operationId: DeleteApplicationBackup
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+        - $ref: '#/components/parameters/BackupId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/upload
+  /flink_applications/upload:
+    post:
+      summary: Upload the application jar
+      operationId: UploadApplicationJar
+      tags:
+        - APPLICATION_TAG
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                applicationJar:
+                  type: string
+                  format: binary
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/checkSavepointPath
+  /flink_applications/{application_id}/savepoint_path/check:
+    get:
+      summary: Check a flink application savepoint path
+      operationId: CheckApplicationSavepointPath
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+        - $ref: '#/components/parameters/SavepointPath'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/app/k8sStartLog
+  /flink_applications/{application_id}/k8s_start_logs:
+    get:
+      summary: Get a flink application k8s start logs
+      operationId: GetApplicationK8sStartLog
+      tags:
+        - APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # application build pipeline controller
+  # TODO /flink/pipe/build
+  /flink_applications/{application_id}/release:
+    post:
+      summary: Release a flink application
+      operationId: ReleaseApplication
+      tags:
+        - FLINK_APPLICATION_BUILD_PIPELINE_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/pipe/detail
+  /flink_applications/{application_id}/release/pipeline:
+    get:
+      summary: Get a flink application release pipeline info
+      operationId: GetApplicationReleasePipeline
+      tags:
+        - FLINK_APPLICATION_BUILD_PIPELINE_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # application history controller
+  # TODO /flink/history/uploadJars
+  /histories/jars:
+    get:
+      summary: List jars history
+      operationId: ListJarHistory
+      tags:
+        - FLINK_APPLICATION_HISTORY_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/history/k8sNamespaces
+  /histories/k8s_namespaces:
+    get:
+      summary: List k8s namespaces history
+      operationId: ListK8sNamespaceHistory
+      tags:
+        - FLINK_APPLICATION_HISTORY_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/history/sessionClusterIds
+  /histories/session_clusters:
+    get:
+      summary: List session clusters history
+      operationId: ListSessionClusterHistory
+      tags:
+        - FLINK_APPLICATION_HISTORY_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/history/flinkBaseImages
+  /histories/flink_base_images:
+    get:
+      summary: List flink base images history
+      operationId: ListFlinkBaseImageHistory
+      tags:
+        - FLINK_APPLICATION_HISTORY_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/history/flinkPodTemplates
+  /histories/flink_pod_templates:
+    get:
+      summary: List flink pod templates history
+      operationId: ListPodTemplateHistory
+      tags:
+        - FLINK_APPLICATION_HISTORY_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/history/flinkJmPodTemplates
+  /histories/flink_jm_pod_templates:
+    get:
+      summary: List flink jm pod templates history
+      operationId: ListJmPodTemplateHistory
+      tags:
+        - FLINK_APPLICATION_HISTORY_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/history/flinkTmPodTemplates
+  /histories/flink_tm_pod_templates:
+    get:
+      summary: List flink tm pod templates history
+      operationId: ListTmPodTemplateHistory
+      tags:
+        - FLINK_APPLICATION_HISTORY_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # config controller
+  /flink_configs/{config_id}:
+    parameters:
+      - $ref: '#/components/parameters/FlinkConfigId'
+
+      # TODO /flink/conf/get
+    get:
+      summary: Get a flink config
+      operationId: GetFlinkConfig
+      tags:
+        - FLINK_CONFIG_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/conf/delete
+    delete:
+      summary: Delete a flink config
+      operationId: DeleteFlinkConfig
+      tags:
+        - FLINK_CONFIG_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/conf/template
+  /flink_configs/conf_template:
+    get:
+      summary: Get flink config template
+      operationId: GetFlinkConfigTemplate
+      tags:
+        - FLINK_CONFIG_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+
+  # TODO /flink/conf/list
+  /flink_applications/{application_id}/configs:
+    get:
+      summary: List a flink application configs
+      operationId: ListApplicationConfig
+      tags:
+        - FLINK_CONFIG_TAG
+        - FLINK_APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/conf/history
+  /flink_applications/{application_id}/configs/history:
+    get:
+      summary: List a flink application configs history
+      operationId: ListApplicationConfigHistory
+      tags:
+        - FLINK_CONFIG_TAG
+        - FLINK_APPLICATION_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/conf/sysHadoopConf
+  /flink_configs/hadoop_configs:
+    get:
+      summary: Get hadoop configs
+      operationId: GetHadoopConfig
+      tags:
+        - FLINK_CONFIG_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+
+  # external link controller
+  /external_links:
+    # TODO /flink/externalLink/list
+    get:
+      summary: List external links
+      operationId: ListExternalLink
+      tags:
+        - EXTERNAL_LINK_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/externalLink/create
+    post:
+      summary: Create external link
+      operationId: CreateExternalLink
+      tags:
+        - EXTERNAL_LINK_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  /external_links/{link_id}:
+    parameters:
+      - $ref: '#/components/parameters/ExternalLinkId'
+
+      # TODO /flink/externalLink/update
+    put:
+      summary: Update external link
+      operationId: UpdateExternalLink
+      tags:
+        - EXTERNAL_LINK_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/externalLink/delete
+    delete:
+      summary: Delete external link
+      operationId: DeleteExternalLink
+      tags:
+        - EXTERNAL_LINK_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/externalLink/render
+  /flink_applications/{application_id}/external_links:
+    get:
+      summary: List a flink application external links
+      operationId: ListApplicationExternalLink
+      tags:
+        - EXTERNAL_LINK_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # flink cluster controller
+  /flink_clusters:
+    # TODO /flink/cluster/list
+    get:
+      summary: List flink clusters
+      operationId: ListFlinkCluster
+      tags:
+        - FLINK_CLUSTER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/cluster/create
+    post:
+      summary: Create a flink cluster
+      operationId: CreateFlinkCluster
+      tags:
+        - FLINK_CLUSTER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+    # TODO /flink/cluster/remoteUrl
+  /flink_clusters/{cluster_id}/remote_address:
+    get:
+      summary: Get a flink cluster remote address
+      operationId: GetFlinkClusterAddress
+      tags:
+        - FLINK_CLUSTER_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkClusterId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/cluster/check
+  /flink_clusters/{cluster_id}/status:
+    get:
+      summary: Get a flink cluster status
+      operationId: GetFlinkClusterStatus
+      tags:
+        - FLINK_CLUSTER_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkClusterId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /flink_clusters/{cluster_id}:
+    parameters:
+      - $ref: '#/components/parameters/FlinkClusterId'
+
+    # TODO /flink/cluster/get
+    get:
+      summary: Get a flink cluster
+      operationId: GetFlinkCluster
+      tags:
+        - FLINK_CLUSTER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/cluster/update
+    put:
+      summary: Update a flink cluster
+      operationId: UpdateFlinkCluster
+      tags:
+        - FLINK_CLUSTER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/cluster/delete
+    delete:
+      summary: Delete a flink cluster
+      operationId: DeleteFlinkCluster
+      tags:
+        - FLINK_CLUSTER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/cluster/start
+  /flink_clusters/{cluster_id}/start:
+    post:
+      summary: Start a flink cluster
+      operationId: StartFlinkCluster
+      tags:
+        - FLINK_CLUSTER_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkClusterId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/cluster/shutdown
+  /flink_clusters/{cluster_id}/shutdown:
+    post:
+      summary: Shutdown a flink cluster
+      operationId: ShutdownFlinkCluster
+      tags:
+        - FLINK_CLUSTER_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkClusterId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # flink env controller
+  # TODO /flink/env/exists
+
+  /flink_enviroments:
+    # TODO /flink/env/create
+    post:
+      summary: Create a flink environment
+      operationId: CreateFlinkEnvironment
+      tags:
+        - FLINK_ENV_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/env/list
+    get:
+      summary: List flink environments
+      operationId: ListFlinkEnvironment
+      tags:
+        - FLINK_ENV_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /flink_enviroments/{env_id}/verify:
+    post:
+      summary: Verify a flink environment
+      operationId: VerifyFlinkEnvironment
+      tags:
+        - FLINK_ENV_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkEnvId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /flink_enviroments/{env_id}:
+    parameters:
+      - $ref: '#/components/parameters/FlinkEnvId'
+      # TODO /flink/env/get
+    get:
+      summary: Get a flink environment
+      operationId: GetFlinkEnvironment
+      tags:
+        - FLINK_ENV_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/env/update or /flink/env/default
+    put:
+      summary: Update a flink environment
+      operationId: UpdateFlinkEnvironment
+      tags:
+        - FLINK_ENV_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/env/sync
+  /flink_enviroments/{env_id}/sync:
+    post:
+      summary: Sync a flink environment
+      operationId: SyncFlinkEnvironment
+      tags:
+        - FLINK_ENV_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkEnvId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # flink pod template controller
+  # TODO /flink/podtmpl/sysHosts
+  /flink_pod_templates/host:
+    get:
+      summary: Get system hosts
+      operationId: GetSystemHosts
+      tags:
+        - FLINK_POD_TEMPLATE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/podtmpl/init
+  /flink_pod_templates/init:
+    get:
+      summary: Get initial pod template
+      operationId: GetInitPodTemplate
+      tags:
+        - FLINK_POD_TEMPLATE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/podtmpl/compHostAlias
+  /flink_pod_templates/host_alias/complete:
+    post:
+      summary: Get pod template of complete host alias
+      operationId: GetHostAliasPodTemplate
+      tags:
+        - FLINK_POD_TEMPLATE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/podtmpl/extractHostAlias
+  /flink_pod_templates/host_alias/extract:
+    post:
+      summary: Extract host alias from pod template
+      operationId: ExtractHostAlias
+      tags:
+        - FLINK_POD_TEMPLATE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/podtmpl/previewHostAlias
+  /flink_pod_templates/host_alias/preview:
+    post:
+      summary: Preview pod template with host alias
+      operationId: PreviewHostAliasPodTemplate
+      tags:
+        - FLINK_POD_TEMPLATE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # flink sql controller
+  # TODO /flink/sql/verify
+  /flink_sql/verify:
+    post:
+      summary: Verify flink sql
+      operationId: VerifyFlinkSql
+      tags:
+        - FLINK_SQL_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /flink_sql:
+    # TODO /flink/sql/list /flink/sql/get -> /flink/sql?id=1,2
+    get:
+      summary: List flink sql
+      operationId: ListFlinkSql
+      tags:
+        - FLINK_SQL_TAG
+      parameters:
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/FilterFlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /flink_sql/{sql_id}:
+    # TODO  /flink/sql/delete
+    delete:
+      summary: Delete a flink sql
+      operationId: DeleteFlinkSql
+      tags:
+        - FLINK_SQL_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkSqlId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/sql/history
+  /flink_applications/{application_id}/sql/history:
+    get:
+      summary: List a flink application sql history
+      operationId: ListApplicationSqlHistory
+      tags:
+        - FLINK_SQL_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/sql/sqlComplete
+  /flink_sql/complete:
+    post:
+      summary: Complete flink sql
+      operationId: CompleteFlinkSql
+      tags:
+        - FLINK_SQL_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # project controller
+  /projects:
+    # TODO /flink/project/create
+    post:
+      summary: Create a project
+      operationId: CreateProject
+      tags:
+        - PROJECT_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/project/list or TODO /flink/project/select /projects?team_id=?
+    get:
+      summary: List projects
+      operationId: ListProject
+      tags:
+        - PROJECT_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /projects/{project_id}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+
+      # TODO /flink/project/get
+    get:
+      summary: Get a project
+      operationId: GetProject
+      tags:
+        - PROJECT_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/project/update
+    put:
+      summary: Update a project
+      operationId: UpdateProject
+      tags:
+        - PROJECT_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/project/delete
+    delete:
+      summary: Delete a project
+      operationId: DeleteProject
+      tags:
+        - PROJECT_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/project/build
+  /projects/{project_id}/build:
+    post:
+      summary: Build a project
+      operationId: BuildProject
+      tags:
+        - PROJECT_TAG
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/project/buildlog
+  /projects/{project_id}/build_logs:
+    get:
+      summary: Get a project build logs
+      operationId: GetProjectBuildLog
+      tags:
+        - PROJECT_TAG
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/project/branches
+  /projects/{project_id}/git/branches:
+    get:
+      summary: List a project git branches
+      operationId: ListProjectGitBranches
+      tags:
+        - PROJECT_TAG
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/project/gitcheck
+  /projects/{project_id}/git/auth:
+    post:
+      summary: Verify a git project authorization
+      operationId: VerifyProjectGitAuthorization
+      tags:
+        - PROJECT_TAG
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/project/exists
+  /projects/{project_id}/check:
+    get:
+      summary: Check a project
+      operationId: CheckProject
+      tags:
+        - PROJECT_TAG
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/project/modules
+  /projects/{project_id}/modules:
+    get:
+      summary: List a project modules
+      operationId: ListProjectModule
+      tags:
+        - PROJECT_TAG
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/project/jars
+  /projects/{project_id}/jars:
+    get:
+      summary: List project jars
+      operationId: ListProjectJar
+      tags:
+        - PROJECT_TAG
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/project/listconf
+  /projects/{project_id}/configurations:
+    get:
+      summary: List project configurations
+      operationId: ListProjectConfiguration
+      tags:
+        - PROJECT_TAG
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # savepoint controller
+  # TODO /flink/savepoint/latest
+  /flink_applications/{application_id}/savepoints/latest:
+    get:
+      summary: Get a application latest savepoint
+      operationId: GetLatestSavepoint
+      tags:
+        - SAVEPOINT_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/savepoint/history
+  /flink_applications/{application_id}/savepoints/history:
+    get:
+      summary: List a application savepoint history
+      operationId: ListSavepointHistory
+      tags:
+        - SAVEPOINT_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/savepoint/delete
+  /savepoints/{savepoint_id}:
+    delete:
+      summary: Delete a savepoint
+      operationId: DeleteSavepoint
+      tags:
+        - SAVEPOINT_TAG
+      parameters:
+        - $ref: '#/components/parameters/SavepointId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/savepoint/trigger
+  /flink_applications/{application_id}/savepoints:
+    post:
+      summary: Trigger a application savepoint
+      operationId: TriggerSavepoint
+      tags:
+        - SAVEPOINT_TAG
+      parameters:
+        - $ref: '#/components/parameters/FlinkApplicationId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # setting controller
+  # TODO  /flink/setting/all
+  /settings:
+    get:
+      summary: List settings
+      operationId: ListSetting
+      tags:
+        - SETTING_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  /settings/{setting_key}:
+    parameters:
+      - $ref: '#/components/parameters/SettingKey'
+
+      # TODO /flink/setting/get
+    get:
+      summary: Get a setting
+      operationId: GetSetting
+      tags:
+        - SETTING_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /flink/setting/update
+    put:
+      summary: Update a setting
+      operationId: UpdateSetting
+      tags:
+        - SETTING_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /flink/setting/weburl
+  /settings/streampark/address:
+    get:
+      summary: Get streampark address
+      operationId: GetStreamParkAddress
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /flink/setting/checkHadoop
+  /settings/hadoop/status:
+    get:
+      summary: Check hadoop status
+      operationId: CheckHadoopStatus
+      tags:
+        - SETTING_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # variable controller
+  /variables:
+    # TODO /variable/page
+    # TODO /variable/list
+    get:
+      summary: List variables
+      operationId: ListVariable
+      tags:
+        - VARIABLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /variable/post
+    post:
+      summary: Create a variable
+      operationId: CreateVariable
+      tags:
+        - VARIABLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /variable/dependApps
+  /variables/{variable_code}/applications:
+    get:
+      summary: List a variable depend applications
+      operationId: ListVariableDependApplication
+      tags:
+        - VARIABLE_TAG
+      parameters:
+        - $ref: '#/components/parameters/VariableCode'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /variables/{variable_id}:
+    parameters:
+      - $ref: '#/components/parameters/VariableId'
+
+      # TODO /variable/showOriginal
+    get:
+      summary: Get a variable
+      operationId: GetVariable
+      tags:
+        - VARIABLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /variable/update
+    put:
+      summary: Update a variable
+      operationId: UpdateVariable
+      tags:
+        - VARIABLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /variable/delete
+    delete:
+      summary: Delete a variable
+      operationId: DeleteVariable
+      tags:
+        - VARIABLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /variable/check/code
+  /variables/{variable_code}/validate:
+    get:
+      summary: Validate a variable code
+      operationId: ValidateVariableCode
+      tags:
+        - VARIABLE_TAG
+      parameters:
+        - $ref: '#/components/parameters/VariableCode'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+
+  # access token controller
+  /tokens:
+    # TODO /token/list
+    get:
+      summary: List tokens
+      operationId: ListToken
+      tags:
+        - TOKEN_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /token/create
+    post:
+      summary: Create a token
+      operationId: CreateToken
+      tags:
+        - TOKEN_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /token/check
+  /tokens/current/status:
+    get:
+      summary: Verify current user token status
+      operationId: VerifyCurrentTokenStatus
+      tags:
+        - TOKEN_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /tokens/{token_id}:
+    parameters:
+      - $ref: '#/components/parameters/TokenId'
+
+    # TODO /token/toggle
+    put:
+      summary: Update a token
+      operationId: UpdateToken
+      tags:
+        - TOKEN_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /token/delete
+    delete:
+      summary: Delete a token
+      operationId: DeleteToken
+      tags:
+        - TOKEN_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # member controller
+  /members:
+    # TODO /member/list
+    get:
+      summary: List Members
+      operationId: ListMember
+      tags:
+        - MEMBER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /member/post
+    post:
+      summary: Create a member
+      operationId: CreateMember
+      tags:
+        - MEMBER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /member/candidateUsers
+  /teams/{team_id}/candidate_users:
+    get:
+      summary: List candidate users
+      operationId: ListCandidateUser
+      tags:
+        - MEMBER_TAG
+      parameters:
+        - $ref: '#/components/parameters/TeamId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /member/teams
+  /members/{member_id}/teams:
+    get:
+      summary: List member teams
+      operationId: ListMemberTeam
+      tags:
+        - MEMBER_TAG
+      parameters:
+        - $ref: '#/components/parameters/MemberId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /member/check/user
+  /members/{username}/check:
+    get:
+      summary: Check a team member
+      operationId: CheckTeamMember
+      tags:
+        - MEMBER_TAG
+      parameters:
+        - $ref: '#/components/parameters/FilterTeamId'
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /members/{member_id}:
+    # TODO /member/update
+    put:
+      summary: Update a member
+      operationId: UpdateMember
+      tags:
+        - MEMBER_TAG
+      parameters:
+        - $ref: '#/components/parameters/MemberId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /member/delete
+    delete:
+      summary: Delete a member
+      operationId: DeleteMember
+      tags:
+        - MEMBER_TAG
+      parameters:
+        - $ref: '#/components/parameters/MemberId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # menu controller
+  # TODO /menu/router
+  /users/current/menu_routes:
+    get:
+      summary: List menu routes
+      operationId: ListMenuRoute
+      tags:
+        - MENU_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  /menus:
+    # TODO /menu/list
+    get:
+      summary: List menus
+      operationId: ListMenu
+      tags:
+        - MENU_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /menu/post
+    post:
+      summary: Create a menu
+      operationId: CreateMenu
+      tags:
+        - MENU_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  /menus/{menu_id}:
+    parameters:
+      - $ref: '#/components/parameters/MenuId'
+
+    # TODO /menu/update
+    put:
+      summary: Update a menu
+      operationId: UpdateMenu
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+    # TODO /menu/delete
+    delete:
+      summary: Delete a menu
+      operationId: DeleteMenu
+      tags:
+        - MENU_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+
+  # passport controller
+  # TODO /passport/signin
+  /passport/signin:
+    post:
+      summary: Signin
+      operationId: Signin
+      tags:
+        - PASSPORT_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  # TODO /passport/signout
+  /passport/signout:
+    post:
+      summary: Signout
+      operationId: Signout
+      tags:
+        - PASSPORT_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # role controller
+  /roles:
+    # TODO /role/list
+    get:
+      summary: List roles
+      operationId: ListRole
+      tags:
+        - ROLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /role/post
+    post:
+      summary: Create a role
+      operationId: CreateRole
+      tags:
+        - ROLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  /roles/{role_id}:
+    parameters:
+      - $ref: '#/components/parameters/RoleId'
+
+    # TODO /role/update
+    put:
+      summary: Update a role
+      operationId: UpdateRole
+      tags:
+        - ROLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+      # TODO /role/delete
+    delete:
+      summary: Delete a role
+      operationId: DeleteRole
+      tags:
+        - ROLE_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /role/menu
+  /roles/{role_id}/menus:
+    get:
+      summary: List a role menus
+      operationId: ListRoleMenu
+      tags:
+        - ROLE_TAG
+      parameters:
+        - $ref: '#/components/parameters/RoleId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /role/check/name
+  /roles/{role_name}/check:
+    get:
+      summary: Check a role
+      operationId: CheckRole
+      tags:
+        - ROLE_TAG
+      parameters:
+        - $ref: '#/components/parameters/RoleName'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # team controller
+  /teams:
+    # TODO /team/list
+    get:
+      summary: List teams
+      operationId: List teams
+      tags:
+        - TEAM_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /team/post
+    post:
+      summary: Create a team
+      operationId: CreateTeam
+      tags:
+        - TEAM_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  /teams/{team_id}:
+    parameters:
+      - $ref: '#/components/parameters/TeamId'
+
+    # TODO /team/update
+    put:
+      summary: Update a team
+      operationId: UpdateTeam
+      tags:
+        - TEAM_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+      # TODO /team/delete
+    delete:
+      summary: Delete a team
+      operationId: DeleteTeam
+      tags:
+        - TEAM_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /team/check/name
+  /teams/{team_name}/check:
+    get:
+      summary: Check team
+      operationId: CheckTeam
+      tags:
+        - TEAM_TAG
+      parameters:
+        - $ref: '#/components/parameters/TeamName'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # user controller
+  # TODO /user/detail
+  /users/{username}:
+    get:
+      summary: Get a user
+      operationId: GetUser
+      tags:
+        - USER_TAG
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /users:
+    # TODO /user/list
+    # TODO /user/getNoTokenUser -> /users?has_token=true
+    get:
+      summary: List users
+      operationId: ListUser
+      tags:
+        - USER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /user/post
+    post:
+      summary: Create a user
+      operationId: CreateUser
+      tags:
+        - USER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /users/{user_id}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+
+    # TODO /user/update
+    put:
+      summary: Update a user
+      operationId: UpdateUser
+      tags:
+        - USER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    # TODO /user/delete
+    delete:
+      summary: Delete a suer
+      operationId: DeleteUser
+      tags:
+        - USER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /user/check/name
+  /users/{username}/check:
+    get:
+      summary: Check username
+      operationId: CheckUsername
+      tags:
+        - USER_TAG
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /user/check/password
+  /users/{user_name}/verify:
+    post:
+      summary: Verify password
+      operationId: VerifyPassword
+      tags:
+        - USER_TAG
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /user/password
+  /users/{user_name}/password:
+    patch:
+      summary: Update password
+      operationId: UpdatePassword
+      tags:
+        - USER_TAG
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /user/password/reset
+  /users/{user_name}/reset_password:
+    post:
+      summary: Reset password
+      operationId: ResetPassword
+      tags:
+        - USER_TAG
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /user/types
+  /users/types:
+    get:
+      summary: List user types
+      operationId: ListUserType
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /user/initTeam
+  /users/{user_id}/team:
+    post:
+      summary: Init the team for a user
+      operationId: InitUserTeam
+      tags:
+        - USER_TAG
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/FilterTeamId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /user/setTeam
+  /users/current/teams:
+    post:
+      summary: Set user's team
+      operationId: SetUserTeam
+      tags:
+        - USER_TAG
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  # TODO /user/appOwners
+  /teams/{team_id}/users:
+    get:
+      summary: List team's users
+      operationId: ListTeamUser
+      tags:
+        - USER_TAG
+      parameters:
+        - $ref: '#/components/parameters/TeamId'
+      responses:
+        '204':
+          description: Success
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+
+
+components:
+  schemas:
+    # base
+    Pagination:
+      description: Metadata about pagination
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+
+    Error:
+      description: Error body.
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        target:
+          type: string
+      required:
+        - code
+        - message
+
+    RestResponse:
+      type: object
+      properties:
+        empty:
+          type: boolean
+      additionalProperties:
+        type: object
+
+    # application
+    ListFlinkApplication:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            applications:
+              type: array
+              items:
+                $ref: '#/components/schemas/FlinkApplication'
+        - $ref: '#/components/schemas/Pagination'
+
+    FlinkApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+
+    CreateFlinkApplicationRequest:
+      type: object
+      properties:
+        teamId:
+          type: integer
+          format: int64
+        jobType:
+          type: string
+          enum: [ CUSTOM_CODE, FLINK_SQL ]
+        executionMode:
+          type: string
+          enum: [ LOCAL, REMOTE, YARN_PER_JOB, YARN_SESSION, YARN_APPLICATION, KUBERNETES_NATIVE_SESSION, KUBERNETES_NATIVE_APPLICATION ]
+        yarnQueue:
+          type: string
+
+    # alert config
+    ListAlertConfig:
+      description: 'list alert config'
+      type: object
+      allOf:
+        - type: object
+          properties:
+            alertConfigs:
+              type: array
+              items:
+                $ref: '#/components/schemas/AlertConfigInfo'
+        - $ref: '#/components/schemas/Pagination'
+
+    CreateAlertConfigRequest:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          example: 100000
+        alertName:
+          type: string
+        alertType:
+          description: >-
+            basic alert type: 1(email), 2(dink talk), 4(wecom), 8(http) 16(lark),
+            also support the combination, e.g. 3 means, email and dink talk
+          type: integer
+          example: 1
+        email:
+          $ref: '#/components/schemas/Email'
+        dingTalk:
+          $ref: '#/components/schemas/DingTalk'
+        weCom:
+          $ref: '#/components/schemas/WeCom'
+        httpCallback:
+          $ref: '#/components/schemas/HttpCallback'
+        lark:
+          $ref: '#/components/schemas/Lark'
+
+    UpdateAlertConfigRequest:
+      description: ''
+      type: object
+      properties:
+        alertName:
+          type: string
+
+    Email:
+      description: 'email parameters'
+      type: object
+      properties:
+        contacts:
+          description: 'email address'
+          example: "aaa@bbb.com"
+          type: string
+      required:
+        - contacts
+
+    DingTalk:
+      description: 'ding talk parameters'
+      type: object
+      properties:
+        dingTalkUrl:
+          description: "ding-talk url"
+          example: "http://qq.com"
+          type: string
+        contacts:
+          description: " address"
+          example: "aaa@bbb.com"
+          type: string
+        isAtAll:
+          description: "is @all"
+          example: "true"
+          type: boolean
+          default: false
+        token:
+          description: "access token"
+          example: "xxxx"
+          type: string
+        secretEnable:
+          description: "whether use ding-talk secret"
+          example: "false"
+          type: boolean
+          default: false
+        secretToken:
+          description: "secret token, only secret enabled"
+          example: ""
+          type: string
+      required:
+        - token
+
+    WeCom:
+      description: "wecom parameters"
+      type: object
+      properties:
+        token:
+          description: "access token"
+          example: "xxxx"
+          type: string
+      required:
+        - token
+
+    HttpCallback:
+      description: "http callback parameters"
+      type: object
+      properties:
+        url:
+          description: http callback url"
+          example: "http://example.com/a"
+          type: string
+        method:
+          description: "http method"
+          example: "POST"
+          type: string
+          enum: [ POST, GET ]
+        contentType:
+          description: "media content type"
+          example: "application/json"
+          type: string
+        requestTemplate:
+          description: "freemarker template for replace parameters"
+          type: string
+      required:
+        - url
+
+    Lark:
+      type: object
+      properties:
+        token:
+          description: "access token"
+          example: "xxxx"
+          type: string
+        isAtAll:
+          description: "is @all"
+          example: "true"
+          type: boolean
+          default: false
+        secretEnable:
+          description: "whether use lark secret"
+          example: "false"
+          type: boolean
+          default: false
+        secretToken:
+          description: "secret token, only secret enabled"
+          type: string
+      required:
+        - token
+
+    AlertConfigInfo:
+      type: object
+      properties:
+        id:
+          format: int64
+          type: integer
+        userId:
+          type: integer
+          format: int64
+        alertName:
+          type: string
+        alertType:
+          type: integer
+        email:
+          $ref: '#/components/schemas/Email'
+        dingTalk:
+          $ref: '#/components/schemas/DingTalk'
+        weCom:
+            $ref: '#/components/schemas/WeCom'
+        httpCallback:
+          $ref: '#/components/schemas/HttpCallback'
+        lark:
+          $ref: '#/components/schemas/Lark'
+
+
+  securitySchemes:
+    Authorization:
+      type: apiKey
+      name: Authorization
+      in: header
+
+  parameters:
+    # Pagination
+    PageOffset:
+      description: The number of items to skip before starting to collect the result set.
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      explode: true
+
+    PageLimit:
+      description: The numbers of items to return.
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 10
+      explode: true
+
+    AlertConfigId:
+      description: The alert config id
+      name: config_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    ProjectId:
+      description: The project id
+      name: project_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    FlinkConfigId:
+      description: The flink config id
+      name: config_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    FlinkApplicationId:
+      description: The application id
+      name: application_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    SavepointId:
+      description: The savepoint id
+      name: savepoint_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    BackupId:
+      description: The application backup id
+      name: backup_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    OperationLogId:
+      description: The application operation log id
+      name: operation_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    FlinkClusterId:
+      description: The cluster id
+      name: cluster_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    FlinkEnvId:
+      description: The environment id
+      name: env_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    TokenId:
+      description: The token id, which is used to operation the token
+      name: token_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    TeamId:
+      description: The team id
+      name: team_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    MemberId:
+      description: The member id
+      name: member_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    Username:
+      description: The username
+      name: username
+      in: path
+      required: true
+      schema:
+        type: string
+
+    ExternalLinkId:
+      description: The external link id
+      name: link_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    VariableId:
+      description: The variable id
+      name: variable_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    VariableCode:
+      description: The variable code
+      name: variable_code
+      in: path
+      required: true
+      schema:
+        type: string
+
+    FlinkSqlId:
+      description: The sql id
+      name: sql_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    SettingKey:
+      description: The setting key
+      name: setting_key
+      in: path
+      required: true
+      schema:
+        type: string
+
+    MenuId:
+      description: The menu id
+      name: menu_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    RoleId:
+      description: The role id
+      name: role_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    UserId:
+      description: The user id
+      name: user_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    TeamName:
+      description: The team name
+      name: team_name
+      in: path
+      required: true
+      schema:
+        type: string
+
+    RoleName:
+      description: The role name
+      name: role_name
+      in: path
+      required: true
+      schema:
+        type: string
+
+    # Filters
+    FilterFlinkApplicationId:
+      name: applicationId
+      in: query
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    FilterTeamId:
+      name: teamId
+      in: query
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    FilterUserId:
+      name: userId
+      in: query
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    ApplicationJar:
+      name: applicationJar
+      in: query
+      required: true
+      schema:
+        type: string
+        format: binary
+
+    SavepointPath:
+      name: savepointPath
+      in: query
+      required: true
+      schema:
+        type: string
+
+  responses:
+    # 400
+    BadRequest:
+      description: Client specified an invalid argument.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    # 401
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    # 403
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    # 404
+    NotFound:
+      description: A specified resource is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    # 500
+    InternalServer:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    # Default 4xx 5xx
+    DefaultErrorResponse:
+      description: Default Error Response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
