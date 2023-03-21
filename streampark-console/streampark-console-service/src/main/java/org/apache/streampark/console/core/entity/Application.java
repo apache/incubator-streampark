@@ -122,6 +122,7 @@ public class Application implements Serializable {
   private Boolean build;
 
   /** max restart retries after job failed */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer restartSize;
 
   /** has restart count */
