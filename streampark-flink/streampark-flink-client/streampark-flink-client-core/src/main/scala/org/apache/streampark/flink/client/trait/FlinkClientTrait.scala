@@ -430,7 +430,7 @@ trait FlinkClientTrait extends Logger {
       programArgs += PARAM_KEY_FLINK_PARALLELISM
       programArgs += getParallelism(submitRequest).toString
       submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
+        case DevelopmentMode.FLINK_SQL =>
           programArgs += PARAM_KEY_FLINK_SQL
           programArgs += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {

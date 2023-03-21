@@ -64,4 +64,4 @@ case class KubernetesDeployParam(clusterId: String,
                                  kubeConf: String = "~/.kube/config",
                                  serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
                                  flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
-                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.ClusterIP)
+                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.CLUSTER_IP)

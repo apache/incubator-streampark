@@ -66,7 +66,7 @@ object YarnApplicationClient extends YarnClientTrait {
         submitRequest.hdfsWorkspace.appJars,
         submitRequest.hdfsWorkspace.appPlugins)
       submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
+        case DevelopmentMode.FLINK_SQL =>
           val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
           version match {
             case Array(1, 12, _) => array += s"${workspace.APP_SHIMS}/flink-1.12"

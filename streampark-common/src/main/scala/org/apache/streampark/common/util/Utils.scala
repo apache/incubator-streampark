@@ -191,7 +191,6 @@ object Utils {
         case c if c == classOf[Double] => v.toDouble.asInstanceOf[T]
         case c if c == classOf[Short] => v.toShort.asInstanceOf[T]
         case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
-        case c if c == classOf[String] => v.asInstanceOf[T]
         case c if c == classOf[JavaByte] => v.toByte.asInstanceOf[T]
         case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
         case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]

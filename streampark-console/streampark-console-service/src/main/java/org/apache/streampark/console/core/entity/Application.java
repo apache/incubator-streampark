@@ -444,12 +444,12 @@ public class Application implements Serializable {
 
   @JsonIgnore
   public boolean isFlinkSqlJob() {
-    return DevelopmentMode.FLINKSQL.getValue().equals(this.getJobType());
+    return DevelopmentMode.FLINK_SQL.getValue().equals(this.getJobType());
   }
 
   @JsonIgnore
   public boolean isCustomCodeJob() {
-    return DevelopmentMode.CUSTOMCODE.getValue().equals(this.getJobType());
+    return DevelopmentMode.CUSTOM_CODE.getValue().equals(this.getJobType());
   }
 
   @JsonIgnore

@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -47,11 +46,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -66,16 +60,6 @@ public class ApplicationBackUpServiceImpl
   @Autowired private EffectiveService effectiveService;
 
   @Autowired private FlinkSqlService flinkSqlService;
-
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-rollback-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
 
   @Override
   public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
@@ -116,7 +100,7 @@ public class ApplicationBackUpServiceImpl
 
     // if running, set Latest
     if (application.isRunning()) {
-      // rollback to buckup config
+      // rollback to back up config
       configService.setLatestOrEffective(true, backParam.getId(), backParam.getAppId());
     } else {
       effectiveService.saveOrUpdate(backParam.getAppId(), EffectiveType.CONFIG, backParam.getId());
@@ -135,15 +119,11 @@ public class ApplicationBackUpServiceImpl
     fsOperator.copyDir(backParam.getPath(), application.getAppHome());
 
     // update restart status
-    try {
-      applicationService.update(
-          new UpdateWrapper<Application>()
-              .lambda()
-              .eq(Application::getId, application.getId())
-              .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
-    } catch (Exception e) {
-      throw e;
-    }
+    applicationService.update(
+        new UpdateWrapper<Application>()
+            .lambda()
+            .eq(Application::getId, application.getId())
+            .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
   }
 
   @Override

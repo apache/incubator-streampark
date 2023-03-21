@@ -196,7 +196,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
-      flinkCluster.setClusterState(ClusterState.STOPED.getValue());
+      flinkCluster.setClusterState(ClusterState.STOPPED.getValue());
       flinkCluster.setException(e.toString());
       updateById(flinkCluster);
       throw new ApiDetailException(e);
@@ -299,7 +299,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
       if (shutDownResponse != null) {
         flinkCluster.setAddress(null);
-        flinkCluster.setClusterState(ClusterState.STOPED.getValue());
+        flinkCluster.setClusterState(ClusterState.STOPPED.getValue());
         updateById(flinkCluster);
       } else {
         throw new ApiAlertException("get shutdown response failed");
