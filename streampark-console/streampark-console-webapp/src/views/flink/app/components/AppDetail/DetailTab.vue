@@ -54,7 +54,7 @@
   import ExecOptionModal from './ExecOptionModal.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useClipboard } from '@vueuse/core';
-  import { AppTypeEnum, JobTypeEnum, SavePointEnum } from '/@/enums/flinkEnum';
+  import { AppTypeEnum, JobTypeEnum, OperationEnum, SavePointEnum } from '/@/enums/flinkEnum';
   import { fetchFlinkSql, fetchFlinkSqlList, fetchRemoveFlinkSql } from '/@/api/flink/app/flinkSql';
   import FlinkSqlReview from './FlinkSqlReview.vue';
   import FlinkSqlCompareModal from './FlinkSqlCompareModal.vue';
@@ -466,10 +466,10 @@
         <BasicTable @register="registerLogsTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'optionName'">
-              <Tag color="#52c41a" v-if="record.optionName == 0"> Release </Tag>
-              <Tag color="#2db7f5" v-if="record.optionName == 1"> Start </Tag>
-              <Tag color="#108ee9" v-if="record.optionName == 2"> Savepoint </Tag>
-              <Tag color="#0C7EF2" v-if="record.optionName == 3"> Cancel </Tag>
+              <Tag color="#52c41a" v-if="record.optionName === OperationEnum.RELEASE"> Release </Tag>
+              <Tag color="#2db7f5" v-if="record.optionName === OperationEnum.START"> Start </Tag>
+              <Tag color="#108ee9" v-if="record.optionName === OperationEnum.SAVEPOINT"> Savepoint </Tag>
+              <Tag color="#0C7EF2" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
             </template>
             <template v-if="column.dataIndex == 'yarnAppId'">
               <a-button type="link" @click="handleView(app as any, '')">

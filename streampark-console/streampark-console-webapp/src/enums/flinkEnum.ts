@@ -62,6 +62,17 @@ export enum ReleaseStateEnum {
   REVOKED = 10,
 }
 
+export enum OperationEnum {
+  /** user operation: release app */
+  RELEASE = 0,
+  /** user operation: start app */
+  START = 1,
+  /** user operation: trigger savepoint */
+  SAVEPOINT = 2,
+  /** user operation: cancel app */
+  CANCEL = 3,
+}
+
 export enum OptionStateEnum {
   /** Application which is currently action: none. */
   NONE = 0,
