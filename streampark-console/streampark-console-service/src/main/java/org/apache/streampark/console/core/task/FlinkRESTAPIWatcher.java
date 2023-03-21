@@ -238,7 +238,7 @@ public class FlinkRESTAPIWatcher {
                   application.setEndTime(new Date());
                   cleanSavepoint(application);
                   cleanOptioning(optionState, key);
-                  doPersistMetrics(application, true);
+                  doPersistMetrics(application, false);
                   FlinkAppState appState = FlinkAppState.of(application.getState());
                   if (appState.equals(FlinkAppState.FAILED)
                       || appState.equals(FlinkAppState.LOST)) {
@@ -415,7 +415,6 @@ public class FlinkRESTAPIWatcher {
       application.setAvailableSlot(null);
       application.setJmMemory(null);
       application.setTmMemory(null);
-      unWatching(application.getId());
     } else if (stopWatch) {
       unWatching(application.getId());
     } else {
