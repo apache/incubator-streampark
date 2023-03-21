@@ -238,6 +238,7 @@ public class FlinkRESTAPIWatcher {
                   application.setEndTime(new Date());
                   cleanSavepoint(application);
                   cleanOptioning(optionState, key);
+                  doPersistMetrics(application, false);
                   FlinkAppState appState = FlinkAppState.of(application.getState());
                   if (appState.equals(FlinkAppState.FAILED)
                       || appState.equals(FlinkAppState.LOST)) {
