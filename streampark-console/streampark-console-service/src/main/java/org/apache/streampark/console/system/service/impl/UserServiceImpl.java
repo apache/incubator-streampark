@@ -150,9 +150,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
     user.setSalt(salt);
     user.setPassword(password);
-    LambdaQueryWrapper<User> queryWrapper =
-        new LambdaQueryWrapper<User>().eq(User::getUserId, user.getUserId());
-    this.baseMapper.update(user, queryWrapper);
+    this.baseMapper.updateById(user);
+  }
+
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void updateSaltPassword(User userParam) {
+    User user = getById(userParam.getUserId());
+    ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
+    user.setSalt(userParam.getSalt());
+    user.setPassword(userParam.getPassword());
+    this.baseMapper.updateById(user);
   }
 
   @Override

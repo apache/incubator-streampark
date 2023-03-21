@@ -100,6 +100,8 @@ public interface UserService extends IService<User> {
    */
   void updatePassword(User user) throws Exception;
 
+  void updateSaltPassword(User user) throws Exception;
+
   /**
    * reset password
    *
