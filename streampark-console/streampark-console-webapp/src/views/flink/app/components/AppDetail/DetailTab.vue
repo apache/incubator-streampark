@@ -49,7 +49,7 @@
   import ExecOptionModal from './ExecOptionModal.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useClipboard } from '@vueuse/core';
-  import { AppTypeEnum, JobTypeEnum, SavePointEnum } from '/@/enums/flinkEnum';
+  import { AppTypeEnum, CandidateTypeEnum, ConfigTypeEnum, JobTypeEnum, SavePointEnum } from '/@/enums/flinkEnum';
   import { fetchFlinkSql, fetchFlinkSqlList, fetchRemoveFlinkSql } from '/@/api/flink/app/flinkSql';
   import FlinkSqlReview from './FlinkSqlReview.vue';
   import FlinkSqlCompareModal from './FlinkSqlCompareModal.vue';
@@ -339,8 +339,8 @@
         <BasicTable @register="registerConfigTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'format'">
-              <Tag color="#2db7f5" v-if="record.format == 1"> yaml </Tag>
-              <Tag color="#108ee9" v-if="record.format == 2"> properties </Tag>
+              <Tag color="#2db7f5" v-if="record.format === ConfigTypeEnum.YAML"> yaml </Tag>
+              <Tag color="#108ee9" v-if="record.format === ConfigTypeEnum.PROPERTIES"> properties </Tag>
             </template>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
@@ -365,9 +365,9 @@
         <BasicTable @register="registerFlinkSqlTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'candidate'">
-              <Tag color="#52c41a" v-if="record.candidate == 0"> None </Tag>
-              <Tag color="#2db7f5" v-if="record.candidate == 1"> New </Tag>
-              <Tag color="#108ee9" v-if="record.candidate == 2"> History </Tag>
+              <Tag color="#52c41a" v-if="record.candidate === CandidateTypeEnum.NONE"> None </Tag>
+              <Tag color="#2db7f5" v-if="record.candidate === CandidateTypeEnum.NEW"> New </Tag>
+              <Tag color="#108ee9" v-if="record.candidate === CandidateTypeEnum.HISTORY"> History </Tag>
             </template>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
