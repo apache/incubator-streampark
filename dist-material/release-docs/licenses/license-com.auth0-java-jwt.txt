@@ -1,1 +1,0 @@
-License: {Name: The MIT License (MIT), URL: https://raw.githubusercontent.com/auth0/java-jwt/master/LICENSE, Distribution: repo, Comments: , }

@@ -1,2 +1,0 @@
-License: {Name: GNU General Public Library, URL: http://www.gnu.org/licenses/gpl.txt, Distribution: repo, Comments: , }
-License: {Name: COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0, URL: http://www.sun.com/cddl/cddl.html, Distribution: repo, Comments: , }

@@ -1,1 +1,0 @@
-License: {Name: MIT License, URL: http://www.opensource.org/licenses/mit-license.php, Distribution: repo, Comments: , }
