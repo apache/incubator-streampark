@@ -64,6 +64,10 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>javax.el</artifactId>
+                </exclusion>
             </exclusions>
             <scope>provided</scope>
         </dependency>
@@ -73,7 +77,5 @@
             <version>${hbase.version}</version>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
-
 </project>
