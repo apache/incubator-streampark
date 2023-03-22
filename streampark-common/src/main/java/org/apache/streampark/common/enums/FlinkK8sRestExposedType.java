@@ -23,13 +23,13 @@ import java.io.Serializable;
 public enum FlinkK8sRestExposedType implements Serializable {
 
   /** LoadBalancer */
-  LoadBalancer("LoadBalancer", 0),
+  LOAD_BALANCER("LoadBalancer", 0),
 
   /** ClusterIP */
-  ClusterIP("ClusterIP", 1),
+  CLUSTER_IP("ClusterIP", 1),
 
   /** NodePort */
-  NodePort("NodePort", 2);
+  NODE_PORT("NodePort", 2);
 
   private final String name;
 

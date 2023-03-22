@@ -87,8 +87,8 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       execStep(3) {
         val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
         val extJarLibs = request.developmentMode match {
-          case DevelopmentMode.FLINKSQL => request.dependencyInfo.extJarLibs
-          case DevelopmentMode.CUSTOMCODE => Set[String]()
+          case DevelopmentMode.FLINK_SQL => request.dependencyInfo.extJarLibs
+          case DevelopmentMode.CUSTOM_CODE => Set[String]()
         }
         val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
         logInfo(s"output shaded flink job jar: ${shadedJar.getAbsolutePath}")

@@ -55,7 +55,7 @@ sealed trait FlinkBuildParam extends BuildParam {
       localWorkspace.APP_JARS,
       localWorkspace.APP_PLUGINS,
       customFlinkUserJar)
-    if (developmentMode == DevelopmentMode.FLINKSQL) {
+    if (developmentMode == DevelopmentMode.FLINK_SQL) {
       providedLibs += {
         val version = flinkVersion.version.split("\\.").map(_.trim.toInt)
         version match {
