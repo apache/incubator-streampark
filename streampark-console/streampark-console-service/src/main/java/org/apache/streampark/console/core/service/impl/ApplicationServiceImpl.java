@@ -1359,12 +1359,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
    * @param appParam
    */
   @Override
-  public void starting(Application appParam) {
-    Application application = getById(appParam.getId());
-    Utils.notNull(
-        application,
-        String.format(
-            "The application id=%s not found, start application failed.", appParam.getId()));
+  public void starting(Application application) {
     application.setState(FlinkAppState.STARTING.getValue());
     application.setOptionTime(new Date());
     updateById(application);
@@ -1373,10 +1368,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   @Transactional(rollbackFor = {Exception.class})
   public void start(Application appParam, boolean auto) throws Exception {
-
     final Application application = getById(appParam.getId());
-
     Utils.notNull(application);
+    if (!application.isCanBeStart()) {
+      throw new ApiAlertException("[StreamPark] The application cannot be started repeatedly.");
+    }
+
+    starting(application);
     application.setAllowNonRestored(appParam.getAllowNonRestored());
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());

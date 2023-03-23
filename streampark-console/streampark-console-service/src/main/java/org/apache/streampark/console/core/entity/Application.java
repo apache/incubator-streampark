@@ -330,6 +330,30 @@ public class Application implements Serializable {
     }
   }
 
+  /**
+   * Determine whether the application can be started to prevent repeated starts.
+   *
+   * @return true: can start | false: can not start.
+   */
+  public boolean isCanBeStart() {
+    FlinkAppState state = FlinkAppState.of(getState());
+    switch (state) {
+      case ADDED:
+      case CREATED:
+      case FAILED:
+      case CANCELED:
+      case FINISHED:
+      case LOST:
+      case TERMINATED:
+      case SUCCEEDED:
+      case KILLED:
+      case POS_TERMINATED:
+        return true;
+      default:
+        return false;
+    }
+  }
+
   public boolean shouldBeTrack() {
     return shouldTracking(FlinkAppState.of(getState())) == 1;
   }
