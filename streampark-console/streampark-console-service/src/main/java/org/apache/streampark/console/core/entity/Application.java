@@ -715,17 +715,6 @@ public class Application implements Serializable {
       return groupId + ":" + artifactId + ":" + version + getClassifier(":");
     }
 
-    @JsonIgnore
-    public String getPath() {
-      return getGroupId()
-          + "_"
-          + getArtifactId()
-          + "-"
-          + getVersion()
-          + getClassifier("_")
-          + ".jar";
-    }
-
     private String getClassifier(String joiner) {
       return StringUtils.isEmpty(classifier) ? "" : joiner + classifier;
     }
