@@ -334,7 +334,7 @@ public class AppBuildPipeServiceImpl
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
         String localWorkspace = app.getLocalAppHome().concat("/lib");
-        if (app.getDevelopmentMode().equals(DevelopmentMode.CUSTOMCODE)
+        if (app.getDevelopmentMode().equals(DevelopmentMode.CUSTOM_CODE)
             && app.getApplicationType().equals(ApplicationType.APACHE_FLINK)) {
           yarnProvidedPath = app.getAppHome();
           localWorkspace = app.getLocalAppHome();
@@ -413,7 +413,7 @@ public class AppBuildPipeServiceImpl
   /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
   private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
     switch (app.getDevelopmentMode()) {
-      case CUSTOMCODE:
+      case CUSTOM_CODE:
         switch (app.getApplicationType()) {
           case STREAMPARK_FLINK:
             return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
@@ -424,7 +424,7 @@ public class AppBuildPipeServiceImpl
                 "[StreamPark] unsupported ApplicationType of custom code: "
                     + app.getApplicationType());
         }
-      case FLINKSQL:
+      case FLINK_SQL:
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
           String clientPath = Workspace.remote().APP_CLIENT();

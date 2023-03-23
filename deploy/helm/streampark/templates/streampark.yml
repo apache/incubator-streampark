@@ -56,9 +56,32 @@ spec:
             - name: {{ .Values.spec.name }}
               containerPort: {{ .Values.spec.containerPort }}
               protocol: TCP
+          env:
+            - name: TZ
+              value: {{ .Values.timezone }}
           securityContext:
             privileged: false
           command: ["bash","-c","bash bin/startup.sh"]
+          {{- if .Values.spec.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command: [ "curl", "-s", "http://localhost:10000/actuator/health/liveness" ]
+            initialDelaySeconds: {{ .Values.spec.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.spec.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.spec.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.spec.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.spec.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.spec.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command: [ "curl", "-s", "http://localhost:10000/actuator/health/readiness" ]
+            initialDelaySeconds: {{ .Values.spec.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.spec.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.spec.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.spec.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.spec.readinessProbe.failureThreshold }}
+          {{- end }}
           volumeMounts:
             - name: volume-docker
               mountPath: /var/run/docker.sock

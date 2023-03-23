@@ -54,7 +54,7 @@
   import ExecOptionModal from './ExecOptionModal.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useClipboard } from '@vueuse/core';
-  import { AppTypeEnum, JobTypeEnum, OperationEnum, SavePointEnum } from '/@/enums/flinkEnum';
+  import { AppTypeEnum, CandidateTypeEnum, ConfigTypeEnum, JobTypeEnum, SavePointEnum } from '/@/enums/flinkEnum';
   import { fetchFlinkSql, fetchFlinkSqlList, fetchRemoveFlinkSql } from '/@/api/flink/app/flinkSql';
   import FlinkSqlReview from './FlinkSqlReview.vue';
   import FlinkSqlCompareModal from './FlinkSqlCompareModal.vue';
@@ -287,8 +287,15 @@
   }
 
   function getBackupAction(record: Recordable): ActionItem[] {
-    return [{
-      popConfirm: {
+    return [
+      {
+        tooltip: { title: t('flink.app.detail.detailTab.copyPath') },
+        shape: 'circle',
+        icon: 'ant-design:copy-outlined',
+        onClick: handleCopy.bind(null, record),
+      },
+      {
+        popConfirm: {
         title: t('flink.app.detail.detailTab.confBackupTitle'),
           confirm: handleDeleteBackup.bind(null, record),
       },
@@ -368,14 +375,14 @@
       </TabPane>
       <TabPane
         key="2"
-        tab="Configuration"
+        :tab="t('flink.app.detail.detailTab.detailTabName.configuration')"
         v-if="app && app.appType == AppTypeEnum.STREAMPARK_FLINK && tabConf.showConf"
       >
         <BasicTable @register="registerConfigTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'format'">
-              <Tag color="#2db7f5" v-if="record.format == 1"> yaml </Tag>
-              <Tag color="#108ee9" v-if="record.format == 2"> properties </Tag>
+              <Tag color="#2db7f5" v-if="record.format === ConfigTypeEnum.YAML"> yaml </Tag>
+              <Tag color="#108ee9" v-if="record.format === ConfigTypeEnum.PROPERTIES"> properties </Tag>
             </template>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
@@ -396,13 +403,13 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="3" tab="Flink SQL" v-if="app.jobType === JobTypeEnum.SQL">
+      <TabPane key="3" :tab="t('flink.app.detail.detailTab.detailTabName.flinkSql')" v-if="app.jobType === JobTypeEnum.SQL">
         <BasicTable @register="registerFlinkSqlTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'candidate'">
-              <Tag color="#52c41a" v-if="record.candidate == 0"> None </Tag>
-              <Tag color="#2db7f5" v-if="record.candidate == 1"> New </Tag>
-              <Tag color="#108ee9" v-if="record.candidate == 2"> History </Tag>
+              <Tag color="#52c41a" v-if="record.candidate === CandidateTypeEnum.NONE"> None </Tag>
+              <Tag color="#2db7f5" v-if="record.candidate === CandidateTypeEnum.NEW"> New </Tag>
+              <Tag color="#108ee9" v-if="record.candidate === CandidateTypeEnum.HISTORY"> History </Tag>
             </template>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
@@ -422,7 +429,7 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="4" tab="Savepoints" v-if="tabConf.showSaveOption">
+      <TabPane key="4" :tab="t('flink.app.detail.detailTab.detailTabName.savepoint')" v-if="tabConf.showSaveOption">
         <BasicTable @register="registerSavePointTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'triggerTime'">
@@ -448,7 +455,7 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="5" tab="Backups" v-if="tabConf.showBackup">
+      <TabPane key="5" :tab="t('flink.app.detail.detailTab.detailTabName.backup')" v-if="tabConf.showBackup">
         <BasicTable @register="registerBackupTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'version'">
@@ -462,7 +469,7 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="6" tab="Option Logs" v-if="tabConf.showOptionLog">
+      <TabPane key="6" :tab="t('flink.app.detail.detailTab.detailTabName.operationLog')" v-if="tabConf.showOptionLog">
         <BasicTable @register="registerLogsTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'optionName'">

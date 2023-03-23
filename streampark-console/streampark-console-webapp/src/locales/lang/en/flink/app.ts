@@ -88,6 +88,14 @@ export default {
     nullAccessToken: 'access token is null,please contact the administrator to add.',
     invalidAccessToken: 'access token is invalid,please contact the administrator.',
     detailTab: {
+      detailTabName: {
+        option: 'Option',
+        configuration: 'Configuration',
+        flinkSql: 'Flink SQL',
+        savepoint: 'Savepoint',
+        backup: 'Backup',
+        operationLog: 'Operation Log'
+      },
       configDetail: 'View Config Detail',
       sqlDetail: 'View SQL Detail',
       confDeleteTitle: 'Are you sure delete this record?',

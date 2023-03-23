@@ -119,6 +119,9 @@ public class CheckpointProcessor {
                 throw new RuntimeException(e);
               }
               break;
+            default:
+              // do nothing
+              break;
           }
         } else {
           counter.increment();

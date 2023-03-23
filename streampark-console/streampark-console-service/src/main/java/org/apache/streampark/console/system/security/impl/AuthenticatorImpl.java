@@ -58,8 +58,25 @@ public class AuthenticatorImpl implements Authenticator {
     }
     // check if user exist
     User user = usersService.findByName(username);
-    if (user != null || !ldapService.createIfUserNotExists()) {
+
+    if (user != null) {
+      String saltPassword = ShaHashUtils.encrypt(user.getSalt(), password);
+
+      // ldap password changed, we should update user password
+      if (!StringUtils.equals(saltPassword, user.getPassword())) {
+
+        // encrypt password again
+        String salt = ShaHashUtils.getRandomSalt();
+        saltPassword = ShaHashUtils.encrypt(salt, password);
+        user.setSalt(salt);
+        user.setPassword(saltPassword);
+        usersService.updateSaltPassword(user);
+      }
       return user;
+    }
+
+    if (!ldapService.createIfUserNotExists()) {
+      return null;
     }
     User newUser = new User();
     newUser.setCreateTime(new Date());

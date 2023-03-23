@@ -103,6 +103,8 @@ export const formSchema: FormSchema[] = [
     label: t('system.token.table.userName'),
     component: 'ApiSelect',
     componentProps: {
+      showSearch: true,
+      optionFilterProp: 'label',
       api: getNoTokenUserList,
       resultField: 'records',
       labelField: 'username',
