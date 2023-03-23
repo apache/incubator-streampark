@@ -103,9 +103,7 @@
           isUpdate.value = !!data?.isUpdate;
           // if (isUpdate.value) teamId.value = data.record.id;
           if (unref(isUpdate)) {
-            setFieldsValue({
-              ...data.record,
-            });
+            setFieldsValue(data.record);
           }
         },
       );
@@ -120,7 +118,12 @@
         try {
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
-          await (isUpdate.value ? fetchYarnQueueUpdate(values) : fetchYarnQueueCreate(values));
+          if(isUpdate.value){
+            await fetchYarnQueueUpdate(values)
+          }else{
+            delete values.id;
+            await fetchYarnQueueCreate(values)
+          }
           closeDrawer();
           emit('success', isUpdate.value);
         } finally {

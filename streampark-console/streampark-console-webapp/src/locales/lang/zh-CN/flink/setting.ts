@@ -124,7 +124,7 @@ export default {
     descriptionMessage: '超过了512个字符的最大长度限制',
     yarnQueueLabelExpression: "Yarn 队列{'@'}标签",
     placeholder: {
-      yarnQueueLabelExpression: "请输入队列，如 {queue} 或 {{queue}@{lab,...}}",
+      yarnQueueLabelExpression: "请输入队列，如 {'{queue} 或 {queue}@{lab1,...}'}",
       description: '请输入描述',
     },
     checkResult: {
