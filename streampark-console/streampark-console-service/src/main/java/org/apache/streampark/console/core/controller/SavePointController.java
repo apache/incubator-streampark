@@ -23,8 +23,8 @@ import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -50,7 +50,7 @@ import javax.annotation.Nullable;
 @RequestMapping("flink/savepoint")
 public class SavePointController {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private OpApplicationInfoService applicationInfoService;
 
   @Autowired private SavePointService savePointService;
 
@@ -73,7 +73,7 @@ public class SavePointController {
   @RequiresPermissions("savepoint:delete")
   public RestResponse delete(Long id) throws InternalException {
     SavePoint savePoint = savePointService.getById(id);
-    Application application = applicationService.getById(savePoint.getAppId());
+    Application application = applicationInfoService.getById(savePoint.getAppId());
     Boolean deleted = savePointService.delete(id, application);
     return RestResponse.success(deleted);
   }

@@ -22,8 +22,8 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ExternalLink;
 import org.apache.streampark.console.core.enums.PlaceholderType;
 import org.apache.streampark.console.core.mapper.ExternalLinkMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ExternalLinkService;
+import org.apache.streampark.console.core.service.application.QueryApplicationInfoService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -44,7 +44,7 @@ import java.util.List;
 public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, ExternalLink>
     implements ExternalLinkService {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private QueryApplicationInfoService queryApplicationInfoService;
 
   @Override
   public void create(ExternalLink externalLink) {
@@ -73,7 +73,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
 
   @Override
   public List<ExternalLink> render(Long appId) {
-    Application app = applicationService.getById(appId);
+    Application app = queryApplicationInfoService.getById(appId);
     Utils.notNull(app, "Application doesn't exist");
     List<ExternalLink> externalLink = this.list();
     if (externalLink != null && externalLink.size() > 0) {

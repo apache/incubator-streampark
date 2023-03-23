@@ -26,11 +26,11 @@ import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.service.application.ValidateApplicationService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
@@ -89,7 +89,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Autowired private CommonService commonService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ValidateApplicationService validateApplicationService;
 
   @Autowired private YarnQueueService yarnQueueService;
 
@@ -204,7 +204,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     checkActiveIfNeeded(flinkCluster);
 
     // 3) check job if running on cluster
-    boolean existsRunningJob = applicationService.existsRunningJobByClusterId(flinkCluster.getId());
+    boolean existsRunningJob =
+        validateApplicationService.existsRunningJobByClusterId(flinkCluster.getId());
     ApiAlertException.throwIfTrue(
         existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
 

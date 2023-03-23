@@ -23,6 +23,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
 import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -51,14 +52,14 @@ class YarnQueueServiceTest extends SpringTestBase {
 
   @Autowired private FlinkClusterService flinkClusterService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private OpApplicationInfoService opApplicationInfoService;
 
   @Autowired private YarnQueueService yarnQueueService;
 
   @AfterEach
   void cleanTestRecordsInDatabase() {
     flinkClusterService.remove(new QueryWrapper<>());
-    applicationService.remove(new QueryWrapper<>());
+    opApplicationInfoService.remove(new QueryWrapper<>());
     yarnQueueService.remove(new QueryWrapper<>());
   }
 
@@ -260,24 +261,26 @@ class YarnQueueServiceTest extends SpringTestBase {
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications that don't belong to the same team, not in yarn mode.
-    applicationService.save(mockYarnModeJobApp(2L, "app1", null, ExecutionMode.REMOTE));
+    opApplicationInfoService.save(mockYarnModeJobApp(2L, "app1", null, ExecutionMode.REMOTE));
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications that don't belong to the same team, in yarn mode
-    applicationService.save(mockYarnModeJobApp(2L, "app2", null, ExecutionMode.YARN_APPLICATION));
+    opApplicationInfoService.save(
+        mockYarnModeJobApp(2L, "app2", null, ExecutionMode.YARN_APPLICATION));
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications that belong to the same team, but not in yarn mode.
-    applicationService.save(mockYarnModeJobApp(targetTeamId, "app3", null, ExecutionMode.REMOTE));
+    opApplicationInfoService.save(
+        mockYarnModeJobApp(targetTeamId, "app3", null, ExecutionMode.REMOTE));
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications that belong to the same team, but without yarn queue value.
-    applicationService.save(
+    opApplicationInfoService.save(
         mockYarnModeJobApp(targetTeamId, "app4", null, ExecutionMode.YARN_PER_JOB));
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications, some apps belong to the same team, but others don't belong to.
-    applicationService.save(
+    opApplicationInfoService.save(
         mockYarnModeJobApp(targetTeamId, "app5", queueLabel, ExecutionMode.YARN_PER_JOB));
     assertThatThrownBy(
             () ->

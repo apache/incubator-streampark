@@ -21,7 +21,9 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.SpringTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.YarnQueue;
-import org.apache.streampark.console.core.service.impl.ApplicationServiceImpl;
+import org.apache.streampark.console.core.service.application.ApplicationService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
+import org.apache.streampark.console.core.service.application.impl.OpApplicationInfoServiceImpl;
 
 import org.apache.hc.core5.http.ContentType;
 
@@ -33,6 +35,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,13 +49,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** org.apache.streampark.console.core.service.ApplicationServiceTest. */
 class ApplicationServiceTest extends SpringTestBase {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private OpApplicationInfoService opApplicationInfoService;
+
+  @Autowired
+  @Qualifier("streamApplicationService")
+  private ApplicationService applicationService;
 
   @Autowired private YarnQueueService yarnQueueService;
 
   @AfterEach
   void cleanTestRecordsInDatabase() {
-    applicationService.remove(new QueryWrapper<>());
+    opApplicationInfoService.remove(new QueryWrapper<>());
     yarnQueueService.remove(new QueryWrapper<>());
   }
 
@@ -90,7 +97,7 @@ class ApplicationServiceTest extends SpringTestBase {
     app.setDrain(false);
     app.setAllowNonRestored(false);
 
-    Assertions.assertDoesNotThrow(() -> applicationService.updateRelease(app));
+    Assertions.assertDoesNotThrow(() -> opApplicationInfoService.updateRelease(app));
   }
 
   @Test
@@ -122,12 +129,13 @@ class ApplicationServiceTest extends SpringTestBase {
             // /tmp/file/streampark.jar)
             ContentType.APPLICATION_OCTET_STREAM.toString(),
             new FileInputStream(fileToStoreUploadFile));
-    applicationService.upload(mulFile);
+    opApplicationInfoService.upload(mulFile);
   }
 
   @Test
   void testCheckQueueValidationIfNeeded() {
-    ApplicationServiceImpl applicationServiceImpl = (ApplicationServiceImpl) applicationService;
+    OpApplicationInfoServiceImpl applicationServiceImpl =
+        (OpApplicationInfoServiceImpl) opApplicationInfoService;
 
     // ------- Test it for the create operation. -------
     final String queueLabel = "queue1@label1";

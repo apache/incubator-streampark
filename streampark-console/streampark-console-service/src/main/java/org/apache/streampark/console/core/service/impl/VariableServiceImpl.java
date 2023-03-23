@@ -26,10 +26,11 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.VariableMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.VariableService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
+import org.apache.streampark.console.core.service.application.QueryApplicationInfoService;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +66,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
   private static final String PLACEHOLDER_END = "}";
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private QueryApplicationInfoService queryApplicationInfoService;
+
+  @Autowired private OpApplicationInfoService applicationInfoService;
 
   @Autowired private FlinkSqlService flinkSqlService;
 
@@ -136,7 +139,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     // set Application's field release to NEED_RESTART
     List<Application> applications = getDependApplicationsByCode(variable);
     if (CollectionUtils.isNotEmpty(applications)) {
-      applicationService.update(
+      applicationInfoService.update(
           new UpdateWrapper<Application>()
               .lambda()
               .in(
@@ -216,7 +219,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
   private List<Application> getDependApplicationsByCode(Variable variable) {
     List<Application> dependApplications = new ArrayList<>();
-    List<Application> applications = applicationService.getByTeamId(variable.getTeamId());
+    List<Application> applications = queryApplicationInfoService.getByTeamId(variable.getTeamId());
     Map<Long, Application> applicationMap =
         applications.stream()
             .collect(Collectors.toMap(Application::getId, application -> application));

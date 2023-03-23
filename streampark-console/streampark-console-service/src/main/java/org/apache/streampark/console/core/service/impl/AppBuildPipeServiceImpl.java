@@ -47,13 +47,14 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ValidateApplicationService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
@@ -125,7 +126,9 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private MessageService messageService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private OpApplicationInfoService applicationInfoService;
+
+  @Autowired private ValidateApplicationService validateApplicationService;
 
   @Autowired private ApplicationLogService applicationLogService;
 
@@ -213,14 +216,14 @@ public class AppBuildPipeServiceImpl
             saveEntity(buildPipeline);
 
             app.setRelease(ReleaseState.RELEASING.get());
-            applicationService.updateRelease(app);
+            applicationInfoService.updateRelease(app);
 
             if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
               flinkRESTAPIWatcher.init();
             }
 
             // 1) checkEnv
-            applicationService.checkEnv(app);
+            validateApplicationService.checkEnv(app);
 
             // 2) some preparatory work
             String appUploads = app.getWorkspace().APP_UPLOADS();
@@ -300,7 +303,7 @@ public class AppBuildPipeServiceImpl
                 // If the current task is not running, or the task has just been added, directly set
                 // the candidate version to the official version
                 if (app.isFlinkSqlJob()) {
-                  applicationService.toEffective(app);
+                  applicationInfoService.toEffective(app);
                 } else {
                   if (app.isStreamParkJob()) {
                     ApplicationConfig config = applicationConfigService.getLatest(app.getId());
@@ -337,7 +340,7 @@ public class AppBuildPipeServiceImpl
               applicationLog.setException(Utils.stringifyException(snapshot.error().exception()));
               applicationLog.setSuccess(false);
             }
-            applicationService.updateRelease(app);
+            applicationInfoService.updateRelease(app);
             applicationLogService.save(applicationLog);
             if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
               flinkRESTAPIWatcher.init();

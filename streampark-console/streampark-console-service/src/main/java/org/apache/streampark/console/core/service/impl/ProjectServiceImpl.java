@@ -37,8 +37,9 @@ import org.apache.streampark.console.core.enums.BuildState;
 import org.apache.streampark.console.core.enums.GitCredential;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
+import org.apache.streampark.console.core.service.application.QueryApplicationInfoService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 
@@ -79,7 +80,9 @@ import java.util.concurrent.TimeUnit;
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     implements ProjectService {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private OpApplicationInfoService applicationInfoService;
+
+  @Autowired private QueryApplicationInfoService queryApplicationInfoService;
 
   @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
 
@@ -148,7 +151,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
               log.info(
                   "update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
               app.setRelease(ReleaseState.NEED_CHECK.get());
-              applicationService.updateRelease(app);
+              applicationInfoService.updateRelease(app);
             });
       }
     }
@@ -163,7 +166,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     Utils.notNull(project);
     LambdaQueryWrapper<Application> queryWrapper =
         new LambdaQueryWrapper<Application>().eq(Application::getProjectId, id);
-    long count = applicationService.count(queryWrapper);
+    long count = applicationInfoService.count(queryWrapper);
     if (count > 0) {
       return false;
     }
@@ -210,7 +213,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             },
             fileLogger -> {
               List<Application> applications =
-                  this.applicationService.getByProjectId(project.getId());
+                  this.queryApplicationInfoService.getByProjectId(project.getId());
               applications.forEach(
                   (app) -> {
                     fileLogger.info(
@@ -219,7 +222,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         app.getJobName());
                     app.setRelease(ReleaseState.NEED_RELEASE.get());
                     app.setBuild(true);
-                    this.applicationService.updateRelease(app);
+                    this.applicationInfoService.updateRelease(app);
                   });
               flinkRESTAPIWatcher.init();
             });
@@ -280,7 +283,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public List<Application> getApplications(Project project) {
-    return this.applicationService.getByProjectId(project.getId());
+    return this.queryApplicationInfoService.getByProjectId(project.getId());
   }
 
   @Override
