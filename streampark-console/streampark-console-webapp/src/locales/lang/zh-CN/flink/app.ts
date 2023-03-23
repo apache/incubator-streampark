@@ -90,7 +90,7 @@ export default {
         option: '选项',
         configuration: '配置',
         flinkSql: 'Flink SQL',
-        savepoint: '保存点',
+        savepoint: 'Savepoint',
         backup: '备份',
         operationLog: '操作日志'
       },
