@@ -86,6 +86,14 @@ export default {
     nullAccessToken: '访问令牌为空，请联系管理员添加.',
     invalidAccessToken: '访问令牌无效，请联系管理员。',
     detailTab: {
+      detailTabName: {
+        option: '选项',
+        configuration: '配置',
+        flinkSql: 'Flink SQL',
+        savepoint: 'Savepoint',
+        backup: '备份',
+        operationLog: '操作日志'
+      },
       configDetail: '查看配置详情',
       sqlDetail: '查看 SQL 详情',
       confDeleteTitle: '您确定要删除此记录吗?',
