@@ -125,7 +125,7 @@ export default {
     deleteConfirm: 'Are you sure to delete this queue ?',
     yarnQueueLabelExpression: "Queue{'@'}Label",
     placeholder: {
-      yarnQueueLabelExpression: 'Please input queue label like {queue} or {queue}@{lab1,...}',
+      yarnQueueLabelExpression: 'Please input queue label like {\'{queue} or {queue}@{lab1,...}\'}',
       description: 'Please input the description of the queue.'
     },
     checkResult: {

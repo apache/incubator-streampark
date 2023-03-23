@@ -122,7 +122,7 @@
     resetFields();
     externalLinkId.value = '';
     if (data && Object.keys(data).length > 0) {
-      externalLinkId.value = data.id;
+      externalLinkId.value = data.id || '';
       setFieldsValue(data);
     }
   });

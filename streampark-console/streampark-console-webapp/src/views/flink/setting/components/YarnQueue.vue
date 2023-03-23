@@ -48,7 +48,7 @@
         </template>
       </template>
     </BasicTable>
-    <YarnQueueDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
+    <YarnQueueDrawer :okText="t('common.okText')" @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
