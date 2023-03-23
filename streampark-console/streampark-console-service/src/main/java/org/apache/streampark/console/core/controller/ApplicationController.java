@@ -235,7 +235,6 @@ public class ApplicationController {
   public RestResponse start(@ApiIgnore Application app) {
     try {
       applicationService.checkEnv(app);
-      applicationService.starting(app);
       applicationService.start(app, false);
       return RestResponse.success(true);
     } catch (Exception e) {
