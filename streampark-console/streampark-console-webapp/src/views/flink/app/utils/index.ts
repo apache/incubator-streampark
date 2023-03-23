@@ -224,13 +224,15 @@ export function handleDependencyJsonToPom(json, pomMap, jarMap) {
         const groupId = x.groupId;
         const artifactId = x.artifactId;
         const version = x.version;
+        const classifier = x.classifier;
         const exclusions = x.exclusions || [];
 
-        const id = groupId + '_' + artifactId;
+        const id = classifier != null ? groupId + '_' + artifactId + '_' + classifier : groupId + '_' + artifactId;
         const mvnPom = {
           groupId: groupId,
           artifactId: artifactId,
           version: version,
+          classifier: classifier,
           exclusions: [] as any[],
         };
         if (exclusions != null && exclusions.length > 0) {
