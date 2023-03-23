@@ -131,6 +131,7 @@ public class Application implements Serializable {
   private Integer optionState;
 
   /** alert id */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer alertId;
 
   private String args;
