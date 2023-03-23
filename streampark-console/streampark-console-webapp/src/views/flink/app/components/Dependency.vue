@@ -330,19 +330,14 @@
       @click="handleEditPom(dept)"
     >
       <template #message>
-        <Space @click="handleEditPom(dept)" class="tag-dependency-pom" v-if="dept.classifier">
-          <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
-            {{ dept.artifactId }}-{{ dept.version }}-{{ dept.classifier }}.jar
-          <Icon
-            :size="12"
-            icon="ant-design:close-outlined"
-            class="icon-close cursor-pointer"
-            @click.stop="handleRemovePom(dept)"
-          />
-        </Space>
-        <Space @click="handleEditPom(dept)" class="tag-dependency-pom" v-else>
-          <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
-            {{ dept.artifactId }}-{{ dept.version }}.jar
+        <Space @click="handleEditPom(dept)" class="tag-dependency-pom">
+          <Tag class="tag-dependency" color="#2db7f5">POM</Tag> 
+            <template v-if="dept.classifier != null"> 
+              {{ dept.artifactId }}-{{ dept.version }}-{{ dept.classifier }}.jar 
+            </template> 
+          <template v-else> 
+            {{ dept.artifactId }}-{{ dept.version }}.jar 
+          </template> 
           <Icon
             :size="12"
             icon="ant-design:close-outlined"
