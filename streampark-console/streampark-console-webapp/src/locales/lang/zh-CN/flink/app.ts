@@ -99,6 +99,7 @@ export default {
       confDeleteTitle: '您确定要删除此记录吗?',
       sqlDeleteTitle: '您确定要删除此 SQL 吗?',
       confBackupTitle: '您确定要删除该备份吗?',
+      operationLogDeleteTitle: '您确定要删除该操作记录吗?',
       copyPath: '复制路径',
       pointDeleteTitle: '您确定要删除?',
       copySuccess: '已成功复制到剪贴板',

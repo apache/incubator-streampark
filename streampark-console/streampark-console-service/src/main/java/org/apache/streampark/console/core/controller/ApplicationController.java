@@ -348,6 +348,13 @@ public class ApplicationController {
     return RestResponse.success(applicationList);
   }
 
+  @PostMapping("deleteOperationLog")
+  @RequiresPermissions("app:delete")
+  public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
+    Boolean deleted = applicationLogService.delete(applicationLog);
+    return RestResponse.success(deleted);
+  }
+
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {

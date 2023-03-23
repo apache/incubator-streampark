@@ -55,6 +55,7 @@ import org.apache.streampark.console.core.enums.ChangedType;
 import org.apache.streampark.console.core.enums.CheckPointType;
 import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.FlinkAppState;
+import org.apache.streampark.console.core.enums.Operation;
 import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ApplicationMapper;
@@ -1168,8 +1169,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   public void cancel(Application appParam) throws Exception {
     FlinkRESTAPIWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
     Application application = getById(appParam.getId());
-
     application.setState(FlinkAppState.CANCELLING.getValue());
+
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(Operation.CANCEL.getValue());
+    applicationLog.setAppId(application.getId());
+    applicationLog.setJobManagerUrl(application.getJobManagerUrl());
+    applicationLog.setOptionTime(new Date());
+    applicationLog.setYarnAppId(application.getClusterId());
+
     if (appParam.getSavePointed()) {
       FlinkRESTAPIWatcher.addSavepoint(application.getId());
       application.setOptionState(OptionState.SAVEPOINTING.getValue());
@@ -1251,6 +1259,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             10L,
             TimeUnit.MINUTES,
             cancelResponse -> {
+              applicationLog.setSuccess(true);
               if (cancelResponse != null && cancelResponse.savePointDir() != null) {
                 String savePointDir = cancelResponse.savePointDir();
                 log.info("savePoint path: {}", savePointDir);
@@ -1289,14 +1298,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                   FlinkRESTAPIWatcher.unWatching(application.getId());
                 }
 
-                ApplicationLog log = new ApplicationLog();
-                log.setAppId(application.getId());
-                log.setYarnAppId(application.getClusterId());
-                log.setOptionTime(new Date());
                 String exception = Utils.stringifyException(e);
-                log.setException(exception);
-                log.setSuccess(false);
-                applicationLogService.save(log);
+                applicationLog.setException(exception);
+                applicationLog.setSuccess(false);
               }
             })
         .whenComplete(
@@ -1306,6 +1310,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.getK8sNamespace(), application.getJobName());
               }
               cancelFutureMap.remove(application.getId());
+              applicationLogService.save(applicationLog);
             });
   }
 
@@ -1394,6 +1399,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     String flinkUserJar = null;
     String jobId = new JobID().toHexString();
     ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(Operation.START.getValue());
     applicationLog.setAppId(application.getId());
     applicationLog.setOptionTime(new Date());
 
@@ -1588,7 +1594,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               }
 
               applicationLog.setSuccess(true);
-              applicationLogService.save(applicationLog);
               // set savepoint to expire
               savePointService.expire(application.getId());
             },
@@ -1599,7 +1604,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String exception = Utils.stringifyException(e);
                 applicationLog.setException(exception);
                 applicationLog.setSuccess(false);
-                applicationLogService.save(applicationLog);
                 Application app = getById(appParam.getId());
                 app.setState(FlinkAppState.FAILED.getValue());
                 app.setOptionState(OptionState.NONE.getValue());
@@ -1613,6 +1617,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             })
         .whenComplete(
             (t, e) -> {
+              applicationLogService.save(applicationLog);
               startFutureMap.remove(application.getId());
             });
   }

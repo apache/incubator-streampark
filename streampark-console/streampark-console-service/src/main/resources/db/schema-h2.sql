@@ -152,6 +152,7 @@ create table if not exists `t_flink_log` (
   `success` tinyint default null,
   `exception` text ,
   `option_time` datetime default null,
+  `option_name` tinyint default null,
   primary key(`id`)
 );
 

@@ -106,3 +106,6 @@ alter table "public"."t_yarn_queue" add constraint "t_yarn_queue_pkey" primary k
 alter table "public"."t_yarn_queue" add constraint "unique_team_id_queue_label" unique("team_id", "queue_label");
 
 -- Issue-2324 End --
+
+
+alter table "public"."t_flink_log" add column "option_name" type int2;

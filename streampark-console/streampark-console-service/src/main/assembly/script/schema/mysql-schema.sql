@@ -171,6 +171,7 @@ create table `t_flink_log` (
   `success` tinyint default null,
   `exception` text collate utf8mb4_general_ci,
   `option_time` datetime default null,
+  `option_name` tinyint default null,
   primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 

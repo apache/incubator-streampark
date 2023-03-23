@@ -40,7 +40,8 @@ public class ApplicationLog {
   private String jobManagerUrl;
   /** start status */
   private Boolean success;
-
+  /** option name */
+  private Integer optionName;
   /** option time */
   private Date optionTime;
 
