@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.security.impl;
 
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
@@ -39,7 +40,7 @@ public class AuthenticatorImpl implements Authenticator {
   @Override
   public User authenticate(String username, String password) {
     User user = usersService.findByName(username);
-    if (user == null) {
+    if (user == null || user.getLoginType() == LoginType.LDAP) {
       return null;
     }
     String salt = user.getSalt();
@@ -60,6 +61,9 @@ public class AuthenticatorImpl implements Authenticator {
     User user = usersService.findByName(username);
 
     if (user != null) {
+      if (user.getLoginType() != LoginType.LDAP) {
+        return null;
+      }
       String saltPassword = ShaHashUtils.encrypt(user.getSalt(), password);
 
       // ldap password changed, we should update user password
@@ -83,8 +87,9 @@ public class AuthenticatorImpl implements Authenticator {
     newUser.setUsername(username);
     newUser.setNickName(username);
     newUser.setUserType(UserType.USER);
+    newUser.setLoginType(LoginType.LDAP);
     newUser.setStatus(User.STATUS_VALID);
-    newUser.setSex(User.SEX_UNKNOW);
+    newUser.setSex(User.SEX_UNKNOWN);
     newUser.setPassword(password);
     usersService.createUser(newUser);
     return newUser;

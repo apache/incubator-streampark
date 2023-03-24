@@ -92,4 +92,8 @@ create table `t_yarn_queue` (
 
 alter table `t_flink_log` add column `option_name` tinyint default null;
 
+-- Issue-2494 Start --
+alter table `t_user` add column `login_type` tinyint default null after `user_type`;
+-- Issue-2494 End --
+
 set foreign_key_checks = 1;
