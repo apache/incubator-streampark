@@ -121,4 +121,17 @@ public class JobStatusCV {
   public void setTaskTotal(int taskTotal) {
     this.taskTotal = taskTotal;
   }
+
+  public JobStatusCV copy(FlinkJobState jobState) {
+    return new JobStatusCV(
+        jobState,
+        jobId,
+        pollEmitTime,
+        pollAckTime,
+        jobName,
+        jobStartTime,
+        jobEndTime,
+        duration,
+        taskTotal);
+  }
 }

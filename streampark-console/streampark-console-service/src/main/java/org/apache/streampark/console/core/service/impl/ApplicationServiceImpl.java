@@ -272,17 +272,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // merge metrics from flink kubernetes cluster
     FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
     if (k8sMetric != null) {
-      totalJmMemory += k8sMetric.totalJmMemory();
-      totalTmMemory += k8sMetric.totalTmMemory();
-      totalTm += k8sMetric.totalTm();
-      totalSlot += k8sMetric.totalSlot();
-      availableSlot += k8sMetric.availableSlot();
-      runningJob += k8sMetric.runningJob();
+      totalJmMemory += k8sMetric.getTotalJmMemory();
+      totalTmMemory += k8sMetric.getTotalTmMemory();
+      totalTm += k8sMetric.getTotalTm();
+      totalSlot += k8sMetric.getTotalSlot();
+      availableSlot += k8sMetric.getAvailableSlot();
+      runningJob += k8sMetric.getRunningJob();
       overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
-      overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
-      overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
-      overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
-      overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
+      overview.setRunning(overview.getRunning() + k8sMetric.getRunningJob());
+      overview.setFinished(overview.getFinished() + k8sMetric.getFinishedJob());
+      overview.setCanceled(overview.getCanceled() + k8sMetric.getCancelledJob());
+      overview.setFailed(overview.getFailed() + k8sMetric.getFailedJob());
     }
 
     // result json

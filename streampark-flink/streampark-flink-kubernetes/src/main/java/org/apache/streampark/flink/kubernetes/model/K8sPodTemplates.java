@@ -27,6 +27,12 @@ public class K8sPodTemplates {
 
   private String tmPodTemplate = "";
 
+  public K8sPodTemplates(String podTemplate, String jmPodTemplate, String tmPodTemplate) {
+    this.podTemplate = podTemplate;
+    this.jmPodTemplate = jmPodTemplate;
+    this.tmPodTemplate = tmPodTemplate;
+  }
+
   public String getPodTemplate() {
     return podTemplate;
   }

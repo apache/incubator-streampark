@@ -41,8 +41,6 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import scala.Enumeration;
-
 import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
 
 /**
@@ -121,16 +119,18 @@ public class FlinkK8sWatcherWrapper {
 
     // covert Application to TrackId
     public static TrackId toTrackId(@Nonnull Application app) {
-        FlinkK8sExecuteMode mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
+      FlinkK8sExecuteMode mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
       if (FlinkK8sExecuteMode.APPLICATION.equals(mode)) {
-        return TrackId.onApplication(
+        return new TrackId(
+            FlinkK8sExecuteMode.APPLICATION,
             app.getK8sNamespace(),
             app.getClusterId(),
             app.getId(),
             app.getJobId(),
             app.getTeamId().toString());
       } else if (FlinkK8sExecuteMode.SESSION.equals(mode)) {
-        return TrackId.onSession(
+        return new TrackId(
+            FlinkK8sExecuteMode.SESSION,
             app.getK8sNamespace(),
             app.getClusterId(),
             app.getId(),

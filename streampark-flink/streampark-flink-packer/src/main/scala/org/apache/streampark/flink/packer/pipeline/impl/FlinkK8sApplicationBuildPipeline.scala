@@ -19,23 +19,22 @@ package org.apache.streampark.flink.packer.pipeline.impl
 
 import java.io.File
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
-
 import com.github.dockerjava.api.command.PushImageCmd
 import com.github.dockerjava.core.command.{HackBuildImageCmd, HackPullImageCmd, HackPushImageCmd}
 import com.google.common.collect.Sets
 import org.apache.commons.lang3.StringUtils
-
 import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.common.util.ThreadUtils
-import org.apache.streampark.flink.kubernetes.{IngressController, PodTemplateTool}
+import org.apache.streampark.flink.kubernetes.{IngressController, PodTemplatePool}
 import org.apache.streampark.flink.packer.docker._
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline.executor
+
+import scala.collection.JavaConverters._
 
 /**
  * Building pipeline for flink kubernetes-native application mode
@@ -70,14 +69,14 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
 
     // Step-2: export k8s pod template files
     val podTemplatePaths = request.flinkPodTemplate match {
-      case podTemplate if podTemplate.isEmpty =>
+      case podTemplate if !podTemplate.nonEmpty() =>
         skipStep(2)
         Map[String, String]()
       case podTemplate =>
         execStep(2) {
-          val podTemplateFiles = PodTemplateTool.preparePodTemplateFiles(buildWorkspace, podTemplate).tmplFiles
-          logInfo(s"export flink podTemplates: ${podTemplateFiles.values.mkString(",")}")
-          podTemplateFiles
+          val podTemplateFiles = PodTemplatePool.preparePodTemplateFiles(buildWorkspace, podTemplate).getTemplateFiles
+          logInfo(s"export flink podTemplates: ${podTemplateFiles.values().asScala.mkString(",")}")
+          podTemplateFiles.asScala.toMap
         }.getOrElse(throw getError.exception)
     }
 

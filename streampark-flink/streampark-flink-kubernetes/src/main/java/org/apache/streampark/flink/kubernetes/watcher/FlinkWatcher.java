@@ -21,11 +21,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface FlinkWatcher extends AutoCloseable {
 
-  AtomicBoolean started = new AtomicBoolean(false);
+  AtomicBoolean STARTED = new AtomicBoolean(false);
 
   default void start() {
     synchronized (this) {
-      if (!started.getAndSet(true)) {
+      if (!STARTED.getAndSet(true)) {
         doStart();
       }
     }
@@ -33,7 +33,7 @@ public interface FlinkWatcher extends AutoCloseable {
 
   default void stop() {
     synchronized (this) {
-      if (started.getAndSet(false)) {
+      if (STARTED.getAndSet(false)) {
         doStop();
       }
     }
@@ -41,7 +41,7 @@ public interface FlinkWatcher extends AutoCloseable {
 
   @Override
   default void close() throws Exception {
-    if (started.get()) {
+    if (STARTED.get()) {
       doStop();
     }
     doClose();

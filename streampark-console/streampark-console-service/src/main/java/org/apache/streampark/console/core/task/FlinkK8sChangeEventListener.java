@@ -77,10 +77,10 @@ public class FlinkK8sChangeEventListener {
   @SuppressWarnings("UnstableApiUsage")
   @Subscribe
   public void subscribeJobStatusChange(FlinkJobStatusChangeEvent event) {
-    JobStatusCV jobStatus = event.jobStatus();
-    TrackId trackId = event.trackId();
+    JobStatusCV jobStatus = event.getJobStatus();
+    TrackId trackId = event.getTrackId();
     // get pre application record
-    Application app = applicationService.getById(trackId.appId());
+    Application app = applicationService.getById(trackId.getAppId());
     if (app == null) {
       return;
     }
@@ -106,24 +106,24 @@ public class FlinkK8sChangeEventListener {
   @SuppressWarnings("UnstableApiUsage")
   @Subscribe
   public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
-    TrackId trackId = event.trackId();
-    ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.executeMode());
+    TrackId trackId = event.getTrackId();
+    ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.getExecuteMode());
     // discard session mode change
     if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
       return;
     }
 
-    Application app = applicationService.getById(trackId.appId());
+    Application app = applicationService.getById(trackId.getAppId());
     if (app == null) {
       return;
     }
 
-    FlinkMetricCV metrics = event.metrics();
-    app.setJmMemory(metrics.totalJmMemory());
-    app.setTmMemory(metrics.totalTmMemory());
-    app.setTotalTM(metrics.totalTm());
-    app.setTotalSlot(metrics.totalSlot());
-    app.setAvailableSlot(metrics.availableSlot());
+    FlinkMetricCV metrics = event.getMetrics();
+    app.setJmMemory(metrics.getTotalJmMemory());
+    app.setTmMemory(metrics.getTotalTmMemory());
+    app.setTotalTM(metrics.getTotalTm());
+    app.setTotalSlot(metrics.getTotalSlot());
+    app.setAvailableSlot(metrics.getAvailableSlot());
 
     applicationService.persistMetrics(app);
   }
@@ -132,33 +132,34 @@ public class FlinkK8sChangeEventListener {
   @Subscribe
   public void subscribeCheckpointChange(FlinkJobCheckpointChangeEvent event) {
     CheckPoints.CheckPoint completed = new CheckPoints.CheckPoint();
-    completed.setId(event.checkpoint().id());
-    completed.setCheckpointType(event.checkpoint().checkpointType());
-    completed.setExternalPath(event.checkpoint().externalPath());
-    completed.setIsSavepoint(event.checkpoint().isSavepoint());
-    completed.setStatus(event.checkpoint().status());
-    completed.setTriggerTimestamp(event.checkpoint().triggerTimestamp());
+    completed.setId(event.getCheckpoint().getId());
+    completed.setCheckpointType(event.getCheckpoint().getCheckpointType());
+    completed.setExternalPath(event.getCheckpoint().getExternalPath());
+    completed.setIsSavepoint(event.getCheckpoint().isSavepoint());
+    completed.setStatus(event.getCheckpoint().getStatus());
+    completed.setTriggerTimestamp(event.getCheckpoint().getTriggerTimestamp());
 
     CheckPoints.Latest latest = new CheckPoints.Latest();
     latest.setCompleted(completed);
     CheckPoints checkPoint = new CheckPoints();
     checkPoint.setLatest(latest);
 
-    checkpointProcessor.process(applicationService.getById(event.trackId().appId()), checkPoint);
+    checkpointProcessor.process(
+        applicationService.getById(event.getTrackId().getAppId()), checkPoint);
   }
 
   private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {
     // infer the final flink job state
     FlinkJobState state =
         FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-            jobStatus.jobState(), toK8sFlinkJobState(FlinkAppState.of(app.getState())));
+            jobStatus.getJobState(), toK8sFlinkJobState(FlinkAppState.of(app.getState())));
 
     // corrective start-time / end-time / duration
     long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;
-    long startTime = Math.max(jobStatus.jobStartTime(), preStartTime);
+    long startTime = Math.max(jobStatus.getJobStartTime(), preStartTime);
     long preEndTime = app.getEndTime() != null ? app.getEndTime().getTime() : 0;
-    long endTime = Math.max(jobStatus.jobEndTime(), preEndTime);
-    long duration = jobStatus.duration();
+    long endTime = Math.max(jobStatus.getJobEndTime(), preEndTime);
+    long duration = jobStatus.getDuration();
 
     if (FlinkJobState.isEndState(state)) {
       IngressController.deleteIngress(app.getJobName(), app.getK8sNamespace());
@@ -171,8 +172,8 @@ public class FlinkK8sChangeEventListener {
     }
 
     app.setState(fromK8sFlinkJobState(state).getValue());
-    app.setJobId(jobStatus.jobId());
-    app.setTotalTask(jobStatus.taskTotal());
+    app.setJobId(jobStatus.getJobId());
+    app.setTotalTask(jobStatus.getTaskTotal());
 
     app.setStartTime(new Date(startTime > 0 ? startTime : 0));
     app.setEndTime(endTime > 0 && endTime >= startTime ? new Date(endTime) : null);

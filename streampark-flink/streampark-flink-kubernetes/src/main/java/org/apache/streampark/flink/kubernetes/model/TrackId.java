@@ -66,11 +66,11 @@ public class TrackId {
   }
 
   public TrackId copy(String jobId) {
-      return new TrackId(executeMode, namespace, clusterId, appId, jobId, groupId);
+    return new TrackId(executeMode, namespace, clusterId, appId, jobId, groupId);
   }
 
   public ClusterKey toClusterKey() {
-      return new ClusterKey(executeMode, namespace, clusterId);
+    return new ClusterKey(executeMode, namespace, clusterId);
   }
 
   public String getClusterId() {
@@ -104,8 +104,12 @@ public class TrackId {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     TrackId trackId = (TrackId) o;
     return appId == trackId.appId
         && executeMode == trackId.executeMode

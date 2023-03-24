@@ -47,6 +47,31 @@ public class FlinkMetricCV {
     this.pollAckTime = pollAckTime;
   }
 
+  public FlinkMetricCV(
+      String groupId,
+      int totalJmMemory,
+      int totalTmMemory,
+      int totalTm,
+      int totalSlot,
+      int availableSlot,
+      int runningJob,
+      int finishedJob,
+      int cancelledJob,
+      int failedJob,
+      long pollAckTime) {
+    this.groupId = groupId;
+    this.totalJmMemory = totalJmMemory;
+    this.totalTmMemory = totalTmMemory;
+    this.totalTm = totalTm;
+    this.totalSlot = totalSlot;
+    this.availableSlot = availableSlot;
+    this.runningJob = runningJob;
+    this.finishedJob = finishedJob;
+    this.cancelledJob = cancelledJob;
+    this.failedJob = failedJob;
+    this.pollAckTime = pollAckTime;
+  }
+
   public static FlinkMetricCV empty(String groupId) {
     FlinkMetricCV flinkMetricCV = new FlinkMetricCV(System.currentTimeMillis());
     flinkMetricCV.setGroupId(groupId);
@@ -55,8 +80,12 @@ public class FlinkMetricCV {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     FlinkMetricCV that = (FlinkMetricCV) o;
     return totalJmMemory == that.totalJmMemory
         && totalTmMemory == that.totalTmMemory

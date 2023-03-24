@@ -284,7 +284,7 @@ public class Application implements Serializable {
   }
 
   public K8sPodTemplates getK8sPodTemplates() {
-    return K8sPodTemplates.of(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
+    return new K8sPodTemplates(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
   }
 
   public void setState(Integer state) {

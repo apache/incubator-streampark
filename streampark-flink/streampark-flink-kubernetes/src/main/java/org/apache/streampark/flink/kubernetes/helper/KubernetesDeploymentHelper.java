@@ -129,12 +129,12 @@ public class KubernetesDeploymentHelper {
     }
   }
 
-  private static String getJobLog(String jobId) {
+  public static String getJobLog(String jobId) {
     String tmpdir = SystemPropertyUtils.getTmpdir();
     return String.format("%s/%s.log", tmpdir, jobId);
   }
 
-  private static String getJobErrorLog(String jobId) {
+  public static String getJobErrorLog(String jobId) {
     String tmpdir = SystemPropertyUtils.getTmpdir();
     return String.format("%s/%s_err.log", tmpdir, jobId);
   }
