@@ -34,6 +34,7 @@ export default {
     exist: 'Sorry the username already exists',
     nickName: 'Nick Name',
     userType: 'User Type',
+    loginType: 'Login Type',
     status: 'Status',
     gender: 'Gender',
     lastLoginTime: 'Recent Login',

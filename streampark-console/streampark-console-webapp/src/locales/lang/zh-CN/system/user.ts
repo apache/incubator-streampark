@@ -34,6 +34,7 @@ export default {
     exist: '抱歉，用户名已存在',
     nickName: '昵称',
     userType: '用户类型',
+    loginType: '登录类型',
     status: '状态',
     gender: '性别',
     lastLoginTime: '最近登录时间',
