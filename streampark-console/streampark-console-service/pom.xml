@@ -471,19 +471,19 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>install node and npm</id>
+                                <id>install node and pnpm</id>
                                 <goals>
-                                    <goal>install-node-and-npm</goal>
+                                    <goal>install-node-and-pnpm</goal>
                                 </goals>
                                 <configuration>
                                     <nodeVersion>v16.16.0</nodeVersion>
-                                    <npmVersion>8.19.2</npmVersion>
+                                    <pnpmVersion>7.3.0</pnpmVersion>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>install</id>
                                 <goals>
-                                    <goal>npm</goal>
+                                    <goal>pnpm</goal>
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
@@ -493,7 +493,7 @@
                             <execution>
                                 <id>build</id>
                                 <goals>
-                                    <goal>npm</goal>
+                                    <goal>pnpm</goal>
                                 </goals>
                                 <configuration>
                                     <arguments>run build:no-cache</arguments>

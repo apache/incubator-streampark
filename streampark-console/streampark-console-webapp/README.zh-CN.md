@@ -43,49 +43,46 @@ Make stream processing easier
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://github.com/apache/incubator-streampark)
 
-## 安装使用
+## 本地开发
 
-- Node.js
+### 前提条件
 
-webui 是用 Javascript 编写的。如果你没有 Node.js 开发环境，请[设置](https://nodejs.org/en/download/)它。需要的最低版本是 14.0。
+- [Node.js 16.0+](https://nodejs.org/en/download/)
+- [pnpm](https://pnpm.io/installation)
 
-- 设置镜像源
+> **Note**
+>
+> 如果你遇到依赖下载缓慢需要配置 npm 镜像源,方法为在用户文件夹下找到 .npmrc 将以下内容写入：
+>
+> ```bash
+> strict-peer-dependencies=false
+> save-workspace-protocol = rolling
+> registry = 'http://registry.npm.taobao.org'
+> sass_binary_site='http://npm.taobao.org/mirrors/node-sass/'
+> phantomjs_cdnurl='http://npm.taobao.org/mirrors/phantomjs'
+> CHROMEDRIVER_CDNURL='http://npm.taobao.org/mirrors/chromedriver'
+> electron_mirror='http://npm.taobao.org/mirrors/electron/'
+> fsevents_binary_host_mirror='http://npm.taobao.org/mirrors/fsevents/'
+> ```
 
-如果你遇到依赖下载缓慢需要配置 npm 镜像源,方法为在用户文件夹下找到 .npmrc 将以下内容写入
+### 构建并运行
 
-```bash
-strict-peer-dependencies=false
-save-workspace-protocol = rolling
-registry = 'http://registry.npm.taobao.org'
-sass_binary_site='http://npm.taobao.org/mirrors/node-sass/'
-phantomjs_cdnurl='http://npm.taobao.org/mirrors/phantomjs'
-CHROMEDRIVER_CDNURL='http://npm.taobao.org/mirrors/chromedriver'
-electron_mirror='http://npm.taobao.org/mirrors/electron/'
-fsevents_binary_host_mirror='http://npm.taobao.org/mirrors/fsevents/'
-```
-
-- 安装依赖
+1. 安装依赖：
 
 ```bash
 pnpm install
-# or
-yarn install
 ```
 
-- 运行
+2. 运行：
 
 ```bash
 pnpm serve
-# or
-yarn serve
 ```
 
-- 打包
+3. 打包
 
 ```bash
 pnpm build
-# or
-yarn build
 ```
 
 ## 浏览器支持
