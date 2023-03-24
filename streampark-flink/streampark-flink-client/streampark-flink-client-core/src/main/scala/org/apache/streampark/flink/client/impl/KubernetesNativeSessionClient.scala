@@ -18,11 +18,9 @@
 package org.apache.streampark.flink.client.impl
 
 import java.io.File
-
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
-
 import io.fabric8.kubernetes.api.model.{Config => _}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
@@ -31,7 +29,6 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.{KubernetesConfigOptions, KubernetesDeploymentTarget}
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
 import org.apache.flink.kubernetes.kubeclient.{FlinkKubeClient, FlinkKubeClientFactory}
-
 import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.flink.core.FlinkKubernetesClient
@@ -40,6 +37,7 @@ import org.apache.streampark.flink.kubernetes.model.ClusterKey
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
 /**
  * kubernetes native session mode submit
@@ -62,15 +60,17 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     Try {
       // get jm rest url of flink session cluster
-      val clusterKey = ClusterKey(
+      val clusterKey = new ClusterKey(
         FlinkK8sExecuteMode.SESSION,
         submitRequest.k8sSubmitParam.kubernetesNamespace,
         submitRequest.k8sSubmitParam.clusterId)
       val jmRestUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
-        .getOrElse(throw new Exception(s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
+        if (!jmRestUrl.isPresent) {
+          throw new IllegalStateException("[flink-submit] retrieve flink session rest url failed, clusterKey=" + clusterKey)
+        }
       // submit job via rest api
-      val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
-      SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId, jmRestUrl)
+      val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl.get(), fatJar, flinkConfig)
+      SubmitResponse(clusterKey.getClusterId, flinkConfig.toMap, jobId, jmRestUrl.get())
     } match {
       case Success(s) => s
       case Failure(e) =>
