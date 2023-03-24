@@ -17,19 +17,26 @@
 
 package org.apache.streampark.flink.core
 
-import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient
-import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.table.api.{Table => FlinkTable}
+import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
+import org.apache.flink.types.Row
 
-import java.util.Optional
+object TableExt {
 
-abstract class FlinkKubernetesClientTrait(val kubeClient: FlinkKubeClient) {
+  class Table(val table: FlinkTable) {
+    def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
+  }
 
-  /**
-   * Get the kubernetes service of the given flink clusterId.
-   *
-   * @param serviceName the name of the service
-   * @return Return the optional kubernetes service of the specified name.
-   */
-  def getService(serviceName: String): Optional[KubernetesService] = kubeClient.getRestService(serviceName)
+  class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
+
+    def \\ : DataStream[Row] = toDataStream
+
+    def >>[T: TypeInformation](implicit context: StreamTableContext): DataStream[T] = {
+      context.isConvertedToDataStream = true
+      super.toAppendStream
+    }
+  }
 
 }
