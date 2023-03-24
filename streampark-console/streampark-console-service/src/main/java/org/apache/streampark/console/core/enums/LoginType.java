@@ -25,7 +25,7 @@ import java.util.Arrays;
 public enum LoginType {
 
   /** sign in with password */
-  LOCAL(0),
+  PASSWORD(0),
 
   /** sign in with ldap */
   LDAP(1);
