@@ -17,7 +17,7 @@
 import { BasicColumn, FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
-import {checkUserName, fetchLoginTypes, fetchUserTypes} from '/@/api/system/user';
+import { checkUserName, fetchLoginTypes, fetchUserTypes } from '/@/api/system/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();

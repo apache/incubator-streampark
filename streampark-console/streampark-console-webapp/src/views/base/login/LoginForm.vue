@@ -112,7 +112,7 @@
   const loading = ref(false);
   const userId = ref('');
   const modelVisible = ref(false);
-  const loginType = ref(LoginTypeEnum.LOCAL);
+  const loginType = ref(LoginTypeEnum.PASSWORD);
   const formData = reactive<LoginForm>({
     account: '',
     password: '',
@@ -121,7 +121,7 @@
   const loginText = computed(() => {
     const localText = t('sys.login.loginButton');
     const ldapText = t('sys.login.ldapTip');
-    if (loginType.value === LoginTypeEnum.LOCAL) {
+    if (loginType.value === LoginTypeEnum.PASSWORD) {
       return { buttonText: localText, linkText: t('sys.login.ldapTip') };
     }
     return { buttonText: ldapText, linkText: t('sys.login.passwordTip') };
@@ -143,7 +143,7 @@
 
   async function handleLoginRequest(loginFormValue: LoginForm): Promise<Result<LoginResultModel>> {
     // local login
-    if (loginType.value == LoginTypeEnum.LOCAL) {
+    if (loginType.value == LoginTypeEnum.PASSWORD) {
       const { data } = await loginApi(
         { password: loginFormValue.password, username: loginFormValue.account },
         'none',
@@ -212,10 +212,10 @@
     handleLogin();
   }
   function changeLoginType() {
-    if (loginType.value === LoginTypeEnum.LOCAL) {
+    if (loginType.value === LoginTypeEnum.PASSWORD) {
       loginType.value = LoginTypeEnum.LDAP;
       return;
     }
-    loginType.value = LoginTypeEnum.LOCAL;
+    loginType.value = LoginTypeEnum.PASSWORD;
   }
 </script>
