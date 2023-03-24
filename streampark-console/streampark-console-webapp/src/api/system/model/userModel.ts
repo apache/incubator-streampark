@@ -78,4 +78,5 @@ export interface UserListRecord {
   salt: string;
   nickName: string;
   teamId: string;
+  loginType: string;
 }
