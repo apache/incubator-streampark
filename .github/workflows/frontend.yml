@@ -45,15 +45,16 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16
+      - run: corepack enable
       - name: Compile and Build
         run: |
-          npm i
-          npm run lint:lint-staged
-          npm run build
+          pnpm install
+          pnpm run lint:lint-staged
+          pnpm run build

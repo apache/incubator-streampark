@@ -43,34 +43,31 @@ Open the project in Gitpod (free online dev environment for GitHub) and start co
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/apache/incubator-streampark)
 
-## Install and use
+## Local development
 
-- Node.js
+### Prerequisite
 
-Console is written using Javascript. If you don't have a Node.js development environment, please [set it up](https://nodejs.org/en/download/). The minimum version required is 14.0.
+- [Node.js 16.0+](https://nodejs.org/en/download/)
+- [pnpm](https://pnpm.io/installation)
 
-- Installation dependencies
+### Build and run
+
+1. Install dependencies:
 
 ```bash
 pnpm install
-# or
-yarn install
 ```
 
-- run
+2. Start a dev server:
 
 ```bash
 pnpm serve
-# or
-yarn serve
 ```
 
-- build
+3. Build for production:
 
 ```bash
 pnpm build
-# or
-yarn build
 ```
 
 ## Browser support

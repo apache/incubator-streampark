@@ -133,8 +133,9 @@
     "gifsicle": "5.2.0"
   },
   "engines": {
-    "node": "^12 || >=14"
+    "node": ">=16"
   },
+  "packageManager": "pnpm@7.3.0",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
