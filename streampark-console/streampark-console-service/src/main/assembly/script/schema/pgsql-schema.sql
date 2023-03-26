@@ -215,7 +215,7 @@ create table "public"."t_flink_app" (
   "cluster_id" varchar(255) collate "pg_catalog"."default",
   "k8s_namespace" varchar(255) collate "pg_catalog"."default",
   "flink_image" varchar(255) collate "pg_catalog"."default",
-  "state" varchar(50) collate "pg_catalog"."default",
+  "state" int4 collate "pg_catalog"."default",
   "restart_size" int4,
   "restart_count" int4,
   "cp_threshold" int4,

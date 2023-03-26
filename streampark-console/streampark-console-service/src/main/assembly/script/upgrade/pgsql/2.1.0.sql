@@ -23,12 +23,10 @@ insert into "public"."t_menu" values (100070, 100015, 'savepoint trigger', null,
 
 -- ISSUE-2192 DDL & DML End
 
-
 -- ISSUE-2366 DDL & DML Start
 alter table "public"."t_flink_app" rename "launch" to "release";
 update "public"."t_menu" set "menu_name"='release',"perms" = 'app:release' where "menu_id" = 100025;
 -- ISSUE-2366 DDL & DML End
-
 
 -- Issue-2191/2215 Start
 drop table if exists "public"."t_external_link";
@@ -109,3 +107,5 @@ alter table "public"."t_yarn_queue" add constraint "unique_team_id_queue_label" 
 
 
 alter table "public"."t_flink_log" add column "option_name" type int2;
+
+ALTER TABLE public.t_flink_app ALTER COLUMN state TYPE int4 USING state::int4;
