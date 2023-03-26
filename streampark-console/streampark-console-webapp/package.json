@@ -83,9 +83,9 @@
     "@types/sortablejs": "^1.15.0",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "^5.45.1",
-    "@vitejs/plugin-legacy": "^4.0.2",
-    "@vitejs/plugin-vue": "^4.1.0",
-    "@vitejs/plugin-vue-jsx": "^3.0.1",
+    "@vitejs/plugin-legacy": "^2.2.0",
+    "@vitejs/plugin-vue": "^3.1.2",
+    "@vitejs/plugin-vue-jsx": "^2.0.1",
     "@vue/compiler-sfc": "^3.2.47",
     "autoprefixer": "^10.4.13",
     "commitizen": "^4.2.5",
@@ -115,7 +115,7 @@
     "stylelint-order": "^5.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2",
-    "vite": "^4.2.1",
+    "vite": "^3.2.5",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-html": "^3.2.0",
     "vite-plugin-imagemin": "^0.6.1",
@@ -135,7 +135,6 @@
   "engines": {
     "node": ">=16"
   },
-  "packageManager": "pnpm@7.3.0",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
