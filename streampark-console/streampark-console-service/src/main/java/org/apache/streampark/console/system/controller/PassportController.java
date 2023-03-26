@@ -23,7 +23,6 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
-import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
@@ -114,10 +113,5 @@ public class PassportController {
     Map<String, Object> userInfo =
         userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
     return new RestResponse().data(userInfo);
-  }
-
-  @PostMapping("types")
-  public RestResponse userTypes() {
-    return RestResponse.success(LoginType.values());
   }
 }

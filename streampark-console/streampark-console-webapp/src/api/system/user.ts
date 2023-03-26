@@ -30,7 +30,6 @@ import { BasicTableParams } from '../model/baseModel';
 
 enum Api {
   Login = '/passport/signin',
-  LoginTypes = '/passport/types',
   LoginByLdap = '/passport/ldapSignin',
   Logout = '/passport/signout',
   GetUserInfo = '/getUserInfo',
@@ -134,17 +133,6 @@ export function fetchUserTypes() {
   return defHttp
     .post({
       url: Api.TYPES,
-      data: {},
-    })
-    .then((res) => {
-      return res.map((t: string) => ({ label: t, value: t }));
-    });
-}
-
-export function fetchLoginTypes() {
-  return defHttp
-    .post({
-      url: Api.LoginTypes,
       data: {},
     })
     .then((res) => {

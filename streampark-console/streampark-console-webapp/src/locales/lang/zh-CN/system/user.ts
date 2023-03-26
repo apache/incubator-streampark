@@ -54,4 +54,6 @@ export default {
   secret: '未知',
   locked: '锁定',
   effective: '有效',
+  password: '密码',
+  ldap: 'LDAP',
 };
