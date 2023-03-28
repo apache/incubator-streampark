@@ -40,12 +40,8 @@ public class AuthenticatorImpl implements Authenticator {
 
   @Override
   public User authenticate(String username, String password, String loginType) throws Exception {
-
-    LoginType loginTypeEnum;
-
-    try {
-      loginTypeEnum = LoginType.valueOf(loginType);
-    } catch (IllegalArgumentException e) {
+    LoginType loginTypeEnum = LoginType.of(loginType);
+    if (loginTypeEnum == null) {
       throw new ApiAlertException(
           String.format("the login type [%s] is not supported.", loginType));
     }

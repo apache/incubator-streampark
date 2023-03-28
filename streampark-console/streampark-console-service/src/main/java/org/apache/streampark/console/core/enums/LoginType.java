@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.enums;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /** The user login type. */
 public enum LoginType {
@@ -42,5 +43,12 @@ public enum LoginType {
 
   public static LoginType of(Integer code) {
     return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+  }
+
+  public static LoginType of(String loginType) {
+    return Arrays.stream(values())
+        .filter((x) -> Objects.equals(x.toString(), loginType))
+        .findFirst()
+        .orElse(null);
   }
 }
