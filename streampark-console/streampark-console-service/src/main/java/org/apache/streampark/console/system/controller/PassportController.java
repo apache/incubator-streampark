@@ -58,24 +58,13 @@ public class PassportController {
   @PostMapping("signin")
   public RestResponse signin(
       @NotBlank(message = "{required}") String username,
-      @NotBlank(message = "{required}") String password)
+      @NotBlank(message = "{required}") String password,
+      @NotBlank(message = "{required}") String loginType)
       throws Exception {
     if (StringUtils.isEmpty(username)) {
       return RestResponse.success().put("code", 0);
     }
-    User user = authenticator.authenticate(username, password);
-    return login(username, password, user);
-  }
-
-  @PostMapping("ldapSignin")
-  public RestResponse ldapSignin(
-      @NotBlank(message = "{required}") String username,
-      @NotBlank(message = "{required}") String password)
-      throws Exception {
-    if (StringUtils.isEmpty(username)) {
-      return RestResponse.success().put("code", 0);
-    }
-    User user = authenticator.ldapAuthenticate(username, password);
+    User user = authenticator.authenticate(username, password, loginType);
     return login(username, password, user);
   }
 

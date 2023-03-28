@@ -108,8 +108,8 @@ alter table "public"."t_yarn_queue" add constraint "unique_team_id_queue_label" 
 -- Issue-2324 End --
 
 
-alter table "public"."t_flink_log" add column "option_name" type int2;
+alter table "public"."t_flink_log" add column "option_name" int2;
 
 -- Issue-2494 Start --
-alter table "public"."t_user" add column "login_type" type int2;
+alter table "public"."t_user" add column "login_type" int2 default 0;
 -- Issue-2494 End --
