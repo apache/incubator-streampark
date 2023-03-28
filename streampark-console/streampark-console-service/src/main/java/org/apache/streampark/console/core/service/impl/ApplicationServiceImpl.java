@@ -1070,7 +1070,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           application.getK8sNamespace(), application.getJobName());
       KubernetesDeploymentHelper.deleteTaskConfigMap(
           application.getK8sNamespace(), application.getJobName());
-      IngressController.deleteIngress(application.getK8sNamespace(), application.getJobName());
+      IngressController.deleteIngress(application.getJobName(), application.getK8sNamespace());
     }
     if (startFuture != null) {
       startFuture.cancel(true);
@@ -1307,7 +1307,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             (t, e) -> {
               if (isKubernetesApp(application)) {
                 IngressController.deleteIngress(
-                    application.getK8sNamespace(), application.getJobName());
+                    application.getJobName(), application.getK8sNamespace());
               }
               cancelFutureMap.remove(application.getId());
               applicationLogService.save(applicationLog);
