@@ -49,4 +49,5 @@ public class StreamParkConsoleBootstrap {
   public static void main(String[] args) {
     SpringApplication.run(StreamParkConsoleBootstrap.class, args);
   }
+  
 }
