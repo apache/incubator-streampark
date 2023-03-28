@@ -17,16 +17,10 @@
 
 package org.apache.streampark.console;
 
-import org.apache.streampark.common.util.SystemPropertyUtils;
-import org.apache.streampark.console.base.util.CommonUtils;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
-import java.io.File;
 
 /**
  *
@@ -53,19 +47,6 @@ import java.io.File;
 public class StreamParkConsoleBootstrap {
 
   public static void main(String[] args) {
-    SpringApplication application = new SpringApplication(StreamParkConsoleBootstrap.class);
-    String pid = SystemPropertyUtils.get("pid");
-    if (pid != null) {
-      application.addListeners(new ApplicationPidFileWriter(pid));
-      Runtime.getRuntime()
-          .addShutdownHook(
-              new Thread(
-                  () -> {
-                    log.info("application shutdown now, pid: " + CommonUtils.getPid());
-                    File pidFile = new File(pid);
-                    pidFile.delete();
-                  }));
-    }
-    application.run();
+    SpringApplication.run(StreamParkConsoleBootstrap.class, args);
   }
 }
