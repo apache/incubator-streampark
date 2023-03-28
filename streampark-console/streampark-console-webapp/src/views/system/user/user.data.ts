@@ -17,9 +17,10 @@
 import { BasicColumn, FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
-import { checkUserName, fetchLoginTypes, fetchUserTypes } from '/@/api/system/user';
+import { checkUserName, fetchUserTypes } from '/@/api/system/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { LoginTypeEnum } from "/@/views/base/login/useLogin";
 const { t } = useI18n();
 // user status enum
 export const enum StatusEnum {
@@ -152,10 +153,12 @@ export const formSchema = (formType: string): FormSchema[] => {
     {
       label: t('system.user.form.loginType'),
       field: 'loginType',
-      component: 'ApiSelect',
+      component: 'Select',
       componentProps: {
-        disabled: isView,
-        api: fetchLoginTypes,
+        options:  [
+          { label: t('system.user.password'), value: LoginTypeEnum[LoginTypeEnum.PASSWORD] },
+          { label: t('system.user.ldap'), value: LoginTypeEnum[LoginTypeEnum.LDAP] },
+        ],
       },
       rules: [{ required: true }],
     },

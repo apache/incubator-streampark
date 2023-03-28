@@ -128,5 +128,3 @@ ldap:
   user:
     identity-attribute: uid
     email-attribute: mail
-    # action when ldap user is not exist (supported types: CREATE,DENY)
-    not-exist-action: CREATE
