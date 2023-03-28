@@ -53,6 +53,6 @@ public class AccessTokenServiceTest extends SpringTestBase {
     Assertions.assertEquals("admin", username);
     User user = userService.findByName(username);
     Assertions.assertNotNull(user);
-    Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getPassword()));
+    Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username));
   }
 }

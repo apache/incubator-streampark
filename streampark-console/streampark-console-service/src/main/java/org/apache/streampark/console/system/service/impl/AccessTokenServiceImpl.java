@@ -66,9 +66,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
       expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
     }
     Long ttl = DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault());
-    String token =
-        WebUtils.encryptToken(
-            JWTUtil.sign(user.getUserId(), user.getUsername(), user.getPassword(), ttl));
+    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), user.getUsername(), ttl));
     JWTToken jwtToken = new JWTToken(token, expireTime);
 
     AccessToken accessToken = new AccessToken();

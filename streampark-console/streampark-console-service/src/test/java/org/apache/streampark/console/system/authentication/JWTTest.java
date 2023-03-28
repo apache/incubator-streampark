@@ -27,20 +27,17 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.UUID;
 
 class JWTTest extends SpringTestBase {
 
   @Test
   void testExpireTime() {
     String userName = "black";
-    String secret = UUID.randomUUID().toString();
     String expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
     String token =
         JWTUtil.sign(
             10000L,
             userName,
-            secret,
             DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
 
     assert token != null;
