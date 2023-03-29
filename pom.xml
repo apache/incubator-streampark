@@ -1,96 +1,148 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.streamxhub.streamx</groupId>
-    <artifactId>streamx</artifactId>
-    <version>1.2.3</version>
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>25</version>
+    </parent>
+
+    <groupId>org.apache.streampark</groupId>
+    <artifactId>streampark</artifactId>
+    <version>2.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>StreamX Parent</name>
-    <description>A magical framework that make stream processing easier</description>
+    <name>StreamPark Project Parent POM</name>
 
-    <modules>
-        <module>streamx-common</module>
-        <module>streamx-flink</module>
-        <module>streamx-plugin</module>
-        <module>streamx-console</module>
-    </modules>
+    <url>https://streampark.apache.org/</url>
 
-    <url>https://github.com/streamxhub/streamx</url>
+    <description>
+        StreamPark, Make stream processing easier! easy-to-use streaming application development framework and operation platform
+    </description>
 
-    <scm>
-        <url>https://github.com/streamxhub/streamx</url>
-        <connection>git@github.com:streamxhub/streamx.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:streamxhub/streamx.git</developerConnection>
-    </scm>
-
-    <developers>
-        <developer>
-            <name>StreamX</name>
-            <id>StreamX</id>
-            <email>benjobs@qq.com</email>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <timezone>+8</timezone>
-        </developer>
-    </developers>
+    <organization>
+        <name>Apache Software Foundation</name>
+        <url>https://www.apache.org</url>
+    </organization>
 
     <licenses>
         <license>
-            <name>The Apache Software License, Version 2.0</name>
+            <name>The Apache License, Version 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
         </license>
     </licenses>
 
-    <distributionManagement>
+    <scm>
+        <connection>scm:git:git://github.com/apache/incubator-streampark.git</connection>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/incubator-streampark.git</developerConnection>
+        <url>scm:git:git@github.com:apache/incubator-streampark.git</url>
+        <tag>HEAD</tag>
+    </scm>
 
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/apache/incubator-streampark/issues</url>
+    </issueManagement>
 
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
+    <mailingLists>
+        <mailingList>
+            <name>StreamPark Developer List</name>
+            <post>dev@streampark.apache.org</post>
+            <subscribe>dev-subscribe@streampark.apache.org</subscribe>
+            <unsubscribe>dev-unsubscribe@streampark.apache.org</unsubscribe>
+        </mailingList>
+        <mailingList>
+            <name>StreamPark Commits List</name>
+            <post>commits@streampark.apache.org</post>
+            <subscribe>commits-subscribe@streampark.apache.org</subscribe>
+            <unsubscribe>commits-unsubscribe@streampark.apache.org</unsubscribe>
+        </mailingList>
+    </mailingLists>
 
-    </distributionManagement>
+    <modules>
+        <module>streampark-common</module>
+        <module>streampark-flink</module>
+        <module>streampark-storage</module>
+        <module>streampark-console</module>
+    </modules>
 
     <properties>
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <streamx.shaded.package>com.streamxhub.streamx.shaded</streamx.shaded.package>
 
-        <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
-        <flink.version>1.14.0</flink.version>
-        <spark.version>2.2.0</spark.version>
-        <hive.version>2.3.4</hive.version>
-        <vertx.version>4.2.3</vertx.version>
-        <hadoop.version>2.10.1</hadoop.version>
-        <hbase.version>2.1.10</hbase.version>
         <scala.version>2.12.8</scala.version>
         <scala.binary.version>2.12</scala.binary.version>
+        <scala.xml.version>1.3.0</scala.xml.version>
         <scalatest.version>3.2.9</scalatest.version>
-        <junit.version>5.6.3</junit.version>
+        <scala.binary.flink.version>_${scala.binary.version}</scala.binary.flink.version>
+
+        <flink.version>1.14.0</flink.version>
+        <flink.shaded.version>1.8.1</flink.shaded.version>
+        <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
+        <spark.version>3.2.0</spark.version>
+        <scalikejdbc.version>4.0.0</scalikejdbc.version>
+        <hive.version>2.3.4</hive.version>
+        <hadoop.version>2.10.2</hadoop.version>
+        <hbase.version>2.1.10</hbase.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
         <redis.version>3.3.0</redis.version>
         <es.version>6.2.3</es.version>
         <influxdb.version>2.17</influxdb.version>
         <protobuf.version>2.5.0</protobuf.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <logback.version>1.2.6</logback.version>
+        <slf4j.version>1.7.30</slf4j.version>
+        <log4j.version>2.17.1</log4j.version>
+        <logback.version>1.2.11</logback.version>
         <grpc.version>1.15.0</grpc.version>
-        <jackson.version>2.13.2</jackson.version>
+        <jackson.version>2.13.4</jackson.version>
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.8.6</caffeine.version>
+        <mysql.version>8.0.27</mysql.version>
+        <hikariCP.version>3.4.5</hikariCP.version>
+        <snakeyaml.version>1.32</snakeyaml.version>
+        <typesafe-conf.version>1.4.2</typesafe-conf.version>
+        <json4s-jackson.version>3.7.0-M2</json4s-jackson.version>
+        <hbase-client.version>1.3.5</hbase-client.version>
+        <commons-cli.version>1.3.1</commons-cli.version>
+        <commons-lang3.version>3.8.1</commons-lang3.version>
+        <enumeratum.version>1.6.1</enumeratum.version>
 
-        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
-        <checkstyle.fails.on.error>true</checkstyle.fails.on.error>
-        <scalastyle-maven-plugin.version>1.0.0</scalastyle-maven-plugin.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <scala-maven-plugin.version>4.7.1</scala-maven-plugin.version>
+        <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
+        <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
+        <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+        <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
+        <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
+        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
+        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <scalastyle.fails.on.error>true</scalastyle.fails.on.error>
+        <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
+        <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
+        <httpclient.version>4.5.13</httpclient.version>
+        <lombok.version>1.18.24</lombok.version>
+        <jupiter.version>5.9.1</jupiter.version>
+        <mockito.version>3.4.6</mockito.version>
+        <assertj.version>3.23.1</assertj.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -98,34 +150,41 @@
         <MaxMetaspace>512m</MaxMetaspace>
     </properties>
 
-    <dependencies>
-
-        <!--scala-->
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-compiler</artifactId>
-            <version>${scala.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-reflect</artifactId>
-            <version>${scala.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-    </dependencies>
-
     <dependencyManagement>
+
         <dependencies>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>force-shading</artifactId>
+                <version>${flink.shaded.version}</version>
+            </dependency>
+
+            <!--scala-->
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-compiler</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-reflect</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.scala-lang.modules</groupId>
+                <artifactId>scala-xml_${scala.binary.version}</artifactId>
+                <version>${scala.xml.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -141,7 +200,7 @@
             <dependency>
                 <groupId>com.beachape</groupId>
                 <artifactId>enumeratum_${scala.binary.version}</artifactId>
-                <version>1.6.1</version>
+                <version>${enumeratum.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.scala-lang</groupId>
@@ -169,22 +228,8 @@
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
-                <version>8.0.16</version>
+                <version>${mysql.version}</version>
             </dependency>
-
-            <!--mysql async start-->
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-jdbc-client</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-core</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-            <!--mysql async end-->
 
             <dependency>
                 <groupId>redis.clients</groupId>
@@ -195,19 +240,25 @@
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>3.4.5</version>
+                <version>${hikariCP.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.typesafe</groupId>
+                <artifactId>config</artifactId>
+                <version>${typesafe-conf.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>1.29</version>
+                <version>${snakeyaml.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.json4s</groupId>
                 <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
-                <version>3.7.0-M2</version>
+                <version>${json4s-jackson.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.scala-lang</groupId>
@@ -248,117 +299,117 @@
                 </exclusions>
             </dependency>
 
-            <!--mail-->
-            <dependency>
-                <groupId>com.solarmosaic.client</groupId>
-                <artifactId>mail-client_${scala.binary.version}</artifactId>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala-library</artifactId>
-                    </exclusion>
-                </exclusions>
-                <version>0.1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-email</artifactId>
-                <version>1.4</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.sun.mail</groupId>
-                <artifactId>javax.mail</artifactId>
-                <version>1.5.5</version>
-            </dependency>
-
             <!--apache.commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.8.1</version>
+                <version>${commons-lang3.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>commons-cli</groupId>
                 <artifactId>commons-cli</artifactId>
-                <version>1.3.1</version>
+                <version>${commons-cli.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>4.5.13</version>
-            </dependency>
-
-            <!--flink-->
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-core</artifactId>
-                <version>${flink.version}</version>
+                <version>${httpclient.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-clients_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-scala_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-jdbc_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <!--state backend-->
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.apache.bahir</groupId>
-                <artifactId>flink-connector-redis_${scala.binary.version}</artifactId>
-                <version>1.0</version>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.apache.flink</groupId>
-                        <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+                        <groupId>*</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.reload4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-cli</groupId>
+                        <artifactId>commons-cli</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.zookeeper</groupId>
+                        <artifactId>zookeeper</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
 
-            <!--hadoop-->
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-yarn-client</artifactId>
                 <version>${hadoop.version}</version>
                 <exclusions>
                     <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.reload4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>commons-cli</groupId>
                         <artifactId>commons-cli</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.reload4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-cli</groupId>
+                        <artifactId>commons-cli</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -367,24 +418,76 @@
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-yarn-api</artifactId>
                 <version>${hadoop.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-common</artifactId>
-                <version>${hadoop.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-hdfs</artifactId>
-                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>ch.qos.reload4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-auth</artifactId>
                 <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.reload4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.zookeeper</groupId>
+                        <artifactId>zookeeper</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-core</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-cli</groupId>
+                        <artifactId>commons-cli</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.reload4j</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!--hbase-->
@@ -399,7 +502,11 @@
                     </exclusion>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.reload4j</groupId>
+                        <artifactId>reload4j</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -407,23 +514,187 @@
             <dependency>
                 <groupId>org.apache.hbase</groupId>
                 <artifactId>hbase-client</artifactId>
-                <version>1.3.5</version>
+                <version>${hbase-client.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
 
+            <!--log4j -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <!--log4j end-->
+
+            <!-- logback -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+            <!-- test -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+
         </dependencies>
+
     </dependencyManagement>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>force-shading</artifactId>
+        </dependency>
+
+        <!--scala-->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-compiler</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--log4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <!--log4j end-->
+
+        <!-- logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- logback end -->
+    </dependencies>
+
     <build>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -435,14 +706,14 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.7</version>
+                    <version>${build-helper-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>add-source</id>
-                            <phase>generate-sources</phase>
                             <goals>
                                 <goal>add-source</goal>
                             </goals>
+                            <phase>generate-sources</phase>
                             <configuration>
                                 <sources>
                                     <source>${basedir}/src/main/java</source>
@@ -454,16 +725,52 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.scalastyle</groupId>
+                    <artifactId>scalastyle-maven-plugin</artifactId>
+                    <version>${maven-scalastyle-plugin.version}</version>
+                    <configuration>
+                        <verbose>false</verbose>
+                        <failOnViolation>${scalastyle.fails.on.error}</failOnViolation>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <failOnWarning>false</failOnWarning>
+                        <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
+                        <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+                        <!--suppress UnresolvedMavenProperty -->
+                        <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/scalastyle-config.xml</configLocation>
+                        <outputFile>${project.build.directory}/target/scalastyle-output.xml</outputFile>
+                        <inputEncoding>UTF-8</inputEncoding>
+                        <outputEncoding>UTF-8</outputEncoding>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>8.14</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>process-sources</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${maven-checkstyle-plugin.version}</version>
                     <configuration>
-                        <!--suppress UnresolvedMavenProperty -->
-                        <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/checkstyle.xml</configLocation>
-                        <encoding>UTF-8</encoding>
+                        <suppressionsLocation>/tools/checkstyle/suppressions.xml</suppressionsLocation>
+                        <configLocation>/tools/checkstyle/checkstyle.xml</configLocation>
+                        <inputEncoding>UTF-8</inputEncoding>
+                        <outputEncoding>UTF-8</outputEncoding>
                         <consoleOutput>true</consoleOutput>
                         <includeTestSourceDirectory>false</includeTestSourceDirectory>
-                        <failOnViolation>${checkstyle.fails.on.error}</failOnViolation>
+                        <failOnViolation>true</failOnViolation>
                         <sourceDirectories>
                             <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
                             <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
@@ -484,6 +791,13 @@
                         <excludes>
                         </excludes>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>8.14</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <id>validate</id>
@@ -494,25 +808,46 @@
                         </execution>
                     </executions>
                 </plugin>
+
                 <plugin>
-                    <groupId>org.scalastyle</groupId>
-                    <artifactId>scalastyle-maven-plugin</artifactId>
-                    <version>${scalastyle-maven-plugin.version}</version>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${maven-spotless-plugin.version}</version>
                     <configuration>
-                        <verbose>false</verbose>
-                        <failOnViolation>true</failOnViolation>
-                        <includeTestSourceDirectory>false</includeTestSourceDirectory>
-                        <failOnWarning>false</failOnWarning>
-                        <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
-                        <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
-                        <!--suppress UnresolvedMavenProperty -->
-                        <configLocation>${maven.multiModuleProjectDirectory}/scalastyle-config.xml</configLocation>
-                        <outputFile>${project.build.directory}/target/scalastyle-output.xml</outputFile>
-                        <inputEncoding>UTF-8</inputEncoding>
-                        <outputEncoding>UTF-8</outputEncoding>
+                        <java>
+                            <includes>
+                                <include>src/main/java/**/*.java</include>
+                                <include>src/test/java/**/*.java</include>
+                            </includes>
+                            <googleJavaFormat>
+                                <version>1.7</version>
+                                <style>GOOGLE</style>
+                            </googleJavaFormat>
+                            <importOrder>
+                                <order>org.apache.streampark,org.apache.streampark.shaded,org.apache,,javax,java,scala,\#</order>
+                            </importOrder>
+                            <replaceRegex>
+                                <name>Remove wildcard imports</name>
+                                <searchRegex>import\s+(static)*\s*[^\*\s]+\*;(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
+                            <replaceRegex>
+                                <name>Block powermock</name>
+                                <searchRegex>import\s+org\.powermock\.[^\*\s]*(|\*);(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
+                            <replaceRegex>
+                                <name>Block jUnit4 imports</name>
+                                <searchRegex>import\s+org\.junit\.[^jupiter][^\*\s]*(|\*);(\r\n|\r|\n)</searchRegex>
+                                <replacement>$1</replacement>
+                            </replaceRegex>
+                            <removeUnusedImports />
+                        </java>
                     </configuration>
                     <executions>
                         <execution>
+                            <id>spotless-check</id>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>
@@ -524,11 +859,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <source>${project.build.jdk}</source>
                         <target>${project.build.jdk}</target>
                         <encoding>UTF-8</encoding>
+                        <!-- The semantics of this option are reversed, see MCOMPILER-209. -->
+                        <useIncrementalCompilation>false</useIncrementalCompilation>
+                        <compilerArgs>
+                            <!-- Prevents recompilation due to missing package-info.class, see MCOMPILER-205 -->
+                            <arg>-Xpkginfo:always</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
 
@@ -536,7 +877,7 @@
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
-                    <version>4.3.0</version>
+                    <version>${scala-maven-plugin.version}</version>
                     <configuration>
                         <addScalacArgs>-target:jvm-${project.build.jdk}</addScalacArgs>
                         <target>${project.build.jdk}</target>
@@ -545,19 +886,18 @@
                     <executions>
                         <execution>
                             <id>install-scala</id>
-                            <phase>process-resources</phase>
                             <goals>
                                 <goal>add-source</goal>
                                 <goal>compile</goal>
                             </goals>
+                            <phase>process-resources</phase>
                         </execution>
                         <execution>
                             <id>test-compile-scala</id>
-                            <phase>test-compile</phase>
                             <goals>
-                                <goal>add-source</goal>
                                 <goal>testCompile</goal>
                             </goals>
+                            <phase>test-compile</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -566,70 +906,41 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.4</version>
+                    <version>${maven-shade-plugin.version}</version>
+                    <configuration>
+                        <shadedArtifactId>true</shadedArtifactId>
+                        <createDependencyReducedPom>true</createDependencyReducedPom>
+                        <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                        <artifactSet>
+                            <includes>
+                                <!--
+                                  This is a dummy dependency that is used to trigger the maven-shade plugin
+                                  so that streampark's published POMs are flattened and do not contain variables.
+
+                                  references:
+                                  [SPARK-3812]: https://issues.apache.org/jira/browse/SPARK-3812
+                                  [FLINK-3565]: https://issues.apache.org/jira/browse/FLINK-3565
+                                -->
+                                <include>org.apache.flink:force-shading</include>
+                            </includes>
+                        </artifactSet>
+                    </configuration>
                     <executions>
                         <execution>
-                            <id>shade-flink</id>
-                            <phase>none</phase>
-                        </execution>
-                        <execution>
-                            <phase>package</phase>
                             <goals>
                                 <goal>shade</goal>
                             </goals>
-                            <configuration>
-                                <createDependencyReducedPom>false</createDependencyReducedPom>
-                                <artifactSet>
-                                    <excludes>
-                                        <exclude>org.apache.flink:force-shading</exclude>
-                                        <exclude>com.google.code.findbugs:jsr305</exclude>
-                                        <exclude>org.slf4j:*</exclude>
-                                        <exclude>log4j:*</exclude>
-                                    </excludes>
-                                </artifactSet>
-                                <filters>
-                                    <filter>
-                                        <artifact>*:*</artifact>
-                                        <excludes>
-                                            <exclude>META-INF/*.SF</exclude>
-                                            <exclude>META-INF/*.DSA</exclude>
-                                            <exclude>META-INF/*.RSA</exclude>
-                                        </excludes>
-                                    </filter>
-                                </filters>
-                            </configuration>
+                            <phase>package</phase>
                         </execution>
                     </executions>
                 </plugin>
                 <!--(end) shade -->
 
-                <!--assembly-->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.1.1</version>
-                    <executions>
-                        <execution>
-                            <id>distro-assembly</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <appendAssemblyId>false</appendAssemblyId>
-                        <descriptors>
-                            <descriptor>assembly.xml</descriptor>
-                        </descriptors>
-                    </configuration>
-                </plugin>
-
                 <!--source and doc-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2.1</version>
+                    <version>${maven-source-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -643,7 +954,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.9.1</version>
+                    <version>${maven-javadoc-plugin.version}</version>
+                    <configuration>
+                        <quiet>true</quiet>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
@@ -657,49 +971,40 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.5</version>
+                    <version>${maven-gpg-plugin.version}</version>
                     <executions>
                         <execution>
-                            <id>sign-artifacts</id>
-                            <phase>verify</phase>
+                            <id>sign-release-artifacts</id>
                             <goals>
                                 <goal>sign</goal>
                             </goals>
+                            <phase>verify</phase>
                         </execution>
                     </executions>
                 </plugin>
 
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.8</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <serverId>ossrh</serverId>
-                        <nexusUrl>https://s01.oss.sonatype.org</nexusUrl>
-                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                    </configuration>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
 
-            <!--maven-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-
-            <!--scala-->
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
             </plugin>
 
             <plugin>
@@ -708,34 +1013,71 @@
             </plugin>
 
             <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
                 <groupId>org.scalastyle</groupId>
                 <artifactId>scalastyle-maven-plugin</artifactId>
             </plugin>
-
-            <!-- maven deploy
-             <plugin>
-                 <groupId>org.apache.maven.plugins</groupId>
-                 <artifactId>maven-source-plugin</artifactId>
-             </plugin>
-
-             <plugin>
-                 <groupId>org.apache.maven.plugins</groupId>
-                 <artifactId>maven-javadoc-plugin</artifactId>
-             </plugin>
-
-             <plugin>
-                 <groupId>org.apache.maven.plugins</groupId>
-                 <artifactId>maven-gpg-plugin</artifactId>
-             </plugin>
-
-             <plugin>
-                 <groupId>org.sonatype.plugins</groupId>
-                 <artifactId>nexus-staging-maven-plugin</artifactId>
-             </plugin>
-             -->
-
         </plugins>
 
     </build>
+
+    <profiles>
+        <profile>
+            <id>flink-1.15</id>
+            <properties>
+                <streampark.flink.shims.version>1.15</streampark.flink.shims.version>
+                <flink.version>1.15.0</flink.version>
+                <scala.binary.flink.version />
+                <flink.table.uber.artifact.id>flink-table-api-java-uber</flink.table.uber.artifact.id>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>scala-2.11</id>
+            <properties>
+                <scala.version>2.11.12</scala.version>
+                <scala.binary.version>2.11</scala.binary.version>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>scala-2.12</id>
+            <modules>
+                <module>streampark-spark</module>
+            </modules>
+            <properties>
+                <scala.version>2.12.8</scala.version>
+                <scala.binary.version>2.12</scala.binary.version>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>apache-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

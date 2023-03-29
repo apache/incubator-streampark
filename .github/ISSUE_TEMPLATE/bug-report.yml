@@ -17,28 +17,79 @@
 
 name: Bug report
 title: "[Bug] Bug title"
-description: Problems and issues with code of StreamX
+description: Problems and issues with code of StreamPark
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
         Please make sure what you are reporting is indeed a bug with reproducible steps.
-        For better global communication, Please write in English.
+        For better global communication, Please write in English. (请确保您所报告的问题是描述清晰,有可重现步骤的。为了更好的交流，请用英文书写)
 
-        If you feel the description in English is not clear, then you can append description in Chinese, thanks!
+        If you feel the description in English is not clear, then you can append description in Chinese, thanks! (如果您觉得英文描述不清楚，可以附加中文描述，谢谢)
 
   - type: checkboxes
     attributes:
       label: Search before asking
       description: >
-        Please make sure to search in the [issues](https://github.com/streamxhub/streamx/issues?q=is%3Aissue+label%3A%22bug%22)
+        Please make sure to search in the [issues](https://github.com/apache/incubator-streampark/issues?q=is%3Aissue+label%3A%22bug%22)
         first to see whether the same issue was reported already.
       options:
         - label: >
-            I had searched in the [issues](https://github.com/streamxhub/streamx/issues?q=is%3Aissue+label%3A%22bug%22) and found
+            I had searched in the [issues](https://github.com/apache/incubator-streampark/issues?q=is%3Aissue+label%3A%22bug%22) and found
             no similar issues.
           required: true
+
+  - type: textarea
+    attributes:
+      label: Java Version
+      description: Provide Java Version.
+      placeholder: >
+        Please provide the version of Java.
+    validations:
+      required: false
+
+  - type: dropdown
+    attributes:
+      label: Scala Version
+      description: Provide Scala version.
+      options:
+        - 2.11.x
+        - 2.12.x
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: StreamPark Version
+      description: Provide StreamPark version.
+      placeholder: >
+        Please provide the version of StreamPark.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Flink Version
+      description: Provide Flink Version.
+      placeholder: >
+        Please provide the version of Flink.
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: deploy mode
+      description: Which mode deploy the flink job?
+      options:
+        - yarn-application
+        - yarn-session
+        - yarn-perjob
+        - remote
+        - kubernetes-application
+        - kubernetes-session
+    validations:
+      required: false
 
   - type: textarea
     attributes:
@@ -51,49 +102,13 @@ body:
 
   - type: textarea
     attributes:
-      label: StreamX Version
-      description: Provide StreamX version.
-      placeholder: >
-        Please provide the version of StreamX.
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: Java Version
-      description: Provide Java Version.
-      placeholder: >
-        Please provide the version of Java.
-    validations:
-      required: false
-
-  - type: textarea
-    attributes:
-      label: Flink Version
-      description: Provide Flink Version.
-      placeholder: >
-        Please provide the version of Flink.
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: Scala Version of Flink
-      description: Provide Scala Version of Flink.
-      placeholder: >
-        Please provide the Scala Version of Flink.
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
       label: Error Exception
       description: Provide the error exception when you run your command.
       placeholder: >
         Please provide the error exception here.
       render: log
     validations:
-      required: true
+      required: false
 
   - type: textarea
     attributes:
@@ -110,9 +125,9 @@ body:
       description: >
         This is absolutely not required, but we are happy to guide you in the contribution process
         especially if you already have a good understanding of how to implement the fix.
-        StreamX is a totally community-driven project and we love to bring new contributors in.
+        StreamPark is a totally community-driven project and we love to bring new contributors in.
       options:
-        - label: Yes I am willing to submit a PR!
+        - label: Yes I am willing to submit a PR!(您是否要贡献这个PR?)
 
   - type: checkboxes
     attributes:

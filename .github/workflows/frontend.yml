@@ -1,0 +1,60 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Frontend
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - '.github/workflows/frontend.yml'
+      - 'streampark-console/streampark-console-webapp/**'
+  pull_request:
+    paths:
+      - '.github/workflows/frontend.yml'
+      - 'streampark-console/streampark-console-webapp/**'
+
+defaults:
+  run:
+    working-directory: streampark-console/streampark-console-webapp
+
+concurrency:
+  group: frontend-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: corepack enable
+      - name: Compile and Build
+        run: |
+          pnpm install
+          pnpm run lint:lint-staged
+          pnpm run build
