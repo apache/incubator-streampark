@@ -204,7 +204,7 @@ public class DorisStreamLoader implements Serializable {
       final Properties properties = dorisConfig.loadProperties();
       properties.forEach((k, v) -> put.setHeader(k.toString(), v.toString()));
       if (properties.containsKey("columns")) {
-        put.setHeader("timeout", dorisConfig.timeout() + "");
+        put.setHeader("timeout", String.valueOf(dorisConfig.timeout()));
       }
       put.setHeader(HttpHeaders.EXPECT, "100-continue");
       put.setHeader(

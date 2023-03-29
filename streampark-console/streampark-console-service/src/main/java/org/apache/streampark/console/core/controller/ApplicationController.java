@@ -398,7 +398,7 @@ public class ApplicationController {
     } else if (pathPart == null) {
       error =
           "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-    } else if (pathPart.length() == 0 || pathPart.equals("/")) {
+    } else if (pathPart.length() == 0 || "/".equals(pathPart)) {
       error = "Cannot use the root directory for checkpoints.";
     }
     if (error != null) {
