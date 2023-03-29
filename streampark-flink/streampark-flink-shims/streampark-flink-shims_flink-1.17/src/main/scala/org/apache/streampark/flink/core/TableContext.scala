@@ -18,8 +18,10 @@
 package org.apache.streampark.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.table.api.{CompiledPlan, PlanReference, Table, TableDescriptor, TableEnvironment, TableResult}
+import org.apache.flink.table.api.{CompiledPlan, ExplainDetail, ExplainFormat, PlanReference, Table, TableDescriptor, TableEnvironment, TableResult}
 import org.apache.flink.table.module.ModuleEntry
+import org.apache.flink.table.resource.ResourceUri
+import java.util.{List => JList}
 
 class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment)
     extends FlinkTableTrait(parameter, tableEnv) {
@@ -58,4 +60,29 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
    * @since 1.15
    */
   override def compilePlanSql(stmt: String): CompiledPlan = tableEnv.compilePlanSql(stmt)
+
+  /**
+   * @since 1.17
+   */
+  override def createFunction(path: String, className: String, resourceUris: JList[ResourceUri]): Unit = tableEnv.createFunction(path, className, resourceUris)
+
+  /**
+   * @since 1.17
+   */
+  override def createFunction(path: String, className: String, resourceUris: JList[ResourceUri], ignoreIfExists: Boolean): Unit = tableEnv.createFunction(path, className, resourceUris, ignoreIfExists)
+
+  /**
+   * @since 1.17
+   */
+  override def createTemporaryFunction(path: String, className: String, resourceUris: JList[ResourceUri]): Unit = tableEnv.createTemporaryFunction(path, className, resourceUris)
+
+  /**
+   * @since 1.17
+   */
+  override def createTemporarySystemFunction(name: String, className: String, resourceUris: JList[ResourceUri]): Unit = tableEnv.createTemporarySystemFunction(name, className, resourceUris)
+
+  /**
+   * @since 1.17
+   */
+  override def explainSql(statement: String, format: ExplainFormat, extraDetails: ExplainDetail*): String = tableEnv.explainSql(statement, format, extraDetails: _*)
 }
