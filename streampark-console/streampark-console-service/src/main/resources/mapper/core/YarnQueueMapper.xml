@@ -61,6 +61,7 @@
                 and id &lt;&gt; #{yarnQueue.id}
             </if>
         </where>
+        limit 1
     </select>
 
 </mapper>

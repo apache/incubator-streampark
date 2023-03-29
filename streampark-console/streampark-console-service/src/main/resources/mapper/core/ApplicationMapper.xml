@@ -89,6 +89,7 @@
             END
         from t_flink_app
         where team_id = #{teamId}
+        limit 1
     </select>
 
     <select id="existsByJobName" resultType="java.lang.Boolean" parameterType="java.lang.String">
@@ -98,6 +99,7 @@
             END
         from t_flink_app
         where job_name = #{jobName}
+        limit 1
     </select>
 
     <select id="existsJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
@@ -107,6 +109,7 @@
             END
         FROM t_flink_app
         WHERE flink_cluster_id = #{clusterId}
+        limit 1
     </select>
 
     <select id="existsRunningJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
@@ -115,8 +118,9 @@
                 WHEN  count(1) > 0 THEN true ELSE false
             END
         from t_flink_app
-        where flink_cluster_id = #{clusterId}
-        and state = 5
+            where flink_cluster_id = #{clusterId}
+             and state = 5
+             limit 1
     </select>
 
     <select id="getByProjectId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
