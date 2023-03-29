@@ -15,17 +15,40 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.security;
+package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.console.system.entity.User;
+import com.baomidou.mybatisplus.annotation.EnumValue;
 
-public interface Authenticator {
-  /**
-   * Verifying legality via username and password
-   *
-   * @param username username
-   * @param password user password
-   * @return result object
-   */
-  User authenticate(String username, String password, String loginType) throws Exception;
+import java.util.Arrays;
+import java.util.Objects;
+
+/** The user login type. */
+public enum LoginType {
+
+  /** sign in with password */
+  PASSWORD(0),
+
+  /** sign in with ldap */
+  LDAP(1);
+
+  @EnumValue private final int code;
+
+  LoginType(int code) {
+    this.code = code;
+  }
+
+  public int getCode() {
+    return code;
+  }
+
+  public static LoginType of(Integer code) {
+    return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+  }
+
+  public static LoginType of(String loginType) {
+    return Arrays.stream(values())
+        .filter((x) -> Objects.equals(x.toString(), loginType))
+        .findFirst()
+        .orElse(null);
+  }
 }

@@ -20,6 +20,7 @@
 export interface LoginParams {
   username: string;
   password: string;
+  loginType: string;
 }
 
 export interface RoleInfo {

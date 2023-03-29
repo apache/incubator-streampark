@@ -336,6 +336,7 @@ create table if not exists `t_user` (
   `password` varchar(128)  not null comment 'password',
   `email` varchar(128)  default null comment 'email',
   `user_type` int  not null comment 'user type 1:admin 2:user',
+  `login_type` tinyint  not null comment 'login type 0:password 1:ldap',
   `last_team_id` bigint default null comment 'last team id',
   `status` char(1)  not null comment 'status 0:locked 1:active',
   `create_time` datetime not null default current_timestamp comment 'create time',

@@ -1374,9 +1374,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       throw new ApiAlertException("[StreamPark] The application cannot be started repeatedly.");
     }
 
-    starting(application);
-    application.setAllowNonRestored(appParam.getAllowNonRestored());
-
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
     if (flinkEnv == null) {
       throw new ApiAlertException("[StreamPark] can no found flink version");
@@ -1392,6 +1389,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       appParam.setSavePointed(true);
       application.setRestartCount(application.getRestartCount() + 1);
     }
+
+    starting(application);
+    application.setAllowNonRestored(appParam.getAllowNonRestored());
 
     String appConf;
     String flinkUserJar = null;

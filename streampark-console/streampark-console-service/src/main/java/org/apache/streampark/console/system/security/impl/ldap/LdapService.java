@@ -17,8 +17,6 @@
 
 package org.apache.streampark.console.system.security.impl.ldap;
 
-import org.apache.commons.lang3.StringUtils;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -59,9 +57,6 @@ public class LdapService {
 
   @Value("${ldap.user.email-attribute:#{null}}")
   private String ldapEmailAttribute;
-
-  @Value("${ldap.user.not-exist-action:CREATE}")
-  private String ldapUserNotExistAction;
 
   /**
    * login by userId and return user email
@@ -117,19 +112,5 @@ public class LdapService {
     env.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
     env.put(Context.PROVIDER_URL, ldapUrls);
     return env;
-  }
-
-  public LdapUserNotExistActionType getLdapUserNotExistAction() {
-    if (StringUtils.isBlank(ldapUserNotExistAction)) {
-      log.info(
-          "security.authentication.ldap.user.not.exist.action configuration is empty, the default value 'CREATE'");
-      return LdapUserNotExistActionType.CREATE;
-    }
-
-    return LdapUserNotExistActionType.valueOf(ldapUserNotExistAction);
-  }
-
-  public boolean createIfUserNotExists() {
-    return getLdapUserNotExistAction() == LdapUserNotExistActionType.CREATE;
   }
 }

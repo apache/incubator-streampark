@@ -89,7 +89,7 @@
     LoginTypeEnum,
   } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { loginApi, loginLdapApi } from '/@/api/system/user';
+  import { loginApi } from '/@/api/system/user';
   import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
   import TeamModal from './teamModal.vue';
   import { fetchUserTeam } from '/@/api/system/member';
@@ -142,20 +142,13 @@
   }
 
   async function handleLoginRequest(loginFormValue: LoginForm): Promise<Result<LoginResultModel>> {
-    // local login
-    if (loginType.value == LoginTypeEnum.PASSWORD) {
-      const { data } = await loginApi(
-        { password: loginFormValue.password, username: loginFormValue.account },
-        'none',
-      );
-      return data;
-    }
-    const { data } = await loginLdapApi(
-      { password: loginFormValue.password, username: loginFormValue.account },
+    const { data } = await loginApi(
+      { password: loginFormValue.password, username: loginFormValue.account, loginType: LoginTypeEnum[loginType.value] },
       'none',
     );
     return data;
   }
+
   async function handleLoginAction(loginFormValue: LoginForm) {
     try {
       loading.value = true;
