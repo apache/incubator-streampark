@@ -64,6 +64,7 @@ sealed trait FlinkBuildParam extends BuildParam {
           case Array(1, 14, _) => s"${localWorkspace.APP_SHIMS}/flink-1.14"
           case Array(1, 15, _) => s"${localWorkspace.APP_SHIMS}/flink-1.15"
           case Array(1, 16, _) => s"${localWorkspace.APP_SHIMS}/flink-1.16"
+          case Array(1, 17, _) => s"${localWorkspace.APP_SHIMS}/flink-1.17"
           case _ => throw new UnsupportedOperationException(s"Unsupported flink version: $flinkVersion")
         }
       }
