@@ -40,10 +40,13 @@
     </resultMap>
 
     <select id="existsByTeamId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
-        select count(1)
+        select
+            CASE
+                WHEN  count(1) > 0 THEN true ELSE false
+            END
         from t_flink_project
-        where team_id = #{teamId}
-        limit 1
+            where team_id = #{teamId}
+            limit 1
     </select>
 
     <select id="selectByTeamId" resultType="org.apache.streampark.console.core.entity.Project" parameterType="java.lang.Long">
