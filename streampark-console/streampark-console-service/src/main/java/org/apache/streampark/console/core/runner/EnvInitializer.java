@@ -87,7 +87,7 @@ public class EnvInitializer implements ApplicationRunner {
               "[StreamPark] System initialization check failed,"
                   + " The system initialization check failed. If started local for development and debugging,"
                   + " please ensure the -D%s parameter is clearly specified,"
-                  + " more detail: https://streampark.apache.org/docs/user-guide/development",
+                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
               ConfigConst.KEY_APP_HOME()));
     }
 
