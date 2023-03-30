@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.program.ClusterClient
 
-abstract class FlinkClientTrait[T](val clusterClient: ClusterClient[T]) {
+abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
 
   def triggerSavepoint(jobID: JobID, savepointDir: String): CompletableFuture[String] = {
     clusterClient.triggerSavepoint(jobID, savepointDir)

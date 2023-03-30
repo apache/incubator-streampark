@@ -22,7 +22,7 @@ import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService
 
 import java.util.Optional
 
-abstract class FlinkKubernetesClientTrait(val kubeClient: FlinkKubeClient) {
+abstract class FlinkKubernetesClientTrait(kubeClient: FlinkKubeClient) {
 
   /**
    * Get the kubernetes service of the given flink clusterId.
