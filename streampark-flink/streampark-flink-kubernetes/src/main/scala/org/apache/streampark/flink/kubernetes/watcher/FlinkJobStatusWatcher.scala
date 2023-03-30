@@ -280,7 +280,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             logger.info("Enter the task failure deletion process.")
             KubernetesDeploymentHelper.watchPodTerminatedLog(trackId.namespace, trackId.clusterId, trackId.jobId)
             KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
-            IngressController.deleteIngress(trackId.namespace, trackId.clusterId)
+            IngressController.deleteIngress(trackId.clusterId, trackId.namespace)
             FlinkJobState.FAILED
           } else {
             inferSilentOrLostFromPreCache(latest)
