@@ -97,3 +97,7 @@ alter table `t_user` add column `login_type` tinyint default 0 after `user_type`
 -- Issue-2494 End --
 
 set foreign_key_checks = 1;
+
+-- Issue-2513 Start --
+drop table if exists "public"."t_flink_tutorial";
+-- Issue-2513 End --

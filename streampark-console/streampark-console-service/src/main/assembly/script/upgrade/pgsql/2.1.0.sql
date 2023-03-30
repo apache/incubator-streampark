@@ -113,3 +113,7 @@ alter table "public"."t_user" add column "login_type" int2 default 0;
 -- Issue-2494 End --
 
 ALTER TABLE public.t_flink_app ALTER COLUMN state TYPE int4 USING state::int4;
+
+-- Issue-2513 Start --
+drop table if exists "public"."t_flink_tutorial";
+-- Issue-2513 End --
