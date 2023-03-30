@@ -42,7 +42,10 @@
     </resultMap>
 
     <select id="existsByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.String">
-        select count(1)
+        select
+         CASE
+           WHEN  count(1) > 0 THEN true ELSE false
+         END
         from t_flink_cluster
         <where>
             cluster_id=#{clusterId}
@@ -54,7 +57,10 @@
     </select>
 
     <select id="existsByClusterName" resultType="java.lang.Boolean" parameterType="java.util.Map">
-        select count(1)
+        select
+         CASE
+           WHEN  count(1) > 0 THEN true ELSE false
+         END
         from t_flink_cluster
         <where>
             cluster_name=#{clusterName}

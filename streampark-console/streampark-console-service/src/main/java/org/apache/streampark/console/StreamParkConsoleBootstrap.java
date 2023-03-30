@@ -17,9 +17,12 @@
 
 package org.apache.streampark.console;
 
+import org.apache.streampark.common.util.SystemPropertyUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -47,6 +50,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class StreamParkConsoleBootstrap {
 
   public static void main(String[] args) {
-    SpringApplication.run(StreamParkConsoleBootstrap.class, args);
+    SpringApplication application = new SpringApplication(StreamParkConsoleBootstrap.class);
+    String pid = SystemPropertyUtils.get("pid");
+    if (pid != null) {
+      application.addListeners(new ApplicationPidFileWriter(pid));
+    }
+    application.run();
   }
 }
