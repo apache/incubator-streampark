@@ -43,7 +43,10 @@ public enum ReleaseState implements Serializable {
   NEED_CHECK(5),
 
   /** revoked */
-  REVOKED(10);
+  REVOKED(10),
+    
+  /** other FlinkApplicationState */
+  OTHER(-2);
 
   private final int value;
 
@@ -56,6 +59,6 @@ public enum ReleaseState implements Serializable {
   }
 
   public static ReleaseState of(Integer state) {
-    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(OTHER);
   }
 }
