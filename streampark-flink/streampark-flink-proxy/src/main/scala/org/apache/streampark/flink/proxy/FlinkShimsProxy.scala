@@ -34,7 +34,7 @@ object FlinkShimsProxy extends Logger {
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
   private[this] val SHIMS_PATTERN = Pattern.compile(
-    "streampark-flink-shims_flink-(1.12|1.13|1.14|1.15|1.16)_(2.11|2.12)-(.*).jar",
+    ConfigConst.STREAMPARK_FLINK_SHIMS_JAR_REGEX,
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
   private[this] val SHIMS_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
