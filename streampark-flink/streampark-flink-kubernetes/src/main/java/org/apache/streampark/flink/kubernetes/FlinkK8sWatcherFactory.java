@@ -31,7 +31,8 @@ public final class FlinkK8sWatcherFactory {
       TrackConfig.FlinkTrackConfig conf, boolean lazyStart) {
     if (lazyStart) {
       // TODO: Implement lazy start logic
-      return new DefaultFlinkK8sWatcher(conf);
+      // return new DefaultFlinkK8sWatcher(conf);
+      return new FlinkK8sWatcherLazyStarter(conf);
     } else {
       return new DefaultFlinkK8sWatcher(conf);
     }

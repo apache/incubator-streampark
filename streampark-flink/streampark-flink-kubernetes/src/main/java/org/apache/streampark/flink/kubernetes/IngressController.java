@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class IngressController {
 
@@ -309,16 +310,11 @@ public class IngressController {
 
   private static boolean determineThePodSurvivalStatus(String name, String namespace) {
     try (KubernetesClient kubernetesClient = KubernetesRetriever.newK8sClient()) {
-      kubernetesClient
-          .apps()
-          .deployments()
-          .inNamespace(namespace)
-          .withName(name)
-          .get()
-          .getSpec()
-          .getSelector()
-          .getMatchLabels();
-      return false;
+      Optional<Map<String, String>> isSurvival =
+          Optional.ofNullable(
+                  kubernetesClient.apps().deployments().inNamespace(namespace).withName(name).get())
+              .map(deploy -> deploy.getSpec().getSelector().getMatchLabels());
+      return !isSurvival.isPresent();
     } catch (Exception e) {
       LOG.warn("Pod status is down", e);
       return true;

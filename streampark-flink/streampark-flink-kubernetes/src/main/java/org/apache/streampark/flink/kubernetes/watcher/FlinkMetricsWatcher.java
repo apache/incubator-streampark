@@ -56,7 +56,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-public class FlinkMetricsWatcher implements FlinkWatcher {
+public class FlinkMetricsWatcher extends FlinkWatcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(FlinkMetricsWatcher.class);
 
@@ -156,7 +156,7 @@ public class FlinkMetricsWatcher implements FlinkWatcher {
     }
     try {
       String overviewResponse =
-          Request.get(String.format("%s/overview", clusterRestUrl))
+          Request.get(String.format("%s/overview", clusterRestUrl.get()))
               .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
               .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
               .execute()
@@ -164,7 +164,7 @@ public class FlinkMetricsWatcher implements FlinkWatcher {
               .asString(StandardCharsets.UTF_8);
 
       String flinkConfigResponse =
-          Request.get(String.format("%s/jobmanager/config", clusterRestUrl))
+          Request.get(String.format("%s/jobmanager/config", clusterRestUrl.get()))
               .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
               .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
               .execute()
@@ -198,7 +198,7 @@ public class FlinkMetricsWatcher implements FlinkWatcher {
               ackTime);
       return Optional.of(flinkMetricCV);
     } catch (IOException e) {
-      LOG.warn("Failed to get metrics from job managers", e);
+      LOG.warn("Failed to get metrics from job managers, {}", e.getMessage());
       return Optional.empty();
     }
   }

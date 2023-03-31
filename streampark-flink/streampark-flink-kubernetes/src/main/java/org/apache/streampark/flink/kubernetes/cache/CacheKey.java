@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.kubernetes.cache;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class CacheKey implements Serializable {
   private final long key;
@@ -32,5 +33,22 @@ public class CacheKey implements Serializable {
 
   public static CacheKey of(long key) {
     return new CacheKey(key);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    CacheKey cacheKey = (CacheKey) o;
+    return key == cacheKey.key;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(key);
   }
 }

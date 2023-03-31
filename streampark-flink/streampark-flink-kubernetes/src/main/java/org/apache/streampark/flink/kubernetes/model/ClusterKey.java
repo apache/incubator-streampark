@@ -19,6 +19,8 @@ package org.apache.streampark.flink.kubernetes.model;
 
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 
+import java.util.Objects;
+
 public class ClusterKey {
   private final FlinkK8sExecuteMode executeMode;
 
@@ -27,13 +29,13 @@ public class ClusterKey {
   private String namespace = "default";
 
   public static ClusterKey of(TrackId trackId) {
-    return new ClusterKey(trackId.getExecuteMode(), trackId.getClusterId(), trackId.getNamespace());
+    return new ClusterKey(trackId.getExecuteMode(), trackId.getNamespace(), trackId.getClusterId());
   }
 
-  public ClusterKey(FlinkK8sExecuteMode executeMode, String clusterId, String namespace) {
+  public ClusterKey(FlinkK8sExecuteMode executeMode, String namespace, String clusterId) {
     this.executeMode = executeMode;
-    this.clusterId = clusterId;
     this.namespace = namespace;
+    this.clusterId = clusterId;
   }
 
   public ClusterKey(FlinkK8sExecuteMode executeMode, String clusterId) {
@@ -51,5 +53,24 @@ public class ClusterKey {
 
   public String getNamespace() {
     return namespace;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ClusterKey that = (ClusterKey) o;
+    return executeMode == that.executeMode
+        && Objects.equals(clusterId, that.clusterId)
+        && Objects.equals(namespace, that.namespace);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(executeMode, clusterId, namespace);
   }
 }

@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-public class FlinkCheckpointWatcher implements FlinkWatcher {
+public class FlinkCheckpointWatcher extends FlinkWatcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(FlinkCheckpointWatcher.class);
 
@@ -175,7 +175,10 @@ public class FlinkCheckpointWatcher implements FlinkWatcher {
           new CheckpointCV(
               id, status, externalPath, isSavepoint, checkpointType, triggerTimestamp));
     } catch (IOException e) {
-      LOG.warn("Failed to request [{}], get checkpoint information failed", requestUrl, e);
+      LOG.warn(
+          "Failed to request [{}], get checkpoint information failed, {}",
+          requestUrl,
+          e.getMessage());
       return Optional.empty();
     }
   }

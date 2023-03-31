@@ -19,11 +19,11 @@ package org.apache.streampark.flink.kubernetes.watcher;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public interface FlinkWatcher extends AutoCloseable {
+public abstract class FlinkWatcher implements AutoCloseable {
 
-  AtomicBoolean STARTED = new AtomicBoolean(false);
+  private final AtomicBoolean STARTED = new AtomicBoolean(false);
 
-  default void start() {
+  public void start() {
     synchronized (this) {
       if (!STARTED.getAndSet(true)) {
         doStart();
@@ -31,7 +31,7 @@ public interface FlinkWatcher extends AutoCloseable {
     }
   }
 
-  default void stop() {
+  public void stop() {
     synchronized (this) {
       if (STARTED.getAndSet(false)) {
         doStop();
@@ -40,25 +40,25 @@ public interface FlinkWatcher extends AutoCloseable {
   }
 
   @Override
-  default void close() throws Exception {
+  public void close() throws Exception {
     if (STARTED.get()) {
       doStop();
     }
     doClose();
   }
 
-  default void restart() {
+  public void restart() {
     synchronized (this) {
       stop();
       start();
     }
   }
 
-  void doStart();
+  abstract void doStart();
 
-  void doStop();
+  abstract void doStop();
 
-  void doClose();
+  abstract void doClose();
 
-  void doWatch();
+  abstract void doWatch();
 }

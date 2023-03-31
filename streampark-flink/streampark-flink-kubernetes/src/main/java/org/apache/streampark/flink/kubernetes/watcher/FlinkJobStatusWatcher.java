@@ -64,8 +64,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class FlinkJobStatusWatcher implements FlinkWatcher {
+import static org.apache.streampark.flink.kubernetes.KubernetesRetriever.FLINK_REST_RETRY_MAX_ATTEMPTS;
+
+public class FlinkJobStatusWatcher extends FlinkWatcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(FlinkJobStatusWatcher.class);
 
@@ -210,7 +213,8 @@ public class FlinkJobStatusWatcher implements FlinkWatcher {
     String clusterId = trackId.getClusterId();
     String namespace = trackId.getNamespace();
     Optional<List<JobDetail>> jobDetails =
-        listJobDetails(new ClusterKey(FlinkK8sExecuteMode.APPLICATION, namespace, clusterId));
+        listJobDetailsOnRetries(
+            new ClusterKey(FlinkK8sExecuteMode.APPLICATION, namespace, clusterId));
     if (!jobDetails.isPresent() || jobDetails.get().isEmpty()) {
       return inferApplicationFlinkJobStateFromK8sEvent(trackId, pollEmitTime);
     }
@@ -240,7 +244,7 @@ public class FlinkJobStatusWatcher implements FlinkWatcher {
               trackId.getNamespace(), trackId.getClusterId(), trackId.getJobId());
           KubernetesDeploymentHelper.deleteTaskDeployment(
               trackId.getNamespace(), trackId.getClusterId());
-          IngressController.deleteIngress(trackId.getNamespace(), trackId.getClusterId());
+          IngressController.deleteIngress(trackId.getClusterId(), trackId.getNamespace());
           jobState = FlinkJobState.FAILED;
         } else {
           jobState = inferSilentOrLostFromPreCache(latest);
@@ -312,7 +316,7 @@ public class FlinkJobStatusWatcher implements FlinkWatcher {
     Map<TrackId, JobStatusCV> result = new HashMap<>();
     long pollEmitTime = System.currentTimeMillis();
     Optional<List<JobDetail>> jobDetails =
-        listJobDetails(new ClusterKey(FlinkK8sExecuteMode.SESSION, namespace, clusterId));
+        listJobDetailsOnRetries(new ClusterKey(FlinkK8sExecuteMode.SESSION, namespace, clusterId));
     jobDetails.ifPresent(
         details ->
             details.forEach(
@@ -332,7 +336,17 @@ public class FlinkJobStatusWatcher implements FlinkWatcher {
     return result;
   }
 
-  public Optional<List<JobDetail>> listJobDetails(ClusterKey clusterKey) {
+  // TODO is retries necessary?
+  public Optional<List<JobDetail>> listJobDetailsOnRetries(ClusterKey clusterKey) {
+    return Stream.iterate(1, i -> i + 1)
+        .limit(FLINK_REST_RETRY_MAX_ATTEMPTS)
+        .map(retryCount -> listJobDetails(clusterKey, retryCount))
+        .filter(Optional::isPresent)
+        .findFirst()
+        .orElse(Optional.empty());
+  }
+
+  public Optional<List<JobDetail>> listJobDetails(ClusterKey clusterKey, Integer retryCount) {
     Optional<String> clusterRestUrl = watchController.getClusterRestUrl(clusterKey);
     if (!clusterRestUrl.isPresent()) {
       return Optional.empty();
@@ -390,8 +404,12 @@ public class FlinkJobStatusWatcher implements FlinkWatcher {
           });
       return Optional.of(jobDetails);
     } catch (IOException e) {
-      // TODO: Add retry logic
-      LOG.warn("Get job details failed from url [{}] failed", requestUrl);
+      LOG.warn(
+          "Get job details failed from url [{}] failed, retry count: {}, {}",
+          requestUrl,
+          retryCount,
+          e.getMessage());
+
       return Optional.empty();
     }
   }

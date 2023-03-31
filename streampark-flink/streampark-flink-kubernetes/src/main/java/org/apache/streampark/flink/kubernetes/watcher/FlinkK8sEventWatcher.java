@@ -31,7 +31,7 @@ import io.fabric8.kubernetes.client.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FlinkK8sEventWatcher implements FlinkWatcher {
+public class FlinkK8sEventWatcher extends FlinkWatcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(FlinkK8sEventWatcher.class);
 
@@ -51,19 +51,19 @@ public class FlinkK8sEventWatcher implements FlinkWatcher {
   public void doStart() {
     kubernetesClient = KubernetesRetriever.newK8sClient();
     doWatch();
-    LOG.info("[flink-k8s] Flink k8s event watcher started");
+    LOG.info("[flink-k8s] Flink k8s event watcher started.");
   }
 
   @Override
   public void doStop() {
     kubernetesClient.close();
     kubernetesClient = null;
-    LOG.info("[flink-k8s] Flink k8s event watcher closed");
+    LOG.info("[flink-k8s] Flink k8s event watcher stopped.");
   }
 
   @Override
   public void doClose() {
-    LOG.info("[flink-k8s] Flink k8s event watcher stopped");
+    LOG.info("[flink-k8s] Flink k8s event watcher closed.");
   }
 
   @Override
