@@ -20,8 +20,6 @@ import java.time.LocalDateTime
 
 object ConfigConst {
 
-  val STREAMPARK_FLINK_SHIMS_JAR_REGEX = "streampark-flink-shims_flink-(1.12|1.13|1.14|1.15|1.16|1.17)_(2.11|2.12)-(.*).jar"
-
   /**
    * common const
    */

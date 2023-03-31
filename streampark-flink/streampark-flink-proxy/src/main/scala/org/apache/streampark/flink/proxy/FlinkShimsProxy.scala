@@ -33,11 +33,9 @@ object FlinkShimsProxy extends Logger {
     "(json4s|jackson)(.*).jar",
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
-  private[this] val SHIMS_PATTERN = Pattern.compile(
-    ConfigConst.STREAMPARK_FLINK_SHIMS_JAR_REGEX,
-    Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
-
   private[this] val SHIMS_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
+
+  private[this] val SHIMS_PATTERN_CACHE = MutableMap[String, Pattern]()
 
   private[this] val VERIFY_SQL_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
@@ -50,11 +48,29 @@ object FlinkShimsProxy extends Logger {
     s"streampark-(.*)_$scalaVersion-(.*).jar",
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
+  private[this] def getShimsLibPattern(flinkVersion: FlinkVersion): Pattern = {
+    flinkVersion.version.split("\\.").map(_.trim.toInt) match {
+      case Array(1, v, _) =>
+        SHIMS_PATTERN_CACHE.getOrElseUpdate(s"1.$v", {
+          val regexp = if (v >= 12 && v <= 14) {
+            s"streampark-flink-shims_flink-1.${v}_(2.11|2.12)-(.*).jar"
+          } else if (v >= 15) {
+            s"streampark-flink-shims_flink-1.${v}_2.12-(.*).jar"
+          } else {
+            throw new UnsupportedOperationException(s"Unsupported flink version: $flinkVersion")
+          }
+          Pattern.compile(regexp, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+        })
+      case _ =>
+        throw new UnsupportedOperationException(s"Unsupported flink version: $flinkVersion")
+    }
+  }
+
   /**
    * Get shimsClassLoader to execute for scala API
    *
    * @param flinkVersion flinkVersion
-   * @param func execute function
+   * @param func         execute function
    * @tparam T
    * @return
    */
@@ -67,7 +83,7 @@ object FlinkShimsProxy extends Logger {
    * Get shimsClassLoader to execute for java API
    *
    * @param flinkVersion flinkVersion
-   * @param func execute function
+   * @param func         execute function
    * @tparam T
    * @return
    */
@@ -117,7 +133,7 @@ object FlinkShimsProxy extends Logger {
 
     libPath.listFiles().foreach((jar: File) => {
       try {
-        val shimsMatcher = SHIMS_PATTERN.matcher(jar.getName)
+        val shimsMatcher = getShimsLibPattern(flinkVersion).matcher(jar.getName)
         if (shimsMatcher.matches()) {
           if (majorVersion == shimsMatcher.group(1) && scalaVersion == shimsMatcher.group(2)) {
             addShimUrl(jar)
