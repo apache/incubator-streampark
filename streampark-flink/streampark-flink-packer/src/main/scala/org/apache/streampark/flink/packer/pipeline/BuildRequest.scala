@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.packer.pipeline
 
 import scala.collection.mutable.ArrayBuffer
-
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.enums.{DevelopmentMode, ExecutionMode}
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
@@ -59,12 +58,7 @@ sealed trait FlinkBuildParam extends BuildParam {
       providedLibs += {
         val version = flinkVersion.version.split("\\.").map(_.trim.toInt)
         version match {
-          case Array(1, 12, _) => s"${localWorkspace.APP_SHIMS}/flink-1.12"
-          case Array(1, 13, _) => s"${localWorkspace.APP_SHIMS}/flink-1.13"
-          case Array(1, 14, _) => s"${localWorkspace.APP_SHIMS}/flink-1.14"
-          case Array(1, 15, _) => s"${localWorkspace.APP_SHIMS}/flink-1.15"
-          case Array(1, 16, _) => s"${localWorkspace.APP_SHIMS}/flink-1.16"
-          case Array(1, 17, _) => s"${localWorkspace.APP_SHIMS}/flink-1.17"
+          case Array(1, v, _) if v >= 12 && v <= 17 => s"${localWorkspace.APP_SHIMS}/flink-1.$v"
           case _ => throw new UnsupportedOperationException(s"Unsupported flink version: $flinkVersion")
         }
       }
