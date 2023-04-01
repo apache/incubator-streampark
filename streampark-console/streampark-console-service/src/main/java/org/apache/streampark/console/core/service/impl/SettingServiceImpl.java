@@ -17,11 +17,16 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.bean.SenderEmail;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.mapper.SettingMapper;
+import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.SettingService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,12 +34,14 @@ import org.apache.commons.lang3.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +50,9 @@ import java.util.Optional;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     implements SettingService, ApplicationListener<ContextRefreshedEvent> {
+
+  @Autowired
+  private ApplicationService applicationService;
 
   @Override
   public Setting get(String key) {
@@ -70,6 +80,14 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       LambdaQueryWrapper<Setting> queryWrapper =
           new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, setting.getSettingKey());
       this.update(entity, queryWrapper);
+
+      if (KEY_INGRESS_MODE_DEFAULT.equals(setting.getSettingKey())){
+        LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.in(Application::getExecutionMode, ExecutionMode.KUBERNETES_NATIVE_SESSION.getMode(),ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getMode());
+        updateWrapper.set(Application::getDefaultModeIngress, value);
+        updateWrapper.set(Application::getModifyTime, new Date());
+        applicationService.update(null, updateWrapper);
+      }
 
       String settingKey = setting.getSettingKey();
       if (CommonConfig.MAVEN_SETTINGS_PATH().key().equals(settingKey)) {
