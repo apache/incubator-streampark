@@ -116,7 +116,6 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
   override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
     executeClientAction(request, flinkConfig, (jobId, clusterClient) => {
       val actionResult = super.triggerSavepoint(request, jobId, clusterClient)
-      IngressController.deleteIngress(request.clusterId, request.kubernetesNamespace)
       SavepointResponse(actionResult)
     })
   }
