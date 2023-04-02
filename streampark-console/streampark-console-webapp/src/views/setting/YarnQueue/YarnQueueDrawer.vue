@@ -54,14 +54,14 @@
               placeholder: t('setting.yarnQueue.placeholder.yarnQueueLabelExpression'),
             },
             required: true,
-            dynamicRules: ({ values }) => {
+            dynamicRules: ({ model }) => {
               return [
                 {
                   validator: async (_, value) => {
                     const params = {
                       queueLabel: value,
                     };
-                    if (unref(isUpdate)) Object.assign(params, { id: values?.id });
+                    if (unref(isUpdate)) Object.assign(params, { id: model?.id });
                     const res = await fetchCheckYarnQueue(params);
                     if (res.status === 0) {
                       return Promise.resolve();
