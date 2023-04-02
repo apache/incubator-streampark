@@ -22,7 +22,7 @@ import { defHttp } from '/@/utils/http/axios';
 enum FLINK_API {
   LIST = '/flink/env/list',
   CREATE = '/flink/env/create',
-  EXISTS = '/flink/env/exists',
+  CHECK = '/flink/env/check',
   GET = '/flink/env/get',
   SYNC = '/flink/env/sync',
   UPDATE = '/flink/env/update',
@@ -66,12 +66,12 @@ export function fetchFlinkInfo(id: string): Promise<FlinkEnv> {
  * @param {Recordable} data
  * @returns {Promise<Boolean>}
  */
-export function fetchExistsEnv(data: {
+export function fetchCheckEnv(data: {
   id: string | null;
   flinkName: string;
   flinkHome: string;
 }): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.post({ url: FLINK_API.EXISTS, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: FLINK_API.CHECK, data }, { isReturnNativeResponse: true });
 }
 /**
  * Create flink

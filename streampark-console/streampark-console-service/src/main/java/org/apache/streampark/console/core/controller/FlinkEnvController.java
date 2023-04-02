@@ -45,10 +45,10 @@ public class FlinkEnvController {
     return RestResponse.success(list);
   }
 
-  @PostMapping("exists")
-  public RestResponse exists(FlinkEnv version) {
-    boolean checked = flinkEnvService.exists(version);
-    return RestResponse.success(checked);
+  @PostMapping("check")
+  public RestResponse check(FlinkEnv version) {
+    Integer checkResp = flinkEnvService.check(version);
+    return RestResponse.success(checkResp);
   }
 
   @PostMapping("create")
