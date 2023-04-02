@@ -26,6 +26,7 @@ export default {
     project: '项目管理',
     application: '作业管理',
     variable: '变量管理',
+    setting: '设置中心',
   },
   setting: {
     system: '系统设置',
