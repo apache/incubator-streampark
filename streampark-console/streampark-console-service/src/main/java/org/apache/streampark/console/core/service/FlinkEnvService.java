@@ -32,6 +32,7 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
    * @return
    */
   Integer check(FlinkEnv version);
+
   /**
    * create new
    *

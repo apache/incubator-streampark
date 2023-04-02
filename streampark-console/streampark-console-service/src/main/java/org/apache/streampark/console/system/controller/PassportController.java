@@ -60,20 +60,13 @@ public class PassportController {
       @NotBlank(message = "{required}") String password,
       @NotBlank(message = "{required}") String loginType)
       throws Exception {
+
     if (StringUtils.isEmpty(username)) {
       return RestResponse.success().put("code", 0);
     }
+
     User user = authenticator.authenticate(username, password, loginType);
-    return login(username, password, user);
-  }
 
-  @PostMapping("signout")
-  public RestResponse signout() {
-    SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
-    return new RestResponse();
-  }
-
-  private RestResponse login(String username, String password, User user) throws Exception {
     if (user == null) {
       return RestResponse.success().put("code", 0);
     }
@@ -82,6 +75,7 @@ public class PassportController {
       return RestResponse.success().put("code", 1);
     }
 
+    // set team
     userService.fillInTeam(user);
 
     // no team.
@@ -99,5 +93,11 @@ public class PassportController {
     Map<String, Object> userInfo =
         userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
     return new RestResponse().data(userInfo);
+  }
+
+  @PostMapping("signout")
+  public RestResponse signout() {
+    SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
+    return new RestResponse();
   }
 }
