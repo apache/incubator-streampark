@@ -40,7 +40,8 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     implements FlinkEnvService {
 
   /**
-   * two places will be checked: 1) name repeated <br>
+   * two places will be checked: <br>
+   * 1) name repeated <br>
    * 2) flink-dist <br>
    * -1) invalid path <br>
    * 0) ok <br>
