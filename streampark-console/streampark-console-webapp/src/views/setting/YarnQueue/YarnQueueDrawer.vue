@@ -33,7 +33,6 @@
     fetchYarnQueueUpdate,
   } from '/@/api/flink/setting/yarnQueue';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { getUserTeamId } from '/@/utils';
   import { renderYarnQueueLabel } from './useYarnQueueRender';
 
   export default defineComponent({
@@ -55,29 +54,34 @@
               placeholder: t('setting.yarnQueue.placeholder.yarnQueueLabelExpression'),
             },
             required: true,
-            rules: [
-              {
-                validator: async (_, value) => {
-                  const res = await fetchCheckYarnQueue({
-                    queueLabel: value,
-                    teamId: getUserTeamId(),
-                  });
-                  if (res.status === 0) {
-                    return Promise.resolve();
-                  } else {
-                    switch (res.status) {
-                      case 1:
-                        return Promise.reject(t('setting.yarnQueue.checkResult.existedHint'));
-                      case 2:
-                        return Promise.reject(t('setting.yarnQueue.checkResult.invalidFormatHint'));
-                      case 3:
-                        return Promise.reject(t('setting.yarnQueue.checkResult.emptyHint'));
+            dynamicRules: ({ model }) => {
+              return [
+                {
+                  validator: async (_, value) => {
+                    const params = {
+                      queueLabel: value,
+                    };
+                    if (unref(isUpdate)) Object.assign(params, { id: model?.id });
+                    const res = await fetchCheckYarnQueue(params);
+                    if (res.status === 0) {
+                      return Promise.resolve();
+                    } else {
+                      switch (res.status) {
+                        case 1:
+                          return Promise.reject(t('setting.yarnQueue.checkResult.existedHint'));
+                        case 2:
+                          return Promise.reject(
+                            t('setting.yarnQueue.checkResult.invalidFormatHint'),
+                          );
+                        case 3:
+                          return Promise.reject(t('setting.yarnQueue.checkResult.emptyHint'));
+                      }
                     }
-                  }
+                  },
+                  trigger: 'blur',
                 },
-                trigger: 'blur',
-              },
-            ],
+              ];
+            },
             render: (renderCallbackParams) => renderYarnQueueLabel(renderCallbackParams),
           },
           {
