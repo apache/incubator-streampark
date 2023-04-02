@@ -696,7 +696,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.setRelease(ReleaseState.NEED_RELEASE.get());
     appParam.setOptionState(OptionState.NONE.getValue());
     appParam.setCreateTime(new Date());
-    appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
     checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
@@ -769,7 +768,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     newApp.setResourceFrom(oldApp.getResourceFrom());
     newApp.setProjectId(oldApp.getProjectId());
     newApp.setModule(oldApp.getModule());
-    newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
     newApp.setUserId(commonService.getUserId());
     newApp.setState(FlinkAppState.ADDED.getValue());
     newApp.setRelease(ReleaseState.NEED_RELEASE.get());
@@ -1499,7 +1497,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Utils.notNull(buildResult);
         DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
         String ingressTemplates = application.getIngressTemplate();
-        String domainName = application.getDefaultModeIngress();
+        String domainName = settingService.getIngressModeDefault();
         if (StringUtils.isNotBlank(ingressTemplates)) {
           String ingressOutput = result.workspacePath() + "/ingress.yaml";
           IngressController.configureIngress(ingressOutput);
