@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
@@ -38,16 +39,31 @@ import java.util.Date;
 public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     implements FlinkEnvService {
 
-  /** two places will be checked: 1) name cannot be repeated 2) flink version need to be parsed */
+  /** two places will be checked: 1) name repeated 2) flink-dist -1) invalid path 0) ok */
   @Override
-  public boolean exists(FlinkEnv version) {
+  public Integer check(FlinkEnv version) {
     // 1) check name
     LambdaQueryWrapper<FlinkEnv> queryWrapper =
         new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
     if (version.getId() != null) {
       queryWrapper.ne(FlinkEnv::getId, version.getId());
     }
-    return this.count(queryWrapper) == 0;
+    if (this.count(queryWrapper) > 0) {
+      return 1;
+    }
+
+    // 2) check dist_jar
+    String lib = version.getFlinkHome().concat("/lib");
+    File flinkLib = new File(lib);
+    if (flinkLib.exists() && flinkLib.isDirectory()) {
+      int distSize = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar")).length;
+      if (distSize > 1) {
+        return 2;
+      }
+    } else {
+      return -1;
+    }
+    return 0;
   }
 
   @Override

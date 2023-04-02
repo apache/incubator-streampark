@@ -28,16 +28,12 @@
   import { SvgIcon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import {
-    fetchExistsEnv,
-    fetchFlinkCreate,
-    fetchFlinkUpdate,
-  } from '/@/api/flink/setting/flinkEnv';
+  import { fetchCheckEnv, fetchFlinkCreate, fetchFlinkUpdate } from '/@/api/flink/setting/flinkEnv';
 
   const emit = defineEmits(['reload', 'register']);
   const versionId = ref<string | null>(null);
   const { t } = useI18n();
-  const { createConfirm, Swal, createMessage } = useMessage();
+  const { Swal } = useMessage();
   const [registerForm, { setFieldsValue, validate, resetFields }] = useForm({
     labelWidth: 120,
     colon: true,
@@ -95,82 +91,71 @@
 
   /* form submit */
   async function handleSubmit() {
-    try {
-      changeOkLoading(true);
-      const formValue = await validate();
-      // Detection environment
-      const { data: resp } = await fetchExistsEnv({
-        id: versionId.value,
-        flinkName: formValue.flinkName,
-        flinkHome: formValue.flinkHome,
-      });
+    changeOkLoading(true);
+    const formValue = await validate();
+    // Detection environment
+    const { data: resp } = await fetchCheckEnv({
+      id: versionId.value,
+      flinkName: formValue.flinkName,
+      flinkHome: formValue.flinkHome,
+    });
+    const checkResp = parseInt(resp.data);
+    if (checkResp != 0) {
       // Environment detection is successful
-      if (resp.data) {
-        let message: string;
-        let success = false;
-        // create
-        if (versionId.value == null) {
-          const { data } = await fetchFlinkCreate(formValue);
-          if (data.data) {
-            success = true;
-            message = formValue.flinkName.concat(
-              t('setting.flinkHome.operateMessage.createFlinkHomeSuccessful'),
-            );
-          } else {
-            message = data.message;
-          }
-        } else {
-          // update
-          const { data } = await fetchFlinkUpdate({
-            id: versionId.value,
-            ...formValue,
-          });
-          if (data.data) {
-            message = formValue.flinkName.concat(
-              t('setting.flinkHome.operateMessage.updateFlinkHomeSuccessful'),
-            );
-            success = true;
-          } else {
-            message = data.message;
-          }
-        }
-        if (success) {
-          Swal.fire({
-            icon: 'success',
-            title: message,
-            showConfirmButton: false,
-            timer: 2000,
-          });
-          closeModal();
-          emit('reload');
-        } else {
-          Swal.fire('Failed', message.replaceAll(/\[StreamPark]/g, ''), 'error');
-        }
-      } else {
-        if (resp.status === 'error') {
-          Swal.fire(
-            'Failed',
-            'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
-            'error',
+      if (checkResp == -1) {
+        Swal.fire('Failed', 'FLINK_HOME invalid path.', 'error');
+      } else if (checkResp == 1) {
+        Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
+      } else if (checkResp == 2) {
+        Swal.fire(
+          'Failed',
+          'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
+          'error',
+        );
+      }
+      return;
+    }
+
+    try {
+      let message: string;
+      let success = false;
+      // create
+      if (versionId.value == null) {
+        const { data } = await fetchFlinkCreate(formValue);
+        if (data.data) {
+          success = true;
+          message = formValue.flinkName.concat(
+            t('setting.flinkHome.operateMessage.createFlinkHomeSuccessful'),
           );
         } else {
-          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
+          message = data.message;
+        }
+      } else {
+        // update
+        const { data } = await fetchFlinkUpdate({
+          id: versionId.value,
+          ...formValue,
+        });
+        if (data.data) {
+          message = formValue.flinkName.concat(
+            t('setting.flinkHome.operateMessage.updateFlinkHomeSuccessful'),
+          );
+          success = true;
+        } else {
+          message = data.message;
         }
       }
-    } catch (error: any) {
-      /* custom alert message */
-      if (error?.response?.data?.message) {
-        createConfirm({
-          iconType: 'error',
-          title: 'Operation Failed',
-          content: h(
-            'div',
-            { class: 'whitespace-pre-wrap' },
-            error?.response?.data?.message.replaceAll(/\[StreamPark]/g, ''),
-          ),
+      if (success) {
+        Swal.fire({
+          icon: 'success',
+          title: message,
+          showConfirmButton: false,
+          timer: 2000,
         });
+        closeModal();
+        emit('reload');
       } else {
-        createMessage.error('error');
+        Swal.fire('Failed', message.replaceAll(/\[StreamPark]/g, ''), 'error');
       }
     } finally {
       changeOkLoading(false);
