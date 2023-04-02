@@ -46,7 +46,7 @@
   import DetailTab from './components/AppDetail/DetailTab.vue';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
-  import ExternalLinkBadge from '../setting/components/ExternalLinkBadge.vue';
+  import { ExternalLinkBadge } from '/@/views/setting/ExternalLink/components';
 
   const route = useRoute();
   const router = useRouter();

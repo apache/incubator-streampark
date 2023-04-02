@@ -143,7 +143,11 @@
 
   async function handleLoginRequest(loginFormValue: LoginForm): Promise<Result<LoginResultModel>> {
     const { data } = await loginApi(
-      { password: loginFormValue.password, username: loginFormValue.account, loginType: LoginTypeEnum[loginType.value] },
+      {
+        password: loginFormValue.password,
+        username: loginFormValue.account,
+        loginType: LoginTypeEnum[loginType.value],
+      },
       'none',
     );
     return data;

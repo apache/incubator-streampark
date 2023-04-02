@@ -14,26 +14,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export default {
-  menu: {
-    system: 'System',
-    userManagement: 'User Management',
-    roleManagement: 'Role Management',
-    menuManagement: 'Menu Management',
-    tokenManagement: 'Token Management',
-    teamManagement: 'Team Management',
-    memberManagement: 'Member Management',
-    project: 'Project',
-    application: 'Application',
-    variable: 'Variable',
-    setting: 'Setting',
-  },
-  setting: {
-    system: 'System',
-    alarm: 'Alert',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Flink Cluster',
-    externalLink: 'External Link',
-    yarnQueue: 'Yarn Queue',
-  },
-};
+export { default as FlinkEnvDrawer } from './Drawer.vue';
+export { default as FlinkEnvModal } from './Modal.vue';

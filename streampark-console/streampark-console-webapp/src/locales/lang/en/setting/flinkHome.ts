@@ -15,25 +15,22 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: 'System',
-    userManagement: 'User Management',
-    roleManagement: 'Role Management',
-    menuManagement: 'Menu Management',
-    tokenManagement: 'Token Management',
-    teamManagement: 'Team Management',
-    memberManagement: 'Member Management',
-    project: 'Project',
-    application: 'Application',
-    variable: 'Variable',
-    setting: 'Setting',
-  },
-  setting: {
-    system: 'System',
-    alarm: 'Alert',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Flink Cluster',
-    externalLink: 'External Link',
-    yarnQueue: 'Yarn Queue',
+  title: 'Flink Home',
+  conf: 'Flink Conf',
+  sync: 'Sync Conf',
+  flinkName: 'Flink Name',
+  flinkNamePlaceholder: 'Please enter flink name',
+  flinkHome: 'Flink Home',
+  flinkHomePlaceholder: 'Please enter flink home',
+  description: 'description',
+  descriptionPlaceholder: 'Please enter description',
+  operateMessage: {
+    flinkNameTips: 'the flink name, e.g: flink-1.12',
+    flinkNameIsUnique: 'flink name is already exists',
+    flinkNameIsRequired: 'flink name is required',
+    flinkHomeTips: 'The absolute path of the FLINK_HOME',
+    flinkHomeIsRequired: 'flink home is required',
+    createFlinkHomeSuccessful: ' create successful!',
+    updateFlinkHomeSuccessful: ' update successful!',
   },
 };

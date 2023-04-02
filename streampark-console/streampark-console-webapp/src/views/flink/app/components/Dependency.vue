@@ -96,7 +96,7 @@
     const groupExp = /<groupId>([\s\S]*?)<\/groupId>/;
     const artifactExp = /<artifactId>([\s\S]*?)<\/artifactId>/;
     const versionExp = /<version>([\s\S]*?)<\/version>/;
-    const classifierExp =  /<classifier>([\s\S]*?)<\/classifier>/;
+    const classifierExp = /<classifier>([\s\S]*?)<\/classifier>/;
     const exclusionsExp = /<exclusions>([\s\S]*?)<\/exclusions>/;
     const invalidArtifact: Array<string> = [];
     props.value
@@ -240,8 +240,8 @@
   function setDefaultValue(dataSource: { pom?: DependencyType[]; jar?: string[] }) {
     dependencyRecords.value = dataSource.pom || [];
     uploadJars.value = dataSource.jar || [];
-    dependency.pom = {}
-    dependency.jar = {}
+    dependency.pom = {};
+    dependency.jar = {};
     dataSource.pom?.map((pomRecord: DependencyType) => {
       const id = getId(pomRecord);
       dependency.pom[id] = pomRecord;
@@ -260,8 +260,8 @@
   }
 
   function getId(pom) {
-    if (pom.classifier != null ) {
-      return pom.groupId + '_' + pom.artifactId + '_' + pom.classifier
+    if (pom.classifier != null) {
+      return pom.groupId + '_' + pom.artifactId + '_' + pom.classifier;
     }
     return pom.groupId + '_' + pom.artifactId;
   }
@@ -331,13 +331,11 @@
     >
       <template #message>
         <Space @click="handleEditPom(dept)" class="tag-dependency-pom">
-          <Tag class="tag-dependency" color="#2db7f5">POM</Tag> 
-            <template v-if="dept.classifier != null"> 
-              {{ dept.artifactId }}-{{ dept.version }}-{{ dept.classifier }}.jar 
-            </template> 
-          <template v-else> 
-            {{ dept.artifactId }}-{{ dept.version }}.jar 
-          </template> 
+          <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
+          <template v-if="dept.classifier != null">
+            {{ dept.artifactId }}-{{ dept.version }}-{{ dept.classifier }}.jar
+          </template>
+          <template v-else> {{ dept.artifactId }}-{{ dept.version }}.jar </template>
           <Icon
             :size="12"
             icon="ant-design:close-outlined"

@@ -92,7 +92,7 @@ export default {
         flinkSql: 'Flink SQL',
         savepoint: 'Savepoint',
         backup: '备份',
-        operationLog: '操作日志'
+        operationLog: '操作日志',
       },
       configDetail: '查看配置详情',
       sqlDetail: '查看 SQL 详情',

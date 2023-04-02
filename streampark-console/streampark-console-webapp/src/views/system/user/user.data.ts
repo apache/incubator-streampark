@@ -20,7 +20,7 @@ import { Tag } from 'ant-design-vue';
 import { checkUserName, fetchUserTypes } from '/@/api/system/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { LoginTypeEnum } from "/@/views/base/login/useLogin";
+import { LoginTypeEnum } from '/@/views/base/login/useLogin';
 const { t } = useI18n();
 // user status enum
 export const enum StatusEnum {
@@ -155,7 +155,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'loginType',
       component: 'Select',
       componentProps: {
-        options:  [
+        options: [
           { label: t('system.user.password'), value: LoginTypeEnum[LoginTypeEnum.PASSWORD] },
           { label: t('system.user.ldap'), value: LoginTypeEnum[LoginTypeEnum.LDAP] },
         ],

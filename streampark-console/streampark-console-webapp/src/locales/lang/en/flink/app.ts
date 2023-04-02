@@ -94,7 +94,7 @@ export default {
         flinkSql: 'Flink SQL',
         savepoint: 'Savepoint',
         backup: 'Backup',
-        operationLog: 'Operation Log'
+        operationLog: 'Operation Log',
       },
       configDetail: 'View Config Detail',
       sqlDetail: 'View SQL Detail',
