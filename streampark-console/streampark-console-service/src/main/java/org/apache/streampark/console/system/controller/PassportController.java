@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
-import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
@@ -90,10 +89,8 @@ public class PassportController {
       return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
     }
 
-    password = ShaHashUtils.encrypt(user.getSalt(), password);
-
     this.userService.updateLoginTime(username);
-    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), username, password));
+    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), username));
     LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
     String expireTimeStr = DateUtils.formatFullTime(expireTime);
     JWTToken jwtToken = new JWTToken(token, expireTimeStr);
