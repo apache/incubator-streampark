@@ -227,7 +227,10 @@ export function handleDependencyJsonToPom(json, pomMap, jarMap) {
         const classifier = x.classifier;
         const exclusions = x.exclusions || [];
 
-        const id = classifier != null ? groupId + '_' + artifactId + '_' + classifier : groupId + '_' + artifactId;
+        const id =
+          classifier != null
+            ? groupId + '_' + artifactId + '_' + classifier
+            : groupId + '_' + artifactId;
         const mvnPom = {
           groupId: groupId,
           artifactId: artifactId,

@@ -15,24 +15,26 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: 'System',
-    userManagement: 'User Management',
-    roleManagement: 'Role Management',
-    menuManagement: 'Menu Management',
-    tokenManagement: 'Token Management',
-    teamManagement: 'Team Management',
-    memberManagement: 'Member Management',
-    project: 'Project',
-    application: 'Application',
-    variable: 'Variable',
+  externalLinkSetting: '扩展链接',
+  form: {
+    badgeLabel: '徽章标签',
+    badgeLabelPlaceholder: '请输入标签的名称',
+    badgeName: '徽章名字',
+    badgeNamePlaceholder: '请输入徽章名字',
+    badgeNameIsRequired: '徽章名字是必填',
+    badgeColor: '徽章颜色',
+    badgeColorIsRequired: '徽章颜色是必选',
+    badgePreview: '徽章预览',
+    linkUrl: '链接',
+    linkUrlPlaceholder: '请输入链接',
+    linkUrlIsRequired: '链接是必填',
   },
-  setting: {
-    system: 'System',
-    alarm: 'Alert',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Flink Cluster',
-    externalLink: 'External Link',
-    yarnQueue: 'Yarn Queue',
+  operateMessage: {
+    createLinkSuccessful: '成功新建扩展链接!',
+    createLinkFailed: '创建扩展链接失败!',
+    updateLinkSuccessful: '成功更新扩展链接!',
+    updateLinkFailed: '更新扩展链接失败!',
+    operationFailed: '操作失败',
   },
+  confDeleteTitle: '请确认删除该条记录',
 };

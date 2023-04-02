@@ -76,15 +76,12 @@ insert into `t_menu` values (100029, 100015, 'savepoint delete', null, null, 'sa
 insert into `t_menu` values (100030, 100015, 'backup rollback', null, null, 'backup:rollback', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100031, 100015, 'backup delete', null, null, 'backup:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100032, 100015, 'conf delete', null, null, 'conf:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100034, 100013, 'menu.setting', '/flink/setting', 'flink/setting/View', null, 'setting', '0', 1, 5, now(), now());
-insert into `t_menu` values (100035, 100034, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
+-- insert into `t_menu` values (100034, 100013, 'menu.setting', '/flink/setting', 'flink/setting/View', null, 'setting', '0', 1, 5, now(), now());
 insert into `t_menu` values (100036, 100014, 'edit', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', 0, null, now(), now());
 insert into `t_menu` values (100037, 100015, 'delete', null, null, 'app:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100038, 100000, 'menu.tokenManagement', '/system/token', 'system/token/Token', null, 'lock', '0', 1, 1, now(), now());
 insert into `t_menu` values (100039, 100038, 'add', null, null, 'token:add', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100040, 100038, 'delete', null, null, 'token:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100041, 100034, 'add cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
-insert into `t_menu` values (100042, 100034, 'edit cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100043, 100015, 'copy', null, null, 'app:copy', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100044, 100000, 'menu.teamManagement', '/system/team', 'system/team/Team', null, 'team', '0', 1, 2, now(), now());
 insert into `t_menu` values (100045, 100044, 'add', null, null, 'team:add', null, '1', 1, null, now(), now());
@@ -110,7 +107,6 @@ insert into `t_menu` values (100064, 100048, 'view', null, null, 'member:view', 
 insert into `t_menu` values (100066, 100014, 'view', null, null, 'project:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100067, 100015, 'view', null, null, 'app:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100068, 100054, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
-insert into `t_menu` values (100069, 100034, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100070, 100054, 'depend view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
 insert into `t_menu` values (100071, 100015, 'savepoint trigger', null, null, 'savepoint:trigger', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100072, 100033, 'link view', null, null, 'externalLink:view', null, '1', 1, null, now(), now());
@@ -118,9 +114,21 @@ insert into `t_menu` values (100073, 100033, 'link create', null, null, 'externa
 insert into `t_menu` values (100074, 100033, 'link update', null, null, 'externalLink:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100075, 100033, 'link delete', null, null, 'externalLink:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100076, 100015, 'sql delete', null, null, 'sql:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100077, 100034, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', 0, null, now(), now());
-insert into `t_menu` values (100078, 100034, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', 0, null, now(), now());
-insert into `t_menu` values (100079, 100034, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', 0, null, now(), now());
+
+insert into `t_menu` values (100080, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', 1, 5, now(), now());
+insert into `t_menu` values (100069, 100080, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100081, 100080, 'setting.system', '/setting/system', 'setting/System/index', null, 'team', '0', 1, 1, now(), now());
+insert into `t_menu` values (100035, 100081, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100082, 100080, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'user', '0', 1, 2, now(), now());
+insert into `t_menu` values (100083, 100080, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'smile', '0', 1, 3, now(), now());
+insert into `t_menu` values (100084, 100080, 'setting.flinkCluster', '/setting/flinkCluster', 'setting/FlinkCluster/index', 'menu:view', 'cluster', '0', 1, 4, now(), now());
+insert into `t_menu` values (100041, 100084, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100042, 100084, 'edit cluster', '/setting/edit_cluster', 'setting/FlinkCluster/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100085, 100080, 'setting.externalLink', '/setting/externalLink', 'setting/ExternalLink/index', 'menu:view', 'link', '0', 1, 5, now(), now());
+insert into `t_menu` values (100086, 100080, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/YarnQueue/index', 'menu:view', 'bars', '0', 1, 6, now(), now());
+insert into `t_menu` values (100077, 100086, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', 0, null, now(), now());
+insert into `t_menu` values (100078, 100086, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', 0, null, now(), now());
+insert into `t_menu` values (100079, 100086, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', 0, null, now(), now());
 
 -- ----------------------------
 -- Records of t_role
@@ -164,7 +172,7 @@ insert into `t_role_menu` values (100030, 100002, 100030);
 insert into `t_role_menu` values (100031, 100002, 100031);
 insert into `t_role_menu` values (100032, 100002, 100032);
 insert into `t_role_menu` values (100033, 100002, 100013);
-insert into `t_role_menu` values (100034, 100002, 100015);
+-- insert into `t_role_menu` values (100034, 100002, 100015);
 insert into `t_role_menu` values (100035, 100002, 100000);
 insert into `t_role_menu` values (100036, 100002, 100036);
 insert into `t_role_menu` values (100037, 100002, 100047);
@@ -200,6 +208,14 @@ insert into `t_role_menu` values (100066, 100002, 100076);
 insert into `t_role_menu` values (100067, 100002, 100077);
 insert into `t_role_menu` values (100068, 100002, 100078);
 insert into `t_role_menu` values (100069, 100002, 100079);
+
+insert into `t_role_menu` values (100070, 100002, 100080);
+insert into `t_role_menu` values (100071, 100002, 100081);
+insert into `t_role_menu` values (100072, 100002, 100082);
+insert into `t_role_menu` values (100073, 100002, 100083);
+insert into `t_role_menu` values (100074, 100002, 100084);
+insert into `t_role_menu` values (100075, 100002, 100085);
+insert into `t_role_menu` values (100076, 100002, 100086);
 
 -- ----------------------------
 -- Records of t_setting

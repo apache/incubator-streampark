@@ -15,24 +15,22 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: 'System',
-    userManagement: 'User Management',
-    roleManagement: 'Role Management',
-    menuManagement: 'Menu Management',
-    tokenManagement: 'Token Management',
-    teamManagement: 'Team Management',
-    memberManagement: 'Member Management',
-    project: 'Project',
-    application: 'Application',
-    variable: 'Variable',
-  },
-  setting: {
-    system: 'System',
-    alarm: 'Alert',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Flink Cluster',
-    externalLink: 'External Link',
-    yarnQueue: 'Yarn Queue',
+  title: 'Flink Home',
+  conf: 'Flink 配置',
+  sync: '配置同步',
+  flinkName: 'Flink名称',
+  flinkNamePlaceholder: '请输入Flink别名',
+  flinkHome: '安装路径',
+  flinkHomePlaceholder: '请输入Flink安装路径',
+  description: '描述',
+  descriptionPlaceholder: 'Flink描述',
+  operateMessage: {
+    flinkNameTips: 'Flink别名,举例: Flink-1.12',
+    flinkNameIsUnique: 'Flink名称已存在',
+    flinkNameIsRequired: 'Flink名称必填',
+    flinkHomeTips: 'Flink所在服务器的绝对路径,举例: /usr/local/flink',
+    flinkHomeIsRequired: 'Flink安装路径必填',
+    createFlinkHomeSuccessful: ' 创建成功!',
+    updateFlinkHomeSuccessful: ' 更新成功!',
   },
 };

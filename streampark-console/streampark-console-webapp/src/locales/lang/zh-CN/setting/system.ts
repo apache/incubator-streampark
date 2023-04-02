@@ -15,24 +15,25 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: 'System',
-    userManagement: 'User Management',
-    roleManagement: 'Role Management',
-    menuManagement: 'Menu Management',
-    tokenManagement: 'Token Management',
-    teamManagement: 'Team Management',
-    memberManagement: 'Member Management',
-    project: 'Project',
-    application: 'Application',
-    variable: 'Variable',
+  systemSetting: '系统设置',
+  systemSettingItems: {
+    mavenSetting: {
+      name: 'Maven配置',
+    },
+    dockerSetting: {
+      name: 'Docker环境配置',
+    },
+    emailSetting: {
+      name: '邮箱配置',
+    },
+    consoleSetting: {
+      name: '控制台配置',
+    },
+    ingressSetting: {
+      name: 'k8s Ingress 配置',
+    },
   },
-  setting: {
-    system: 'System',
-    alarm: 'Alert',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Flink Cluster',
-    externalLink: 'External Link',
-    yarnQueue: 'Yarn Queue',
+  update: {
+    success: '设置更新成功！',
   },
 };

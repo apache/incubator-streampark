@@ -15,24 +15,25 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: 'System',
-    userManagement: 'User Management',
-    roleManagement: 'Role Management',
-    menuManagement: 'Menu Management',
-    tokenManagement: 'Token Management',
-    teamManagement: 'Team Management',
-    memberManagement: 'Member Management',
-    project: 'Project',
-    application: 'Application',
-    variable: 'Variable',
+  systemSetting: 'System Setting',
+  systemSettingItems: {
+    mavenSetting: {
+      name: 'Maven Setting',
+    },
+    dockerSetting: {
+      name: 'Docker Setting',
+    },
+    emailSetting: {
+      name: 'Sender Email Setting',
+    },
+    consoleSetting: {
+      name: 'Console Setting',
+    },
+    ingressSetting: {
+      name: 'Ingress Setting',
+    },
   },
-  setting: {
-    system: 'System',
-    alarm: 'Alert',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Flink Cluster',
-    externalLink: 'External Link',
-    yarnQueue: 'Yarn Queue',
+  update: {
+    success: 'setting updated successfully',
   },
 };
