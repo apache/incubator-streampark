@@ -54,6 +54,4 @@ export default {
   secret: 'secret',
   locked: 'locked',
   effective: 'effective',
-  password: 'PASSWORD',
-  ldap: 'LDAP',
 };

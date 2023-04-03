@@ -151,18 +151,6 @@ export const formSchema = (formType: string): FormSchema[] => {
       rules: [{ required: true }],
     },
     {
-      label: t('system.user.form.loginType'),
-      field: 'loginType',
-      component: 'Select',
-      componentProps: {
-        options: [
-          { label: t('system.user.password'), value: LoginTypeEnum[LoginTypeEnum.PASSWORD] },
-          { label: t('system.user.ldap'), value: LoginTypeEnum[LoginTypeEnum.LDAP] },
-        ],
-      },
-      rules: [{ required: true }],
-    },
-    {
       field: 'status',
       label: t('system.user.form.status'),
       component: 'RadioGroup',
