@@ -690,7 +690,7 @@ create table "public"."t_user" (
   "password" varchar(128) collate "pg_catalog"."default" not null,
   "email" varchar(128) collate "pg_catalog"."default",
   "user_type" int4,
-  "login_type" int2,
+  "login_type" int2 default 0,
   "last_team_id" int8,
   "status" int2,
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
