@@ -257,6 +257,23 @@ print_logo() {
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
 }
 
+parse_yaml() {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|^\($s\):|\1|" \
+        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
+}
+
 # shellcheck disable=SC2120
 running() {
   if [ -f "$APP_PID" ]; then
@@ -303,14 +320,25 @@ start() {
 
   PROPER="${APP_CONF}/application.yml"
   if [[ ! -f "$PROPER" ]] ; then
-    PROPER="${APP_CONF}/application.properties"
-    if [[ ! -f "$PROPER" ]] ; then
-      echo_r "Usage: properties file (application.properties|application.yml) not found! ";
-    else
-      echo_g "Usage: properties file:application.properties ";
-    fi
+    echo_r "ERROR: config file application.yml invalid or not found! ";
+    exit 1;
   else
-    echo_g "Usage: properties file:application.yml ";
+    echo_g "Usage: config file: $PROPER ";
+  fi
+
+  # shellcheck disable=SC2046
+  eval $(parse_yaml "${PROPER}" "conf_")
+  # shellcheck disable=SC2001
+  # shellcheck disable=SC2154
+  # shellcheck disable=SC2155
+  local workspace=$(echo "$conf_streampark_workspace_local" | sed 's/#.*$//g')
+  if [[ ! -d $workspace ]]; then
+    echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in application.yml"
+    exit 1;
+  fi
+  if [[ ! -w $workspace ]] || [[ ! -r $workspace ]]; then
+      echo_r "ERROR: streampark.workspace.local: \"$workspace\" Permission denied! "
+      exit 1;
   fi
 
   if [ "${HADOOP_HOME}"x == ""x ]; then
