@@ -147,6 +147,7 @@ interface AppControl {
 export interface CancelParam {
   id: string;
   savePointed: boolean;
+  savePointTimeout: number;
   drain: boolean;
   savePoint: string;
 }
