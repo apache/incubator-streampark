@@ -34,8 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("metrics")
-public class MetricsController {
+@RequestMapping("message")
+public class MessageController {
 
   @Autowired private MessageService messageService;
 
