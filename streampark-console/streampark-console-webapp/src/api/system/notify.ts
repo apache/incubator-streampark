@@ -26,8 +26,8 @@ interface NotifyParam {
   pageSize: number;
 }
 enum NOTIFY_API {
-  NOTICE = '/metrics/notice',
-  DEL = '/metrics/delnotice',
+  NOTICE = '/message/notice',
+  DEL = '/message/delnotice',
 }
 /**
  * Get notification list
