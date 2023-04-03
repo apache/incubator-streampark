@@ -22,6 +22,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Team;
@@ -80,6 +81,7 @@ public class UserController {
   @PostMapping("post")
   @RequiresPermissions("user:add")
   public RestResponse addUser(@Valid User user) throws Exception {
+    user.setLoginType(LoginType.PASSWORD);
     this.userService.createUser(user);
     return RestResponse.success();
   }
