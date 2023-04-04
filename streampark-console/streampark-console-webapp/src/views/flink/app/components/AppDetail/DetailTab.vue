@@ -387,12 +387,12 @@
       >
         <BasicTable @register="registerConfigTable">
           <template #bodyCell="{ column, record }">
-            <template v-if="column.dataIndex == 'format'">
+            <div class="bold-tag" v-if="column.dataIndex == 'format'">
               <Tag color="#2db7f5" v-if="record.format === ConfigTypeEnum.YAML"> yaml </Tag>
               <Tag color="#108ee9" v-if="record.format === ConfigTypeEnum.PROPERTIES">
                 properties
               </Tag>
-            </template>
+            </div>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
                 {{ record.version }}
@@ -419,13 +419,13 @@
       >
         <BasicTable @register="registerFlinkSqlTable">
           <template #bodyCell="{ column, record }">
-            <template v-if="column.dataIndex == 'candidate'">
+            <div class="bold-tag" v-if="column.dataIndex == 'candidate'">
               <Tag color="#52c41a" v-if="record.candidate === CandidateTypeEnum.NONE"> None </Tag>
               <Tag color="#2db7f5" v-if="record.candidate === CandidateTypeEnum.NEW"> New </Tag>
               <Tag color="#108ee9" v-if="record.candidate === CandidateTypeEnum.HISTORY">
                 History
               </Tag>
-            </template>
+            </div>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
                 {{ record.version }}
@@ -455,19 +455,17 @@
               <Icon icon="ant-design:clock-circle-outlined" />
               {{ record.triggerTime }}
             </template>
-            <template v-if="column.dataIndex == 'type'">
-              <div class="app_state">
-                <Tag color="#0C7EF2" v-if="record['type'] === SavePointEnum.CHECK_POINT">
-                  {{ t('flink.app.detail.detailTab.check') }}
-                </Tag>
-                <Tag color="#52c41a" v-if="record['type'] === SavePointEnum.SAVE_POINT">
-                  {{ t('flink.app.detail.detailTab.save') }}
-                </Tag>
-              </div>
-            </template>
-            <template v-if="column.dataIndex == 'latest'">
+            <div v-if="column.dataIndex == 'type'">
+              <Tag color="blue" v-if="record['type'] === SavePointEnum.CHECK_POINT">
+                {{ t('flink.app.detail.detailTab.check') }}
+              </Tag>
+              <Tag color="cyan" v-if="record['type'] === SavePointEnum.SAVE_POINT">
+                {{ t('flink.app.detail.detailTab.save') }}
+              </Tag>
+            </div>
+            <div v-if="column.dataIndex == 'latest'">
               <Tag color="green" v-if="record.latest"> Latest </Tag>
-            </template>
+            </div>
             <template v-if="column.dataIndex == 'operation'">
               <TableAction :actions="getSavePointAction(record)" />
             </template>
@@ -500,14 +498,12 @@
         <BasicTable @register="registerLogsTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'optionName'">
-              <Tag color="#52c41a" v-if="record.optionName === OperationEnum.RELEASE">
-                Release
-              </Tag>
-              <Tag color="#2db7f5" v-if="record.optionName === OperationEnum.START"> Start </Tag>
-              <Tag color="#108ee9" v-if="record.optionName === OperationEnum.SAVEPOINT">
+              <Tag color="blue" v-if="record.optionName === OperationEnum.RELEASE"> Release </Tag>
+              <Tag color="green" v-if="record.optionName === OperationEnum.START"> Start </Tag>
+              <Tag color="cyan" v-if="record.optionName === OperationEnum.SAVEPOINT">
                 Savepoint
               </Tag>
-              <Tag color="#0C7EF2" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
+              <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
             </template>
             <template v-if="column.dataIndex == 'yarnAppId'">
               <a-button type="link" @click="handleView(app as any, '')">
@@ -515,17 +511,19 @@
               </a-button>
             </template>
             <template v-if="column.dataIndex == 'jobManagerUrl'">
-              <a-button type="link" :href="record.jobManagerUrl" target="_blank">
+              <a type="link" :href="record.jobManagerUrl" target="_blank">
                 {{ record.jobManagerUrl }}
-              </a-button>
+              </a>
             </template>
             <template v-if="column.dataIndex == 'optionTime'">
               <Icon icon="ant-design:clock-circle-outlined" />
               {{ record.optionTime }}
             </template>
             <template v-if="column.dataIndex == 'success'">
-              <Tag class="start-state" color="#52c41a" v-if="record.success"> SUCCESS </Tag>
-              <Tag class="start-state" color="#f5222d" v-else> FAILED </Tag>
+              <span class="bold-tag">
+                <Tag color="#52c41a" v-if="record.success"> SUCCESS </Tag>
+                <Tag color="#f5222d" v-else> FAILED </Tag>
+              </span>
             </template>
             <template v-if="column.dataIndex == 'operation'">
               <TableAction :actions="getOperationLogAction(record)" />

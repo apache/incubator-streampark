@@ -20,7 +20,6 @@ import { Tag } from 'ant-design-vue';
 import { checkUserName, fetchUserTypes } from '/@/api/system/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { LoginTypeEnum } from '/@/views/base/login/useLogin';
 const { t } = useI18n();
 // user status enum
 export const enum StatusEnum {
