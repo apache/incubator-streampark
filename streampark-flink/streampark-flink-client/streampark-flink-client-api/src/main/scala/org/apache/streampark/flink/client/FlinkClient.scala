@@ -60,6 +60,7 @@ object FlinkClient extends Logger {
   }
 
   private[this] def proxy[T: ClassTag](request: Object, flinkVersion: FlinkVersion, requestBody: (String, String)): T = {
+    flinkVersion.checkVersion()
     FlinkShimsProxy.proxy(flinkVersion, (classLoader: ClassLoader) => {
       val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
       val requestClass = classLoader.loadClass(requestBody._1)

@@ -109,6 +109,18 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
     distJar.head
   }
 
+  def checkVersion(throwable: Boolean): Boolean = {
+    version.split("\\.").map(_.trim.toInt) match {
+      case Array(1, v, _) if v >= 12 && v <= 17 => true
+      case _ =>
+        if (throwable) {
+          throw new UnsupportedOperationException(s"Unsupported flink version: $version")
+        } else {
+          false
+        }
+    }
+  }
+
   // StreamPark flink shims version, like "streampark-flink-shims_flink-1.13"
   lazy val shimsVersion: String = s"streampark-flink-shims_flink-$majorVersion"
 

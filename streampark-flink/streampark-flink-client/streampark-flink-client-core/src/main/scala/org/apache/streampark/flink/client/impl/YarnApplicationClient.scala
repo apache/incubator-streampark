@@ -67,11 +67,7 @@ object YarnApplicationClient extends YarnClientTrait {
         submitRequest.hdfsWorkspace.appPlugins)
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINK_SQL =>
-          val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
-          version match {
-            case Array(1, v, _) if v >= 12 && v <= 17 => array += s"${workspace.APP_SHIMS}/flink-1.$v"
-            case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
-          }
+          array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
           val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
           if (HdfsUtils.exists(jobLib)) {
             array += jobLib
