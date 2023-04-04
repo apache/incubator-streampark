@@ -42,9 +42,8 @@ object FlinkShimsProxy extends Logger {
       s"flink-(.*)-$flinkLargeVersion(.*).jar",
       Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
-  private[this] def getStreamParkLibPattern(scalaVersion: String): Pattern = Pattern.compile(
-    s"streampark-(.*)_$scalaVersion-(.*).jar",
-    Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+
+  private[this] lazy val FLINK_SHIMS_PREFIX = "streampark-flink-shims_flink"
 
   /**
    * Get shimsClassLoader to execute for scala API
@@ -108,21 +107,24 @@ object FlinkShimsProxy extends Logger {
 
     val majorVersion = flinkVersion.majorVersion
     val scalaVersion = flinkVersion.scalaVersion
-    val streamParkMatcher = getStreamParkLibPattern(scalaVersion)
 
     libPath.listFiles().foreach((jar: File) => {
-      val shimsPrefix = s"streampark-flink-shims_flink-${majorVersion}_$scalaVersion"
-      if (jar.getName.startsWith(shimsPrefix) && jar.getName.endsWith(".jar")) {
-        addShimUrl(jar)
-        logInfo(s"include flink shims jar lib: ${jar.getName}")
-      } else {
-        if (INCLUDE_PATTERN.matcher(jar.getName).matches()) {
-          addShimUrl(jar)
-          logInfo(s"include jar lib: ${jar.getName}")
-        }
-        if (streamParkMatcher.matcher(jar.getName).matches()) {
-          addShimUrl(jar)
-          logInfo(s"include streampark lib: ${jar.getName}")
+      val jarName = jar.getName
+      if (jarName.endsWith(".jar")) {
+        if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
+          val prefixVer = s"$FLINK_SHIMS_PREFIX-${majorVersion}_$scalaVersion"
+          if (jarName.startsWith(prefixVer)) {
+            addShimUrl(jar)
+            logInfo(s"include flink shims jar lib: $jarName")
+          }
+        } else {
+          if (INCLUDE_PATTERN.matcher(jarName).matches()) {
+            addShimUrl(jar)
+            logInfo(s"include jar lib: $jarName")
+          } else if (jarName.matches(s"^streampark-.*_$scalaVersion.*$$")) {
+            addShimUrl(jar)
+            logInfo(s"include streampark lib: $jarName")
+          }
         }
       }
     })
@@ -160,7 +162,8 @@ object FlinkShimsProxy extends Logger {
         new ChildFirstClassLoader(
           shimsUrls.toArray,
           Thread.currentThread().getContextClassLoader,
-          getFlinkShimsResourcePattern(flinkVersion.majorVersion))
+          getFlinkShimsResourcePattern(flinkVersion.majorVersion)
+        )
       })
   }
 
