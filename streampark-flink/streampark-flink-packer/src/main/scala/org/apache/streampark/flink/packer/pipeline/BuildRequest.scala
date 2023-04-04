@@ -55,13 +55,7 @@ sealed trait FlinkBuildParam extends BuildParam {
       localWorkspace.APP_PLUGINS,
       customFlinkUserJar)
     if (developmentMode == DevelopmentMode.FLINK_SQL) {
-      providedLibs += {
-        val version = flinkVersion.version.split("\\.").map(_.trim.toInt)
-        version match {
-          case Array(1, v, _) if v >= 12 && v <= 17 => s"${localWorkspace.APP_SHIMS}/flink-1.$v"
-          case _ => throw new UnsupportedOperationException(s"Unsupported flink version: $flinkVersion")
-        }
-      }
+      providedLibs += s"${localWorkspace.APP_SHIMS}/flink-${flinkVersion.majorVersion}"
     }
     dependencyInfo.merge(providedLibs.toSet)
   }
