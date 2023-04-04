@@ -68,7 +68,7 @@ public class FlinkCluster implements Serializable {
 
   private String clusterName;
 
-  private Integer executionMode;
+  private ExecutionMode executionMode;
 
   /** flink version */
   private Long versionId;
@@ -91,7 +91,7 @@ public class FlinkCluster implements Serializable {
 
   private String dynamicProperties;
 
-  private Integer k8sRestExposedType;
+  private FlinkK8sRestExposedType k8sRestExposedType;
 
   private String k8sConf;
 
@@ -100,23 +100,10 @@ public class FlinkCluster implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String exception;
 
-  private Integer clusterState;
+  private ClusterState clusterState;
 
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
   private Date createTime = new Date();
-
-  @JsonIgnore
-  public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
-    return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
-  }
-
-  public ExecutionMode getExecutionModeEnum() {
-    return ExecutionMode.of(this.executionMode);
-  }
-
-  public ClusterState getClusterStateEnum() {
-    return ClusterState.of(this.clusterState);
-  }
 
   @JsonIgnore
   @SneakyThrows
@@ -125,7 +112,7 @@ public class FlinkCluster implements Serializable {
       return Collections.emptyMap();
     }
     Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
-    if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
+    if (ExecutionMode.YARN_SESSION.equals(getExecutionMode())) {
       map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
       map.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
     }
@@ -146,7 +133,7 @@ public class FlinkCluster implements Serializable {
   }
 
   public boolean verifyClusterConnection() {
-    if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
+    if (ExecutionMode.REMOTE.equals(this.getExecutionMode())) {
       if (address == null) {
         return false;
       }
@@ -166,7 +153,7 @@ public class FlinkCluster implements Serializable {
         //
       }
       return false;
-    } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+    } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionMode())) {
       try {
         String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
         String result =

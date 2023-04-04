@@ -169,7 +169,7 @@ public class CheckpointProcessor {
     savePoint.setAppId(appId);
     savePoint.setChkId(checkPoint.getId());
     savePoint.setLatest(true);
-    savePoint.setType(checkPoint.getCheckPointType().get());
+    savePoint.setType(checkPoint.getCheckPointType());
     savePoint.setPath(checkPoint.getExternalPath());
     savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
     savePoint.setCreateTime(new Date());

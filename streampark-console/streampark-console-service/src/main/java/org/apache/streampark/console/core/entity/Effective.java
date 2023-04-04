@@ -40,7 +40,7 @@ public class Effective {
    * 1) config <br>
    * 2) flink Sql<br>
    */
-  private Integer targetType;
+  private EffectiveType targetType;
 
   private Long targetId;
   private Date createTime;
@@ -51,7 +51,7 @@ public class Effective {
 
   public Effective(Long appId, EffectiveType type, Long targetId) {
     this.appId = appId;
-    this.targetType = type.getType();
+    this.targetType = type;
     this.targetId = targetId;
     this.createTime = new Date();
   }

@@ -138,7 +138,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       }
       if (projectParam.getBuildState() != null) {
         project.setBuildState(projectParam.getBuildState());
-        if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
+        if (projectParam.getBuildState() == BuildState.NEED_REBUILD) {
           List<Application> applications = getApplications(project);
           // Update deployment status
           applications.forEach(
@@ -147,7 +147,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     "update deploy by project: {}, appName:{}",
                     project.getName(),
                     app.getJobName());
-                app.setRelease(ReleaseState.NEED_CHECK.get());
+                app.setRelease(ReleaseState.NEED_CHECK);
                 applicationService.updateRelease(app);
               });
         }
@@ -221,7 +221,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         "update deploy by project: {}, appName:{}",
                         project.getName(),
                         app.getJobName());
-                    app.setRelease(ReleaseState.NEED_RELEASE.get());
+                    app.setRelease(ReleaseState.NEED_RELEASE);
                     app.setBuild(true);
                     this.applicationService.updateRelease(app);
                   });
@@ -237,7 +237,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   public List<String> modules(Long id) {
     Project project = getById(id);
     Utils.notNull(project);
-    BuildState buildState = BuildState.of(project.getBuildState());
+    BuildState buildState = project.getBuildState();
     if (BuildState.SUCCESSFUL.equals(buildState)) {
       File appHome = project.getDistHome();
       if (appHome.exists()) {
@@ -362,7 +362,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       log.warn(errorMsg);
       return RestResponse.success().data(errorMsg);
     }
-    boolean isBuilding = this.getById(id).getBuildState() == 0;
+    boolean isBuilding = this.getById(id).getBuildState() == BuildState.BUILDING;
     byte[] fileContent;
     long endOffset = 0L;
     boolean readFinished = true;

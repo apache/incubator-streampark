@@ -20,8 +20,8 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.JobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -168,7 +168,7 @@ public class AppBuildPipeServiceImpl
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
 
-            app.setRelease(ReleaseState.RELEASING.get());
+            app.setRelease(ReleaseState.RELEASING);
             applicationService.updateRelease(app);
 
             if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
@@ -191,7 +191,7 @@ public class AppBuildPipeServiceImpl
                 // upload jar copy to appHome
                 String uploadJar = appUploads.concat("/").concat(app.getJar());
                 checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
-                switch (app.getApplicationType()) {
+                switch (app.getAppType()) {
                   case STREAMPARK_FLINK:
                     fsOperator.mkdirs(app.getAppLib());
                     fsOperator.copy(uploadJar, app.getAppLib(), false, true);
@@ -203,7 +203,7 @@ public class AppBuildPipeServiceImpl
                   default:
                     throw new IllegalArgumentException(
                         "[StreamPark] unsupported ApplicationType of custom code: "
-                            + app.getApplicationType());
+                            + app.getAppType());
                 }
               } else {
                 fsOperator.upload(app.getDistHome(), appHome);
@@ -239,10 +239,10 @@ public class AppBuildPipeServiceImpl
             if (result.pass()) {
               // running job ...
               if (app.isRunning()) {
-                app.setRelease(ReleaseState.NEED_RESTART.get());
+                app.setRelease(ReleaseState.NEED_RESTART);
               } else {
-                app.setOptionState(OptionState.NONE.getValue());
-                app.setRelease(ReleaseState.DONE.get());
+                app.setOptionState(OptionState.NONE);
+                app.setRelease(ReleaseState.DONE);
                 // If the current task is not running, or the task has just been added, directly set
                 // the candidate version to the official version
                 if (app.isFlinkSqlJob()) {
@@ -277,8 +277,8 @@ public class AppBuildPipeServiceImpl
                       Utils.stringifyException(snapshot.error().exception()),
                       NoticeType.EXCEPTION);
               messageService.push(message);
-              app.setRelease(ReleaseState.FAILED.get());
-              app.setOptionState(OptionState.NONE.getValue());
+              app.setRelease(ReleaseState.FAILED);
+              app.setOptionState(OptionState.NONE);
               app.setBuild(true);
               applicationLog.setException(Utils.stringifyException(snapshot.error().exception()));
               applicationLog.setSuccess(false);
@@ -328,14 +328,14 @@ public class AppBuildPipeServiceImpl
   private BuildPipeline createPipelineInstance(@Nonnull Application app) {
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
     String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
-    ExecutionMode executionMode = app.getExecutionModeEnum();
+    ExecutionMode executionMode = app.getExecutionMode();
     String mainClass = ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
     switch (executionMode) {
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
         String localWorkspace = app.getLocalAppHome().concat("/lib");
-        if (app.getDevelopmentMode().equals(DevelopmentMode.CUSTOM_CODE)
-            && app.getApplicationType().equals(ApplicationType.APACHE_FLINK)) {
+        if (app.getJobType().equals(JobType.CUSTOM_CODE)
+            && app.getAppType().equals(ApplicationType.APACHE_FLINK)) {
           yarnProvidedPath = app.getAppHome();
           localWorkspace = app.getLocalAppHome();
         }
@@ -345,7 +345,7 @@ public class AppBuildPipeServiceImpl
                 mainClass,
                 localWorkspace,
                 yarnProvidedPath,
-                app.getDevelopmentMode(),
+                app.getJobType(),
                 app.getDependencyInfo());
         log.info("Submit params to building pipeline : {}", yarnAppRequest);
         return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
@@ -359,8 +359,8 @@ public class AppBuildPipeServiceImpl
                 mainClass,
                 flinkUserJar,
                 app.isCustomCodeJob(),
-                app.getExecutionModeEnum(),
-                app.getDevelopmentMode(),
+                app.getExecutionMode(),
+                app.getJobType(),
                 flinkEnv.getFlinkVersion(),
                 app.getDependencyInfo());
         log.info("Submit params to building pipeline : {}", buildRequest);
@@ -372,8 +372,8 @@ public class AppBuildPipeServiceImpl
                 app.getLocalAppHome(),
                 mainClass,
                 flinkUserJar,
-                app.getExecutionModeEnum(),
-                app.getDevelopmentMode(),
+                app.getExecutionMode(),
+                app.getJobType(),
                 flinkEnv.getFlinkVersion(),
                 app.getDependencyInfo(),
                 app.getClusterId(),
@@ -387,8 +387,8 @@ public class AppBuildPipeServiceImpl
                 app.getLocalAppHome(),
                 mainClass,
                 flinkUserJar,
-                app.getExecutionModeEnum(),
-                app.getDevelopmentMode(),
+                app.getExecutionMode(),
+                app.getJobType(),
                 flinkEnv.getFlinkVersion(),
                 app.getDependencyInfo(),
                 app.getClusterId(),
@@ -406,34 +406,33 @@ public class AppBuildPipeServiceImpl
         return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
       default:
         throw new UnsupportedOperationException(
-            "Unsupported Building Application for ExecutionMode: " + app.getExecutionModeEnum());
+            "Unsupported Building Application for ExecutionMode: " + app.getExecutionMode());
     }
   }
 
   /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
   private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
-    switch (app.getDevelopmentMode()) {
+    switch (app.getJobType()) {
       case CUSTOM_CODE:
-        switch (app.getApplicationType()) {
+        switch (app.getAppType()) {
           case STREAMPARK_FLINK:
             return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
           case APACHE_FLINK:
             return String.format("%s/%s", app.getAppHome(), app.getJar());
           default:
             throw new IllegalArgumentException(
-                "[StreamPark] unsupported ApplicationType of custom code: "
-                    + app.getApplicationType());
+                "[StreamPark] unsupported ApplicationType of custom code: " + app.getAppType());
         }
       case FLINK_SQL:
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
-        if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+        if (app.getExecutionMode() == ExecutionMode.YARN_APPLICATION) {
           String clientPath = Workspace.remote().APP_CLIENT();
           return String.format("%s/%s", clientPath, sqlDistJar);
         }
         return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
       default:
         throw new UnsupportedOperationException(
-            "[StreamPark] unsupported JobType: " + app.getDevelopmentMode());
+            "[StreamPark] unsupported JobType: " + app.getJobType());
     }
   }
 
@@ -453,7 +452,7 @@ public class AppBuildPipeServiceImpl
   @Override
   public boolean allowToBuildNow(@Nonnull Long appId) {
     return getCurrentBuildPipeline(appId)
-        .map(pipeline -> PipelineStatus.running != pipeline.getPipelineStatus())
+        .map(pipeline -> PipelineStatus.running != pipeline.getPipeStatusCode())
         .orElse(true);
   }
 
@@ -470,7 +469,7 @@ public class AppBuildPipeServiceImpl
       return Collections.emptyMap();
     }
     return appBuildPipelines.stream()
-        .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipelineStatus));
+        .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipeStatusCode));
   }
 
   @Override

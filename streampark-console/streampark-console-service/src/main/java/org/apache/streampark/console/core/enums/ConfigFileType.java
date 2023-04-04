@@ -17,8 +17,10 @@
 
 package org.apache.streampark.console.core.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
-import java.util.Arrays;
 
 /** configFile Type enum */
 public enum ConfigFileType implements Serializable {
@@ -30,7 +32,7 @@ public enum ConfigFileType implements Serializable {
 
   UNKNOWN(0, null);
 
-  private final int value;
+  @JsonValue @EnumValue private final int value;
   private final String typeName;
 
   ConfigFileType(int value, String name) {
@@ -44,9 +46,5 @@ public enum ConfigFileType implements Serializable {
 
   public String getTypeName() {
     return typeName;
-  }
-
-  public static ConfigFileType of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
   }
 }

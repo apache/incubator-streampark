@@ -34,7 +34,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <postgresql.version>42.5.0</postgresql.version>
-        <mybatis-plus.version>3.5.2</mybatis-plus.version>
         <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
         <frontend.project.name>streampark-console-webapp</frontend.project.name>
         <PermGen>64m</PermGen>

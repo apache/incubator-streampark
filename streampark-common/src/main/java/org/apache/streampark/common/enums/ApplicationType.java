@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
 
 public enum ApplicationType implements Serializable {
@@ -29,7 +32,7 @@ public enum ApplicationType implements Serializable {
   /** Apache Spark */
   APACHE_SPARK(4, "Apache Spark");
 
-  private final int type;
+  @JsonValue @EnumValue private final int type;
   private final String name;
 
   ApplicationType(int type, String name) {
@@ -43,14 +46,5 @@ public enum ApplicationType implements Serializable {
 
   public String getName() {
     return name;
-  }
-
-  public static ApplicationType of(int type) {
-    for (ApplicationType appType : ApplicationType.values()) {
-      if (appType.getType() == type) {
-        return appType;
-      }
-    }
-    return null;
   }
 }

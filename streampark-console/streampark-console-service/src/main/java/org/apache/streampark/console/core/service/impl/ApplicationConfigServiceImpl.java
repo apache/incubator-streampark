@@ -73,12 +73,12 @@ public class ApplicationConfigServiceImpl
     applicationConfig.setAppId(application.getId());
 
     if (application.getFormat() != null) {
-      ConfigFileType fileType = ConfigFileType.of(application.getFormat());
+      ConfigFileType fileType = application.getFormat();
       if (fileType == null || ConfigFileType.UNKNOWN.equals(fileType)) {
         throw new ApiAlertException(
             "application' config error. must be (.properties|.yaml|.yml |.conf)");
       }
-      applicationConfig.setFormat(fileType.getValue());
+      applicationConfig.setFormat(fileType);
     }
 
     applicationConfig.setContent(config);

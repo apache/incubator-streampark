@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
 
 import java.io.Serializable;
@@ -39,7 +41,7 @@ public enum ExecutionMode implements Serializable {
   /** kubernetes application */
   KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
 
-  private final Integer mode;
+  @JsonValue @EnumValue private final Integer mode;
 
   private final String name;
 
@@ -51,15 +53,6 @@ public enum ExecutionMode implements Serializable {
   public static ExecutionMode of(Integer value) {
     for (ExecutionMode executionMode : values()) {
       if (executionMode.mode.equals(value)) {
-        return executionMode;
-      }
-    }
-    return null;
-  }
-
-  public static ExecutionMode of(String name) {
-    for (ExecutionMode executionMode : values()) {
-      if (executionMode.name.equals(name)) {
         return executionMode;
       }
     }
@@ -78,28 +71,8 @@ public enum ExecutionMode implements Serializable {
     return YARN_PER_JOB.equals(mode) || YARN_APPLICATION.equals(mode) || YARN_SESSION.equals(mode);
   }
 
-  public static boolean isYarnSessionMode(ExecutionMode mode) {
-    return YARN_SESSION.equals(mode);
-  }
-
-  public static boolean isYarnMode(Integer value) {
-    return isYarnMode(of(value));
-  }
-
-  public static boolean isKubernetesSessionMode(Integer value) {
-    return KUBERNETES_NATIVE_SESSION.equals(of(value));
-  }
-
   public static boolean isKubernetesMode(ExecutionMode mode) {
     return KUBERNETES_NATIVE_SESSION.equals(mode) || KUBERNETES_NATIVE_APPLICATION.equals(mode);
-  }
-
-  public static boolean isKubernetesMode(Integer value) {
-    return isKubernetesMode(of(value));
-  }
-
-  public static boolean isKubernetesApplicationMode(Integer value) {
-    return KUBERNETES_NATIVE_APPLICATION.equals(of(value));
   }
 
   public static List<Integer> getKubernetesMode() {
@@ -109,10 +82,6 @@ public enum ExecutionMode implements Serializable {
 
   public static boolean isSessionMode(ExecutionMode mode) {
     return KUBERNETES_NATIVE_SESSION.equals(mode) || YARN_SESSION.equals(mode);
-  }
-
-  public static boolean isRemoteMode(Integer value) {
-    return isRemoteMode(of(value));
   }
 
   public static boolean isRemoteMode(ExecutionMode mode) {

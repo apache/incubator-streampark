@@ -92,7 +92,7 @@ public class YarnQueueLabelExpression {
    * @param executionMode execution mode.
    * @param queueLabel queueLabel expression.
    */
-  public static void checkQueueLabelIfNeed(int executionMode, String queueLabel) {
+  public static void checkQueueLabelIfNeed(ExecutionMode executionMode, String queueLabel) {
     if (ExecutionMode.isYarnMode(executionMode)) {
       ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
     }

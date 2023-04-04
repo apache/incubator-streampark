@@ -51,7 +51,7 @@ public class ApplicationConfig {
    * 2)prop <br>
    * 3)hocon
    */
-  private Integer format;
+  private ConfigFileType format;
 
   /** default version: 1 */
   private Integer version = 1;
@@ -75,7 +75,7 @@ public class ApplicationConfig {
   }
 
   public Map<String, String> readConfig() {
-    ConfigFileType fileType = ConfigFileType.of(this.format);
+    ConfigFileType fileType = this.format;
     Map<String, String> configs = null;
     if (fileType != null) {
       switch (fileType) {

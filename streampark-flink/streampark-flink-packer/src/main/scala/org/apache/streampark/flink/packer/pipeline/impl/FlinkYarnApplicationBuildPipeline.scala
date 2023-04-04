@@ -22,7 +22,7 @@ import java.io.{File, FileInputStream, IOException}
 import org.apache.commons.codec.digest.DigestUtils
 
 import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.enums.JobType
 import org.apache.streampark.common.fs.{FsOperator, HdfsOperator, LfsOperator}
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.packer.maven.MavenTool
@@ -49,7 +49,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
   override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
       request.developmentMode match {
-        case DevelopmentMode.FLINK_SQL =>
+        case JobType.FLINK_SQL =>
           LfsOperator.mkCleanDirs(request.localWorkspace)
           HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
         case _ =>
@@ -60,7 +60,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
     val mavenJars =
       execStep(2) {
         request.developmentMode match {
-          case DevelopmentMode.FLINK_SQL =>
+          case JobType.FLINK_SQL =>
             val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
             mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
           case _ => Set[String]()

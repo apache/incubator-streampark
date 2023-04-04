@@ -17,6 +17,9 @@
 
 package org.apache.streampark.console.core.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -26,7 +29,7 @@ public enum NoticeType implements Serializable {
   /** message */
   MESSAGE(2);
 
-  private final int value;
+  @JsonValue @EnumValue private final int value;
 
   public int get() {
     return this.value;

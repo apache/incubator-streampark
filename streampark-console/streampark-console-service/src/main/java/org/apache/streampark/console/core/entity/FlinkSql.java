@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.console.core.enums.CandidateType;
 import org.apache.streampark.console.core.enums.ChangedType;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -49,7 +50,7 @@ public class FlinkSql {
    * 1: newly added record becomes a candidate <br>
    * 2: specific history becomes a candidate <br>
    */
-  private Integer candidate;
+  private CandidateType candidate;
 
   private Date createTime;
   private transient boolean effective = false;

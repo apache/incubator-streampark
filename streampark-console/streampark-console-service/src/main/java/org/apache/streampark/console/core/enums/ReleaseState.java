@@ -17,9 +17,13 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
-import java.util.Arrays;
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 
+import java.io.Serializable;
+
+@Getter
 public enum ReleaseState implements Serializable {
 
   /** release failed */
@@ -45,17 +49,9 @@ public enum ReleaseState implements Serializable {
   /** revoked */
   REVOKED(10);
 
-  private final int value;
+  @JsonValue @EnumValue private final int value;
 
   ReleaseState(int value) {
     this.value = value;
-  }
-
-  public int get() {
-    return this.value;
-  }
-
-  public static ReleaseState of(Integer state) {
-    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
   }
 }

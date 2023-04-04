@@ -17,6 +17,9 @@
 
 package org.apache.streampark.console.core.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
 
 public enum EffectiveType implements Serializable {
@@ -25,7 +28,7 @@ public enum EffectiveType implements Serializable {
   /** FLINKSQL */
   FLINKSQL(2);
 
-  private final int type;
+  @JsonValue @EnumValue private final int type;
 
   EffectiveType(int value) {
     this.type = value;

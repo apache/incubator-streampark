@@ -45,7 +45,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          executionMode: ExecutionMode,
                          properties: JavaMap[String, Any],
                          flinkYaml: String,
-                         developmentMode: DevelopmentMode,
+                         developmentMode: JobType,
                          id: Long,
                          jobId: String,
                          appName: String,
@@ -62,7 +62,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case DevelopmentMode.FLINK_SQL => ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS
+    case JobType.FLINK_SQL => ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
