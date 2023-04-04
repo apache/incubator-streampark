@@ -244,6 +244,7 @@ public class Application implements Serializable {
   private transient String savePoint;
   private transient Boolean savePointed = false;
   private transient Boolean drain = false;
+  private transient Long savePointTimeout = 60L;
   private transient Boolean allowNonRestored = false;
   private transient String socketId;
   private transient String projectName;

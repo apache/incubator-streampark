@@ -475,16 +475,14 @@ trait FlinkClientTrait extends Logger {
 
     val savePointDir: String = tryGetSavepointPathIfNeed(cancelRequest)
 
-    val clientTimeout = getOptionFromDefaultFlinkConfig(cancelRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
-
     val clientWrapper = new FlinkClusterClient(client)
 
     (Try(cancelRequest.withSavepoint).getOrElse(false), Try(cancelRequest.withDrain).getOrElse(false)) match {
       case (false, false) =>
         client.cancel(jobID).get()
         null
-      case (true, false) => clientWrapper.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
-      case (_, _) => clientWrapper.stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      case (true, false) => clientWrapper.cancelWithSavepoint(jobID, savePointDir).get(cancelRequest.savePointTimeout, TimeUnit.SECONDS)
+      case (_, _) => clientWrapper.stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir).get(cancelRequest.savePointTimeout, TimeUnit.SECONDS)
     }
   }
 
