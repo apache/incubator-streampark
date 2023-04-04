@@ -109,11 +109,11 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
     distJar.head
   }
 
-  def checkVersion(throwable: Boolean = true): Boolean = {
+  def checkVersion(throwException: Boolean = true): Boolean = {
     version.split("\\.").map(_.trim.toInt) match {
       case Array(1, v, _) if v >= 12 && v <= 17 => true
       case _ =>
-        if (throwable) {
+        if (throwException) {
           throw new UnsupportedOperationException(s"Unsupported flink version: $version")
         } else {
           false
