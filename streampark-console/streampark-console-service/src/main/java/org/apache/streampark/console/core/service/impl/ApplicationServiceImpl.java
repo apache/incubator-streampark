@@ -858,6 +858,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
 
+    // when flink version has changed, we should rebuild the application. Otherwise, the shims jar
+    // may be not suitable for the new flink version.
+    if (!ObjectUtils.safeEquals(application.getVersionId(), appParam.getVersionId())) {
+      application.setBuild(true);
+    }
+
     appParam.setJobType(application.getJobType());
     // changes to the following parameters need to be re-release to take effect
     application.setJobName(appParam.getJobName());
@@ -1355,7 +1361,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   /**
    * Setup task is starting (for webUI "state" display)
    *
-   * @param appParam
+   * @param application
    */
   @Override
   public void starting(Application application) {
