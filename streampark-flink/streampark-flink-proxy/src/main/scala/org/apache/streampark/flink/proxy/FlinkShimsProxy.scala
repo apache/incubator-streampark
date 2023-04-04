@@ -86,7 +86,7 @@ object FlinkShimsProxy extends Logger {
 
         // 3) add only streampark shims jar
         addShimsUrls(flinkVersion, file => {
-          if (file.getName.startsWith(FLINK_SHIMS_PREFIX)) {
+          if (file.getName.startsWith("streampark-flink-shims")) {
             shimsUrls += file.toURI.toURL
           }
         })
