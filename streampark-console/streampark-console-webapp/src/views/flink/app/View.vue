@@ -237,7 +237,7 @@
               :key="'tag-'.concat(index.toString())"
               class="pl-4px"
             >
-              <Tag color="blue" class="app-tag">{{ tag }}</Tag>
+              <Tag color="blue">{{ tag }}</Tag>
             </span>
           </Tooltip>
         </template>

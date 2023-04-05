@@ -107,7 +107,7 @@
           </ListItemMeta>
 
           <div class="list-content flex" style="width: 40%">
-            <div class="list-content-item">
+            <div class="list-content-item" style="width: 60%">
               <span>Flink Home</span>
               <p style="margin-top: 10px">
                 {{ item.flinkHome }}

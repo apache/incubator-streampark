@@ -39,7 +39,6 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { AlertTypeInfo, DetailModal, AlertModal } from './components';
   import { PageWrapper } from '/@/components/Page';
-  import { BasicTitle } from '/@/components/Basic';
   const ListItem = List.Item;
 
   const { t } = useI18n();
@@ -171,7 +170,7 @@
 <template>
   <PageWrapper contentFullHeight>
     <div v-auth="'project:create'" class="bg-white pt-10px px-24px">
-      <BasicTitle class="my-2">{{ t('setting.alarm.alertSetting') }}</BasicTitle>
+      <span class="alarm-title">{{ t('setting.alarm.alertSetting') }}</span>
       <a-button
         type="dashed"
         style="width: 100%; margin-top: 10px"
@@ -299,6 +298,16 @@
     .ant-card-head-title {
       padding: 8px 0;
     }
+  }
+
+  .alarm-title {
+    background-color: @background-color-base;
+    height: 100%;
+    font-size: 14px;
+    display: table;
+    font-weight: normal;
+    margin: 14px 0;
+    padding: 8px 12px;
   }
 
   .alert-card-list {

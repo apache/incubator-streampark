@@ -72,7 +72,7 @@ export default {
   },
   detail: {
     detailTitle: '作业详情',
-    flinkWebUi: 'Flink原生引擎界面',
+    flinkWebUi: 'Flink Web UI',
     compareConfig: '比较配置',
     compareFlinkSql: '比较 Flink SQL',
     candidate: '侯选',

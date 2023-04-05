@@ -128,13 +128,17 @@
       </div>
       <List>
         <ListItem v-for="(item, index) in clusters" :key="index">
-          <ListItemMeta :title="item.clusterName" :description="item.description">
+          <ListItemMeta
+            :title="item.clusterName"
+            style="width: 20%"
+            :description="item.description"
+          >
             <template #avatar>
               <SvgIcon class="avatar p-15px" name="flink" size="60" />
             </template>
           </ListItemMeta>
-          <div class="list-content" style="width: 15%">
-            <div class="list-content-item" style="width: 60%">
+          <div class="list-content" style="width: 20%">
+            <div class="list-content-item">
               <span>{{ t('setting.flinkCluster.form.executionMode') }}</span>
               <p style="margin-top: 10px">
                 {{ item.executionModeEnum.toLowerCase() }}
@@ -143,7 +147,7 @@
           </div>
           <div
             class="list-content"
-            style="width: 40%"
+            style="width: 30%"
             v-if="
               item.executionMode === ExecModeEnum.REMOTE ||
               item.executionMode === ExecModeEnum.YARN_SESSION
@@ -152,7 +156,9 @@
             <div class="list-content-item">
               <span>{{ t('setting.flinkCluster.form.address') }}</span>
               <p style="margin-top: 10px">
-                {{ item.address }}
+                <a :href="item.address">
+                  {{ item.address }}
+                </a>
               </p>
             </div>
           </div>
