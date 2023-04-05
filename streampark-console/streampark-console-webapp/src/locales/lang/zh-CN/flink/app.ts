@@ -163,7 +163,7 @@ export default {
     start: '启动作业',
     cancel: '取消作业',
     savepoint: '触发 Savepoint',
-    detail: '查看作业详情',
+    detail: '作业详情',
     startLog: '查看 Flink 启动日志',
     force: '强制停止作业',
     copy: '复制作业',

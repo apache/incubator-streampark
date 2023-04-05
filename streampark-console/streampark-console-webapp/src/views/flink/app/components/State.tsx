@@ -155,9 +155,9 @@ export default defineComponent({
 
     const renderState = () => {
       if (unref(data).optionState === OptionStateEnum.NONE) {
-        return <div class="app_state">{renderTag(stateMap, unref(data).state)}</div>;
+        return <div class="bold-tag">{renderTag(stateMap, unref(data).state)}</div>;
       } else {
-        return <div class="app_state">{renderTag(optionStateMap, unref(data).optionState)}</div>;
+        return <div class="bold-tag">{renderTag(optionStateMap, unref(data).optionState)}</div>;
       }
     };
     function renderOverview() {
@@ -184,7 +184,7 @@ export default defineComponent({
         )
       ) {
         return (
-          <div class="task-tag">
+          <div class="bold-tag">
             {unref(data).totalTask && (
               <Tooltip title="TOTAL">
                 <Tag color="#102541">{unref(data)?.totalTask}</Tag>
@@ -203,11 +203,11 @@ export default defineComponent({
       }
 
       if (unref(option) === 'release') {
-        return <span class="app_state">{renderTag(releaseStateMap, unref(data).release)}</span>;
+        return <span class="bold-tag">{renderTag(releaseStateMap, unref(data).release)}</span>;
       }
 
       if (unref(option) === 'build') {
-        return <span class="app_state">{renderTag(buildStatusMap, unref(data).buildStatus)}</span>;
+        return <span class="bold-tag">{renderTag(buildStatusMap, unref(data).buildStatus)}</span>;
       }
 
       return <span>{renderOtherOption()}</span>;

@@ -71,7 +71,7 @@
       },
       {
         field: 'savePointTimeout',
-        label: 'SavePoint Timeout',
+        label: 'Savepoint Timeout',
         component: 'Select',
         afterItem: () => h('span', { class: 'conf-switch' }, 'savepoint timeout, Unit: second'),
         slot: 'savePointTimeout',
