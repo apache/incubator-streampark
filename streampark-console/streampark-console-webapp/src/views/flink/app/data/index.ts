@@ -32,19 +32,10 @@ export const getAppColumns = (): BasicColumn[] => [
     dataIndex: 'jobName',
     align: 'left',
     fixed: 'left',
-    width: 300,
+    width: 250,
   },
+  { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion', width: 110 },
   { title: t('flink.app.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
-  { title: t('flink.app.owner'), dataIndex: 'nickName', width: 100 },
-  { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion', width: 130 },
-  {
-    title: t('flink.app.duration'),
-    dataIndex: 'duration',
-    sorter: true,
-    width: 150,
-    customRender: ({ value }) => dateToDuration(value),
-  },
-  { title: t('flink.app.modifiedTime'), dataIndex: 'modifyTime', sorter: true, width: 170 },
   {
     title: t('flink.app.runStatus'),
     dataIndex: 'state',
@@ -63,6 +54,15 @@ export const getAppColumns = (): BasicColumn[] => [
     ],
   },
   { title: t('flink.app.releaseBuild'), dataIndex: 'release', width: 220 },
+  {
+    title: t('flink.app.duration'),
+    dataIndex: 'duration',
+    sorter: true,
+    width: 150,
+    customRender: ({ value }) => dateToDuration(value),
+  },
+  { title: t('flink.app.modifiedTime'), dataIndex: 'modifyTime', sorter: true, width: 165 },
+  { title: t('flink.app.owner'), dataIndex: 'nickName', width: 100 },
 ];
 
 /* Get diff editor configuration */
