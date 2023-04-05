@@ -125,6 +125,6 @@
       <Icon icon="ant-design:camera-outlined" color="#3c7eff" />
       &nbsp;{{ t('flink.app.view.savepoint') }}
     </template>
-    <BasicForm @register="registerForm" class="!pt-30px" height="80px" />
+    <BasicForm @register="registerForm" class="!pt-30px"/>
   </BasicModal>
 </template>
