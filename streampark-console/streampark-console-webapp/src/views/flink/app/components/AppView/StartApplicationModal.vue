@@ -170,7 +170,7 @@
       {{ t('flink.app.view.start') }}
     </template>
 
-    <BasicForm @register="registerForm">
+    <BasicForm @register="registerForm" class="!pt-40px">
       <template #savepoint="{ model, field }">
         <template v-if="receiveData.historySavePoint && receiveData.historySavePoint.length > 0">
           <Select allow-clear v-model:value="model[field]">

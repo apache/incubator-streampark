@@ -60,7 +60,7 @@
       },
       {
         field: 'customSavepoint',
-        label: 'Custom SavePoint',
+        label: 'Custom Savepoint',
         component: 'Input',
         componentProps: {
           placeholder: 'Entry the custom savepoint path',
@@ -117,7 +117,7 @@
             savePoint: customSavepoint,
           });
           if (data.data === false) {
-            createErrorSwal('custom savePoint path is invalid, ' + data.message);
+            createErrorSwal('custom savepoint path is invalid, ' + data.message);
           } else {
             handleStopAction(stopReq);
           }
@@ -166,7 +166,7 @@
       <SvgIcon name="shutdown" style="color: red" />
       {{ t('flink.app.view.stop') }}
     </template>
-    <BasicForm @register="registerForm" class="!pt-20px">
+    <BasicForm @register="registerForm" class="!pt-30px">
       <template #savePointTimeout="{ model, field }">
         <InputNumber v-model:value="model[field]" :min="10" :max="7200" step="10" />
       </template>

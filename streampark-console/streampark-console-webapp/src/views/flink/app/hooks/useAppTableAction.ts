@@ -24,12 +24,12 @@ import { AppListRecord } from '/@/api/flink/app/app.type';
 import { ActionItem, FormProps } from '/@/components/Table';
 import { useMessage } from '/@/hooks/web/useMessage';
 import {
+  AppStateEnum,
   AppTypeEnum,
   ExecModeEnum,
-  ReleaseStateEnum,
-  OptionStateEnum,
-  AppStateEnum,
   JobTypeEnum,
+  OptionStateEnum,
+  ReleaseStateEnum,
 } from '/@/enums/flinkEnum';
 import { usePermission } from '/@/hooks/web/usePermission';
 import { useI18n } from '/@/hooks/web/useI18n';
@@ -147,6 +147,11 @@ export const useAppTableAction = (
         ifShow: [
           AppStateEnum.ADDED,
           AppStateEnum.FAILED,
+          AppStateEnum.CANCELED,
+          AppStateEnum.KILLED,
+          AppStateEnum.SUCCEEDED,
+          AppStateEnum.TERMINATED,
+          AppStateEnum.POS_TERMINATED,
           AppStateEnum.FINISHED,
           AppStateEnum.SUSPENDED,
           AppStateEnum.LOST,
