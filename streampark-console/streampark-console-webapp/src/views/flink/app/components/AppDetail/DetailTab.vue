@@ -387,12 +387,18 @@
       >
         <BasicTable @register="registerConfigTable">
           <template #bodyCell="{ column, record }">
-            <div class="bold-tag" v-if="column.dataIndex == 'format'">
-              <Tag color="#2db7f5" v-if="record.format === ConfigTypeEnum.YAML"> yaml </Tag>
-              <Tag color="#108ee9" v-if="record.format === ConfigTypeEnum.PROPERTIES">
+            <template v-if="column.dataIndex == 'format'">
+              <Tag class="bold-tag" color="#2db7f5" v-if="record.format === ConfigTypeEnum.YAML">
+                yaml
+              </Tag>
+              <Tag
+                class="bold-tag"
+                color="#108ee9"
+                v-if="record.format === ConfigTypeEnum.PROPERTIES"
+              >
                 properties
               </Tag>
-            </div>
+            </template>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
                 {{ record.version }}
@@ -419,13 +425,29 @@
       >
         <BasicTable @register="registerFlinkSqlTable">
           <template #bodyCell="{ column, record }">
-            <div class="bold-tag" v-if="column.dataIndex == 'candidate'">
-              <Tag color="#52c41a" v-if="record.candidate === CandidateTypeEnum.NONE"> None </Tag>
-              <Tag color="#2db7f5" v-if="record.candidate === CandidateTypeEnum.NEW"> New </Tag>
-              <Tag color="#108ee9" v-if="record.candidate === CandidateTypeEnum.HISTORY">
+            <template v-if="column.dataIndex == 'candidate'">
+              <Tag
+                class="bold-tag"
+                color="#52c41a"
+                v-if="record.candidate === CandidateTypeEnum.NONE"
+              >
+                None
+              </Tag>
+              <Tag
+                class="bold-tag"
+                color="#2db7f5"
+                v-if="record.candidate === CandidateTypeEnum.NEW"
+              >
+                New
+              </Tag>
+              <Tag
+                class="bold-tag"
+                color="#108ee9"
+                v-if="record.candidate === CandidateTypeEnum.HISTORY"
+              >
                 History
               </Tag>
-            </div>
+            </template>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
                 {{ record.version }}
@@ -520,10 +542,8 @@
               {{ record.optionTime }}
             </template>
             <template v-if="column.dataIndex == 'success'">
-              <span class="bold-tag">
-                <Tag color="#52c41a" v-if="record.success"> SUCCESS </Tag>
-                <Tag color="#f5222d" v-else> FAILED </Tag>
-              </span>
+              <Tag class="bold-tag" color="#52c41a" v-if="record.success"> SUCCESS </Tag>
+              <Tag class="bold-tag" color="#f5222d" v-else> FAILED </Tag>
             </template>
             <template v-if="column.dataIndex == 'operation'">
               <TableAction :actions="getOperationLogAction(record)" />

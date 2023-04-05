@@ -165,7 +165,7 @@ export default {
     start: 'Start Application',
     cancel: 'Cancel Application',
     savepoint: 'Trigger Savepoint',
-    detail: 'View Application Detail',
+    detail: 'View Detail',
     startLog: 'See Flink Start log',
     force: 'Forced Stop Application',
     copy: 'Copy Application',
