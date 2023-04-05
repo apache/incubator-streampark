@@ -26,7 +26,7 @@ export default {
     project: 'Project',
     application: 'Application',
     variable: 'Variable',
-    setting: 'Setting',
+    setting: 'Settings',
   },
   setting: {
     system: 'System Setting',
