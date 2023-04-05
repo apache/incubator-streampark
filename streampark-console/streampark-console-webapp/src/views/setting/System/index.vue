@@ -91,7 +91,8 @@
 
 <template>
   <PageWrapper contentFullHeight>
-    <Card :bordered="false" class="system-setting" :title="t('setting.system.systemSetting')">
+    <Card :bordered="false" class="system-setting">
+      <span class="streampark-basic-title">{{ t('setting.system.systemSetting') }}</span>
       <Collapse class="collapse" v-model:activeKey="collapseActive">
         <CollapsePane v-for="item in settingsList" :key="item.key" :header="item.title">
           <div class="bg-white">
@@ -111,6 +112,15 @@
   .system-setting {
     .ant-card-body {
       padding: 0 24px;
+    }
+
+    .streampark-basic-title {
+      background-color: @background-color-base;
+      height: 100%;
+      font-size: 14px !important;
+      display: table !important;
+      font-weight: normal;
+      margin-top: 24px !important;
     }
 
     .collapse {

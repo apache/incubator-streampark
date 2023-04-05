@@ -50,7 +50,7 @@
       <li class="list-content_item">
         <span>{{ t('flink.project.form.branches') }}</span>
         <p>
-          <a-tag color="blue">{{ item.branches }}</a-tag>
+          <Tag color="blue" style="border-radius: 4px">{{ item.branches }}</Tag>
         </p>
       </li>
       <li class="list-content_item build_time">

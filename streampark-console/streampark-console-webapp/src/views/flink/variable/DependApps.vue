@@ -68,13 +68,3 @@
     <BasicTable @register="registerTable" />
   </PageWrapper>
 </template>
-
-<style lang="less">
-  .app-bar {
-    background-color: @background-color-base;
-    height: 100%;
-    font-weight: normal;
-    margin: 0 32px 0 0;
-    padding: 8px 12px;
-  }
-</style>

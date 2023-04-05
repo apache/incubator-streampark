@@ -258,7 +258,7 @@
         <Icon icon="ant-design:arrow-left-outlined" />
       </a-button>
       <a-button
-        type="danger"
+        type="primary"
         @click="handleFlinkView"
         :disabled="appNotRunning"
         class="float-right -mt-8px mr-20px"

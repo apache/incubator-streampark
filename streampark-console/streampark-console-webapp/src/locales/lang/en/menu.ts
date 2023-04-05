@@ -29,8 +29,8 @@ export default {
     setting: 'Setting',
   },
   setting: {
-    system: 'System',
-    alarm: 'Alert',
+    system: 'System Setting',
+    alarm: 'Alarm Setting',
     flinkHome: 'Flink Home',
     flinkCluster: 'Flink Cluster',
     externalLink: 'External Link',
