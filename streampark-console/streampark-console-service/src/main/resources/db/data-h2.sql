@@ -116,11 +116,11 @@ insert into `t_menu` values (100075, 100033, 'link delete', null, null, 'externa
 insert into `t_menu` values (100076, 100015, 'sql delete', null, null, 'sql:delete', null, '1', 1, null, now(), now());
 
 insert into `t_menu` values (100080, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', 1, 5, now(), now());
-insert into `t_menu` values (100081, 100080, 'setting.system', '/setting/system', 'setting/System/index', null, 'team', '0', 1, 1, now(), now());
+insert into `t_menu` values (100081, 100080, 'setting.system', '/setting/system', 'setting/System/index', null, 'database', '0', 1, 1, now(), now());
 insert into `t_menu` values (100069, 100081, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100035, 100081, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100082, 100080, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'user', '0', 1, 2, now(), now());
-insert into `t_menu` values (100083, 100080, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'smile', '0', 1, 3, now(), now());
+insert into `t_menu` values (100082, 100080, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'alert', '0', 1, 2, now(), now());
+insert into `t_menu` values (100083, 100080, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'desktop', '0', 1, 3, now(), now());
 insert into `t_menu` values (100084, 100080, 'setting.flinkCluster', '/setting/flinkCluster', 'setting/FlinkCluster/index', 'menu:view', 'cluster', '0', 1, 4, now(), now());
 insert into `t_menu` values (100041, 100084, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100042, 100084, 'edit cluster', '/setting/edit_cluster', 'setting/FlinkCluster/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
