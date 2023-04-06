@@ -23,12 +23,10 @@ insert into "public"."t_menu" values (100070, 100015, 'savepoint trigger', null,
 
 -- ISSUE-2192 DDL & DML End
 
-
 -- ISSUE-2366 DDL & DML Start
 alter table "public"."t_flink_app" rename "launch" to "release";
 update "public"."t_menu" set "menu_name"='release',"perms" = 'app:release' where "menu_id" = 100025;
 -- ISSUE-2366 DDL & DML End
-
 
 -- Issue-2191/2215 Start
 drop table if exists "public"."t_external_link";
@@ -106,3 +104,52 @@ alter table "public"."t_yarn_queue" add constraint "t_yarn_queue_pkey" primary k
 alter table "public"."t_yarn_queue" add constraint "unique_team_id_queue_label" unique("team_id", "queue_label");
 
 -- Issue-2324 End --
+
+
+alter table "public"."t_flink_log" add column "option_name" int2;
+
+-- Issue-2494 Start --
+alter table "public"."t_user" add column "login_type" int2 default 0;
+-- Issue-2494 End --
+
+ALTER TABLE public.t_flink_app ALTER COLUMN state TYPE int4 USING state::int4;
+
+-- Issue-2513 Start --
+drop table if exists "public"."t_flink_tutorial";
+-- Issue-2513 End --
+
+-- PR-2545: Split the setting menu
+
+-- delete the old setting menu and associated permissions
+delete from "public"."t_menu" where "menu_id" in (100033,100034,100040,100041,100068,100076,100077,100078);
+
+-- create setting menu and associated sub menus
+insert into "public"."t_menu" values (100080, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', 1, 5, now(), now());
+insert into "public"."t_menu" values (100081, 100080, 'setting.system', '/setting/system', 'setting/System/index', null, 'team', '0', 1, 1, now(), now());
+insert into "public"."t_menu" values (100082, 100080, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'user', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (100083, 100080, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'smile', '0', 1, 3, now(), now());
+insert into "public"."t_menu" values (100084, 100080, 'setting.flinkCluster', '/setting/flinkCluster', 'setting/FlinkCluster/index', 'menu:view', 'cluster', '0', 1, 4, now(), now());
+insert into "public"."t_menu" values (100085, 100080, 'setting.externalLink', '/setting/externalLink', 'setting/ExternalLink/index', 'menu:view', 'link', '0', 1, 5, now(), now());
+insert into "public"."t_menu" values (100086, 100080, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/YarnQueue/index', 'menu:view', 'bars', '0', 1, 6, now(), now());
+
+-- create permissions for setting.system menu
+insert into "public"."t_menu" values (100087, 100081, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (100088, 100081, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
+
+-- create permissions for setting.flinkCluster menu
+insert into "public"."t_menu" values (100089, 100084, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
+insert into "public"."t_menu" values (100090, 100084, 'edit cluster', '/setting/edit_cluster', 'setting/FlinkCluster/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
+
+-- create permissions for setting.yarnQueue menu
+insert into "public"."t_menu" values (100091, 100086, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', 0, null, now(), now());
+insert into "public"."t_menu" values (100092, 100086, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', 0, null, now(), now());
+insert into "public"."t_menu" values (100093, 100086, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', 0, null, now(), now());
+
+-- set permissions for role 100002(team admin)
+insert into "public"."t_role_menu" values (null, 100002, 100080);
+insert into "public"."t_role_menu" values (null, 100002, 100081);
+insert into "public"."t_role_menu" values (null, 100002, 100082);
+insert into "public"."t_role_menu" values (null, 100002, 100083);
+insert into "public"."t_role_menu" values (null, 100002, 100084);
+insert into "public"."t_role_menu" values (null, 100002, 100085);
+insert into "public"."t_role_menu" values (null, 100002, 100086);

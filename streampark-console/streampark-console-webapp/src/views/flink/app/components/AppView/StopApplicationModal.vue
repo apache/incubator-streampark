@@ -23,6 +23,7 @@
 </script>
 
 <script setup lang="ts" name="StopApplicationModal">
+  import { InputNumber } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
@@ -59,7 +60,7 @@
       },
       {
         field: 'customSavepoint',
-        label: 'Custom SavePoint',
+        label: 'Custom Savepoint',
         component: 'Input',
         componentProps: {
           placeholder: 'Entry the custom savepoint path',
@@ -67,6 +68,16 @@
         },
         afterItem: () => h('span', { class: 'conf-switch' }, 'cancel job with savepoint path'),
         ifShow: ({ values }) => !!values.stopSavePointed,
+      },
+      {
+        field: 'savePointTimeout',
+        label: 'Savepoint Timeout',
+        component: 'Select',
+        afterItem: () => h('span', { class: 'conf-switch' }, 'savepoint timeout, Unit: second'),
+        slot: 'savePointTimeout',
+        defaultValue: 60,
+        ifShow: ({ values }) => !!values.stopSavePointed,
+        required: true,
       },
       {
         field: 'drain',
@@ -90,12 +101,14 @@
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, drain, customSavepoint } = (await validate()) as Recordable;
+      const { stopSavePointed, customSavepoint, savePointTimeout, drain } =
+        (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
         savePointed: stopSavePointed,
-        drain: drain,
         savePoint: customSavepoint,
+        savePointTimeout: savePointTimeout,
+        drain: drain,
       };
 
       if (stopSavePointed) {
@@ -104,7 +117,7 @@
             savePoint: customSavepoint,
           });
           if (data.data === false) {
-            createErrorSwal('custom savePoint path is invalid, ' + data.message);
+            createErrorSwal('custom savepoint path is invalid, ' + data.message);
           } else {
             handleStopAction(stopReq);
           }
@@ -151,9 +164,12 @@
   >
     <template #title>
       <SvgIcon name="shutdown" style="color: red" />
-
       {{ t('flink.app.view.stop') }}
     </template>
-    <BasicForm @register="registerForm" class="!pt-20px" />
+    <BasicForm @register="registerForm" class="!pt-30px">
+      <template #savePointTimeout="{ model, field }">
+        <InputNumber v-model:value="model[field]" :min="10" :max="7200" step="10" />
+      </template>
+    </BasicForm>
   </BasicModal>
 </template>

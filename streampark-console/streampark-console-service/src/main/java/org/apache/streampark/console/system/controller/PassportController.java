@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
-import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
@@ -58,34 +57,16 @@ public class PassportController {
   @PostMapping("signin")
   public RestResponse signin(
       @NotBlank(message = "{required}") String username,
-      @NotBlank(message = "{required}") String password)
+      @NotBlank(message = "{required}") String password,
+      @NotBlank(message = "{required}") String loginType)
       throws Exception {
+
     if (StringUtils.isEmpty(username)) {
       return RestResponse.success().put("code", 0);
     }
-    User user = authenticator.authenticate(username, password);
-    return login(username, password, user);
-  }
 
-  @PostMapping("ldapSignin")
-  public RestResponse ldapSignin(
-      @NotBlank(message = "{required}") String username,
-      @NotBlank(message = "{required}") String password)
-      throws Exception {
-    if (StringUtils.isEmpty(username)) {
-      return RestResponse.success().put("code", 0);
-    }
-    User user = authenticator.ldapAuthenticate(username, password);
-    return login(username, password, user);
-  }
+    User user = authenticator.authenticate(username, password, loginType);
 
-  @PostMapping("signout")
-  public RestResponse signout() {
-    SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
-    return new RestResponse();
-  }
-
-  private RestResponse login(String username, String password, User user) throws Exception {
     if (user == null) {
       return RestResponse.success().put("code", 0);
     }
@@ -94,6 +75,7 @@ public class PassportController {
       return RestResponse.success().put("code", 1);
     }
 
+    // set team
     userService.fillInTeam(user);
 
     // no team.
@@ -101,10 +83,8 @@ public class PassportController {
       return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
     }
 
-    password = ShaHashUtils.encrypt(user.getSalt(), password);
-
     this.userService.updateLoginTime(username);
-    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), username, password));
+    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), username));
     LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
     String expireTimeStr = DateUtils.formatFullTime(expireTime);
     JWTToken jwtToken = new JWTToken(token, expireTimeStr);
@@ -113,5 +93,11 @@ public class PassportController {
     Map<String, Object> userInfo =
         userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
     return new RestResponse().data(userInfo);
+  }
+
+  @PostMapping("signout")
+  public RestResponse signout() {
+    SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
+    return new RestResponse();
   }
 }

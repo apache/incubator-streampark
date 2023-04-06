@@ -42,18 +42,29 @@
   import { fetchGetVer, fetchListVer, fetchRemoveConf } from '/@/api/flink/config';
   import { fetchRemoveSavePoint, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 
-  import { fetchBackUps, fetchOptionLog, fetchRemoveBackup } from '/@/api/flink/app/app';
+  import {
+    fetchBackUps,
+    fetchOptionLog,
+    fetchRemoveBackup,
+    fetchDeleteOperationLog,
+  } from '/@/api/flink/app/app';
   import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';
   import CompareModal from './CompareModal.vue';
   import ExecOptionModal from './ExecOptionModal.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useClipboard } from '@vueuse/core';
-  import { AppTypeEnum, JobTypeEnum, SavePointEnum } from '/@/enums/flinkEnum';
+  import {
+    AppTypeEnum,
+    CandidateTypeEnum,
+    ConfigTypeEnum,
+    JobTypeEnum,
+    SavePointEnum,
+  } from '/@/enums/flinkEnum';
   import { fetchFlinkSql, fetchFlinkSqlList, fetchRemoveFlinkSql } from '/@/api/flink/app/flinkSql';
   import FlinkSqlReview from './FlinkSqlReview.vue';
   import FlinkSqlCompareModal from './FlinkSqlCompareModal.vue';
-
+  import { OperationEnum } from '/@/enums/flinkEnum';
   const DescriptionItem = Descriptions.Item;
   const TabPane = Tabs.TabPane;
 
@@ -136,7 +147,7 @@
     ...tableCommonConf,
   });
 
-  const [registerLogsTable] = useTable({
+  const [registerLogsTable, { reload: reloadOperationLog }] = useTable({
     api: fetchOptionLog,
     columns: getOptionLogColumns(),
     ...tableCommonConf,
@@ -276,23 +287,56 @@
         auth: 'app:delete',
         type: 'link',
         icon: 'ant-design:delete-outlined',
-        color: 'error'
+        color: 'error',
       },
     ];
   }
 
   function getBackupAction(record: Recordable): ActionItem[] {
-    return [{
-      popConfirm: {
-        title: t('flink.app.detail.detailTab.confBackupTitle'),
-          confirm: handleDeleteBackup.bind(null, record),
+    return [
+      {
+        tooltip: { title: t('flink.app.detail.detailTab.copyPath') },
+        shape: 'circle',
+        icon: 'ant-design:copy-outlined',
+        onClick: handleCopy.bind(null, record),
       },
-      auth: 'app:delete',
-      type: 'link',
-      icon: 'ant-design:delete-outlined',
-      color: 'error'
-    }]
+      {
+        popConfirm: {
+          title: t('flink.app.detail.detailTab.confBackupTitle'),
+          confirm: handleDeleteBackup.bind(null, record),
+        },
+        auth: 'app:delete',
+        type: 'link',
+        icon: 'ant-design:delete-outlined',
+        color: 'error',
+      },
+    ];
   }
+
+  function getOperationLogAction(record: Recordable): ActionItem[] {
+    return [
+      {
+        tooltip: { title: t('flink.app.detail.detailTab.exception') },
+        auth: 'app:detail',
+        shape: 'circle',
+        type: 'default',
+        ifShow: !record.success,
+        icon: 'ant-design:eye-outlined',
+        onClick: handleException.bind(null, record),
+      },
+      {
+        popConfirm: {
+          title: t('flink.app.detail.detailTab.operationLogDeleteTitle'),
+          confirm: handleDeleteOperationLog.bind(null, record),
+        },
+        auth: 'app:delete',
+        type: 'link',
+        icon: 'ant-design:delete-outlined',
+        color: 'error',
+      },
+    ];
+  }
+
   /* delete savePoint */
   async function handleDeleteSavePoint(record: Recordable) {
     await fetchRemoveSavePoint({ id: record.id });
@@ -302,6 +346,11 @@
   async function handleDeleteBackup(record: Recordable) {
     await fetchRemoveBackup(record.id);
     reloadBackup();
+  }
+
+  async function handleDeleteOperationLog(record: Recordable) {
+    await fetchDeleteOperationLog(record.id);
+    reloadOperationLog();
   }
 
   /* copy path */
@@ -333,14 +382,22 @@
       </TabPane>
       <TabPane
         key="2"
-        tab="Configuration"
+        :tab="t('flink.app.detail.detailTab.detailTabName.configuration')"
         v-if="app && app.appType == AppTypeEnum.STREAMPARK_FLINK && tabConf.showConf"
       >
         <BasicTable @register="registerConfigTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'format'">
-              <Tag color="#2db7f5" v-if="record.format == 1"> yaml </Tag>
-              <Tag color="#108ee9" v-if="record.format == 2"> properties </Tag>
+              <Tag class="bold-tag" color="#2db7f5" v-if="record.format === ConfigTypeEnum.YAML">
+                yaml
+              </Tag>
+              <Tag
+                class="bold-tag"
+                color="#108ee9"
+                v-if="record.format === ConfigTypeEnum.PROPERTIES"
+              >
+                properties
+              </Tag>
             </template>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
@@ -361,13 +418,35 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="3" tab="Flink SQL" v-if="app.jobType === JobTypeEnum.SQL">
+      <TabPane
+        key="3"
+        :tab="t('flink.app.detail.detailTab.detailTabName.flinkSql')"
+        v-if="app.jobType === JobTypeEnum.SQL"
+      >
         <BasicTable @register="registerFlinkSqlTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'candidate'">
-              <Tag color="#52c41a" v-if="record.candidate == 0"> None </Tag>
-              <Tag color="#2db7f5" v-if="record.candidate == 1"> New </Tag>
-              <Tag color="#108ee9" v-if="record.candidate == 2"> History </Tag>
+              <Tag
+                class="bold-tag"
+                color="#52c41a"
+                v-if="record.candidate === CandidateTypeEnum.NONE"
+              >
+                None
+              </Tag>
+              <Tag
+                class="bold-tag"
+                color="#2db7f5"
+                v-if="record.candidate === CandidateTypeEnum.NEW"
+              >
+                New
+              </Tag>
+              <Tag
+                class="bold-tag"
+                color="#108ee9"
+                v-if="record.candidate === CandidateTypeEnum.HISTORY"
+              >
+                History
+              </Tag>
             </template>
             <template v-if="column.dataIndex == 'version'">
               <a-button type="primary" shape="circle" size="small" class="mr-10px">
@@ -387,33 +466,39 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="4" tab="Savepoints" v-if="tabConf.showSaveOption">
+      <TabPane
+        key="4"
+        :tab="t('flink.app.detail.detailTab.detailTabName.savepoint')"
+        v-if="tabConf.showSaveOption"
+      >
         <BasicTable @register="registerSavePointTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'triggerTime'">
               <Icon icon="ant-design:clock-circle-outlined" />
               {{ record.triggerTime }}
             </template>
-            <template v-if="column.dataIndex == 'type'">
-              <div class="app_state">
-                <Tag color="#0C7EF2" v-if="record['type'] === SavePointEnum.CHECK_POINT">
-                  {{ t('flink.app.detail.detailTab.check') }}
-                </Tag>
-                <Tag color="#52c41a" v-if="record['type'] === SavePointEnum.SAVE_POINT">
-                  {{ t('flink.app.detail.detailTab.save') }}
-                </Tag>
-              </div>
-            </template>
-            <template v-if="column.dataIndex == 'latest'">
+            <div v-if="column.dataIndex == 'type'">
+              <Tag color="blue" v-if="record['type'] === SavePointEnum.CHECK_POINT">
+                {{ t('flink.app.detail.detailTab.check') }}
+              </Tag>
+              <Tag color="cyan" v-if="record['type'] === SavePointEnum.SAVE_POINT">
+                {{ t('flink.app.detail.detailTab.save') }}
+              </Tag>
+            </div>
+            <div v-if="column.dataIndex == 'latest'">
               <Tag color="green" v-if="record.latest"> Latest </Tag>
-            </template>
+            </div>
             <template v-if="column.dataIndex == 'operation'">
               <TableAction :actions="getSavePointAction(record)" />
             </template>
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="5" tab="Backups" v-if="tabConf.showBackup">
+      <TabPane
+        key="5"
+        :tab="t('flink.app.detail.detailTab.detailTabName.backup')"
+        v-if="tabConf.showBackup"
+      >
         <BasicTable @register="registerBackupTable">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex == 'version'">
@@ -427,41 +512,41 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="6" tab="Option Logs" v-if="tabConf.showOptionLog">
+      <TabPane
+        key="6"
+        :tab="t('flink.app.detail.detailTab.detailTabName.operationLog')"
+        v-if="tabConf.showOptionLog"
+      >
         <BasicTable @register="registerLogsTable">
           <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex == 'optionName'">
+              <Tag color="blue" v-if="record.optionName === OperationEnum.RELEASE"> Release </Tag>
+              <Tag color="green" v-if="record.optionName === OperationEnum.START"> Start </Tag>
+              <Tag color="cyan" v-if="record.optionName === OperationEnum.SAVEPOINT">
+                Savepoint
+              </Tag>
+              <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
+            </template>
             <template v-if="column.dataIndex == 'yarnAppId'">
               <a-button type="link" @click="handleView(app as any, '')">
                 {{ record.yarnAppId }}
               </a-button>
             </template>
             <template v-if="column.dataIndex == 'jobManagerUrl'">
-              <a-button type="link" :href="record.jobManagerUrl" target="_blank">
+              <a type="link" :href="record.jobManagerUrl" target="_blank">
                 {{ record.jobManagerUrl }}
-              </a-button>
+              </a>
             </template>
             <template v-if="column.dataIndex == 'optionTime'">
               <Icon icon="ant-design:clock-circle-outlined" />
               {{ record.optionTime }}
             </template>
             <template v-if="column.dataIndex == 'success'">
-              <Tag class="start-state" color="#52c41a" v-if="record.success"> SUCCESS </Tag>
-              <Tag class="start-state" color="#f5222d" v-else> FAILED </Tag>
+              <Tag class="bold-tag" color="#52c41a" v-if="record.success"> SUCCESS </Tag>
+              <Tag class="bold-tag" color="#f5222d" v-else> FAILED </Tag>
             </template>
             <template v-if="column.dataIndex == 'operation'">
-              <TableAction
-                :actions="[
-                  {
-                    tooltip: { title: t('flink.app.detail.detailTab.exception') },
-                    auth: 'app:detail',
-                    shape: 'circle',
-                    type: 'default',
-                    ifShow: !record.success,
-                    icon: 'ant-design:eye-outlined',
-                    onClick: handleException.bind(null, record),
-                  },
-                ]"
-              />
+              <TableAction :actions="getOperationLogAction(record)" />
             </template>
           </template>
         </BasicTable>

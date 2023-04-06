@@ -48,7 +48,10 @@
     </select>
 
     <select id="existsByQueueLabel" resultType="java.lang.Boolean" parameterType="org.apache.streampark.console.core.entity.YarnQueue">
-        select count(1)
+        select
+         CASE
+          WHEN  count(1) > 0 THEN true ELSE false
+         END
         from t_yarn_queue
         <where>
             team_id = #{yarnQueue.teamId}

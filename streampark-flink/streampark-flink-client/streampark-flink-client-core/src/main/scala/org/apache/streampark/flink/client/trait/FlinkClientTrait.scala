@@ -47,6 +47,7 @@ import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 import org.apache.streampark.flink.client.bean._
 
+import java.time.Duration
 import scala.annotation.tailrec
 
 trait FlinkClientTrait extends Logger {
@@ -119,7 +120,7 @@ trait FlinkClientTrait extends Logger {
 
   }
 
-  def setJvmOptions(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+  private[this] def setJvmOptions(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     if (MapUtils.isNotEmpty(submitRequest.properties)) {
       submitRequest.properties.foreach(x => {
         val k = x._1.trim
@@ -164,18 +165,20 @@ trait FlinkClientTrait extends Logger {
     logInfo(
       s"""
          |----------------------------------------- flink job cancel --------------------------------
-         |     userFlinkHome  : ${cancelRequest.flinkVersion.flinkHome}
-         |     flinkVersion   : ${cancelRequest.flinkVersion.version}
-         |     clusterId      : ${cancelRequest.clusterId}
-         |     withSavePoint  : ${cancelRequest.withSavepoint}
-         |     savePointPath  : ${cancelRequest.savepointPath}
-         |     withDrain      : ${cancelRequest.withDrain}
-         |     k8sNamespace   : ${cancelRequest.kubernetesNamespace}
-         |     appId          : ${cancelRequest.clusterId}
-         |     jobId          : ${cancelRequest.jobId}
+         |     userFlinkHome     : ${cancelRequest.flinkVersion.flinkHome}
+         |     flinkVersion      : ${cancelRequest.flinkVersion.version}
+         |     clusterId         : ${cancelRequest.clusterId}
+         |     withSavePoint     : ${cancelRequest.withSavepoint}
+         |     savePointPath     : ${cancelRequest.savepointPath}
+         |     savePointTimeout  : ${cancelRequest.savePointTimeout}
+         |     withDrain         : ${cancelRequest.withDrain}
+         |     k8sNamespace      : ${cancelRequest.kubernetesNamespace}
+         |     appId             : ${cancelRequest.clusterId}
+         |     jobId             : ${cancelRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     val flinkConf = new Configuration()
+    flinkConf.safeSet(ClientOptions.CLIENT_TIMEOUT, Duration.ofSeconds(cancelRequest.savePointTimeout))
     doCancel(cancelRequest, flinkConf)
   }
 
@@ -430,7 +433,7 @@ trait FlinkClientTrait extends Logger {
       programArgs += PARAM_KEY_FLINK_PARALLELISM
       programArgs += getParallelism(submitRequest).toString
       submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
+        case DevelopmentMode.FLINK_SQL =>
           programArgs += PARAM_KEY_FLINK_SQL
           programArgs += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
@@ -475,16 +478,14 @@ trait FlinkClientTrait extends Logger {
 
     val savePointDir: String = tryGetSavepointPathIfNeed(cancelRequest)
 
-    val clientTimeout = getOptionFromDefaultFlinkConfig(cancelRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
-
     val clientWrapper = new FlinkClusterClient(client)
 
     (Try(cancelRequest.withSavepoint).getOrElse(false), Try(cancelRequest.withDrain).getOrElse(false)) match {
       case (false, false) =>
         client.cancel(jobID).get()
         null
-      case (true, false) => clientWrapper.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
-      case (_, _) => clientWrapper.stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      case (true, false) => clientWrapper.cancelWithSavepoint(jobID, savePointDir).get(cancelRequest.savePointTimeout, TimeUnit.SECONDS)
+      case (_, _) => clientWrapper.stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir).get(cancelRequest.savePointTimeout, TimeUnit.SECONDS)
     }
   }
 
@@ -512,14 +513,9 @@ trait FlinkClientTrait extends Logger {
   }
 
   private[client] def triggerSavepoint(savepointRequest: TriggerSavepointRequest, jobID: JobID, client: ClusterClient[_]): String = {
-
     val savepointPath = tryGetSavepointPathIfNeed(savepointRequest)
-
-    val clientTimeout = getOptionFromDefaultFlinkConfig(savepointRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
-
     val clientWrapper = new FlinkClusterClient(client)
-
-    clientWrapper.triggerSavepoint(jobID, savepointPath).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+    clientWrapper.triggerSavepoint(jobID, savepointPath).get()
   }
 
 }

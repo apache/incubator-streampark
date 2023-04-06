@@ -30,7 +30,6 @@ import { BasicTableParams } from '../model/baseModel';
 
 enum Api {
   Login = '/passport/signin',
-  LoginByLdap = '/passport/ldapSignin',
   Logout = '/passport/signout',
   GetUserInfo = '/getUserInfo',
   GetPermCode = '/getPermCode',
@@ -58,19 +57,6 @@ export function loginApi(
 ): Promise<AxiosResponse<Result<LoginResultModel>>> {
   return defHttp.post(
     { url: Api.Login, data },
-    { isReturnNativeResponse: true, errorMessageMode: mode },
-  );
-}
-/**
- * @description: user login api (ldap)
- * @return {Promise<AxiosResponse<Result<LoginResultModel>>>}
- */
-export function loginLdapApi(
-  data: LoginParams,
-  mode: ErrorMessageMode = 'modal',
-): Promise<AxiosResponse<Result<LoginResultModel>>> {
-  return defHttp.post(
-    { url: Api.LoginByLdap, data },
     { isReturnNativeResponse: true, errorMessageMode: mode },
   );
 }
@@ -139,6 +125,7 @@ export function fetchUserTypes() {
       return res.map((t: string) => ({ label: t, value: t }));
     });
 }
+
 /**
  * User change password
  * @param data

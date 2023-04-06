@@ -19,6 +19,7 @@ export function toPomString(pom) {
   const groupId = pom.groupId;
   const artifactId = pom.artifactId;
   const version = pom.version;
+  const classifier = pom.classifier;
   const exclusions = pom.exclusions || [];
   let exclusionString = '';
   let pomString = '';
@@ -50,18 +51,36 @@ export function toPomString(pom) {
       '     </exclusions>\n' +
       '   </dependency>';
   } else {
-    pomString =
-      '  <dependency>\n' +
-      '    <groupId>' +
-      groupId +
-      '</groupId>\n' +
-      '    <artifactId>' +
-      artifactId +
-      '</artifactId>\n' +
-      '    <version>' +
-      version +
-      '</version>\n' +
-      '  </dependency>';
+    if (classifier != null) {
+      pomString =
+        '  <dependency>\n' +
+        '    <groupId>' +
+        groupId +
+        '</groupId>\n' +
+        '    <artifactId>' +
+        artifactId +
+        '</artifactId>\n' +
+        '    <version>' +
+        version +
+        '</version>\n' +
+        '    <classifier>' +
+        classifier +
+        '</classifier>\n' +
+        '  </dependency>';
+    } else {
+      pomString =
+        '  <dependency>\n' +
+        '    <groupId>' +
+        groupId +
+        '</groupId>\n' +
+        '    <artifactId>' +
+        artifactId +
+        '</artifactId>\n' +
+        '    <version>' +
+        version +
+        '</version>\n' +
+        '  </dependency>';
+    }
   }
   return pomString;
 }

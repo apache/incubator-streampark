@@ -44,10 +44,10 @@ export function dateToDuration(ms: number) {
   const hh = mi * 60;
   const dd = hh * 24;
 
-  const day = parseInt(ms / dd);
-  const hour = parseInt((ms - day * dd) / hh);
-  const minute = parseInt((ms - day * dd - hour * hh) / mi);
-  const seconds = parseInt((ms - day * dd - hour * hh - minute * mi) / ss);
+  const day = Math.floor(ms / dd);
+  const hour = Math.floor((ms - day * dd) / hh);
+  const minute = Math.floor((ms - day * dd - hour * hh) / mi);
+  const seconds = Math.floor((ms - day * dd - hour * hh - minute * mi) / ss);
   if (day > 0) {
     return day + 'd ' + hour + 'h ' + minute + 'm ' + seconds + 's';
   } else if (hour > 0) {

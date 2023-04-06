@@ -116,7 +116,6 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
   override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
     executeClientAction(request, flinkConfig, (jobId, clusterClient) => {
       val actionResult = super.triggerSavepoint(request, jobId, clusterClient)
-      IngressController.deleteIngress(request.clusterId, request.kubernetesNamespace)
       SavepointResponse(actionResult)
     })
   }
@@ -150,9 +149,9 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
       s"namespace=${conf.get(KubernetesConfigOptions.NAMESPACE)}"
 
   private def covertToServiceExposedType(exposedType: FlinkK8sRestExposedType): ServiceExposedType = exposedType match {
-    case FlinkK8sRestExposedType.ClusterIP => ServiceExposedType.ClusterIP
-    case FlinkK8sRestExposedType.LoadBalancer => ServiceExposedType.LoadBalancer
-    case FlinkK8sRestExposedType.NodePort => ServiceExposedType.NodePort
+    case FlinkK8sRestExposedType.CLUSTER_IP => ServiceExposedType.ClusterIP
+    case FlinkK8sRestExposedType.LOAD_BALANCER => ServiceExposedType.LoadBalancer
+    case FlinkK8sRestExposedType.NODE_PORT => ServiceExposedType.NodePort
     case _ => ServiceExposedType.LoadBalancer
   }
 

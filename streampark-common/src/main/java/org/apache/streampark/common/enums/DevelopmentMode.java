@@ -22,10 +22,10 @@ import java.io.Serializable;
 public enum DevelopmentMode implements Serializable {
 
   /** custom code */
-  CUSTOMCODE("Custom Code", 1),
+  CUSTOM_CODE("Custom Code", 1),
 
   /** Flink SQL */
-  FLINKSQL("Flink SQL", 2);
+  FLINK_SQL("Flink SQL", 2);
 
   private final String mode;
 

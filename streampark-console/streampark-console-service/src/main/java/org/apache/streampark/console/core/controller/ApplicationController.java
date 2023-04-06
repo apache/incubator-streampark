@@ -214,7 +214,6 @@ public class ApplicationController {
   public RestResponse start(@Parameter(hidden = true) Application app) {
     try {
       applicationService.checkEnv(app);
-      applicationService.starting(app);
       applicationService.start(app, false);
       return RestResponse.success(true);
     } catch (Exception e) {
@@ -322,6 +321,13 @@ public class ApplicationController {
     return RestResponse.success(applicationList);
   }
 
+  @PostMapping("deleteOperationLog")
+  @RequiresPermissions("app:delete")
+  public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
+    Boolean deleted = applicationLogService.delete(applicationLog);
+    return RestResponse.success(deleted);
+  }
+
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
@@ -366,7 +372,7 @@ public class ApplicationController {
     } else if (pathPart == null) {
       error =
           "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-    } else if (pathPart.length() == 0 || pathPart.equals("/")) {
+    } else if (pathPart.length() == 0 || "/".equals(pathPart)) {
       error = "Cannot use the root directory for checkpoints.";
     }
     if (error != null) {

@@ -25,7 +25,15 @@ export default {
     memberManagement: '成员管理',
     project: '项目管理',
     application: '作业管理',
-    setting: '设置中心',
     variable: '变量管理',
+    setting: '设置中心',
+  },
+  setting: {
+    system: '系统设置',
+    alarm: '告警设置',
+    flinkHome: 'Flink 版本',
+    flinkCluster: 'Flink集群',
+    externalLink: '扩展链接',
+    yarnQueue: 'Yarn 队列',
   },
 };

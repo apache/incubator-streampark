@@ -56,10 +56,12 @@ export const useLockStore = defineStore({
       const tryLogin = async () => {
         try {
           const username = userStore.getUserInfo?.username;
+          const loginType = userStore.getUserInfo?.loginType;
           const { data } = await loginApi(
             {
               username,
               password: password!,
+              loginType,
             },
             'none',
           );

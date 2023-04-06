@@ -21,7 +21,7 @@ import java.util.regex.Pattern
 
 import org.eclipse.aether.artifact.{Artifact => AetherArtifact}
 
-case class Artifact(groupId: String, artifactId: String, version: String) {
+case class Artifact(groupId: String, artifactId: String, version: String, classifier: String = null) {
 
   def eq(artifact: AetherArtifact): Boolean = {
     artifact.getGroupId match {

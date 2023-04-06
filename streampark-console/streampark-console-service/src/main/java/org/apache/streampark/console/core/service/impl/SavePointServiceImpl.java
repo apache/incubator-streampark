@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
-import org.apache.streampark.common.util.FlinkUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
@@ -36,6 +35,7 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.CheckPointType;
+import org.apache.streampark.console.core.enums.Operation;
 import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.mapper.SavePointMapper;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
@@ -48,6 +48,7 @@ import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
+import org.apache.streampark.flink.util.FlinkUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CheckpointingOptions;
@@ -281,6 +282,13 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     log.info("Start to trigger savepoint for app {}", appId);
     Application application = applicationService.getById(appId);
 
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(Operation.SAVEPOINT.getValue());
+    applicationLog.setAppId(application.getId());
+    applicationLog.setJobManagerUrl(application.getJobManagerUrl());
+    applicationLog.setOptionTime(new Date());
+    applicationLog.setYarnAppId(application.getClusterId());
+
     FlinkRESTAPIWatcher.addSavepoint(application.getId());
 
     application.setOptionState(OptionState.SAVEPOINTING.getValue());
@@ -311,38 +319,35 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     CompletableFuture<SavepointResponse> savepointFuture =
         CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
 
-    handleSavepointResponseFuture(application, savepointFuture);
+    handleSavepointResponseFuture(application, applicationLog, savepointFuture);
   }
 
   private void handleSavepointResponseFuture(
-      Application application, CompletableFuture<SavepointResponse> savepointFuture) {
+      Application application,
+      ApplicationLog applicationLog,
+      CompletableFuture<SavepointResponse> savepointFuture) {
     CompletableFutureUtils.runTimeout(
             savepointFuture,
             10L,
             TimeUnit.MINUTES,
             savepointResponse -> {
               if (savepointResponse != null && savepointResponse.savePointDir() != null) {
+                applicationLog.setSuccess(true);
                 String savePointDir = savepointResponse.savePointDir();
                 log.info("Request savepoint successful, savepointDir: {}", savePointDir);
               }
             },
             e -> {
               log.error("Trigger savepoint for flink job failed.", e);
-              ApplicationLog log = new ApplicationLog();
-              log.setAppId(application.getId());
-              if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-                log.setYarnAppId(application.getClusterId());
-              }
-              log.setOptionTime(new Date());
               String exception = Utils.stringifyException(e);
-              log.setException(exception);
+              applicationLog.setException(exception);
               if (!(e instanceof TimeoutException)) {
-                log.setSuccess(false);
+                applicationLog.setSuccess(false);
               }
-              applicationLogService.save(log);
             })
         .whenComplete(
             (t, e) -> {
+              applicationLogService.save(applicationLog);
               application.setOptionState(OptionState.NONE.getValue());
               application.setOptionTime(new Date());
               applicationService.update(application);

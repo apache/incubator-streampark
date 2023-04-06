@@ -202,7 +202,7 @@
       }
       const params = {
         id: app.id,
-        sqlId: values.sqlId || app.sqlId || null,
+        sqlId: values.flinkSqlHistory || app.sqlId || null,
         flinkSql: values.flinkSql,
         config,
         format: values.isSetConfig ? 1 : null,

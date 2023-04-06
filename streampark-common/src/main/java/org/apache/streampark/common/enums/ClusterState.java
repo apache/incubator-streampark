@@ -26,7 +26,7 @@ public enum ClusterState implements Serializable {
   /** cluster started */
   STARTED(1),
   /** cluster stopped */
-  STOPED(2),
+  STOPPED(2),
 
   /** cluster lost */
   LOST(3);

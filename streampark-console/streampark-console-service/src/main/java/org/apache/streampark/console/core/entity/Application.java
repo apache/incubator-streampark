@@ -122,6 +122,7 @@ public class Application implements Serializable {
   private Boolean build;
 
   /** max restart retries after job failed */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer restartSize;
 
   /** has restart count */
@@ -130,6 +131,7 @@ public class Application implements Serializable {
   private Integer optionState;
 
   /** alert id */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer alertId;
 
   private String args;
@@ -242,6 +244,7 @@ public class Application implements Serializable {
   private transient String savePoint;
   private transient Boolean savePointed = false;
   private transient Boolean drain = false;
+  private transient Long savePointTimeout = 60L;
   private transient Boolean allowNonRestored = false;
   private transient String socketId;
   private transient String projectName;
@@ -326,6 +329,30 @@ public class Application implements Serializable {
         return 0;
       default:
         return 1;
+    }
+  }
+
+  /**
+   * Determine whether the application can be started to prevent repeated starts.
+   *
+   * @return true: can start | false: can not start.
+   */
+  public boolean isCanBeStart() {
+    FlinkAppState state = FlinkAppState.of(getState());
+    switch (state) {
+      case ADDED:
+      case CREATED:
+      case FAILED:
+      case CANCELED:
+      case FINISHED:
+      case LOST:
+      case TERMINATED:
+      case SUCCEEDED:
+      case KILLED:
+      case POS_TERMINATED:
+        return true;
+      default:
+        return false;
     }
   }
 
@@ -444,12 +471,12 @@ public class Application implements Serializable {
 
   @JsonIgnore
   public boolean isFlinkSqlJob() {
-    return DevelopmentMode.FLINKSQL.getValue().equals(this.getJobType());
+    return DevelopmentMode.FLINK_SQL.getValue().equals(this.getJobType());
   }
 
   @JsonIgnore
   public boolean isCustomCodeJob() {
-    return DevelopmentMode.CUSTOMCODE.getValue().equals(this.getJobType());
+    return DevelopmentMode.CUSTOM_CODE.getValue().equals(this.getJobType());
   }
 
   @JsonIgnore
@@ -674,7 +701,13 @@ public class Application implements Serializable {
     public DependencyInfo toJarPackDeps() {
       List<Artifact> mvnArts =
           this.pom.stream()
-              .map(pom -> new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
+              .map(
+                  pom ->
+                      new Artifact(
+                          pom.getGroupId(),
+                          pom.getArtifactId(),
+                          pom.getVersion(),
+                          pom.getClassifier()))
               .collect(Collectors.toList());
       List<String> extJars =
           this.jar.stream()
@@ -705,6 +738,7 @@ public class Application implements Serializable {
     private String groupId;
     private String artifactId;
     private String version;
+    private String classifier;
 
     @Override
     public boolean equals(Object o) {
@@ -719,17 +753,16 @@ public class Application implements Serializable {
 
     @Override
     public int hashCode() {
-      return Objects.hash(groupId, artifactId, version);
+      return Objects.hash(groupId, artifactId, version, classifier);
     }
 
     @Override
     public String toString() {
-      return groupId + ":" + artifactId + ":" + version;
+      return groupId + ":" + artifactId + ":" + version + getClassifier(":");
     }
 
-    @JsonIgnore
-    public String getPath() {
-      return getGroupId() + "_" + getArtifactId() + "-" + getVersion() + ".jar";
+    private String getClassifier(String joiner) {
+      return StringUtils.isEmpty(classifier) ? "" : joiner + classifier;
     }
   }
 }

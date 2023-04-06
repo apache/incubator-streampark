@@ -46,6 +46,7 @@ enum APP_API {
   ROLLBACK = '/flink/app/rollback',
   REVOKE = '/flink/app/revoke',
   OPTION_LOG = '/flink/app/optionlog',
+  DELETE_OPERATION_LOG = '/flink/app/deleteOperationLog',
   CHECK_JAR = '/flink/app/checkjar',
   VERIFY_SCHEMA = '/flink/app/verifySchema',
   CHECK_SAVEPOINT_PATH = '/flink/app/checkSavepointPath',
@@ -159,6 +160,11 @@ export function fetchBackUps(data) {
 export function fetchOptionLog(data) {
   return defHttp.post({ url: APP_API.OPTION_LOG, data });
 }
+
+export function fetchDeleteOperationLog(id: string) {
+  return defHttp.post({ url: APP_API.DELETE_OPERATION_LOG, data: { id } });
+}
+
 /**
  * forced stop
  * @param params id:string

@@ -91,7 +91,7 @@ public class ShiroRealm extends AuthorizingRealm {
       throw new AuthenticationException("ERROR Incorrect username or password!");
     }
 
-    if (!JWTUtil.verify(token, username, user.getPassword())) {
+    if (!JWTUtil.verify(token, username)) {
       // Check whether the token belongs to the api and whether the permission is valid
       String tokenDb = WebUtils.encryptToken(token);
       boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);

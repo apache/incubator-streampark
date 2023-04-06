@@ -29,32 +29,27 @@ import org.apache.streampark.common.util.{ClassLoaderUtils, Logger, Utils}
 
 object FlinkShimsProxy extends Logger {
 
-  private[this] val INCLUDE_PATTERN: Pattern = Pattern.compile(
-    "(json4s|jackson)(.*).jar",
-    Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
-
-  private[this] val SHIMS_PATTERN = Pattern.compile(
-    "streampark-flink-shims_flink-(1.12|1.13|1.14|1.15|1.16)_(2.11|2.12)-(.*).jar",
-    Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
-
   private[this] val SHIMS_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
   private[this] val VERIFY_SQL_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
+
+  private[this] val INCLUDE_PATTERN: Pattern = Pattern.compile(
+    "(json4s|jackson)(.*).jar",
+    Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
   private[this] def getFlinkShimsResourcePattern(flinkLargeVersion: String) =
     Pattern.compile(
       s"flink-(.*)-$flinkLargeVersion(.*).jar",
       Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
-  private[this] def getStreamParkLibPattern(scalaVersion: String): Pattern = Pattern.compile(
-    s"streampark-(.*)_$scalaVersion-(.*).jar",
-    Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+
+  private[this] lazy val FLINK_SHIMS_PREFIX = "streampark-flink-shims_flink"
 
   /**
    * Get shimsClassLoader to execute for scala API
    *
    * @param flinkVersion flinkVersion
-   * @param func execute function
+   * @param func         execute function
    * @tparam T
    * @return
    */
@@ -67,7 +62,7 @@ object FlinkShimsProxy extends Logger {
    * Get shimsClassLoader to execute for java API
    *
    * @param flinkVersion flinkVersion
-   * @param func execute function
+   * @param func         execute function
    * @tparam T
    * @return
    */
@@ -76,7 +71,6 @@ object FlinkShimsProxy extends Logger {
     ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
-  // flink 1.12 1.13~1.14 1.15 1.16 parseSql class exist in different dependencies,
   // need to load all flink-table dependencies compatible with different versions
   def getVerifySqlLibClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
     logInfo(s"add verify sql lib,flink version: $flinkVersion")
@@ -91,13 +85,12 @@ object FlinkShimsProxy extends Logger {
         val shimsUrls = ListBuffer[URL](libTableURL ++ optTableURL: _*)
 
         // 3) add only streampark shims jar
-        addShimsUrls(
-          flinkVersion,
-          file => {
-            if (file != null && file.getName.startsWith("streampark-flink-shims")) {
-              shimsUrls += file.toURI.toURL
-            }
-          })
+        addShimsUrls(flinkVersion, file => {
+          if (file.getName.startsWith("streampark-flink-shims")) {
+            shimsUrls += file.toURI.toURL
+          }
+        })
+
         new ChildFirstClassLoader(
           shimsUrls.toArray,
           Thread.currentThread().getContextClassLoader,
@@ -111,29 +104,28 @@ object FlinkShimsProxy extends Logger {
 
     val libPath = new File(s"$appHome/lib")
     require(libPath.exists())
+
     val majorVersion = flinkVersion.majorVersion
     val scalaVersion = flinkVersion.scalaVersion
-    val streamParkMatcher = getStreamParkLibPattern(scalaVersion)
 
     libPath.listFiles().foreach((jar: File) => {
-      try {
-        val shimsMatcher = SHIMS_PATTERN.matcher(jar.getName)
-        if (shimsMatcher.matches()) {
-          if (majorVersion == shimsMatcher.group(1) && scalaVersion == shimsMatcher.group(2)) {
+      val jarName = jar.getName
+      if (jarName.endsWith(".jar")) {
+        if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
+          val prefixVer = s"$FLINK_SHIMS_PREFIX-${majorVersion}_$scalaVersion"
+          if (jarName.startsWith(prefixVer)) {
             addShimUrl(jar)
+            logInfo(s"include flink shims jar lib: $jarName")
           }
         } else {
-          if (INCLUDE_PATTERN.matcher(jar.getName).matches()) {
+          if (INCLUDE_PATTERN.matcher(jarName).matches()) {
             addShimUrl(jar)
-            logInfo(s"include jar lib: ${jar.getName}")
-          }
-          if (streamParkMatcher.matcher(jar.getName).matches()) {
+            logInfo(s"include jar lib: $jarName")
+          } else if (jarName.matches(s"^streampark-.*_$scalaVersion.*$$")) {
             addShimUrl(jar)
-            logInfo(s"include streampark lib: ${jar.getName}")
+            logInfo(s"include streampark lib: $jarName")
           }
         }
-      } catch {
-        case e: Exception => e.printStackTrace()
       }
     })
   }
@@ -161,18 +153,17 @@ object FlinkShimsProxy extends Logger {
         val shimsUrls = ListBuffer[URL](libURL: _*)
 
         // 2) add all shims jar
-        addShimsUrls(
-          flinkVersion,
-          file => {
-            if (file != null) {
-              shimsUrls += file.toURI.toURL
-            }
-          })
+        addShimsUrls(flinkVersion, file => {
+          if (file != null) {
+            shimsUrls += file.toURI.toURL
+          }
+        })
 
         new ChildFirstClassLoader(
           shimsUrls.toArray,
           Thread.currentThread().getContextClassLoader,
-          getFlinkShimsResourcePattern(flinkVersion.majorVersion))
+          getFlinkShimsResourcePattern(flinkVersion.majorVersion)
+        )
       })
   }
 
@@ -182,8 +173,7 @@ object FlinkShimsProxy extends Logger {
     file.listFiles.filter(filterFun).map(_.toURI.toURL).toList
   }
 
-  @throws[Exception]
-  def getObject[T](loader: ClassLoader, obj: Object): T = {
+  @throws[Exception] def getObject[T](loader: ClassLoader, obj: Object): T = {
     val arrayOutputStream = new ByteArrayOutputStream
     val result = Utils.tryWithResource(new ObjectOutputStream(arrayOutputStream))(objectOutputStream => {
       objectOutputStream.writeObject(obj)

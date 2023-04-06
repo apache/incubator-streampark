@@ -38,6 +38,7 @@ export const columns: BasicColumn[] = [
   { title: t('system.user.form.userName'), dataIndex: 'username', sorter: true },
   { title: t('system.user.form.nickName'), dataIndex: 'nickName' },
   { title: t('system.user.form.userType'), dataIndex: 'userType' },
+  { title: t('system.user.form.loginType'), dataIndex: 'loginType' },
   {
     title: t('system.user.form.status'),
     dataIndex: 'status',

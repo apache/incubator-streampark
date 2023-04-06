@@ -16,7 +16,6 @@
  */
 import { CSSProperties, VNodeChild } from 'vue';
 import VueTypes, {
-  toType,
   toValidableType,
   createTypes,
   VueTypeValidableDef,
@@ -24,14 +23,6 @@ import VueTypes, {
 } from 'vue-types';
 
 export default class ProjectTypes extends VueTypes {
-  // define a custom validator that accepts configuration parameters
-  static maxLength() {
-    return toType('maxLength', {
-      type: String,
-      validator: (max, v) => v.length <= max,
-    });
-  }
-
   // a native-like validator that supports the `.validable` method
   static get positive() {
     return toValidableType('positive', {
@@ -57,18 +48,4 @@ const propTypes = createTypes({
   object: undefined,
   integer: undefined,
 }) as PropTypes;
-
-propTypes.extend([
-  {
-    name: 'style',
-    getter: true,
-    type: [String, Object],
-    default: undefined,
-  },
-  {
-    name: 'VNodeChild',
-    getter: true,
-    type: undefined,
-  },
-]);
 export { propTypes };

@@ -171,6 +171,7 @@ create table `t_flink_log` (
   `success` tinyint default null,
   `exception` text collate utf8mb4_general_ci,
   `option_time` datetime default null,
+  `option_name` tinyint default null,
   primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
@@ -376,6 +377,7 @@ create table `t_user` (
   `password` varchar(128) collate utf8mb4_general_ci not null comment 'password',
   `email` varchar(128) collate utf8mb4_general_ci default null comment 'email',
   `user_type` int  not null comment 'user type 1:admin 2:user',
+  `login_type` tinyint default 0 comment 'login type 0:password 1:ldap',
   `last_team_id` bigint default null comment 'last team id',
   `status` char(1) collate utf8mb4_general_ci not null comment 'status 0:locked 1:active',
   `create_time` datetime not null default current_timestamp comment 'create time',

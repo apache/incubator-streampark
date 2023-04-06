@@ -49,6 +49,7 @@
   import { UserListRecord } from '/@/api/system/model/userModel';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
+  import { LoginTypeEnum } from '/@/views/base/login/useLogin';
 
   export default defineComponent({
     name: 'User',
@@ -104,7 +105,9 @@
             icon: 'bx:reset',
             auth: 'user:reset',
             tooltip: t('system.user.table.reset'),
-            ifShow: () => record.username !== 'admin' || userName.value === 'admin',
+            ifShow: () =>
+              (record.username !== 'admin' || userName.value === 'admin') &&
+              record.loginType == LoginTypeEnum[LoginTypeEnum.PASSWORD],
             popConfirm: {
               title: t('system.user.table.resetTip'),
               confirm: handleReset.bind(null, record),

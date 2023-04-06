@@ -45,8 +45,8 @@
         select s.*
         from t_flink_sql s
         inner join t_flink_app a
-        where s.app_id = a.id
-        and a.team_id = #{teamId}
+        on s.app_id = a.id
+        where a.team_id = #{teamId}
     </select>
 
 </mapper>

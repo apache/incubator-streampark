@@ -25,7 +25,15 @@ export default {
     memberManagement: 'Member Management',
     project: 'Project',
     application: 'Application',
-    setting: 'Setting',
     variable: 'Variable',
+    setting: 'Settings',
+  },
+  setting: {
+    system: 'System Setting',
+    alarm: 'Alarm Setting',
+    flinkHome: 'Flink Home',
+    flinkCluster: 'Flink Cluster',
+    externalLink: 'External Link',
+    yarnQueue: 'Yarn Queue',
   },
 };

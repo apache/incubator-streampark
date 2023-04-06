@@ -55,6 +55,7 @@ import org.apache.streampark.console.core.enums.ChangedType;
 import org.apache.streampark.console.core.enums.CheckPointType;
 import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.FlinkAppState;
+import org.apache.streampark.console.core.enums.Operation;
 import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ApplicationMapper;
@@ -695,7 +696,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.setRelease(ReleaseState.NEED_RELEASE.get());
     appParam.setOptionState(OptionState.NONE.getValue());
     appParam.setCreateTime(new Date());
-    appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
     checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
@@ -768,7 +768,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     newApp.setResourceFrom(oldApp.getResourceFrom());
     newApp.setProjectId(oldApp.getProjectId());
     newApp.setModule(oldApp.getModule());
-    newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
     newApp.setUserId(commonService.getUserId());
     newApp.setState(FlinkAppState.ADDED.getValue());
     newApp.setRelease(ReleaseState.NEED_RELEASE.get());
@@ -857,6 +856,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           || !ObjectUtils.safeTrimEquals(application.getFlinkImage(), appParam.getFlinkImage())) {
         application.setBuild(true);
       }
+    }
+
+    // when flink version has changed, we should rebuild the application. Otherwise, the shims jar
+    // may be not suitable for the new flink version.
+    if (!ObjectUtils.safeEquals(application.getVersionId(), appParam.getVersionId())) {
+      application.setBuild(true);
     }
 
     appParam.setJobType(application.getJobType());
@@ -1069,7 +1074,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           application.getK8sNamespace(), application.getJobName());
       KubernetesDeploymentHelper.deleteTaskConfigMap(
           application.getK8sNamespace(), application.getJobName());
-      IngressController.deleteIngress(application.getK8sNamespace(), application.getJobName());
+      IngressController.deleteIngress(application.getJobName(), application.getK8sNamespace());
     }
     if (startFuture != null) {
       startFuture.cancel(true);
@@ -1168,8 +1173,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   public void cancel(Application appParam) throws Exception {
     FlinkRESTAPIWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
     Application application = getById(appParam.getId());
-
     application.setState(FlinkAppState.CANCELLING.getValue());
+
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(Operation.CANCEL.getValue());
+    applicationLog.setAppId(application.getId());
+    applicationLog.setJobManagerUrl(application.getJobManagerUrl());
+    applicationLog.setOptionTime(new Date());
+    applicationLog.setYarnAppId(application.getClusterId());
+
     if (appParam.getSavePointed()) {
       FlinkRESTAPIWatcher.addSavepoint(application.getId());
       application.setOptionState(OptionState.SAVEPOINTING.getValue());
@@ -1238,6 +1250,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getSavePointed(),
             appParam.getDrain(),
             customSavepoint,
+            appParam.getSavePointTimeout(),
             application.getK8sNamespace());
 
     final Date triggerTime = new Date();
@@ -1251,6 +1264,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             10L,
             TimeUnit.MINUTES,
             cancelResponse -> {
+              applicationLog.setSuccess(true);
               if (cancelResponse != null && cancelResponse.savePointDir() != null) {
                 String savePointDir = cancelResponse.savePointDir();
                 log.info("savePoint path: {}", savePointDir);
@@ -1289,23 +1303,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                   FlinkRESTAPIWatcher.unWatching(application.getId());
                 }
 
-                ApplicationLog log = new ApplicationLog();
-                log.setAppId(application.getId());
-                log.setYarnAppId(application.getClusterId());
-                log.setOptionTime(new Date());
                 String exception = Utils.stringifyException(e);
-                log.setException(exception);
-                log.setSuccess(false);
-                applicationLogService.save(log);
+                applicationLog.setException(exception);
+                applicationLog.setSuccess(false);
               }
             })
         .whenComplete(
             (t, e) -> {
               if (isKubernetesApp(application)) {
                 IngressController.deleteIngress(
-                    application.getK8sNamespace(), application.getJobName());
+                    application.getJobName(), application.getK8sNamespace());
               }
               cancelFutureMap.remove(application.getId());
+              applicationLogService.save(applicationLog);
             });
   }
 
@@ -1351,15 +1361,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   /**
    * Setup task is starting (for webUI "state" display)
    *
-   * @param appParam
+   * @param application
    */
   @Override
-  public void starting(Application appParam) {
-    Application application = getById(appParam.getId());
-    Utils.notNull(
-        application,
-        String.format(
-            "The application id=%s not found, start application failed.", appParam.getId()));
+  public void starting(Application application) {
     application.setState(FlinkAppState.STARTING.getValue());
     application.setOptionTime(new Date());
     updateById(application);
@@ -1368,11 +1373,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   @Transactional(rollbackFor = {Exception.class})
   public void start(Application appParam, boolean auto) throws Exception {
-
     final Application application = getById(appParam.getId());
-
     Utils.notNull(application);
-    application.setAllowNonRestored(appParam.getAllowNonRestored());
+    if (!application.isCanBeStart()) {
+      throw new ApiAlertException("[StreamPark] The application cannot be started repeatedly.");
+    }
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
     if (flinkEnv == null) {
@@ -1390,10 +1395,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       application.setRestartCount(application.getRestartCount() + 1);
     }
 
+    starting(application);
+    application.setAllowNonRestored(appParam.getAllowNonRestored());
+
     String appConf;
     String flinkUserJar = null;
     String jobId = new JobID().toHexString();
     ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(Operation.START.getValue());
     applicationLog.setAppId(application.getId());
     applicationLog.setOptionTime(new Date());
 
@@ -1495,7 +1504,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Utils.notNull(buildResult);
         DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
         String ingressTemplates = application.getIngressTemplate();
-        String domainName = application.getDefaultModeIngress();
+        String domainName = settingService.getIngressModeDefault();
         if (StringUtils.isNotBlank(ingressTemplates)) {
           String ingressOutput = result.workspacePath() + "/ingress.yaml";
           IngressController.configureIngress(ingressOutput);
@@ -1588,7 +1597,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               }
 
               applicationLog.setSuccess(true);
-              applicationLogService.save(applicationLog);
               // set savepoint to expire
               savePointService.expire(application.getId());
             },
@@ -1599,7 +1607,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String exception = Utils.stringifyException(e);
                 applicationLog.setException(exception);
                 applicationLog.setSuccess(false);
-                applicationLogService.save(applicationLog);
                 Application app = getById(appParam.getId());
                 app.setState(FlinkAppState.FAILED.getValue());
                 app.setOptionState(OptionState.NONE.getValue());
@@ -1613,6 +1620,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             })
         .whenComplete(
             (t, e) -> {
+              applicationLogService.save(applicationLog);
               startFutureMap.remove(application.getId());
             });
   }

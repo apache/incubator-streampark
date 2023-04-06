@@ -44,10 +44,13 @@ export function fetchYarnQueueList(data: BasicTableParams) {
  * @returns {Promise<AxiosResponse<Result>>}
  */
 export function fetchYarnQueueDelete(data: Recordable): Promise<AxiosResponse<Result>> {
-  return defHttp.post({
-    url: YARN_QUEUE_API.DELETE,
-    data
-  }, { isReturnNativeResponse: true });
+  return defHttp.post(
+    {
+      url: YARN_QUEUE_API.DELETE,
+      data,
+    },
+    { isReturnNativeResponse: true },
+  );
 }
 
 /**

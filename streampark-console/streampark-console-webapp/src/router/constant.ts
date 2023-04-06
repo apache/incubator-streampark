@@ -39,7 +39,7 @@ export const getParentLayout = (_name?: string) => {
     });
 };
 const projectPath = '/flink/project';
-const settingPath = '/flink/setting';
+const settingPath = '/setting';
 const variablePath = '/flink/variable';
 
 const applicationPath = '/flink/app';
@@ -51,7 +51,7 @@ export const menuMap = {
   [`${applicationPath}/edit_flink`]: applicationPath,
   [`${applicationPath}/edit_streampark`]: applicationPath,
   [`${applicationPath}/edit_streampark`]: applicationPath,
-  [`${settingPath}/add_cluster`]: settingPath,
-  [`${settingPath}/edit_cluster`]: settingPath,
+  [`${settingPath}/add_cluster`]: `${settingPath}/flinkCluster`,
+  [`${settingPath}/edit_cluster`]: `${settingPath}/flinkCluster`,
   [`${variablePath}/depend_apps`]: variablePath,
 };

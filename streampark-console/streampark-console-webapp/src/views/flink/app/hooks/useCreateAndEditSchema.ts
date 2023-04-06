@@ -332,7 +332,7 @@ export const useCreateAndEditSchema = (
 
   const getFlinkFormOtherSchemas = computed((): FormSchema[] => {
     const commonInputNum = {
-      min: 1,
+      min: 0,
       step: 1,
       class: '!w-full',
     };

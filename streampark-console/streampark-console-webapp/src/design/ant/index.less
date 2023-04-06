@@ -34,7 +34,7 @@ span.anticon:not(.app-iconify) {
 }
 
 .collapse-container__body {
-  > .ant-descriptions {
+  >.ant-descriptions {
     margin-left: 6px;
   }
 }
@@ -81,4 +81,24 @@ span.anticon:not(.app-iconify) {
   .ant-descriptions-bordered .ant-descriptions-item-label {
     background-color: transparent !important;
   }
+}
+
+.bold-tag, .bold-tag > .ant-tag {
+  border-radius: 0 !important;
+  font-weight: 600;
+  padding: 0 4px !important;
+  cursor: default;
+}
+
+.app-bar,.streampark-basic-title {
+  background-color: @background-color-base;
+  height: 100%;
+  font-size: 14px !important;
+  font-weight: normal;
+  margin: 0 32px 0 0 !important;
+  padding: 8px 12px !important;
+}
+
+.ant-card-body > .streampark-basic-title {
+  display: table !important;
 }

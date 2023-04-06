@@ -106,7 +106,7 @@ export default {
     otherSignIn: 'Sign in with',
 
     ldapTip: 'Sign in with LDAP',
-    passwordTip: 'Sign in with LDAP',
+    passwordTip: 'Sign in with password',
 
     // notify
     loginSuccessTitle: 'Login successful',

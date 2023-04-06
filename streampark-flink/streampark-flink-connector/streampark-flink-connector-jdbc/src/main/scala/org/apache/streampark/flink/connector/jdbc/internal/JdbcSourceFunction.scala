@@ -34,8 +34,9 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceCont
 
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{FlinkUtils, JdbcUtils, Logger}
+import org.apache.streampark.common.util.{JdbcUtils, Logger}
 import org.apache.streampark.flink.connector.function.{RunningFunction, SQLQueryFunction, SQLResultFunction}
+import org.apache.streampark.flink.util.FlinkUtils
 
 class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSourceFunction[R]
     with CheckpointedFunction

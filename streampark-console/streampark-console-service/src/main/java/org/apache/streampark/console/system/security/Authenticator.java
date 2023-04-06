@@ -27,7 +27,5 @@ public interface Authenticator {
    * @param password user password
    * @return result object
    */
-  User authenticate(String username, String password) throws Exception;
-
-  User ldapAuthenticate(String username, String password) throws Exception;
+  User authenticate(String username, String password, String loginType) throws Exception;
 }

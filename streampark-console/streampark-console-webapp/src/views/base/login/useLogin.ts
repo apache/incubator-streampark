@@ -26,7 +26,7 @@ export enum LoginStateEnum {
   QR_CODE,
 }
 export enum LoginTypeEnum {
-  LOCAL,
+  PASSWORD,
   LDAP,
 }
 

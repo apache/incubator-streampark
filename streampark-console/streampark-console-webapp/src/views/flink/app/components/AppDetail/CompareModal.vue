@@ -17,7 +17,6 @@
 <script lang="ts">
   import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { CandidateTypeEnum } from '/@/enums/flinkEnum';
   export default defineComponent({
     name: 'CompareModal',
   });

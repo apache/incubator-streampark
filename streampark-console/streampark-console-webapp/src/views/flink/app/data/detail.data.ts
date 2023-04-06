@@ -40,7 +40,7 @@ export const getDescSchema = (): DescItem[] => {
       render: (curVal) =>
         h(
           'div',
-          { class: 'app_state' },
+          { class: 'bold-tag' },
           h(Tag, { color: curVal === 1 ? '#545454' : '#0C7EF2', class: 'mr-8px' }, () =>
             curVal === 1 ? 'Custom Code' : 'Flink SQL',
           ),
@@ -131,6 +131,7 @@ export const getBackupColumns = (): BasicColumn[] => [
 ];
 
 export const getOptionLogColumns = (): BasicColumn[] => [
+  { title: 'Operation Name', dataIndex: 'optionName' },
   { title: 'Application Id', dataIndex: 'yarnAppId' },
   { title: 'JobManager URL', dataIndex: 'jobManagerUrl' },
   { title: 'Start Status', dataIndex: 'success', width: 120 },

@@ -30,6 +30,7 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
+import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
@@ -41,6 +42,7 @@ import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
+import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -115,6 +117,8 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationService applicationService;
 
+  @Autowired private ApplicationLogService applicationLogService;
+
   @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
 
   @Autowired private ApplicationConfigService applicationConfigService;
@@ -139,8 +143,7 @@ public class AppBuildPipeServiceImpl
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
   @Override
-  public boolean buildApplication(@Nonnull Application app) {
-
+  public boolean buildApplication(@Nonnull Application app, ApplicationLog applicationLog) {
     // 1) flink sql setDependency
     FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
@@ -262,7 +265,7 @@ public class AppBuildPipeServiceImpl
                   backUpService.backup(app, null);
                 }
               }
-
+              applicationLog.setSuccess(true);
               app.setBuild(false);
 
             } else {
@@ -277,8 +280,11 @@ public class AppBuildPipeServiceImpl
               app.setRelease(ReleaseState.FAILED.get());
               app.setOptionState(OptionState.NONE.getValue());
               app.setBuild(true);
+              applicationLog.setException(Utils.stringifyException(snapshot.error().exception()));
+              applicationLog.setSuccess(false);
             }
             applicationService.updateRelease(app);
+            applicationLogService.save(applicationLog);
             if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
               flinkRESTAPIWatcher.init();
             }
@@ -328,7 +334,7 @@ public class AppBuildPipeServiceImpl
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
         String localWorkspace = app.getLocalAppHome().concat("/lib");
-        if (app.getDevelopmentMode().equals(DevelopmentMode.CUSTOMCODE)
+        if (app.getDevelopmentMode().equals(DevelopmentMode.CUSTOM_CODE)
             && app.getApplicationType().equals(ApplicationType.APACHE_FLINK)) {
           yarnProvidedPath = app.getAppHome();
           localWorkspace = app.getLocalAppHome();
@@ -407,7 +413,7 @@ public class AppBuildPipeServiceImpl
   /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
   private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
     switch (app.getDevelopmentMode()) {
-      case CUSTOMCODE:
+      case CUSTOM_CODE:
         switch (app.getApplicationType()) {
           case STREAMPARK_FLINK:
             return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
@@ -418,7 +424,7 @@ public class AppBuildPipeServiceImpl
                 "[StreamPark] unsupported ApplicationType of custom code: "
                     + app.getApplicationType());
         }
-      case FLINKSQL:
+      case FLINK_SQL:
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
           String clientPath = Workspace.remote().APP_CLIENT();

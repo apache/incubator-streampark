@@ -18,6 +18,8 @@
 # When enabled RBAC is only created for said namespaces, otherwise it is done for the cluster scope.
 # watchNamespaces: ["streampark"]
 
+timezone: "Asia/Shanghai"
+
 image:
   repository: "apache/streampark"
   pullPolicy: "IfNotPresent"
@@ -48,6 +50,26 @@ spec:
   #   requests:
   #     memory: "1Gi"
   #     cpu: "500m"
+  ## Indicates whether the container is running. If the liveness probe fails, the kubelet kills the container,
+  ## and the container is subjected to its restart policy.
+  ## More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: "90"
+    periodSeconds: "30"
+    timeoutSeconds: "20"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## Indicates whether the container is ready to respond to requests. If the readiness probe fails,
+  ## the endpoints controller removes the Pod's IP address from the endpoints of all Services that match the Pod.
+  ## More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: "90"
+    periodSeconds: "30"
+    timeoutSeconds: "20"
+    failureThreshold: "3"
+    successThreshold: "1"
 
 ingress:
   enabled: false

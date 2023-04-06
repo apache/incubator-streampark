@@ -31,12 +31,13 @@ import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
 
-import org.apache.streampark.common.util.{FlinkUtils, Utils}
+import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.connector.redis.bean.RedisMapper
 import org.apache.streampark.flink.connector.redis.conf.RedisConfig
 import org.apache.streampark.flink.connector.redis.internal.{Redis2PCSinkFunction, RedisSinkFunction}
 import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
+import org.apache.streampark.flink.util.FlinkUtils
 
 object RedisSink {
 

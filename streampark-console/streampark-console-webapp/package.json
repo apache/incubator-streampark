@@ -6,6 +6,15 @@
     "url": "https://streampark.apache.org"
   },
   "packageManager": "pnpm@7.3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apache/incubator-streampark.git"
+  },
+  "license": "Apache-2.0 license",
+  "bugs": {
+    "url": "https://github.com/apache/incubator-streampark/issues"
+  },
+  "homepage": "https://streampark.apache.org",
   "scripts": {
     "bootstrap": "pnpm install",
     "serve": "npm run dev",
@@ -55,10 +64,10 @@
     "sweetalert2": "^11.4.18",
     "sortablejs": "^1.15.0",
     "terser": "^5.16.1",
-    "vue": "^3.2.45",
+    "vue": "^3.2.47",
     "vue-i18n": "^9.2.2",
     "vue-router": "^4.1.6",
-    "vue-types": "^4.2.1"
+    "vue-types": "^5.0.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.3.0",
@@ -74,14 +83,12 @@
     "@types/sortablejs": "^1.15.0",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "^5.45.1",
-    "@vitejs/plugin-legacy": "^2.3.1",
-    "@vitejs/plugin-vue": "^3.2.0",
-    "@vitejs/plugin-vue-jsx": "^2.1.1",
-    "@vue/compiler-sfc": "^3.2.45",
-    "@vue/test-utils": "^2.2.6",
+    "@vitejs/plugin-legacy": "^2.2.0",
+    "@vitejs/plugin-vue": "^3.1.2",
+    "@vitejs/plugin-vue-jsx": "^2.0.1",
+    "@vue/compiler-sfc": "^3.2.47",
     "autoprefixer": "^10.4.13",
     "commitizen": "^4.2.5",
-    "conventional-changelog-cli": "^2.2.2",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "eslint": "^8.29.0",
@@ -98,8 +105,8 @@
     "postcss-less": "^6.0.0",
     "prettier": "^2.8.0",
     "rimraf": "^3.0.2",
-    "rollup": "^3.6.0",
-    "rollup-plugin-visualizer": "^5.8.3",
+    "rollup": "^3.20.1",
+    "rollup-plugin-visualizer": "^5.9.0",
     "stylelint": "^14.16.0",
     "stylelint-config-prettier": "^9.0.4",
     "stylelint-config-recommended": "^9.0.0",
@@ -107,35 +114,26 @@
     "stylelint-config-standard": "^29.0.0",
     "stylelint-order": "^5.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.3",
+    "typescript": "^5.0.2",
     "vite": "^3.2.5",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-html": "^3.2.0",
     "vite-plugin-imagemin": "^0.6.1",
-    "vite-plugin-purge-icons": "^0.9.1",
+    "vite-plugin-purge-icons": "^0.9.2",
     "vite-plugin-style-import": "^2.0.0",
     "vite-plugin-svg-icons": "^2.0.1",
     "vite-plugin-theme": "^0.8.6",
-    "vite-plugin-windicss": "^1.8.8",
+    "vite-plugin-windicss": "^1.8.10",
     "vue-eslint-parser": "^9.1.0",
-    "vue-tsc": "^1.0.11"
+    "vue-tsc": "^1.2.0"
   },
   "resolutions": {
     "bin-wrapper": "npm:bin-wrapper-china",
     "rollup": "^2.56.3",
     "gifsicle": "5.2.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/apache/incubator-streampark.git"
-  },
-  "license": "Apache-2.0 license",
-  "bugs": {
-    "url": "https://github.com/apache/incubator-streampark/issues"
-  },
-  "homepage": "https://streampark.apache.org",
   "engines": {
-    "node": "^12 || >=14"
+    "node": ">=16"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

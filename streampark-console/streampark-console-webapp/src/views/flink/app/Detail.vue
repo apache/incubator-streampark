@@ -46,7 +46,7 @@
   import DetailTab from './components/AppDetail/DetailTab.vue';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
-  import ExternalLinkBadge from '../setting/components/ExternalLinkBadge.vue';
+  import { ExternalLinkBadge } from '/@/views/setting/ExternalLink/components';
 
   const route = useRoute();
   const router = useRouter();
@@ -250,7 +250,6 @@
             :redirect="link.renderedLinkUrl"
             :color="link.badgeColor"
             :message="link.badgeName"
-            :openLink="true"
             :disabled="appNotRunning"
           />
         </div>
@@ -259,7 +258,7 @@
         <Icon icon="ant-design:arrow-left-outlined" />
       </a-button>
       <a-button
-        type="danger"
+        type="primary"
         @click="handleFlinkView"
         :disabled="appNotRunning"
         class="float-right -mt-8px mr-20px"

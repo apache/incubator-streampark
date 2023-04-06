@@ -16,6 +16,7 @@
 -->
 <script lang="ts">
   import { reactive, defineComponent } from 'vue';
+  import Icon from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   export default defineComponent({
     name: 'SavepointApplicationModal',
@@ -45,7 +46,7 @@
     schemas: [
       {
         field: 'customSavepoint',
-        label: 'Custom SavePoint',
+        label: 'Custom Savepoint',
         component: 'Input',
         componentProps: {
           placeholder: 'Optional: Entry the custom savepoint path',
@@ -75,7 +76,7 @@
           savePoint: customSavepoint,
         });
         if (data.data === false) {
-          createErrorSwal('custom savePoint path is invalid, ' + data.message);
+          createErrorSwal('custom savepoint path is invalid, ' + data.message);
         } else {
           await handleSavepointAction(savepointReq);
           emit('updateOption', {
@@ -121,8 +122,9 @@
     :cancelText="t('common.cancelText')"
   >
     <template #title>
-      {{ t('flink.app.view.savepoint') }}
+      <Icon icon="ant-design:camera-outlined" color="#3c7eff" />
+      &nbsp;{{ t('flink.app.view.savepoint') }}
     </template>
-    <BasicForm @register="registerForm" class="!pt-20px" />
+    <BasicForm @register="registerForm" class="!pt-30px" />
   </BasicModal>
 </template>

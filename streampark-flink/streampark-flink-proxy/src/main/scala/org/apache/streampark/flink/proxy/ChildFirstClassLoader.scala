@@ -34,7 +34,7 @@ import scala.util.Try
  */
 
 class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern, classLoadingExceptionHandler: Consumer[Throwable])
-    extends URLClassLoader(urls, parent) {
+  extends URLClassLoader(urls, parent) {
 
   ClassLoader.registerAsParallelCapable()
 
@@ -66,10 +66,9 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
 
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
-    try this.synchronized {
-        return this.loadClassWithoutExceptionHandling(name, resolve)
-      }
-    catch {
+    try {
+      this.synchronized(this.loadClassWithoutExceptionHandling(name, resolve))
+    } catch {
       case e: Throwable =>
         classLoadingExceptionHandler.accept(e)
         throw e
