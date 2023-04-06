@@ -34,7 +34,6 @@ import java.util.Date;
 public class YarnQueue implements Serializable {
 
   @TableId(type = IdType.AUTO)
-  @TableField(fill = FieldFill.INSERT, updateStrategy = FieldStrategy.NEVER)
   private Long id;
 
   @TableField(fill = FieldFill.INSERT, updateStrategy = FieldStrategy.NEVER)

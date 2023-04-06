@@ -1250,7 +1250,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getSavePointed(),
             appParam.getDrain(),
             customSavepoint,
-            application.getSavePointTimeout(),
+            appParam.getSavePointTimeout(),
             application.getK8sNamespace());
 
     final Date triggerTime = new Date();

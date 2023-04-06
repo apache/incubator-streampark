@@ -120,7 +120,7 @@ trait FlinkClientTrait extends Logger {
 
   }
 
-  def setJvmOptions(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+  private[this] def setJvmOptions(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     if (MapUtils.isNotEmpty(submitRequest.properties)) {
       submitRequest.properties.foreach(x => {
         val k = x._1.trim
@@ -165,15 +165,16 @@ trait FlinkClientTrait extends Logger {
     logInfo(
       s"""
          |----------------------------------------- flink job cancel --------------------------------
-         |     userFlinkHome  : ${cancelRequest.flinkVersion.flinkHome}
-         |     flinkVersion   : ${cancelRequest.flinkVersion.version}
-         |     clusterId      : ${cancelRequest.clusterId}
-         |     withSavePoint  : ${cancelRequest.withSavepoint}
-         |     savePointPath  : ${cancelRequest.savepointPath}
-         |     withDrain      : ${cancelRequest.withDrain}
-         |     k8sNamespace   : ${cancelRequest.kubernetesNamespace}
-         |     appId          : ${cancelRequest.clusterId}
-         |     jobId          : ${cancelRequest.jobId}
+         |     userFlinkHome     : ${cancelRequest.flinkVersion.flinkHome}
+         |     flinkVersion      : ${cancelRequest.flinkVersion.version}
+         |     clusterId         : ${cancelRequest.clusterId}
+         |     withSavePoint     : ${cancelRequest.withSavepoint}
+         |     savePointPath     : ${cancelRequest.savepointPath}
+         |     savePointTimeout  : ${cancelRequest.savePointTimeout}
+         |     withDrain         : ${cancelRequest.withDrain}
+         |     k8sNamespace      : ${cancelRequest.kubernetesNamespace}
+         |     appId             : ${cancelRequest.clusterId}
+         |     jobId             : ${cancelRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     val flinkConf = new Configuration()
