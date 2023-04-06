@@ -47,6 +47,7 @@ import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 import org.apache.streampark.flink.client.bean._
 
+import java.time.Duration
 import scala.annotation.tailrec
 
 trait FlinkClientTrait extends Logger {
@@ -176,6 +177,7 @@ trait FlinkClientTrait extends Logger {
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     val flinkConf = new Configuration()
+    flinkConf.safeSet(ClientOptions.CLIENT_TIMEOUT, Duration.ofSeconds(cancelRequest.savePointTimeout))
     doCancel(cancelRequest, flinkConf)
   }
 
@@ -510,14 +512,9 @@ trait FlinkClientTrait extends Logger {
   }
 
   private[client] def triggerSavepoint(savepointRequest: TriggerSavepointRequest, jobID: JobID, client: ClusterClient[_]): String = {
-
     val savepointPath = tryGetSavepointPathIfNeed(savepointRequest)
-
-    val clientTimeout = getOptionFromDefaultFlinkConfig(savepointRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
-
     val clientWrapper = new FlinkClusterClient(client)
-
-    clientWrapper.triggerSavepoint(jobID, savepointPath).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+    clientWrapper.triggerSavepoint(jobID, savepointPath).get()
   }
 
 }
