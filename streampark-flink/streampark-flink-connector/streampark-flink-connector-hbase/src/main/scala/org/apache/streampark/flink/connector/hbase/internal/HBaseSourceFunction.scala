@@ -34,10 +34,11 @@ import org.apache.hadoop.hbase.client.{Result, Table}
 
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{FlinkUtils, Logger}
+import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.connector.function.RunningFunction
 import org.apache.streampark.flink.connector.hbase.bean.HBaseQuery
 import org.apache.streampark.flink.connector.hbase.function.{HBaseQueryFunction, HBaseResultFunction}
+import org.apache.streampark.flink.util.FlinkUtils
 
 class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, prop: Properties) extends RichSourceFunction[R] with CheckpointedFunction
     with CheckpointListener with Logger {

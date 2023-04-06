@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
-import org.apache.streampark.common.util.FlinkUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
@@ -49,6 +48,7 @@ import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
+import org.apache.streampark.flink.util.FlinkUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CheckpointingOptions;

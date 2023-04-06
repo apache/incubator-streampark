@@ -26,7 +26,7 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
-import org.apache.streampark.common.util.FlinkUtils
+import org.apache.streampark.flink.util.FlinkUtils
 
 case class DeployRequest(flinkVersion: FlinkVersion,
                          executionMode: ExecutionMode,

@@ -105,21 +105,6 @@
             <artifactId>commons-cli</artifactId>
         </dependency>
 
-        <!--flink base-->
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-core</artifactId>
-            <version>${flink.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-clients${scala.binary.flink.version}</artifactId>
-            <version>${flink.version}</version>
-            <optional>true</optional>
-        </dependency>
-
         <!--hbase-->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
