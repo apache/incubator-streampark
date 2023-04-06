@@ -31,9 +31,10 @@ import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
-import org.apache.streampark.common.util.{FlinkUtils, Utils}
+import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
+import org.apache.streampark.flink.util.FlinkUtils
 
 /**
  * yarn PerJob mode submit

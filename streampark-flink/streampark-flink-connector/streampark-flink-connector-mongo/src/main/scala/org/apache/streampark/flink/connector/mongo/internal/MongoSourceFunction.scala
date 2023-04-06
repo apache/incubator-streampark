@@ -36,9 +36,10 @@ import org.bson.Document
 
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{FlinkUtils, Logger, MongoConfig}
+import org.apache.streampark.common.util.{Logger, MongoConfig}
 import org.apache.streampark.flink.connector.function.RunningFunction
 import org.apache.streampark.flink.connector.mongo.function.{MongoQueryFunction, MongoResultFunction}
+import org.apache.streampark.flink.util.FlinkUtils
 
 class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties(), collection: String) extends RichSourceFunction[R]
     with CheckpointedFunction with CheckpointListener with Logger {

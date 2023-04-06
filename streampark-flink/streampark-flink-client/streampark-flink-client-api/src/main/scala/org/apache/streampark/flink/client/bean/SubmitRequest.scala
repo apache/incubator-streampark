@@ -31,8 +31,9 @@ import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointResto
 import org.apache.streampark.common.conf.{ConfigConst, FlinkVersion, Workspace}
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.enums._
-import org.apache.streampark.common.util.{DeflaterUtils, FlinkUtils, HdfsUtils, PropertiesUtils}
+import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
+import org.apache.streampark.flink.util.FlinkUtils
 
 /**
  * @param clusterId            flink cluster id in k8s cluster.
