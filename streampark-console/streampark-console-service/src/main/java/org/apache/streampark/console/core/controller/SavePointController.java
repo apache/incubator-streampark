@@ -54,18 +54,21 @@ public class SavePointController {
 
   @Autowired private SavePointService savePointService;
 
+  @Operation(summary = "Get application  savepoint latest")
   @PostMapping("latest")
   public RestResponse latest(Long appId) {
     SavePoint savePoint = savePointService.getLatest(appId);
     return RestResponse.success(savePoint);
   }
 
+  @Operation(summary = "List application savepoint histories")
   @PostMapping("history")
   public RestResponse history(SavePoint savePoint, RestRequest request) {
     IPage<SavePoint> page = savePointService.page(savePoint, request);
     return RestResponse.success(page);
   }
 
+  @Operation(summary = "Delete savepoint")
   @PostMapping("delete")
   @RequiresPermissions("savepoint:delete")
   public RestResponse delete(Long id) throws InternalException {

@@ -59,7 +59,9 @@ public class ExternalLinkController {
     return RestResponse.success(externalLink);
   }
 
-  @Operation(summary = "Render external link", description = "Render external link by app id")
+  @Operation(
+      summary = "Get the application external links",
+      description = "Render external link by app id")
   @Parameters({@Parameter(name = "appId", required = true, example = "100000")})
   @PostMapping("/render")
   public RestResponse render(

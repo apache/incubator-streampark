@@ -36,6 +36,8 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -52,6 +54,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "USER_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -64,11 +67,13 @@ public class UserController {
 
   @Autowired private CommonService commonService;
 
+  @Operation(summary = "Get user")
   @PostMapping("detail")
   public User detail(@NotBlank(message = "{required}") @PathVariable String username) {
     return this.userService.findByName(username);
   }
 
+  @Operation(summary = "List users")
   @PostMapping("list")
   @RequiresPermissions(
       value = {"user:view", "app:view"},
@@ -78,6 +83,7 @@ public class UserController {
     return RestResponse.success(userList);
   }
 
+  @Operation(summary = "Create user")
   @PostMapping("post")
   @RequiresPermissions("user:add")
   public RestResponse addUser(@Valid User user) throws Exception {
@@ -86,6 +92,7 @@ public class UserController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "Update user")
   @PutMapping("update")
   @RequiresPermissions("user:update")
   public RestResponse updateUser(@Valid User user) throws Exception {
@@ -93,6 +100,7 @@ public class UserController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "Delete user")
   @DeleteMapping("delete")
   @RequiresPermissions("user:delete")
   public RestResponse deleteUser(Long userId) throws Exception {
@@ -100,12 +108,14 @@ public class UserController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "Update user profile")
   @PutMapping("profile")
   public RestResponse updateProfile(@Valid User user) throws Exception {
     this.userService.updateProfile(user);
     return RestResponse.success();
   }
 
+  @Operation(summary = "Update user avatar")
   @PutMapping("avatar")
   public RestResponse updateAvatar(
       @NotBlank(message = "{required}") String username,
@@ -115,18 +125,21 @@ public class UserController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "List without token users")
   @PostMapping("getNoTokenUser")
   public RestResponse getNoTokenUser() {
     List<User> userList = this.userService.getNoTokenUser();
     return RestResponse.success(userList);
   }
 
+  @Operation(summary = "Check the username")
   @PostMapping("check/name")
   public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
     boolean result = this.userService.findByName(username) == null;
     return RestResponse.success(result);
   }
 
+  @Operation(summary = "Verify the user")
   @PostMapping("check/password")
   public RestResponse checkPassword(
       @NotBlank(message = "{required}") String username,
@@ -139,12 +152,14 @@ public class UserController {
     return RestResponse.success(result);
   }
 
+  @Operation(summary = "Update password")
   @PutMapping("password")
   public RestResponse updatePassword(User user) throws Exception {
     userService.updatePassword(user);
     return RestResponse.success();
   }
 
+  @Operation(summary = "Reset password")
   @PutMapping("password/reset")
   @RequiresPermissions("user:reset")
   public RestResponse resetPassword(@NotBlank(message = "{required}") String usernames)
@@ -154,12 +169,14 @@ public class UserController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "List user types")
   @PostMapping("types")
   @RequiresPermissions("user:types")
   public RestResponse userTypes() {
     return RestResponse.success(UserType.values());
   }
 
+  @Operation(summary = "Init the user teams")
   @PostMapping("initTeam")
   public RestResponse initTeam(Long teamId, Long userId) {
     Team team = teamService.getById(teamId);
@@ -170,6 +187,7 @@ public class UserController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "Set the current user teams")
   @PostMapping("setTeam")
   public RestResponse setTeam(Long teamId) {
     Team team = teamService.getById(teamId);
@@ -188,6 +206,7 @@ public class UserController {
     return new RestResponse().data(infoMap);
   }
 
+  @Operation(summary = "List the team users")
   @PostMapping("appOwners")
   public RestResponse appOwners(Long teamId) {
     List<User> userList = userService.findByAppOwner(teamId);

@@ -76,6 +76,7 @@ public class ApplicationController {
 
   @Autowired private AppBuildPipeService appBuildPipeService;
 
+  @Operation(summary = "Get application")
   @ApiAccess
   @PostMapping("get")
   @RequiresPermissions("app:detail")
@@ -84,6 +85,7 @@ public class ApplicationController {
     return RestResponse.success(application);
   }
 
+  @Operation(summary = "Create application")
   @ApiAccess
   @PostMapping("create")
   @RequiresPermissions("app:create")
@@ -116,6 +118,7 @@ public class ApplicationController {
         : RestResponse.success(true).data(data);
   }
 
+  @Operation(summary = "Update application")
   @AppUpdated
   @PostMapping("update")
   @RequiresPermissions("app:update")
@@ -124,12 +127,14 @@ public class ApplicationController {
     return RestResponse.success(true);
   }
 
+  @Operation(summary = "Get applications dashboard data")
   @PostMapping("dashboard")
   public RestResponse dashboard(Long teamId) {
     Map<String, Serializable> map = applicationService.dashboard(teamId);
     return RestResponse.success(map);
   }
 
+  @Operation(summary = "List applications")
   @ApiAccess
   @PostMapping("list")
   @RequiresPermissions("app:view")
@@ -166,6 +171,7 @@ public class ApplicationController {
     return RestResponse.success(applicationList);
   }
 
+  @Operation(summary = "Mapping application")
   @AppUpdated
   @PostMapping("mapping")
   @RequiresPermissions("app:mapping")
@@ -174,6 +180,7 @@ public class ApplicationController {
     return RestResponse.success(flag);
   }
 
+  @Operation(summary = "Revoke application")
   @AppUpdated
   @PostMapping("revoke")
   @RequiresPermissions("app:release")
@@ -256,6 +263,7 @@ public class ApplicationController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "Clean application")
   @AppUpdated
   @ApiAccess
   @PostMapping("clean")
@@ -266,6 +274,7 @@ public class ApplicationController {
   }
 
   /** force stop(stop normal start or in progress) */
+  @Operation(summary = "Force stop application")
   @PostMapping("forcedStop")
   @RequiresPermissions("app:cancel")
   public RestResponse forcedStop(Application app) {
@@ -273,54 +282,55 @@ public class ApplicationController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "Get application on yarn proxy address")
   @PostMapping("yarn")
   public RestResponse yarn() {
     return RestResponse.success(YarnUtils.getRMWebAppProxyURL());
   }
 
+  @Operation(summary = "Get application on yarn name")
   @PostMapping("name")
   public RestResponse yarnName(Application app) {
     String yarnName = applicationService.getYarnName(app);
     return RestResponse.success(yarnName);
   }
 
+  @Operation(summary = "Check the application exist status")
   @PostMapping("checkName")
   public RestResponse checkName(Application app) {
     AppExistsState exists = applicationService.checkExists(app);
     return RestResponse.success(exists.get());
   }
 
+  @Operation(summary = "Get application conf")
   @PostMapping("readConf")
   public RestResponse readConf(Application app) throws IOException {
     String config = applicationService.readConf(app);
     return RestResponse.success(config);
   }
 
+  @Operation(summary = "Get application main-class")
   @PostMapping("main")
   public RestResponse getMain(Application application) {
     String mainClass = applicationService.getMain(application);
     return RestResponse.success(mainClass);
   }
 
+  @Operation(summary = "List application backups")
   @PostMapping("backups")
   public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
     IPage<ApplicationBackUp> backups = backUpService.page(backUp, request);
     return RestResponse.success(backups);
   }
 
-  @PostMapping("rollback")
-  public RestResponse rollback(ApplicationBackUp backUp) {
-    // TODO: next version implementation
-    // backUpService.rollback(backUp);
-    return RestResponse.success();
-  }
-
+  @Operation(summary = "List application operation logs")
   @PostMapping("optionlog")
   public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
     IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
     return RestResponse.success(applicationList);
   }
 
+  @Operation(summary = "Delete application operation log")
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
   public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
@@ -328,6 +338,7 @@ public class ApplicationController {
     return RestResponse.success(deleted);
   }
 
+  @Operation(summary = "Delete application")
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
@@ -335,12 +346,14 @@ public class ApplicationController {
     return RestResponse.success(deleted);
   }
 
+  @Operation(summary = "Backup application when deleted")
   @PostMapping("deletebak")
   public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
     Boolean deleted = backUpService.delete(backUp.getId());
     return RestResponse.success(deleted);
   }
 
+  @Operation(summary = "Check the application jar")
   @PostMapping("checkjar")
   public RestResponse checkjar(String jar) {
     File file = new File(jar);
@@ -352,6 +365,7 @@ public class ApplicationController {
     }
   }
 
+  @Operation(summary = "Upload the application jar")
   @PostMapping("upload")
   @RequiresPermissions("app:create")
   public RestResponse upload(MultipartFile file) throws Exception {
@@ -359,6 +373,7 @@ public class ApplicationController {
     return RestResponse.success(uploadPath);
   }
 
+  @Operation(hidden = true)
   @PostMapping("verifySchema")
   public RestResponse verifySchema(String path) {
     final URI uri = URI.create(path);
@@ -381,6 +396,7 @@ public class ApplicationController {
     return restResponse;
   }
 
+  @Operation(summary = "Check the application savepoint path")
   @PostMapping("checkSavepointPath")
   public RestResponse checkSavepointPath(Application app) throws Exception {
     String error = applicationService.checkSavepointPath(app);
@@ -391,7 +407,7 @@ public class ApplicationController {
     }
   }
 
-  @Operation(summary = "Read flink on k8s deploy log")
+  @Operation(summary = "Get application on k8s deploy logs")
   @Parameters({
     @Parameter(
         name = "id",

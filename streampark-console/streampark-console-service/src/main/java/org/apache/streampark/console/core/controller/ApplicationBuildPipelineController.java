@@ -26,7 +26,6 @@ import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkEnv;
-import org.apache.streampark.console.core.enums.Operation;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -121,7 +120,8 @@ public class ApplicationBuildPipelineController {
       // you don't need to go through the build process)
 
       ApplicationLog applicationLog = new ApplicationLog();
-      applicationLog.setOptionName(Operation.RELEASE.getValue());
+      applicationLog.setOptionName(
+          org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
       applicationLog.setAppId(app.getId());
       applicationLog.setOptionTime(new Date());
 
@@ -150,6 +150,7 @@ public class ApplicationBuildPipelineController {
    * @param appId application id
    * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
    */
+  @Operation(summary = "Get application release pipeline")
   @ApiAccess
   @PostMapping("/detail")
   @RequiresPermissions("app:view")
