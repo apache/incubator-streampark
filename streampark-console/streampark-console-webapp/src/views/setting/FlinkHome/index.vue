@@ -185,7 +185,13 @@
               :ok-text="t('common.yes')"
               @confirm="handleDelete(item)"
             >
-              <a-button type="danger" shape="circle" size="large" class="control-button">
+              <a-button
+                :disabled="item.isDefault && flinks.length > 1"
+                type="danger"
+                shape="circle"
+                size="large"
+                class="control-button"
+              >
                 <DeleteOutlined />
               </a-button>
             </Popconfirm>
