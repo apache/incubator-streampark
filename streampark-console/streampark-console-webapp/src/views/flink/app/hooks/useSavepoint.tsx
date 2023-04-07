@@ -60,7 +60,7 @@ export const useSavepoint = (updateOption: Fn) => {
       },
       content: () => {
         return (
-          <Form class="!pt-30px">
+          <Form class="!pt-50px">
             <Form.Item
               name="customSavepoint"
               label="Custom Savepoint"
