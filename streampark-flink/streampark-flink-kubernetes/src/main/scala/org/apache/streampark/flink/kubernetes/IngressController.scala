@@ -166,14 +166,14 @@ object IngressController extends Logger {
 }
 
 case class IngressMeta(
-                        addresses: List[String],
-                        port: Integer,
-                        protocol: String,
-                        serviceName: String,
-                        ingressName: String,
-                        hostname: String,
-                        path: String,
-                        allNodes: Boolean)
+    addresses: List[String],
+    port: Integer,
+    protocol: String,
+    serviceName: String,
+    ingressName: String,
+    hostname: String,
+    path: String,
+    allNodes: Boolean)
 
 object IngressMeta {
 
