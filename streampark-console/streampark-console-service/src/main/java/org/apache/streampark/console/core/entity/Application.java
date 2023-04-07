@@ -48,7 +48,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
@@ -161,10 +160,8 @@ public class Application implements Serializable {
 
   private String mainClass;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
   private Date startTime;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Date endTime;
 
@@ -195,14 +192,11 @@ public class Application implements Serializable {
 
   private String description;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-  private Date createTime;
+    private Date createTime;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-  private Date optionTime;
+    private Date optionTime;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-  private Date modifyTime;
+    private Date modifyTime;
 
   /** The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type) */
   private Integer k8sRestExposedType;
