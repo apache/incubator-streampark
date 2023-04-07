@@ -129,8 +129,11 @@ object IngressController extends Logger {
     lazy val fromV1beta1 = Option(client.network.v1beta1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
       .map(ingress => ingress.getSpec.getRules.get(0))
       .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
-    fromV1.orElse(fromV1beta1)
-      .map { case (host, path) => s"https://$host$path" }.getOrElse(clusterClient.getWebInterfaceURL)
+    Try(
+      fromV1.orElse(fromV1beta1)
+        .map { case (host, path) => s"https://$host$path" }
+        .getOrElse(clusterClient.getWebInterfaceURL)
+    ).getOrElse(throw new RuntimeException("[StreamPark] get ingressUrlAddress error."))
   }
 
   @throws[IOException]
