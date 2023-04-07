@@ -54,10 +54,14 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+    deserialization:
+      fail-on-unknown-properties: false
   main:
     allow-circular-references: true
     banner-mode: off
-
+  mvc:
+    converters:
+      preferred-json-mapper: jackson
 
 management:
   endpoints:
