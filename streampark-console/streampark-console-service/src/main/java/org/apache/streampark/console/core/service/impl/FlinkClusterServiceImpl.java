@@ -327,7 +327,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   public Boolean existsByFlinkEnvId(Long flinkEnvId) {
     LambdaQueryWrapper<FlinkCluster> lambdaQueryWrapper =
         new LambdaQueryWrapper<FlinkCluster>().eq(FlinkCluster::getVersionId, flinkEnvId);
-    return this.count(lambdaQueryWrapper) > 0;
+    return getBaseMapper().exists(lambdaQueryWrapper);
   }
 
   @Override

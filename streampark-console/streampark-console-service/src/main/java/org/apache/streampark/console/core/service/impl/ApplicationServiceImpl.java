@@ -537,7 +537,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   public boolean existsJobByFlinkEnvId(Long flinkEnvId) {
     LambdaQueryWrapper<Application> lambdaQueryWrapper =
         new LambdaQueryWrapper<Application>().eq(Application::getVersionId, flinkEnvId);
-    return this.count(lambdaQueryWrapper) > 0;
+    return getBaseMapper().exists(lambdaQueryWrapper);
   }
 
   @Override

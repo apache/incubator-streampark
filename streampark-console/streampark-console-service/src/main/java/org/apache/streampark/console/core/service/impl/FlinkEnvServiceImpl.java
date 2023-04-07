@@ -44,6 +44,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
   @Autowired private FlinkClusterService flinkClusterService;
   @Autowired private ApplicationService applicationService;
+
   /**
    * two places will be checked: <br>
    * 1) name repeated <br>
