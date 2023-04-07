@@ -122,17 +122,18 @@ object IngressController extends Logger {
   def ingressUrlAddress(nameSpace: String, clusterId: String, clusterClient: ClusterClient[_]): String = {
     if (determineIfIngressExists(nameSpace, clusterId)) {
       val client = new DefaultKubernetesClient
-      val ingress = client.network.ingress.inNamespace(nameSpace).withName(clusterId).get
-      val publicEndpoints = ingress.getMetadata.getAnnotations.get("field.cattle.io/publicEndpoints")
-      IngressMeta.as(publicEndpoints) match {
-        case Some(metas) =>
-          val ingressMeta = metas.head
-          val hostname = ingressMeta.hostname
-          val path = ingressMeta.path
-          logger.info(s"Retrieve flink cluster $clusterId successfully, JobManager Web Interface: https://$hostname$path")
-          s"https://$hostname$path"
-        case None => throw new RuntimeException("[StreamPark] get ingressUrlAddress error.")
-      }
+      // for kubernetes 1.22+
+      val fromV1 = Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
+        .map(ingress => ingress.getSpec.getRules.get(0))
+        .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
+      // for kubernetes 1.22-
+      val fromV1beta1 = Option(client.network.v1beta1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
+        .map(ingress => ingress.getSpec.getRules.get(0))
+        .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
+      Try {
+        fromV1.orElse(fromV1beta1)
+          .map { case (host, path) => s"https://$host$path" }.get
+      }.getOrElse(throw new RuntimeException("[StreamPark] get ingressUrlAddress error."))
     } else {
       clusterClient.getWebInterfaceURL
     }
@@ -165,14 +166,14 @@ object IngressController extends Logger {
 }
 
 case class IngressMeta(
-    addresses: List[String],
-    port: Integer,
-    protocol: String,
-    serviceName: String,
-    ingressName: String,
-    hostname: String,
-    path: String,
-    allNodes: Boolean)
+                        addresses: List[String],
+                        port: Integer,
+                        protocol: String,
+                        serviceName: String,
+                        ingressName: String,
+                        hostname: String,
+                        path: String,
+                        allNodes: Boolean)
 
 object IngressMeta {
 
