@@ -247,7 +247,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
         );
       },
       okText: t('common.apply'),
-      cancelText: t('common.close'),
+      cancelText: t('common.closeText'),
       onOk: async () => {
         //1) check empty
         if (copyAppName == null) {
@@ -350,7 +350,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
         );
       },
       okText: t('common.apply'),
-      cancelText: t('common.close'),
+      cancelText: t('common.closeText'),
       onOk: async () => {
         try {
           await mappingRef.value.validate();

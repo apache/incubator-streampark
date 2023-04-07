@@ -238,7 +238,7 @@ export const useAppTableAction = (
   // click savepoint for application
   function handleSavepoint(app: AppListRecord) {
     if (!optionApps.savepointing.get(app.id) || app['optionState'] == OptionStateEnum.NONE) {
-      openSavepointModal(true, { application: app });
+      openSavepointModal(app);
     }
   }
   // click stop application
