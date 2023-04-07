@@ -151,7 +151,7 @@ object TrackIdCache {
 
 class JobStatusCache {
 
-  private[this] lazy val cache: Cache[CacheKey, JobStatusCV] = Caffeine.newBuilder.expireAfterWrite(20,TimeUnit.SECONDS).build()
+  private[this] lazy val cache: Cache[CacheKey, JobStatusCV] = Caffeine.newBuilder.expireAfterWrite(20, TimeUnit.SECONDS).build()
 
   def putAll(kvs: Map[TrackId, JobStatusCV]): Unit = cache.putAll(kvs.map(t => (CacheKey(t._1.appId), t._2)))
 
