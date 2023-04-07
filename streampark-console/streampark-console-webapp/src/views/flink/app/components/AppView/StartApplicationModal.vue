@@ -164,7 +164,13 @@
   }
 </script>
 <template>
-  <BasicModal @register="registerModal" @ok="handleSubmit" okText="Apply" cancelText="Cancel">
+  <BasicModal
+    @register="registerModal"
+    :minHeight="100"
+    @ok="handleSubmit"
+    :okText="t('common.apply')"
+    :cancelText="t('common.cancelText')"
+  >
     <template #title>
       <SvgIcon name="play" />
       {{ t('flink.app.view.start') }}
