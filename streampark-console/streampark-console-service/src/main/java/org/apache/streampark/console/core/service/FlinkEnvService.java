@@ -42,6 +42,13 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
   boolean create(FlinkEnv version) throws Exception;
 
   /**
+   * delete flink env
+   *
+   * @param id
+   */
+  void delete(Long id);
+
+  /**
    * update
    *
    * @param version

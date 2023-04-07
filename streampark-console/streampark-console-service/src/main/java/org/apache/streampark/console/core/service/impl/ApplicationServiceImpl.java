@@ -534,6 +534,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public boolean existsJobByFlinkEnvId(Long flinkEnvId) {
+    LambdaQueryWrapper<Application> lambdaQueryWrapper =
+        new LambdaQueryWrapper<Application>().eq(Application::getVersionId, flinkEnvId);
+    return this.count(lambdaQueryWrapper) > 0;
+  }
+
+  @Override
   public List<String> getRecentK8sNamespace() {
     return baseMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
   }

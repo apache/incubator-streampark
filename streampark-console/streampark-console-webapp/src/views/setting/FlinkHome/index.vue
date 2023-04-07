@@ -25,10 +25,28 @@
   import { onMounted, ref } from 'vue';
   import { useModal } from '/@/components/Modal';
   import { SvgIcon } from '/@/components/Icon';
-  import { List, Switch, Card } from 'ant-design-vue';
-  import { CheckOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons-vue';
+  import {
+    List,
+    Switch,
+    Card,
+    Popconfirm,
+    Tooltip
+  } from 'ant-design-vue';
+  import {
+    CheckOutlined,
+    CloseOutlined,
+    DeleteOutlined,
+    EyeOutlined,
+    EditOutlined,
+    PlusOutlined
+  } from '@ant-design/icons-vue';
   import { FlinkEnvModal, FlinkEnvDrawer } from './components';
-  import { fetchDefaultSet, fetchFlinkEnv, fetchFlinkInfo } from '/@/api/flink/setting/flinkEnv';
+  import {
+    fetchDefaultSet,
+    fetchFlinkEnv,
+    fetchFlinkEnvRemove,
+    fetchFlinkInfo
+  } from '/@/api/flink/setting/flinkEnv';
   import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useDrawer } from '/@/components/Drawer';
@@ -40,7 +58,7 @@
 
   const { t } = useI18n();
   const versionId = ref<string | null>(null);
-  const { Swal } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const flinks = ref<FlinkEnv[]>([]);
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
@@ -59,6 +77,13 @@
   async function handleFlinkConf(item: FlinkEnv) {
     const res = await fetchFlinkInfo(item.id);
     openEnvDrawer(true, res);
+  }
+
+  /* delete flink home */
+  async function handleDelete(item: FlinkEnv) {
+    await fetchFlinkEnvRemove(item.id);
+    await getFlinkSetting();
+    createMessage.success('The current flink home is removed');
   }
 
   /* set as default environment */
@@ -133,12 +158,37 @@
           </div>
 
           <template #actions>
-            <a-button type="link" @click="handleEditFlink(item)">
-              {{ t('common.edit') }}
-            </a-button>
-            <a-button type="link" @click="handleFlinkConf(item)">
-              {{ t('setting.flinkHome.conf') }}
-            </a-button>
+            <Tooltip :title="t('setting.flinkHome.edit')">
+              <a-button
+                @click="handleEditFlink(item)"
+                shape="circle"
+                size="large"
+                class="control-button"
+              >
+                <EditOutlined />
+              </a-button>
+            </Tooltip>
+            <Tooltip :title="t('setting.flinkHome.conf')">
+              <a-button
+                shape="circle"
+                @click="handleFlinkConf(item)"
+                target="_blank"
+                size="large"
+                class="control-button"
+              >
+                <EyeOutlined />
+              </a-button>
+            </Tooltip>
+            <Popconfirm
+              :title="t('setting.flinkHome.delete')"
+              :cancel-text="t('common.no')"
+              :ok-text="t('common.yes')"
+              @confirm="handleDelete(item)"
+            >
+              <a-button type="danger" shape="circle" size="large" class="control-button">
+                <DeleteOutlined />
+              </a-button>
+            </Popconfirm>
           </template>
         </ListItem>
       </List>
