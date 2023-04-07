@@ -78,6 +78,10 @@ public enum ExecutionMode implements Serializable {
     return YARN_PER_JOB.equals(mode) || YARN_APPLICATION.equals(mode) || YARN_SESSION.equals(mode);
   }
 
+  public static boolean isYarnPerJobOrAppMode(ExecutionMode mode) {
+    return YARN_PER_JOB.equals(mode) || YARN_APPLICATION.equals(mode);
+  }
+
   public static boolean isYarnSessionMode(ExecutionMode mode) {
     return YARN_SESSION.equals(mode);
   }

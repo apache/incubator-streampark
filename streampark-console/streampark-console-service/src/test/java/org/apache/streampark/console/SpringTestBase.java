@@ -19,6 +19,10 @@ package org.apache.streampark.console;
 
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.entity.YarnQueue;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,5 +78,35 @@ public abstract class SpringTestBase {
         tempPath.getAbsolutePath(),
         CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
         localWorkspace.toAbsolutePath());
+  }
+
+  // Help methods.
+
+  protected FlinkCluster mockYarnSessionFlinkCluster(
+      String name, String yarnQueue, Long versionId) {
+    FlinkCluster cluster = new FlinkCluster();
+    cluster.setClusterName(name);
+    cluster.setYarnQueue(yarnQueue);
+    cluster.setVersionId(versionId);
+    cluster.setExecutionMode(ExecutionMode.YARN_SESSION.getMode());
+    return cluster;
+  }
+
+  protected Application mockYarnModeJobApp(
+      Long teamId, String name, String yarnQueue, ExecutionMode executionMode) {
+    Application application = new Application();
+    application.setYarnQueue(yarnQueue);
+    application.setTeamId(teamId);
+    application.setJobName(name);
+    application.setExecutionMode(executionMode.getMode());
+    application.doSetHotParams();
+    return application;
+  }
+
+  protected YarnQueue mockYarnQueue(Long teamId, String queueLabel) {
+    YarnQueue yarnQueue = new YarnQueue();
+    yarnQueue.setTeamId(teamId);
+    yarnQueue.setQueueLabel(queueLabel);
+    return yarnQueue;
   }
 }
