@@ -156,7 +156,7 @@
             <div class="list-content-item">
               <span>{{ t('setting.flinkCluster.form.address') }}</span>
               <p style="margin-top: 10px">
-                <a :href="item.address">
+                <a :href="item.address" target="_blank">
                   {{ item.address }}
                 </a>
               </p>
