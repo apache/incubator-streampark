@@ -75,11 +75,11 @@ export const useEdit = () => {
         } else {
           if (k.startsWith('jobmanager.memory.')) {
             memoryItems.jmMemoryItems.push(key);
-            fieldValueOptions.jmOptionsItem[key] = parseInt(v);
+            fieldValueOptions.jmOptionsItem[key] = parseFloat(v);
           }
           if (k.startsWith('taskmanager.memory.')) {
             memoryItems.tmMemoryItems.push(key);
-            fieldValueOptions.tmOptionsItem[key] = parseInt(v);
+            fieldValueOptions.tmOptionsItem[key] = parseFloat(v);
           }
         }
       } else {
