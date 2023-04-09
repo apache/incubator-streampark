@@ -81,9 +81,11 @@
 
   /* delete flink home */
   async function handleDelete(item: FlinkEnv) {
-    await fetchFlinkEnvRemove(item.id);
-    await getFlinkSetting();
-    createMessage.success('The current flink home is removed');
+    const resp = await fetchFlinkEnvRemove(item.id);
+    if (resp.data.code == 200) {
+      await getFlinkSetting();
+      createMessage.success('The current flink home is removed.');
+    }
   }
 
   /* set as default environment */

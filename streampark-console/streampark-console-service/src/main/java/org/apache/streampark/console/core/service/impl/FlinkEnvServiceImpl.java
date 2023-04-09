@@ -90,28 +90,25 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
   @Override
   public void delete(Long id) {
-    // 1.check exists
     FlinkEnv flinkEnv = getById(id);
-    if (flinkEnv == null) {
-      throw new ApiAlertException("the flink home does not exist, please check.");
-    }
+
+    // 1.check exists
+    ApiAlertException.throwIfNull(flinkEnv, "The flink home does not exist, please check.");
 
     // 2.check if it is being used by any flink cluster
-    if (flinkClusterService.existsByFlinkEnvId(id)) {
-      throw new ApiAlertException(
-          "the flink home is still in use by some flink cluster, please check.");
-    }
+    ApiAlertException.throwIfFalse(
+        !flinkClusterService.existsByFlinkEnvId(id),
+        "The flink home is still in use by some flink cluster, please check.");
 
     // 3.check if it is being used by any application
-    if (applicationService.existsJobByFlinkEnvId(id)) {
-      throw new ApiAlertException(
-          "the flink home is still in use by some application, please check.");
-    }
+    ApiAlertException.throwIfFalse(
+        !applicationService.existsJobByFlinkEnvId(id),
+        "The flink home is still in use by some application, please check.");
 
     Long count = this.baseMapper.selectCount(null);
-    if (count > 1 && flinkEnv.getIsDefault()) {
-      throw new ApiAlertException("the flink home is set as default, please change it first.");
-    }
+    ApiAlertException.throwIfFalse(
+        !(count > 1 && flinkEnv.getIsDefault()),
+        "The flink home is set as default, please change it first.");
 
     this.baseMapper.deleteById(id);
   }
