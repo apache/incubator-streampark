@@ -99,39 +99,34 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
   }
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
-    if (this.appConf == null) Map.empty[String, String]
-    else {
+    if (this.appConf == null) {
+      return Map.empty[String, String]
+    }
+    val format = this.appConf.substring(0, 7)
+    if (format == "json://") {
+      val json = this.appConf.drop(7)
+      new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap.filter(_._2 != null)
+    } else {
       lazy val content = DeflaterUtils.unzipString(this.appConf.trim.drop(7))
-      val map = this.appConf match {
-        case x if x.trim.startsWith("yaml://") => PropertiesUtils.fromYamlText(content)
-        case x if x.trim.startsWith("conf://") => PropertiesUtils.fromHoconText(content)
-        case x if x.trim.startsWith("prop://") => PropertiesUtils.fromPropertiesText(content)
-        case x if x.trim.startsWith("hdfs://") =>
-          /*
-           * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
-           */
+      val map = format match {
+        case "yaml://" => PropertiesUtils.fromYamlText(content)
+        case "conf://" => PropertiesUtils.fromHoconText(content)
+        case "prop://" => PropertiesUtils.fromPropertiesText(content)
+        case "hdfs://" =>
+          // 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
           val text = HdfsUtils.read(this.appConf)
           val extension = this.appConf.split("\\.").last.toLowerCase
           extension match {
             case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
             case "conf" => PropertiesUtils.fromHoconText(text)
             case "properties" => PropertiesUtils.fromPropertiesText(text)
-            case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
+            case _ => throw new IllegalArgumentException("[StreamPark] Usage: application config format error,must be [yaml|conf|properties]")
           }
-        case x if x.trim.startsWith("json://") =>
-          val json = x.trim.drop(7)
-          new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap.filter(_._2 != null)
-        case _ => throw new IllegalArgumentException("[StreamPark] appConf format error.")
+        case _ => throw new IllegalArgumentException("[StreamPark] application config format error.")
       }
-      if (this.appConf.trim.startsWith("json://")) map
-      else {
-        prefix match {
-          case "" | null => map
-          case other => map
-            .filter(_._1.startsWith(other)).filter(_._2.nonEmpty)
-            .map(x => x._1.drop(other.length) -> x._2)
-        }
-      }
+      map
+        .filter(_._1.startsWith(prefix)).filter(_._2.nonEmpty)
+        .map(x => x._1.drop(prefix.length) -> x._2)
     }
   }
 
