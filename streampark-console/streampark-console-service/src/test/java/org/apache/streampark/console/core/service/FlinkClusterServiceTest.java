@@ -19,20 +19,16 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.SpringTestBase;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.impl.FlinkClusterServiceImpl;
-import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.apache.streampark.console.core.service.impl.FlinkClusterServiceImpl.ERROR_CLUSTER_QUEUE_HINT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** The unit test class for {@link FlinkClusterService}. */
 class FlinkClusterServiceTest extends SpringTestBase {
@@ -45,26 +41,6 @@ class FlinkClusterServiceTest extends SpringTestBase {
   void cleanTestRecordsInDatabase() {
     flinkClusterService.remove(new QueryWrapper<>());
     yarnQueueService.remove(new QueryWrapper<>());
-  }
-
-  @Test
-  void testIsYarnSessionModeAndNotDefaultQueue() {
-    FlinkClusterServiceImpl clusterServiceImpl = (FlinkClusterServiceImpl) flinkClusterService;
-
-    // Test for cluster not yarn-session mode
-    FlinkCluster cluster = new FlinkCluster();
-    cluster.setExecutionMode(ExecutionMode.KUBERNETES_NATIVE_SESSION.getMode());
-    assertThat(clusterServiceImpl.isYarnSessionModeAndNotDefaultQueue(cluster)).isFalse();
-
-    // Test for cluster with empty & default queue in yarn-session mode
-    cluster.setExecutionMode(ExecutionMode.YARN_SESSION.getMode());
-    assertThat(clusterServiceImpl.isYarnSessionModeAndNotDefaultQueue(cluster)).isFalse();
-    cluster.setYarnQueue(YarnQueueServiceImpl.DEFAULT_QUEUE);
-    assertThat(clusterServiceImpl.isYarnSessionModeAndNotDefaultQueue(cluster)).isFalse();
-
-    // Test for cluster with non-empty & non-default in yarn-session mode
-    cluster.setYarnQueue("testQueue");
-    assertThat(clusterServiceImpl.isYarnSessionModeAndNotDefaultQueue(cluster)).isTrue();
   }
 
   @Test
@@ -87,16 +63,14 @@ class FlinkClusterServiceTest extends SpringTestBase {
     yarnQueueService.save(yarnQueue2);
 
     FlinkCluster cluster = mockYarnSessionFlinkCluster("cluster1", queueLabel1, 1L);
-    clusterServiceImpl.checkQueueValidationIfNeeded(cluster);
+    assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster)).isTrue();
 
     cluster.setYarnQueue(queueLabel2);
-    clusterServiceImpl.checkQueueValidationIfNeeded(cluster);
+    assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster)).isTrue();
 
     // Test cluster without available queue
     cluster.setYarnQueue("non-exited-queue");
-    assertThatThrownBy(() -> clusterServiceImpl.checkQueueValidationIfNeeded(cluster))
-        .isInstanceOf(ApiAlertException.class)
-        .hasMessage(String.format(ERROR_CLUSTER_QUEUE_HINT, cluster.getYarnQueue()));
+    assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster)).isFalse();
 
     // ------- Test it for the update operation. -------
     final String queue1Label1 = "queue1@label1";
@@ -110,7 +84,7 @@ class FlinkClusterServiceTest extends SpringTestBase {
     // Test update for both versions in yarn-session with same yarn queue
     FlinkCluster cluster1 = mockYarnSessionFlinkCluster(clusterName, queue1Label1, targetVersion);
     FlinkCluster cluster2 = mockYarnSessionFlinkCluster(clusterName, queue1Label1, targetVersion);
-    clusterServiceImpl.checkQueueValidationIfNeeded(cluster1, cluster2);
+    assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster1, cluster2)).isTrue();
 
     // Test available queue
     YarnQueue yarnQueueLabel1 = mockYarnQueue(teamId3, queue1Label1);
@@ -118,13 +92,11 @@ class FlinkClusterServiceTest extends SpringTestBase {
     YarnQueue yarnQueueLabel2 = mockYarnQueue(teamId4, queue1Label2);
     yarnQueueService.save(yarnQueueLabel2);
     cluster2.setYarnQueue(queue1Label2);
-    clusterServiceImpl.checkQueueValidationIfNeeded(cluster1, cluster2);
+    assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster1, cluster2)).isTrue();
 
     // Test non-existed queue
     cluster1.setExecutionMode(ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getMode());
     cluster2.setYarnQueue(nonExistedQueue);
-    assertThatThrownBy(() -> clusterServiceImpl.checkQueueValidationIfNeeded(cluster1, cluster2))
-        .isInstanceOf(ApiAlertException.class)
-        .hasMessage(String.format(ERROR_CLUSTER_QUEUE_HINT, cluster2.getYarnQueue()));
+    assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster1, cluster2)).isFalse();
   }
 }

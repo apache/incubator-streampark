@@ -183,7 +183,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   }
 
   @Override
-  public boolean isEmptyOrDefaultQueue(String queueLabel) {
+  public boolean isDefaultQueue(String queueLabel) {
     return StringUtils.equals(DEFAULT_QUEUE, queueLabel) || StringUtils.isEmpty(queueLabel);
   }
 

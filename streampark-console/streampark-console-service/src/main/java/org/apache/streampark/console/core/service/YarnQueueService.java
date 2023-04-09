@@ -39,7 +39,7 @@ public interface YarnQueueService extends IService<YarnQueue> {
 
   void checkQueueLabelFormatIfNeeded(ExecutionMode executionMode, String queueLabel);
 
-  boolean isEmptyOrDefaultQueue(String queueLabel);
+  boolean isDefaultQueue(String queueLabel);
 
   boolean existByQueueLabel(String queueLabel);
 

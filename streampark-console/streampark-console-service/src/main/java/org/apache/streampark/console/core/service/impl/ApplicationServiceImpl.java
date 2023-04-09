@@ -160,7 +160,7 @@ import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isK
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements ApplicationService {
 
-  public static final String ERROR_APP_QUEUE_HINT =
+  private static final String ERROR_APP_QUEUE_HINT =
       "Queue label '%s' isn't available for teamId '%d', please add it into the team first.";
 
   private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
@@ -703,7 +703,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.setOptionState(OptionState.NONE.getValue());
     appParam.setCreateTime(new Date());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
-    checkQueueValidationIfNeeded(appParam);
+
+    boolean success = checkQueueValidationIfNeeded(appParam);
+    ApiAlertException.throwIfFalse(
+        success,
+        String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
       String jarPath =
@@ -818,7 +823,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Transactional(rollbackFor = {Exception.class})
   public boolean update(Application appParam) {
     Application application = getById(appParam.getId());
-    checkQueueValidationIfNeeded(application, appParam);
+
+    boolean success = checkQueueValidationIfNeeded(application, appParam);
+    ApiAlertException.throwIfFalse(
+        success,
+        String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+
     application.setRelease(ReleaseState.NEED_RELEASE.get());
     if (application.isUploadJob()) {
       if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
@@ -1732,38 +1742,43 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     return null;
   }
 
-  /** Check queue label validation when create the application if needed. */
+  /**
+   * Check queue label validation when create the application if needed.
+   *
+   * @param appParam the app to create.
+   * @return <code>true</code> if validate it successfully, <code>false</code> else.
+   */
   @VisibleForTesting
-  public void checkQueueValidationIfNeeded(Application appParam) {
+  public boolean checkQueueValidationIfNeeded(Application appParam) {
     yarnQueueService.checkQueueLabelFormatIfNeeded(
         appParam.getExecutionModeEnum(), appParam.getYarnQueue());
-    if (!isYarnPerJobAppModeNotDefaultQueue(appParam)) {
-      return;
+    if (!isYarnNotDefaultQueue(appParam)) {
+      return true;
     }
-    boolean exist =
-        yarnQueueService.existByTeamIdQueueLabel(appParam.getTeamId(), appParam.getYarnQueue());
-    ApiAlertException.throwIfFalse(
-        exist, String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+    return yarnQueueService.existByTeamIdQueueLabel(appParam.getTeamId(), appParam.getYarnQueue());
   }
 
-  /** Check queue label validation when update the application if needed. */
+  /**
+   * Check queue label validation when update the application if needed.
+   *
+   * @param oldApp the old app to update.
+   * @param newApp the new app payload.
+   * @return <code>true</code> if validate it successfully, <code>false</code> else.
+   */
   @VisibleForTesting
-  public void checkQueueValidationIfNeeded(Application oldApp, Application newApp) {
+  public boolean checkQueueValidationIfNeeded(Application oldApp, Application newApp) {
     yarnQueueService.checkQueueLabelFormatIfNeeded(
         newApp.getExecutionModeEnum(), newApp.getYarnQueue());
-    if (!isYarnPerJobAppModeNotDefaultQueue(newApp)) {
-      return;
+    if (!isYarnNotDefaultQueue(newApp)) {
+      return true;
     }
 
     oldApp.setYarnQueueByHotParams();
     if (ExecutionMode.isYarnPerJobOrAppMode(newApp.getExecutionModeEnum())
         && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
-      return;
+      return true;
     }
-    boolean exist =
-        yarnQueueService.existByTeamIdQueueLabel(newApp.getTeamId(), newApp.getYarnQueue());
-    ApiAlertException.throwIfFalse(
-        exist, String.format(ERROR_APP_QUEUE_HINT, newApp.getYarnQueue(), newApp.getTeamId()));
+    return yarnQueueService.existByTeamIdQueueLabel(newApp.getTeamId(), newApp.getYarnQueue());
   }
 
   /**
@@ -1774,9 +1789,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
    * @return If the executionMode is (Yarn PerJob or application mode) and the queue label is not
    *     (empty or default), return true, false else.
    */
-  @VisibleForTesting
-  public boolean isYarnPerJobAppModeNotDefaultQueue(Application application) {
+  private boolean isYarnNotDefaultQueue(Application application) {
     return ExecutionMode.isYarnPerJobOrAppMode(application.getExecutionModeEnum())
-        && !yarnQueueService.isEmptyOrDefaultQueue(application.getYarnQueue());
+        && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
   }
 }

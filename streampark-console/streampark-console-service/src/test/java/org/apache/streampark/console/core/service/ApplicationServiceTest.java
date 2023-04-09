@@ -19,11 +19,9 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.SpringTestBase;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.impl.ApplicationServiceImpl;
-import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
 
 import org.apache.http.entity.ContentType;
 
@@ -43,9 +41,7 @@ import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.util.Date;
 
-import static org.apache.streampark.console.core.service.impl.ApplicationServiceImpl.ERROR_APP_QUEUE_HINT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** org.apache.streampark.console.core.service.ApplicationServiceTest. */
 class ApplicationServiceTest extends SpringTestBase {
@@ -130,37 +126,6 @@ class ApplicationServiceTest extends SpringTestBase {
   }
 
   @Test
-  void testIsYarnPerJobAppModeNotDefaultQueue() {
-
-    ApplicationServiceImpl applicationServiceImpl = (ApplicationServiceImpl) applicationService;
-
-    // Test for app not (yarn per-job or application-mode)
-    Application app = new Application();
-    app.setExecutionMode(ExecutionMode.REMOTE.getMode());
-    assertThat(applicationServiceImpl.isYarnPerJobAppModeNotDefaultQueue(app)).isFalse();
-
-    // Test for app with empty & default queue in (yarn per-job or application-mode)
-    app.setExecutionMode(ExecutionMode.YARN_PER_JOB.getMode());
-    assertThat(applicationServiceImpl.isYarnPerJobAppModeNotDefaultQueue(app)).isFalse();
-
-    app.setExecutionMode(ExecutionMode.YARN_APPLICATION.getMode());
-    assertThat(applicationServiceImpl.isYarnPerJobAppModeNotDefaultQueue(app)).isFalse();
-
-    app.setExecutionMode(ExecutionMode.YARN_PER_JOB.getMode());
-    app.setYarnQueue(YarnQueueServiceImpl.DEFAULT_QUEUE);
-    assertThat(applicationServiceImpl.isYarnPerJobAppModeNotDefaultQueue(app)).isFalse();
-
-    app.setExecutionMode(ExecutionMode.YARN_APPLICATION.getMode());
-    app.setYarnQueue(YarnQueueServiceImpl.DEFAULT_QUEUE);
-    assertThat(applicationServiceImpl.isYarnPerJobAppModeNotDefaultQueue(app)).isFalse();
-
-    // Test for app with non-empty & non-default queue in (yarn per-job or application-mode)
-    app.setExecutionMode(ExecutionMode.YARN_APPLICATION.getMode());
-    app.setYarnQueue("testQueue");
-    assertThat(applicationServiceImpl.isYarnPerJobAppModeNotDefaultQueue(app)).isTrue();
-  }
-
-  @Test
   void testCheckQueueValidationIfNeeded() {
     ApplicationServiceImpl applicationServiceImpl = (ApplicationServiceImpl) applicationService;
 
@@ -173,15 +138,11 @@ class ApplicationServiceTest extends SpringTestBase {
     yarnQueueService.save(yarnQueue);
     Application application =
         mockYarnModeJobApp(targetTeamId, "app1", queueLabel, ExecutionMode.YARN_APPLICATION);
-    applicationServiceImpl.checkQueueValidationIfNeeded(application);
+    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(application)).isTrue();
 
     // Test application without available queue
     application.setYarnQueue("non-exited-queue");
-    assertThatThrownBy(() -> applicationServiceImpl.checkQueueValidationIfNeeded(application))
-        .isInstanceOf(ApiAlertException.class)
-        .hasMessage(
-            String.format(
-                ERROR_APP_QUEUE_HINT, application.getYarnQueue(), application.getTeamId()));
+    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(application)).isFalse();
 
     // ------- Test it for the update operation. -------
     final String queueLabel1 = "queue1@label1";
@@ -195,7 +156,7 @@ class ApplicationServiceTest extends SpringTestBase {
         mockYarnModeJobApp(teamId2, appName, queueLabel1, ExecutionMode.YARN_APPLICATION);
     Application app2 =
         mockYarnModeJobApp(teamId2, appName, queueLabel1, ExecutionMode.YARN_PER_JOB);
-    applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2);
+    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2)).isTrue();
 
     // Test available queue
     YarnQueue yarnQueueLabel1 = mockYarnQueue(teamId2, queueLabel1);
@@ -203,13 +164,11 @@ class ApplicationServiceTest extends SpringTestBase {
     YarnQueue yarnQueueLabel2 = mockYarnQueue(teamId2, queueLabel2);
     yarnQueueService.save(yarnQueueLabel2);
     app2.setYarnQueue(queueLabel2);
-    applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2);
+    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2)).isTrue();
 
     // Test non-existed queue
     app1.setExecutionMode(ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getMode());
     app2.setYarnQueue(nonExistedQueue);
-    assertThatThrownBy(() -> applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2))
-        .isInstanceOf(ApiAlertException.class)
-        .hasMessage(String.format(ERROR_APP_QUEUE_HINT, app2.getYarnQueue(), app2.getTeamId()));
+    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2)).isFalse();
   }
 }

@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
 public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, FlinkCluster>
     implements FlinkClusterService {
 
-  public static final String ERROR_CLUSTER_QUEUE_HINT =
+  private static final String ERROR_CLUSTER_QUEUE_HINT =
       "Queue label '%s' isn't available in database, please add it first.";
 
   private final ExecutorService executorService =
@@ -136,7 +136,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Override
   public Boolean create(FlinkCluster flinkCluster) {
     flinkCluster.setUserId(commonService.getUserId());
-    checkQueueValidationIfNeeded(flinkCluster);
+    boolean successful = validateQueueIfNeeded(flinkCluster);
+    ApiAlertException.throwIfFalse(
+        successful, String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()));
     flinkCluster.setCreateTime(new Date());
     if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
       flinkCluster.setClusterState(ClusterState.STARTED.getValue());
@@ -211,7 +213,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Override
   public void update(FlinkCluster cluster) {
     FlinkCluster flinkCluster = getById(cluster.getId());
-    checkQueueValidationIfNeeded(flinkCluster, cluster);
+    boolean success = validateQueueIfNeeded(flinkCluster, cluster);
+    ApiAlertException.throwIfFalse(
+        success, String.format(ERROR_CLUSTER_QUEUE_HINT, cluster.getYarnQueue()));
     flinkCluster.setClusterName(cluster.getClusterName());
     flinkCluster.setDescription(cluster.getDescription());
     if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
@@ -362,35 +366,42 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     removeById(id);
   }
 
-  /** Check queue label validation when create the cluster if needed. */
+  /**
+   * Check queue label validation when create the cluster if needed.
+   *
+   * @param clusterInfo the new cluster info.
+   * @return <code>true</code> if validate it successfully, <code>false</code> else.
+   */
   @VisibleForTesting
-  public void checkQueueValidationIfNeeded(FlinkCluster clusterInfo) {
+  public boolean validateQueueIfNeeded(FlinkCluster clusterInfo) {
     yarnQueueService.checkQueueLabelFormatIfNeeded(
         clusterInfo.getExecutionModeEnum(), clusterInfo.getYarnQueue());
-    if (!isYarnSessionModeAndNotDefaultQueue(clusterInfo)) {
-      return;
+    if (!isYarnNotDefaultQueue(clusterInfo)) {
+      return true;
     }
-    boolean exist = yarnQueueService.existByQueueLabel(clusterInfo.getYarnQueue());
-    ApiAlertException.throwIfFalse(
-        exist, String.format(ERROR_CLUSTER_QUEUE_HINT, clusterInfo.getYarnQueue()));
+    return yarnQueueService.existByQueueLabel(clusterInfo.getYarnQueue());
   }
 
-  /** Check queue label validation when update the cluster if needed. */
+  /**
+   * Check queue label validation when update the cluster if needed.
+   *
+   * @param oldCluster the old cluster.
+   * @param newCluster the new cluster.
+   * @return <code>true</code> if validate it successfully, <code>false</code> else.
+   */
   @VisibleForTesting
-  public void checkQueueValidationIfNeeded(FlinkCluster oldCluster, FlinkCluster newCluster) {
+  public boolean validateQueueIfNeeded(FlinkCluster oldCluster, FlinkCluster newCluster) {
     yarnQueueService.checkQueueLabelFormatIfNeeded(
         newCluster.getExecutionModeEnum(), newCluster.getYarnQueue());
-    if (!isYarnSessionModeAndNotDefaultQueue(newCluster)) {
-      return;
+    if (!isYarnNotDefaultQueue(newCluster)) {
+      return true;
     }
 
     if (ExecutionMode.isYarnSessionMode(newCluster.getExecutionModeEnum())
         && StringUtils.equals(oldCluster.getYarnQueue(), newCluster.getYarnQueue())) {
-      return;
+      return true;
     }
-    boolean exist = yarnQueueService.existByQueueLabel(newCluster.getYarnQueue());
-    ApiAlertException.throwIfFalse(
-        exist, String.format(ERROR_CLUSTER_QUEUE_HINT, newCluster.getYarnQueue()));
+    return yarnQueueService.existByQueueLabel(newCluster.getYarnQueue());
   }
 
   /**
@@ -401,9 +412,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
    * @return If the executionMode is yarn session mode and the queue label is not (empty or
    *     default), return true, false else.
    */
-  @VisibleForTesting
-  public boolean isYarnSessionModeAndNotDefaultQueue(FlinkCluster cluster) {
+  private boolean isYarnNotDefaultQueue(FlinkCluster cluster) {
     return ExecutionMode.isYarnSessionMode(cluster.getExecutionModeEnum())
-        && !yarnQueueService.isEmptyOrDefaultQueue(cluster.getYarnQueue());
+        && !yarnQueueService.isDefaultQueue(cluster.getYarnQueue());
   }
 }

@@ -42,7 +42,6 @@ import { SelectValue } from 'ant-design-vue/lib/select';
 import { CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/flink/setting/yarnQueue';
-import { getUserTeamId } from '/@/utils';
 import { ApiSelect } from '/@/components/Form';
 
 const { t } = useI18n();
@@ -242,7 +241,7 @@ export const renderYarnQueue = ({ model, field }: RenderCallbackParams) => {
         name="yarnQueue"
         placeholder={t('setting.yarnQueue.placeholder.yarnQueueLabelExpression')}
         api={fetchYarnQueueList}
-        params={{ page: 1, pageSize: 9999, teamId: getUserTeamId() }}
+        params={{ page: 1, pageSize: 9999 }}
         resultField={'records'}
         labelField={'queueLabel'}
         valueField={'queueLabel'}
