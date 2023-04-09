@@ -706,7 +706,7 @@ create table "public"."t_user" (
   "username" varchar(64) collate "pg_catalog"."default" not null,
   "nick_name" varchar(64) collate "pg_catalog"."default" not null,
   "salt" varchar(26) collate "pg_catalog"."default",
-  "password" varchar(64) collate "pg_catalog"."default" not null,
+  "password" varchar(64) collate "pg_catalog"."default",
   "email" varchar(64) collate "pg_catalog"."default",
   "user_type" int4,
   "login_type" int2 default 0,
@@ -727,7 +727,7 @@ comment on column "public"."t_user"."salt" is 'salt';
 comment on column "public"."t_user"."password" is 'password';
 comment on column "public"."t_user"."email" is 'email';
 comment on column "public"."t_user"."user_type" is 'user type 1:admin 2:user';
-comment on column "public"."t_user"."login_type" is 'login type 0:password 1:ldap';
+comment on column "public"."t_user"."login_type" is 'login type 0:password 1:ldap 2:sso';
 comment on column "public"."t_user"."last_team_id" is 'last team id';
 comment on column "public"."t_user"."status" is 'status 0:locked 1:active';
 comment on column "public"."t_user"."create_time" is 'creation time';

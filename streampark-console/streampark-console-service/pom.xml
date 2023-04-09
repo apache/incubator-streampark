@@ -46,6 +46,12 @@
         <commons-compress.version>1.21</commons-compress.version>
         <javax-mail.version>1.4.7</javax-mail.version>
         <shiro.version>1.10.0</shiro.version>
+
+        <!-- Pac4j 4.x for jdk 8 -->
+        <pac4jVersion>4.5.7</pac4jVersion>
+        <!-- buji-pac4j 5.x for jdk 8-->
+        <bujiVersion>5.0.1</bujiVersion>
+
         <p6spy.version>3.9.1</p6spy.version>
         <freemarker.version>2.3.30</freemarker.version>
         <commons-email.version>1.5</commons-email.version>
@@ -183,6 +189,39 @@
                     <groupId>commons-beanutils</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- pac4j for SSO-->
+        <dependency>
+            <groupId>io.buji</groupId>
+            <artifactId>buji-pac4j</artifactId>
+            <version>${bujiVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.pac4j</groupId>
+            <artifactId>pac4j-core</artifactId>
+            <version>${pac4jVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.pac4j</groupId>
+            <artifactId>pac4j-springboot</artifactId>
+            <version>${pac4jVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.pac4j</groupId>
+            <artifactId>pac4j-oauth</artifactId>
+            <version>${pac4jVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.pac4j</groupId>
+            <artifactId>pac4j-oidc</artifactId>
+            <version>${pac4jVersion}</version>
         </dependency>
 
         <!-- spring cache -->
