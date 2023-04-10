@@ -704,7 +704,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.setCreateTime(new Date());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
 
-    boolean success = checkQueueValidationIfNeeded(appParam);
+    boolean success = validateQueueIfNeeded(appParam);
     ApiAlertException.throwIfFalse(
         success,
         String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
@@ -824,7 +824,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   public boolean update(Application appParam) {
     Application application = getById(appParam.getId());
 
-    boolean success = checkQueueValidationIfNeeded(application, appParam);
+    boolean success = validateQueueIfNeeded(application, appParam);
     ApiAlertException.throwIfFalse(
         success,
         String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
@@ -1749,9 +1749,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
    * @return <code>true</code> if validate it successfully, <code>false</code> else.
    */
   @VisibleForTesting
-  public boolean checkQueueValidationIfNeeded(Application appParam) {
-    yarnQueueService.checkQueueLabelFormatIfNeeded(
-        appParam.getExecutionModeEnum(), appParam.getYarnQueue());
+  public boolean validateQueueIfNeeded(Application appParam) {
+    yarnQueueService.checkQueueLabel(appParam.getExecutionModeEnum(), appParam.getYarnQueue());
     if (!isYarnNotDefaultQueue(appParam)) {
       return true;
     }
@@ -1766,9 +1765,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
    * @return <code>true</code> if validate it successfully, <code>false</code> else.
    */
   @VisibleForTesting
-  public boolean checkQueueValidationIfNeeded(Application oldApp, Application newApp) {
-    yarnQueueService.checkQueueLabelFormatIfNeeded(
-        newApp.getExecutionModeEnum(), newApp.getYarnQueue());
+  public boolean validateQueueIfNeeded(Application oldApp, Application newApp) {
+    yarnQueueService.checkQueueLabel(newApp.getExecutionModeEnum(), newApp.getYarnQueue());
     if (!isYarnNotDefaultQueue(newApp)) {
       return true;
     }

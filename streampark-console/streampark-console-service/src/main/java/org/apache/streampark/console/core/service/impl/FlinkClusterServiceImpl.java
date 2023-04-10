@@ -374,7 +374,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
    */
   @VisibleForTesting
   public boolean validateQueueIfNeeded(FlinkCluster clusterInfo) {
-    yarnQueueService.checkQueueLabelFormatIfNeeded(
+    yarnQueueService.checkQueueLabel(
         clusterInfo.getExecutionModeEnum(), clusterInfo.getYarnQueue());
     if (!isYarnNotDefaultQueue(clusterInfo)) {
       return true;
@@ -391,8 +391,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
    */
   @VisibleForTesting
   public boolean validateQueueIfNeeded(FlinkCluster oldCluster, FlinkCluster newCluster) {
-    yarnQueueService.checkQueueLabelFormatIfNeeded(
-        newCluster.getExecutionModeEnum(), newCluster.getYarnQueue());
+    yarnQueueService.checkQueueLabel(newCluster.getExecutionModeEnum(), newCluster.getYarnQueue());
     if (!isYarnNotDefaultQueue(newCluster)) {
       return true;
     }

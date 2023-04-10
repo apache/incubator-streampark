@@ -176,7 +176,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
    * @param queueLabel queueLabel expression.
    */
   @Override
-  public void checkQueueLabelFormatIfNeeded(ExecutionMode executionMode, String queueLabel) {
+  public void checkQueueLabel(ExecutionMode executionMode, String queueLabel) {
     if (ExecutionMode.isYarnMode(executionMode)) {
       ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
     }

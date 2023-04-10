@@ -138,11 +138,11 @@ class ApplicationServiceTest extends SpringTestBase {
     yarnQueueService.save(yarnQueue);
     Application application =
         mockYarnModeJobApp(targetTeamId, "app1", queueLabel, ExecutionMode.YARN_APPLICATION);
-    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(application)).isTrue();
+    assertThat(applicationServiceImpl.validateQueueIfNeeded(application)).isTrue();
 
     // Test application without available queue
     application.setYarnQueue("non-exited-queue");
-    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(application)).isFalse();
+    assertThat(applicationServiceImpl.validateQueueIfNeeded(application)).isFalse();
 
     // ------- Test it for the update operation. -------
     final String queueLabel1 = "queue1@label1";
@@ -156,7 +156,7 @@ class ApplicationServiceTest extends SpringTestBase {
         mockYarnModeJobApp(teamId2, appName, queueLabel1, ExecutionMode.YARN_APPLICATION);
     Application app2 =
         mockYarnModeJobApp(teamId2, appName, queueLabel1, ExecutionMode.YARN_PER_JOB);
-    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2)).isTrue();
+    assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isTrue();
 
     // Test available queue
     YarnQueue yarnQueueLabel1 = mockYarnQueue(teamId2, queueLabel1);
@@ -164,11 +164,11 @@ class ApplicationServiceTest extends SpringTestBase {
     YarnQueue yarnQueueLabel2 = mockYarnQueue(teamId2, queueLabel2);
     yarnQueueService.save(yarnQueueLabel2);
     app2.setYarnQueue(queueLabel2);
-    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2)).isTrue();
+    assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isTrue();
 
     // Test non-existed queue
     app1.setExecutionMode(ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getMode());
     app2.setYarnQueue(nonExistedQueue);
-    assertThat(applicationServiceImpl.checkQueueValidationIfNeeded(app1, app2)).isFalse();
+    assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isFalse();
   }
 }

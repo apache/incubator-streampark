@@ -37,7 +37,7 @@ public interface YarnQueueService extends IService<YarnQueue> {
 
   void deleteYarnQueue(YarnQueue yarnQueue);
 
-  void checkQueueLabelFormatIfNeeded(ExecutionMode executionMode, String queueLabel);
+  void checkQueueLabel(ExecutionMode executionMode, String queueLabel);
 
   boolean isDefaultQueue(String queueLabel);
 
