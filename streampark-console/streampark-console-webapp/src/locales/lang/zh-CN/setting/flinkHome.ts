@@ -18,6 +18,8 @@ export default {
   title: 'Flink Home',
   conf: 'Flink 配置',
   sync: '配置同步',
+  edit: '编辑 Flink Home',
+  delete: '确定要删除此 Flink home ?',
   flinkName: 'Flink名称',
   flinkNamePlaceholder: '请输入Flink别名',
   flinkHome: '安装路径',

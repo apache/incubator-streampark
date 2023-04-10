@@ -18,6 +18,8 @@ export default {
   title: 'Flink Home',
   conf: 'Flink Conf',
   sync: 'Sync Conf',
+  edit: 'Edit Flink Home',
+  delete: 'Are you sure delete this flink home ?',
   flinkName: 'Flink Name',
   flinkNamePlaceholder: 'Please enter flink name',
   flinkHome: 'Flink Home',

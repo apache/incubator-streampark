@@ -20,11 +20,14 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
+import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,9 @@ import java.util.Date;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     implements FlinkEnvService {
+
+  @Autowired private FlinkClusterService flinkClusterService;
+  @Autowired private ApplicationService applicationService;
 
   /**
    * two places will be checked: <br>
@@ -80,6 +86,31 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     version.doSetFlinkConf();
     version.doSetVersion();
     return save(version);
+  }
+
+  @Override
+  public void delete(Long id) {
+    FlinkEnv flinkEnv = getById(id);
+
+    // 1.check exists
+    ApiAlertException.throwIfNull(flinkEnv, "The flink home does not exist, please check.");
+
+    // 2.check if it is being used by any flink cluster
+    ApiAlertException.throwIfFalse(
+        !flinkClusterService.existsByFlinkEnvId(id),
+        "The flink home is still in use by some flink cluster, please check.");
+
+    // 3.check if it is being used by any application
+    ApiAlertException.throwIfFalse(
+        !applicationService.existsJobByFlinkEnvId(id),
+        "The flink home is still in use by some application, please check.");
+
+    Long count = this.baseMapper.selectCount(null);
+    ApiAlertException.throwIfFalse(
+        !(count > 1 && flinkEnv.getIsDefault()),
+        "The flink home is set as default, please change it first.");
+
+    this.baseMapper.deleteById(id);
   }
 
   @Override
