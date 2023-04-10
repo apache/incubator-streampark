@@ -22,6 +22,7 @@ import { defHttp } from '/@/utils/http/axios';
 enum FLINK_API {
   LIST = '/flink/env/list',
   CREATE = '/flink/env/create',
+  DELETE = '/flink/env/delete',
   CHECK = '/flink/env/check',
   GET = '/flink/env/get',
   SYNC = '/flink/env/sync',
@@ -59,6 +60,18 @@ export function fetchFlinkInfo(id: string): Promise<FlinkEnv> {
     url: FLINK_API.GET,
     data: { id },
   });
+}
+
+/**
+ * delete flink env
+ * @param {String} id
+ * @returns {Promise<Boolean>}
+ */
+export function fetchFlinkEnvRemove(id: string): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.post({
+    url: FLINK_API.DELETE,
+    data: { id },
+  }, { isReturnNativeResponse: true });
 }
 
 /**

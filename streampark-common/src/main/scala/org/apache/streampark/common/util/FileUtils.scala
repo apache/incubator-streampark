@@ -19,6 +19,7 @@ package org.apache.streampark.common.util
 import java.io._
 import java.net.URL
 import java.util
+import java.util.Scanner
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
@@ -131,6 +132,22 @@ object FileUtils extends org.apache.commons.io.FileUtils {
           true
         }
     }
+  }
+
+  @throws[IOException] def readString(file: File): String = {
+    require(file != null && file.isFile)
+    val reader = new FileReader(file)
+    val scanner = new Scanner(reader)
+    val buffer = new mutable.StringBuilder()
+    if (scanner.hasNextLine) {
+      buffer.append(scanner.nextLine())
+    }
+    while (scanner.hasNextLine) {
+      buffer.append("\r\n")
+      buffer.append(scanner.nextLine())
+    }
+    Utils.close(scanner, reader)
+    buffer.toString()
   }
 
 }

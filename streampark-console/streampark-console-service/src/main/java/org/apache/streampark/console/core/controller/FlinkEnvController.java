@@ -93,6 +93,13 @@ public class FlinkEnvController {
     return RestResponse.success(true);
   }
 
+  @Operation(summary = "Delete flink environment")
+  @PostMapping("delete")
+  public RestResponse delete(Long id) {
+    flinkEnvService.delete(id);
+    return RestResponse.success();
+  }
+
   @Operation(summary = "Update flink environment as default")
   @PostMapping("default")
   public RestResponse setDefault(Long id) {

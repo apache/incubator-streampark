@@ -246,8 +246,8 @@ export const useFlinkApplication = (openStartModal: Fn) => {
           </Form>
         );
       },
-      okText: 'Apply',
-      cancelText: 'Close',
+      okText: t('common.apply'),
+      cancelText: t('common.closeText'),
       onOk: async () => {
         //1) check empty
         if (copyAppName == null) {
@@ -301,7 +301,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
   }
 
   /* mapping */
-  function handleMapping(app) {
+  function handleMapping(app: Recordable) {
     const mappingRef = ref();
     const formValue = reactive<any>({});
     createConfirm({
@@ -349,8 +349,8 @@ export const useFlinkApplication = (openStartModal: Fn) => {
           </Form>
         );
       },
-      okText: 'Apply',
-      cancelText: 'Close',
+      okText: t('common.apply'),
+      cancelText: t('common.closeText'),
       onOk: async () => {
         try {
           await mappingRef.value.validate();

@@ -103,6 +103,8 @@ public interface ApplicationService extends IService<Application> {
 
   boolean existsJobByClusterId(Long id);
 
+  boolean existsJobByFlinkEnvId(Long id);
+
   List<String> getRecentK8sNamespace();
 
   List<String> getRecentK8sClusterId(Integer executionMode);

@@ -75,11 +75,22 @@ export const useEdit = () => {
         } else {
           if (k.startsWith('jobmanager.memory.')) {
             memoryItems.jmMemoryItems.push(key);
-            fieldValueOptions.jmOptionsItem[key] = parseInt(v);
+            if (k === 'jobmanager.memory.jvm-overhead.fraction') {
+              fieldValueOptions.jmOptionsItem[key] = parseFloat(v);
+            } else {
+              fieldValueOptions.jmOptionsItem[key] = parseInt(v);
+            }
           }
           if (k.startsWith('taskmanager.memory.')) {
             memoryItems.tmMemoryItems.push(key);
-            fieldValueOptions.tmOptionsItem[key] = parseInt(v);
+            if (
+              k === 'taskmanager.memory.managed.fraction' ||
+              k === 'taskmanager.memory.jvm-overhead.fraction'
+            ) {
+              fieldValueOptions.tmOptionsItem[key] = parseFloat(v);
+            } else {
+              fieldValueOptions.tmOptionsItem[key] = parseInt(v);
+            }
           }
         }
       } else {
