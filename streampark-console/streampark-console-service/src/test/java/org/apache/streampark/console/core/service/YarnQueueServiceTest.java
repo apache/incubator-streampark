@@ -22,8 +22,6 @@ import org.apache.streampark.console.SpringTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.ResponseResult;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
 
@@ -45,7 +43,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
 /**
- * Test for {@link YarnQueueService}. We use {@link Execution} to avoid noisy data form h2 database.
+ * Test for {@link YarnQueueService}. We use {@link Execution} to specify the same thread mode to
+ * avoid noisy data form h2 database.
  */
 @Execution(SAME_THREAD)
 class YarnQueueServiceTest extends SpringTestBase {
@@ -68,11 +67,15 @@ class YarnQueueServiceTest extends SpringTestBase {
   @Test
   void testFindYarnQueues() {
     final Long targetTeamId = 1L;
-    yarnQueueService.save(mockYarnQueue(targetTeamId, "q1@l1"));
-    yarnQueueService.save(mockYarnQueue(targetTeamId, "q2@l1"));
-    yarnQueueService.save(mockYarnQueue(targetTeamId, "q3@l1"));
-    yarnQueueService.save(mockYarnQueue(targetTeamId, "q3@l3"));
-    yarnQueueService.save(mockYarnQueue(2L, "q3@l1"));
+    String q1AtL1 = "q1@l1";
+    String q2AtL1 = "q2@l1";
+    String q3AtL1 = "q3@l1";
+    String q3AtL3 = "q3@l3";
+    yarnQueueService.save(mockYarnQueue(targetTeamId, q1AtL1));
+    yarnQueueService.save(mockYarnQueue(targetTeamId, q2AtL1));
+    yarnQueueService.save(mockYarnQueue(targetTeamId, q3AtL1));
+    yarnQueueService.save(mockYarnQueue(targetTeamId, q3AtL3));
+    yarnQueueService.save(mockYarnQueue(2L, q3AtL1));
 
     // Test for 1st page, size = 2, order by create time desc
     YarnQueue queryParams = new YarnQueue();
@@ -88,7 +91,7 @@ class YarnQueueServiceTest extends SpringTestBase {
             yarnQueues.getRecords().stream()
                 .map(YarnQueue::getQueueLabel)
                 .collect(Collectors.toList()))
-        .containsExactly("q3@l3", "q3@l1");
+        .containsExactly(q3AtL3, q3AtL1);
 
     // Test for 1st page, size = 2, order by create time with queue_label
     queryParams.setQueueLabel("q3");
@@ -98,7 +101,7 @@ class YarnQueueServiceTest extends SpringTestBase {
             yarnQueuesWithQueueLabelLikeQuery.getRecords().stream()
                 .map(YarnQueue::getQueueLabel)
                 .collect(Collectors.toList()))
-        .containsExactly("q3@l3", "q3@l1");
+        .containsExactly(q3AtL3, q3AtL1);
   }
 
   @Test
@@ -152,15 +155,18 @@ class YarnQueueServiceTest extends SpringTestBase {
   @Test
   void testUpdateYarnQueue() {
     final Long queueId = 1L;
+    String newQueueAtNewLabel1 = "newQueue@newLable1";
+    String newQueue = "newQueue";
+    String mockedDesc = "mocked desc";
     // Test for same information
     YarnQueue yarnQueue = mockYarnQueue(1L, "queue1");
     yarnQueue.setId(queueId);
     yarnQueueService.save(yarnQueue);
 
     // Test for only change description
-    yarnQueue.setDescription("mocked desc");
+    yarnQueue.setDescription(mockedDesc);
     yarnQueueService.updateYarnQueue(yarnQueue);
-    assertThat(yarnQueueService.getById(queueId).getDescription()).isEqualTo("mocked desc");
+    assertThat(yarnQueueService.getById(queueId).getDescription()).isEqualTo(mockedDesc);
 
     // Test for error queue label format
     yarnQueue.setQueueLabel("q1@");
@@ -169,12 +175,12 @@ class YarnQueueServiceTest extends SpringTestBase {
         .hasMessage(ERR_FORMAT_HINTS);
 
     // Test for formal cases.
-    yarnQueue.setQueueLabel("newQueue");
-    yarnQueue.setDescription("newQueue@newLable1");
+    yarnQueue.setQueueLabel(newQueue);
+    yarnQueue.setDescription(newQueueAtNewLabel1);
     yarnQueueService.updateYarnQueue(yarnQueue);
     YarnQueue queueFromDB = yarnQueueService.getById(queueId);
-    assertThat(queueFromDB.getQueueLabel()).isEqualTo("newQueue");
-    assertThat(queueFromDB.getDescription()).isEqualTo("newQueue@newLable1");
+    assertThat(queueFromDB.getQueueLabel()).isEqualTo(newQueue);
+    assertThat(queueFromDB.getDescription()).isEqualTo(newQueueAtNewLabel1);
   }
 
   /**
@@ -279,34 +285,5 @@ class YarnQueueServiceTest extends SpringTestBase {
                     targetTeamId, queueLabel, operation))
         .isInstanceOf(ApiAlertException.class)
         .hasMessage(String.format(QUEUE_USED_FORMAT, "applications", operation));
-  }
-
-  // help methods.
-
-  private FlinkCluster mockYarnSessionFlinkCluster(String name, String yarnQueue, Long versionId) {
-    FlinkCluster cluster = new FlinkCluster();
-    cluster.setClusterName(name);
-    cluster.setYarnQueue(yarnQueue);
-    cluster.setVersionId(versionId);
-    cluster.setExecutionMode(ExecutionMode.YARN_SESSION.getMode());
-    return cluster;
-  }
-
-  private Application mockYarnModeJobApp(
-      Long teamId, String name, String yarnQueue, ExecutionMode executionMode) {
-    Application application = new Application();
-    application.setYarnQueue(yarnQueue);
-    application.setTeamId(teamId);
-    application.setJobName(name);
-    application.setExecutionMode(executionMode.getMode());
-    application.doSetHotParams();
-    return application;
-  }
-
-  private YarnQueue mockYarnQueue(Long teamId, String queueLabel) {
-    YarnQueue yarnQueue = new YarnQueue();
-    yarnQueue.setTeamId(teamId);
-    yarnQueue.setQueueLabel(queueLabel);
-    return yarnQueue;
   }
 }

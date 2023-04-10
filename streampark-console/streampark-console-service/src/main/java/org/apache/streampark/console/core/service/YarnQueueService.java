@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
@@ -35,4 +36,12 @@ public interface YarnQueueService extends IService<YarnQueue> {
   void updateYarnQueue(YarnQueue yarnQueue);
 
   void deleteYarnQueue(YarnQueue yarnQueue);
+
+  void checkQueueLabel(ExecutionMode executionMode, String queueLabel);
+
+  boolean isDefaultQueue(String queueLabel);
+
+  boolean existByQueueLabel(String queueLabel);
+
+  boolean existByTeamIdQueueLabel(Long teamId, String queueLabel);
 }

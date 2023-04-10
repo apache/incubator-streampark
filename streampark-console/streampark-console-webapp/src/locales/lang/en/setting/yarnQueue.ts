@@ -27,6 +27,7 @@ export default {
     yarnQueueLabelExpression: "Please input queue label like {'{queue} or {queue}@{lab1,...}'}",
     description: 'Please input the description of the queue.',
   },
+  selectionHint: "Quick-set 'yarn.application.name' and 'yarn.application.node-label'. Please contact admins to add queue by the 'Settings' -> 'Yarn Queue' page if no available queues.",
   checkResult: {
     emptyHint: 'Queue label can not be empty.',
     invalidFormatHint: 'Invalid queue label format',
