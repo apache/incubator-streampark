@@ -42,10 +42,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -69,7 +69,7 @@ public class UserController {
 
   @Operation(summary = "Get user")
   @PostMapping("detail")
-  public User detail(@NotBlank(message = "{required}") @PathVariable String username) {
+  public User detail(@NotBlank(message = "{required}") @RequestParam String username) {
     return this.userService.findByName(username);
   }
 

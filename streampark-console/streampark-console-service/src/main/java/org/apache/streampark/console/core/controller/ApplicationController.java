@@ -39,9 +39,11 @@ import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -101,13 +103,18 @@ public class ApplicationController {
     @Parameter(
         name = "id",
         description = "copied target app id",
+        in = ParameterIn.QUERY,
         required = true,
         example = "100000"),
-    @Parameter(name = "jobName", description = "new application name", example = "copy-app"),
-    @Parameter(name = "args", description = "new application args")
+    @Parameter(
+        name = "jobName",
+        description = "new application name",
+        in = ParameterIn.QUERY,
+        example = "copy-app"),
+    @Parameter(name = "args", description = "new application args", in = ParameterIn.QUERY)
   })
   @ApiAccess
-  @PostMapping(value = "copy", consumes = "application/x-www-form-urlencoded")
+  @PostMapping(value = "copy")
   @RequiresPermissions("app:copy")
   public RestResponse copy(@Parameter(hidden = true) Application app) throws IOException {
     Long id = applicationService.copy(app);
@@ -196,27 +203,31 @@ public class ApplicationController {
     @Parameter(
         name = "id",
         description = "start app id",
+        in = ParameterIn.QUERY,
         required = true,
         example = "100000",
         schema = @Schema(implementation = Long.class)),
     @Parameter(
         name = "savePointed",
         description = "restored app from the savepoint or latest checkpoint",
+        in = ParameterIn.QUERY,
         required = true,
+        example = "false",
         schema = @Schema(implementation = boolean.class, defaultValue = "false")),
     @Parameter(
         name = "savePoint",
         description = "savepoint or checkpoint path",
-        required = true,
+        in = ParameterIn.QUERY,
         schema = @Schema(implementation = String.class)),
     @Parameter(
         name = "allowNonRestored",
         description = "ignore savepoint if cannot be restored",
-        required = true,
+        in = ParameterIn.QUERY,
+        required = false,
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @ApiAccess
-  @PostMapping(value = "start", consumes = "application/x-www-form-urlencoded")
+  @PostMapping(value = "start")
   @RequiresPermissions("app:start")
   public RestResponse start(@Parameter(hidden = true) Application app) {
     try {
@@ -236,27 +247,31 @@ public class ApplicationController {
     @Parameter(
         name = "id",
         description = "cancel app id",
+        in = ParameterIn.QUERY,
         required = true,
         example = "100000",
         schema = @Schema(implementation = Long.class)),
     @Parameter(
         name = "savePointed",
         description = "trigger savepoint before taking stopping",
+        in = ParameterIn.QUERY,
         required = true,
         schema = @Schema(implementation = boolean.class, defaultValue = "false")),
     @Parameter(
         name = "savePoint",
         description = "savepoint path",
+        in = ParameterIn.QUERY,
         example = "hdfs:///savepoint/100000",
         schema = @Schema(implementation = String.class)),
     @Parameter(
         name = "drain",
         description = "send max watermark before canceling",
+        in = ParameterIn.QUERY,
         required = true,
         example = "false",
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
-  @PostMapping(value = "cancel", consumes = "application/x-www-form-urlencoded")
+  @PostMapping(value = "cancel")
   @RequiresPermissions("app:cancel")
   public RestResponse cancel(@Parameter(hidden = true) Application app) throws Exception {
     applicationService.cancel(app);
@@ -373,7 +388,7 @@ public class ApplicationController {
     return RestResponse.success(uploadPath);
   }
 
-  @Operation(hidden = true)
+  @Hidden
   @PostMapping("verifySchema")
   public RestResponse verifySchema(String path) {
     final URI uri = URI.create(path);

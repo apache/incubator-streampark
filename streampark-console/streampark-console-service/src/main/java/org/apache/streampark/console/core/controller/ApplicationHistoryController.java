@@ -52,7 +52,7 @@ public class ApplicationHistoryController {
     return RestResponse.success(jars);
   }
 
-  @Operation(summary = "List the input k8s namespace history records")
+  @Operation(summary = "List the k8s namespace history records")
   @PostMapping("k8sNamespaces")
   @RequiresPermissions("app:create")
   public RestResponse listK8sNamespace() {

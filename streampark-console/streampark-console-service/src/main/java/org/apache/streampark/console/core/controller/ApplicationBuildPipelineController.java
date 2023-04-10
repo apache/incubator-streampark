@@ -90,7 +90,7 @@ public class ApplicationBuildPipelineController {
         schema = @Schema(defaultValue = "false", implementation = boolean.class))
   })
   @ApiAccess
-  @PostMapping(value = "build", consumes = "application/x-www-form-urlencoded")
+  @PostMapping(value = "build")
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
     try {

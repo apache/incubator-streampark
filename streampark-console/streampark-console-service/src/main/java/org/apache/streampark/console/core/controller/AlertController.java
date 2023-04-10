@@ -28,7 +28,6 @@ import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -112,8 +111,7 @@ public class AlertController {
     return RestResponse.success(result);
   }
 
-  /** TODO after remove to unit test */
-  @Hidden
+  @Operation(summary = "Send alert config")
   @PostMapping("/send")
   public RestResponse sendAlert(Long id) throws AlertException {
     AlertTemplate alertTemplate = new AlertTemplate();

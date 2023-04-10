@@ -155,11 +155,10 @@ public class AccessTokenController {
   }
 
   /**
-   * TODO after remove
-   *
-   * <p>copy cURL, hardcode now, there is no need for configuration here, because there are several
+   * copy cURL, hardcode now, there is no need for configuration here, because there are several
    * fixed interfaces
    */
+  @Operation(summary = "Generate api with token")
   @PostMapping(value = "curl")
   public RestResponse copyRestApiCurl(
       @NotBlank(message = "{required}") String appId,

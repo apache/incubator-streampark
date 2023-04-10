@@ -54,7 +54,7 @@ public class SavePointController {
 
   @Autowired private SavePointService savePointService;
 
-  @Operation(summary = "Get application  savepoint latest")
+  @Operation(summary = "Get application savepoint latest")
   @PostMapping("latest")
   public RestResponse latest(Long appId) {
     SavePoint savePoint = savePointService.getLatest(appId);
