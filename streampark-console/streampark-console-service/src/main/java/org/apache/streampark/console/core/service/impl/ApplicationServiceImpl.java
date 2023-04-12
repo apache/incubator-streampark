@@ -1517,8 +1517,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     BuildResult buildResult = buildPipeline.getBuildResult();
     if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
       buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
-    } else {
-
     }
 
     // Get the args after placeholder replacement
