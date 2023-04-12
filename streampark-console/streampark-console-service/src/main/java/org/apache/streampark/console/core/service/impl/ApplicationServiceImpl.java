@@ -808,8 +808,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         FlinkSql flinkSql = new FlinkSql(newApp);
         flinkSqlService.create(flinkSql);
       }
-      if (newApp.getConfig() != null) {
-        ApplicationConfig copyConfig = configService.getEffective(appParam.getId());
+      ApplicationConfig copyConfig = configService.getEffective(appParam.getId());
+      if (copyConfig != null) {
         ApplicationConfig config = new ApplicationConfig();
         config.setAppId(newApp.getId());
         config.setFormat(copyConfig.getFormat());
