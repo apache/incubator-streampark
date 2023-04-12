@@ -16,8 +16,6 @@
  */
 import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
-import { executionModes } from '../data';
-import { fetchCheckHadoop } from '/@/api/flink/setting';
 import { AppTypeEnum, ConfigTypeEnum, ExecModeEnum } from '/@/enums/flinkEnum';
 
 import Icon, { SvgIcon } from '/@/components/Icon';
@@ -60,6 +58,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     projectList,
     getFlinkSqlSchema,
     getFlinkClusterSchemas,
+    getExecutionModeSchema,
     getFlinkFormOtherSchemas,
     suggestions,
   } = useCreateAndEditSchema(dependencyRef);
@@ -108,43 +107,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           { required: true, message: t('flink.app.addAppTips.developmentModeIsRequiredMessage') },
         ],
       },
-      {
-        field: 'executionMode',
-        label: t('flink.app.executionMode'),
-        component: 'Select',
-        componentProps: {
-          placeholder: t('flink.app.addAppTips.executionModePlaceholder'),
-          options: executionModes,
-        },
-        dynamicRules: () => {
-          return [
-            {
-              required: true,
-              validator: async (_rule, value) => {
-                if (value === null || value === undefined || value === '') {
-                  return Promise.reject(t('flink.app.addAppTips.executionModeIsRequiredMessage'));
-                } else {
-                  if (
-                    [
-                      ExecModeEnum.YARN_PER_JOB,
-                      ExecModeEnum.YARN_SESSION,
-                      ExecModeEnum.YARN_APPLICATION,
-                    ].includes(value)
-                  ) {
-                    const res = await fetchCheckHadoop();
-                    if (res) {
-                      return Promise.resolve();
-                    } else {
-                      return Promise.reject(t('flink.app.addAppTips.hadoopEnvInitMessage'));
-                    }
-                  }
-                  return Promise.resolve();
-                }
-              },
-            },
-          ];
-        },
-      },
+      ...getExecutionModeSchema.value,
       ...getFlinkClusterSchemas.value,
       ...getFlinkSqlSchema.value,
       {
