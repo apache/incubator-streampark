@@ -78,7 +78,6 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
   override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     executeClientAction(cancelRequest, flinkConfig, (jobId, clusterClient) => {
       val actionResult = super.cancelJob(cancelRequest, jobId, clusterClient)
-      IngressController.deleteIngress(cancelRequest.clusterId, cancelRequest.kubernetesNamespace)
       CancelResponse(actionResult)
     })
   }

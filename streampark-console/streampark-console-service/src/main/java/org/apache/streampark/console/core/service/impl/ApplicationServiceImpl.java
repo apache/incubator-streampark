@@ -91,7 +91,6 @@ import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
-import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.io.FileUtils;
@@ -1098,7 +1097,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           application.getK8sNamespace(), application.getJobName());
       KubernetesDeploymentHelper.deleteTaskConfigMap(
           application.getK8sNamespace(), application.getJobName());
-      IngressController.deleteIngress(application.getJobName(), application.getK8sNamespace());
     }
     if (startFuture != null) {
       startFuture.cancel(true);
@@ -1334,10 +1332,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             })
         .whenComplete(
             (t, e) -> {
-              if (isKubernetesApp(application)) {
-                IngressController.deleteIngress(
-                    application.getJobName(), application.getK8sNamespace());
-              }
               cancelFutureMap.remove(application.getId());
               applicationLogService.save(applicationLog);
             });
@@ -1523,32 +1517,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     BuildResult buildResult = buildPipeline.getBuildResult();
     if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
       buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
-    } else {
-      if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-        Utils.notNull(buildResult);
-        DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
-        String ingressTemplates = application.getIngressTemplate();
-        String domainName = settingService.getIngressModeDefault();
-        if (StringUtils.isNotBlank(ingressTemplates)) {
-          String ingressOutput = result.workspacePath() + "/ingress.yaml";
-          IngressController.configureIngress(ingressOutput);
-        }
-        if (StringUtils.isNotBlank(domainName)) {
-          try {
-            IngressController.configureIngress(
-                domainName, application.getClusterId(), application.getK8sNamespace());
-          } catch (KubernetesClientException e) {
-            log.info("Failed to create ingress, stack info:{}", e.getMessage());
-            applicationLog.setException(e.getMessage());
-            applicationLog.setSuccess(false);
-            applicationLogService.save(applicationLog);
-            application.setState(FlinkAppState.FAILED.getValue());
-            application.setOptionState(OptionState.NONE.getValue());
-            updateById(application);
-            return;
-          }
-        }
-      }
     }
 
     // Get the args after placeholder replacement
@@ -1644,6 +1612,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             })
         .whenComplete(
             (t, e) -> {
+              if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+                String domainName = settingService.getIngressModeDefault();
+                if (StringUtils.isNotBlank(domainName)) {
+                  try {
+                    IngressController.configureIngress(
+                        domainName, application.getClusterId(), application.getK8sNamespace());
+                  } catch (KubernetesClientException kubernetesClientException) {
+                    log.info(
+                        "Failed to create ingress, stack info:{}",
+                        kubernetesClientException.getMessage());
+                    applicationLog.setException(e.getMessage());
+                    applicationLog.setSuccess(false);
+                    applicationLogService.save(applicationLog);
+                    application.setState(FlinkAppState.FAILED.getValue());
+                    application.setOptionState(OptionState.NONE.getValue());
+                    updateById(application);
+                    return;
+                  }
+                }
+              }
+
               applicationLogService.save(applicationLog);
               startFutureMap.remove(application.getId());
             });
