@@ -115,16 +115,6 @@ object IngressController extends Logger {
     }
   }
 
-  def deleteIngress(ingressName: String, nameSpace: String): Unit = {
-    if (determineThePodSurvivalStatus(ingressName, nameSpace)) {
-      close {
-        val client = new DefaultKubernetesClient
-        client.network.ingress.inNamespace(nameSpace).withName(ingressName).delete
-        client
-      }
-    }
-  }
-
   private[this] def determineThePodSurvivalStatus(name: String, nameSpace: String): Boolean = {
     tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
