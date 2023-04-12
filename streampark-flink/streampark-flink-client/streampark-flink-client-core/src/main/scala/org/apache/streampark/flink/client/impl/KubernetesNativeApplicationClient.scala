@@ -21,7 +21,7 @@ import com.google.common.collect.Lists
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{Configuration, DeploymentOptions, DeploymentOptionsInternal, PipelineOptions}
+import org.apache.flink.configuration.{Configuration, DeploymentOptions, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
@@ -35,6 +35,18 @@ import org.apache.streampark.flink.client.bean._
  * kubernetes native application mode submit
  */
 object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
+
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    if (submitRequest.buildResult != null) {
+      val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
+        buildResult.podTemplatePaths.foreach(p => {
+          flinkConfig
+            .safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
+            .safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
+            .safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
+        })
+    }
+  }
 
   @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
@@ -51,10 +63,7 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
 
     // add flink pipeline.jars configuration
     flinkConfig.safeSet(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))
-    // add flink conf configuration, mainly to set the log4j configuration
-    if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {
-      flinkConfig.safeSet(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkVersion.flinkHome}/conf")
-    }
+
     // add flink container image tag to flink configuration
     flinkConfig.safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
 

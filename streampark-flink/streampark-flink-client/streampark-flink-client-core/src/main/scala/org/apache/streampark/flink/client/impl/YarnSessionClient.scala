@@ -87,8 +87,9 @@ object YarnSessionClient extends YarnClientTrait {
       .safeSet(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
       // flinkDistJar
       .safeSet(YarnConfigOptions.FLINK_DIST_JAR, deployRequest.hdfsWorkspace.flinkDistJar)
-      //
+      // yarnDeployment Target
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+      // conf dir
       .safeSet(DeploymentOptionsInternal.CONF_DIR, s"${deployRequest.flinkVersion.flinkHome}/conf")
 
     logInfo(
