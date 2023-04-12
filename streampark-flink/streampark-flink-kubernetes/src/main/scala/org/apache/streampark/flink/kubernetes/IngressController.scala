@@ -21,19 +21,16 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-
 import scala.collection.JavaConverters._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
-
-import io.fabric8.kubernetes.api.model.IntOrString
+import io.fabric8.kubernetes.api.model.{IntOrString, OwnerReferenceBuilder}
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
 import org.json4s.{DefaultFormats, JArray}
 import org.json4s.jackson.JsonMethods.parse
-
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.common.util.Utils._
 
@@ -50,11 +47,36 @@ object IngressController extends Logger {
           "app" -> clusterId,
           "type" -> "flink-native-kubernetes",
           "component" -> "ingress")
+
+        val deployment = client
+          .apps()
+          .deployments()
+          .inNamespace(nameSpace)
+          .withName(clusterId)
+          .get()
+
+        val deploymentUid = if (deployment != null) {
+          deployment.getMetadata.getUid
+        } else {
+          throw new RuntimeException(s"Deployment with name $clusterId not found in namespace $nameSpace")
+        }
+
+        // Create OwnerReference object
+        val ownerReference = new OwnerReferenceBuilder()
+          .withApiVersion("apps/v1")
+          .withKind("Deployment")
+          .withName(clusterId)
+          .withUid(deploymentUid)
+          .withController(true)
+          .withBlockOwnerDeletion(true)
+          .build()
+
         val ingress = new IngressBuilder()
           .withNewMetadata()
           .withName(clusterId)
           .addToAnnotations(annotMap.asJava)
           .addToLabels(labelsMap.asJava)
+          .addToOwnerReferences(ownerReference) // Add OwnerReference
           .endMetadata()
           .withNewSpec()
           .addNewRule()
