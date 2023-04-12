@@ -36,18 +36,6 @@ import org.apache.streampark.flink.client.bean._
  */
 object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
 
-  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
-    if (submitRequest.buildResult != null) {
-      val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
-        buildResult.podTemplatePaths.foreach(p => {
-          flinkConfig
-            .safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
-            .safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
-            .safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
-        })
-    }
-  }
-
   @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
 
