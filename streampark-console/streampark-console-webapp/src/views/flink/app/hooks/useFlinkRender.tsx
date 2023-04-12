@@ -459,6 +459,11 @@ export const renderSqlHistory = (
                 {t('flink.app.flinkSql.candidateVersion')}
               </Tag>
             )}
+
+            <span style="color: darkgrey">
+                <Icon icon="ant-design:clock-circle-outlined" />
+              {ver.createTime}
+            </span>
           </div>
         </Select.Option>
       );
