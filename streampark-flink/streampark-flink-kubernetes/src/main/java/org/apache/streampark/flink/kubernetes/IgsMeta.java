@@ -23,90 +23,97 @@ import java.io.Serializable;
 import java.util.List;
 
 public class IgsMeta implements Serializable {
-    public IgsMeta() {
-    }
+  public IgsMeta() {}
 
-    public IgsMeta(List<String> addresses, int port, String protocol, String serviceName, String ingressName, String hostname, String path, Boolean allNodes) {
-        this.addresses = addresses;
-        this.port = port;
-        this.protocol = protocol;
-        this.serviceName = serviceName;
-        this.ingressName = ingressName;
-        this.hostname = hostname;
-        this.path = path;
-        this.allNodes = allNodes;
-    }
+  public IgsMeta(
+      List<String> addresses,
+      int port,
+      String protocol,
+      String serviceName,
+      String ingressName,
+      String hostname,
+      String path,
+      Boolean allNodes) {
+    this.addresses = addresses;
+    this.port = port;
+    this.protocol = protocol;
+    this.serviceName = serviceName;
+    this.ingressName = ingressName;
+    this.hostname = hostname;
+    this.path = path;
+    this.allNodes = allNodes;
+  }
 
-    public List<String> getAddresses() {
-        return addresses;
-    }
+  public List<String> getAddresses() {
+    return addresses;
+  }
 
-    public void setAddresses(List<String> addresses) {
-        this.addresses = addresses;
-    }
+  public void setAddresses(List<String> addresses) {
+    this.addresses = addresses;
+  }
 
-    public int getPort() {
-        return port;
-    }
+  public int getPort() {
+    return port;
+  }
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+  public void setPort(int port) {
+    this.port = port;
+  }
 
-    public String getProtocol() {
-        return protocol;
-    }
+  public String getProtocol() {
+    return protocol;
+  }
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
+  public void setProtocol(String protocol) {
+    this.protocol = protocol;
+  }
 
-    public String getServiceName() {
-        return serviceName;
-    }
+  public String getServiceName() {
+    return serviceName;
+  }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
-    }
+  public void setServiceName(String serviceName) {
+    this.serviceName = serviceName;
+  }
 
-    public String getIngressName() {
-        return ingressName;
-    }
+  public String getIngressName() {
+    return ingressName;
+  }
 
-    public void setIngressName(String ingressName) {
-        this.ingressName = ingressName;
-    }
+  public void setIngressName(String ingressName) {
+    this.ingressName = ingressName;
+  }
 
-    public String getHostname() {
-        return hostname;
-    }
+  public String getHostname() {
+    return hostname;
+  }
 
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
-    }
+  public void setHostname(String hostname) {
+    this.hostname = hostname;
+  }
 
-    public String getPath() {
-        return path;
-    }
+  public String getPath() {
+    return path;
+  }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
+  public void setPath(String path) {
+    this.path = path;
+  }
 
-    public Boolean getAllNodes() {
-        return allNodes;
-    }
+  public Boolean getAllNodes() {
+    return allNodes;
+  }
 
-    public void setAllNodes(Boolean allNodes) {
-        this.allNodes = allNodes;
-    }
+  public void setAllNodes(Boolean allNodes) {
+    this.allNodes = allNodes;
+  }
 
-    List<String> addresses;
-    int port;
-    String protocol;
-    String serviceName;
-    String ingressName;
-    String hostname;
-    String path;
-    Boolean allNodes;
+  List<String> addresses;
+  int port;
+  String protocol;
+  String serviceName;
+  String ingressName;
+  String hostname;
+  String path;
+  Boolean allNodes;
 }

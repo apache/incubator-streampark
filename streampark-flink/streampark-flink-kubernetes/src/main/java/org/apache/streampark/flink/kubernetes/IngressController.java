@@ -17,15 +17,18 @@
 
 package org.apache.streampark.flink.kubernetes;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.client.program.ClusterClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -61,12 +64,35 @@ public class IngressController {
       labelsMap.put("app", clusterId);
       labelsMap.put("type", "flink-native-kubernetes");
       labelsMap.put("component", "ingress");
+
+      Deployment deployment =
+          kubernetesClient.apps().deployments().inNamespace(namespace).withName(clusterId).get();
+
+      String deploymentUid;
+      if (deployment != null) {
+        deploymentUid = deployment.getMetadata().getUid();
+      } else {
+        throw new RuntimeException(
+            "Deployment with name " + clusterId + " not found in namespace " + namespace);
+      }
+
+      OwnerReference ownerReference =
+          new OwnerReferenceBuilder()
+              .withApiVersion("apps/v1")
+              .withKind("Deployment")
+              .withName(clusterId)
+              .withUid(deploymentUid)
+              .withController(true)
+              .withBlockOwnerDeletion(true)
+              .build();
+
       Ingress ingress =
           new IngressBuilder()
               .withNewMetadata()
               .withName(clusterId)
               .addToAnnotations(annotMap)
               .addToLabels(labelsMap)
+              .addToOwnerReferences(ownerReference)
               .endMetadata()
               .withNewSpec()
               .addNewRule()
@@ -109,31 +135,25 @@ public class IngressController {
     }
   }
 
-  public static void deleteIngress(String ingressName, String namespace) {
-    if (determineThePodSurvivalStatus(ingressName, namespace)) {
-      try (KubernetesClient kubernetesClient = KubernetesRetriever.newK8sClient()) {
-        kubernetesClient.network().ingress().inNamespace(namespace).withName(ingressName).delete();
-      }
+  public static String ingressUrlAddress(
+      String nameSpace, String clusterId, ClusterClient clusterClient)
+      throws JsonProcessingException {
+    if (determineIfIngressExists(nameSpace, clusterId)) {
+      KubernetesClient client = new DefaultKubernetesClient();
+      Ingress ingress = client.network().ingress().inNamespace(nameSpace).withName(clusterId).get();
+      String str = ingress.getMetadata().getAnnotations().get("field.cattle.io/publicEndpoints");
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      List<IgsMeta> ingressMetas =
+          objectMapper.readValue(str, new TypeReference<List<IgsMeta>>() {});
+      String hostname = ingressMetas.get(0).hostname;
+      String path = ingressMetas.get(0).path;
+      String url = "https://" + hostname + path;
+      return url;
+    } else {
+      return clusterClient.getWebInterfaceURL();
     }
   }
-
-    public static String ingressUrlAddress(String nameSpace, String clusterId, ClusterClient clusterClient) throws JsonProcessingException {
-        if (determineIfIngressExists(nameSpace, clusterId)){
-            KubernetesClient client = new DefaultKubernetesClient();
-            Ingress ingress = client.network().ingress().inNamespace(nameSpace).withName(clusterId).get();
-            String str = ingress.getMetadata().getAnnotations().get("field.cattle.io/publicEndpoints");
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<IgsMeta> ingressMetas = objectMapper.readValue(str, new TypeReference<List<IgsMeta>>(){});
-            String hostname = ingressMetas.get(0).hostname;
-            String path = ingressMetas.get(0).path;
-            String url = "https://" + hostname + path;
-            return url;
-        } else {
-            return clusterClient.getWebInterfaceURL();
-        }
-    }
-
 
   public static String prepareIngressTemplateFiles(String buildWorkspace, String ingressTemplates)
       throws IOException {

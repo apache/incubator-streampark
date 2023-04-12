@@ -20,7 +20,6 @@ package org.apache.streampark.flink.kubernetes.watcher;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.flink.kubernetes.ChangeEventBus;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatchController;
-import org.apache.streampark.flink.kubernetes.IngressController;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.TrackConfig.JobStatusWatcherConfig;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
@@ -244,7 +243,6 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
               trackId.getNamespace(), trackId.getClusterId(), trackId.getJobId());
           KubernetesDeploymentHelper.deleteTaskDeployment(
               trackId.getNamespace(), trackId.getClusterId());
-          IngressController.deleteIngress(trackId.getClusterId(), trackId.getNamespace());
           jobState = FlinkJobState.FAILED;
         } else {
           jobState = inferSilentOrLostFromPreCache(latest);

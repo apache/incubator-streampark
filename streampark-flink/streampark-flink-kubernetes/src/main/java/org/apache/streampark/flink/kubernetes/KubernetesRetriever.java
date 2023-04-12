@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.kubernetes;
 
-import lombok.SneakyThrows;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.model.ClusterKey;
 
@@ -33,6 +32,7 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import lombok.SneakyThrows;
 
 import java.time.Duration;
 import java.util.List;

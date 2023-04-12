@@ -25,7 +25,6 @@ import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.alert.AlertService;
-import org.apache.streampark.flink.kubernetes.IngressController;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
@@ -94,7 +93,6 @@ public class FlinkK8sChangeEventListener {
         || FlinkAppState.LOST.equals(state)
         || FlinkAppState.RESTARTING.equals(state)
         || FlinkAppState.FINISHED.equals(state)) {
-      IngressController.deleteIngress(app.getClusterId(), app.getK8sNamespace());
       executor.execute(() -> alertService.alert(app, state));
     }
   }
@@ -162,7 +160,6 @@ public class FlinkK8sChangeEventListener {
     long duration = jobStatus.getDuration();
 
     if (FlinkJobState.isEndState(state)) {
-      IngressController.deleteIngress(app.getJobName(), app.getK8sNamespace());
       if (endTime < startTime) {
         endTime = System.currentTimeMillis();
       }

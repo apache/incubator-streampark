@@ -79,7 +79,6 @@ public class FlinkK8sWatchController implements AutoCloseable {
       cancellingCache.invalidate(trackId);
       jobStatusCache.invalidate(trackId);
       metricCache.invalidate(ClusterKey.of(trackId));
-      IngressController.deleteIngress(trackId.getClusterId(), trackId.getNamespace());
     }
   }
 
