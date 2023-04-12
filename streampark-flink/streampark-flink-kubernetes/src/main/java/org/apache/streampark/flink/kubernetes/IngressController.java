@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.client.program.ClusterClient;
@@ -116,32 +117,23 @@ public class IngressController {
     }
   }
 
-  public static String ingressUrlAddress(
-      String namespace, String clusterId, ClusterClient<?> clusterClient) {
-    if (determineIfIngressExists(namespace, clusterId)) {
-      try (KubernetesClient kubernetesClient = KubernetesRetriever.newK8sClient()) {
-        Ingress ingress =
-            kubernetesClient.network().ingress().inNamespace(namespace).withName(clusterId).get();
-        String publicEndpoints =
-            ingress.getMetadata().getAnnotations().get("field.cattle.io/publicEndpoints");
-        List<IngressMeta> ingressMetas = IngressMeta.as(publicEndpoints);
-        if (ingressMetas.isEmpty()) {
-          throw new RuntimeException("[StreamPark] get ingress url address failed");
+    public static String ingressUrlAddress(String nameSpace, String clusterId, ClusterClient clusterClient) throws JsonProcessingException {
+        if (determineIfIngressExists(nameSpace, clusterId)){
+            KubernetesClient client = new DefaultKubernetesClient();
+            Ingress ingress = client.network().ingress().inNamespace(nameSpace).withName(clusterId).get();
+            String str = ingress.getMetadata().getAnnotations().get("field.cattle.io/publicEndpoints");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<IgsMeta> ingressMetas = objectMapper.readValue(str, new TypeReference<List<IgsMeta>>(){});
+            String hostname = ingressMetas.get(0).hostname;
+            String path = ingressMetas.get(0).path;
+            String url = "https://" + hostname + path;
+            return url;
+        } else {
+            return clusterClient.getWebInterfaceURL();
         }
-        IngressMeta ingressMeta = ingressMetas.get(0);
-        String hostname = ingressMeta.getHostname();
-        String path = ingressMeta.getPath();
-        LOG.info(
-            "Retrieve flink cluster {} successfully, JobManager Web Interface: https://{}{}",
-            clusterId,
-            hostname,
-            path);
-        return String.format("https://%s%s", hostname, path);
-      }
-    } else {
-      return clusterClient.getWebInterfaceURL();
     }
-  }
+
 
   public static String prepareIngressTemplateFiles(String buildWorkspace, String ingressTemplates)
       throws IOException {
