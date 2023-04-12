@@ -397,7 +397,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // 8) remove app
     removeApp(application);
 
-    if (isKubernetesApp(paramApp)) {
+    if (isKubernetesApp(application)) {
       k8SFlinkTrackMonitor.unWatching(toTrackId(application));
     } else {
       FlinkRESTAPIWatcher.unWatching(paramApp.getId());
