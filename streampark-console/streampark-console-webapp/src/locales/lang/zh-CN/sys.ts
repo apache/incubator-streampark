@@ -118,6 +118,7 @@ export default {
 
     userName: '账号',
     password: '密码',
+    selectTeam: '请选择一个团队',
     oldPassword: '当前密码',
     newPassword: '新密码',
     confirmPassword: '确认密码',
