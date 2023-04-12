@@ -149,6 +149,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         .safeSet(KubernetesConfigOptions.CLUSTER_ID, deployRequest.clusterId)
         .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, deployRequest.k8sDeployParam.flinkImage)
         .safeSet(KubernetesConfigOptions.KUBE_CONFIG_FILE, getDefaultKubernetesConf(deployRequest.k8sDeployParam.kubeConf))
+        .safeSet(DeploymentOptionsInternal.CONF_DIR, s"${deployRequest.flinkVersion.flinkHome}/conf")
 
       val kubernetesClusterDescriptor = getK8sClusterDescriptorAndSpecification(flinkConfig)
       clusterDescriptor = kubernetesClusterDescriptor._1
