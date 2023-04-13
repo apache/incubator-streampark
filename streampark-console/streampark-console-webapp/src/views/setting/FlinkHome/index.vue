@@ -42,6 +42,7 @@
   } from '@ant-design/icons-vue';
   import { FlinkEnvModal, FlinkEnvDrawer } from './components';
   import {
+    fetchCheckForUpdateOrDelete,
     fetchDefaultSet,
     fetchFlinkEnv,
     fetchFlinkEnvRemove,
@@ -63,14 +64,17 @@
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
   /* Edit button */
-  function handleEditFlink(item: FlinkEnv) {
-    versionId.value = item.id;
-    openFlinkModal(true, {
-      versionId: item.id,
-      flinkName: item.flinkName,
-      flinkHome: item.flinkHome,
-      description: item.description || null,
-    });
+  async function handleEditFlink(item: FlinkEnv) {
+    const resp = await fetchCheckForUpdateOrDelete(item.id);
+    if (resp.data.code == 200) {
+      versionId.value = item.id;
+      openFlinkModal(true, {
+        versionId: item.id,
+        flinkName: item.flinkName,
+        flinkHome: item.flinkHome,
+        description: item.description || null,
+      });
+    }
   }
 
   /* View configuration */

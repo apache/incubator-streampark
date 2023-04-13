@@ -28,6 +28,7 @@ enum FLINK_API {
   SYNC = '/flink/env/sync',
   UPDATE = '/flink/env/update',
   DEFAULT = '/flink/env/default',
+  CHECK_FOR_UPDATE_OR_DELETE = '/flink/env/checkForUpdateOrDelete',
 }
 /**
  * flink environment data
@@ -86,6 +87,19 @@ export function fetchCheckEnv(data: {
 }): Promise<AxiosResponse<Result<boolean>>> {
   return defHttp.post({ url: FLINK_API.CHECK, data }, { isReturnNativeResponse: true });
 }
+
+/**
+ * check for update or delete operation
+ * @param {String} id
+ * @returns {Promise<Boolean>}
+ */
+export function fetchCheckForUpdateOrDelete(id: string): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.post({
+    url: FLINK_API.CHECK_FOR_UPDATE_OR_DELETE,
+    data: { id },
+  }, { isReturnNativeResponse: true });
+}
+
 /**
  * Create flink
  * @param {FlinkCreate} data
