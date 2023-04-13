@@ -18,9 +18,7 @@
 package org.apache.streampark.flink.client.`trait`
 
 import javax.annotation.Nonnull
-
 import scala.language.postfixOps
-
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.ClusterSpecification
@@ -29,10 +27,10 @@ import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.{KubernetesClusterClientFactory, KubernetesClusterDescriptor}
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
-
-import org.apache.streampark.common.enums.FlinkK8sRestExposedType
+import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
 import org.apache.streampark.flink.kubernetes.IngressController
 import org.apache.streampark.flink.client.bean._
+import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 
 /**
  * kubernetes native mode submit
@@ -47,6 +45,17 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
       .safeSet(
         KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
         covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))
+
+    if (submitRequest.buildResult != null) {
+      if (submitRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+        val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
+        buildResult.podTemplatePaths.foreach(p => {
+          flinkConfig
+            .safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
+            .safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
+            .safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
+        })
+      }
 
     // add flink conf configuration, mainly to set the log4j configuration
     if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {

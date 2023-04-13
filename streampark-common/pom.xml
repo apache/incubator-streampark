@@ -178,7 +178,7 @@
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-shaded-slf4j</artifactId>
-            <version>${project.version}</version>
+            <version>${streampark.shaded.version}</version>
         </dependency>
 
     </dependencies>
