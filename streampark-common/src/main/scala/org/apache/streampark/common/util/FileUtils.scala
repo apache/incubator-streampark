@@ -23,7 +23,7 @@ import java.util.Scanner
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
-object FileUtils extends org.apache.commons.io.FileUtils {
+object FileUtils {
 
   private[this] def bytesToHexString(src: Array[Byte]): String = {
     val stringBuilder = new mutable.StringBuilder
@@ -151,3 +151,4 @@ object FileUtils extends org.apache.commons.io.FileUtils {
   }
 
 }
+

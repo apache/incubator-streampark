@@ -19,8 +19,7 @@ package org.apache.streampark.spark.core
 
 import scala.annotation.meta.getter
 
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.SparkContext
 
 /**
  * <b><code>SparkBatch</code></b>
@@ -37,4 +36,5 @@ trait SparkBatch extends Spark {
   override def destroy(): Unit = {
     context.stop()
   }
+
 }
