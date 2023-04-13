@@ -56,6 +56,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
             .safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
         })
       }
+    }
 
     // add flink conf configuration, mainly to set the log4j configuration
     if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {
