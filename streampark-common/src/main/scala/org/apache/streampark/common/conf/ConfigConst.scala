@@ -83,12 +83,6 @@ object ConfigConst {
 
   // spark
 
-  val KEY_SPARK_USER_ARGS = "spark.user.args"
-
-  val KEY_SPARK_CONF = "spark.conf"
-
-  val KEY_SPARK_DEBUG_CONF = "spark.debug.conf"
-
   val KEY_SPARK_MAIN_CLASS = "spark.main.class"
 
   val KEY_SPARK_APP_NAME = "spark.app.name"

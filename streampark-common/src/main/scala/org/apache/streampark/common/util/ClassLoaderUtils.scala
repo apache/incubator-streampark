@@ -20,8 +20,6 @@ import java.io.File
 import java.net.{URL, URLClassLoader}
 import java.util.function.Supplier
 
-import scala.util.Try
-
 object ClassLoaderUtils extends Logger {
 
   private[this] val originalClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader

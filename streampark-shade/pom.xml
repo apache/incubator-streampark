@@ -176,10 +176,43 @@
 
         <!--log4j -->
         <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-shaded-slf4j</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!--log4j end-->
+
+        <!-- logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- logback end -->
 
     </dependencies>
 
@@ -210,22 +243,35 @@
                             <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
                             <artifactSet>
                                 <includes>
+                                    <!--jackson-->
                                     <include>com.fasterxml.jackson.*:*</include>
                                     <include>com.beachape:*</include>
+                                    <!-- logback -->
+                                    <include>org.slf4j:*:*</include>
+                                    <include>org.apache.logging.log4j:*:*</include>
+                                    <include>ch.qos.logback:*:*</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.fasterxml.jackson.code</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.code</shadedPattern>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.fasterxml.jackson.module</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
+                                    <pattern>org.slf4j</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.org.slf4j</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.fasterxml.jackson.databind</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.databind</shadedPattern>
+                                    <pattern>ch.qos.logback</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.ch.qos.logback</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.logging.log4j</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.org.apache.logging.log4j</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.log4j</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.org.apache.log4j</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>

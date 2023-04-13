@@ -1,0 +1,40 @@
+spark:
+  app.name: HiveQuickApp
+  submit.deployMode: client # cluster | client
+  master: local # yarn | local
+  yarn.queue: default
+  batch.duration: 5
+  serializer: org.apache.spark.serializer.KryoSerializer
+  main.class: org.apache.streampark.spark.quickstart.HiveSourceApp
+  config:
+    system.properties:
+      HADOOP_USER_NAME: hadoop
+    enable.hive.support: true
+    spark.sql:
+      parquet.writeLegacyFormat: true
+      hive.convertMetastoreParquet: false
+
+  driver:
+    memory: 512MB
+    cores: 1
+    userClassPathFirst: false
+
+  dynamicAllocation:
+    initialExecutors: 1
+    cachedExecutorIdleTimeout: -1
+    minExecutors: 1
+    sustainedSchedulerBacklogTimeout: 1s
+    executorIdleTimeout: 60s
+    schedulerBacklogTimeout: 1s
+    enabled: true
+    maxExecutors: 60
+  executor:
+    cores: 1
+    memory: 512MB
+    instances: 1
+    userClassPathFirst: true
+
+  shuffle.service:
+    port: 7337
+    enabled: true
+
