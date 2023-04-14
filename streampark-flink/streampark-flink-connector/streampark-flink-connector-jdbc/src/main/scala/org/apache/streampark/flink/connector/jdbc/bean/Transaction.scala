@@ -17,16 +17,18 @@
 
 package org.apache.streampark.flink.connector.jdbc.bean
 
-import scala.collection.mutable
-
 import org.apache.streampark.common.util.Utils
+
+import scala.collection.mutable
 
 case class Transaction(
     transactionId: String = Utils.uuid(),
     sql: mutable.MutableList[String] = mutable.MutableList.empty[String],
     var insertMode: Boolean = true,
-    var invoked: Boolean = false) extends Serializable {
+    var invoked: Boolean = false)
+  extends Serializable {
   def +(text: String): Unit = sql += text
 
-  override def toString: String = s"(transactionId:$transactionId,size:${sql.size},insertMode:$insertMode,invoked:$invoked)"
+  override def toString: String =
+    s"(transactionId:$transactionId,size:${sql.size},insertMode:$insertMode,invoked:$invoked)"
 }

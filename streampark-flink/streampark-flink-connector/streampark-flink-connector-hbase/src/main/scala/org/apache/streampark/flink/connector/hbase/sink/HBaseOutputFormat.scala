@@ -17,19 +17,21 @@
 
 package org.apache.streampark.flink.connector.hbase.sink
 
-import java.lang.{Iterable => JIter}
-import java.util.Properties
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.function.TransformFunction
+import org.apache.streampark.flink.connector.hbase.internal.HBaseSinkFunction
 
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.hadoop.hbase.client.Mutation
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.function.TransformFunction
-import org.apache.streampark.flink.connector.hbase.internal.HBaseSinkFunction
+import java.lang.{Iterable => JIter}
+import java.util.Properties
 
-class HBaseOutputFormat[T: TypeInformation](tabName: String, prop: Properties) extends RichOutputFormat[T] with Logger {
+class HBaseOutputFormat[T: TypeInformation](tabName: String, prop: Properties)
+  extends RichOutputFormat[T]
+  with Logger {
 
   var sinkFunction: HBaseSinkFunction[T] = _
 
@@ -40,7 +42,10 @@ class HBaseOutputFormat[T: TypeInformation](tabName: String, prop: Properties) e
   }
 
   // for JAVA
-  def this(tabName: String, properties: Properties, javaTransformFunc: TransformFunction[T, JIter[Mutation]]) = {
+  def this(
+      tabName: String,
+      properties: Properties,
+      javaTransformFunc: TransformFunction[T, JIter[Mutation]]) = {
 
     this(tabName, properties)
     this.sinkFunction = new HBaseSinkFunction[T](tabName, properties, javaTransformFunc)

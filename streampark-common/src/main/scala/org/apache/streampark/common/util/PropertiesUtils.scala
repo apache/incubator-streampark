@@ -16,19 +16,21 @@
  */
 package org.apache.streampark.common.util
 
-import java.io._
-import java.util.{Properties, Scanner, HashMap => JavaMap, LinkedHashMap => JavaLinkedMap}
-import java.util.concurrent.atomic.AtomicInteger
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import scala.collection.mutable.{Map => MutableMap}
 import com.typesafe.config.ConfigFactory
 import org.apache.commons.lang3.StringUtils
 import org.yaml.snakeyaml.Yaml
 
-import java.util.regex.Pattern
 import javax.annotation.Nonnull
+
+import java.io._
+import java.util.{HashMap => JavaMap, LinkedHashMap => JavaLinkedMap, Properties, Scanner}
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.regex.Pattern
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.collection.mutable.{Map => MutableMap}
 
 object PropertiesUtils extends Logger {
 
@@ -51,15 +53,22 @@ object PropertiesUtils extends Logger {
     buffer.toString()
   }
 
-  private[this] def eachAppendYamlItem(prefix: String, k: String, v: Any, proper: collection.mutable.Map[String, String]): Map[String, String] = {
+  private[this] def eachAppendYamlItem(
+      prefix: String,
+      k: String,
+      v: Any,
+      proper: collection.mutable.Map[String, String]): Map[String, String] = {
     v match {
       case map: JavaLinkedMap[String, Any] =>
-        map.flatMap(x => {
-          prefix match {
-            case "" => eachAppendYamlItem(k, x._1, x._2, proper)
-            case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
-          }
-        }).toMap
+        map
+          .flatMap(
+            x => {
+              prefix match {
+                case "" => eachAppendYamlItem(k, x._1, x._2, proper)
+                case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
+              }
+            })
+          .toMap
       case text =>
         val value = text match {
           case null => ""
@@ -79,9 +88,11 @@ object PropertiesUtils extends Logger {
       new Yaml()
         .load(text)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading conf error:", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(s"Failed when loading conf error:", e)
     }
   }
 
@@ -99,7 +110,8 @@ object PropertiesUtils extends Logger {
       properties.load(new StringReader(conf))
       properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties ", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(s"Failed when loading properties ", e)
     }
   }
 
@@ -123,22 +135,28 @@ object PropertiesUtils extends Logger {
   def fromPropertiesFile(filename: String): Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"[StreamPark] fromPropertiesFile: Properties file $file does not exist")
-    require(file.isFile, s"[StreamPark] fromPropertiesFile: Properties file $file is not a normal file")
+    require(
+      file.isFile,
+      s"[StreamPark] fromPropertiesFile: Properties file $file is not a normal file")
     val inputStream = new FileInputStream(file)
     fromPropertiesFile(inputStream)
   }
 
   /** Load Yaml present in the given file. */
   def fromYamlFile(inputStream: InputStream): Map[String, String] = {
-    require(inputStream != null, s"[StreamPark] fromYamlFile: Properties inputStream  must not be null")
+    require(
+      inputStream != null,
+      s"[StreamPark] fromYamlFile: Properties inputStream  must not be null")
     try {
       val map = MutableMap[String, String]()
       new Yaml()
         .load(inputStream)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading yaml from inputStream", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(s"Failed when loading yaml from inputStream", e)
     } finally {
       inputStream.close()
     }
@@ -155,13 +173,16 @@ object PropertiesUtils extends Logger {
 
   private[this] def parseHoconByReader(reader: Reader): Map[String, String] = {
     try {
-      ConfigFactory.parseReader(reader)
+      ConfigFactory
+        .parseReader(reader)
         .entrySet()
-        .map { x =>
-          val k = x.getKey.trim.replaceAll("\"", "")
-          val v = x.getValue.unwrapped().toString.trim
-          k -> v
-        }.toMap
+        .map {
+          x =>
+            val k = x.getKey.trim.replaceAll("\"", "")
+            val v = x.getValue.unwrapped().toString.trim
+            k -> v
+        }
+        .toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading Hocon ", e)
     }
@@ -169,40 +190,56 @@ object PropertiesUtils extends Logger {
 
   /** Load properties present in the given file. */
   def fromPropertiesFile(inputStream: InputStream): Map[String, String] = {
-    require(inputStream != null, s"[StreamPark] fromPropertiesFile: Properties inputStream  must not be null")
+    require(
+      inputStream != null,
+      s"[StreamPark] fromPropertiesFile: Properties inputStream  must not be null")
     try {
       val properties = new Properties()
       properties.load(inputStream)
       properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"[StreamPark] Failed when loading properties from inputStream", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(
+          s"[StreamPark] Failed when loading properties from inputStream",
+          e)
     }
   }
 
-  def fromYamlTextAsJava(text: String): JavaMap[String, String] = new JavaMap[String, String](fromYamlText(text).asJava)
+  def fromYamlTextAsJava(text: String): JavaMap[String, String] =
+    new JavaMap[String, String](fromYamlText(text).asJava)
 
-  def fromHoconTextAsJava(text: String): JavaMap[String, String] = new JavaMap[String, String](fromHoconText(text).asJava)
+  def fromHoconTextAsJava(text: String): JavaMap[String, String] =
+    new JavaMap[String, String](fromHoconText(text).asJava)
 
-  def fromPropertiesTextAsJava(text: String): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesText(text).asJava)
+  def fromPropertiesTextAsJava(text: String): JavaMap[String, String] =
+    new JavaMap[String, String](fromPropertiesText(text).asJava)
 
-  def fromYamlFileAsJava(filename: String): JavaMap[String, String] = new JavaMap[String, String](fromYamlFile(filename).asJava)
+  def fromYamlFileAsJava(filename: String): JavaMap[String, String] =
+    new JavaMap[String, String](fromYamlFile(filename).asJava)
 
-  def fromHoconFileAsJava(filename: String): JavaMap[String, String] = new JavaMap[String, String](fromHoconFile(filename).asJava)
+  def fromHoconFileAsJava(filename: String): JavaMap[String, String] =
+    new JavaMap[String, String](fromHoconFile(filename).asJava)
 
-  def fromPropertiesFileAsJava(filename: String): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesFile(filename).asJava)
+  def fromPropertiesFileAsJava(filename: String): JavaMap[String, String] =
+    new JavaMap[String, String](fromPropertiesFile(filename).asJava)
 
-  def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromYamlFile(inputStream).asJava)
+  def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] =
+    new JavaMap[String, String](fromYamlFile(inputStream).asJava)
 
-  def fromHoconFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromHoconFile(inputStream).asJava)
+  def fromHoconFileAsJava(inputStream: InputStream): JavaMap[String, String] =
+    new JavaMap[String, String](fromHoconFile(inputStream).asJava)
 
-  def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesFile(inputStream).asJava)
+  def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] =
+    new JavaMap[String, String](fromPropertiesFile(inputStream).asJava)
 
   /**
    * @param file
    * @return
    */
   def loadFlinkConfYaml(file: File): JavaMap[String, String] = {
-    require(file != null && file.exists() && file.isFile, "[StreamPark] loadFlinkConfYaml: file must not be null")
+    require(
+      file != null && file.exists() && file.isFile,
+      "[StreamPark] loadFlinkConfYaml: file must not be null")
     loadFlinkConfYaml(org.apache.commons.io.FileUtils.readFileToString(file))
   }
 
@@ -239,23 +276,23 @@ object PropertiesUtils extends Logger {
     flinkConf
   }
 
-  /**
-   * extract flink configuration from application.properties
-   */
+  /** extract flink configuration from application.properties */
   @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
-    if (StringUtils.isEmpty(properties)) Map.empty[String, String] else {
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String]
+    else {
       val map = mutable.Map[String, String]()
       val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
       simple.split("\\s?-D") match {
         case d if Utils.notEmpty(d) =>
-          d.foreach(x => {
-            if (x.nonEmpty) {
-              val p = PROPERTY_PATTERN.matcher(x.trim)
-              if (p.matches) {
-                map += p.group(1).trim -> p.group(2).trim
+          d.foreach(
+            x => {
+              if (x.nonEmpty) {
+                val p = PROPERTY_PATTERN.matcher(x.trim)
+                if (p.matches) {
+                  map += p.group(1).trim -> p.group(2).trim
+                }
               }
-            }
-          })
+            })
         case _ =>
       }
       val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)

@@ -21,9 +21,8 @@ import org.apache.streampark.flink.kubernetes.event.BuildInEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
 
 /**
- * AOP for FlinkK8sWatcher used to trigger the run behavior.
- * What more, this AOP has the ability to automatically recover
- * the FlinkK8sWatcher's internal FlinkWatcher.
+ * AOP for FlinkK8sWatcher used to trigger the run behavior. What more, this AOP has the ability to
+ * automatically recover the FlinkK8sWatcher's internal FlinkWatcher.
  */
 trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
 

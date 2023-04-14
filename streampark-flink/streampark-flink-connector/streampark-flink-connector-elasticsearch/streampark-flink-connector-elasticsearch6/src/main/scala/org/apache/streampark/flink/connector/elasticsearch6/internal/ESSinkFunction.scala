@@ -17,6 +17,11 @@
 
 package org.apache.streampark.flink.connector.elasticsearch6.internal
 
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.function.TransformFunction
+
 import org.apache.flink.api.common.functions.RuntimeContext
 import org.apache.flink.streaming.connectors.elasticsearch.{ElasticsearchSinkFunction, RequestIndexer}
 import org.elasticsearch.action.ActionRequest
@@ -24,12 +29,9 @@ import org.elasticsearch.action.delete.DeleteRequest
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest
 
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.function.TransformFunction
-
-class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchSinkFunction[T] with Logger {
+class ESSinkFunction[T](apiType: ApiType = ApiType.scala)
+  extends ElasticsearchSinkFunction[T]
+  with Logger {
   private[this] var scalaFunc: T => ActionRequest = _
   private[this] var javaFunc: TransformFunction[T, ActionRequest] = _
 
@@ -50,14 +52,21 @@ class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchS
     case ApiType.scala => scalaFunc(element)
   }
 
-  override def process(element: T, runtimeContext: RuntimeContext, requestIndexer: RequestIndexer): Unit = {
+  override def process(
+      element: T,
+      runtimeContext: RuntimeContext,
+      requestIndexer: RequestIndexer): Unit = {
     val request: ActionRequest = createIndexRequest(element)
     request match {
-      case indexRequest if indexRequest.isInstanceOf[IndexRequest] => requestIndexer.add(indexRequest.asInstanceOf[IndexRequest])
-      case deleteRequest if deleteRequest.isInstanceOf[DeleteRequest] => requestIndexer.add(deleteRequest.asInstanceOf[DeleteRequest])
-      case updateRequest if updateRequest.isInstanceOf[UpdateRequest] => requestIndexer.add(updateRequest.asInstanceOf[UpdateRequest])
+      case indexRequest if indexRequest.isInstanceOf[IndexRequest] =>
+        requestIndexer.add(indexRequest.asInstanceOf[IndexRequest])
+      case deleteRequest if deleteRequest.isInstanceOf[DeleteRequest] =>
+        requestIndexer.add(deleteRequest.asInstanceOf[DeleteRequest])
+      case updateRequest if updateRequest.isInstanceOf[UpdateRequest] =>
+        requestIndexer.add(updateRequest.asInstanceOf[UpdateRequest])
       case _ =>
-        logError("ElasticsearchSinkFunction add ActionRequest is deprecated, please use IndexRequest|DeleteRequest|UpdateRequest ")
+        logError(
+          "ElasticsearchSinkFunction add ActionRequest is deprecated, please use IndexRequest|DeleteRequest|UpdateRequest ")
         requestIndexer.add(request)
     }
   }

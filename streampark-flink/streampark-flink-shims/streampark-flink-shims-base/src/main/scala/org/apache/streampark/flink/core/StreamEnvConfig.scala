@@ -18,6 +18,9 @@ package org.apache.streampark.flink.core
 
 class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
 
-class StreamTableEnvConfig(val args: Array[String], val streamConfig: StreamEnvConfigFunction, val tableConfig: TableEnvConfigFunction)
+class StreamTableEnvConfig(
+    val args: Array[String],
+    val streamConfig: StreamEnvConfigFunction,
+    val tableConfig: TableEnvConfigFunction)
 
 class TableEnvConfig(val args: Array[String], val conf: TableEnvConfigFunction)

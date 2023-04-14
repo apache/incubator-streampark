@@ -17,23 +17,28 @@
 
 package org.apache.streampark.flink.packer.docker
 
-import javax.annotation.Nullable
-
 import com.github.dockerjava.api.model.AuthConfig
+
+import javax.annotation.Nullable
 
 /**
  * Authentication Configuration of Remote Docker Register
  *
- * @param registerAddress  docker image regoster address. when this configuration item
- *                         is empty, it means that the dockerhub public repository is used.
- * @param registerUsername login username of docker image regoster.
- * @param registerPassword login password of docker image regoster.
+ * @param registerAddress
+ *   docker image regoster address. when this configuration item is empty, it means that the
+ *   dockerhub public repository is used.
+ * @param registerUsername
+ *   login username of docker image regoster.
+ * @param registerPassword
+ *   login password of docker image regoster.
  */
-case class DockerConf(@Nullable registerAddress: String, imageNamespace: String, registerUsername: String, registerPassword: String) {
+case class DockerConf(
+    @Nullable registerAddress: String,
+    imageNamespace: String,
+    registerUsername: String,
+    registerPassword: String) {
 
-  /**
-   * covert to com.github.docker.java.api.model.AuthConfig
-   */
+  /** covert to com.github.docker.java.api.model.AuthConfig */
   def toAuthConf: AuthConfig = new AuthConfig()
     .withRegistryAddress(registerAddress)
     .withUsername(registerUsername)
@@ -43,6 +48,10 @@ case class DockerConf(@Nullable registerAddress: String, imageNamespace: String,
 
 object DockerConf {
 
-  def of(@Nullable registerAddress: String, imageNameSpace: String, registerUsername: String, registerPassword: String): DockerConf =
+  def of(
+      @Nullable registerAddress: String,
+      imageNameSpace: String,
+      registerUsername: String,
+      registerPassword: String): DockerConf =
     DockerConf(registerAddress, imageNameSpace, registerUsername, registerPassword)
 }

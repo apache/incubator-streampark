@@ -26,9 +26,8 @@ trait FlinkWatcher extends AutoCloseable {
   private[this] val started: AtomicBoolean = new AtomicBoolean(false)
 
   /**
-   * Start watcher process.
-   * This method should be a thread-safe implementation of
-   * light locking and can be called idempotent.
+   * Start watcher process. This method should be a thread-safe implementation of light locking and
+   * can be called idempotent.
    */
   def start(): Unit = this.synchronized {
     if (!started.getAndSet(true)) {
@@ -37,9 +36,8 @@ trait FlinkWatcher extends AutoCloseable {
   }
 
   /**
-   * Stop watcher process.
-   * This method should be a thread-safe implementation of
-   * light locking and can be called idempotent.
+   * Stop watcher process. This method should be a thread-safe implementation of light locking and
+   * can be called idempotent.
    */
   def stop(): Unit = this.synchronized {
     if (started.getAndSet(false)) {
@@ -55,8 +53,8 @@ trait FlinkWatcher extends AutoCloseable {
   }
 
   /**
-   * This method should be a thread-safe implementation of
-   * light locking and can be called idempotent.
+   * This method should be a thread-safe implementation of light locking and can be called
+   * idempotent.
    */
   def restart(): Unit = this.synchronized {
     stop()
@@ -71,9 +69,7 @@ trait FlinkWatcher extends AutoCloseable {
 
   def doWatch(): Unit
 
-  /**
-   * Runnable streamline syntax
-   */
+  /** Runnable streamline syntax */
   implicit protected def funcToRunnable(fun: () => Unit): Runnable = new Runnable() {
     def run(): Unit = fun()
   }

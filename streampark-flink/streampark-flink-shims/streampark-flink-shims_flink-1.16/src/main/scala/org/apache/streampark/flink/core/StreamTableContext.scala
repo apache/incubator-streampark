@@ -26,23 +26,36 @@ import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.types.Row
 
-class StreamTableContext(override val parameter: ParameterTool, private val streamEnv: StreamExecutionEnvironment, private val tableEnv: StreamTableEnvironment)
-    extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
+class StreamTableContext(
+    override val parameter: ParameterTool,
+    private val streamEnv: StreamExecutionEnvironment,
+    private val tableEnv: StreamTableEnvironment)
+  extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
 
-  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
+  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) =
+    this(args._1, args._2, args._3)
 
   def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-  override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table = tableEnv.fromDataStream[T](dataStream, schema)
+  override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table =
+    tableEnv.fromDataStream[T](dataStream, schema)
 
-  override def fromChangelogStream(dataStream: DataStream[Row]): Table = tableEnv.fromChangelogStream(dataStream)
+  override def fromChangelogStream(dataStream: DataStream[Row]): Table =
+    tableEnv.fromChangelogStream(dataStream)
 
-  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema): Table = tableEnv.fromChangelogStream(dataStream, schema)
+  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema): Table =
+    tableEnv.fromChangelogStream(dataStream, schema)
 
-  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema, changelogMode: ChangelogMode): Table =
+  override def fromChangelogStream(
+      dataStream: DataStream[Row],
+      schema: Schema,
+      changelogMode: ChangelogMode): Table =
     tableEnv.fromChangelogStream(dataStream, schema, changelogMode)
 
-  override def createTemporaryView[T](path: String, dataStream: DataStream[T], schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
+  override def createTemporaryView[T](
+      path: String,
+      dataStream: DataStream[T],
+      schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
 
   override def toDataStream(table: Table): DataStream[Row] = {
     isConvertedToDataStream = true
@@ -69,7 +82,10 @@ class StreamTableContext(override val parameter: ParameterTool, private val stre
     tableEnv.toChangelogStream(table, targetSchema)
   }
 
-  override def toChangelogStream(table: Table, targetSchema: Schema, changelogMode: ChangelogMode): DataStream[Row] = {
+  override def toChangelogStream(
+      table: Table,
+      targetSchema: Schema,
+      changelogMode: ChangelogMode): DataStream[Row] = {
     isConvertedToDataStream = true
     tableEnv.toChangelogStream(table, targetSchema, changelogMode)
   }
@@ -78,26 +94,23 @@ class StreamTableContext(override val parameter: ParameterTool, private val stre
 
   override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
 
-  override def createTemporaryTable(path: String, descriptor: TableDescriptor): Unit = tableEnv.createTemporaryTable(path, descriptor)
+  override def createTemporaryTable(path: String, descriptor: TableDescriptor): Unit =
+    tableEnv.createTemporaryTable(path, descriptor)
 
-  override def createTable(path: String, descriptor: TableDescriptor): Unit = tableEnv.createTable(path, descriptor)
+  override def createTable(path: String, descriptor: TableDescriptor): Unit =
+    tableEnv.createTable(path, descriptor)
 
   override def from(descriptor: TableDescriptor): Table = tableEnv.from(descriptor)
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 
-  /**
-   * @since 1.15
-   */
+  /** @since 1.15 */
   override def listTables(s: String, s1: String): Array[String] = tableEnv.listTables(s, s1)
 
-  /**
-   * @since 1.15
-   */
-  override def loadPlan(planReference: PlanReference): CompiledPlan = tableEnv.loadPlan(planReference)
+  /** @since 1.15 */
+  override def loadPlan(planReference: PlanReference): CompiledPlan =
+    tableEnv.loadPlan(planReference)
 
-  /**
-   * @since 1.15
-   */
+  /** @since 1.15 */
   override def compilePlanSql(s: String): CompiledPlan = tableEnv.compilePlanSql(s)
 }

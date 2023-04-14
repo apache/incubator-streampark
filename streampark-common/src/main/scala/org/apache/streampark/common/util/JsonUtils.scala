@@ -16,13 +16,13 @@
  */
 package org.apache.streampark.common.util
 
-import java.text.SimpleDateFormat
-
-import scala.reflect.ClassTag
-
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+
+import java.text.SimpleDateFormat
+
+import scala.reflect.ClassTag
 
 object JsonUtils extends Serializable {
 
@@ -51,7 +51,8 @@ object JsonUtils extends Serializable {
     }
   }
 
-  def read[T](obj: AnyRef)(implicit classTag: ClassTag[T]): T = this.read(obj, classTag.runtimeClass).asInstanceOf[T]
+  def read[T](obj: AnyRef)(implicit classTag: ClassTag[T]): T =
+    this.read(obj, classTag.runtimeClass).asInstanceOf[T]
 
   def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
 

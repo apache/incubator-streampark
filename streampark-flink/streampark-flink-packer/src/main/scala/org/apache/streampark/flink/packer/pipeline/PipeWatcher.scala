@@ -17,26 +17,20 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
-/**
- * Trait for watching a BuildPipeline instance
- */
+/** Trait for watching a BuildPipeline instance */
 trait PipeWatcher {
 
-  /**
-   * called when the pipeline is launched.
-   */
+  /** called when the pipeline is launched. */
   @throws[Exception]
   def onStart(snapshot: PipeSnapshot): Unit
 
-  /**
-   * called when the any status of building step is changed.
-   */
+  /** called when the any status of building step is changed. */
   @throws[Exception]
   def onStepStateChange(snapshot: PipeSnapshot): Unit
 
   /**
-   * called when the pipeline is finished, or you can get the
-   * results directly from the BuildPipeline.launch() synchronously.
+   * called when the pipeline is finished, or you can get the results directly from the
+   * BuildPipeline.launch() synchronously.
    */
   @throws[Exception]
   def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit

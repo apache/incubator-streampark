@@ -16,7 +16,10 @@
  */
 package org.apache.streampark.flink.core
 
-import scala.util.{Failure, Try}
+import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
+import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.flink.core.SqlCommand._
+
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
 import org.apache.calcite.sql.parser.SqlParser.Config
@@ -27,23 +30,28 @@ import org.apache.flink.table.api.{SqlDialect, TableConfig}
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.config.TableConfigOptions
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
-import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
-import org.apache.streampark.common.util.{Logger, Utils}
-import org.apache.streampark.flink.core.SqlCommand._
+
+import scala.util.{Failure, Try}
 
 object FlinkSqlValidator extends Logger {
 
-  private[this] val FLINK112_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.calcite.CalciteParser"
+  private[this] val FLINK112_CALCITE_PARSER_CLASS =
+    "org.apache.flink.table.planner.calcite.CalciteParser"
 
-  private[this] val FLINK113_PLUS_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.parse.CalciteParser"
+  private[this] val FLINK113_PLUS_CALCITE_PARSER_CLASS =
+    "org.apache.flink.table.planner.parse.CalciteParser"
 
   private[this] val SYNTAX_ERROR_REGEXP = ".*at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*".r
 
   private[this] lazy val sqlParserConfigMap: Map[String, SqlParser.Config] = {
     def getConfig(sqlDialect: SqlDialect): Config = {
       val tableConfig = new TableConfig()
-      tableConfig.getConfiguration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.STREAMING)
-      tableConfig.getConfiguration.set(TableConfigOptions.TABLE_SQL_DIALECT, sqlDialect.name().toLowerCase())
+      tableConfig.getConfiguration.set(
+        ExecutionOptions.RUNTIME_MODE,
+        RuntimeExecutionMode.STREAMING)
+      tableConfig.getConfiguration.set(
+        TableConfigOptions.TABLE_SQL_DIALECT,
+        sqlDialect.name().toLowerCase())
       val conformance = sqlDialect match {
         case HIVE => FlinkSqlConformance.HIVE
         case DEFAULT => FlinkSqlConformance.DEFAULT
@@ -80,16 +88,19 @@ object FlinkSqlValidator extends Logger {
             hasInsert = true
           }
           Try {
-            val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS))
+            val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS))
+              .getOrElse(Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS))
             sqlDialect.toUpperCase() match {
               case "HIVE" =>
               case "DEFAULT" =>
-                val parser = calciteClass.getConstructor(Array(classOf[Config]): _*).newInstance(sqlParserConfigMap(sqlDialect.toUpperCase()))
+                val parser = calciteClass
+                  .getConstructor(Array(classOf[Config]): _*)
+                  .newInstance(sqlParserConfigMap(sqlDialect.toUpperCase()))
                 val method = parser.getClass.getDeclaredMethod("parse", classOf[String])
                 method.setAccessible(true)
                 method.invoke(parser, call.originSql)
               case _ =>
-                throw new UnsupportedOperationException(s"unsupported dialect: ${sqlDialect}")
+                throw new UnsupportedOperationException(s"unsupported dialect: $sqlDialect")
             }
           } match {
             case Failure(e) =>
@@ -107,7 +118,8 @@ object FlinkSqlValidator extends Logger {
                   errorLine = errorLine,
                   errorColumn = column.toInt,
                   sql = call.originSql,
-                  exception = causedBy.replaceAll(s"at\\sline\\s$line", s"at line $errorLine"))
+                  exception = causedBy.replaceAll(s"at\\sline\\s$line", s"at line $errorLine")
+                )
               } else {
                 return FlinkSqlValidationResult(
                   success = false,
@@ -115,7 +127,8 @@ object FlinkSqlValidator extends Logger {
                   lineStart = call.lineStart,
                   lineEnd = call.lineEnd,
                   sql = call.originSql,
-                  exception = causedBy)
+                  exception = causedBy
+                )
               }
             case _ =>
           }
@@ -130,7 +143,8 @@ object FlinkSqlValidator extends Logger {
         failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
         lineStart = sqlCommands.head.lineStart,
         lineEnd = sqlCommands.last.lineEnd,
-        exception = "No 'INSERT' statement to trigger the execution of the Flink job.")
+        exception = "No 'INSERT' statement to trigger the execution of the Flink job."
+      )
     }
   }
 

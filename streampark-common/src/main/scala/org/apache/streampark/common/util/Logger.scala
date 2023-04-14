@@ -18,18 +18,18 @@ package org.apache.streampark.common.util
 
 import org.apache.streampark.shaded.ch.qos.logback.classic.LoggerContext
 import org.apache.streampark.shaded.ch.qos.logback.classic.joran.JoranConfigurator
-import org.apache.streampark.shaded.ch.qos.logback.classic.util.ContextSelectorStaticBinder
 import org.apache.streampark.shaded.ch.qos.logback.classic.util.{ContextInitializer => LogBackContextInitializer}
+import org.apache.streampark.shaded.ch.qos.logback.classic.util.ContextSelectorStaticBinder
 import org.apache.streampark.shaded.ch.qos.logback.core.{CoreConstants, LogbackException}
 import org.apache.streampark.shaded.ch.qos.logback.core.status.StatusUtil
 import org.apache.streampark.shaded.ch.qos.logback.core.util.StatusPrinter
-
 import org.apache.streampark.shaded.org.slf4j.{ILoggerFactory, Logger => Slf4JLogger}
 import org.apache.streampark.shaded.org.slf4j.spi.LoggerFactoryBinder
 
 import java.io.{ByteArrayInputStream, File}
 import java.net.URL
 import java.nio.charset.StandardCharsets
+
 import scala.util.Try
 
 trait Logger {
@@ -99,14 +99,15 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
     val defaultLoggerContext = new LoggerContext
 
     Try(new ContextInitializer(defaultLoggerContext).autoConfig())
-      .recover[Unit]({ case e =>
-        val msg = "Failed to auto configure default logger context"
-        // scalastyle:off println
-        System.err.println(msg)
-        // scalastyle:off println
-        System.err.println("Reported exception:")
-        e.printStackTrace()
-      })
+      .recover[Unit] {
+        case e =>
+          val msg = "Failed to auto configure default logger context"
+          // scalastyle:off println
+          System.err.println(msg)
+          // scalastyle:off println
+          System.err.println("Reported exception:")
+          e.printStackTrace()
+      }
 
     if (!StatusUtil.contextHasStatusListener(defaultLoggerContext)) {
       StatusPrinter.printInCaseOfErrorsOrWarnings(defaultLoggerContext)
@@ -119,14 +120,16 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
 
   override def getLoggerFactory: ILoggerFactory = {
     if (contextSelectorBinder.getContextSelector == null) {
-      throw new IllegalStateException("contextSelector cannot be null. See also " + CoreConstants.CODES_URL + "#null_CS")
+      throw new IllegalStateException(
+        "contextSelector cannot be null. See also " + CoreConstants.CODES_URL + "#null_CS")
     }
     contextSelectorBinder.getContextSelector.getLoggerContext
   }
 
   override def getLoggerFactoryClassStr: String = contextSelectorBinder.getClass.getName
 
-  private class ContextInitializer(loggerContext: LoggerContext) extends LogBackContextInitializer(loggerContext) {
+  private class ContextInitializer(loggerContext: LoggerContext)
+    extends LogBackContextInitializer(loggerContext) {
 
     val shadedPackage = "org.apache.streampark.shaded"
 
@@ -136,23 +139,20 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
       if (path.endsWith("xml")) {
         val configurator = new JoranConfigurator()
         configurator.setContext(loggerContext)
-        val text = FileUtils.readString(new File(path))
-          .replaceAll(
-            "ch.qos.logback",
-            s"$shadedPackage.ch.qos.logback")
-          .replaceAll(
-            "org.slf4j",
-            s"$shadedPackage.org.slf4j")
+        val text = FileUtils
+          .readString(new File(path))
+          .replaceAll("ch.qos.logback", s"$shadedPackage.ch.qos.logback")
+          .replaceAll("org.slf4j", s"$shadedPackage.org.slf4j")
 
         val input = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))
         configurator.doConfigure(input)
-      } else throw {
-        new LogbackException("Unexpected filename extension of file [" + url.toString + "]. Should be .xml")
-      }
+      } else
+        throw {
+          new LogbackException(
+            "Unexpected filename extension of file [" + url.toString + "]. Should be .xml")
+        }
     }
 
   }
 
 }
-
-

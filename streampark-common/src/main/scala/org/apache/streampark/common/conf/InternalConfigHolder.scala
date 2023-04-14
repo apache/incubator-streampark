@@ -17,44 +17,37 @@
 
 package org.apache.streampark.common.conf
 
+import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 import org.apache.streampark.common.util.Utils.StringCasts
+
+import javax.annotation.{Nonnull, Nullable}
 
 import java.util
 import java.util.concurrent.ConcurrentHashMap
-import javax.annotation.{Nonnull, Nullable}
+
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 
 /**
- * Thread-safe configuration storage containers.
- * All configurations will be automatically initialized from the spring
- * configuration items of the same name.
+ * Thread-safe configuration storage containers. All configurations will be automatically
+ * initialized from the spring configuration items of the same name.
  */
 object InternalConfigHolder extends Logger {
 
   private val initialCapacity = 45
 
-  /**
-   * configuration values storage (key -> value)
-   */
+  /** configuration values storage (key -> value) */
   private val confData = new ConcurrentHashMap[String, Any](initialCapacity)
 
-  /**
-   * configuration key options storage (key -> ConfigOption)
-   */
+  /** configuration key options storage (key -> ConfigOption) */
   private val confOptions = new ConcurrentHashMap[String, InternalOption](initialCapacity)
 
-  /**
-   * Initialize the ConfigHub.
-   */
+  /** Initialize the ConfigHub. */
   {
     Seq(CommonConfig, K8sFlinkConfig)
   }
 
-  /**
-   * Register the ConfigOption
-   */
+  /** Register the ConfigOption */
   private[conf] def register(@Nonnull conf: InternalOption): Unit = {
     confOptions.put(conf.key, conf)
     if (conf.defaultValue != null) {
@@ -66,13 +59,12 @@ object InternalConfigHolder extends Logger {
    * Get configuration value via ConfigOption.
    *
    * When using this api, the type must be explicitly declared and the relevant type will be
-   * automatically converted to some extent.
-   * 1) in scala:
-   * val result: Long = ConfigHub.get(K8sFlinkConfig.sglMetricTrackTaskTimeoutSec)
-   * 2) in java:
-   * Long result = ConfigHub.get(K8sFlinkConfig.sglMetricTrackTaskTimeoutSec());
+   * automatically converted to some extent. 1) in scala: val result: Long =
+   * ConfigHub.get(K8sFlinkConfig.sglMetricTrackTaskTimeoutSec) 2) in java: Long result =
+   * ConfigHub.get(K8sFlinkConfig.sglMetricTrackTaskTimeoutSec());
    *
-   * @return return the defaultValue of ConfigOption when the value has not been overwritten.
+   * @return
+   *   return the defaultValue of ConfigOption when the value has not been overwritten.
    */
   @Nonnull
   def get[T](@Nonnull conf: InternalOption): T = {
@@ -90,14 +82,15 @@ object InternalConfigHolder extends Logger {
    * Get configuration value via key.
    *
    * When using this api, the type must be explicitly declared and the relevant type will be
-   * automatically converted to some extent.
-   * 1) in scala:
-   * val result: Long = ConfigHub.get("streampark.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric")
-   * 2) in java:
-   * Long result = ConfigHub.get("streampark.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric");
+   * automatically converted to some extent. 1) in scala: val result: Long =
+   * ConfigHub.get("streampark.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric") 2) in
+   * java: Long result =
+   * ConfigHub.get("streampark.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric");
    *
-   * @throws IllegalArgumentException when the key has not been registered to ConfigHub.
-   * @return return the defaultValue of ConfigOption when the value has not been overwritten.
+   * @throws IllegalArgumentException
+   *   when the key has not been registered to ConfigHub.
+   * @return
+   *   return the defaultValue of ConfigOption when the value has not been overwritten.
    */
   @throws[IllegalArgumentException]
   @Nonnull
@@ -109,7 +102,8 @@ object InternalConfigHolder extends Logger {
             val config = getConfig(key)
             SystemPropertyUtils.get(key) match {
               case v if v != null => v.cast[T](config.classType)
-              case _ => throw new IllegalArgumentException(s"config key has not been registered: $key")
+              case _ =>
+                throw new IllegalArgumentException(s"config key has not been registered: $key")
             }
           case conf: InternalOption => conf.defaultValue.asInstanceOf[T]
         }
@@ -120,16 +114,15 @@ object InternalConfigHolder extends Logger {
   /**
    * Get registered ConfigOption by key.
    *
-   * @return nullable
+   * @return
+   *   nullable
    */
   @Nullable
   def getConfig(key: String): InternalOption = {
     confOptions.get(key)
   }
 
-  /**
-   * Get keys of all registered ConfigOption.
-   */
+  /** Get keys of all registered ConfigOption. */
   @Nonnull
   def keys(): util.Set[String] = {
     val map = new util.HashMap[String, InternalOption](confOptions.size())
@@ -140,10 +133,12 @@ object InternalConfigHolder extends Logger {
   /**
    * Overwritten configuration value.
    *
-   * @param conf  should not be null.
-   * @param value the type of value should be same as conf.classType.
-   * @throws IllegalArgumentException when the conf has not been registered,
-   *                                  or the value type is not same as conf.classType.
+   * @param conf
+   *   should not be null.
+   * @param value
+   *   the type of value should be same as conf.classType.
+   * @throws IllegalArgumentException
+   *   when the conf has not been registered, or the value type is not same as conf.classType.
    */
   @throws[IllegalArgumentException]
   def set(@Nonnull conf: InternalOption, value: Any): Unit = {
@@ -161,16 +156,17 @@ object InternalConfigHolder extends Logger {
     }
   }
 
-  /**
-   * log the current configuration info.
-   */
+  /** log the current configuration info. */
   def log(): Unit = {
     val configKeys = keys()
-    logInfo(
-      s"""registered configs:
-         |ConfigHub collected configs: ${configKeys.size}
-         |  ${configKeys.map(key => s"$key = ${if (key.contains("password")) ConfigConst.DEFAULT_DATAMASK_STRING else get(key)}").mkString(
-          "\n  ")}""".stripMargin)
+    logInfo(s"""registered configs:
+               |ConfigHub collected configs: ${configKeys.size}
+               |  ${configKeys
+                .map(
+                  key =>
+                    s"$key = ${if (key.contains("password")) ConfigConst.DEFAULT_DATAMASK_STRING
+                      else get(key)}")
+                .mkString("\n  ")}""".stripMargin)
   }
 
 }

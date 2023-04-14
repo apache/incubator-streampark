@@ -17,12 +17,12 @@
 
 package org.apache.streampark.flink.client.bean
 
-import java.util.{Map => JavaMap}
-
 import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
 import org.apache.streampark.common.enums.ExecutionMode
 
 import javax.annotation.Nullable
+
+import java.util.{Map => JavaMap}
 
 trait SavepointRequestTrait {
 

@@ -18,4 +18,5 @@ package org.apache.streampark.flink.core
 
 import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient
 
-class FlinkKubernetesClient(kubeClient: FlinkKubeClient) extends FlinkKubernetesClientTrait(kubeClient) {}
+class FlinkKubernetesClient(kubeClient: FlinkKubeClient)
+  extends FlinkKubernetesClientTrait(kubeClient) {}

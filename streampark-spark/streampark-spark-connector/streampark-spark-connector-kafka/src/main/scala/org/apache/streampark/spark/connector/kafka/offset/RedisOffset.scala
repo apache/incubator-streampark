@@ -17,24 +17,22 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
-import scala.collection.JavaConversions._
-import scala.util.Try
+import org.apache.streampark.common.util.{RedisEndpoint, RedisUtils}
 
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
 import redis.clients.jedis.Protocol
 
-import org.apache.streampark.common.util.{RedisEndpoint, RedisUtils}
+import scala.collection.JavaConversions._
+import scala.util.Try
 
-/**
- * Redis Offset Manager
- */
+/** Redis Offset Manager */
 private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
 
   implicit private[this] def endpoint(implicit params: Map[String, String]): RedisEndpoint = {
     val host = params.getOrElse("redis.hosts", Protocol.DEFAULT_HOST)
     val port = params.getOrElse("redis.port", Protocol.DEFAULT_PORT.toString).toInt
-    val auth = Try(params("redis.auth")) getOrElse null
+    val auth = Try(params("redis.auth")).getOrElse(null)
     val dbNum = params.getOrElse("redis.db", Protocol.DEFAULT_DATABASE.toString).toInt
     val timeout = params.getOrElse("redis.timeout", Protocol.DEFAULT_TIMEOUT.toString).toInt
     RedisEndpoint(host, port, auth, dbNum, timeout)
@@ -42,21 +40,24 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
 
   override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
-    val offsetMap = RedisUtils.doRedis { redis =>
-      topics.flatMap(topic => {
-        redis.hgetAll(key(groupId, topic)).map {
-          case (partition, offset) =>
-            // if offset invalid, please use earliest offset to instead of
-            val tp = new TopicPartition(topic, partition.toInt)
-            val finalOffset = earliestOffsets.get(tp) match {
-              case Some(left) if left > offset.toLong =>
-                logWarn(s"storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left")
-                left
-              case _ => offset.toLong
+    val offsetMap = RedisUtils.doRedis {
+      redis =>
+        topics.flatMap(
+          topic => {
+            redis.hgetAll(key(groupId, topic)).map {
+              case (partition, offset) =>
+                // if offset invalid, please use earliest offset to instead of
+                val tp = new TopicPartition(topic, partition.toInt)
+                val finalOffset = earliestOffsets.get(tp) match {
+                  case Some(left) if left > offset.toLong =>
+                    logWarn(
+                      s"storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left")
+                    left
+                  case _ => offset.toLong
+                }
+                tp -> finalOffset
             }
-            tp -> finalOffset
-        }
-      })
+          })
     }
 
     val offsetMaps = reset.toLowerCase() match {
@@ -68,8 +69,12 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   override def update(groupId: String, offsets: Map[TopicPartition, Long]): Unit = {
-    RedisUtils.doRedis { redis =>
-      offsets.foreach { case (tp, offset) => redis.hset(key(groupId, tp.topic), tp.partition().toString, offset.toString) }
+    RedisUtils.doRedis {
+      redis =>
+        offsets.foreach {
+          case (tp, offset) =>
+            redis.hset(key(groupId, tp.topic), tp.partition().toString, offset.toString)
+        }
     }
     logInfo(s"storeType:Redis,updateOffsets [ $groupId,${offsets.mkString(",")} ]")
   }

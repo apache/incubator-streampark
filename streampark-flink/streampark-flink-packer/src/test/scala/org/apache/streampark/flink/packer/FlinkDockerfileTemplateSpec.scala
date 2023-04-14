@@ -16,14 +16,14 @@
  */
 package org.apache.streampark.flink.packer
 
-import java.io.File
+import org.apache.streampark.flink.packer.docker.FlinkDockerfileTemplate
 
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import org.apache.streampark.flink.packer.docker.FlinkDockerfileTemplate
+import java.io.File
 
 class FlinkDockerfileTemplateSpec extends AnyWordSpec with BeforeAndAfter with Matchers {
 
@@ -45,7 +45,11 @@ class FlinkDockerfileTemplateSpec extends AnyWordSpec with BeforeAndAfter with M
   "FlinkDockerfileTemplate" when {
 
     "create dockerfile" should {
-      val template = FlinkDockerfileTemplate(outputDir.getAbsolutePath, "1.13-scala_2.11", path("flink/WordCountSQL.jar"), Set())
+      val template = FlinkDockerfileTemplate(
+        outputDir.getAbsolutePath,
+        "1.13-scala_2.11",
+        path("flink/WordCountSQL.jar"),
+        Set())
       val assertDockerFileContent =
         """FROM 1.13-scala_2.11
           |RUN mkdir -p $FLINK_HOME/usrlib

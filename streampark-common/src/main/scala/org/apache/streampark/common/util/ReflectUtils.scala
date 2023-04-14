@@ -17,26 +17,31 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.commons.lang3.StringUtils
+
 import java.lang.reflect.{Field, Modifier}
 import java.util.Objects
 
 import scala.util.{Failure, Success, Try}
-
-import org.apache.commons.lang3.StringUtils
 
 object ReflectUtils extends Logger {
 
   /**
    * Get field.
    *
-   * @param beanClass the bean class
-   * @param name      the name
-   * @return the field
-   * @throws SecurityException the security exception
+   * @param beanClass
+   *   the bean class
+   * @param name
+   *   the name
+   * @return
+   *   the field
+   * @throws SecurityException
+   *   the security exception
    */
   @throws[SecurityException]
   def getField(beanClass: Class[_], name: String): Field = {
-    Try(beanClass.getDeclaredFields.filter(f => Objects.equals(name, f.getName)).head).getOrElse(null)
+    Try(beanClass.getDeclaredFields.filter(f => Objects.equals(name, f.getName)).head)
+      .getOrElse(null)
   }
 
   def getFieldValue(obj: Any, fieldName: String): Any = {
@@ -57,7 +62,9 @@ object ReflectUtils extends Logger {
 
   def setFieldValue(obj: Any, fieldName: String, value: Any): Unit = {
     val field = getAccessibleField(obj, fieldName)
-    if (Objects.isNull(field)) throw new IllegalArgumentException("Could not find field [" + fieldName + "] on target [" + obj + "]")
+    if (Objects.isNull(field))
+      throw new IllegalArgumentException(
+        "Could not find field [" + fieldName + "] on target [" + obj + "]")
     try
       field.set(obj, value)
     catch {
@@ -85,9 +92,11 @@ object ReflectUtils extends Logger {
   }
 
   private def makeAccessible(field: Field): Unit = {
-    if ((!Modifier.isPublic(field.getModifiers)
+    if (
+      (!Modifier.isPublic(field.getModifiers)
         || !Modifier.isPublic(field.getDeclaringClass.getModifiers)
-        || Modifier.isFinal(field.getModifiers)) && !field.isAccessible) {
+        || Modifier.isFinal(field.getModifiers)) && !field.isAccessible
+    ) {
       field.setAccessible(true)
     }
   }

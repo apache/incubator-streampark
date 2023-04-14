@@ -16,24 +16,34 @@
  */
 package org.apache.streampark.flink.core
 
-import java.util.concurrent.CompletableFuture
-
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.core.execution.SavepointFormatType
 
-class FlinkClusterClient[T](clusterClient: ClusterClient[T]) extends FlinkClientTrait[T](clusterClient) {
+import java.util.concurrent.CompletableFuture
+
+class FlinkClusterClient[T](clusterClient: ClusterClient[T])
+  extends FlinkClientTrait[T](clusterClient) {
 
   override def triggerSavepoint(jobID: JobID, savepointDir: String): CompletableFuture[String] = {
     clusterClient.triggerSavepoint(jobID, savepointDir, SavepointFormatType.DEFAULT)
   }
 
-  override def cancelWithSavepoint(jobID: JobID, savepointDirectory: String): CompletableFuture[String] = {
+  override def cancelWithSavepoint(
+      jobID: JobID,
+      savepointDirectory: String): CompletableFuture[String] = {
     clusterClient.cancelWithSavepoint(jobID, savepointDirectory, SavepointFormatType.DEFAULT)
   }
 
-  override def stopWithSavepoint(jobID: JobID, advanceToEndOfEventTime: Boolean, savepointDirectory: String): CompletableFuture[String] = {
-    clusterClient.stopWithSavepoint(jobID, advanceToEndOfEventTime, savepointDirectory, SavepointFormatType.DEFAULT)
+  override def stopWithSavepoint(
+      jobID: JobID,
+      advanceToEndOfEventTime: Boolean,
+      savepointDirectory: String): CompletableFuture[String] = {
+    clusterClient.stopWithSavepoint(
+      jobID,
+      advanceToEndOfEventTime,
+      savepointDirectory,
+      SavepointFormatType.DEFAULT)
   }
 
 }

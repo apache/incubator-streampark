@@ -17,10 +17,12 @@
 
 package org.apache.streampark.flink.connector.elasticsearch5.sink
 
-import java.util.{Map => JavaMap, Properties}
-
-import scala.annotation.meta.param
-import scala.collection.JavaConversions._
+import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.flink.connector.elasticsearch5.conf.ESConfig
+import org.apache.streampark.flink.connector.elasticsearch5.internal.ESSinkFunction
+import org.apache.streampark.flink.connector.function.TransformFunction
+import org.apache.streampark.flink.connector.sink.Sink
+import org.apache.streampark.flink.core.scala.StreamingContext
 
 import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream, DataStreamSink}
 import org.apache.flink.streaming.api.scala.DataStream
@@ -29,12 +31,10 @@ import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExe
 import org.apache.flink.streaming.connectors.elasticsearch5.ElasticsearchSink
 import org.elasticsearch.action.ActionRequest
 
-import org.apache.streampark.common.util.{Logger, Utils}
-import org.apache.streampark.flink.connector.elasticsearch5.conf.ESConfig
-import org.apache.streampark.flink.connector.elasticsearch5.internal.ESSinkFunction
-import org.apache.streampark.flink.connector.function.TransformFunction
-import org.apache.streampark.flink.connector.sink.Sink
-import org.apache.streampark.flink.core.scala.StreamingContext
+import java.util.{Map => JavaMap, Properties}
+
+import scala.annotation.meta.param
+import scala.collection.JavaConversions._
 
 object ES5Sink {
 
@@ -43,7 +43,8 @@ object ES5Sink {
       property: Properties = new Properties(),
       parallelism: Int = 0,
       name: String = null,
-      uid: String = null)(implicit ctx: StreamingContext): ES5Sink = new ES5Sink(ctx, property, parallelism, name, uid)
+      uid: String = null)(implicit ctx: StreamingContext): ES5Sink =
+    new ES5Sink(ctx, property, parallelism, name, uid)
 
 }
 
@@ -53,7 +54,9 @@ class ES5Sink(
     parallelism: Int = 0,
     name: String = null,
     uid: String = null,
-    alias: String = "") extends Sink with Logger {
+    alias: String = "")
+  extends Sink
+  with Logger {
 
   val prop: Properties = ctx.parameter.getProperties
 
@@ -72,7 +75,8 @@ class ES5Sink(
       f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
     require(f != null, () => s"es pocess element func  must not null")
-    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(userConfig, config.host, new ESSinkFunction(f), failureHandler)
+    val esSink: ElasticsearchSink[T] =
+      new ElasticsearchSink(userConfig, config.host, new ESSinkFunction(f), failureHandler)
     if (config.disableFlushOnCheckpoint) {
       esSink.disableFlushOnCheckpoint()
     }
@@ -87,7 +91,8 @@ class ES5Sink(
       f: T => ActionRequest): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
     require(f != null, () => s"es pocess element fun  must not null")
-    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(userConfig, config.host, new ESSinkFunction(f), failureHandler)
+    val esSink: ElasticsearchSink[T] =
+      new ElasticsearchSink(userConfig, config.host, new ESSinkFunction(f), failureHandler)
     if (config.disableFlushOnCheckpoint) {
       esSink.disableFlushOnCheckpoint()
     }
@@ -107,7 +112,8 @@ class ES5Sink(
   def sink[T](
       userConfig: JavaMap[String, String],
       stream: DataStream[T],
-      failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)(implicit f: T => ActionRequest): DataStreamSink[T] = {
+      failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)(
+      implicit f: T => ActionRequest): DataStreamSink[T] = {
     process(userConfig, stream, failureHandler, f)
   }
 
@@ -119,7 +125,10 @@ class ES5Sink(
     process(userConfig, stream, failureHandler, f)
   }
 
-  def sink[T](userConfig: JavaMap[String, String], stream: JavaDataStream[T], f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
+  def sink[T](
+      userConfig: JavaMap[String, String],
+      stream: JavaDataStream[T],
+      f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
     process(userConfig, stream, new RetryRejectedExecutionFailureHandler, f)
   }
 }

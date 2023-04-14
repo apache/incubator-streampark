@@ -22,9 +22,7 @@ import java.util.zip.{DataFormatException, Deflater, Inflater}
 
 object DeflaterUtils {
 
-  /**
-   * Compress the specified text
-   */
+  /** Compress the specified text */
   def zipString(text: String): String = {
     // compression level (0 ~ 9): low to high
     // create a new deflater with the specified compression level

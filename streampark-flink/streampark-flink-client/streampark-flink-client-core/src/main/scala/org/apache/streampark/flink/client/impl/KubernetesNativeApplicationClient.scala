@@ -17,6 +17,12 @@
 
 package org.apache.streampark.flink.client.impl
 
+import org.apache.streampark.common.enums.ExecutionMode
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
+import org.apache.streampark.flink.client.bean._
+import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
+
 import com.google.common.collect.Lists
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -25,24 +31,19 @@ import org.apache.flink.configuration.{Configuration, DeploymentOptions, Pipelin
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-import org.apache.streampark.common.enums.ExecutionMode
-import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
-import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
-import org.apache.streampark.flink.client.bean._
-
-/**
- * kubernetes native application mode submit
- */
+/** kubernetes native application mode submit */
 object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
 
   @throws[Exception]
-  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
+  override def doSubmit(
+      submitRequest: SubmitRequest,
+      flinkConfig: Configuration): SubmitResponse = {
 
     // require parameters
     require(
       StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
-      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}")
+      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
+    )
 
     // check the last building result
     submitRequest.checkBuildResult()
@@ -50,7 +51,9 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
 
     // add flink pipeline.jars configuration
-    flinkConfig.safeSet(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))
+    flinkConfig.safeSet(
+      PipelineOptions.JARS,
+      Lists.newArrayList(buildResult.dockerInnerMainJarPath))
 
     // add flink container image tag to flink configuration
     flinkConfig.safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
@@ -68,8 +71,13 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
         .getClusterClient
 
       val clusterId = clusterClient.getClusterId
-      val result = SubmitResponse(clusterId, flinkConfig.toMap, submitRequest.jobId, clusterClient.getWebInterfaceURL)
-      logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
+      val result = SubmitResponse(
+        clusterId,
+        flinkConfig.toMap,
+        submitRequest.jobId,
+        clusterClient.getWebInterfaceURL)
+      logInfo(
+        s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
       result
     } catch {
       case e: Exception =>
@@ -80,12 +88,18 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     }
   }
 
-  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
-    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+  override def doCancel(
+      cancelRequest: CancelRequest,
+      flinkConfig: Configuration): CancelResponse = {
+    flinkConfig.safeSet(
+      DeploymentOptions.TARGET,
+      ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
     super.doCancel(cancelRequest, flinkConfig)
   }
 
-  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConf: Configuration): SavepointResponse = {
+  override def doTriggerSavepoint(
+      request: TriggerSavepointRequest,
+      flinkConf: Configuration): SavepointResponse = {
     flinkConf.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
     super.doTriggerSavepoint(request, flinkConf)
   }

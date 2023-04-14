@@ -21,7 +21,11 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink
 
 trait Sink extends Serializable {
 
-  def afterSink[T](sink: DataStreamSink[T], parallelism: Int, name: String, uid: String): DataStreamSink[T] = {
+  def afterSink[T](
+      sink: DataStreamSink[T],
+      parallelism: Int,
+      name: String,
+      uid: String): DataStreamSink[T] = {
     if (parallelism > 0) {
       sink.setParallelism(parallelism)
     }

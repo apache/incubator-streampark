@@ -17,27 +17,20 @@
 
 package org.apache.streampark.spark.core
 
-import scala.annotation.meta.getter
+import org.apache.streampark.common.conf.ConfigConst._
 
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-import org.apache.streampark.common.conf.ConfigConst._
+import scala.annotation.meta.getter
 
-/**
- * <b><code>SparkBatch</code></b>
- * <p/>
- * Spark streaming handle entrance
- * <p/>
- */
+/** <b><code>SparkBatch</code></b> <p/> Spark streaming handle entrance <p/> */
 trait SparkStreaming extends Spark {
 
   @(transient @getter)
   protected lazy val context: StreamingContext = {
 
-    /**
-     * Construct StreamingContext
-     */
+    /** Construct StreamingContext */
     def _context(): StreamingContext = {
       val duration = sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt
       new StreamingContext(sparkSession.sparkContext, Seconds(duration))
@@ -46,7 +39,8 @@ trait SparkStreaming extends Spark {
     checkpoint match {
       case "" => _context()
       case checkpointPath =>
-        val tmpContext = StreamingContext.getOrCreate(checkpointPath, _context, createOnError = createOnError)
+        val tmpContext =
+          StreamingContext.getOrCreate(checkpointPath, _context, createOnError = createOnError)
         tmpContext.checkpoint(checkpointPath)
         tmpContext
     }
@@ -58,17 +52,16 @@ trait SparkStreaming extends Spark {
   }
 
   /**
-   * The purpose of the config phase is to allow the developer to set more parameters (other than the agreed
-   * configuration file) by means of hooks.
-   * Such as,
-   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
+   * The purpose of the config phase is to allow the developer to set more parameters (other than
+   * the agreed configuration file) by means of hooks. Such as, conf.set("spark.serializer",
+   * "org.apache.spark.serializer.KryoSerializer") conf.registerKryoClasses(Array(classOf[User],
+   * classOf[Order],...))
    */
   override def config(sparkConf: SparkConf): Unit = {}
 
   /**
-   * The ready phase is an entry point for the developer to do other actions after the parameters have been set,
-   * and is done after initialization and before the program starts.
+   * The ready phase is an entry point for the developer to do other actions after the parameters
+   * have been set, and is done after initialization and before the program starts.
    */
   override def ready(): Unit = {}
 

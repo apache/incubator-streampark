@@ -16,16 +16,16 @@
  */
 package org.apache.streampark.common.util
 
-import java.util.Properties
-
-import scala.collection.JavaConversions._
+import org.apache.streampark.common.conf.ConfigConst._
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
 import org.apache.hadoop.security.UserGroupInformation
 
-import org.apache.streampark.common.conf.ConfigConst._
+import java.util.Properties
+
+import scala.collection.JavaConversions._
 
 class HBaseClient(func: () => Connection) extends Serializable {
   lazy val connection: Connection = func()
@@ -39,17 +39,19 @@ object HBaseClient {
   def apply(prop: Properties): HBaseClient = {
     val user = prop.remove(KEY_HBASE_AUTH_USER)
     prop.foreach(x => conf.set(x._1, x._2))
-    new HBaseClient(() => {
-      if (user != null) {
-        UserGroupInformation.setConfiguration(conf)
-        val remoteUser: UserGroupInformation = UserGroupInformation.createRemoteUser(user.toString)
-        UserGroupInformation.setLoginUser(remoteUser)
-      }
-      val connection = ConnectionFactory.createConnection(conf)
-      sys.addShutdownHook {
-        connection.close()
-      }
-      connection
-    })
+    new HBaseClient(
+      () => {
+        if (user != null) {
+          UserGroupInformation.setConfiguration(conf)
+          val remoteUser: UserGroupInformation =
+            UserGroupInformation.createRemoteUser(user.toString)
+          UserGroupInformation.setLoginUser(remoteUser)
+        }
+        val connection = ConnectionFactory.createConnection(conf)
+        sys.addShutdownHook {
+          connection.close()
+        }
+        connection
+      })
   }
 }

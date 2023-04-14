@@ -17,17 +17,19 @@
 
 package org.apache.streampark.flink.connector.clickhouse.sink
 
-import java.util.Properties
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.clickhouse.internal.AsyncClickHouseSinkFunction
+import org.apache.streampark.flink.connector.function.TransformFunction
 
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.clickhouse.internal.AsyncClickHouseSinkFunction
-import org.apache.streampark.flink.connector.function.TransformFunction
+import java.util.Properties
 
-class AsyncClickHouseOutputFormat[T: TypeInformation](prop: Properties) extends RichOutputFormat[T] with Logger {
+class AsyncClickHouseOutputFormat[T: TypeInformation](prop: Properties)
+  extends RichOutputFormat[T]
+  with Logger {
 
   var sinkFunction: AsyncClickHouseSinkFunction[T] = _
 

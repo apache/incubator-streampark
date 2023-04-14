@@ -17,26 +17,29 @@
 
 package org.apache.streampark.flink.connector.mongo.source
 
-import java.util.Properties
-
-import scala.annotation.meta.param
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.connector.mongo.internal.MongoSourceFunction
+import org.apache.streampark.flink.core.scala.StreamingContext
 
 import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.DataStream
 import org.bson.Document
 
-import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.connector.mongo.internal.MongoSourceFunction
-import org.apache.streampark.flink.core.scala.StreamingContext
+import java.util.Properties
+
+import scala.annotation.meta.param
 
 object MongoSource {
 
-  def apply(@(transient @param) property: Properties = new Properties())(implicit ctx: StreamingContext): MongoSource = new MongoSource(ctx, property)
+  def apply(@(transient @param) property: Properties = new Properties())(implicit
+      ctx: StreamingContext): MongoSource = new MongoSource(ctx, property)
 
 }
 
-class MongoSource(@(transient @param) val ctx: StreamingContext, property: Properties = new Properties()) {
+class MongoSource(
+    @(transient @param) val ctx: StreamingContext,
+    property: Properties = new Properties()) {
 
   def getDataStream[R: TypeInformation](
       collection: String,

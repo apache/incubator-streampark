@@ -17,28 +17,25 @@
 
 package org.apache.streampark.spark.core
 
-import scala.annotation.meta.getter
-import scala.collection.mutable.ArrayBuffer
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.util.{Logger, PropertiesUtils}
 
-/**
- * <b><code>Spark</code></b>
- * <p/>
- * Spark Basic Traits
- * <p/>
- */
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
+
+import scala.annotation.meta.getter
+import scala.collection.mutable.ArrayBuffer
+
+/** <b><code>Spark</code></b> <p/> Spark Basic Traits <p/> */
 trait Spark extends Logger {
 
-  @(transient@getter)
+  @(transient @getter)
   final protected lazy val sparkConf: SparkConf = new SparkConf()
 
-  @(transient@getter)
-  private[this] final  val sparkListeners = new ArrayBuffer[String]()
+  @(transient @getter)
+  final private[this] val sparkListeners = new ArrayBuffer[String]()
 
-  @(transient@getter)
+  @(transient @getter)
   final protected var sparkSession: SparkSession = _
 
   // Directory of checkpoint
@@ -47,9 +44,7 @@ trait Spark extends Logger {
   // If recovery from checkpoint fails, recreate
   final protected var createOnError: Boolean = true
 
-  /**
-   * Entrance
-   */
+  /** Entrance */
   def main(args: Array[String]): Unit = {
 
     init(args)
@@ -59,9 +54,10 @@ trait Spark extends Logger {
     // 1) system.properties
     val sysProps = sparkConf.getAllWithPrefix("spark.config.system.properties")
     if (sysProps != null) {
-      sysProps.foreach(x => {
-        System.getProperties.setProperty(x._1.drop(1), x._2)
-      })
+      sysProps.foreach(
+        x => {
+          System.getProperties.setProperty(x._1.drop(1), x._2)
+        })
     }
 
     val builder = SparkSession.builder().config(sparkConf)
@@ -75,9 +71,10 @@ trait Spark extends Logger {
     // 2) hive
     val sparkSql = sparkConf.getAllWithPrefix("spark.config.spark.sql")
     if (sparkSql != null) {
-      sparkSql.foreach(x => {
-        sparkSession.sparkContext.getConf.set(x._1.drop(1), x._2)
-      })
+      sparkSql.foreach(
+        x => {
+          sparkSession.sparkContext.getConf.set(x._1.drop(1), x._2)
+        })
     }
 
     ready()
@@ -86,10 +83,8 @@ trait Spark extends Logger {
     destroy()
   }
 
-  /**
-   * Initialize sparkConf according to user parameters
-   */
-  private final def init(args: Array[String]): Unit = {
+  /** Initialize sparkConf according to user parameters */
+  final private def init(args: Array[String]): Unit = {
 
     logDebug("init application config ....")
 
@@ -119,17 +114,20 @@ trait Spark extends Logger {
       case "conf" => PropertiesUtils.fromHoconFile(conf)
       case "properties" => PropertiesUtils.fromPropertiesFile(conf)
       case "yaml" | "yml" => PropertiesUtils.fromYamlFile(conf)
-      case _ => throw new IllegalArgumentException("[StreamPark] Usage: config file error,must be [properties|yaml|conf]")
+      case _ =>
+        throw new IllegalArgumentException(
+          "[StreamPark] Usage: config file error,must be [properties|yaml|conf]")
     }
 
     localConf.foreach(x => sparkConf.set(x._1, x._2))
 
     val (appMain, appName) = sparkConf.get(KEY_SPARK_MAIN_CLASS, null) match {
       case null | "" => (null, null)
-      case other => sparkConf.get(KEY_SPARK_APP_NAME, null) match {
-        case null | "" => (other, other)
-        case name => (other, name)
-      }
+      case other =>
+        sparkConf.get(KEY_SPARK_APP_NAME, null) match {
+          case null | "" => (other, other)
+          case name => (other, name)
+        }
     }
 
     if (appMain == null) {
@@ -146,35 +144,34 @@ trait Spark extends Logger {
     // stop...
     sparkConf.set("spark.streaming.stopGracefullyOnShutdown", "true")
 
-    val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
+    val extraListeners =
+      sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
     if (extraListeners != "") {
       sparkConf.set("spark.extraListeners", extraListeners)
     }
   }
 
   /**
-   * The purpose of the config phase is to allow the developer to set more parameters (other than the agreed
-   * configuration file) by means of hooks.
-   * Such as,
-   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
+   * The purpose of the config phase is to allow the developer to set more parameters (other than
+   * the agreed configuration file) by means of hooks. Such as, conf.set("spark.serializer",
+   * "org.apache.spark.serializer.KryoSerializer") conf.registerKryoClasses(Array(classOf[User],
+   * classOf[Order],...))
    */
   def config(sparkConf: SparkConf): Unit = {}
 
   /**
-   * The ready phase is an entry point for the developer to do other actions after the parameters have been set,
-   * and is done after initialization and before the program starts.
+   * The ready phase is an entry point for the developer to do other actions after the parameters
+   * have been set, and is done after initialization and before the program starts.
    */
   def ready(): Unit = {}
 
   /**
-   * The handle phase is the entry point to the code written by the developer and is the most important phase.
+   * The handle phase is the entry point to the code written by the developer and is the most
+   * important phase.
    */
   def handle(): Unit
 
-  /**
-   * The start phase starts the task, which is executed automatically by the framework.
-   */
+  /** The start phase starts the task, which is executed automatically by the framework. */
   def start(): Unit = {}
 
   /**
@@ -183,9 +180,7 @@ trait Spark extends Logger {
    */
   def destroy(): Unit
 
-  /**
-   * printUsageAndExit
-   */
+  /** printUsageAndExit */
   private[this] def printUsageAndExit(): Unit = {
     logError(
       """

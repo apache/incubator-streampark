@@ -19,4 +19,5 @@ package org.apache.streampark.flink.kubernetes.event
 
 import org.apache.streampark.flink.kubernetes.model.{FlinkMetricCV, TrackId}
 
-case class FlinkClusterMetricChangeEvent(trackId: TrackId, metrics: FlinkMetricCV) extends BuildInEvent
+case class FlinkClusterMetricChangeEvent(trackId: TrackId, metrics: FlinkMetricCV)
+  extends BuildInEvent

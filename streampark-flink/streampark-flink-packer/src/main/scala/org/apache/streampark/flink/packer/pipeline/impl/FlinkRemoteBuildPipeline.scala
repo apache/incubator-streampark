@@ -21,18 +21,14 @@ import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 
-/**
- * Building pipeline for flink standalone session mode
- */
+/** Building pipeline for flink standalone session mode */
 class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends BuildPipeline {
 
   override def pipeType: PipelineType = PipelineType.FLINK_STANDALONE
 
   override def offerBuildParam: FlinkRemotePerJobBuildRequest = request
 
-  /**
-   * The construction logic needs to be implemented by subclasses
-   */
+  /** The construction logic needs to be implemented by subclasses */
   @throws[Throwable]
   override protected def buildProcess(): ShadedBuildResponse = {
     // create workspace.
@@ -47,7 +43,10 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
       // build flink job shaded jar
       val shadedJar =
         execStep(2) {
-          val output = MavenTool.buildFatJar(request.mainClass, request.providedLibs, request.getShadedJarPath(request.workspace))
+          val output = MavenTool.buildFatJar(
+            request.mainClass,
+            request.providedLibs,
+            request.getShadedJarPath(request.workspace))
           logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
           output
         }.getOrElse(throw getError.exception)
@@ -59,5 +58,6 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
 }
 
 object FlinkRemoteBuildPipeline {
-  def of(request: FlinkRemotePerJobBuildRequest): FlinkRemoteBuildPipeline = new FlinkRemoteBuildPipeline(request)
+  def of(request: FlinkRemotePerJobBuildRequest): FlinkRemoteBuildPipeline =
+    new FlinkRemoteBuildPipeline(request)
 }
