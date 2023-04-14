@@ -17,13 +17,8 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: [ "dev" ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "dev" ]
   schedule:
-    - cron: '20 16 * * 5'
+    - cron: '0 1 * * *'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
