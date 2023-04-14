@@ -85,12 +85,9 @@ trait Spark extends Logger {
 
   /** Initialize sparkConf according to user parameters */
   final private def init(args: Array[String]): Unit = {
-
-    logDebug("init application config ....")
-
     var argv = args.toList
-
     var conf: String = null
+    val userArgs = ArrayBuffer[(String, String)]()
 
     while (argv.nonEmpty) {
       argv match {
@@ -104,6 +101,9 @@ trait Spark extends Logger {
           createOnError = value.toBoolean
           argv = tail
         case Nil =>
+        case other :: value :: tail if other.startsWith("--") =>
+          userArgs += other.drop(2) -> value
+          argv = tail
         case tail =>
           logError(s"Unrecognized options: ${tail.mkString(" ")}")
           printUsageAndExit()
@@ -119,20 +119,17 @@ trait Spark extends Logger {
           "[StreamPark] Usage: config file error,must be [properties|yaml|conf]")
     }
 
-    localConf.foreach(x => sparkConf.set(x._1, x._2))
+    sparkConf.setAll(localConf).setAll(userArgs)
 
-    val (appMain, appName) = sparkConf.get(KEY_SPARK_MAIN_CLASS, null) match {
-      case null | "" => (null, null)
-      case other =>
-        sparkConf.get(KEY_SPARK_APP_NAME, null) match {
-          case null | "" => (other, other)
-          case name => (other, name)
-        }
+    val appMain = sparkConf.get(KEY_SPARK_MAIN_CLASS, null)
+    if (appMain == null) {
+      logError(s"[StreamPark] parameter: $KEY_SPARK_MAIN_CLASS must not be empty!")
+      System.exit(1)
     }
 
-    if (appMain == null) {
-      logError(s"[StreamPark] $KEY_SPARK_MAIN_CLASS must not be empty!")
-      System.exit(1)
+    val appName = sparkConf.get(KEY_SPARK_APP_NAME, null) match {
+      case null | "" => appMain
+      case name => name
     }
 
     // debug mode
