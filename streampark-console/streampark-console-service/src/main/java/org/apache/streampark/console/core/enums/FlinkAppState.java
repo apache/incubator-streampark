@@ -68,13 +68,13 @@ public enum FlinkAppState implements Serializable {
   SUSPENDED(11),
   /** The job is currently reconciling and waits for task execution report to recover state. */
   RECONCILING(12),
-  /** 失联 */
+  /** Loss of mapping */
   LOST(13),
 
-  /** 射影中... */
+  /** Mapping */
   MAPPING(14),
 
-  /** 其他不关心的状态... */
+  /** Other statuses */
   OTHER(15),
 
   /** has rollback */
