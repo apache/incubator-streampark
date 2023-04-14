@@ -68,20 +68,8 @@
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.fasterxml.jackson.code</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.code</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.fasterxml.jackson.module</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.fasterxml.jackson.module</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.fasterxml.jackson.databind</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.databind</shadedPattern>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>

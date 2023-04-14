@@ -25,6 +25,7 @@ import io.netty.handler.codec.http.HttpHeaders
 import org.apache.http.client.methods._
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}
 
+import java.util
 import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
 
 import scala.collection.JavaConversions._
@@ -80,13 +81,13 @@ case class HttpWriterTask(
     Try(uriAndParams(1).trim).getOrElse(null) match {
       case null =>
       case params =>
-        var paramMap = Map[String, String]()
+        val paramMap = new util.HashMap[String, String]()
         params
           .split("&")
           .foreach(
             x => {
               val param = x.split("=")
-              paramMap += param.head -> param.last
+              paramMap.put(param.head, param.last)
             })
         if (paramMap.nonEmpty) {
           builder.setHeader(HttpHeaders.Names.CONTENT_TYPE, HttpHeaders.Values.APPLICATION_JSON)
