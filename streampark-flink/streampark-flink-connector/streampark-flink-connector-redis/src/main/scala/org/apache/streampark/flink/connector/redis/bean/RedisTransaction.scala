@@ -17,15 +17,18 @@
 
 package org.apache.streampark.flink.connector.redis.bean
 
-import scala.collection.mutable
-
 import org.apache.streampark.common.util.Utils
+
+import scala.collection.mutable
 
 case class RedisTransaction[T](
     transactionId: String = Utils.uuid(),
-    mapper: mutable.MutableList[(RedisMapper[T], T, Int)] = mutable.MutableList.empty[(RedisMapper[T], T, Int)],
-    var invoked: Boolean = false) extends Serializable {
+    mapper: mutable.MutableList[(RedisMapper[T], T, Int)] =
+      mutable.MutableList.empty[(RedisMapper[T], T, Int)],
+    var invoked: Boolean = false)
+  extends Serializable {
   def +(redisMapper: (RedisMapper[T], T, Int)): Unit = mapper += redisMapper
 
-  override def toString: String = s"(transactionId:$transactionId,size:${mapper.size},invoked:$invoked)"
+  override def toString: String =
+    s"(transactionId:$transactionId,size:${mapper.size},invoked:$invoked)"
 }

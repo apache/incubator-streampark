@@ -17,20 +17,6 @@
 
 package org.apache.streampark.flink.connector.redis.sink
 
-import java.lang.reflect.Field
-import java.util
-import java.util.Properties
-
-import scala.annotation.meta.param
-import scala.collection.JavaConversions._
-import scala.util.Try
-
-import org.apache.flink.streaming.api.CheckpointingMode
-import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream, DataStreamSink}
-import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
-
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.connector.redis.bean.RedisMapper
 import org.apache.streampark.flink.connector.redis.conf.RedisConfig
@@ -39,6 +25,20 @@ import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
 import org.apache.streampark.flink.util.FlinkUtils
 
+import org.apache.flink.streaming.api.CheckpointingMode
+import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream, DataStreamSink}
+import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
+
+import java.lang.reflect.Field
+import java.util
+import java.util.Properties
+
+import scala.annotation.meta.param
+import scala.collection.JavaConversions._
+import scala.util.Try
+
 object RedisSink {
 
   def apply(
@@ -46,7 +46,8 @@ object RedisSink {
       property: Properties = new Properties(),
       parallelism: Int = 0,
       name: String = null,
-      uid: String = null)(implicit ctx: StreamingContext): RedisSink = new RedisSink(ctx, property, parallelism, name, uid)
+      uid: String = null)(implicit ctx: StreamingContext): RedisSink =
+    new RedisSink(ctx, property, parallelism, name, uid)
 }
 
 class RedisSink(
@@ -54,7 +55,8 @@ class RedisSink(
     property: Properties = new Properties(),
     parallelism: Int = 0,
     name: String = null,
-    uid: String = null) extends Sink {
+    uid: String = null)
+  extends Sink {
 
   def this(ctx: StreamingContext) {
     this(ctx, new Properties(), 0, null, null)
@@ -67,8 +69,9 @@ class RedisSink(
   val enableCheckpoint: Boolean = FlinkUtils.isCheckpointEnabled(allProperties)
 
   val cpMode: CheckpointingMode = Try(
-    CheckpointingMode.valueOf(allProperties.get(ExecutionCheckpointingOptions.CHECKPOINTING_MODE.key()))).getOrElse(
-    ExecutionCheckpointingOptions.CHECKPOINTING_MODE.defaultValue())
+    CheckpointingMode.valueOf(
+      allProperties.get(ExecutionCheckpointingOptions.CHECKPOINTING_MODE.key())))
+    .getOrElse(ExecutionCheckpointingOptions.CHECKPOINTING_MODE.defaultValue())
 
   lazy val config: FlinkJedisConfigBase = {
     val connectType: String = redisConfig.connectType
@@ -89,48 +92,53 @@ class RedisSink(
     redisConfig.connectType match {
       case "sentinel" =>
         val builder = new FlinkJedisSentinelConfig.Builder().setSentinels(redisConfig.sentinels)
-        internalProp.foreach(x => {
-          val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
-            throw new IllegalArgumentException(
-              s"""
-                 |redis config error,property:${x._1} invalid,init FlinkJedisSentinelConfig error, property options:
-                 |<String masterName>,
-                 |<Set<String> sentinels>,
-                 |<int connectionTimeout>,
-                 |<int soTimeout>,
-                 |<String password>,
-                 |<int database>,
-                 |<int maxTotal>,
-                 |<int maxIdle>,
-                 |<int minIdle>
-                 |""".stripMargin)
-          }
-          setFieldValue(field, builder, x._2)
-        })
+        internalProp.foreach(
+          x => {
+            val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
+              throw new IllegalArgumentException(
+                s"""
+                   |redis config error,property:${x._1} invalid,init FlinkJedisSentinelConfig error, property options:
+                   |<String masterName>,
+                   |<Set<String> sentinels>,
+                   |<int connectionTimeout>,
+                   |<int soTimeout>,
+                   |<String password>,
+                   |<int database>,
+                   |<int maxTotal>,
+                   |<int maxIdle>,
+                   |<int minIdle>
+                   |""".stripMargin)
+            }
+            setFieldValue(field, builder, x._2)
+          })
         builder.build()
 
       case "jedisPool" =>
-        val builder: FlinkJedisPoolConfig.Builder = new FlinkJedisPoolConfig.Builder().setHost(redisConfig.host).setPort(redisConfig.port)
-        internalProp.foreach(x => {
-          val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
-            throw new IllegalArgumentException(
-              s"""
-                 |redis config error,property:${x._1} invalid,init FlinkJedisPoolConfig error,property options:
-                 |<String host>,
-                 |<int port>,
-                 |<int timeout>,
-                 |<int database>,
-                 |<String password>,
-                 |<int maxTotal>,
-                 |<int maxIdle>,
-                 |<int minIdle>
-                 |""".stripMargin)
-          }
-          setFieldValue(field, builder, x._2)
-        })
+        val builder: FlinkJedisPoolConfig.Builder =
+          new FlinkJedisPoolConfig.Builder().setHost(redisConfig.host).setPort(redisConfig.port)
+        internalProp.foreach(
+          x => {
+            val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
+              throw new IllegalArgumentException(
+                s"""
+                   |redis config error,property:${x._1} invalid,init FlinkJedisPoolConfig error,property options:
+                   |<String host>,
+                   |<int port>,
+                   |<int timeout>,
+                   |<int database>,
+                   |<String password>,
+                   |<int maxTotal>,
+                   |<int maxIdle>,
+                   |<int minIdle>
+                   |""".stripMargin)
+            }
+            setFieldValue(field, builder, x._2)
+          })
 
         builder.build()
-      case _ => throw throw new IllegalArgumentException(s"redis connectType must be jedisPool|sentinel $connectType")
+      case _ =>
+        throw throw new IllegalArgumentException(
+          s"redis connectType must be jedisPool|sentinel $connectType")
     }
   }
 
@@ -143,13 +151,18 @@ class RedisSink(
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T], mapper: RedisMapper[T], ttl: Int = Int.MaxValue): DataStreamSink[T] = {
+  def sink[T](
+      stream: DataStream[T],
+      mapper: RedisMapper[T],
+      ttl: Int = Int.MaxValue): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
     require(mapper != null, () => s"redis mapper must not null")
     require(ttl > 0, () => s"redis ttl must greater than 0")
     val sinkFun = (enableCheckpoint, cpMode) match {
-      case (false, CheckpointingMode.EXACTLY_ONCE) => throw new IllegalArgumentException("redis sink EXACTLY_ONCE must enable checkpoint")
-      case (true, CheckpointingMode.EXACTLY_ONCE) => new Redis2PCSinkFunction[T](config, mapper, ttl)
+      case (false, CheckpointingMode.EXACTLY_ONCE) =>
+        throw new IllegalArgumentException("redis sink EXACTLY_ONCE must enable checkpoint")
+      case (true, CheckpointingMode.EXACTLY_ONCE) =>
+        new Redis2PCSinkFunction[T](config, mapper, ttl)
       case _ => new RedisSinkFunction[T](config, mapper, ttl)
     }
     val sink = stream.addSink(sinkFun)
