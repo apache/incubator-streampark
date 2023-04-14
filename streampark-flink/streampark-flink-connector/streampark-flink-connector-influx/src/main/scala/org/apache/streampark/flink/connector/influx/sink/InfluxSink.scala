@@ -17,18 +17,18 @@
 
 package org.apache.streampark.flink.connector.influx.sink
 
-import java.util.Properties
-
-import scala.annotation.meta.param
-
-import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.scala.DataStream
-
 import org.apache.streampark.common.util.{ConfigUtils, Utils}
 import org.apache.streampark.flink.connector.influx.bean.InfluxEntity
 import org.apache.streampark.flink.connector.influx.function.InfluxFunction
 import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
+
+import org.apache.flink.streaming.api.datastream.DataStreamSink
+import org.apache.flink.streaming.api.scala.DataStream
+
+import java.util.Properties
+
+import scala.annotation.meta.param
 
 object InfluxSink {
 
@@ -37,7 +37,8 @@ object InfluxSink {
       property: Properties = new Properties(),
       parallelism: Int = 0,
       name: String = null,
-      uid: String = null)(implicit ctx: StreamingContext): InfluxSink = new InfluxSink(ctx, property, parallelism, name, uid)
+      uid: String = null)(implicit ctx: StreamingContext): InfluxSink =
+    new InfluxSink(ctx, property, parallelism, name, uid)
 
 }
 
@@ -46,9 +47,11 @@ class InfluxSink(
     property: Properties = new Properties(),
     parallelism: Int = 0,
     name: String = null,
-    uid: String = null) extends Sink {
+    uid: String = null)
+  extends Sink {
 
-  def sink[T](stream: DataStream[T], alias: String = "")(implicit entity: InfluxEntity[T]): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], alias: String = "")(implicit
+      entity: InfluxEntity[T]): DataStreamSink[T] = {
     val prop = ConfigUtils.getInfluxConfig(ctx.parameter.toMap)(alias)
     Utils.copyProperties(property, prop)
     val sinkFun = new InfluxFunction[T](prop)

@@ -21,8 +21,11 @@ import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.Watcher.Action
 
 /**
- * @param action      event action
- * @param event       event content
- * @param pollAckTime polling ack time
+ * @param action
+ *   event action
+ * @param event
+ *   event content
+ * @param pollAckTime
+ *   polling ack time
  */
 case class K8sDeploymentEventCV(action: Action, event: Deployment, pollAckTime: Long)

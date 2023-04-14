@@ -20,9 +20,7 @@ package org.apache.streampark.spark.connector.kafka.offset
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
 
-/**
- * Default offset manager
- */
+/** Default offset manager */
 private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
 
   /**

@@ -17,22 +17,23 @@
 
 package org.apache.streampark.flink.connector.hbase.source
 
-import java.util.Properties
-
-import scala.annotation.meta.param
-
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.hadoop.hbase.client._
-
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.connector.hbase.bean.HBaseQuery
 import org.apache.streampark.flink.connector.hbase.internal.HBaseSourceFunction
 import org.apache.streampark.flink.core.scala.StreamingContext
 
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.hadoop.hbase.client._
+
+import java.util.Properties
+
+import scala.annotation.meta.param
+
 object HBaseSource {
 
-  def apply(@(transient @param) property: Properties = new Properties())(implicit ctx: StreamingContext): HBaseSource = new HBaseSource(ctx, property)
+  def apply(@(transient @param) property: Properties = new Properties())(implicit
+      ctx: StreamingContext): HBaseSource = new HBaseSource(ctx, property)
 
 }
 
@@ -42,10 +43,14 @@ object HBaseSource {
  * @param ctx
  * @param property
  */
-class HBaseSource(@(transient @param) val ctx: StreamingContext, property: Properties = new Properties()) {
+class HBaseSource(
+    @(transient @param) val ctx: StreamingContext,
+    property: Properties = new Properties()) {
 
-  def getDataStream[R: TypeInformation](query: R => HBaseQuery, func: Result => R, running: Unit => Boolean)(implicit
-      prop: Properties = new Properties()): DataStream[R] = {
+  def getDataStream[R: TypeInformation](
+      query: R => HBaseQuery,
+      func: Result => R,
+      running: Unit => Boolean)(implicit prop: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, prop)
     val hBaseFunc = new HBaseSourceFunction[R](prop, query, func, running)
     ctx.addSource(hBaseFunc)

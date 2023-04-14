@@ -17,6 +17,9 @@
 
 package org.apache.streampark.flink.connector.elasticsearch7.bean
 
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.elasticsearch7.conf.ES7Config
+
 import org.apache.flink.streaming.connectors.elasticsearch7.RestClientFactory
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.CredentialsProvider
@@ -25,9 +28,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.message.BasicHeader
 import org.elasticsearch.client.RestClientBuilder
-
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.elasticsearch7.conf.ES7Config
 
 class RestClientFactoryImpl(val config: ES7Config) extends RestClientFactory with Logger {
   override def configureRestClientBuilder(restClientBuilder: RestClientBuilder): Unit = {
@@ -38,17 +38,21 @@ class RestClientFactoryImpl(val config: ES7Config) extends RestClientFactory wit
       // userName,password must be all set,or all not set..
       require(
         (userName != null && password != null) || (userName == null && password == null),
-        "[StreamPark] elasticsearch auth info error,userName,password must be all set,or all not set.")
+        "[StreamPark] elasticsearch auth info error,userName,password must be all set,or all not set."
+      )
       val credentialsProvider = (userName, password) match {
         case (null, null) => null
         case _ =>
           val credentialsProvider: CredentialsProvider = new BasicCredentialsProvider()
-          credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(userName, password))
+          credentialsProvider.setCredentials(
+            AuthScope.ANY,
+            new UsernamePasswordCredentials(userName, password))
           credentialsProvider
       }
 
       val httpClientConfigCallback = new RestClientBuilder.HttpClientConfigCallback {
-        override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+        override def customizeHttpClient(
+            httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
           if (credentialsProvider != null) {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
             logInfo("elasticsearch auth by userName,password...")
@@ -58,7 +62,8 @@ class RestClientFactoryImpl(val config: ES7Config) extends RestClientFactory wit
       }
 
       val requestConfigCallback = new RestClientBuilder.RequestConfigCallback {
-        override def customizeRequestConfig(requestConfigBuilder: RequestConfig.Builder): RequestConfig.Builder = {
+        override def customizeRequestConfig(
+            requestConfigBuilder: RequestConfig.Builder): RequestConfig.Builder = {
           if (credentialsProvider != null) {
             requestConfigBuilder.setAuthenticationEnabled(true)
           }

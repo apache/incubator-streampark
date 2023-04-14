@@ -17,6 +17,17 @@
 
 package org.apache.streampark.flink.connector.hbase.internal
 
+import org.apache.streampark.common.conf.ConfigConst.{DEFAULT_HBASE_COMMIT_BATCH, DEFAULT_HBASE_WRITE_SIZE, KEY_HBASE_COMMIT_BATCH, KEY_HBASE_WRITE_SIZE}
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{HBaseClient, Logger}
+import org.apache.streampark.flink.connector.function.TransformFunction
+
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
+import org.apache.hadoop.hbase.TableName
+import org.apache.hadoop.hbase.client._
+
 import java.lang.{Iterable => JIter}
 import java.util.Properties
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
@@ -25,18 +36,9 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
-import org.apache.hadoop.hbase.TableName
-import org.apache.hadoop.hbase.client._
-
-import org.apache.streampark.common.conf.ConfigConst.{DEFAULT_HBASE_COMMIT_BATCH, DEFAULT_HBASE_WRITE_SIZE, KEY_HBASE_COMMIT_BATCH, KEY_HBASE_WRITE_SIZE}
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{HBaseClient, Logger}
-import org.apache.streampark.flink.connector.function.TransformFunction
-
-class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, prop: Properties) extends RichSinkFunction[T] with Logger {
+class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, prop: Properties)
+  extends RichSinkFunction[T]
+  with Logger {
 
   private var connection: Connection = _
   private var table: Table = _
@@ -45,8 +47,10 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
   private val scheduled: AtomicBoolean = new AtomicBoolean(false)
   private var timestamp = 0L
 
-  private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, s"$DEFAULT_HBASE_COMMIT_BATCH").toInt
-  private val writeBufferSize = prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"$DEFAULT_HBASE_WRITE_SIZE").toLong
+  private val commitBatch =
+    prop.getOrElse(KEY_HBASE_COMMIT_BATCH, s"$DEFAULT_HBASE_COMMIT_BATCH").toInt
+  private val writeBufferSize =
+    prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"$DEFAULT_HBASE_WRITE_SIZE").toLong
 
   private val mutations = new ArrayBuffer[Mutation]()
   private val putArray = new ArrayBuffer[Put]()
@@ -62,7 +66,10 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
   }
 
   // for JAVA
-  def this(tabName: String, properties: Properties, javaTransformFunc: TransformFunction[T, JIter[Mutation]]) = {
+  def this(
+      tabName: String,
+      properties: Properties,
+      javaTransformFunc: TransformFunction[T, JIter[Mutation]]) = {
 
     this(ApiType.java, tabName, properties)
     this.javaTransformFunc = javaTransformFunc
@@ -77,9 +84,12 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
     val mutatorParam = new BufferedMutatorParams(tableName)
       .writeBufferSize(writeBufferSize)
       .listener(new BufferedMutator.ExceptionListener {
-        override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
+        override def onException(
+            exception: RetriesExhaustedWithDetailsException,
+            mutator: BufferedMutator): Unit = {
           for (i <- 0.until(exception.getNumExceptions)) {
-            logger.error(s"[StreamPark] HBaseSink Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
+            logger.error(
+              s"[StreamPark] HBaseSink Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
           }
         }
       })
@@ -100,7 +110,8 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
 
     offset.incrementAndGet() % commitBatch match {
       case 0 => execBatch()
-      case _ => if (!scheduled.get()) {
+      case _ =>
+        if (!scheduled.get()) {
           scheduled.set(true)
           service.schedule(
             new Runnable {
@@ -137,7 +148,8 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
       // mutation...
       if (mutations.nonEmpty) {
         table.batch(mutations, new Array[AnyRef](mutations.length))
-        logInfo(s"HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")
+        logInfo(
+          s"HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")
         mutations.clear()
       }
       offset.set(0L)

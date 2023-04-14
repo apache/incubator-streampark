@@ -17,19 +17,21 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
+import org.apache.streampark.common.util.Utils
+
 import java.lang.{Long => JavaLong}
 import java.util.{Map => JavaMap}
 
 import scala.collection.JavaConverters._
 
-import org.apache.streampark.common.util.Utils
-
 /**
- * Snapshot for a BuildPipeline instance.
- * see org.apache.streampark.flink.packer.pipeline.BuildPipeline
+ * Snapshot for a BuildPipeline instance. see
+ * org.apache.streampark.flink.packer.pipeline.BuildPipeline
  *
- * @param emitTime   snapshot interception time
- * @param stepStatus StepSeq -> (PipeStepStatus -> status update timestamp)
+ * @param emitTime
+ *   snapshot interception time
+ * @param stepStatus
+ *   StepSeq -> (PipeStepStatus -> status update timestamp)
  */
 
 case class PipeSnapshot(
@@ -45,7 +47,10 @@ case class PipeSnapshot(
   def percent(): Double = Utils.calPercent(curStep, allSteps)
 
   def stepStatusAsJava: JavaMap[Integer, (PipelineStepStatus, JavaLong)] = {
-    stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> (e._2._1 -> JavaLong.valueOf(e._2._2))).toMap.asJava
+    stepStatus.toSeq
+      .map(e => Integer.valueOf(e._1) -> (e._2._1 -> JavaLong.valueOf(e._2._2)))
+      .toMap
+      .asJava
   }
 
   def pureStepStatusAsJava: JavaMap[Integer, PipelineStepStatus] = {

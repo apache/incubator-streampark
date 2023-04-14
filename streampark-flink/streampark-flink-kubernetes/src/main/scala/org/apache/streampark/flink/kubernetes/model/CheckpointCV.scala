@@ -17,4 +17,10 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-case class CheckpointCV(id: Long, status: String, externalPath: String, isSavepoint: Boolean, checkpointType: String, triggerTimestamp: Long)
+case class CheckpointCV(
+    id: Long,
+    status: String,
+    externalPath: String,
+    isSavepoint: Boolean,
+    checkpointType: String,
+    triggerTimestamp: Long)

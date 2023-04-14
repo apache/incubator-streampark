@@ -17,13 +17,11 @@
 
 package org.apache.streampark.flink.connector.jdbc.internal
 
-import java.lang
-import java.util.Properties
-
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import scala.collection.Map
-import scala.util.{Success, Try}
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{JdbcUtils, Logger}
+import org.apache.streampark.flink.connector.function.{RunningFunction, SQLQueryFunction, SQLResultFunction}
+import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -32,16 +30,19 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{JdbcUtils, Logger}
-import org.apache.streampark.flink.connector.function.{RunningFunction, SQLQueryFunction, SQLResultFunction}
-import org.apache.streampark.flink.util.FlinkUtils
+import java.lang
+import java.util.Properties
 
-class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSourceFunction[R]
-    with CheckpointedFunction
-    with CheckpointListener
-    with Logger {
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.collection.Map
+import scala.util.{Success, Try}
+
+class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties)
+  extends RichSourceFunction[R]
+  with CheckpointedFunction
+  with CheckpointListener
+  with Logger {
 
   @volatile private[this] var running = true
   private[this] var scalaRunningFunc: Unit => Boolean = (_) => true
@@ -56,7 +57,11 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   private[this] var last: R = _
 
   // for Scala
-  def this(jdbc: Properties, sqlFunc: R => String, resultFunc: Iterable[Map[String, _]] => Iterable[R], runningFunc: Unit => Boolean) = {
+  def this(
+      jdbc: Properties,
+      sqlFunc: R => String,
+      resultFunc: Iterable[Map[String, _]] => Iterable[R],
+      runningFunc: Unit => Boolean) = {
 
     this(ApiType.scala, jdbc)
     this.scalaSqlFunc = sqlFunc
@@ -65,15 +70,21 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   }
 
   // for JAVA
-  def this(jdbc: Properties, javaSqlFunc: SQLQueryFunction[R], javaResultFunc: SQLResultFunction[R], runningFunc: RunningFunction) {
+  def this(
+      jdbc: Properties,
+      javaSqlFunc: SQLQueryFunction[R],
+      javaResultFunc: SQLResultFunction[R],
+      runningFunc: RunningFunction) {
 
     this(ApiType.java, jdbc)
     this.javaSqlFunc = javaSqlFunc
     this.javaResultFunc = javaResultFunc
-    this.javaRunningFunc = if (runningFunc != null) runningFunc
-    else new RunningFunction {
-      override def running(): lang.Boolean = true
-    }
+    this.javaRunningFunc =
+      if (runningFunc != null) runningFunc
+      else
+        new RunningFunction {
+          override def running(): lang.Boolean = true
+        }
   }
 
   @throws[Exception]
@@ -85,10 +96,11 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
             ctx.getCheckpointLock.synchronized {
               val sql = scalaSqlFunc(last)
               val result: List[Map[String, _]] = JdbcUtils.select(sql)(jdbc)
-              scalaResultFunc(result).foreach(x => {
-                last = x
-                ctx.collectWithTimestamp(last, System.currentTimeMillis())
-              })
+              scalaResultFunc(result).foreach(
+                x => {
+                  last = x
+                  ctx.collectWithTimestamp(last, System.currentTimeMillis())
+                })
             }
           }
         case ApiType.java =>
@@ -96,10 +108,13 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
             ctx.getCheckpointLock.synchronized {
               val sql = javaSqlFunc.query(last)
               val result: List[Map[String, _]] = JdbcUtils.select(sql)(jdbc)
-              javaResultFunc.result(result.map(_.asJava)).foreach(x => {
-                last = x
-                ctx.collectWithTimestamp(last, System.currentTimeMillis())
-              })
+              javaResultFunc
+                .result(result.map(_.asJava))
+                .foreach(
+                  x => {
+                    last = x
+                    ctx.collectWithTimestamp(last, System.currentTimeMillis())
+                  })
             }
           }
       }

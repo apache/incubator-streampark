@@ -29,11 +29,15 @@ import scala.util.Try
  * A variant of the URLClassLoader that first loads from the URLs and only after that from the
  * parent.
  *
- * <p>{@link # getResourceAsStream ( String )} uses {@link # getResource ( String )} internally so we don't
- * override that.
+ * <p>{@link # getResourceAsStream ( String )} uses {@link # getResource ( String )} internally so
+ * we don't override that.
  */
 
-class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern, classLoadingExceptionHandler: Consumer[Throwable])
+class ChildFirstClassLoader(
+    urls: Array[URL],
+    parent: ClassLoader,
+    flinkResourcePattern: Pattern,
+    classLoadingExceptionHandler: Consumer[Throwable])
   extends URLClassLoader(urls, parent) {
 
   ClassLoader.registerAsParallelCapable()
@@ -48,7 +52,8 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
       })
   }
 
-  private val FLINK_PATTERN = Pattern.compile("flink-(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+  private val FLINK_PATTERN =
+    Pattern.compile("flink-(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
   private val JAR_PROTOCOL = "jar"
 
@@ -62,7 +67,8 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
     "ch.qos.logback",
     "org.xml",
     "org.w3c",
-    "org.apache.hadoop")
+    "org.apache.hadoop"
+  )
 
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
@@ -84,14 +90,9 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
   }
 
   /**
-   * e.g.
-   * flinkResourcePattern: flink-1.12
-   * <p>
-   * flink-1.12.jar/resource flink-1.14.jar/resource other.jar/resource
-   * =>
-   * after filterFlinkShimsResource
-   * =>
-   * flink-1.12.jar/resource other.jar/resource
+   * e.g. flinkResourcePattern: flink-1.12 <p> flink-1.12.jar/resource flink-1.14.jar/resource
+   * other.jar/resource \=> after filterFlinkShimsResource \=> flink-1.12.jar/resource
+   * other.jar/resource
    *
    * @param urlClassLoaderResource
    * @return
@@ -100,7 +101,9 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
     if (urlClassLoaderResource != null && JAR_PROTOCOL == urlClassLoaderResource.getProtocol) {
       val spec = urlClassLoaderResource.getFile
       val filename = new File(spec.substring(0, spec.indexOf("!/"))).getName
-      if (FLINK_PATTERN.matcher(filename).matches && !flinkResourcePattern.matcher(filename).matches) {
+      if (
+        FLINK_PATTERN.matcher(filename).matches && !flinkResourcePattern.matcher(filename).matches
+      ) {
         return null
       }
     }

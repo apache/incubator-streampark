@@ -17,10 +17,10 @@
 
 package org.apache.streampark.flink.connector.influx.function
 
-import java.util.{Map => JavaMap, Properties}
-import java.util.concurrent.TimeUnit
-
-import scala.collection.JavaConversions._
+import org.apache.streampark.common.conf.ConfigConst.{KEY_JDBC_PASSWORD, KEY_JDBC_URL, KEY_JDBC_USER}
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.influx.bean.InfluxEntity
 
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
@@ -28,12 +28,14 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction.Context
 import org.influxdb.{InfluxDB, InfluxDBFactory}
 import org.influxdb.dto.Point
 
-import org.apache.streampark.common.conf.ConfigConst.{KEY_JDBC_PASSWORD, KEY_JDBC_URL, KEY_JDBC_USER}
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.influx.bean.InfluxEntity;
+import java.util.{Map => JavaMap, Properties}
+import java.util.concurrent.TimeUnit
 
-class InfluxFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) extends RichSinkFunction[T] with Logger {
+import scala.collection.JavaConversions._;
+
+class InfluxFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T])
+  extends RichSinkFunction[T]
+  with Logger {
 
   var influxDB: InfluxDB = _
 
@@ -59,7 +61,8 @@ class InfluxFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) 
       case ApiType.java => endpoint.javaFieldFun.transform(value)
       case ApiType.scala => endpoint.scalaFieldFun(value)
     }
-    val point = Point.measurement(endpoint.measurement)
+    val point = Point
+      .measurement(endpoint.measurement)
       .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
       .tag(tag)
       .fields(fields)

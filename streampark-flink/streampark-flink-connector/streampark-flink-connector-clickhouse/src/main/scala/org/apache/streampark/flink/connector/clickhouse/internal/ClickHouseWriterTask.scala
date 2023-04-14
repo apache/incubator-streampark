@@ -17,28 +17,32 @@
 
 package org.apache.streampark.flink.connector.clickhouse.internal
 
-import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
-
-import scala.collection.JavaConversions._
-import scala.util.Try
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.clickhouse.conf.ClickHouseHttpConfig
+import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
 
 import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaders}
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.clickhouse.conf.ClickHouseHttpConfig
-import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
+import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
+
+import scala.collection.JavaConversions._
+import scala.util.Try
 
 case class ClickHouseWriterTask(
     id: Int,
     clickHouseConf: ClickHouseHttpConfig,
     asyncHttpClient: AsyncHttpClient,
     queue: BlockingQueue[SinkRequest],
-    callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
+    callbackService: ExecutorService)
+  extends Runnable
+  with AutoCloseable
+  with Logger {
 
   @volatile var isWorking = false
 
-  val failoverWriter: FailoverWriter = new FailoverWriter(clickHouseConf.storageType, clickHouseConf.getFailoverConfig)
+  val failoverWriter: FailoverWriter =
+    new FailoverWriter(clickHouseConf.storageType, clickHouseConf.getFailoverConfig)
 
   override def run(): Unit =
     try {
@@ -79,22 +83,26 @@ case class ClickHouseWriterTask(
     builder.build
   }
 
-  def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable = new Runnable {
-    override def run(): Unit = {
-      Try(whenResponse.get()).getOrElse(null) match {
-        case null =>
-          logError(s"""Error ClickHouseSink executing callback, params = $clickHouseConf,can not get Response. """)
-          handleFailedResponse(null, sinkRequest)
-        case resp if resp.getStatusCode != 200 =>
-          logError(s"Error ClickHouseSink executing callback, params = ${clickHouseConf}, StatusCode = ${resp.getStatusCode} ")
-          handleFailedResponse(resp, sinkRequest)
-        case _ =>
+  def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable =
+    new Runnable {
+      override def run(): Unit = {
+        Try(whenResponse.get()).getOrElse(null) match {
+          case null =>
+            logError(
+              s"""Error ClickHouseSink executing callback, params = $clickHouseConf,can not get Response. """)
+            handleFailedResponse(null, sinkRequest)
+          case resp if resp.getStatusCode != 200 =>
+            logError(
+              s"Error ClickHouseSink executing callback, params = $clickHouseConf, StatusCode = ${resp.getStatusCode} ")
+            handleFailedResponse(resp, sinkRequest)
+          case _ =>
+        }
       }
     }
-  }
 
   /**
-   * if send data to ClickHouse Failed, retry maxRetries, if still failed,flush data to failoverStorage
+   * if send data to ClickHouse Failed, retry maxRetries, if still failed,flush data to
+   * failoverStorage
    *
    * @param response
    * @param sinkRequest
@@ -104,10 +112,12 @@ case class ClickHouseWriterTask(
       logWarn(
         s"""Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.storageType}""")
       failoverWriter.write(sinkRequest)
-      logInfo(s"failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
+      logInfo(
+        s"failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
     } else {
       sinkRequest.incrementCounter()
-      logWarn(s"Next attempt to send data to ClickHouse, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
+      logWarn(
+        s"Next attempt to send data to ClickHouse, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
       queue.put(sinkRequest)
     }
   }

@@ -20,48 +20,58 @@ package org.apache.streampark.flink.kubernetes
 import org.apache.streampark.common.conf.{InternalConfigHolder, K8sFlinkConfig}
 
 /**
- * @param jobStatusWatcherConf configuration for flink job status tracking process
- * @param metricWatcherConf    configuration for flink metric tracking process
+ * @param jobStatusWatcherConf
+ *   configuration for flink job status tracking process
+ * @param metricWatcherConf
+ *   configuration for flink metric tracking process
  */
-case class FlinkTrackConfig(jobStatusWatcherConf: JobStatusWatcherConfig, metricWatcherConf: MetricWatcherConfig)
+case class FlinkTrackConfig(
+    jobStatusWatcherConf: JobStatusWatcherConfig,
+    metricWatcherConf: MetricWatcherConfig)
 
 /**
  * configuration for FlinkMetricWatcher
  *
- * @param requestTimeoutSec  run timeout of single tracking task
- * @param requestIntervalSec interval seconds between two single tracking task
+ * @param requestTimeoutSec
+ *   run timeout of single tracking task
+ * @param requestIntervalSec
+ *   interval seconds between two single tracking task
  */
 case class MetricWatcherConfig(requestTimeoutSec: Long, requestIntervalSec: Long)
 
 /**
  * configuration for FlinkJobStatusWatcher
  *
- * @param requestTimeoutSec             run timeout of single tracking task
- * @param requestIntervalSec            interval seconds between two single tracking task
- * @param silentStateJobKeepTrackingSec retained tracking time for SILENT state flink tasks
+ * @param requestTimeoutSec
+ *   run timeout of single tracking task
+ * @param requestIntervalSec
+ *   interval seconds between two single tracking task
+ * @param silentStateJobKeepTrackingSec
+ *   retained tracking time for SILENT state flink tasks
  */
-case class JobStatusWatcherConfig(requestTimeoutSec: Long, requestIntervalSec: Long, silentStateJobKeepTrackingSec: Int)
+case class JobStatusWatcherConfig(
+    requestTimeoutSec: Long,
+    requestIntervalSec: Long,
+    silentStateJobKeepTrackingSec: Int)
 
 object FlinkTrackConfig {
-  def defaultConf: FlinkTrackConfig = FlinkTrackConfig(
-    JobStatusWatcherConfig.defaultConf,
-    MetricWatcherConfig.defaultConf)
+  def defaultConf: FlinkTrackConfig =
+    FlinkTrackConfig(JobStatusWatcherConfig.defaultConf, MetricWatcherConfig.defaultConf)
 
-  def debugConf: FlinkTrackConfig = FlinkTrackConfig(
-    JobStatusWatcherConfig.debugConf,
-    MetricWatcherConfig.debugConf)
+  def debugConf: FlinkTrackConfig =
+    FlinkTrackConfig(JobStatusWatcherConfig.debugConf, MetricWatcherConfig.debugConf)
 
-  /**
-   * create from ConfigHub
-   */
+  /** create from ConfigHub */
   def fromConfigHub: FlinkTrackConfig = FlinkTrackConfig(
     JobStatusWatcherConfig(
       InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackTaskTimeoutSec),
       InternalConfigHolder.get(K8sFlinkConfig.jobStatueTrackTaskIntervalSec),
-      InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)),
+      InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)
+    ),
     MetricWatcherConfig(
       InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskTimeoutSec),
-      InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec)))
+      InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec))
+  )
 
 }
 
@@ -78,11 +88,9 @@ object JobStatusWatcherConfig {
 }
 
 object MetricWatcherConfig {
-  def defaultConf: MetricWatcherConfig = MetricWatcherConfig(
-    requestTimeoutSec = 120,
-    requestIntervalSec = 10)
+  def defaultConf: MetricWatcherConfig =
+    MetricWatcherConfig(requestTimeoutSec = 120, requestIntervalSec = 10)
 
-  def debugConf: MetricWatcherConfig = MetricWatcherConfig(
-    requestTimeoutSec = 120,
-    requestIntervalSec = 2)
+  def debugConf: MetricWatcherConfig =
+    MetricWatcherConfig(requestTimeoutSec = 120, requestIntervalSec = 2)
 }

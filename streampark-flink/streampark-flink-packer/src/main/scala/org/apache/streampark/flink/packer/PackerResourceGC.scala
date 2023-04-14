@@ -17,18 +17,16 @@
 
 package org.apache.streampark.flink.packer
 
+import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.util.Logger
+
+import org.apache.commons.io.FileUtils
+
 import java.io.File
 
 import scala.util.Try
 
-import org.apache.commons.io.FileUtils
-
-import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.util.Logger
-
-/**
- * Garbage resource collector during packing.
- */
+/** Garbage resource collector during packing. */
 object PackerResourceGC extends Logger {
 
   val appWorkspacePath: String = Workspace.local.APP_WORKSPACE
@@ -36,7 +34,8 @@ object PackerResourceGC extends Logger {
   /**
    * Start a building legacy resources collection process.
    *
-   * @param expiredHours Expected expiration time of building resources.
+   * @param expiredHours
+   *   Expected expiration time of building resources.
    */
   def startGc(expiredHours: Integer): Unit = {
     val appWorkspace = new File(appWorkspacePath)
@@ -62,7 +61,8 @@ object PackerResourceGC extends Logger {
     if (isApplicationMode) {
       Array(file -> file.listFiles.map(_.lastModified).max)
     } else {
-      file.listFiles.filter(_.isDirectory)
+      file.listFiles
+        .filter(_.isDirectory)
         .map(subFile => subFile -> subFile.listFiles.map(_.lastModified).max)
     }
   }

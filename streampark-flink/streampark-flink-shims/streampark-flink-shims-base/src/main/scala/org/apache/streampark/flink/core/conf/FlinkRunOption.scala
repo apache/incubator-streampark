@@ -16,19 +16,18 @@
  */
 package org.apache.streampark.flink.core.conf
 
+import org.apache.commons.cli.{CommandLine, DefaultParser, Option, Options}
+
 import java.lang.{Boolean => JavaBoolean}
 
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
-import org.apache.commons.cli.{CommandLine, DefaultParser, Option, Options}
-
-/**
- * Applies to all optional parameters under flink run
- */
+/** Applies to all optional parameters under flink run */
 object FlinkRunOption {
 
-  val HELP_OPTION = new Option("h", "help", false, "Show the help message for the CLI Frontend or the action.")
+  val HELP_OPTION =
+    new Option("h", "help", false, "Show the help message for the CLI Frontend or the action.")
 
   val JAR_OPTION = new Option("j", "jarfile", true, "Flink program JAR file.")
 
@@ -50,7 +49,8 @@ object FlinkRunOption {
     true,
     "The parallelism with which to run the program. Optional flag to override the default value specified in the configuration.")
 
-  val DETACHED_OPTION = new Option("d", "detached", false, "If present, runs the job in detached mode")
+  val DETACHED_OPTION =
+    new Option("d", "detached", false, "If present, runs the job in detached mode")
 
   val SHUTDOWN_IF_ATTACHED_OPTION = new Option(
     "sae",
@@ -59,12 +59,21 @@ object FlinkRunOption {
     "If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.")
 
   /**
-   * @deprecated use non-prefixed variant {@link #DETACHED_OPTION} for both YARN and non-YARN deployments
+   * @deprecated
+   *   use non-prefixed variant {@link #DETACHED_OPTION} for both YARN and non-YARN deployments
    */
   @deprecated val YARN_DETACHED_OPTION =
-    new Option("yd", "yarndetached", false, "If present, runs the job in detached mode (deprecated; use non-YARN specific option instead)")
+    new Option(
+      "yd",
+      "yarndetached",
+      false,
+      "If present, runs the job in detached mode (deprecated; use non-YARN specific option instead)")
 
-  val ARGS_OPTION = new Option("a", "arguments", true, "Program arguments. Arguments can also be added without -a, simply as trailing parameters.")
+  val ARGS_OPTION = new Option(
+    "a",
+    "arguments",
+    true,
+    "Program arguments. Arguments can also be added without -a, simply as trailing parameters.")
 
   val ADDRESS_OPTION = new Option(
     "m",
@@ -72,7 +81,11 @@ object FlinkRunOption {
     true,
     "Address of the JobManager to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration.")
 
-  val SAVEPOINT_PATH_OPTION = new Option("s", "fromSavepoint", true, "Path to a savepoint to restore the job from (for example hdfs:///flink/savepoint-1537).")
+  val SAVEPOINT_PATH_OPTION = new Option(
+    "s",
+    "fromSavepoint",
+    true,
+    "Path to a savepoint to restore the job from (for example hdfs:///flink/savepoint-1537).")
 
   val SAVEPOINT_ALLOW_NON_RESTORED_OPTION = new Option(
     "n",
@@ -83,13 +96,19 @@ object FlinkRunOption {
   val SAVEPOINT_DISPOSE_OPTION = new Option("d", "dispose", true, "Path of savepoint to dispose.")
 
   // list specific options
-  val RUNNING_OPTION = new Option("r", "running", false, "Show only running programs and their JobIDs")
+  val RUNNING_OPTION =
+    new Option("r", "running", false, "Show only running programs and their JobIDs")
 
-  val SCHEDULED_OPTION = new Option("s", "scheduled", false, "Show only scheduled programs and their JobIDs")
+  val SCHEDULED_OPTION =
+    new Option("s", "scheduled", false, "Show only scheduled programs and their JobIDs")
 
   val ALL_OPTION = new Option("a", "all", false, "Show all programs and their JobIDs")
 
-  val ZOOKEEPER_NAMESPACE_OPTION = new Option("z", "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
+  val ZOOKEEPER_NAMESPACE_OPTION = new Option(
+    "z",
+    "zookeeperNamespace",
+    true,
+    "Namespace to create the Zookeeper sub-paths for high availability mode")
 
   val CANCEL_WITH_SAVEPOINT_OPTION = new Option(
     "s",
@@ -103,10 +122,18 @@ object FlinkRunOption {
     true,
     "Path to the savepoint (for example hdfs:///flink/savepoint-1537). If no directory is specified, the configured default will be used (\"state.savepoints.dir\").")
 
-  val STOP_AND_DRAIN = new Option("d", "drain", false, "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.")
+  val STOP_AND_DRAIN = new Option(
+    "d",
+    "drain",
+    false,
+    "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.")
 
   val PY_OPTION =
-    new Option("py", "python", true, "Python script with the program entry point. The dependent resources can be configured with the `--pyFiles` option.")
+    new Option(
+      "py",
+      "python",
+      true,
+      "Python script with the program entry point. The dependent resources can be configured with the `--pyFiles` option.")
 
   val PYFILES_OPTION = new Option(
     "pyfs",
@@ -115,7 +142,11 @@ object FlinkRunOption {
     "Attach custom python files for job. These files will be added to the PYTHONPATH of both the local client and the remote python UDF worker. The standard python resource file suffixes such as .py/.egg/.zip or directory are all supported. Comma (',') could be used as the separator to specify multiple files (e.g.: --pyFiles file:///tmp/myresource.zip,hdfs:///$namenode_address/myresource2.zip).")
 
   val PYMODULE_OPTION =
-    new Option("pym", "pyModule", true, "Python module with the program entry point. This option must be used in conjunction with `--pyFiles`.")
+    new Option(
+      "pym",
+      "pyModule",
+      true,
+      "Python module with the program entry point. This option must be used in conjunction with `--pyFiles`.")
 
   val PYREQUIREMENTS_OPTION = new Option(
     "pyreq",
@@ -136,7 +167,13 @@ object FlinkRunOption {
     "Specify the path of the python interpreter used to execute the python UDF worker (e.g.: --pyExecutable /usr/local/bin/python3). The python UDF worker depends on Python 3.5+, Apache Beam (version == 2.23.0), Pip (version >= 7.1.0) and SetupTools (version >= 37.0.0). Please ensure that the specified environment meets the above requirements.")
 
   val DYNAMIC_PROPERTIES =
-    Option.builder("D").argName("property=value").numberOfArgs(2).valueSeparator('=').desc("Allows specifying multiple generic configuration options. The available options can be found at https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html").build
+    Option
+      .builder("D")
+      .argName("property=value")
+      .numberOfArgs(2)
+      .valueSeparator('=')
+      .desc("Allows specifying multiple generic configuration options. The available options can be found at https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html")
+      .build
 
   @deprecated val EXECUTOR_OPTION = new Option(
     "e",
@@ -208,15 +245,15 @@ object FlinkRunOption {
 
   PYEXEC_OPTION.setRequired(false)
 
-  /**
-   * @return
-   */
+  /** @return */
   def allOptions: Options = {
     val commOptions = getRunCommandOptions
     val yarnOptions = getYARNOptions
     val resultOptions = new Options
     commOptions.getOptions.foreach(resultOptions.addOption)
-    yarnOptions.getOptions.filter(x => !resultOptions.hasOption(x.getOpt)).foreach(resultOptions.addOption)
+    yarnOptions.getOptions
+      .filter(x => !resultOptions.hasOption(x.getOpt))
+      .foreach(resultOptions.addOption)
     resultOptions
   }
 

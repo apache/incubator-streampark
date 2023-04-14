@@ -17,11 +17,15 @@
 
 package org.apache.streampark.flink.packer.maven
 
-import java.util.regex.Pattern
-
 import org.eclipse.aether.artifact.{Artifact => AetherArtifact}
 
-case class Artifact(groupId: String, artifactId: String, version: String, classifier: String = null) {
+import java.util.regex.Pattern
+
+case class Artifact(
+    groupId: String,
+    artifactId: String,
+    version: String,
+    classifier: String = null) {
 
   def eq(artifact: AetherArtifact): Boolean = {
     artifact.getGroupId match {
@@ -40,9 +44,7 @@ object Artifact {
 
   private lazy val PATTERN = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)")
 
-  /**
-   * build from coords
-   */
+  /** build from coords */
   def of(coords: String): Artifact = {
     PATTERN.matcher(coords) match {
       case m if m.matches() =>

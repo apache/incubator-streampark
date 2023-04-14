@@ -17,11 +17,11 @@
 
 package org.apache.streampark.flink
 
+import org.codehaus.plexus.util.IOUtil
+
 import java.io.{InputStream, IOException}
 import java.util
 import java.util.jar.JarFile
-
-import org.codehaus.plexus.util.IOUtil
 
 package object packer {
 

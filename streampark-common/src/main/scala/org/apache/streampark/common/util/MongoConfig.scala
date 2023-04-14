@@ -16,13 +16,13 @@
  */
 package org.apache.streampark.common.util
 
-import java.util.Properties
-
-import scala.collection.JavaConversions._
+import org.apache.streampark.common.conf.ConfigConst._
 
 import com.mongodb._
 
-import org.apache.streampark.common.conf.ConfigConst._
+import java.util.Properties
+
+import scala.collection.JavaConversions._
 
 object MongoConfig {
 
@@ -34,7 +34,8 @@ object MongoConfig {
   val password = "password"
   val min_connections_per_host = "min-connections-per-host"
   val max_connections_per_host = "max-connections-per-host"
-  val threads_allowed_to_block_for_connection_multiplier = "threads-allowed-to-block-for-connection-multiplier"
+  val threads_allowed_to_block_for_connection_multiplier =
+    "threads-allowed-to-block-for-connection-multiplier"
   val server_selection_timeout = "server-selection-timeout"
   val max_wait_time = "max-wait-time"
   val max_connection_idel_time = "max-connection-idel-time"
@@ -59,10 +60,14 @@ object MongoConfig {
 
   def getProperties(properties: Properties)(implicit alias: String = ""): Properties = {
     val prop = new Properties()
-    properties.filter(_._1.startsWith(MONGO_PREFIX)).filter(_._2.nonEmpty).map(x => {
-      val k = x._1.replaceAll(s"$MONGO_PREFIX$alias", "").replaceFirst("^\\.", "")
-      prop.put(k, x._2.trim)
-    })
+    properties
+      .filter(_._1.startsWith(MONGO_PREFIX))
+      .filter(_._2.nonEmpty)
+      .map(
+        x => {
+          val k = x._1.replaceAll(s"$MONGO_PREFIX$alias", "").replaceFirst("^\\.", "")
+          prop.put(k, x._2.trim)
+        })
     prop
   }
 
@@ -84,7 +89,8 @@ object MongoConfig {
         builder.requiredReplicaSetName(mongoParam(replica_set))
       }
       if (mongoParam.containsKey(threads_allowed_to_block_for_connection_multiplier)) {
-        builder.threadsAllowedToBlockForConnectionMultiplier(mongoParam(threads_allowed_to_block_for_connection_multiplier).toInt)
+        builder.threadsAllowedToBlockForConnectionMultiplier(
+          mongoParam(threads_allowed_to_block_for_connection_multiplier).toInt)
       }
       if (mongoParam.containsKey(server_selection_timeout)) {
         builder.serverSelectionTimeout(mongoParam(server_selection_timeout).toInt)
@@ -129,14 +135,19 @@ object MongoConfig {
         builder.localThreshold(mongoParam(local_threshold).toInt)
       }
       val mongoClientOptions = builder.build
-      val serverAddresses = mongoParam(address).split(",").map(x => {
-        val hostAndPort = x.split(":")
-        val host = hostAndPort.head
-        val port = hostAndPort(1).toInt
-        new ServerAddress(host, port)
-      })
+      val serverAddresses = mongoParam(address)
+        .split(",")
+        .map(
+          x => {
+            val hostAndPort = x.split(":")
+            val host = hostAndPort.head
+            val port = hostAndPort(1).toInt
+            new ServerAddress(host, port)
+          })
       if (mongoParam.containsKey(username)) {
-        val db = if (mongoParam.containsKey(authentication_database)) mongoParam(authentication_database) else mongoParam(database)
+        val db =
+          if (mongoParam.containsKey(authentication_database)) mongoParam(authentication_database)
+          else mongoParam(database)
         val mongoCredential = MongoCredential.createScramSha1Credential(
           mongoParam(username),
           db,

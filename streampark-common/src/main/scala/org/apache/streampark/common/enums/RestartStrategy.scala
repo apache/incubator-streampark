@@ -29,7 +29,9 @@ object RestartStrategy extends Enumeration {
     else {
       values.find(_.toString.replace("$minus", "-").equalsIgnoreCase(name)) match {
         case Some(v) => v
-        case _ => throw new IllegalArgumentException("[StreamPark] RestartStrategy must be (fixed-delay|failure-rate|none)")
+        case _ =>
+          throw new IllegalArgumentException(
+            "[StreamPark] RestartStrategy must be (fixed-delay|failure-rate|none)")
       }
     }
   }

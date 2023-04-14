@@ -17,9 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.enums
 
-/**
- * flink job status on kubernetes
- */
+/** flink job status on kubernetes */
 object FlinkJobState extends Enumeration {
 
   // flink job has been submit by the streampark.
@@ -39,7 +37,8 @@ object FlinkJobState extends Enumeration {
 
   // the following enum have the same meaning as the native flink state enum.
   // @see org.apache.flink.api.common.JobStatus
-  val INITIALIZING, CREATED, RUNNING, FAILING, FAILED, CANCELLING, CANCELED, FINISHED, RESTARTING, SUSPENDED, RECONCILING = Value
+  val INITIALIZING, CREATED, RUNNING, FAILING, FAILED, CANCELLING, CANCELED, FINISHED, RESTARTING,
+      SUSPENDED, RECONCILING = Value
 
   // ending flink states, the tracking monitor will stop tracking these states of flink job.
   val endingStates = Seq(FAILED, CANCELED, FINISHED, POS_TERMINATED, TERMINATED, LOST)

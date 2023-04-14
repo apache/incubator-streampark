@@ -27,27 +27,28 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
 
   def size: Int = records.size()
 
-  private[this] lazy val TABLE_REGEXP = Pattern.compile(
-    "(insert\\s+into|update|delete)\\s+(.*?)(\\(|\\s+)",
-    Pattern.CASE_INSENSITIVE)
+  private[this] lazy val TABLE_REGEXP =
+    Pattern.compile("(insert\\s+into|update|delete)\\s+(.*?)(\\(|\\s+)", Pattern.CASE_INSENSITIVE)
 
-  private[this] lazy val INSERT_REGEXP = Pattern.compile(
-    "^(.*)\\s+(values|value)(.*)",
-    Pattern.CASE_INSENSITIVE)
+  private[this] lazy val INSERT_REGEXP =
+    Pattern.compile("^(.*)\\s+(values|value)(.*)", Pattern.CASE_INSENSITIVE)
 
   lazy val sqlStatement: String = {
     val matcher = INSERT_REGEXP.matcher(records.head)
     if (!matcher.find()) null;
     else {
       val prefix = matcher.group(1)
-      val values = records.map(x => {
-        val valueMatcher = INSERT_REGEXP.matcher(x)
-        if (valueMatcher.find()) {
-          valueMatcher.group(3)
-        } else {
-          null
-        }
-      }).mkString(",")
+      val values = records
+        .map(
+          x => {
+            val valueMatcher = INSERT_REGEXP.matcher(x)
+            if (valueMatcher.find()) {
+              valueMatcher.group(3)
+            } else {
+              null
+            }
+          })
+        .mkString(",")
       s"$prefix VALUES $values"
     }
   }

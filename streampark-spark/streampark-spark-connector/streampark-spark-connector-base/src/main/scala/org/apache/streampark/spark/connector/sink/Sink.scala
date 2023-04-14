@@ -16,22 +16,20 @@
  */
 package org.apache.streampark.spark.connector.sink
 
-import java.util.Properties
-
-import scala.annotation.meta.getter
-import scala.collection.Map
-import scala.util.Try
+import org.apache.streampark.common.util.Logger
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 import org.apache.spark.streaming.dstream.DStream
 
-import org.apache.streampark.common.util.Logger
+import java.util.Properties
 
-/**
- * Base output trait
- */
+import scala.annotation.meta.getter
+import scala.collection.Map
+import scala.util.Try
+
+/** Base output trait */
 trait Sink[T] extends Serializable with Logger {
 
   @(transient @getter)
@@ -47,7 +45,11 @@ trait Sink[T] extends Serializable with Logger {
     case _ => None
   } toMap
 
-  def filterProp(param: Map[String, String], overrided: Map[String, String], prefix: String = "", replacement: String = ""): Properties = {
+  def filterProp(
+      param: Map[String, String],
+      overrided: Map[String, String],
+      prefix: String = "",
+      replacement: String = ""): Properties = {
     val p = new Properties()
     val map = param ++ overrided
     val filtered = if (prefix.isEmpty) map else map.filter(_._1.startsWith(prefix))
@@ -58,7 +60,8 @@ trait Sink[T] extends Serializable with Logger {
   /**
    * sink
    *
-   * @param dStream dStream
+   * @param dStream
+   *   dStream
    */
   def sink(dStream: DStream[T]): Unit = {
     dStream.foreachRDD((rdd, time) => sink(rdd, time))
@@ -67,8 +70,10 @@ trait Sink[T] extends Serializable with Logger {
   /**
    * sink
    *
-   * @param rdd  spark.RDD
-   * @param time spark.streaming.Time
+   * @param rdd
+   *   spark.RDD
+   * @param time
+   *   spark.streaming.Time
    */
   def sink(rdd: RDD[T], time: Time): Unit
 }

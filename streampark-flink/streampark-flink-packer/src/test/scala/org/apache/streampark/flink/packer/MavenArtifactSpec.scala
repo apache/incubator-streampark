@@ -16,11 +16,11 @@
  */
 package org.apache.streampark.flink.packer
 
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AnyWordSpec
-
 import org.apache.streampark.flink.packer.MavenArtifactSpec.illegalArtifactCoordsCases
 import org.apache.streampark.flink.packer.maven.Artifact
+
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 object MavenArtifactSpec {
 
@@ -44,11 +44,12 @@ class MavenArtifactSpec extends AnyWordSpec with Matchers {
         art.version mustBe "1.13.0"
       }
       "with illegal coords" in {
-        illegalArtifactCoordsCases.foreach(coord => {
-          assertThrows[IllegalArgumentException] {
-            Artifact.of(coord)
-          }
-        })
+        illegalArtifactCoordsCases.foreach(
+          coord => {
+            assertThrows[IllegalArgumentException] {
+              Artifact.of(coord)
+            }
+          })
       }
     }
   }

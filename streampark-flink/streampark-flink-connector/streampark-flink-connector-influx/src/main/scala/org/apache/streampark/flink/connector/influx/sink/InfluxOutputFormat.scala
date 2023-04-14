@@ -17,17 +17,19 @@
 
 package org.apache.streampark.flink.connector.influx.sink
 
-import java.util.Properties
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.influx.bean.InfluxEntity
+import org.apache.streampark.flink.connector.influx.function.InfluxFunction
 
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.influx.bean.InfluxEntity
-import org.apache.streampark.flink.connector.influx.function.InfluxFunction
+import java.util.Properties
 
-class InfluxOutputFormat[T: TypeInformation](implicit prop: Properties, endpoint: InfluxEntity[T]) extends RichOutputFormat[T] with Logger {
+class InfluxOutputFormat[T: TypeInformation](implicit prop: Properties, endpoint: InfluxEntity[T])
+  extends RichOutputFormat[T]
+  with Logger {
 
   private val sinkFunction = new InfluxFunction[T](prop)
 

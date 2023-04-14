@@ -17,19 +17,23 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+import org.apache.streampark.common.util.Utils
 
 import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
 
-import org.apache.streampark.common.util.Utils
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
-/**
- * cache storage for docker resolved progress
- */
-class DockerResolveProgress(val pull: DockerPullProgress, val build: DockerBuildProgress, val push: DockerPushProgress)
+/** cache storage for docker resolved progress */
+class DockerResolveProgress(
+    val pull: DockerPullProgress,
+    val build: DockerBuildProgress,
+    val push: DockerPushProgress)
 
-class DockerPullProgress(val layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
+class DockerPullProgress(
+    val layers: mutable.Map[String, DockerLayerProgress],
+    var error: String,
+    var lastTime: Long) {
   // noinspection DuplicatedCode
   def update(pullRsp: PullResponseItem): Unit = {
     if (pullRsp == null || pullRsp.getId == null || pullRsp.getStatus == null) {
@@ -65,7 +69,10 @@ class DockerBuildProgress(val steps: ArrayBuffer[String], var lastTime: Long) {
   def snapshot: DockerBuildSnapshot = DockerBuildSnapshot(steps, lastTime)
 }
 
-class DockerPushProgress(val layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
+class DockerPushProgress(
+    val layers: mutable.Map[String, DockerLayerProgress],
+    var error: String,
+    var lastTime: Long) {
   // noinspection DuplicatedCode
   def update(pushRsp: PushResponseItem): Unit = {
     if (pushRsp == null || pushRsp.getId == null || pushRsp.getStatus == null) {
@@ -91,28 +98,35 @@ class DockerPushProgress(val layers: mutable.Map[String, DockerLayerProgress], v
 }
 
 object DockerPullProgress {
-  def empty(): DockerPullProgress = new DockerPullProgress(mutable.Map(), "", System.currentTimeMillis)
+  def empty(): DockerPullProgress =
+    new DockerPullProgress(mutable.Map(), "", System.currentTimeMillis)
 }
 
 object DockerBuildProgress {
-  def empty(): DockerBuildProgress = new DockerBuildProgress(ArrayBuffer(), System.currentTimeMillis)
+  def empty(): DockerBuildProgress =
+    new DockerBuildProgress(ArrayBuffer(), System.currentTimeMillis)
 }
 
 object DockerPushProgress {
-  def empty(): DockerPushProgress = new DockerPushProgress(mutable.Map(), "", System.currentTimeMillis)
+  def empty(): DockerPushProgress =
+    new DockerPushProgress(mutable.Map(), "", System.currentTimeMillis)
 }
 
 /**
  * push/pull progress of per docker layer.
  *
- * @param current already download size (byte)
- * @param total   layer size (byte)
+ * @param current
+ *   already download size (byte)
+ * @param total
+ *   layer size (byte)
  */
 case class DockerLayerProgress(layerId: String, status: String, current: Long, total: Long) {
 
   def percent: Double = Utils.calPercent(current, total)
 
-  def currentMb: Double = if (current == 0) 0 else (current.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
+  def currentMb: Double =
+    if (current == 0) 0 else (current.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
 
-  def totalMb: Double = if (total == 0) 0 else (total.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
+  def totalMb: Double =
+    if (total == 0) 0 else (total.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
 }

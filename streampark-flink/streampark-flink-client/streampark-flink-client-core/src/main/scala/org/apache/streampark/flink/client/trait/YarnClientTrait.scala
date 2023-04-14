@@ -17,11 +17,10 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.flink.api.common.JobID
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.client.bean._
 
-import java.lang.{Boolean => JavaBool}
-import java.lang.reflect.Method
-import scala.util.Try
+import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{ClusterDescriptor, ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.{ClusterClient, ClusterClientProvider}
 import org.apache.flink.configuration.Configuration
@@ -30,16 +29,19 @@ import org.apache.flink.util.FlinkException
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.yarn.api.records.ApplicationId
-import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.client.bean._
 
-/**
- * yarn application mode submit
- */
+import java.lang.{Boolean => JavaBool}
+import java.lang.reflect.Method
+
+import scala.util.Try
+
+/** yarn application mode submit */
 trait YarnClientTrait extends FlinkClientTrait {
 
-  private[this] def executeClientAction[R <: SavepointRequestTrait, O](request: R, flinkConf: Configuration,
-                                                         actionFunc: (JobID, ClusterClient[_]) => O): O = {
+  private[this] def executeClientAction[R <: SavepointRequestTrait, O](
+      request: R,
+      flinkConf: Configuration,
+      actionFunc: (JobID, ClusterClient[_]) => O): O = {
     val jobID = getJobID(request.jobId)
     val clusterClient = {
       flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
@@ -55,22 +57,31 @@ trait YarnClientTrait extends FlinkClientTrait {
     Try {
       actionFunc(jobID, clusterClient)
     }.recover {
-      case e => throw new FlinkException(
-        s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
-          s"detail: ${Utils.stringifyException(e)}");
+      case e =>
+        throw new FlinkException(
+          s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
+            s"detail: ${Utils.stringifyException(e)}");
     }.get
   }
 
-  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConf: Configuration): SavepointResponse = {
-    executeClientAction(request, flinkConf, (jid, client) => {
-            SavepointResponse(super.triggerSavepoint(request, jid, client))
-    })
+  override def doTriggerSavepoint(
+      request: TriggerSavepointRequest,
+      flinkConf: Configuration): SavepointResponse = {
+    executeClientAction(
+      request,
+      flinkConf,
+      (jid, client) => {
+        SavepointResponse(super.triggerSavepoint(request, jid, client))
+      })
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
-    executeClientAction(cancelRequest, flinkConf, (jid, client) => {
-      CancelResponse(super.cancelJob(cancelRequest, jid, client))
-    })
+    executeClientAction(
+      cancelRequest,
+      flinkConf,
+      (jid, client) => {
+        CancelResponse(super.cancelJob(cancelRequest, jid, client))
+      })
   }
 
   private lazy val deployInternalMethod: Method = {
@@ -81,7 +92,8 @@ trait YarnClientTrait extends FlinkClientTrait {
       classOf[JobGraph],
       Boolean2boolean(true).getClass // get boolean class.
     )
-    val deployInternal = classOf[YarnClusterDescriptor].getDeclaredMethod("deployInternal", paramClass: _*)
+    val deployInternal =
+      classOf[YarnClusterDescriptor].getDeclaredMethod("deployInternal", paramClass: _*)
     deployInternal.setAccessible(true)
     deployInternal
   }
@@ -93,16 +105,19 @@ trait YarnClientTrait extends FlinkClientTrait {
       yarnClusterEntrypoint: String,
       jobGraph: JobGraph,
       detached: JavaBool): ClusterClientProvider[ApplicationId] = {
-    deployInternalMethod.invoke(
-      clusterDescriptor,
-      clusterSpecification,
-      applicationName,
-      yarnClusterEntrypoint,
-      jobGraph,
-      detached).asInstanceOf[ClusterClientProvider[ApplicationId]]
+    deployInternalMethod
+      .invoke(
+        clusterDescriptor,
+        clusterSpecification,
+        applicationName,
+        yarnClusterEntrypoint,
+        jobGraph,
+        detached)
+      .asInstanceOf[ClusterClientProvider[ApplicationId]]
   }
 
-  private[client] def getSessionClusterDescriptor[T <: ClusterDescriptor[ApplicationId]](flinkConfig: Configuration): (ApplicationId, T) = {
+  private[client] def getSessionClusterDescriptor[T <: ClusterDescriptor[ApplicationId]](
+      flinkConfig: Configuration): (ApplicationId, T) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
     val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
@@ -111,7 +126,8 @@ trait YarnClientTrait extends FlinkClientTrait {
     (yarnClusterId, clusterDescriptor)
   }
 
-  private[client] def getSessionClusterDeployDescriptor[T <: ClusterDescriptor[ApplicationId]](flinkConfig: Configuration): (ClusterSpecification, T) = {
+  private[client] def getSessionClusterDeployDescriptor[T <: ClusterDescriptor[ApplicationId]](
+      flinkConfig: Configuration): (ClusterSpecification, T) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
     val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)

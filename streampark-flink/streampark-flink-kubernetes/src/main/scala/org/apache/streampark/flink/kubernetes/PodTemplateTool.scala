@@ -17,31 +17,39 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import java.io.File
-
-import scala.collection.mutable
+import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 
 import org.apache.commons.io.FileUtils
 import org.apache.flink.configuration.Configuration
 
-import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
+import java.io.File
+
+import scala.collection.mutable
 
 object PodTemplateTool {
 
-  val KUBERNETES_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file", "pod-template.yaml")
+  val KUBERNETES_POD_TEMPLATE: PodTemplateType =
+    PodTemplateType("kubernetes.pod-template-file", "pod-template.yaml")
 
-  val KUBERNETES_JM_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file.jobmanager", "jm-pod-template.yaml")
+  val KUBERNETES_JM_POD_TEMPLATE: PodTemplateType =
+    PodTemplateType("kubernetes.pod-template-file.jobmanager", "jm-pod-template.yaml")
 
-  val KUBERNETES_TM_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file.taskmanager", "tm-pod-template.yaml")
+  val KUBERNETES_TM_POD_TEMPLATE: PodTemplateType =
+    PodTemplateType("kubernetes.pod-template-file.taskmanager", "tm-pod-template.yaml")
 
   /**
    * Prepare kubernetes pod template file to buildWorkspace direactory.
    *
-   * @param buildWorkspace project workspace dir of flink job
-   * @param podTemplates   flink kubernetes pod templates
-   * @return Map[k8s pod template option, template file output path]
+   * @param buildWorkspace
+   *   project workspace dir of flink job
+   * @param podTemplates
+   *   flink kubernetes pod templates
+   * @return
+   *   Map[k8s pod template option, template file output path]
    */
-  def preparePodTemplateFiles(buildWorkspace: String, podTemplates: K8sPodTemplates): K8sPodTemplateFiles = {
+  def preparePodTemplateFiles(
+      buildWorkspace: String,
+      podTemplates: K8sPodTemplates): K8sPodTemplateFiles = {
     val workspaceDir = new File(buildWorkspace)
     if (!workspaceDir.exists()) {
       workspaceDir.mkdir()
@@ -50,7 +58,7 @@ object PodTemplateTool {
     val podTempleMap = mutable.Map[String, String]()
     val outputTmplContent = (tmplContent: String, podTmpl: PodTemplateType) => {
       if (tmplContent.nonEmpty) {
-        val outputPath = s"${buildWorkspace}/${podTmpl.fileName}"
+        val outputPath = s"$buildWorkspace/${podTmpl.fileName}"
         val outputFile = new File(outputPath)
         FileUtils.write(outputFile, tmplContent, "UTF-8")
         podTempleMap += (podTmpl.key -> outputPath)
@@ -66,13 +74,12 @@ object PodTemplateTool {
 }
 
 /**
- * @param tmplFiles key of flink pod template configuration -> absolute file path of pod template
+ * @param tmplFiles
+ *   key of flink pod template configuration -> absolute file path of pod template
  */
 case class K8sPodTemplateFiles(tmplFiles: Map[String, String]) {
 
-  /**
-   * merge k8s pod template configuration to Flink Configuration
-   */
+  /** merge k8s pod template configuration to Flink Configuration */
   def mergeToFlinkConf(flinkConf: Configuration): Unit =
     tmplFiles
       .filter(_._2.nonEmpty)

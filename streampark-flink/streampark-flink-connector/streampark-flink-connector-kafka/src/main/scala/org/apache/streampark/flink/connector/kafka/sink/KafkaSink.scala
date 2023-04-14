@@ -17,10 +17,11 @@
 
 package org.apache.streampark.flink.connector.kafka.sink
 
-import java.util.{Optional, Properties}
-
-import scala.annotation.meta.param
-import scala.util.Try
+import org.apache.streampark.common.conf.ConfigConst
+import org.apache.streampark.common.util.{ConfigUtils, Utils}
+import org.apache.streampark.flink.connector.kafka.bean.KafkaEqualityPartitioner
+import org.apache.streampark.flink.connector.sink.Sink
+import org.apache.streampark.flink.core.scala.StreamingContext
 
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
@@ -30,11 +31,10 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.{DEFAULT_K
 import org.apache.flink.streaming.connectors.kafka.internals.KeyedSerializationSchemaWrapper
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
 
-import org.apache.streampark.common.conf.ConfigConst
-import org.apache.streampark.common.util.{ConfigUtils, Utils}
-import org.apache.streampark.flink.connector.kafka.bean.KafkaEqualityPartitioner
-import org.apache.streampark.flink.connector.sink.Sink
-import org.apache.streampark.flink.core.scala.StreamingContext
+import java.util.{Optional, Properties}
+
+import scala.annotation.meta.param
+import scala.util.Try
 
 object KafkaSink {
   def apply(
@@ -42,7 +42,8 @@ object KafkaSink {
       property: Properties = new Properties(),
       parallelism: Int = 0,
       name: String = null,
-      uid: String = null)(implicit ctx: StreamingContext): KafkaSink = new KafkaSink(ctx, property, parallelism, name, uid)
+      uid: String = null)(implicit ctx: StreamingContext): KafkaSink =
+    new KafkaSink(ctx, property, parallelism, name, uid)
 }
 
 class KafkaSink(
@@ -50,7 +51,8 @@ class KafkaSink(
     property: Properties = new Properties(),
     parallelism: Int = 0,
     name: String = null,
-    uid: String = null) extends Sink {
+    uid: String = null)
+  extends Sink {
 
   /**
    * for scala
@@ -58,12 +60,14 @@ class KafkaSink(
    * @param stream
    * @param alias
    * @param topic
-   * @param serializer  serializer, if not specified, used <b>SimpleStringSchema<b>
-   * @param partitioner kafka partitioner, used <b>KafkaEqualityPartitioner</b> as default partitioner,
-   *                    the partitioner can evenly write data to each partition.
-   *                    Note: The default used in Flink is <span style="color:RED">FlinkFixedPartitioner</span>,
-   *                    which is need to pay attention to the parallelism of sink and the number of kafka partitions,
-   *                    otherwise it will appear to write to a partition.)
+   * @param serializer
+   *   serializer, if not specified, used <b>SimpleStringSchema<b>
+   * @param partitioner
+   *   kafka partitioner, used <b>KafkaEqualityPartitioner</b> as default partitioner, the
+   *   partitioner can evenly write data to each partition. Note: The default used in Flink is <span
+   *   style="color:RED">FlinkFixedPartitioner</span>, which is need to pay attention to the
+   *   parallelism of sink and the number of kafka partitions, otherwise it will appear to write to
+   *   a partition.)
    * @tparam T
    * @return
    */
@@ -71,23 +75,26 @@ class KafkaSink(
       stream: DataStream[T],
       alias: String = "",
       topic: String = "",
-      serializer: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
-      partitioner: FlinkKafkaPartitioner[T] = new KafkaEqualityPartitioner[T](ctx.getParallelism)): DataStreamSink[T] = {
+      serializer: SerializationSchema[T] =
+        new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
+      partitioner: FlinkKafkaPartitioner[T] = new KafkaEqualityPartitioner[T](ctx.getParallelism))
+      : DataStreamSink[T] = {
 
     val producer = {
       val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic, alias)
       Utils.copyProperties(property, prop)
       val topicId = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
 
-      /**
-       * kafkaProducersPoolSize will be used under EXACTLY_ONCE semantics
-       */
-      val semantic = Try(Some(prop.remove(ConfigConst.KEY_KAFKA_SEMANTIC).toString.toUpperCase)).getOrElse(None) match {
+      /** kafkaProducersPoolSize will be used under EXACTLY_ONCE semantics */
+      val semantic = Try(Some(prop.remove(ConfigConst.KEY_KAFKA_SEMANTIC).toString.toUpperCase))
+        .getOrElse(None) match {
         case None => Semantic.AT_LEAST_ONCE
         case Some("AT_LEAST_ONCE") => Semantic.AT_LEAST_ONCE
         case Some("EXACTLY_ONCE") => Semantic.EXACTLY_ONCE
         case Some("NONE") => Semantic.NONE
-        case _ => throw new IllegalArgumentException("[StreamPark] kafka.sink semantic error,must be (AT_LEAST_ONCE|EXACTLY_ONCE|NONE) ")
+        case _ =>
+          throw new IllegalArgumentException(
+            "[StreamPark] kafka.sink semantic error,must be (AT_LEAST_ONCE|EXACTLY_ONCE|NONE) ")
       }
       val schema = new KeyedSerializationSchemaWrapper[T](serializer)
 
@@ -95,12 +102,18 @@ class KafkaSink(
         case null => Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]]
         case part => Optional.of(part)
       }
-      new FlinkKafkaProducer[T](topicId, schema, prop, customPartitioner, semantic, DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
+      new FlinkKafkaProducer[T](
+        topicId,
+        schema,
+        prop,
+        customPartitioner,
+        semantic,
+        DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
     }
 
     /**
-     * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;
-     * this method is not available for earlier Kafka versions
+     * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka; this
+     * method is not available for earlier Kafka versions
      */
     producer.setWriteTimestampToKafka(true)
 

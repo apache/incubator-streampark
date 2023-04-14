@@ -17,13 +17,6 @@
 
 package org.apache.streampark.flink.connector.clickhouse.internal
 
-import java.util.Properties
-
-import scala.util.{Failure, Try}
-
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
-
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.Logger
@@ -33,7 +26,16 @@ import org.apache.streampark.flink.connector.clickhouse.util.ClickhouseConvertUt
 import org.apache.streampark.flink.connector.failover.{FailoverChecker, SinkBuffer}
 import org.apache.streampark.flink.connector.function.TransformFunction
 
-class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, properties: Properties) extends RichSinkFunction[T] with Logger {
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
+
+import java.util.Properties
+
+import scala.util.{Failure, Try}
+
+class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, properties: Properties)
+  extends RichSinkFunction[T]
+  with Logger {
 
   private[this] object Lock {
     @volatile var initialized = false
@@ -69,7 +71,8 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
           clickHouseConf = new ClickHouseHttpConfig(properties)
           clickHouseWriter = internal.ClickHouseSinkWriter(clickHouseConf)
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)
-          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize)
+          sinkBuffer =
+            SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("AsyncClickHouseSink initialize... ")
         }
@@ -80,7 +83,8 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
   override def invoke(value: T): Unit = {
     val sql = (javaSqlFunc, scalaSqlFunc) match {
       case (null, null) => convert[T](value)
-      case _ => apiType match {
+      case _ =>
+        apiType match {
           case ApiType.java => javaSqlFunc.transform(value)
           case ApiType.scala => scalaSqlFunc(value)
         }

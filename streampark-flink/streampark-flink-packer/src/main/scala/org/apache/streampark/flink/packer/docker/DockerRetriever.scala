@@ -17,21 +17,21 @@
 
 package org.apache.streampark.flink.packer.docker
 
-import java.net.URI
-import java.time.Duration
+import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
+import org.apache.streampark.common.util.Utils
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientConfig, HackDockerClient}
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 
-import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
-import org.apache.streampark.common.util.Utils
+import java.net.URI
+import java.time.Duration
 
 object DockerRetriever {
 
   /**
-   * docker config param from system properties,
-   * see in https://github.com/docker-java/docker-java/blob/master/docs/getting_started.md#properties-docker-javaproperties
+   * docker config param from system properties, see in
+   * https://github.com/docker-java/docker-java/blob/master/docs/getting_started.md#properties-docker-javaproperties
    * todo support custom docker configuration parameters in unified configurations in the future
    */
   lazy val dockerClientConf: DockerClientConfig = {
@@ -39,27 +39,26 @@ object DockerRetriever {
   }
 
   /**
-   * docker http client builder, use ApacheDockerHttpClient by default
-   * todo support custom http client configuration parameters in unified configurations in the future
+   * docker http client builder, use ApacheDockerHttpClient by default todo support custom http
+   * client configuration parameters in unified configurations in the future
    */
-  lazy val dockerHttpClientBuilder: ApacheDockerHttpClient.Builder = new ApacheDockerHttpClient.Builder()
-    .dockerHost(dockerClientConf.getDockerHost)
-    .sslConfig(dockerClientConf.getSSLConfig)
-    .maxConnections(InternalConfigHolder.get(CommonConfig.DOCKER_MAX_CONNECTIONS))
-    .connectionTimeout(Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC)))
-    .responseTimeout(Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC)))
+  lazy val dockerHttpClientBuilder: ApacheDockerHttpClient.Builder =
+    new ApacheDockerHttpClient.Builder()
+      .dockerHost(dockerClientConf.getDockerHost)
+      .sslConfig(dockerClientConf.getSSLConfig)
+      .maxConnections(InternalConfigHolder.get(CommonConfig.DOCKER_MAX_CONNECTIONS))
+      .connectionTimeout(
+        Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC)))
+      .responseTimeout(Duration.ofSeconds(
+        InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC)))
 
-  /**
-   * get new DockerClient instance
-   */
+  /** get new DockerClient instance */
   def newDockerClient(): DockerClient = {
     setDockerHost()
     HackDockerClient.getInstance(dockerClientConf, dockerHttpClientBuilder.build())
   }
 
-  /**
-   * set docker-host for kata
-   */
+  /** set docker-host for kata */
   def setDockerHost(): Unit = {
     val dockerhost: String = InternalConfigHolder.get(CommonConfig.DOCKER_HOST)
     if (Utils.notEmpty(dockerhost)) {

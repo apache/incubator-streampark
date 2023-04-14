@@ -27,41 +27,53 @@ import org.apache.flink.table.sources.TableSource
 /**
  * Integration api of stream and table
  *
- * @param parameter parameter
- * @param streamEnv streamEnv
- * @param tableEnv tableEnv
+ * @param parameter
+ *   parameter
+ * @param streamEnv
+ *   streamEnv
+ * @param tableEnv
+ *   tableEnv
  */
-class StreamTableContext(override val parameter: ParameterTool, private val streamEnv: StreamExecutionEnvironment, private val tableEnv: StreamTableEnvironment)
-    extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
+class StreamTableContext(
+    override val parameter: ParameterTool,
+    private val streamEnv: StreamExecutionEnvironment,
+    private val tableEnv: StreamTableEnvironment)
+  extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
 
-  /**
-   * for scala
-   */
-  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
+  /** for scala */
+  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) =
+    this(args._1, args._2, args._3)
 
-  /**
-   * for Java
-   */
+  /** for Java */
   def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-  @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
+  @deprecated override def connect(
+      connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor =
+    tableEnv.connect(connectorDescriptor)
 
   def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
 
-  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
+  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph =
+    this.streamEnv.getStreamGraph(jobName, clearTransformations)
 
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
-  @deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+  @deprecated override def fromTableSource(source: TableSource[_]): Table =
+    tableEnv.fromTableSource(source)
 
-  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
+  @deprecated override def insertInto(
+      table: Table,
+      sinkPath: String,
+      sinkPathContinued: String*): Unit =
     tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
+  @deprecated override def insertInto(targetPath: String, table: Table): Unit =
+    tableEnv.insertInto(targetPath, table)
 
   @deprecated override def explain(table: Table): String = tableEnv.explain(table)
 
-  @deprecated override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
+  @deprecated override def explain(table: Table, extended: Boolean): String =
+    tableEnv.explain(table, extended)
 
   @deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
 

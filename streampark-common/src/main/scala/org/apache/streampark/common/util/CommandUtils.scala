@@ -46,9 +46,14 @@ object CommandUtils extends Logger {
     }
   }
 
-  def execute(directory: String, commands: JavaIterable[String], consumer: Consumer[String]): Int = {
+  def execute(
+      directory: String,
+      commands: JavaIterable[String],
+      consumer: Consumer[String]): Int = {
     Try {
-      require(commands != null && commands.nonEmpty, "[StreamPark] CommandUtils.execute: commands must not be null.")
+      require(
+        commands != null && commands.nonEmpty,
+        "[StreamPark] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
 
       // 1) init
@@ -63,7 +68,8 @@ object CommandUtils extends Logger {
 
       // 2) input
       def input(): Unit = {
-        val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
+        val out =
+          new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
         // scalastyle:off println
         commands.foreach(out.println)
         if (!commands.last.equalsIgnoreCase("exit")) {

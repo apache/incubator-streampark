@@ -20,17 +20,23 @@ package org.apache.streampark.flink.packer.docker
 /**
  * Base flink docker file image template.
  *
- * @param workspacePath      Path of dockerfile workspace, it should be a directory.
- * @param flinkBaseImage     Flink base docker image name, see https://hub.docker.com/_/flink.
- * @param flinkMainJarPath   Path of flink job main jar which would copy to $FLINK_HOME/usrlib/
- * @param flinkExtraLibPaths Path of additional flink lib path which would copy to $FLINK_HOME/lib/
+ * @param workspacePath
+ *   Path of dockerfile workspace, it should be a directory.
+ * @param flinkBaseImage
+ *   Flink base docker image name, see https://hub.docker.com/_/flink.
+ * @param flinkMainJarPath
+ *   Path of flink job main jar which would copy to $FLINK_HOME/usrlib/
+ * @param flinkExtraLibPaths
+ *   Path of additional flink lib path which would copy to $FLINK_HOME/lib/
  */
-case class FlinkDockerfileTemplate(workspacePath: String, flinkBaseImage: String, flinkMainJarPath: String, flinkExtraLibPaths: Set[String])
-    extends FlinkDockerfileTemplateTrait {
+case class FlinkDockerfileTemplate(
+    workspacePath: String,
+    flinkBaseImage: String,
+    flinkMainJarPath: String,
+    flinkExtraLibPaths: Set[String])
+  extends FlinkDockerfileTemplateTrait {
 
-  /**
-   * offer content of DockerFile
-   */
+  /** offer content of DockerFile */
   override def offerDockerfileContent: String = {
     s"""FROM $flinkBaseImage
        |RUN mkdir -p $FLINK_HOME/usrlib

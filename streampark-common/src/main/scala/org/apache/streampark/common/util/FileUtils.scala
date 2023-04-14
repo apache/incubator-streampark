@@ -20,6 +20,7 @@ import java.io._
 import java.net.URL
 import java.util
 import java.util.Scanner
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
@@ -29,7 +30,7 @@ object FileUtils {
     val stringBuilder = new mutable.StringBuilder
     if (src == null || src.length <= 0) return null
     for (i <- src.indices) {
-      val v: Int = src(i) & 0xFF
+      val v: Int = src(i) & 0xff
       val hv: String = Integer.toHexString(v).toUpperCase
       if (hv.length < 2) {
         stringBuilder.append(0)
@@ -43,10 +44,11 @@ object FileUtils {
     if (input == null) {
       throw new RuntimeException("The inputStream can not be null")
     }
-    Utils.tryWithResource(input) { in =>
-      val b = new Array[Byte](4)
-      in.read(b, 0, b.length)
-      bytesToHexString(b)
+    Utils.tryWithResource(input) {
+      in =>
+        val b = new Array[Byte](4)
+        in.read(b, 0, b.length)
+        bytesToHexString(b)
     } == "504B0304"
   }
 
@@ -72,12 +74,16 @@ object FileUtils {
   }
 
   def exists(path: String): Unit = {
-    require(path != null && path.nonEmpty && new File(path).exists(), s"[StreamPark] FileUtils.exists: file $path is not exist!")
+    require(
+      path != null && path.nonEmpty && new File(path).exists(),
+      s"[StreamPark] FileUtils.exists: file $path is not exist!")
   }
 
   def getPathFromEnv(env: String): String = {
     val path = System.getenv(env)
-    require(Utils.notEmpty(path), s"[StreamPark] FileUtils.getPathFromEnv: $env is not set on system env")
+    require(
+      Utils.notEmpty(path),
+      s"[StreamPark] FileUtils.getPathFromEnv: $env is not set on system env")
     val file = new File(path)
     require(file.exists(), s"[StreamPark] FileUtils.getPathFromEnv: $env is not exist!")
     file.getAbsolutePath
@@ -85,7 +91,9 @@ object FileUtils {
 
   def resolvePath(parent: String, child: String): String = {
     val file = new File(parent, child)
-    require(file.exists, s"[StreamPark] FileUtils.resolvePath: ${file.getAbsolutePath} is not exist!")
+    require(
+      file.exists,
+      s"[StreamPark] FileUtils.resolvePath: ${file.getAbsolutePath} is not exist!")
     file.getAbsolutePath
   }
 
@@ -134,7 +142,8 @@ object FileUtils {
     }
   }
 
-  @throws[IOException] def readString(file: File): String = {
+  @throws[IOException]
+  def readString(file: File): String = {
     require(file != null && file.isFile)
     val reader = new FileReader(file)
     val scanner = new Scanner(reader)
@@ -151,4 +160,3 @@ object FileUtils {
   }
 
 }
-

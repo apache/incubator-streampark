@@ -17,18 +17,16 @@
 
 package org.apache.streampark.common.fs
 
-import java.io.{File, FileInputStream}
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.Utils.{isAnyBank, notEmpty}
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang3.StringUtils
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.common.util.Utils.{isAnyBank, notEmpty}
+import java.io.{File, FileInputStream}
 
-/**
- * Local File System (aka LFS) Operator
- */
+/** Local File System (aka LFS) Operator */
 //noinspection DuplicatedCode
 object LfsOperator extends FsOperator with Logger {
 
@@ -62,7 +60,11 @@ object LfsOperator extends FsOperator with Logger {
     FileUtils.moveToDirectory(srcFile, dstFile, true)
   }
 
-  override def upload(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
+  override def upload(
+      srcPath: String,
+      dstPath: String,
+      delSrc: Boolean,
+      overwrite: Boolean): Unit = {
     if (new File(srcPath).isDirectory) {
       copyDir(srcPath, dstPath, delSrc, overwrite)
     } else {
@@ -71,9 +73,8 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   /**
-   * When the suffixes of srcPath and dstPath are the same,
-   * or the file names are the same, copy to the file,
-   * otherwise copy to the directory.
+   * When the suffixes of srcPath and dstPath are the same, or the file names are the same, copy to
+   * the file, otherwise copy to the directory.
    */
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
     if (isAnyBank(srcPath, dstPath)) return
@@ -87,17 +88,20 @@ object LfsOperator extends FsOperator with Logger {
         case f if f.exists() =>
           if (f.isDirectory) new File(f, srcFile.getName) else f
         case f =>
-          require(f.getParentFile.exists(), "[StreamPark] dstPath is invalid and does not exist. Please check")
+          require(
+            f.getParentFile.exists(),
+            "[StreamPark] dstPath is invalid and does not exist. Please check")
           f
       }
     }
 
     require(srcFile.getCanonicalPath != dstFile.getCanonicalPath)
 
-    val shouldCopy = if (overwrite) true;
-    else {
-      if (!dstFile.exists()) true else dstFile.getName != srcFile.getName
-    }
+    val shouldCopy =
+      if (overwrite) true;
+      else {
+        if (!dstFile.exists()) true else dstFile.getName != srcFile.getName
+      }
 
     if (shouldCopy) {
       FileUtils.copyFile(srcFile, dstFile)
@@ -105,7 +109,11 @@ object LfsOperator extends FsOperator with Logger {
     }
   }
 
-  override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
+  override def copyDir(
+      srcPath: String,
+      dstPath: String,
+      delSrc: Boolean,
+      overwrite: Boolean): Unit = {
     if (isAnyBank(srcPath, dstPath)) return
     val srcFile = new File(srcPath)
     if (!srcFile.exists) return
@@ -123,30 +131,29 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def fileMd5(path: String): String = {
-    require(path != null && path.nonEmpty, s"[StreamPark] LFsOperator.fileMd5: file must not be null.")
+    require(
+      path != null && path.nonEmpty,
+      s"[StreamPark] LFsOperator.fileMd5: file must not be null.")
     val file = new File(path)
     require(file.exists, s"[StreamPark] LFsOperator.fileMd5: file must exists.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
-  /**
-   * Force delete directory and recreate it.
-   */
+  /** Force delete directory and recreate it. */
   override def mkCleanDirs(path: String): Unit = {
     delete(path)
     mkdirs(path)
   }
 
-  /**
-   * list file under directory, one level of traversal only
-   */
+  /** list file under directory, one level of traversal only */
   def listDir(path: String): Array[File] = {
     if (path == null || path.trim.isEmpty) Array.empty
-    else new File(path) match {
-      case f if !f.exists => Array()
-      case f if f.isFile => Array(f)
-      case f => f.listFiles()
-    }
+    else
+      new File(path) match {
+        case f if !f.exists => Array()
+        case f if f.isFile => Array(f)
+        case f => f.listFiles()
+      }
   }
 
 }

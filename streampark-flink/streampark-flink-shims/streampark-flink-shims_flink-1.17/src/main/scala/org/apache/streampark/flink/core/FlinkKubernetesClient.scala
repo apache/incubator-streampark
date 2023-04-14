@@ -21,7 +21,8 @@ import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService
 
 import java.util.Optional
 
-class FlinkKubernetesClient(kubeClient: FlinkKubeClient) extends FlinkKubernetesClientTrait(kubeClient) {
+class FlinkKubernetesClient(kubeClient: FlinkKubeClient)
+  extends FlinkKubernetesClientTrait(kubeClient) {
 
   override def getService(serviceName: String): Optional[KubernetesService] = {
     kubeClient.getService(serviceName)

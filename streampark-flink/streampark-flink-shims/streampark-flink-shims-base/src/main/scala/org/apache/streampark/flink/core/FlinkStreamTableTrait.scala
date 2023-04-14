@@ -16,7 +16,8 @@
  */
 package org.apache.streampark.flink.core
 
-import java.util.{List => JavaList, Optional}
+import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import com.esotericsoftware.kryo.Serializer
 import org.apache.flink.api.common.{JobExecutionResult, RuntimeExecutionMode}
@@ -45,30 +46,31 @@ import org.apache.flink.table.module.Module
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.util.SplittableIterator
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.flink.core.EnhancerImplicit._
+import java.util.{List => JavaList, Optional}
 
 /**
  * Integration api of stream and table
  *
- * @param parameter parameter
- * @param streamEnv streamEnv
- * @param tableEnv tableEnv
+ * @param parameter
+ *   parameter
+ * @param streamEnv
+ *   streamEnv
+ * @param tableEnv
+ *   tableEnv
  */
 abstract class FlinkStreamTableTrait(
     val parameter: ParameterTool,
     private val streamEnv: StreamExecutionEnvironment,
-    private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
+    private val tableEnv: StreamTableEnvironment)
+  extends StreamTableEnvironment {
 
   /**
-   * Once a Table has been converted to a DataStream, the DataStream job must be executed
-   * using the execute method of the StreamExecutionEnvironment.
+   * Once a Table has been converted to a DataStream, the DataStream job must be executed using the
+   * execute method of the StreamExecutionEnvironment.
    */
   var isConvertedToDataStream: Boolean = false
 
-  /**
-   * Recommended to use this Api to start tasks
-   */
+  /** Recommended to use this Api to start tasks */
   def start(name: String = null): JobExecutionResult = {
     val appName = parameter.getAppName(name, true)
     execute(appName)
@@ -81,103 +83,145 @@ abstract class FlinkStreamTableTrait(
     } else null
   }
 
-  def sql(sql: String = null)(implicit callback: String => Unit = null): Unit = FlinkSqlExecutor.executeSql(sql, parameter, this)
+  def sql(sql: String = null)(implicit callback: String => Unit = null): Unit =
+    FlinkSqlExecutor.executeSql(sql, parameter, this)
   // ...streamEnv api start...
 
   def getJavaEnv: JavaStreamExecutionEnvironment = this.streamEnv.getJavaEnv
 
-  def $getCachedFiles: JavaList[tuple.Tuple2[String, DistributedCache.DistributedCacheEntry]] = this.streamEnv.getCachedFiles
+  def $getCachedFiles: JavaList[tuple.Tuple2[String, DistributedCache.DistributedCacheEntry]] =
+    this.streamEnv.getCachedFiles
 
   def $getJobListeners: JavaList[JobListener] = this.streamEnv.getJobListeners
 
   def $setParallelism(parallelism: Int): Unit = this.streamEnv.setParallelism(parallelism)
 
-  def $setRuntimeMode(executionMode: RuntimeExecutionMode): StreamExecutionEnvironment = this.streamEnv.setRuntimeMode(executionMode)
+  def $setRuntimeMode(executionMode: RuntimeExecutionMode): StreamExecutionEnvironment =
+    this.streamEnv.setRuntimeMode(executionMode)
 
-  def $setMaxParallelism(maxParallelism: Int): Unit = this.streamEnv.setMaxParallelism(maxParallelism)
+  def $setMaxParallelism(maxParallelism: Int): Unit =
+    this.streamEnv.setMaxParallelism(maxParallelism)
 
   def $getParallelism: Int = this.streamEnv.getParallelism
 
   def $getMaxParallelism: Int = this.streamEnv.getMaxParallelism
 
-  def $setBufferTimeout(timeoutMillis: Long): StreamExecutionEnvironment = this.streamEnv.setBufferTimeout(timeoutMillis)
+  def $setBufferTimeout(timeoutMillis: Long): StreamExecutionEnvironment =
+    this.streamEnv.setBufferTimeout(timeoutMillis)
 
   def $getBufferTimeout: Long = this.streamEnv.getBufferTimeout
 
-  def $disableOperatorChaining(): StreamExecutionEnvironment = this.streamEnv.disableOperatorChaining()
+  def $disableOperatorChaining(): StreamExecutionEnvironment =
+    this.streamEnv.disableOperatorChaining()
 
   def $getCheckpointConfig: CheckpointConfig = this.streamEnv.getCheckpointConfig
 
-  def $enableCheckpointing(interval: Long, mode: CheckpointingMode): StreamExecutionEnvironment = this.streamEnv.enableCheckpointing(interval, mode)
+  def $enableCheckpointing(interval: Long, mode: CheckpointingMode): StreamExecutionEnvironment =
+    this.streamEnv.enableCheckpointing(interval, mode)
 
-  def $enableCheckpointing(interval: Long): StreamExecutionEnvironment = this.streamEnv.enableCheckpointing(interval)
+  def $enableCheckpointing(interval: Long): StreamExecutionEnvironment =
+    this.streamEnv.enableCheckpointing(interval)
 
   def $getCheckpointingMode: CheckpointingMode = this.streamEnv.getCheckpointingMode
 
-  def $setStateBackend(backend: StateBackend): StreamExecutionEnvironment = this.streamEnv.setStateBackend(backend)
+  def $setStateBackend(backend: StateBackend): StreamExecutionEnvironment =
+    this.streamEnv.setStateBackend(backend)
 
   def $getStateBackend: StateBackend = this.streamEnv.getStateBackend
 
-  def $setRestartStrategy(restartStrategyConfiguration: RestartStrategies.RestartStrategyConfiguration): Unit =
+  def $setRestartStrategy(
+      restartStrategyConfiguration: RestartStrategies.RestartStrategyConfiguration): Unit =
     this.streamEnv.setRestartStrategy(restartStrategyConfiguration)
 
-  def $getRestartStrategy: RestartStrategies.RestartStrategyConfiguration = this.streamEnv.getRestartStrategy
+  def $getRestartStrategy: RestartStrategies.RestartStrategyConfiguration =
+    this.streamEnv.getRestartStrategy
 
-  def $setNumberOfExecutionRetries(numRetries: Int): Unit = this.streamEnv.setNumberOfExecutionRetries(numRetries)
+  def $setNumberOfExecutionRetries(numRetries: Int): Unit =
+    this.streamEnv.setNumberOfExecutionRetries(numRetries)
 
   def $getNumberOfExecutionRetries: Int = this.streamEnv.getNumberOfExecutionRetries
 
-  def $addDefaultKryoSerializer[T <: Serializer[_] with Serializable](`type`: Class[_], serializer: T): Unit =
+  def $addDefaultKryoSerializer[T <: Serializer[_] with Serializable](
+      `type`: Class[_],
+      serializer: T): Unit =
     this.streamEnv.addDefaultKryoSerializer(`type`, serializer)
 
-  def $addDefaultKryoSerializer(`type`: Class[_], serializerClass: Class[_ <: Serializer[_]]): Unit =
+  def $addDefaultKryoSerializer(
+      `type`: Class[_],
+      serializerClass: Class[_ <: Serializer[_]]): Unit =
     this.streamEnv.addDefaultKryoSerializer(`type`, serializerClass)
 
-  def $registerTypeWithKryoSerializer[T <: Serializer[_] with Serializable](clazz: Class[_], serializer: T): Unit =
+  def $registerTypeWithKryoSerializer[T <: Serializer[_] with Serializable](
+      clazz: Class[_],
+      serializer: T): Unit =
     this.streamEnv.registerTypeWithKryoSerializer(clazz, serializer)
 
-  def $registerTypeWithKryoSerializer(clazz: Class[_], serializer: Class[_ <: Serializer[_]]): Unit =
+  def $registerTypeWithKryoSerializer(
+      clazz: Class[_],
+      serializer: Class[_ <: Serializer[_]]): Unit =
     this.streamEnv.registerTypeWithKryoSerializer(clazz, serializer)
 
   def $registerType(typeClass: Class[_]): Unit = this.streamEnv.registerType(typeClass)
 
   def $getStreamTimeCharacteristic: TimeCharacteristic = this.streamEnv.getStreamTimeCharacteristic
 
-  def $configure(configuration: ReadableConfig, classLoader: ClassLoader): Unit = this.streamEnv.configure(configuration, classLoader)
+  def $configure(configuration: ReadableConfig, classLoader: ClassLoader): Unit =
+    this.streamEnv.configure(configuration, classLoader)
 
   def $fromSequence(from: Long, to: Long): DataStream[Long] = this.streamEnv.fromSequence(from, to)
 
-  def $fromElements[T](data: T*)(implicit info: TypeInformation[T]): DataStream[T] = this.streamEnv.fromElements(data: _*)
+  def $fromElements[T](data: T*)(implicit info: TypeInformation[T]): DataStream[T] =
+    this.streamEnv.fromElements(data: _*)
 
-  def $fromCollection[T](data: Seq[T])(implicit info: TypeInformation[T]): DataStream[T] = this.streamEnv.fromCollection(data)
+  def $fromCollection[T](data: Seq[T])(implicit info: TypeInformation[T]): DataStream[T] =
+    this.streamEnv.fromCollection(data)
 
-  def $fromCollection[T](data: Iterator[T])(implicit info: TypeInformation[T]): DataStream[T] = this.streamEnv.fromCollection(data)
+  def $fromCollection[T](data: Iterator[T])(implicit info: TypeInformation[T]): DataStream[T] =
+    this.streamEnv.fromCollection(data)
 
-  def $fromParallelCollection[T](data: SplittableIterator[T])(implicit info: TypeInformation[T]): DataStream[T] = this.streamEnv.fromParallelCollection(data)
+  def $fromParallelCollection[T](data: SplittableIterator[T])(implicit
+      info: TypeInformation[T]): DataStream[T] = this.streamEnv.fromParallelCollection(data)
 
   def $readTextFile(filePath: String): DataStream[String] = this.streamEnv.readTextFile(filePath)
 
-  def $readTextFile(filePath: String, charsetName: String): DataStream[String] = this.streamEnv.readTextFile(filePath, charsetName)
+  def $readTextFile(filePath: String, charsetName: String): DataStream[String] =
+    this.streamEnv.readTextFile(filePath, charsetName)
 
-  def $readFile[T](inputFormat: FileInputFormat[T], filePath: String)(implicit info: TypeInformation[T]): DataStream[T] =
+  def $readFile[T](inputFormat: FileInputFormat[T], filePath: String)(implicit
+      info: TypeInformation[T]): DataStream[T] =
     this.streamEnv.readFile(inputFormat, filePath)
 
-  def $readFile[T](inputFormat: FileInputFormat[T], filePath: String, watchType: FileProcessingMode, interval: Long)(implicit
-      info: TypeInformation[T]): DataStream[T] = this.streamEnv.readFile(inputFormat, filePath, watchType, interval)
+  def $readFile[T](
+      inputFormat: FileInputFormat[T],
+      filePath: String,
+      watchType: FileProcessingMode,
+      interval: Long)(implicit info: TypeInformation[T]): DataStream[T] =
+    this.streamEnv.readFile(inputFormat, filePath, watchType, interval)
 
-  def $socketTextStream(hostname: String, port: Int, delimiter: Char, maxRetry: Long): DataStream[String] =
+  def $socketTextStream(
+      hostname: String,
+      port: Int,
+      delimiter: Char,
+      maxRetry: Long): DataStream[String] =
     this.streamEnv.socketTextStream(hostname, port, delimiter, maxRetry)
 
-  def $createInput[T](inputFormat: InputFormat[T, _])(implicit info: TypeInformation[T]): DataStream[T] = this.streamEnv.createInput(inputFormat)
+  def $createInput[T](inputFormat: InputFormat[T, _])(implicit
+      info: TypeInformation[T]): DataStream[T] = this.streamEnv.createInput(inputFormat)
 
-  def $addSource[T](function: SourceFunction[T])(implicit info: TypeInformation[T]): DataStream[T] = this.streamEnv.addSource(function)
+  def $addSource[T](function: SourceFunction[T])(implicit info: TypeInformation[T]): DataStream[T] =
+    this.streamEnv.addSource(function)
 
-  def $addSource[T](function: SourceFunction.SourceContext[T] => Unit)(implicit info: TypeInformation[T]): DataStream[T] = this.streamEnv.addSource(function)
+  def $addSource[T](function: SourceFunction.SourceContext[T] => Unit)(implicit
+      info: TypeInformation[T]): DataStream[T] = this.streamEnv.addSource(function)
 
-  def $fromSource[T](source: Source[T, _ <: SourceSplit, _], watermarkStrategy: WatermarkStrategy[T], sourceName: String)(implicit
-      info: TypeInformation[T]): DataStream[T] = this.streamEnv.fromSource(source, watermarkStrategy, sourceName)
+  def $fromSource[T](
+      source: Source[T, _ <: SourceSplit, _],
+      watermarkStrategy: WatermarkStrategy[T],
+      sourceName: String)(implicit info: TypeInformation[T]): DataStream[T] =
+    this.streamEnv.fromSource(source, watermarkStrategy, sourceName)
 
-  def $registerJobListener(jobListener: JobListener): Unit = this.streamEnv.registerJobListener(jobListener)
+  def $registerJobListener(jobListener: JobListener): Unit =
+    this.streamEnv.registerJobListener(jobListener)
 
   def $clearJobListeners(): Unit = this.streamEnv.clearJobListeners()
 
@@ -189,24 +233,35 @@ abstract class FlinkStreamTableTrait(
 
   def $getStreamGraph: StreamGraph = this.streamEnv.getStreamGraph
 
-  def $getWrappedStreamExecutionEnvironment: JavaStreamExecutionEnvironment = this.streamEnv.getWrappedStreamExecutionEnvironment
+  def $getWrappedStreamExecutionEnvironment: JavaStreamExecutionEnvironment =
+    this.streamEnv.getWrappedStreamExecutionEnvironment
 
-  def $registerCachedFile(filePath: String, name: String): Unit = this.streamEnv.registerCachedFile(filePath, name)
+  def $registerCachedFile(filePath: String, name: String): Unit =
+    this.streamEnv.registerCachedFile(filePath, name)
 
-  def $registerCachedFile(filePath: String, name: String, executable: Boolean): Unit = this.streamEnv.registerCachedFile(filePath, name, executable)
+  def $registerCachedFile(filePath: String, name: String, executable: Boolean): Unit =
+    this.streamEnv.registerCachedFile(filePath, name, executable)
 
   def $isUnalignedCheckpointsEnabled: Boolean = this.streamEnv.isUnalignedCheckpointsEnabled
 
   def $isForceUnalignedCheckpoints: Boolean = this.streamEnv.isForceUnalignedCheckpoints
 
-  @deprecated def $enableCheckpointing(interval: Long, mode: CheckpointingMode, force: Boolean): StreamExecutionEnvironment =
+  @deprecated def $enableCheckpointing(
+      interval: Long,
+      mode: CheckpointingMode,
+      force: Boolean): StreamExecutionEnvironment =
     this.streamEnv.enableCheckpointing(interval, mode, force)
 
-  @deprecated def $enableCheckpointing(): StreamExecutionEnvironment = this.streamEnv.enableCheckpointing()
+  @deprecated def $enableCheckpointing(): StreamExecutionEnvironment =
+    this.streamEnv.enableCheckpointing()
 
-  @deprecated def $generateSequence(from: Long, to: Long): DataStream[Long] = this.streamEnv.generateSequence(from, to)
+  @deprecated def $generateSequence(from: Long, to: Long): DataStream[Long] =
+    this.streamEnv.generateSequence(from, to)
 
-  @deprecated def $readFileStream(StreamPath: String, intervalMillis: Long, watchType: FileMonitoringFunction.WatchType): DataStream[String] =
+  @deprecated def $readFileStream(
+      StreamPath: String,
+      intervalMillis: Long,
+      watchType: FileMonitoringFunction.WatchType): DataStream[String] =
     this.streamEnv.readFileStream(StreamPath, intervalMillis, watchType)
 
   @deprecated def $readFile[T](
@@ -214,17 +269,24 @@ abstract class FlinkStreamTableTrait(
       filePath: String,
       watchType: FileProcessingMode,
       interval: Long,
-      filter: FilePathFilter)(implicit info: TypeInformation[T]): DataStream[T] = this.streamEnv.readFile(inputFormat, filePath, watchType, interval, filter)
+      filter: FilePathFilter)(implicit info: TypeInformation[T]): DataStream[T] =
+    this.streamEnv.readFile(inputFormat, filePath, watchType, interval, filter)
 
   // ...streamEnv api end...
 
-  override def fromDataStream[T](dataStream: DataStream[T]): Table = tableEnv.fromDataStream(dataStream)
+  override def fromDataStream[T](dataStream: DataStream[T]): Table =
+    tableEnv.fromDataStream(dataStream)
 
-  override def fromDataStream[T](dataStream: DataStream[T], fields: Expression*): Table = tableEnv.fromDataStream(dataStream, fields: _*)
+  override def fromDataStream[T](dataStream: DataStream[T], fields: Expression*): Table =
+    tableEnv.fromDataStream(dataStream, fields: _*)
 
-  override def createTemporaryView[T](path: String, dataStream: DataStream[T]): Unit = tableEnv.createTemporaryView(path, dataStream)
+  override def createTemporaryView[T](path: String, dataStream: DataStream[T]): Unit =
+    tableEnv.createTemporaryView(path, dataStream)
 
-  override def createTemporaryView[T](path: String, dataStream: DataStream[T], fields: Expression*): Unit =
+  override def createTemporaryView[T](
+      path: String,
+      dataStream: DataStream[T],
+      fields: Expression*): Unit =
     tableEnv.createTemporaryView(path, dataStream, fields: _*)
 
   override def toAppendStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[T] = {
@@ -232,50 +294,68 @@ abstract class FlinkStreamTableTrait(
     tableEnv.toAppendStream(table)
   }
 
-  override def toRetractStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[(Boolean, T)] = {
+  override def toRetractStream[T](table: Table)(implicit
+      info: TypeInformation[T]): DataStream[(Boolean, T)] = {
     isConvertedToDataStream = true
     tableEnv.toRetractStream(table)
   }
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 
-  override def fromValues(rowType: AbstractDataType[_], values: Expression*): Table = tableEnv.fromValues(rowType, values: _*)
+  override def fromValues(rowType: AbstractDataType[_], values: Expression*): Table =
+    tableEnv.fromValues(rowType, values: _*)
 
   override def fromValues(values: java.lang.Iterable[_]): Table = tableEnv.fromValues(values)
 
-  override def fromValues(rowType: AbstractDataType[_], values: java.lang.Iterable[_]): Table = tableEnv.fromValues(rowType, values)
+  override def fromValues(rowType: AbstractDataType[_], values: java.lang.Iterable[_]): Table =
+    tableEnv.fromValues(rowType, values)
 
-  override def registerCatalog(catalogName: String, catalog: Catalog): Unit = tableEnv.registerCatalog(catalogName, catalog)
+  override def registerCatalog(catalogName: String, catalog: Catalog): Unit =
+    tableEnv.registerCatalog(catalogName, catalog)
 
   override def getCatalog(catalogName: String): Optional[Catalog] = tableEnv.getCatalog(catalogName)
 
-  override def loadModule(moduleName: String, module: Module): Unit = tableEnv.loadModule(moduleName, module)
+  override def loadModule(moduleName: String, module: Module): Unit =
+    tableEnv.loadModule(moduleName, module)
 
   override def unloadModule(moduleName: String): Unit = tableEnv.unloadModule(moduleName)
 
-  override def createTemporarySystemFunction(name: String, functionClass: Class[_ <: UserDefinedFunction]): Unit =
+  override def createTemporarySystemFunction(
+      name: String,
+      functionClass: Class[_ <: UserDefinedFunction]): Unit =
     tableEnv.createTemporarySystemFunction(name, functionClass)
 
-  override def createTemporarySystemFunction(name: String, functionInstance: UserDefinedFunction): Unit =
+  override def createTemporarySystemFunction(
+      name: String,
+      functionInstance: UserDefinedFunction): Unit =
     tableEnv.createTemporarySystemFunction(name, functionInstance)
 
-  override def dropTemporarySystemFunction(name: String): Boolean = tableEnv.dropTemporarySystemFunction(name)
+  override def dropTemporarySystemFunction(name: String): Boolean =
+    tableEnv.dropTemporarySystemFunction(name)
 
-  override def createFunction(path: String, functionClass: Class[_ <: UserDefinedFunction]): Unit = tableEnv.createFunction(path, functionClass)
+  override def createFunction(path: String, functionClass: Class[_ <: UserDefinedFunction]): Unit =
+    tableEnv.createFunction(path, functionClass)
 
-  override def createFunction(path: String, functionClass: Class[_ <: UserDefinedFunction], ignoreIfExists: Boolean): Unit =
+  override def createFunction(
+      path: String,
+      functionClass: Class[_ <: UserDefinedFunction],
+      ignoreIfExists: Boolean): Unit =
     tableEnv.createFunction(path, functionClass)
 
   override def dropFunction(path: String): Boolean = tableEnv.dropFunction(path)
 
-  override def createTemporaryFunction(path: String, functionClass: Class[_ <: UserDefinedFunction]): Unit =
+  override def createTemporaryFunction(
+      path: String,
+      functionClass: Class[_ <: UserDefinedFunction]): Unit =
     tableEnv.createTemporaryFunction(path, functionClass)
 
-  override def createTemporaryFunction(path: String, functionInstance: UserDefinedFunction): Unit = tableEnv.createTemporaryFunction(path, functionInstance)
+  override def createTemporaryFunction(path: String, functionInstance: UserDefinedFunction): Unit =
+    tableEnv.createTemporaryFunction(path, functionInstance)
 
   override def dropTemporaryFunction(path: String): Boolean = tableEnv.dropTemporaryFunction(path)
 
-  override def createTemporaryView(path: String, view: Table): Unit = tableEnv.createTemporaryView(path, view)
+  override def createTemporaryView(path: String, view: Table): Unit =
+    tableEnv.createTemporaryView(path, view)
 
   override def from(path: String): Table = tableEnv.from(path)
 
@@ -301,7 +381,8 @@ abstract class FlinkStreamTableTrait(
 
   override def dropTemporaryView(path: String): Boolean = tableEnv.dropTemporaryView(path)
 
-  override def explainSql(statement: String, extraDetails: ExplainDetail*): String = tableEnv.explainSql(statement, extraDetails: _*)
+  override def explainSql(statement: String, extraDetails: ExplainDetail*): String =
+    tableEnv.explainSql(statement, extraDetails: _*)
 
   override def sqlQuery(query: String): Table = tableEnv.sqlQuery(query)
 
@@ -322,27 +403,38 @@ abstract class FlinkStreamTableTrait(
    * @param dataStream
    * @tparam T
    */
-  @deprecated override def registerFunction[T](name: String, tf: TableFunction[T])(implicit info: TypeInformation[T]): Unit =
+  @deprecated override def registerFunction[T](name: String, tf: TableFunction[T])(implicit
+      info: TypeInformation[T]): Unit =
     tableEnv.registerFunction(name, tf)
 
-  @deprecated override def registerFunction[T, ACC](name: String, f: AggregateFunction[T, ACC])(implicit
+  @deprecated override def registerFunction[T, ACC](name: String, f: AggregateFunction[T, ACC])(
+      implicit
       info1: TypeInformation[T],
       info2: TypeInformation[ACC]): Unit = tableEnv.registerFunction(name, f)
 
-  @deprecated override def registerFunction[T, ACC](name: String, f: TableAggregateFunction[T, ACC])(implicit
+  @deprecated override def registerFunction[T, ACC](
+      name: String,
+      f: TableAggregateFunction[T, ACC])(implicit
       info1: TypeInformation[T],
       info2: TypeInformation[ACC]): Unit = tableEnv.registerFunction(name, f)
 
-  @deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T]): Unit = tableEnv.registerDataStream(name, dataStream)
+  @deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T]): Unit =
+    tableEnv.registerDataStream(name, dataStream)
 
-  @deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T], fields: Expression*): Unit =
+  @deprecated override def registerDataStream[T](
+      name: String,
+      dataStream: DataStream[T],
+      fields: Expression*): Unit =
     tableEnv.registerDataStream(name, dataStream, fields: _*)
 
-  @deprecated override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
+  @deprecated override def registerFunction(name: String, function: ScalarFunction): Unit =
+    tableEnv.registerFunction(name, function)
 
-  @deprecated override def registerTable(name: String, table: Table): Unit = tableEnv.registerTable(name, table)
+  @deprecated override def registerTable(name: String, table: Table): Unit =
+    tableEnv.registerTable(name, table)
 
   @deprecated override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
 
-  @deprecated override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
+  @deprecated override def getCompletionHints(statement: String, position: Int): Array[String] =
+    tableEnv.getCompletionHints(statement, position)
 }

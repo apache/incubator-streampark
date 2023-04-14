@@ -17,11 +17,10 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import java.time.Duration
-import javax.annotation.Nullable
-
-import scala.collection.JavaConverters._
-import scala.util.{Failure, Success, Try}
+import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.common.util.Utils.tryWithResource
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.cli.ClientOptions
@@ -31,10 +30,12 @@ import org.apache.flink.configuration.{Configuration, DeploymentOptions, RestOpt
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-import org.apache.streampark.common.util.{Logger, Utils}
-import org.apache.streampark.common.util.Utils.tryWithResource
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
-import org.apache.streampark.flink.kubernetes.model.ClusterKey
+import javax.annotation.Nullable
+
+import java.time.Duration
+
+import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 object KubernetesRetriever extends Logger {
 
@@ -45,27 +46,24 @@ object KubernetesRetriever extends Logger {
   // see org.apache.flink.configuration.RestOptions.RETRY_MAX_ATTEMPTS
   val FLINK_REST_RETRY_MAX_ATTEMPTS = 2
 
-  /**
-   * get new KubernetesClient
-   */
+  /** get new KubernetesClient */
   @throws(classOf[KubernetesClientException])
   def newK8sClient(): KubernetesClient = {
     new DefaultKubernetesClient()
   }
 
-  /**
-   * check connection of kubernetes cluster
-   */
+  /** check connection of kubernetes cluster */
   def checkK8sConnection(): Boolean = {
     Try(newK8sClient().getVersion != null).getOrElse(false)
   }
 
   private val clusterClientServiceLoader = new DefaultClusterClientServiceLoader()
 
-  /**
-   * get new flink cluster client of kubernetes mode
-   */
-  def newFinkClusterClient(clusterId: String, @Nullable namespace: String, executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
+  /** get new flink cluster client of kubernetes mode */
+  def newFinkClusterClient(
+      clusterId: String,
+      @Nullable namespace: String,
+      executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
     // build flink config
     val flinkConfig = new Configuration()
     flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString)
@@ -74,14 +72,18 @@ object KubernetesRetriever extends Logger {
     flinkConfig.setLong(RestOptions.AWAIT_LEADER_TIMEOUT, FLINK_REST_AWAIT_TIMEOUT_SEC * 1000)
     flinkConfig.setInteger(RestOptions.RETRY_MAX_ATTEMPTS, FLINK_REST_RETRY_MAX_ATTEMPTS)
     if (Try(namespace.isEmpty).getOrElse(true)) {
-      flinkConfig.setString(KubernetesConfigOptions.NAMESPACE, KubernetesConfigOptions.NAMESPACE.defaultValue())
+      flinkConfig.setString(
+        KubernetesConfigOptions.NAMESPACE,
+        KubernetesConfigOptions.NAMESPACE.defaultValue())
     } else {
       flinkConfig.setString(KubernetesConfigOptions.NAMESPACE, namespace)
     }
     // retrieve flink cluster client
-    val clientFactory: ClusterClientFactory[String] = clusterClientServiceLoader.getClusterClientFactory(flinkConfig)
+    val clientFactory: ClusterClientFactory[String] =
+      clusterClientServiceLoader.getClusterClientFactory(flinkConfig)
 
-    val clusterProvider: KubernetesClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
+    val clusterProvider: KubernetesClusterDescriptor =
+      clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
 
     Try {
       clusterProvider
@@ -98,35 +100,38 @@ object KubernetesRetriever extends Logger {
   /**
    * check whether deployment exists on kubernetes cluster
    *
-   * @param name      deployment name
-   * @param namespace deployment namespace
+   * @param name
+   *   deployment name
+   * @param namespace
+   *   deployment namespace
    */
   def isDeploymentExists(name: String, namespace: String): Boolean = {
     tryWithResource(KubernetesRetriever.newK8sClient()) {
       client =>
-        client.apps()
+        client
+          .apps()
           .deployments()
           .inNamespace(namespace)
           .withLabel("type", "flink-native-kubernetes")
           .list()
-          .getItems.asScala
+          .getItems
+          .asScala
           .exists(e => e.getMetadata.getName == name)
-    } { _ => false }
+    }(_ => false)
   }
 
-  /**
-   * retrieve flink jobManager rest url
-   */
+  /** retrieve flink jobManager rest url */
   def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
     Utils.tryWithResource(
-      KubernetesRetriever.newFinkClusterClient(
-        clusterKey.clusterId,
-        clusterKey.namespace,
-        clusterKey.executeMode).getOrElse(return None)) { client =>
-      val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
-      logger.info(s"retrieve flink jobManager rest url: $url")
-      client.close()
-      Some(url)
+      KubernetesRetriever
+        .newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
+        .getOrElse(return None)) {
+      client =>
+        val url =
+          IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+        logger.info(s"retrieve flink jobManager rest url: $url")
+        client.close()
+        Some(url)
     }
   }
 }

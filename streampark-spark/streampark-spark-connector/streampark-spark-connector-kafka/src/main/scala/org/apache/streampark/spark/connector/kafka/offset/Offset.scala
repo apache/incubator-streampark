@@ -17,27 +17,26 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
+import org.apache.streampark.common.util.Logger
+
+import org.apache.kafka.common.TopicPartition
+import org.apache.spark.SparkConf
+
 import java.util.Properties
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.util.Try
 
-import org.apache.kafka.common.TopicPartition
-import org.apache.spark.SparkConf
-
-import org.apache.streampark.common.util.Logger
-
-/**
- * Offset Manager
- */
+/** Offset Manager */
 trait Offset extends Logger with Serializable {
 
   val sparkConf: SparkConf
 
   lazy val storeType: String = storeParams.getOrElse("type", "none")
 
-  implicit lazy val storeParams: Map[String, String] = sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
+  implicit lazy val storeParams: Map[String, String] =
+    sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
 
   implicit def toProperty(map: Map[String, String]): Properties = {
     require(map != null)
@@ -48,8 +47,11 @@ trait Offset extends Logger with Serializable {
 
   lazy val reset: String = sparkConf.get("spark.source.kafka.consume.auto.offset.reset", "largest")
 
-  lazy val (host, port) = sparkConf.get("spark.source.kafka.consume.bootstrap.servers")
-    .split(",").head.split(":") match {
+  lazy val (host, port) = sparkConf
+    .get("spark.source.kafka.consume.bootstrap.servers")
+    .split(",")
+    .head
+    .split(":") match {
     case Array(h, p) => (h, p.toInt)
   }
 
@@ -96,7 +98,8 @@ trait Offset extends Logger with Serializable {
    * @param topics
    * @return
    */
-  def getEarliestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, EarliestTime)
+  def getEarliestOffsets(topics: Seq[String]): Map[TopicPartition, Long] =
+    getOffsets(topics, EarliestTime)
 
   /**
    * get latest offset
@@ -104,7 +107,8 @@ trait Offset extends Logger with Serializable {
    * @param topics
    * @return
    */
-  def getLatestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, LatestTime)
+  def getLatestOffsets(topics: Seq[String]): Map[TopicPartition, Long] =
+    getOffsets(topics, LatestTime)
 
   /**
    * get specific timestamp offset
@@ -117,16 +121,21 @@ trait Offset extends Logger with Serializable {
 
     import org.apache.kafka.clients.consumer.KafkaConsumer
     val props = new Properties()
-    props.setProperty("bootstrap.servers", s"${host}:${port}")
+    props.setProperty("bootstrap.servers", s"$host:$port")
     props.setProperty("group.id", s"offsetLookup-${System.currentTimeMillis()}")
     props.setProperty("enable.auto.commit", "false")
-    props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
-    props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
+    props.setProperty(
+      "key.deserializer",
+      "org.apache.kafka.common.serialization.StringDeserializer")
+    props.setProperty(
+      "value.deserializer",
+      "org.apache.kafka.common.serialization.StringDeserializer")
     val consumer = new KafkaConsumer[String, String](props)
 
-    val partitions = topics.flatMap(topic => {
-      consumer.partitionsFor(topic).asScala.map(x => new TopicPartition(x.topic(), x.partition()))
-    })
+    val partitions = topics.flatMap(
+      topic => {
+        consumer.partitionsFor(topic).asScala.map(x => new TopicPartition(x.topic(), x.partition()))
+      })
 
     val offsetInfos = time match {
       case EarliestTime => consumer.beginningOffsets(partitions.asJavaCollection)

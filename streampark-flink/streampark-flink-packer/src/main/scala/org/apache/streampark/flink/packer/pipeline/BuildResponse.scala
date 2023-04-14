@@ -19,14 +19,10 @@ package org.apache.streampark.flink.packer.pipeline
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
-/**
- * Result of a BuildPipeline instance.
- */
+/** Result of a BuildPipeline instance. */
 sealed trait BuildResult {
 
-  /**
-   * is pass aka is successfully
-   */
+  /** is pass aka is successfully */
   def pass: Boolean
 
   def as[T <: BuildResult](implicit clz: Class[T]): T = this.asInstanceOf[T]
@@ -40,16 +36,18 @@ sealed trait FlinkBuildResult extends BuildResult {
 case class ErrorResult(pass: Boolean = false) extends BuildResult {}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class SimpleBuildResponse(workspacePath: String = null, pass: Boolean = true) extends FlinkBuildResult {
+case class SimpleBuildResponse(workspacePath: String = null, pass: Boolean = true)
+  extends FlinkBuildResult {
   override def toString: String = s"{ workspacePath: $workspacePath, pass: $pass }"
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class ShadedBuildResponse(workspacePath: String, shadedJarPath: String, pass: Boolean = true) extends FlinkBuildResult {
+case class ShadedBuildResponse(workspacePath: String, shadedJarPath: String, pass: Boolean = true)
+  extends FlinkBuildResult {
   override def toString: String =
     s"{ workspacePath: $workspacePath, " +
-    s"shadedJarPath: $shadedJarPath, " +
-    s"pass: $pass }"
+      s"shadedJarPath: $shadedJarPath, " +
+      s"pass: $pass }"
 
 }
 
@@ -59,11 +57,12 @@ case class DockerImageBuildResponse(
     flinkImageTag: String,
     podTemplatePaths: Map[String, String],
     dockerInnerMainJarPath: String,
-    pass: Boolean = true) extends FlinkBuildResult {
+    pass: Boolean = true)
+  extends FlinkBuildResult {
   override def toString: String =
     s"{ workspacePath: $workspacePath, " +
-    s"flinkImageTag: $flinkImageTag, " +
-    s"podTemplatePaths: ${podTemplatePaths.mkString(",")}, " +
-    s"dockerInnerMainJarPath: $dockerInnerMainJarPath, " +
-    s"pass: $pass }"
+      s"flinkImageTag: $flinkImageTag, " +
+      s"podTemplatePaths: ${podTemplatePaths.mkString(",")}, " +
+      s"dockerInnerMainJarPath: $dockerInnerMainJarPath, " +
+      s"pass: $pass }"
 }

@@ -16,19 +16,17 @@
  */
 package org.apache.streampark.spark.connector.source
 
-import scala.annotation.meta.getter
-import scala.reflect.ClassTag
-import scala.util.Try
+import org.apache.streampark.common.util.Logger
 
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 
-import org.apache.streampark.common.util.Logger
+import scala.annotation.meta.getter
+import scala.reflect.ClassTag
+import scala.util.Try
 
-/**
- * Base source trait
- */
+/** Base source trait */
 trait Source extends Logger with Serializable {
 
   @(transient @getter)
@@ -46,8 +44,6 @@ trait Source extends Logger with Serializable {
 
   type SourceType
 
-  /**
-   * get DStream
-   */
+  /** get DStream */
   def getDStream[R: ClassTag](f: SourceType => R): DStream[R]
 }
