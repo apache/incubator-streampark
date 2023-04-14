@@ -31,8 +31,6 @@ import java.io.{ByteArrayInputStream, File}
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
 
 trait Logger {
 
@@ -44,11 +42,10 @@ trait Logger {
 
   protected def logger: Slf4JLogger = {
     if (_logger == null) {
-      initializeLogging()
+      _logger = LoggerFactory.getLoggerFactory().getLogger(logName)
     }
     _logger
   }
-
 
   protected def logInfo(msg: => String) {
     if (logger.isInfoEnabled) logger.info(s"$prefix $msg")
@@ -94,42 +91,27 @@ trait Logger {
     logger.isTraceEnabled
   }
 
-  protected def initializeLogging(): Unit = {
-    if (!Logger.initialized) {
-      Logger.initLock.synchronized {
-        if (!Logger.initialized) {
-          val factory = LoggerFactory.getLoggerFactory()
-          _logger = factory.getLogger(logName)
-          Logger.initialized = true
-        }
-      }
-    }
-  }
-
-}
-
-private object Logger {
-  @volatile private var initialized = false
-  val initLock = new Object()
 }
 
 private[this] object LoggerFactory extends LoggerFactoryBinder {
 
   private lazy val contextSelectorBinder: ContextSelectorStaticBinder = {
     val defaultLoggerContext = new LoggerContext
-    Try(new ContextInitializer(defaultLoggerContext).autoConfig()) match {
-      case Success(s) => s
-      case Failure(e) =>
+
+    Try(new ContextInitializer(defaultLoggerContext).autoConfig())
+      .recover[Unit]({ case e =>
         val msg = "Failed to auto configure default logger context"
         // scalastyle:off println
         System.err.println(msg)
         // scalastyle:off println
         System.err.println("Reported exception:")
         e.printStackTrace()
-    }
+      })
+
     if (!StatusUtil.contextHasStatusListener(defaultLoggerContext)) {
       StatusPrinter.printInCaseOfErrorsOrWarnings(defaultLoggerContext)
     }
+
     val selectorBinder = new ContextSelectorStaticBinder()
     selectorBinder.init(defaultLoggerContext, new Object())
     selectorBinder
