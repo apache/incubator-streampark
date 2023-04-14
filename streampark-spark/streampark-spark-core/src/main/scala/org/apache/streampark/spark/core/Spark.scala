@@ -119,9 +119,7 @@ trait Spark extends Logger {
           "[StreamPark] Usage: config file error,must be [properties|yaml|conf]")
     }
 
-    localConf.foreach(x => sparkConf.set(x._1, x._2))
-
-    userArgs.foreach(x => sparkConf.set(x._1, x._2))
+    sparkConf.setAll(localConf).setAll(userArgs)
 
     val (appMain, appName) = sparkConf.get(KEY_SPARK_MAIN_CLASS, null) match {
       case null | "" => (null, null)
