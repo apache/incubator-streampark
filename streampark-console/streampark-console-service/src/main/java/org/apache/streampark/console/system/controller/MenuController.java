@@ -25,18 +25,15 @@ import org.apache.streampark.console.system.service.MenuService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -70,15 +67,6 @@ public class MenuController {
   @RequiresPermissions("menu:add")
   public RestResponse addMenu(@Valid Menu menu) {
     this.menuService.createMenu(menu);
-    return RestResponse.success();
-  }
-
-  @DeleteMapping("delete")
-  @RequiresPermissions("menu:delete")
-  public RestResponse deleteMenus(@NotBlank(message = "{required}") String menuIds)
-      throws Exception {
-    String[] ids = menuIds.split(StringPool.COMMA);
-    this.menuService.deleteMenus(ids);
     return RestResponse.success();
   }
 
