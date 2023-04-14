@@ -27,7 +27,6 @@
 
     <properties>
         <slf4j.version>1.7.32</slf4j.version>
-        <log4j.version>2.17.1</log4j.version>
         <logback.version>1.2.11</logback.version>
         <jackson.version>2.13.4</jackson.version>
         <scala.version>2.12.8</scala.version>
@@ -46,45 +45,10 @@
                 <version>${slf4j.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>log4j-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            <!--log4j end-->
-
             <!-- logback -->
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
                 <version>${logback.version}</version>
                 <exclusions>
                     <exclusion>
@@ -135,7 +99,7 @@
     </dependencyManagement>
 
     <modules>
-        <module>streampark-shaded-slf4j</module>
+        <module>streampark-shaded-logback</module>
         <module>streampark-shaded-jackson</module>
     </modules>
 

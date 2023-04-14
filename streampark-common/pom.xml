@@ -174,10 +174,10 @@
             <optional>true</optional>
         </dependency>
 
-        <!--log4j -->
+        <!--logback -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-shaded-slf4j</artifactId>
+            <artifactId>streampark-shaded-logback</artifactId>
             <version>${streampark.shaded.version}</version>
         </dependency>
 

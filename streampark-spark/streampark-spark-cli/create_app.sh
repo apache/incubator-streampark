@@ -275,7 +275,6 @@ cat > $name/pom.xml <<EOF
         <es.version>5.6.3</es.version>
         <protobuf.version>2.5.0</protobuf.version>
 
-        <log4j.version>1.7.25</log4j.version>
         <json4s.version>3.2.10</json4s.version>
         <spray.version>1.3.3</spray.version>
         <akka.version>2.3.9</akka.version>
