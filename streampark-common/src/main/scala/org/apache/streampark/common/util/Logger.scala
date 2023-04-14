@@ -45,58 +45,62 @@ trait Logger {
   protected def logger: Slf4JLogger = {
     if (_logger == null) {
       initializeLogging()
-      val factory = LoggerFactory.getLoggerFactory()
-      _logger = factory.getLogger(logName)
     }
     _logger
   }
 
-  def logInfo(msg: => String) {
-    logger.info(s"$prefix $msg")
+
+  protected def logInfo(msg: => String) {
+    if (logger.isInfoEnabled) logger.info(s"$prefix $msg")
   }
 
-  def logInfo(msg: => String, throwable: Throwable) {
-    logger.info(s"$prefix $msg", throwable)
+  protected def logInfo(msg: => String, throwable: Throwable) {
+    if (logger.isInfoEnabled) logger.info(s"$prefix $msg", throwable)
   }
 
-  def logDebug(msg: => String) {
-    logger.debug(s"$prefix $msg")
+  protected def logDebug(msg: => String) {
+    if (logger.isDebugEnabled) logger.debug(s"$prefix $msg")
   }
 
-  def logDebug(msg: => String, throwable: Throwable) {
-    logger.debug(s"$prefix $msg", throwable)
+  protected def logDebug(msg: => String, throwable: Throwable) {
+    if (logger.isDebugEnabled) logger.debug(s"$prefix $msg", throwable)
   }
 
   def logTrace(msg: => String) {
-    logger.trace(s"$prefix $msg")
+    if (logger.isTraceEnabled) logger.trace(s"$prefix $msg")
   }
 
-  def logTrace(msg: => String, throwable: Throwable) {
-    logger.trace(s"$prefix $msg", throwable)
+  protected def logTrace(msg: => String, throwable: Throwable) {
+    if (logger.isTraceEnabled) logger.trace(s"$prefix $msg", throwable)
   }
 
   def logWarn(msg: => String) {
-    logger.warn(s"$prefix $msg")
+    if (logger.isWarnEnabled) logger.warn(s"$prefix $msg")
   }
 
-  def logWarn(msg: => String, throwable: Throwable) {
-    logger.warn(s"$prefix $msg", throwable)
+  protected def logWarn(msg: => String, throwable: Throwable) {
+    if (logger.isWarnEnabled) logger.warn(s"$prefix $msg", throwable)
   }
 
-  def logError(msg: => String) {
-    logger.error(s"$prefix $msg")
+  protected def logError(msg: => String) {
+    if (logger.isErrorEnabled) logger.error(s"$prefix $msg")
   }
 
-  def logError(msg: => String, throwable: Throwable) {
-    logger.error(s"$prefix $msg", throwable)
+  protected def logError(msg: => String, throwable: Throwable) {
+    if (logger.isErrorEnabled) logger.error(s"$prefix $msg", throwable)
+  }
+
+  protected def isTraceEnabled(): Boolean = {
+    logger.isTraceEnabled
   }
 
   protected def initializeLogging(): Unit = {
     if (!Logger.initialized) {
       Logger.initLock.synchronized {
         if (!Logger.initialized) {
+          val factory = LoggerFactory.getLoggerFactory()
+          _logger = factory.getLogger(logName)
           Logger.initialized = true
-          logger
         }
       }
     }
@@ -141,6 +145,9 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
   override def getLoggerFactoryClassStr: String = contextSelectorBinder.getClass.getName
 
   private class ContextInitializer(loggerContext: LoggerContext) extends LogBackContextInitializer(loggerContext) {
+
+    val shadedPackage = "org.apache.streampark.shaded"
+
     override def configureByResource(url: URL): Unit = {
       Utils.notNull(url, "URL argument cannot be null")
       val path = url.getPath
@@ -150,16 +157,10 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
         val text = FileUtils.readString(new File(path))
           .replaceAll(
             "ch.qos.logback",
-            "org.apache.streampark.shaded.ch.qos.logback")
+            s"$shadedPackage.ch.qos.logback")
           .replaceAll(
             "org.slf4j",
-            "org.apache.streampark.shaded.org.slf4j")
-          .replaceAll(
-            "org.apache.log4j",
-            "org.apache.streampark.shaded.org.apache.log4j")
-          .replaceAll(
-            "org.apache.logging.log4j",
-            "org.apache.streampark.shaded.org.apache.logging.log4j")
+            s"$shadedPackage.org.slf4j")
 
         val input = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))
         configurator.doConfigure(input)
