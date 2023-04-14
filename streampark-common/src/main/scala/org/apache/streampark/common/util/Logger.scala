@@ -117,19 +117,21 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
 
   private lazy val contextSelectorBinder: ContextSelectorStaticBinder = {
     val defaultLoggerContext = new LoggerContext
-    Try(new ContextInitializer(defaultLoggerContext).autoConfig()) match {
-      case Success(s) => s
-      case Failure(e) =>
+
+    Try(new ContextInitializer(defaultLoggerContext).autoConfig())
+      .recover[Unit]({ case e =>
         val msg = "Failed to auto configure default logger context"
         // scalastyle:off println
         System.err.println(msg)
         // scalastyle:off println
         System.err.println("Reported exception:")
         e.printStackTrace()
-    }
+      })
+
     if (!StatusUtil.contextHasStatusListener(defaultLoggerContext)) {
       StatusPrinter.printInCaseOfErrorsOrWarnings(defaultLoggerContext)
     }
+
     val selectorBinder = new ContextSelectorStaticBinder()
     selectorBinder.init(defaultLoggerContext, new Object())
     selectorBinder
