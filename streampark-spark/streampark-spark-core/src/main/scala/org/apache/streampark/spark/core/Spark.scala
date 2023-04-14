@@ -85,12 +85,9 @@ trait Spark extends Logger {
 
   /** Initialize sparkConf according to user parameters */
   final private def init(args: Array[String]): Unit = {
-
-    logDebug("init application config ....")
-
     var argv = args.toList
-
     var conf: String = null
+    val userArgs = ArrayBuffer[(String, String)]()
 
     while (argv.nonEmpty) {
       argv match {
@@ -104,6 +101,9 @@ trait Spark extends Logger {
           createOnError = value.toBoolean
           argv = tail
         case Nil =>
+        case other :: value :: tail if other.startsWith("--") =>
+          userArgs += other.drop(2) -> value
+          argv = tail
         case tail =>
           logError(s"Unrecognized options: ${tail.mkString(" ")}")
           printUsageAndExit()
@@ -120,6 +120,8 @@ trait Spark extends Logger {
     }
 
     localConf.foreach(x => sparkConf.set(x._1, x._2))
+
+    userArgs.foreach(x => sparkConf.set(x._1, x._2))
 
     val (appMain, appName) = sparkConf.get(KEY_SPARK_MAIN_CLASS, null) match {
       case null | "" => (null, null)
