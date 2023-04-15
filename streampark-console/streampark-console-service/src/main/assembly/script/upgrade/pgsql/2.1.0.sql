@@ -15,27 +15,11 @@
  * limitations under the License.
  */
 
--- ISSUE-2192 DDL & DML Start
-
 alter table "public"."t_flink_savepoint" alter column "path" type varchar(1024) collate "pg_catalog"."default";
-
-insert into "public"."t_menu" values (100070, 100015, 'savepoint trigger', null, null, 'savepoint:trigger', null, '1', '1', null, now(), now());
-
--- ISSUE-2192 DDL & DML End
-
--- ISSUE-2366 DDL & DML Start
 alter table "public"."t_flink_app" rename "launch" to "release";
-update "public"."t_menu" set "menu_name"='release',"perms" = 'app:release' where "menu_id" = 100025;
--- ISSUE-2366 DDL & DML End
-
--- Issue-2191/2215 Start
 drop table if exists "public"."t_external_link";
 drop sequence if exists "public"."streampark_t_external_link_id_seq";
--- ----------------------------
--- table structure for t_external_link
--- ----------------------------
-create sequence "public"."streampark_t_external_link_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+create sequence "public"."streampark_t_external_link_id_seq" increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
 create table "public"."t_external_link" (
   "id" int8 not null default nextval('streampark_t_external_link_id_seq'::regclass),
@@ -44,45 +28,14 @@ create table "public"."t_external_link" (
   "badge_color" varchar(100) collate "pg_catalog"."default",
   "link_url" varchar(1000) collate "pg_catalog"."default",
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone))
-;
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+);
+
 alter table "public"."t_external_link" add constraint "t_external_link_pkey" primary key ("id");
 
-insert into "public"."t_menu" values (100071, 100033, 'link view', null, null, 'externalLink:view', null, '1', '1', NULL, now(), now());
-insert into "public"."t_menu" values (100072, 100033, 'link create', null, null, 'externalLink:create', null, '1', '1', NULL, now(), now());
-insert into "public"."t_menu" values (100073, 100033, 'link update', null, null, 'externalLink:update', null, '1', '1', NULL, now(), now());
-insert into "public"."t_menu" values (100074, 100033, 'link delete', null, null, 'externalLink:delete', null, '1', '1', NULL, now(), now());
-
-insert into "public"."t_role_menu" values (100061, 100002, 100071);
-insert into "public"."t_role_menu" values (100062, 100002, 100072);
-insert into "public"."t_role_menu" values (100063, 100002, 100073);
-insert into "public"."t_role_menu" values (100064, 100002, 100074);
--- Issue-2191/2215 End
-
--- ISSUE-2401 Start
-insert into "public"."t_menu" values (100075, 100015, 'sql delete', null, null, 'sql:delete', null, '1', '1', null, now(), now());
-insert into "public"."t_role_menu" values (100065, 100001, 100075);
-insert into "public"."t_role_menu" values (100066, 100002, 100075);
--- ISSUE-2401 End
-
--- Issue-2324 Start --
-insert into "public"."t_menu" values (100076, 100033, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', '0', null, now(), now());
-insert into "public"."t_menu" values (100077, 100033, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', '0', null, now(), now());
-insert into "public"."t_menu" values (100078, 100033, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', '0', null, now(), now());
-
-insert into "public"."t_role_menu" values (100067, 100002, 100076);
-insert into "public"."t_role_menu" values (100068, 100002, 100077);
-insert into "public"."t_role_menu" values (100069, 100002, 100078);
-
 drop table if exists "public"."t_yarn_queue";
-
 drop sequence if exists "public"."streampark_t_yarn_queue_id_seq";
-
--- ----------------------------
--- table structure for t_yarn_queue
--- ----------------------------
-create sequence "public"."streampark_t_yarn_queue_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+create sequence "public"."streampark_t_yarn_queue_id_seq" increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
 create table "public"."t_yarn_queue" (
     "id" int8 not null default nextval('streampark_t_yarn_queue_id_seq'::regclass),
@@ -91,8 +44,7 @@ create table "public"."t_yarn_queue" (
     "description" varchar(512) collate "pg_catalog"."default",
     "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
     "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
-)
-;
+);
 comment on column "public"."t_yarn_queue"."id" is 'queue id';
 comment on column "public"."t_yarn_queue"."team_id" is 'team id';
 comment on column "public"."t_yarn_queue"."queue_label" is 'queue label expression';
@@ -102,54 +54,180 @@ comment on column "public"."t_yarn_queue"."modify_time" is 'modify time';
 
 alter table "public"."t_yarn_queue" add constraint "t_yarn_queue_pkey" primary key ("id");
 alter table "public"."t_yarn_queue" add constraint "unique_team_id_queue_label" unique("team_id", "queue_label");
-
--- Issue-2324 End --
-
-
 alter table "public"."t_flink_log" add column "option_name" int2;
-
--- Issue-2494 Start --
 alter table "public"."t_user" add column "login_type" int2 default 0;
--- Issue-2494 End --
-
 ALTER TABLE public.t_flink_app ALTER COLUMN state TYPE int4 USING state::int4;
 
--- Issue-2513 Start --
 drop table if exists "public"."t_flink_tutorial";
--- Issue-2513 End --
 
--- PR-2545: Split the setting menu
+delete from "public"."t_menu";
+insert into "public"."t_menu" values (110000, 0, 'menu.system', '/system', 'PageView', null, 'desktop', '0', 1, 1, now(), now());
+insert into "public"."t_menu" values (120000, 0, 'StreamPark', '/flink', 'PageView', null, 'build', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (130000, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', 1, 5, now(), now());
+insert into "public"."t_menu" values (110100, 110000, 'menu.userManagement', '/system/user', 'system/user/User', null, 'user', '0', 1, 1, now(), now());
+insert into "public"."t_menu" values (110200, 110000, 'menu.roleManagement', '/system/role', 'system/role/Role', null, 'smile', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (110300, 110000, 'menu.menuManagement', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', 1, 3, now(), now());
+insert into "public"."t_menu" values (110400, 110000, 'menu.tokenManagement', '/system/token', 'system/token/Token', null, 'lock', '0', 1, 1, now(), now());
+insert into "public"."t_menu" values (110500, 110000, 'menu.teamManagement', '/system/team', 'system/team/Team', null, 'team', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (110600, 110000, 'menu.memberManagement', '/system/member', 'system/member/Member', null, 'usergroup-add', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (120100, 120000, 'menu.project', '/flink/project', 'flink/project/View', null, 'github', '0', 1, 1, now(), now());
+insert into "public"."t_menu" values (120200, 120000, 'menu.application', '/flink/app', 'flink/app/View', null, 'mobile', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (120300, 120000, 'menu.variable', '/flink/variable', 'flink/variable/View', null, 'code', '0', 1, 3, now(), now());
+insert into "public"."t_menu" values (130100, 130000, 'setting.system', '/setting/system', 'setting/System/index', null, 'database', '0', 1, 1, now(), now());
+insert into "public"."t_menu" values (130200, 130000, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'alert', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (130300, 130000, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'desktop', '0', 1, 3, now(), now());
+insert into "public"."t_menu" values (130400, 130000, 'setting.flinkCluster', '/setting/flinkCluster', 'setting/FlinkCluster/index', 'menu:view', 'cluster', '0', 1, 4, now(), now());
+insert into "public"."t_menu" values (130500, 130000, 'setting.externalLink', '/setting/externalLink', 'setting/ExternalLink/index', 'menu:view', 'link', '0', 1, 5, now(), now());
+insert into "public"."t_menu" values (130600, 130000, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/YarnQueue/index', 'menu:view', 'bars', '0', 1, 6, now(), now());
+insert into "public"."t_menu" values (110101, 110100, 'add', null, null, 'user:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110102, 110100, 'update', null, null, 'user:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110103, 110100, 'delete', null, null, 'user:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110104, 110100, 'reset', null, null, 'user:reset', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110105, 110100, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110106, 110100, 'view', null, null, 'user:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110201, 110200, 'add', null, null, 'role:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110202, 110200, 'update', null, null, 'role:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110203, 110200, 'delete', null, null, 'role:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110204, 110200, 'view', null, null, 'role:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110401, 110400, 'add', null, null, 'token:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110402, 110400, 'delete', null, null, 'token:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110403, 110400, 'view', null, null, 'token:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110501, 110500, 'add', null, null, 'team:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110502, 110500, 'update', null, null, 'team:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110503, 110500, 'delete', null, null, 'team:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110504, 110500, 'view', null, null, 'team:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110601, 110600, 'add', null, null, 'member:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110602, 110600, 'update', null, null, 'member:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110603, 110600, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110604, 110600, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (110605, 110600, 'view', null, null, 'member:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120101, 120100, 'add', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', 0, null, now(), now());
+insert into "public"."t_menu" values (120102, 120100, 'build', null, null, 'project:build', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120103, 120100, 'delete', null, null, 'project:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120104, 120100, 'edit', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', 0, null, now(), now());
+insert into "public"."t_menu" values (120105, 120100, 'view', null, null, 'project:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120201, 120200, 'add', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', 0, null, now(), now());
+insert into "public"."t_menu" values (120202, 120200, 'detail app', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', 0, null, now(), now());
+insert into "public"."t_menu" values (120203, 120200, 'edit flink', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', 0, null, now(), now());
+insert into "public"."t_menu" values (120204, 120200, 'edit streampark', '/flink/app/edit_streampark', 'flink/app/EditStreamPark', 'app:update', '', '0', 0, null, now(), now());
+insert into "public"."t_menu" values (120205, 120200, 'mapping', null, null, 'app:mapping', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120206, 120200, 'release', null, null, 'app:release', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120207, 120200, 'start', null, null, 'app:start', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120208, 120200, 'clean', null, null, 'app:clean', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120209, 120200, 'cancel', null, null, 'app:cancel', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120210, 120200, 'savepoint delete', null, null, 'savepoint:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120211, 120200, 'backup rollback', null, null, 'backup:rollback', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120212, 120200, 'backup delete', null, null, 'backup:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120213, 120200, 'conf delete', null, null, 'conf:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120214, 120200, 'delete', null, null, 'app:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120215, 120200, 'copy', null, null, 'app:copy', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120216, 120200, 'view', null, null, 'app:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120217, 120200, 'savepoint trigger', null, null, 'savepoint:trigger', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120218, 120200, 'sql delete', null, null, 'sql:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120301, 120300, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
+insert into "public"."t_menu" values (120302, 120300, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
+insert into "public"."t_menu" values (120303, 120300, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
+insert into "public"."t_menu" values (120304, 120300, 'depend apps', '/flink/variable/depend_apps', 'flink/variable/DependApps', 'variable:depend_apps', '', '0', 0, NULL, now(), now());
+insert into "public"."t_menu" values (120305, 120300, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', 1, NULL, now(), now());
+insert into "public"."t_menu" values (120306, 120300, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (120307, 120300, 'depend view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
+insert into "public"."t_menu" values (130101, 130100, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (130102, 130100, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (130401, 130400, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
+insert into "public"."t_menu" values (130402, 130400, 'edit cluster', '/setting/edit_cluster', 'setting/FlinkCluster/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
+insert into "public"."t_menu" values (130501, 130500, 'link view', null, null, 'externalLink:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (130502, 130500, 'link create', null, null, 'externalLink:create', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (130503, 130500, 'link update', null, null, 'externalLink:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (130504, 130500, 'link delete', null, null, 'externalLink:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (130601, 130600, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', 0, null, now(), now());
+insert into "public"."t_menu" values (130602, 130600, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', 0, null, now(), now());
+insert into "public"."t_menu" values (130603, 130600, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', 0, null, now(), now());
 
--- delete the old setting menu and associated permissions
-delete from "public"."t_menu" where "menu_id" in (100033,100034,100040,100041,100068,100076,100077,100078);
+update "public"."t_role_menu" set menu_id=110000 where menu_id=100000;
+update "public"."t_role_menu" set menu_id=110100 where menu_id=100001;
+update "public"."t_role_menu" set menu_id=110101 where menu_id=100004;
+update "public"."t_role_menu" set menu_id=110102 where menu_id=100005;
+update "public"."t_role_menu" set menu_id=110103 where menu_id=100006;
+update "public"."t_role_menu" set menu_id=110104 where menu_id=100012;
+update "public"."t_role_menu" set menu_id=110105 where menu_id=100052;
+update "public"."t_role_menu" set menu_id=110106 where menu_id=100059;
+update "public"."t_role_menu" set menu_id=110200 where menu_id=100002;
+update "public"."t_role_menu" set menu_id=110201 where menu_id=100007;
+update "public"."t_role_menu" set menu_id=110202 where menu_id=100008;
+update "public"."t_role_menu" set menu_id=110203 where menu_id=100009;
+update "public"."t_role_menu" set menu_id=110204 where menu_id=100061;
+update "public"."t_role_menu" set menu_id=110300 where menu_id=100003;
+update "public"."t_role_menu" set menu_id=110400 where menu_id=100037;
+update "public"."t_role_menu" set menu_id=110401 where menu_id=100038;
+update "public"."t_role_menu" set menu_id=110402 where menu_id=100039;
+update "public"."t_role_menu" set menu_id=110403 where menu_id=100060;
+update "public"."t_role_menu" set menu_id=110500 where menu_id=100043;
+update "public"."t_role_menu" set menu_id=110501 where menu_id=100044;
+update "public"."t_role_menu" set menu_id=110502 where menu_id=100045;
+update "public"."t_role_menu" set menu_id=110503 where menu_id=100046;
+update "public"."t_role_menu" set menu_id=110504 where menu_id=100062;
+update "public"."t_role_menu" set menu_id=110600 where menu_id=100047;
+update "public"."t_role_menu" set menu_id=110601 where menu_id=100048;
+update "public"."t_role_menu" set menu_id=110602 where menu_id=100049;
+update "public"."t_role_menu" set menu_id=110603 where menu_id=100050;
+update "public"."t_role_menu" set menu_id=110604 where menu_id=100051;
+update "public"."t_role_menu" set menu_id=110605 where menu_id=100063;
+update "public"."t_role_menu" set menu_id=120000 where menu_id=100013;
+update "public"."t_role_menu" set menu_id=120100 where menu_id=100014;
+update "public"."t_role_menu" set menu_id=120101 where menu_id=100017;
+update "public"."t_role_menu" set menu_id=120102 where menu_id=100022;
+update "public"."t_role_menu" set menu_id=120103 where menu_id=100023;
+update "public"."t_role_menu" set menu_id=120104 where menu_id=100035;
+update "public"."t_role_menu" set menu_id=120105 where menu_id=100065;
+update "public"."t_role_menu" set menu_id=120200 where menu_id=100015;
+update "public"."t_role_menu" set menu_id=120201 where menu_id=100016;
+update "public"."t_role_menu" set menu_id=120202 where menu_id=100018;
+update "public"."t_role_menu" set menu_id=120203 where menu_id=100020;
+update "public"."t_role_menu" set menu_id=120204 where menu_id=100021;
+update "public"."t_role_menu" set menu_id=120205 where menu_id=100024;
+update "public"."t_role_menu" set menu_id=120207 where menu_id=100026;
+update "public"."t_role_menu" set menu_id=120208 where menu_id=100027;
+update "public"."t_role_menu" set menu_id=120209 where menu_id=100028;
+update "public"."t_role_menu" set menu_id=120210 where menu_id=100029;
+update "public"."t_role_menu" set menu_id=120211 where menu_id=100030;
+update "public"."t_role_menu" set menu_id=120212 where menu_id=100031;
+update "public"."t_role_menu" set menu_id=120213 where menu_id=100032;
+update "public"."t_role_menu" set menu_id=120214 where menu_id=100036;
+update "public"."t_role_menu" set menu_id=120215 where menu_id=100042;
+update "public"."t_role_menu" set menu_id=120216 where menu_id=100066;
+update "public"."t_role_menu" set menu_id=120300 where menu_id=100053;
+update "public"."t_role_menu" set menu_id=120301 where menu_id=100054;
+update "public"."t_role_menu" set menu_id=120302 where menu_id=100055;
+update "public"."t_role_menu" set menu_id=120303 where menu_id=100056;
+update "public"."t_role_menu" set menu_id=120304 where menu_id=100057;
+update "public"."t_role_menu" set menu_id=120305 where menu_id=100058;
+update "public"."t_role_menu" set menu_id=120306 where menu_id=100067;
+update "public"."t_role_menu" set menu_id=120307 where menu_id=100069;
+update "public"."t_role_menu" set menu_id=130101 where menu_id=100068;
+update "public"."t_role_menu" set menu_id=130102 where menu_id=100034;
+update "public"."t_role_menu" set menu_id=120206 where menu_id=100025;
+update "public"."t_role_menu" set menu_id=130000 where menu_id=100033;
+update "public"."t_role_menu" set menu_id=130401 where menu_id=100040;
+update "public"."t_role_menu" set menu_id=130402 where menu_id=100041;
 
--- create setting menu and associated sub menus
-insert into "public"."t_menu" values (100080, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', 1, 5, now(), now());
-insert into "public"."t_menu" values (100081, 100080, 'setting.system', '/setting/system', 'setting/System/index', null, 'team', '0', 1, 1, now(), now());
-insert into "public"."t_menu" values (100082, 100080, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'user', '0', 1, 2, now(), now());
-insert into "public"."t_menu" values (100083, 100080, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'smile', '0', 1, 3, now(), now());
-insert into "public"."t_menu" values (100084, 100080, 'setting.flinkCluster', '/setting/flinkCluster', 'setting/FlinkCluster/index', 'menu:view', 'cluster', '0', 1, 4, now(), now());
-insert into "public"."t_menu" values (100085, 100080, 'setting.externalLink', '/setting/externalLink', 'setting/ExternalLink/index', 'menu:view', 'link', '0', 1, 5, now(), now());
-insert into "public"."t_menu" values (100086, 100080, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/YarnQueue/index', 'menu:view', 'bars', '0', 1, 6, now(), now());
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120104);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120215);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120217);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 130000);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120217);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120218);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130100);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130200);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130300);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130400);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130500);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130501);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130502);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130503);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130504);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130600);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130601);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130602);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130603);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110000);
 
--- create permissions for setting.system menu
-insert into "public"."t_menu" values (100087, 100081, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
-insert into "public"."t_menu" values (100088, 100081, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
-
--- create permissions for setting.flinkCluster menu
-insert into "public"."t_menu" values (100089, 100084, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
-insert into "public"."t_menu" values (100090, 100084, 'edit cluster', '/setting/edit_cluster', 'setting/FlinkCluster/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
-
--- create permissions for setting.yarnQueue menu
-insert into "public"."t_menu" values (100091, 100086, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', 0, null, now(), now());
-insert into "public"."t_menu" values (100092, 100086, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', 0, null, now(), now());
-insert into "public"."t_menu" values (100093, 100086, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', 0, null, now(), now());
-
--- set permissions for role 100002(team admin)
-insert into "public"."t_role_menu" values (null, 100002, 100080);
-insert into "public"."t_role_menu" values (null, 100002, 100081);
-insert into "public"."t_role_menu" values (null, 100002, 100082);
-insert into "public"."t_role_menu" values (null, 100002, 100083);
-insert into "public"."t_role_menu" values (null, 100002, 100084);
-insert into "public"."t_role_menu" values (null, 100002, 100085);
-insert into "public"."t_role_menu" values (null, 100002, 100086);
