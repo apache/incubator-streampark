@@ -34,7 +34,9 @@ object FlinkShimsProxy extends Logger {
   private[this] val VERIFY_SQL_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
   private[this] val INCLUDE_PATTERN: Pattern =
-    Pattern.compile("(json4s|jackson)(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+    Pattern.compile(
+      "(streampark-shaded-jackson-)(.*).jar",
+      Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
   private[this] def getFlinkShimsResourcePattern(flinkLargeVersion: String) =
     Pattern.compile(

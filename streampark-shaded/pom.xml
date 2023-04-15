@@ -25,6 +25,11 @@
     <name>StreamPark : Shaded Parent</name>
     <packaging>pom</packaging>
 
+    <modules>
+        <module>streampark-shaded-slf4j</module>
+        <module>streampark-shaded-jackson</module>
+    </modules>
+
     <properties>
         <slf4j.version>1.7.32</slf4j.version>
         <logback.version>1.2.11</logback.version>
@@ -38,10 +43,16 @@
     <dependencyManagement>
 
         <dependencies>
-            <!--log4j -->
+            <!--slf4j -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
 
@@ -74,34 +85,8 @@
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
-                <version>${jackson.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala-reflect</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala-compiler</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala-library</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
-
-    <modules>
-        <module>streampark-shaded-logback</module>
-        <module>streampark-shaded-jackson</module>
-    </modules>
 
     <profiles>
         <profile>

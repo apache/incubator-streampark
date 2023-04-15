@@ -87,12 +87,6 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>junit</artifactId>
-                    <groupId>junit</groupId>
-                </exclusion>
-            </exclusions>
             <optional>true</optional>
         </dependency>
 
@@ -130,13 +124,13 @@
         <!--logback -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-shaded-logback</artifactId>
+            <artifactId>streampark-shaded-slf4j</artifactId>
             <version>${streampark.shaded.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-shaded-jackson_${scala.binary.version}</artifactId>
+            <artifactId>streampark-shaded-jackson</artifactId>
             <version>${streampark.shaded.version}</version>
         </dependency>
 

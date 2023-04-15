@@ -24,14 +24,20 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>streampark-shaded-logback</artifactId>
-    <name>StreamPark : Shaded Logback </name>
+    <artifactId>streampark-shaded-slf4j</artifactId>
+    <name>StreamPark : Shaded Slf4j </name>
 
     <dependencies>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
             <optional>true</optional>
         </dependency>
 
@@ -61,7 +67,6 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.slf4j:*:*</include>
-                                    <include>org.apache.logging.log4j:*:*</include>
                                     <include>ch.qos.logback:*:*</include>
                                 </includes>
                             </artifactSet>
@@ -73,10 +78,6 @@
                                 <relocation>
                                     <pattern>ch.qos.logback</pattern>
                                     <shadedPattern>${streampark.shaded.package}.ch.qos.logback</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.logging.log4j</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.org.apache.logging.log4j</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.log4j</pattern>
