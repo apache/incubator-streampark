@@ -16,13 +16,13 @@
  */
 package org.apache.streampark.common
 
+import org.apache.commons.io.FileUtils
+import org.junit.jupiter.api.function.Executable
+
 import java.io.File
 
 import scala.language.implicitConversions
 import scala.util.Random
-
-import org.apache.commons.io.FileUtils
-import org.junit.jupiter.api.function.Executable
 
 package object fs {
 
@@ -33,10 +33,15 @@ package object fs {
   /**
    * generate a random binary file
    *
-   * @param dir  parent directory
-   * @param size file size
+   * @param dir
+   *   parent directory
+   * @param size
+   *   file size
    */
-  def genRandomFile(dir: String, name: String = s"${java.util.UUID.randomUUID().toString}.dat", size: Int = 256): File = {
+  def genRandomFile(
+      dir: String,
+      name: String = s"${java.util.UUID.randomUUID().toString}.dat",
+      size: Int = 256): File = {
     val random = new Random()
     val c = new Array[Byte](size)
     random.nextBytes(c)
@@ -48,7 +53,8 @@ package object fs {
   /**
    * generate a random directory that contains some random files
    *
-   * @return Directory File object -> Children random files array.
+   * @return
+   *   Directory File object -> Children random files array.
    */
   def genRandomDir(dirPath: String, childFileCount: Int = 5): (File, Array[File]) = {
     val dir = new File(dirPath)

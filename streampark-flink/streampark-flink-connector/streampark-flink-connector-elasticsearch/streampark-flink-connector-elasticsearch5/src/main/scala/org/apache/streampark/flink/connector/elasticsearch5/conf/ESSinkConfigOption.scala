@@ -17,13 +17,13 @@
 
 package org.apache.streampark.flink.connector.elasticsearch5.conf
 
+import org.apache.streampark.common.conf.ConfigOption
+import org.apache.streampark.common.util.ConfigUtils
+
 import java.net.InetSocketAddress
 import java.util.{Map => JavaMap, Properties}
 
 import scala.collection.JavaConverters._
-
-import org.apache.streampark.common.conf.ConfigOption
-import org.apache.streampark.common.util.ConfigUtils
 
 object ESSinkConfigOption {
   val ES_SINK_PREFIX = "es.sink"
@@ -32,7 +32,10 @@ object ESSinkConfigOption {
    * @param properties
    * @return
    */
-  def apply(prefixStr: String = ES_SINK_PREFIX, properties: Properties = new Properties): ESSinkConfigOption = new ESSinkConfigOption(prefixStr, properties)
+  def apply(
+      prefixStr: String = ES_SINK_PREFIX,
+      properties: Properties = new Properties): ESSinkConfigOption =
+    new ESSinkConfigOption(prefixStr, properties)
 
 }
 
@@ -55,11 +58,16 @@ class ESSinkConfigOption(prefixStr: String, properties: Properties) extends Seri
     required = true,
     classType = classOf[Array[InetSocketAddress]],
     handle = key =>
-      properties.getProperty(key).split(SIGN_COMMA).map(x => {
-        x.split(SIGN_COLON) match {
-          case Array(host, port) => new InetSocketAddress(host, port.toInt)
-        }
-      }))
+      properties
+        .getProperty(key)
+        .split(SIGN_COMMA)
+        .map(
+          x => {
+            x.split(SIGN_COLON) match {
+              case Array(host, port) => new InetSocketAddress(host, port.toInt)
+            }
+          })
+  )
 
   def getInternalConfig(): JavaMap[String, String] = {
     ConfigUtils.getConf(prop.asScala.asJava, prefix)(alias = "").asScala.asJava

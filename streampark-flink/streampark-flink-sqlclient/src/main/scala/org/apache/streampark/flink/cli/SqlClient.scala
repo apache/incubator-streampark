@@ -17,16 +17,16 @@
 
 package org.apache.streampark.flink.cli
 
-import scala.language.implicitConversions
-import scala.util.Try
-
-import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.ExecutionOptions
-
 import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_CONF, KEY_FLINK_SQL, KEY_FLINK_TABLE_MODE}
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.streampark.flink.core.{SqlCommand, SqlCommandParser}
 import org.apache.streampark.flink.core.scala.{FlinkStreamTable, FlinkTable}
+
+import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.configuration.ExecutionOptions
+
+import scala.language.implicitConversions
+import scala.util.Try
 
 object SqlClient extends App {
 
@@ -35,7 +35,8 @@ object SqlClient extends App {
   val flinkSql = {
     val sql = parameterTool.get(KEY_FLINK_SQL())
     require(sql != null && sql.trim.nonEmpty, "Usage: flink sql cannot be null")
-    Try(DeflaterUtils.unzipString(sql)).getOrElse(throw new IllegalArgumentException("Usage: flink sql is invalid or null, please check"))
+    Try(DeflaterUtils.unzipString(sql)).getOrElse(
+      throw new IllegalArgumentException("Usage: flink sql is invalid or null, please check"))
   }
 
   val sets = SqlCommandParser.parseSQL(flinkSql).filter(_.command == SqlCommand.SET)
@@ -55,7 +56,9 @@ object SqlClient extends App {
   mode match {
     case "batch" => BatchSqlApp.main(args)
     case "streaming" => StreamSqlApp.main(args)
-    case _ => throw new IllegalArgumentException("Usage: runtime execution-mode invalid, optional [streaming|batch]")
+    case _ =>
+      throw new IllegalArgumentException(
+        "Usage: runtime execution-mode invalid, optional [streaming|batch]")
   }
 
   private[this] object BatchSqlApp extends FlinkTable {

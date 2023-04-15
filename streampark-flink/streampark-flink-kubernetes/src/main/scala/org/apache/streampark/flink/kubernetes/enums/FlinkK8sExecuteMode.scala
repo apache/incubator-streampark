@@ -19,9 +19,7 @@ package org.apache.streampark.flink.kubernetes.enums
 
 import org.apache.streampark.common.enums.ExecutionMode
 
-/**
- * execution mode of flink on kubernetes
- */
+/** execution mode of flink on kubernetes */
 object FlinkK8sExecuteMode extends Enumeration {
 
   val SESSION: FlinkK8sExecuteMode.Value = Value("kubernetes-session")

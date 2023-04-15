@@ -17,13 +17,13 @@
 
 package org.apache.streampark.flink.connector.redis.bean
 
+import org.apache.streampark.common.util.Logger
+
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
 import org.apache.flink.streaming.connectors.redis.common.container.{RedisContainer => BahirRedisContainer}
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand._
 import redis.clients.jedis.{Jedis, JedisPool, JedisSentinelPool}
-
-import org.apache.streampark.common.util.Logger
 
 class RedisContainer(container: BahirRedisContainer) {
 
@@ -37,47 +37,61 @@ class RedisContainer(container: BahirRedisContainer) {
     method.invoke(container).asInstanceOf[Jedis]
   }
 
-  def invoke[T](mapper: RedisMapper[T], input: T, transaction: Option[redis.clients.jedis.Transaction]): Unit = {
+  def invoke[T](
+      mapper: RedisMapper[T],
+      input: T,
+      transaction: Option[redis.clients.jedis.Transaction]): Unit = {
     val key = mapper.getKeyFromData(input)
     val value = mapper.getValueFromData(input)
     mapper.getCommandDescription.getCommand match {
-      case RPUSH => transaction match {
+      case RPUSH =>
+        transaction match {
           case Some(t) => t.rpush(key, value)
           case _ => this.container.rpush(key, value)
         }
-      case LPUSH => transaction match {
+      case LPUSH =>
+        transaction match {
           case Some(t) => t.lpush(key, value)
           case _ => this.container.lpush(key, value)
         }
-      case SADD => transaction match {
+      case SADD =>
+        transaction match {
           case Some(t) => t.sadd(key, value)
           case _ => this.container.sadd(key, value)
         }
-      case SET => transaction match {
+      case SET =>
+        transaction match {
           case Some(t) => t.set(key, value)
           case _ => this.container.set(key, value)
         }
-      case PFADD => transaction match {
+      case PFADD =>
+        transaction match {
           case Some(t) => t.pfadd(key, value)
           case _ => this.container.pfadd(key, value)
         }
-      case PUBLISH => transaction match {
+      case PUBLISH =>
+        transaction match {
           case Some(t) => t.publish(key, value)
           case _ => this.container.publish(key, value)
         }
-      case ZADD => transaction match {
+      case ZADD =>
+        transaction match {
           case Some(t) => t.zadd(mapper.getCommandDescription.getAdditionalKey, value.toDouble, key)
           case _ => this.container.zadd(mapper.getCommandDescription.getAdditionalKey, value, key)
         }
-      case ZREM => transaction match {
+      case ZREM =>
+        transaction match {
           case Some(t) => t.zrem(mapper.getCommandDescription.getAdditionalKey, key)
           case _ => this.container.zrem(mapper.getCommandDescription.getAdditionalKey, key)
         }
-      case HSET => transaction match {
+      case HSET =>
+        transaction match {
           case Some(t) => t.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
           case _ => this.container.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
         }
-      case other => throw new IllegalArgumentException("[StreamPark] RedisSink:Cannot process such data type: " + other)
+      case other =>
+        throw new IllegalArgumentException(
+          "[StreamPark] RedisSink:Cannot process such data type: " + other)
     }
   }
 

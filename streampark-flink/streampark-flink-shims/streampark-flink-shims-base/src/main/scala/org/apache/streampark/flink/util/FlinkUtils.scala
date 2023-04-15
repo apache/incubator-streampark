@@ -17,27 +17,34 @@
 
 package org.apache.streampark.flink.util
 
-import java.io.File
-import java.time.Duration
-import java.util
-
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext
 import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
 import org.apache.flink.util.TimeUtils
 
+import java.io.File
+import java.time.Duration
+import java.util
+
 object FlinkUtils {
 
-  def getUnionListState[R: TypeInformation](context: FunctionInitializationContext, descriptorName: String): ListState[R] = {
-    context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
+  def getUnionListState[R: TypeInformation](
+      context: FunctionInitializationContext,
+      descriptorName: String): ListState[R] = {
+    context.getOperatorStateStore.getUnionListState(
+      new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
   }
 
   def getFlinkDistJar(flinkHome: String): String = {
     new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamPark] can no found flink-dist jar in $flinkHome/lib")
+      case Array() =>
+        throw new IllegalArgumentException(
+          s"[StreamPark] can no found flink-dist jar in $flinkHome/lib")
       case array if array.length == 1 => s"$flinkHome/lib/${array.head}"
-      case more => throw new IllegalArgumentException(s"[StreamPark] found multiple flink-dist jar in ${flinkHome}/lib,[${more.mkString(",")}]")
+      case more =>
+        throw new IllegalArgumentException(
+          s"[StreamPark] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
     }
   }
 

@@ -17,17 +17,13 @@
 
 package org.apache.streampark.spark.core
 
+import org.apache.spark.SparkContext
+
 import scala.annotation.meta.getter
 
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.SparkSession
-
 /**
- * <b><code>SparkBatch</code></b>
- * <p/>
- * Spark batch processing entry
- * <p/>
- * <b>Creation Time:</b> 2022/8/8 20:44.
+ * <b><code>SparkBatch</code></b> <p/> Spark batch processing entry <p/> <b>Creation Time:</b>
+ * 2022/8/8 20:44.
  */
 trait SparkBatch extends Spark {
 
@@ -37,4 +33,5 @@ trait SparkBatch extends Spark {
   override def destroy(): Unit = {
     context.stop()
   }
+
 }

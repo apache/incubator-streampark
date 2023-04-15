@@ -41,6 +41,8 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
 import { CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { fetchYarnQueueList } from '/@/api/flink/setting/yarnQueue';
+import { ApiSelect } from '/@/components/Form';
 
 const { t } = useI18n();
 /* render input dropdown component */
@@ -235,18 +237,24 @@ export const renderOptionsItems = (
 export const renderYarnQueue = ({ model, field }: RenderCallbackParams) => {
   return (
     <div>
-      <Input
+      <ApiSelect
         name="yarnQueue"
-        placeholder={t('flink.app.addAppTips.yarnQueuePlaceholder')}
+        placeholder={t('setting.yarnQueue.placeholder.yarnQueueLabelExpression')}
+        api={fetchYarnQueueList}
+        params={{ page: 1, pageSize: 9999 }}
+        resultField={'records'}
+        labelField={'queueLabel'}
+        valueField={'queueLabel'}
+        showSearch={true}
         value={model[field]}
-        onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
+        onChange={(value: string) => (model[field] = value)}
       />
       <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
             {t('flink.app.noteInfo.note')}
           </Tag>
-          {t('flink.app.noteInfo.yarnQueue')}
+          {t('setting.yarnQueue.selectionHint')}
         </span>
       </p>
     </div>
@@ -451,6 +459,11 @@ export const renderSqlHistory = (
                 {t('flink.app.flinkSql.candidateVersion')}
               </Tag>
             )}
+
+            <span style="color: darkgrey">
+                <Icon icon="ant-design:clock-circle-outlined" />
+              {ver.createTime}
+            </span>
           </div>
         </Select.Option>
       );

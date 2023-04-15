@@ -17,15 +17,16 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import java.util.concurrent.TimeUnit
-import scala.collection.JavaConversions._
-import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.model._
 
-/**
- * Tracking info cache pool on flink kubernetes mode.
- */
+import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
+
+import java.util.concurrent.TimeUnit
+
+import scala.collection.JavaConversions._
+
+/** Tracking info cache pool on flink kubernetes mode. */
 class FlinkK8sWatchController extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
@@ -51,16 +52,13 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
     trackIds.cleanUp()
   }
 
-  /**
-   * collect all tracking identifiers
-   */
+  /** collect all tracking identifiers */
   def getAllWatchingIds(): Set[TrackId] = trackIds.getAll()
 
-  /**
-   * determines whether the specified TrackId is in the trace
-   */
+  /** determines whether the specified TrackId is in the trace */
   def isInWatching(trackId: TrackId): Boolean = {
-    if (!trackId.isLegal) false; else {
+    if (!trackId.isLegal) false;
+    else {
       trackIds.get(trackId) != null
     }
   }
@@ -71,42 +69,33 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
       canceling.invalidate(trackId)
       jobStatuses.invalidate(trackId)
       flinkMetrics.invalidate(ClusterKey.of(trackId))
-      IngressController.deleteIngress(trackId.clusterId, trackId.namespace)
     }
   }
 
-  /**
-   * collect all legal tracking ids, and covert to ClusterKey
-   */
-  private[kubernetes] def getActiveWatchingIds(): Set[TrackId] = getAllWatchingIds().filter(_.isActive)
+  /** collect all legal tracking ids, and covert to ClusterKey */
+  private[kubernetes] def getActiveWatchingIds(): Set[TrackId] =
+    getAllWatchingIds().filter(_.isActive)
 
-  /**
-   * collect the aggregation of flink metrics that in tracking
-   */
+  /** collect the aggregation of flink metrics that in tracking */
   def collectAccGroupMetric(groupId: String): FlinkMetricCV = {
     // get cluster metrics that in tracking
     val empty = FlinkMetricCV.empty(groupId)
     getActiveWatchingIds() match {
       case k if k.isEmpty => empty
       case k =>
-        flinkMetrics.getAll(for (elem <- k) yield ClusterKey.of(elem))
-        match {
+        flinkMetrics.getAll(for (elem <- k) yield ClusterKey.of(elem)) match {
           case m if m.isEmpty => empty
           case m => m.values.fold(empty)((x, y) => x + y)
         }
     }
   }
 
-  /**
-   * get flink job-manager rest url from cache which will auto refresh when it it empty.
-   */
+  /** get flink job-manager rest url from cache which will auto refresh when it it empty. */
   def getClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
     Option(endpoints.get(clusterKey)).filter(_.nonEmpty).orElse(refreshClusterRestUrl(clusterKey))
   }
 
-  /**
-   * refresh flink job-manager rest url from remote flink cluster, and cache it.
-   */
+  /** refresh flink job-manager rest url from remote flink cluster, and cache it. */
   def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
     val restUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
     if (restUrl.nonEmpty) {
@@ -151,15 +140,18 @@ object TrackIdCache {
 
 class JobStatusCache {
 
-  private[this] lazy val cache: Cache[CacheKey, JobStatusCV] = Caffeine.newBuilder.expireAfterWrite(20, TimeUnit.SECONDS).build()
+  private[this] lazy val cache: Cache[CacheKey, JobStatusCV] =
+    Caffeine.newBuilder.expireAfterWrite(20, TimeUnit.SECONDS).build()
 
-  def putAll(kvs: Map[TrackId, JobStatusCV]): Unit = cache.putAll(kvs.map(t => (CacheKey(t._1.appId), t._2)))
+  def putAll(kvs: Map[TrackId, JobStatusCV]): Unit =
+    cache.putAll(kvs.map(t => (CacheKey(t._1.appId), t._2)))
 
   def put(k: TrackId, v: JobStatusCV): Unit = cache.put(CacheKey(k.appId), v)
 
   def asMap(): Map[CacheKey, JobStatusCV] = cache.asMap().toMap
 
-  def getAsMap(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] = cache.getAllPresent(trackIds.map(t => t.appId)).toMap
+  def getAsMap(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] =
+    cache.getAllPresent(trackIds.map(t => t.appId)).toMap
 
   def get(k: TrackId): JobStatusCV = cache.getIfPresent(CacheKey(k.appId))
 
@@ -177,7 +169,8 @@ object JobStatusCache {
 
 class EndpointCache {
 
-  private[this] lazy val cache: Cache[ClusterKey, String] = Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
+  private[this] lazy val cache: Cache[ClusterKey, String] =
+    Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
 
   def invalidate(k: ClusterKey): Unit = cache.invalidate(k)
 

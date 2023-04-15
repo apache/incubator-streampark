@@ -16,6 +16,11 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.fs.LfsOperator
+
+import com.google.common.collect.Maps
+import org.apache.commons.io.{FileUtils => ApacheFileUtils}
+
 import java.io.File
 import java.util.{Collections, Map => JavaMap, Optional => JOption}
 
@@ -24,23 +29,16 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
-import com.google.common.collect.Maps
-import org.apache.commons.io.{FileUtils => ApacheFileUtils}
-
-import org.apache.streampark.common.fs.LfsOperator
-
-/**
- * Hadoop client configuration tools mainly for flink use.
- */
+/** Hadoop client configuration tools mainly for flink use. */
 object HadoopConfigUtils {
 
-  val HADOOP_CLIENT_CONF_FILES: Array[String] = Array("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
+  val HADOOP_CLIENT_CONF_FILES: Array[String] =
+    Array("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
 
-  val HIVE_CLIENT_CONF_FILES: Array[String] = Array("core-site.xml", "hdfs-site.xml", "hive-site.xml")
+  val HIVE_CLIENT_CONF_FILES: Array[String] =
+    Array("core-site.xml", "hdfs-site.xml", "hive-site.xml")
 
-  /**
-   * Get Hadoop configuration directory path from system.
-   */
+  /** Get Hadoop configuration directory path from system. */
   def getSystemHadoopConfDir: Option[String] = {
     Try(FileUtils.getPathFromEnv("HADOOP_CONF_DIR")) match {
       case Success(p) => Some(p)
@@ -50,18 +48,17 @@ object HadoopConfigUtils {
     }
   }
 
-  def getSystemHadoopConfDirAsJava: JOption[String] = JOption.ofNullable(getSystemHadoopConfDir.orNull)
+  def getSystemHadoopConfDirAsJava: JOption[String] =
+    JOption.ofNullable(getSystemHadoopConfDir.orNull)
 
-  /**
-   * Get Hive configuration directory path from system.
-   */
+  /** Get Hive configuration directory path from system. */
   def getSystemHiveConfDir: Option[String] = Try(FileUtils.getPathFromEnv("HIVE_CONF_DIR")).toOption
 
   def getSystemHiveConfDirAsJava: JOption[String] = JOption.ofNullable(getSystemHiveConfDir.orNull)
 
   /**
-   * Replace host information with ip of hadoop config file or hive config file.
-   * Such as core-site.xml, hdfs-site.xml, hive-site.xml.
+   * Replace host information with ip of hadoop config file or hive config file. Such as
+   * core-site.xml, hdfs-site.xml, hive-site.xml.
    */
   def replaceHostWithIP(configFile: File): Unit = {
     if (configFile.exists && configFile.isFile && configFile.getName.endsWith(".xml")) {
@@ -73,10 +70,10 @@ object HadoopConfigUtils {
     }
   }
 
-  /**
-   * Replace host information with ip of configuration files under hadoop/hive config dir.
-   */
-  def batchReplaceHostWithIP(configDir: File, filter: Array[String] = HADOOP_CLIENT_CONF_FILES): Unit = {
+  /** Replace host information with ip of configuration files under hadoop/hive config dir. */
+  def batchReplaceHostWithIP(
+      configDir: File,
+      filter: Array[String] = HADOOP_CLIENT_CONF_FILES): Unit = {
     if (!configDir.isDirectory) {
       replaceHostWithIP(configDir)
       return
@@ -86,11 +83,14 @@ object HadoopConfigUtils {
       return
     }
     configDir.listFiles
-      .filter(_.isFile).filter(e => filter.contains(e.getName))
+      .filter(_.isFile)
+      .filter(e => filter.contains(e.getName))
       .foreach(rewriteHostIpMapper(_, hostsMap))
   }
 
-  private[this] def rewriteHostIpMapper(configFile: File, hostsMap: ListMap[String, String]): Unit = {
+  private[this] def rewriteHostIpMapper(
+      configFile: File,
+      hostsMap: ListMap[String, String]): Unit = {
     // replace the host information in the configuration content
     val lines = ApacheFileUtils.readLines(configFile).map {
       case line if !line.trim.startsWith("<value>") => line
@@ -107,27 +107,30 @@ object HadoopConfigUtils {
     ApacheFileUtils.writeLines(configFile, lines)
   }
 
-  /**
-   * Read system hadoop config to Map
-   */
+  /** Read system hadoop config to Map */
   def readSystemHadoopConf: JavaMap[String, String] =
     getSystemHadoopConfDir
-      .map(confDir =>
-        LfsOperator.listDir(confDir)
-          .filter(f => HADOOP_CLIENT_CONF_FILES.contains(f.getName))
-          .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
-          .toMap.asJava)
+      .map(
+        confDir =>
+          LfsOperator
+            .listDir(confDir)
+            .filter(f => HADOOP_CLIENT_CONF_FILES.contains(f.getName))
+            .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+            .toMap
+            .asJava)
       .getOrElse(Collections.emptyMap[String, String]())
 
-  /**
-   * Read system hive config to Map
-   */
+  /** Read system hive config to Map */
   def readSystemHiveConf: JavaMap[String, String] = {
-    getSystemHiveConfDir.map(confDir =>
-      LfsOperator.listDir(confDir)
-        .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
-        .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
-        .toMap.asJava)
+    getSystemHiveConfDir
+      .map(
+        confDir =>
+          LfsOperator
+            .listDir(confDir)
+            .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
+            .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+            .toMap
+            .asJava)
       .getOrElse(Collections.emptyMap[String, String]())
 
   }

@@ -20,8 +20,6 @@ import java.io.File
 import java.net.{URL, URLClassLoader}
 import java.util.function.Supplier
 
-import scala.util.Try
-
 object ClassLoaderUtils extends Logger {
 
   private[this] val originalClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader
@@ -66,19 +64,25 @@ object ClassLoaderUtils extends Logger {
 
   def loadJar(jarFilePath: String): Unit = {
     val jarFile = new File(jarFilePath)
-    require(jarFile.exists, s"[StreamPark] ClassLoaderUtils.loadJar: jarFilePath $jarFilePath is not exists")
-    require(jarFile.isFile, s"[StreamPark] ClassLoaderUtils.loadJar: jarFilePath $jarFilePath is not file")
+    require(
+      jarFile.exists,
+      s"[StreamPark] ClassLoaderUtils.loadJar: jarFilePath $jarFilePath is not exists")
+    require(
+      jarFile.isFile,
+      s"[StreamPark] ClassLoaderUtils.loadJar: jarFilePath $jarFilePath is not file")
     loadPath(jarFile.getAbsolutePath)
   }
 
   def loadJars(path: String): Unit = {
     val jarDir = new File(path)
     require(jarDir.exists, s"[StreamPark] ClassLoaderUtils.loadJars: jarPath $path is not exists")
-    require(jarDir.isDirectory, s"[StreamPark] ClassLoaderUtils.loadJars: jarPath $path is not directory")
-    require(jarDir.listFiles.length > 0, s"[StreamPark] ClassLoaderUtils.loadJars: have not jar in path:$path")
-    jarDir.listFiles.foreach { x =>
-      loadPath(x.getAbsolutePath)
-    }
+    require(
+      jarDir.isDirectory,
+      s"[StreamPark] ClassLoaderUtils.loadJars: jarPath $path is not directory")
+    require(
+      jarDir.listFiles.length > 0,
+      s"[StreamPark] ClassLoaderUtils.loadJars: have not jar in path:$path")
+    jarDir.listFiles.foreach(x => loadPath(x.getAbsolutePath))
   }
 
   def loadResource(filepath: String): Unit = {

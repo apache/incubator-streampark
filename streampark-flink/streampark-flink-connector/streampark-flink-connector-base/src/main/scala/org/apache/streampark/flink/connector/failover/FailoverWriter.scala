@@ -17,18 +17,20 @@
 
 package org.apache.streampark.flink.connector.failover
 
+import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.util._
+import org.apache.streampark.flink.connector.conf.FailoverStorageType._
+
+import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
+
 import java.util._
 import java.util.concurrent.locks.ReentrantLock
 
 import scala.collection.JavaConversions._
 
-import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
-
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.util._
-import org.apache.streampark.flink.connector.conf.FailoverStorageType._
-
-class FailoverWriter(failoverStorage: FailoverStorageType, properties: Properties) extends AutoCloseable with Logger {
+class FailoverWriter(failoverStorage: FailoverStorageType, properties: Properties)
+  extends AutoCloseable
+  with Logger {
 
   private[this] object Lock {
     @volatile var initialized = false
@@ -51,13 +53,19 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
               Lock.lock.lock()
               if (!Lock.initialized) {
                 Lock.initialized = true
-                properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-                properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+                properties.put(
+                  "key.serializer",
+                  "org.apache.kafka.common.serialization.StringSerializer")
+                properties.put(
+                  "value.serializer",
+                  "org.apache.kafka.common.serialization.StringSerializer")
                 kafkaProducer = new KafkaProducer[String, String](properties)
               }
             } catch {
               case exception: Exception => {
-                logError(s"build Failover storageType:KAFKA failed exception ${exception.getStackTrace.mkString("Array(", ", ", ")")}")
+                logError(
+                  s"build Failover storageType:KAFKA failed exception ${exception.getStackTrace
+                      .mkString("Array(", ", ", ")")}")
                 throw exception
               }
             } finally {
@@ -75,13 +83,17 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                |}
                |""".stripMargin
           val record = new ProducerRecord[String, String](topic, sendData)
-          kafkaProducer.send(
-            record,
-            new Callback() {
-              override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
-                logInfo(s"Failover successful!! storageType:Kafka,table: $table,size:${request.size}")
+          kafkaProducer
+            .send(
+              record,
+              new Callback() {
+                override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
+                  logInfo(
+                    s"Failover successful!! storageType:Kafka,table: $table,size:${request.size}")
+                }
               }
-            }).get()
+            )
+            .get()
         case MySQL =>
           if (!Lock.initialized) {
             try {
@@ -90,7 +102,8 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                 Lock.initialized = true
                 properties.put(KEY_ALIAS, s"failover-$table")
                 val mysqlConnect = JdbcUtils.getConnection(properties)
-                val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
+                val mysqlTable =
+                  mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
                 if (!mysqlTable.next()) {
                   JdbcUtils.execute(
                     mysqlConnect,
@@ -100,21 +113,25 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
               }
             } catch {
               case exception: Exception =>
-                logError(s"build Failover storageType:MySQL failed exception ${exception.getStackTrace}")
+                logError(
+                  s"build Failover storageType:MySQL failed exception ${exception.getStackTrace}")
                 throw exception
             } finally {
               Lock.lock.unlock()
             }
           }
           val timestamp = System.currentTimeMillis()
-          val records = request.records.map(x => {
-            val v = cleanUp(x)
-            s""" ($v,$timestamp) """.stripMargin
-          })
+          val records = request.records.map(
+            x => {
+              val v = cleanUp(x)
+              s""" ($v,$timestamp) """.stripMargin
+            })
           val sql = s"INSERT INTO $table(`values`,`timestamp`) VALUES ${records.mkString(",")} "
           JdbcUtils.update(sql)(properties)
           logInfo(s"Failover successful!! storageType:MySQL,table: $table,size:${request.size}")
-        case _ => throw new UnsupportedOperationException(s"[StreamPark] unsupported failover storageType:$failoverStorage")
+        case _ =>
+          throw new UnsupportedOperationException(
+            s"[StreamPark] unsupported failover storageType:$failoverStorage")
       }
     }
   }

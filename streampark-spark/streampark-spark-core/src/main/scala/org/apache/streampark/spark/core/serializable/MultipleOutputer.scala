@@ -23,8 +23,10 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs
 /**
  * Multiple dir output
  *
- * @tparam K key
- * @tparam V value
+ * @tparam K
+ *   key
+ * @tparam V
+ *   value
  */
 trait MultipleOutputer[K, V] {
   def write(key: K, value: V, path: String): Unit
@@ -41,7 +43,8 @@ object MultipleOutputer {
    * @tparam K
    * @tparam V
    */
-  implicit class AvroMultipleOutputer[K, V](mo: AvroMultipleOutputs) extends MultipleOutputer[K, V] {
+  implicit class AvroMultipleOutputer[K, V](mo: AvroMultipleOutputs)
+    extends MultipleOutputer[K, V] {
     def write(key: K, value: V, path: String): Unit = mo.write(key, value, path)
 
     def close(): Unit = mo.close()
@@ -54,7 +57,8 @@ object MultipleOutputer {
    * @tparam K
    * @tparam V
    */
-  implicit class PlainMultipleOutputer[K, V](mo: MultipleOutputs[K, V]) extends MultipleOutputer[K, V] {
+  implicit class PlainMultipleOutputer[K, V](mo: MultipleOutputs[K, V])
+    extends MultipleOutputer[K, V] {
     def write(key: K, value: V, path: String): Unit = mo.write(key, value, path)
 
     def close(): Unit = mo.close()

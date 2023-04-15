@@ -17,15 +17,17 @@
 
 package org.apache.streampark.flink.connector.failover
 
+import org.apache.streampark.common.util.Logger
+
 import java.util
 import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
 
 import scala.collection.JavaConversions._
 
-import org.apache.streampark.common.util.Logger
-
-case class SinkBuffer(writer: SinkWriter, flushInterval: Long, bufferSize: Int) extends AutoCloseable with Logger {
+case class SinkBuffer(writer: SinkWriter, flushInterval: Long, bufferSize: Int)
+  extends AutoCloseable
+  with Logger {
 
   private var timestamp = 0L
 
@@ -65,7 +67,8 @@ case class SinkBuffer(writer: SinkWriter, flushInterval: Long, bufferSize: Int) 
     } else false
   }
 
-  private[this] def buildDeepCopy(original: util.List[String]): util.List[String] = Collections.unmodifiableList(new util.ArrayList[String](original))
+  private[this] def buildDeepCopy(original: util.List[String]): util.List[String] =
+    Collections.unmodifiableList(new util.ArrayList[String](original))
 
   override def close(): Unit = if (localValues.nonEmpty) addToQueue()
 

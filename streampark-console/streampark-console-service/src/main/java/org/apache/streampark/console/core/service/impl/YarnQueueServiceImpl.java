@@ -29,11 +29,11 @@ import org.apache.streampark.console.core.mapper.YarnQueueMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.YarnQueueService;
-import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
+import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.isValid;
 
 @Slf4j
 @Service
@@ -58,12 +59,14 @@ import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.
 public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue>
     implements YarnQueueService {
 
+  public static final String DEFAULT_QUEUE = "default";
   public static final String QUEUE_USED_FORMAT =
-      "Please remove the yarn queue for %s referenced it before %s.";
+      "Please remove the yarn queue for '%s' referenced it before '%s'.";
   public static final String QUEUE_EXISTED_IN_TEAM_HINT =
       "The queue label existed already. Try on a new queue label, please.";
   public static final String QUEUE_EMPTY_HINT = "Yarn queue label mustn't be empty.";
   public static final String QUEUE_AVAILABLE_HINT = "The queue label is available.";
+
   @Autowired private ApplicationService applicationService;
   @Autowired private FlinkClusterService flinkClusterService;
 
@@ -96,7 +99,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
       return responseResult;
     }
 
-    boolean valid = YarnQueueLabelExpression.isValid(yarnQueue.getQueueLabel());
+    boolean valid = isValid(yarnQueue.getQueueLabel());
     if (!valid) {
       responseResult.setStatus(2);
       responseResult.setMsg(ERR_FORMAT_HINTS);
@@ -141,8 +144,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     }
 
     // 3 update yarnQueue
-    ApiAlertException.throwIfFalse(
-        YarnQueueLabelExpression.isValid(yarnQueue.getQueueLabel()), ERR_FORMAT_HINTS);
+    ApiAlertException.throwIfFalse(isValid(yarnQueue.getQueueLabel()), ERR_FORMAT_HINTS);
 
     checkNotReferencedByApplications(
         queueFromDB.getTeamId(), queueFromDB.getQueueLabel(), "updating");
@@ -164,6 +166,40 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     checkNotReferencedByFlinkClusters(queueFromDB.getQueueLabel(), "deleting");
 
     removeById(yarnQueue.getId());
+  }
+
+  /**
+   * Only check the validation of queue-labelExpression when using yarn application or yarn-session
+   * mode or yarn-perjob mode.
+   *
+   * @param executionMode execution mode.
+   * @param queueLabel queueLabel expression.
+   */
+  @Override
+  public void checkQueueLabel(ExecutionMode executionMode, String queueLabel) {
+    if (ExecutionMode.isYarnMode(executionMode)) {
+      ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
+    }
+  }
+
+  @Override
+  public boolean isDefaultQueue(String queueLabel) {
+    return StringUtils.equals(DEFAULT_QUEUE, queueLabel) || StringUtils.isEmpty(queueLabel);
+  }
+
+  @Override
+  public boolean existByQueueLabel(String queueLabel) {
+    return getBaseMapper()
+        .exists(new LambdaQueryWrapper<YarnQueue>().eq(YarnQueue::getQueueLabel, queueLabel));
+  }
+
+  @Override
+  public boolean existByTeamIdQueueLabel(Long teamId, String queueLabel) {
+    return getBaseMapper()
+        .exists(
+            new LambdaQueryWrapper<YarnQueue>()
+                .eq(YarnQueue::getTeamId, teamId)
+                .eq(YarnQueue::getQueueLabel, queueLabel));
   }
 
   // --------- private methods------------

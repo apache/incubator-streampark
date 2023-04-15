@@ -17,10 +17,8 @@
 
 package org.apache.streampark.flink.client.tool
 
-import java.io.File
-import java.nio.charset.StandardCharsets
-
-import scala.util.{Failure, Success, Try}
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration.{Configuration, CoreOptions}
@@ -34,8 +32,10 @@ import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.KubernetesRetriever
+import java.io.File
+import java.nio.charset.StandardCharsets
+
+import scala.util.{Failure, Success, Try}
 
 object FlinkSessionSubmitHelper extends Logger {
 
@@ -45,21 +45,32 @@ object FlinkSessionSubmitHelper extends Logger {
   /**
    * Submit Flink Job via Rest API.
    *
-   * @param jmRestUrl   jobmanager rest url of target flink cluster
-   * @param flinkJobJar flink job jar file
-   * @param flinkConfig flink configuration
-   * @return jobID of submitted flink job
+   * @param jmRestUrl
+   *   jobmanager rest url of target flink cluster
+   * @param flinkJobJar
+   *   flink job jar file
+   * @param flinkConfig
+   *   flink configuration
+   * @return
+   *   jobID of submitted flink job
    */
   @throws[Exception]
   def submitViaRestApi(jmRestUrl: String, flinkJobJar: File, flinkConfig: Configuration): String = {
     // upload flink-job jar
-    val uploadResult = Request.post(s"$jmRestUrl/jars/upload")
+    val uploadResult = Request
+      .post(s"$jmRestUrl/jars/upload")
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(60))
-      .body(MultipartEntityBuilder
-        .create()
-        .addBinaryBody("jarfile", flinkJobJar, ContentType.create("application/java-archive"), flinkJobJar.getName)
-        .build()).execute
+      .body(
+        MultipartEntityBuilder
+          .create()
+          .addBinaryBody(
+            "jarfile",
+            flinkJobJar,
+            ContentType.create("application/java-archive"),
+            flinkJobJar.getName)
+          .build())
+      .execute
       .returnContent()
       .asString(StandardCharsets.UTF_8)
 
@@ -72,15 +83,19 @@ object FlinkSessionSubmitHelper extends Logger {
     }
 
     if (!jarUploadResponse.isSuccessful) {
-      throw new Exception(s"[flink-submit] upload flink jar to flink session cluster failed, jmRestUrl=$jmRestUrl, response=$jarUploadResponse")
+      throw new Exception(
+        s"[flink-submit] upload flink jar to flink session cluster failed, jmRestUrl=$jmRestUrl, response=$jarUploadResponse")
     }
 
     // refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
-    val resp = Request.post(s"$jmRestUrl/jars/${jarUploadResponse.jarId}/run")
+    val resp = Request
+      .post(s"$jmRestUrl/jars/${jarUploadResponse.jarId}/run")
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(60))
       .body(new StringEntity(Serialization.write(new JarRunRequest(flinkConfig))))
-      .execute.returnContent().asString(StandardCharsets.UTF_8)
+      .execute
+      .returnContent()
+      .asString(StandardCharsets.UTF_8)
 
     Try(parse(resp)) match {
       case Success(ok) => (ok \ "jobid").extractOpt[String].orNull
@@ -103,14 +118,22 @@ private[client] case class JarUploadResponse(filename: String, status: String) {
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[client] case class JarRunRequest(entryClass: String, programArgs: String, parallelism: String, savepointPath: String, allowNonRestoredState: Boolean) {
+private[client] case class JarRunRequest(
+    entryClass: String,
+    programArgs: String,
+    parallelism: String,
+    savepointPath: String,
+    allowNonRestoredState: Boolean) {
   def this(flinkConf: Configuration) {
     this(
       entryClass = flinkConf.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS),
-      programArgs = Option(flinkConf.get(ApplicationConfiguration.APPLICATION_ARGS)).map(String.join(" ", _)).orNull,
+      programArgs = Option(flinkConf.get(ApplicationConfiguration.APPLICATION_ARGS))
+        .map(String.join(" ", _))
+        .orNull,
       parallelism = String.valueOf(flinkConf.get(CoreOptions.DEFAULT_PARALLELISM)),
       savepointPath = flinkConf.get(SavepointConfigOptions.SAVEPOINT_PATH),
-      allowNonRestoredState = flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE))
+      allowNonRestoredState =
+        flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE))
   }
 
 }

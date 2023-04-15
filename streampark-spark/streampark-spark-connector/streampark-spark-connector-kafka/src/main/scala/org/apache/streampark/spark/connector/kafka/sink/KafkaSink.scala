@@ -17,20 +17,22 @@
 
 package org.apache.streampark.spark.connector.kafka.sink
 
-import java.util.UUID
-
-import scala.reflect.ClassTag
+import org.apache.streampark.spark.connector.kafka.writer.KafkaWriter.createKafkaOutputWriter
+import org.apache.streampark.spark.connector.sink.Sink
 
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 
-import org.apache.streampark.spark.connector.kafka.writer.KafkaWriter.createKafkaOutputWriter
-import org.apache.streampark.spark.connector.sink.Sink
+import java.util.UUID
 
-class KafkaSink[T: ClassTag](@transient override val sc: SparkContext, initParams: Map[String, String] = Map.empty[String, String])
-    extends Sink[T] {
+import scala.reflect.ClassTag
+
+class KafkaSink[T: ClassTag](
+    @transient override val sc: SparkContext,
+    initParams: Map[String, String] = Map.empty[String, String])
+  extends Sink[T] {
 
   override val prefix: String = "spark.sink.kafka."
 
@@ -38,10 +40,10 @@ class KafkaSink[T: ClassTag](@transient override val sc: SparkContext, initParam
 
   private val outputTopic = prop.getProperty("topic")
 
-  /**
-   * Sink to kafka as a string
-   */
+  /** Sink to kafka as a string */
   override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
-    rdd.writeToKafka(prop, x => new ProducerRecord[String, String](outputTopic, UUID.randomUUID().toString, x.toString))
+    rdd.writeToKafka(
+      prop,
+      x => new ProducerRecord[String, String](outputTopic, UUID.randomUUID().toString, x.toString))
   }
 }

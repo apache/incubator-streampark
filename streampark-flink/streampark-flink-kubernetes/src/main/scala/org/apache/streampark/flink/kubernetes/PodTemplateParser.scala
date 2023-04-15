@@ -17,6 +17,10 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import org.apache.commons.collections.CollectionUtils
+import org.apache.commons.lang3.StringUtils
+import org.yaml.snakeyaml.Yaml
+
 import java.util
 import java.util.{List => JList, Map => JMap}
 
@@ -24,10 +28,6 @@ import scala.collection.JavaConverters._
 import scala.language.postfixOps
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
-
-import org.apache.commons.collections.CollectionUtils
-import org.apache.commons.lang3.StringUtils
-import org.yaml.snakeyaml.Yaml
 
 object PodTemplateParser {
 
@@ -38,17 +38,17 @@ object PodTemplateParser {
       |  name: pod-template
       |""".stripMargin
 
-  /**
-   * Get init content of pod template
-   */
+  /** Get init content of pod template */
   def getInitPodTemplateContent: String =
     PodTemplateParser.POD_TEMPLATE_INIT_CONTENT.concat("spec:\n")
 
   /**
    * Complementary initialization pod templates
    *
-   * @param podTemplateContent original pod template
-   * @return complemented pod template
+   * @param podTemplateContent
+   *   original pod template
+   * @return
+   *   complemented pod template
    */
   def completeInitPodTemplate(podTemplateContent: String): String = {
     if (podTemplateContent == null || podTemplateContent.trim.isEmpty) {
@@ -70,20 +70,25 @@ object PodTemplateParser {
           }))
     }
 
-    if (root.containsKey("spec")
-      && Try(!root.get("spec").asInstanceOf[JMap[String, Any]].isEmpty).getOrElse(false)) {
+    if (
+      root.containsKey("spec")
+      && Try(!root.get("spec").asInstanceOf[JMap[String, Any]].isEmpty).getOrElse(false)
+    ) {
       res.put("spec", root.get("spec"))
     }
     yaml.dumpAsMap(res)
   }
 
   /**
-   * Add or Merge host alias spec into pod template.
-   * When parser pod template error, it would return the origin content.
+   * Add or Merge host alias spec into pod template. When parser pod template error, it would return
+   * the origin content.
    *
-   * @param hosts              hosts info [hostname, ip]
-   * @param podTemplateContent pod template content
-   * @return pod template content
+   * @param hosts
+   *   hosts info [hostname, ip]
+   * @param podTemplateContent
+   *   pod template content
+   * @return
+   *   pod template content
    */
   def completeHostAliasSpec(hosts: JMap[String, String], podTemplateContent: String): String = {
     if (hosts.isEmpty) return podTemplateContent
@@ -110,28 +115,32 @@ object PodTemplateParser {
     }
   }
 
-  /**
-   * convert hosts map to host alias
-   */
-  private[this] def covertHostsMapToHostAliasNode(hosts: JMap[String, String]): util.ArrayList[util.LinkedHashMap[String, Any]] =
+  /** convert hosts map to host alias */
+  private[this] def covertHostsMapToHostAliasNode(
+      hosts: JMap[String, String]): util.ArrayList[util.LinkedHashMap[String, Any]] =
     new util.ArrayList(
       hosts.asScala
         .map(e => e._1.trim -> e._2.trim)
         .groupBy(_._2)
         .mapValues(_.keys)
-        .toList.map(e => {
-          val map = new util.LinkedHashMap[String, Any]()
-          map.put("ip", e._1)
-          map.put("hostnames", new util.ArrayList(e._2.toList.asJava))
-          map
-        }).asJava)
+        .toList
+        .map(
+          e => {
+            val map = new util.LinkedHashMap[String, Any]()
+            map.put("ip", e._1)
+            map.put("hostnames", new util.ArrayList(e._2.toList.asJava))
+            map
+          })
+        .asJava)
 
   /**
-   * Extract host-ip map from pod template.
-   * When parser pod template error, it would return empty Map.
+   * Extract host-ip map from pod template. When parser pod template error, it would return empty
+   * Map.
    *
-   * @param podTemplateContent pod template content
-   * @return hostname -> ipv4
+   * @param podTemplateContent
+   *   pod template content
+   * @return
+   *   hostname -> ipv4
    */
   def extractHostAliasMap(podTemplateContent: String): JMap[String, String] = {
     val hosts = new util.LinkedHashMap[String, String](0)
@@ -172,8 +181,10 @@ object PodTemplateParser {
   /**
    * Preview HostAlias pod template content
    *
-   * @param hosts hostname -> ipv4
-   * @return pod template content
+   * @param hosts
+   *   hostname -> ipv4
+   * @return
+   *   pod template content
    */
   def previewHostAliasSpec(hosts: JMap[String, String]): String = {
     val hostAlias = covertHostsMapToHostAliasNode(hosts)

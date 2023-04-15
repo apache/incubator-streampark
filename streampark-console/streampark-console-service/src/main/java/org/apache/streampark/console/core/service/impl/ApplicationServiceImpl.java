@@ -76,6 +76,7 @@ import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
+import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
@@ -90,7 +91,6 @@ import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
-import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.io.FileUtils;
@@ -110,6 +110,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -151,13 +152,15 @@ import java.util.stream.Collectors;
 import static org.apache.streampark.common.enums.StorageType.LFS;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
-import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.checkQueueLabelIfNeed;
 
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements ApplicationService {
+
+  private static final String ERROR_APP_QUEUE_HINT =
+      "Queue label '%s' isn't available for teamId '%d', please add it into the team first.";
 
   private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
@@ -209,6 +212,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private VariableService variableService;
 
   @Autowired private LogClientService logClient;
+
+  @Autowired private YarnQueueService yarnQueueService;
 
   @PostConstruct
   public void resetOptionState() {
@@ -391,7 +396,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // 8) remove app
     removeApp(application);
 
-    if (isKubernetesApp(paramApp)) {
+    if (isKubernetesApp(application)) {
       k8SFlinkTrackMonitor.unWatching(toTrackId(application));
     } else {
       FlinkRESTAPIWatcher.unWatching(paramApp.getId());
@@ -703,7 +708,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.setRelease(ReleaseState.NEED_RELEASE.get());
     appParam.setOptionState(OptionState.NONE.getValue());
     appParam.setCreateTime(new Date());
-    checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
+    appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
+
+    boolean success = validateQueueIfNeeded(appParam);
+    ApiAlertException.throwIfFalse(
+        success,
+        String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
       String jarPath =
@@ -796,8 +807,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         FlinkSql flinkSql = new FlinkSql(newApp);
         flinkSqlService.create(flinkSql);
       }
-      if (newApp.getConfig() != null) {
-        ApplicationConfig copyConfig = configService.getEffective(appParam.getId());
+      ApplicationConfig copyConfig = configService.getEffective(appParam.getId());
+      if (copyConfig != null) {
         ApplicationConfig config = new ApplicationConfig();
         config.setAppId(newApp.getId());
         config.setFormat(copyConfig.getFormat());
@@ -817,8 +828,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   @Transactional(rollbackFor = {Exception.class})
   public boolean update(Application appParam) {
-    checkQueueLabelIfNeed(appParam.getExecutionMode(), appParam.getYarnQueue());
     Application application = getById(appParam.getId());
+
+    boolean success = validateQueueIfNeeded(application, appParam);
+    ApiAlertException.throwIfFalse(
+        success,
+        String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+
     application.setRelease(ReleaseState.NEED_RELEASE.get());
     if (application.isUploadJob()) {
       if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
@@ -1081,7 +1097,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           application.getK8sNamespace(), application.getJobName());
       KubernetesDeploymentHelper.deleteTaskConfigMap(
           application.getK8sNamespace(), application.getJobName());
-      IngressController.deleteIngress(application.getJobName(), application.getK8sNamespace());
     }
     if (startFuture != null) {
       startFuture.cancel(true);
@@ -1317,10 +1332,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             })
         .whenComplete(
             (t, e) -> {
-              if (isKubernetesApp(application)) {
-                IngressController.deleteIngress(
-                    application.getJobName(), application.getK8sNamespace());
-              }
               cancelFutureMap.remove(application.getId());
               applicationLogService.save(applicationLog);
             });
@@ -1506,32 +1517,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     BuildResult buildResult = buildPipeline.getBuildResult();
     if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
       buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
-    } else {
-      if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-        Utils.notNull(buildResult);
-        DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
-        String ingressTemplates = application.getIngressTemplate();
-        String domainName = settingService.getIngressModeDefault();
-        if (StringUtils.isNotBlank(ingressTemplates)) {
-          String ingressOutput = result.workspacePath() + "/ingress.yaml";
-          IngressController.configureIngress(ingressOutput);
-        }
-        if (StringUtils.isNotBlank(domainName)) {
-          try {
-            IngressController.configureIngress(
-                domainName, application.getClusterId(), application.getK8sNamespace());
-          } catch (KubernetesClientException e) {
-            log.info("Failed to create ingress, stack info:{}", e.getMessage());
-            applicationLog.setException(e.getMessage());
-            applicationLog.setSuccess(false);
-            applicationLogService.save(applicationLog);
-            application.setState(FlinkAppState.FAILED.getValue());
-            application.setOptionState(OptionState.NONE.getValue());
-            updateById(application);
-            return;
-          }
-        }
-      }
     }
 
     // Get the args after placeholder replacement
@@ -1627,6 +1612,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             })
         .whenComplete(
             (t, e) -> {
+              if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+                String domainName = settingService.getIngressModeDefault();
+                if (StringUtils.isNotBlank(domainName)) {
+                  try {
+                    IngressController.configureIngress(
+                        domainName, application.getClusterId(), application.getK8sNamespace());
+                  } catch (KubernetesClientException kubernetesClientException) {
+                    log.info(
+                        "Failed to create ingress, stack info:{}",
+                        kubernetesClientException.getMessage());
+                    applicationLog.setException(e.getMessage());
+                    applicationLog.setSuccess(false);
+                    applicationLogService.save(applicationLog);
+                    application.setState(FlinkAppState.FAILED.getValue());
+                    application.setOptionState(OptionState.NONE.getValue());
+                    updateById(application);
+                    return;
+                  }
+                }
+              }
+
               applicationLogService.save(applicationLog);
               startFutureMap.remove(application.getId());
             });
@@ -1730,5 +1736,55 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
     return null;
+  }
+
+  /**
+   * Check queue label validation when create the application if needed.
+   *
+   * @param appParam the app to create.
+   * @return <code>true</code> if validate it successfully, <code>false</code> else.
+   */
+  @VisibleForTesting
+  public boolean validateQueueIfNeeded(Application appParam) {
+    yarnQueueService.checkQueueLabel(appParam.getExecutionModeEnum(), appParam.getYarnQueue());
+    if (!isYarnNotDefaultQueue(appParam)) {
+      return true;
+    }
+    return yarnQueueService.existByTeamIdQueueLabel(appParam.getTeamId(), appParam.getYarnQueue());
+  }
+
+  /**
+   * Check queue label validation when update the application if needed.
+   *
+   * @param oldApp the old app to update.
+   * @param newApp the new app payload.
+   * @return <code>true</code> if validate it successfully, <code>false</code> else.
+   */
+  @VisibleForTesting
+  public boolean validateQueueIfNeeded(Application oldApp, Application newApp) {
+    yarnQueueService.checkQueueLabel(newApp.getExecutionModeEnum(), newApp.getYarnQueue());
+    if (!isYarnNotDefaultQueue(newApp)) {
+      return true;
+    }
+
+    oldApp.setYarnQueueByHotParams();
+    if (ExecutionMode.isYarnPerJobOrAppMode(newApp.getExecutionModeEnum())
+        && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
+      return true;
+    }
+    return yarnQueueService.existByTeamIdQueueLabel(newApp.getTeamId(), newApp.getYarnQueue());
+  }
+
+  /**
+   * Judge the execution mode whether is the Yarn PerJob or Application mode with not default or
+   * empty queue label.
+   *
+   * @param application application entity.
+   * @return If the executionMode is (Yarn PerJob or application mode) and the queue label is not
+   *     (empty or default), return true, false else.
+   */
+  private boolean isYarnNotDefaultQueue(Application application) {
+    return ExecutionMode.isYarnPerJobOrAppMode(application.getExecutionModeEnum())
+        && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
   }
 }

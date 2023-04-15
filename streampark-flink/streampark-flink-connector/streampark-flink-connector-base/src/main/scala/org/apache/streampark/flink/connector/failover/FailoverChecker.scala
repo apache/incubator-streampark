@@ -17,19 +17,24 @@
 
 package org.apache.streampark.flink.connector.failover
 
+import org.apache.streampark.common.util.{Logger, ThreadUtils}
+
 import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
-import org.apache.streampark.common.util.{Logger, ThreadUtils}
-
 case class FailoverChecker(delayTime: Long) extends AutoCloseable with Logger {
 
   val sinkBuffers: ListBuffer[SinkBuffer] = ListBuffer[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("FailoverChecker")
-  val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
-  scheduledExecutorService.scheduleWithFixedDelay(getTask, delayTime, delayTime, TimeUnit.MILLISECONDS)
+  val scheduledExecutorService: ScheduledExecutorService =
+    Executors.newSingleThreadScheduledExecutor(factory)
+  scheduledExecutorService.scheduleWithFixedDelay(
+    getTask,
+    delayTime,
+    delayTime,
+    TimeUnit.MILLISECONDS)
   logInfo(s"Build Sink scheduled checker, timeout (microSeconds) = $delayTime")
 
   def addSinkBuffer(buffer: SinkBuffer): Unit = {

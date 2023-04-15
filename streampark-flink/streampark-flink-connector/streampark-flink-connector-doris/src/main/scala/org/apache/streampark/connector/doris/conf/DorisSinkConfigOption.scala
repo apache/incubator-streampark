@@ -17,17 +17,19 @@
 
 package org.apache.streampark.connector.doris.conf
 
+import org.apache.streampark.common.conf.ConfigOption
+import org.apache.streampark.common.util.ConfigUtils
+
 import java.util.Properties
 
 import scala.collection.JavaConverters._
 
-import org.apache.streampark.common.conf.ConfigOption
-import org.apache.streampark.common.util.ConfigUtils
-
 object DorisSinkConfigOption {
   val DORIS_SINK_PREFIX = "doris.sink"
 
-  def apply(prefixStr: String = DORIS_SINK_PREFIX, properties: Properties = new Properties): DorisSinkConfigOption =
+  def apply(
+      prefixStr: String = DORIS_SINK_PREFIX,
+      properties: Properties = new Properties): DorisSinkConfigOption =
     new DorisSinkConfigOption(prefixStr, properties)
 }
 
@@ -49,12 +51,11 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
         .filter(_.nonEmpty)
         .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
         .toList
-    })
+    }
+  )
 
-  val user: ConfigOption[String] = ConfigOption(
-    key = "user",
-    required = true,
-    classType = classOf[String])
+  val user: ConfigOption[String] =
+    ConfigOption(key = "user", required = true, classType = classOf[String])
 
   val loadFormat: ConfigOption[String] = ConfigOption(
     key = "loadFormat",
@@ -62,22 +63,14 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     defaultValue = "csv",
     classType = classOf[String])
 
-  val password: ConfigOption[String] = ConfigOption(
-    key = "password",
-    required = true,
-    classType = classOf[String])
+  val password: ConfigOption[String] =
+    ConfigOption(key = "password", required = true, classType = classOf[String])
 
-  val database: ConfigOption[String] = ConfigOption(
-    key = "database",
-    required = false,
-    defaultValue = "",
-    classType = classOf[String])
+  val database: ConfigOption[String] =
+    ConfigOption(key = "database", required = false, defaultValue = "", classType = classOf[String])
 
-  val table: ConfigOption[String] = ConfigOption(
-    key = "table",
-    required = false,
-    defaultValue = "",
-    classType = classOf[String])
+  val table: ConfigOption[String] =
+    ConfigOption(key = "table", required = false, defaultValue = "", classType = classOf[String])
 
   val sinkOfferTimeout: ConfigOption[Long] = ConfigOption(
     key = "sinkOfferTimeout",
@@ -121,11 +114,8 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     defaultValue = -1,
     classType = classOf[Int])
 
-  val maxRow: ConfigOption[Int] = ConfigOption(
-    key = "maxRow",
-    required = false,
-    defaultValue = 100000,
-    classType = classOf[Int])
+  val maxRow: ConfigOption[Int] =
+    ConfigOption(key = "maxRow", required = false, defaultValue = 100000, classType = classOf[Int])
 
   val maxBytes: ConfigOption[Int] = ConfigOption(
     key = "maxRow",
@@ -133,11 +123,8 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     defaultValue = 94371840,
     classType = classOf[Int])
 
-  val maxRetries: ConfigOption[Int] = ConfigOption(
-    key = "maxRetries",
-    required = false,
-    defaultValue = 1,
-    classType = classOf[Int])
+  val maxRetries: ConfigOption[Int] =
+    ConfigOption(key = "maxRetries", required = false, defaultValue = 1, classType = classOf[Int])
 
   val lablePrefix: ConfigOption[String] = ConfigOption(
     key = "lablePrefix",

@@ -16,10 +16,11 @@
  */
 package org.apache.streampark.common.conf
 
-import java.net.URI
 import org.apache.streampark.common.enums.StorageType
-import org.apache.streampark.common.util.Utils.StringCasts
 import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
+import org.apache.streampark.common.util.Utils.StringCasts
+
+import java.net.URI
 
 object Workspace {
 
@@ -31,34 +32,22 @@ object Workspace {
 
   private[this] lazy val localWorkspace = local.WORKSPACE
 
-  /**
-   * local build path
-   */
+  /** local build path */
   lazy val APP_LOCAL_DIST = s"$localWorkspace/dist"
 
-  /**
-   * dirPath of the maven local repository with built-in compilation process
-   */
+  /** dirPath of the maven local repository with built-in compilation process */
   lazy val MAVEN_LOCAL_PATH = s"$localWorkspace/mvnrepo"
 
-  /**
-   * local sourceCode path.(for git...)
-   */
+  /** local sourceCode path.(for git...) */
   lazy val PROJECT_LOCAL_PATH = s"$localWorkspace/project"
 
-  /**
-   * local log path.
-   */
+  /** local log path. */
   lazy val LOG_LOCAL_PATH = s"$localWorkspace/logs"
 
-  /**
-   * project build log path.
-   */
+  /** project build log path. */
   lazy val PROJECT_BUILD_LOG_PATH = s"$LOG_LOCAL_PATH/build_logs"
 
-  /**
-   * project archives path
-   */
+  /** project archives path */
   lazy val ARCHIVES_FILE_PATH = s"${remote.WORKSPACE}/historyserver/archive"
 
 }
@@ -108,9 +97,7 @@ case class Workspace(storageType: StorageType) {
 
   lazy val APP_CLIENT = s"$WORKSPACE/client"
 
-  /**
-   * store flink multi version support jars
-   */
+  /** store flink multi version support jars */
   lazy val APP_SHIMS = s"$WORKSPACE/shims"
 
   lazy val APP_UPLOADS = s"$WORKSPACE/uploads"
@@ -123,9 +110,7 @@ case class Workspace(storageType: StorageType) {
 
   lazy val APP_SAVEPOINTS = s"$WORKSPACE/savepoints"
 
-  /**
-   * store global public jars
-   */
+  /** store global public jars */
   lazy val APP_JARS = s"$WORKSPACE/jars"
 
 }

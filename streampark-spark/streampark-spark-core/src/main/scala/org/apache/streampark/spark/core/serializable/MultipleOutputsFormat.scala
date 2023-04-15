@@ -17,8 +17,6 @@
 
 package org.apache.streampark.spark.core.serializable
 
-import java.io.IOException
-
 import org.apache.hadoop.io.{DataInputBuffer, NullWritable}
 import org.apache.hadoop.mapred.RawKeyValueIterator
 import org.apache.hadoop.mapreduce.{Job, _}
@@ -28,46 +26,58 @@ import org.apache.hadoop.mapreduce.task.ReduceContextImpl
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl.DummyReporter
 import org.apache.hadoop.util.Progress
 
+import java.io.IOException
+
 object MultipleOutputsFormat {
   // Type inference fails with this inlined in constructor parameters
-  private def defaultMultipleOutputsMaker[K, V](io: TaskInputOutputContext[_, _, K, V]): MultipleOutputer[K, V] = new MultipleOutputs[K, V](io)
+  private def defaultMultipleOutputsMaker[K, V](
+      io: TaskInputOutputContext[_, _, K, V]): MultipleOutputer[K, V] =
+    new MultipleOutputs[K, V](io)
 }
 
 /**
- * Use this abstract class to create multiple outputs of OutputFormat.
- * The output format requires a two-part key (outputPath and actualKey), and the outputPath will be used to
- * output into different directories ('/' separated by filenames).
+ * Use this abstract class to create multiple outputs of OutputFormat. The output format requires a
+ * two-part key (outputPath and actualKey), and the outputPath will be used to output into different
+ * directories ('/' separated by filenames).
  *
- * @param outputFormat         OutputFormat
- * @param multipleOutputsMaker Methods that implement the MultipleOutputer trait
- * @tparam K Basic OutputFormat's key type
- * @tparam V Basic OutputFormat's value type
+ * @param outputFormat
+ *   OutputFormat
+ * @param multipleOutputsMaker
+ *   Methods that implement the MultipleOutputer trait
+ * @tparam K
+ *   Basic OutputFormat's key type
+ * @tparam V
+ *   Basic OutputFormat's value type
  */
 abstract class MultipleOutputsFormat[K, V](
     outputFormat: OutputFormat[K, V],
     multipleOutputsMaker: TaskInputOutputContext[_, _, K, V] => MultipleOutputer[K, V] =
-      (r: TaskInputOutputContext[_, _, K, V]) => MultipleOutputsFormat.defaultMultipleOutputsMaker[K, V](r))
-    extends OutputFormat[(String, K), V] {
+      (r: TaskInputOutputContext[_, _, K, V]) =>
+        MultipleOutputsFormat.defaultMultipleOutputsMaker[K, V](r))
+  extends OutputFormat[(String, K), V] {
 
   /**
    * Check for validity of the output-specification for the job.
    *
-   * <p>This is to validate the output specification for the job when it is
-   * a job is submitted.  Typically checks that it does not already exist,
-   * throwing an exception when it already exists, so that output is not
-   * overwritten.</p>
+   * <p>This is to validate the output specification for the job when it is a job is submitted.
+   * Typically checks that it does not already exist, throwing an exception when it already exists,
+   * so that output is not overwritten.</p>
    *
-   * @param context information about the job
-   * @throws IOException when output should not be attempted
+   * @param context
+   *   information about the job
+   * @throws IOException
+   *   when output should not be attempted
    */
   override def checkOutputSpecs(context: JobContext): Unit = outputFormat.checkOutputSpecs(context)
 
   /**
-   * Get the output committer for this output format. This is responsible
-   * for ensuring the output is committed correctly.
+   * Get the output committer for this output format. This is responsible for ensuring the output is
+   * committed correctly.
    *
-   * @param context the task context
-   * @return an output committer
+   * @param context
+   *   the task context
+   * @return
+   *   an output committer
    * @throws IOException
    * @throws InterruptedException
    */
@@ -77,8 +87,10 @@ abstract class MultipleOutputsFormat[K, V](
   /**
    * Get the {@link RecordWriter} for the given task.
    *
-   * @param context the information about the current task.
-   * @return a { @link RecordWriter} to write the output for the job.
+   * @param context
+   *   the information about the current task.
+   * @return
+   *   a { @link RecordWriter} to write the output for the job.
    * @throws IOException
    */
   override def getRecordWriter(context: TaskAttemptContext): RecordWriter[(String, K), V] =
@@ -105,8 +117,10 @@ abstract class MultipleOutputsFormat[K, V](
       /**
        * Writes a keys/value pair.
        *
-       * @param keys  the key to write.
-       * @param value the value to write.
+       * @param keys
+       *   the key to write.
+       * @param value
+       *   the value to write.
        * @throws IOException
        */
       override def write(keys: (String, K), value: V): Unit = {

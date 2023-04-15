@@ -16,6 +16,8 @@
  */
 package org.apache.streampark.common.util
 
+import redis.clients.jedis.{Jedis, JedisCluster, Pipeline, ScanParams}
+
 import java.lang.{Integer => JInt}
 import java.util.Set
 
@@ -24,30 +26,32 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.util.{Failure, Success, Try}
 
-import redis.clients.jedis.{Jedis, JedisCluster, Pipeline, ScanParams}
-
 object RedisUtils extends Logger {
 
   def exists(key: String)(implicit endpoint: RedisEndpoint): Boolean = doRedis(_.exists(key))
 
-  def hexists(key: String, field: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Boolean = doRedis(_.hexists(key, field), func)
+  def hexists(key: String, field: String, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): Boolean = doRedis(_.hexists(key, field), func)
 
   def get(key: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.get(key))
 
-  def hget(key: String, field: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.hget(key, field))
+  def hget(key: String, field: String)(implicit endpoint: RedisEndpoint): String = doRedis(
+    _.hget(key, field))
 
   /**
-   * The Redis Setex command sets the value and expiration time. If the key already exists,
-   * the Setex command will replace the old value.
+   * The Redis Setex command sets the value and expiration time. If the key already exists, the
+   * Setex command will replace the old value.
    */
-  def setex(key: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): String =
+  def setex(key: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): String =
     doRedis(_.setex(key, ttl, value), func)
 
   /**
-   * The Redis Setnx (SET if Not eXists) command sets the specified value
-   * if the specified key does not exist
+   * The Redis Setnx (SET if Not eXists) command sets the specified value if the specified key does
+   * not exist
    */
-  def setnx(key: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(
+  def setnx(key: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): Long = doRedis(
     r => {
       val x = r.setnx(key, value)
       if (x == 1 && ttl != null) {
@@ -59,10 +63,11 @@ object RedisUtils extends Logger {
 
   /**
    * The Redis Hsetnx command is used to assign values to fields in a hash table that do not exist.
-   * If the hash table does not exist, a new hash table is created and the HSET operation is performed.
-   * If the field already exists in the hash table, the operation is invalid
+   * If the hash table does not exist, a new hash table is created and the HSET operation is
+   * performed. If the field already exists in the hash table, the operation is invalid
    */
-  def hsetnx(key: String, field: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(
+  def hsetnx(key: String, field: String, value: String, ttl: JInt = null, func: () => Unit = null)(
+      implicit endpoint: RedisEndpoint): Long = doRedis(
     r => {
       val x = r.hsetnx(key, field, value)
       if (x == 1 && ttl != null) {
@@ -72,11 +77,14 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def mget(keys: Array[String])(implicit endpoint: RedisEndpoint): Array[String] = doRedis(_.mget(keys: _*).asScala.toArray)
+  def mget(keys: Array[String])(implicit endpoint: RedisEndpoint): Array[String] = doRedis(
+    _.mget(keys: _*).asScala.toArray)
 
-  def del(key: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(_.del(key), func)
+  def del(key: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long =
+    doRedis(_.del(key), func)
 
-  def set(key: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): String = doRedis(
+  def set(key: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): String = doRedis(
     r => {
       val s = r.set(key, value)
       if (ttl != null) {
@@ -86,7 +94,8 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def hset(key: String, field: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(
+  def hset(key: String, field: String, value: String, ttl: JInt = null, func: () => Unit = null)(
+      implicit endpoint: RedisEndpoint): Long = doRedis(
     r => {
       val s = r.hset(key, field, value)
       if (ttl != null) {
@@ -96,7 +105,8 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def hmset(key: String, hash: Map[String, String], ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): String = doRedis(
+  def hmset(key: String, hash: Map[String, String], ttl: JInt = null, func: () => Unit = null)(
+      implicit endpoint: RedisEndpoint): String = doRedis(
     r => {
       val s = r.hmset(key, hash.asJava)
       if (ttl != null) {
@@ -106,16 +116,20 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def hmget(key: String, fields: String*)(implicit endpoint: RedisEndpoint): List[String] = doRedis(_.hmget(key, fields: _*).toList)
+  def hmget(key: String, fields: String*)(implicit endpoint: RedisEndpoint): List[String] = doRedis(
+    _.hmget(key, fields: _*).toList)
 
-  def hgetAll(key: String)(implicit endpoint: RedisEndpoint): Map[String, String] = doRedis(_.hgetAll(key).toMap)
+  def hgetAll(key: String)(implicit endpoint: RedisEndpoint): Map[String, String] = doRedis(
+    _.hgetAll(key).toMap)
 
-  def hdel(key: String, fields: immutable.List[String], func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = {
+  def hdel(key: String, fields: immutable.List[String], func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): Long = {
     if (key == null || fields == null || fields.isEmpty) 0L
     else doRedis(_.hdel(key, fields.toArray: _*), func)
   }
 
-  def sadd(key: String, members: immutable.List[String], ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = {
+  def sadd(key: String, members: immutable.List[String], ttl: JInt = null, func: () => Unit = null)(
+      implicit endpoint: RedisEndpoint): Long = {
     doRedis(
       r => {
         val res = r.sadd(key, members.toArray: _*)
@@ -127,12 +141,19 @@ object RedisUtils extends Logger {
       func)
   }
 
-  def smembers(key: String)(implicit endpoint: RedisEndpoint): Set[String] = doRedis(_.smembers(key))
+  def smembers(key: String)(implicit endpoint: RedisEndpoint): Set[String] = doRedis(
+    _.smembers(key))
 
-  def srem(key: String, members: immutable.List[String], func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long =
+  def srem(key: String, members: immutable.List[String], func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): Long =
     doRedis(_.srem(key, members.toArray: _*), func)
 
-  def getOrElseHset(key: String, field: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): String = doRedis(
+  def getOrElseHset(
+      key: String,
+      field: String,
+      value: String,
+      ttl: JInt = null,
+      func: () => Unit = null)(implicit endpoint: RedisEndpoint): String = doRedis(
     x => {
       val v = x.hget(key, field)
       if (v == null) {
@@ -145,7 +166,8 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def getOrElseSet(key: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): String = doRedis(
+  def getOrElseSet(key: String, value: String, ttl: JInt = null, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): String = doRedis(
     x => {
       val v = x.get(key)
       if (v == null) {
@@ -158,7 +180,8 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def hincrBy(key: String, field: String, value: Long, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(
+  def hincrBy(key: String, field: String, value: Long, ttl: JInt = null, func: () => Unit = null)(
+      implicit endpoint: RedisEndpoint): Long = doRedis(
     x => {
       val reply = x.hincrBy(key, field, value)
       if (ttl != null) {
@@ -168,7 +191,12 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def hincrByFloat(key: String, field: String, value: Double, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Double = doRedis(
+  def hincrByFloat(
+      key: String,
+      field: String,
+      value: Double,
+      ttl: JInt = null,
+      func: () => Unit = null)(implicit endpoint: RedisEndpoint): Double = doRedis(
     x => {
       val reply = x.hincrByFloat(key, field, value)
       if (ttl != null) {
@@ -178,7 +206,8 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def incrBy(key: String, value: Long, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(
+  def incrBy(key: String, value: Long, ttl: JInt = null, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): Long = doRedis(
     x => {
       val reply = x.incrBy(key, value)
       if (ttl != null) {
@@ -188,7 +217,8 @@ object RedisUtils extends Logger {
     },
     func)
 
-  def incrByFloat(key: String, value: Double, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Double = doRedis(
+  def incrByFloat(key: String, value: Double, ttl: JInt = null, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): Double = doRedis(
     x => {
       val reply = x.incrByFloat(key, value)
       if (ttl != null) {
@@ -198,58 +228,65 @@ object RedisUtils extends Logger {
     },
     func)
 
-  /**
-   * Batch writing
-   */
-  def mSets(kvs: Seq[(String, String)], ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(
+  /** Batch writing */
+  def mSets(kvs: Seq[(String, String)], ttl: JInt = null, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): Long = doRedis(
     x => {
       val start = System.currentTimeMillis()
       val pipe = x.pipelined()
-      kvs.foreach { case (k, v) =>
-        pipe.mset(k, v)
-        if (ttl != null) {
-          pipe.expire(k, ttl)
-        }
+      kvs.foreach {
+        case (k, v) =>
+          pipe.mset(k, v)
+          if (ttl != null) {
+            pipe.expire(k, ttl)
+          }
       }
       pipe.sync()
       System.currentTimeMillis() - start
     },
-    func)
+    func
+  )
 
-  def mSetex(kvs: Seq[(String, String)], ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(
+  def mSetex(kvs: Seq[(String, String)], ttl: JInt = null, func: () => Unit = null)(implicit
+      endpoint: RedisEndpoint): Long = doRedis(
     x => {
       val start = System.currentTimeMillis()
       val pipe = x.pipelined()
-      kvs.foreach { case (k, v) =>
-        pipe.setnx(k, v)
-        if (ttl != null) {
-          pipe.expire(k, ttl)
-        }
+      kvs.foreach {
+        case (k, v) =>
+          pipe.setnx(k, v)
+          if (ttl != null) {
+            pipe.expire(k, ttl)
+          }
       }
       pipe.sync()
       System.currentTimeMillis() - start
     },
-    func)
+    func
+  )
 
-  def expire(key: String, s: Int)(implicit endpoint: RedisEndpoint): Long = doRedis(_.expire(key, s))
+  def expire(key: String, s: Int)(implicit endpoint: RedisEndpoint): Long = doRedis(
+    _.expire(key, s))
 
-  def delByPattern(key: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Any = doRedis(
-    r => {
-      // Use scan to delete 10,000 records at a time, to prevent a load of too many records, caused oom
-      val scanParams = new ScanParams
-      scanParams.`match`(key)
-      scanParams.count(10000)
-      var cursor = ScanParams.SCAN_POINTER_START
-      do {
-        val scanResult = r.scan(cursor, scanParams)
-        cursor = scanResult.getCursor
-        val keys = scanResult.getResult.toList
-        if (keys.nonEmpty) {
-          r.del(keys: _*)
-        }
-      } while (cursor != "0")
-    },
-    func)
+  def delByPattern(key: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Any =
+    doRedis(
+      r => {
+        // Use scan to delete 10,000 records at a time, to prevent a load of too many records, caused oom
+        val scanParams = new ScanParams
+        scanParams.`match`(key)
+        scanParams.count(10000)
+        var cursor = ScanParams.SCAN_POINTER_START
+        do {
+          val scanResult = r.scan(cursor, scanParams)
+          cursor = scanResult.getCursor
+          val keys = scanResult.getResult.toList
+          if (keys.nonEmpty) {
+            r.del(keys: _*)
+          }
+        } while (cursor != "0")
+      },
+      func
+    )
 
   def hlen(key: String)(implicit endpoint: RedisEndpoint): Long = doRedis(_.hlen(key))
 

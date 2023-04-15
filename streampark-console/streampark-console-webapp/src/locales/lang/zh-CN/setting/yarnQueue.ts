@@ -27,6 +27,7 @@ export default {
     yarnQueueLabelExpression: "请输入队列，如 {'{queue} 或 {queue}@{lab1,...}'}",
     description: '请输入描述',
   },
+  selectionHint: "用来快速设置 'yarn.application.name' 与 'yarn.application.node-label'。如果没有可用队列请联系管理员在 'Settings' -> 'Yarn Queue' 页面中创建",
   checkResult: {
     emptyHint: '队列标签不能为空',
     invalidFormatHint: '队列标签格式错误',

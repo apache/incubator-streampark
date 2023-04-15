@@ -19,9 +19,7 @@ package org.apache.streampark.common.fs
 
 import org.apache.streampark.common.util.{HdfsUtils, Logger}
 
-/**
- * Hadoop File System (aka HDFS) Operator
- */
+/** Hadoop File System (aka HDFS) Operator */
 object HdfsOperator extends FsOperator with Logger {
 
   override def exists(path: String): Boolean = HdfsUtils.exists(toHdfsPath(path))
@@ -30,16 +28,29 @@ object HdfsOperator extends FsOperator with Logger {
 
   override def delete(path: String): Unit = HdfsUtils.delete(toHdfsPath(path))
 
-  override def move(srcPath: String, dstPath: String): Unit = HdfsUtils.move(toHdfsPath(srcPath), toHdfsPath(dstPath))
+  override def move(srcPath: String, dstPath: String): Unit =
+    HdfsUtils.move(toHdfsPath(srcPath), toHdfsPath(dstPath))
 
   override def upload(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
     HdfsUtils.upload(srcPath, toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
 
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
-    HdfsUtils.copyHdfs(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
+    HdfsUtils.copyHdfs(
+      toHdfsPath(srcPath),
+      toHdfsPath(dstPath),
+      delSrc = delSrc,
+      overwrite = overwrite)
 
-  override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
-    HdfsUtils.copyHdfsDir(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
+  override def copyDir(
+      srcPath: String,
+      dstPath: String,
+      delSrc: Boolean,
+      overwrite: Boolean): Unit =
+    HdfsUtils.copyHdfsDir(
+      toHdfsPath(srcPath),
+      toHdfsPath(dstPath),
+      delSrc = delSrc,
+      overwrite = overwrite)
 
   override def mkCleanDirs(path: String): Unit = {
     delete(path)
@@ -47,7 +58,9 @@ object HdfsOperator extends FsOperator with Logger {
   }
 
   override def fileMd5(path: String): String = {
-    require(path != null && path.nonEmpty, "[StreamPark] HdfsOperator.fileMd5: file must not be null.")
+    require(
+      path != null && path.nonEmpty,
+      "[StreamPark] HdfsOperator.fileMd5: file must not be null.")
     HdfsUtils.fileMd5(toHdfsPath(path))
   }
 

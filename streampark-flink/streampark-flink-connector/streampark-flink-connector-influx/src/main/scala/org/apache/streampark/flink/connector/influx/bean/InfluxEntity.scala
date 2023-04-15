@@ -22,14 +22,23 @@ import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.flink.connector.influx.function.{InfluxFieldFunction, InfluxTagFunction}
 
 /**
- * @param database        database
- * @param measurement     measurement
- * @param retentionPolicy retentionPolicy
- * @param tagFun          tag function
- * @param fieldFun        field function
+ * @param database
+ *   database
+ * @param measurement
+ *   measurement
+ * @param retentionPolicy
+ *   retentionPolicy
+ * @param tagFun
+ *   tag function
+ * @param fieldFun
+ *   field function
  * @tparam T
  */
-case class InfluxEntity[T](apiType: ApiType = ApiType.scala, database: String, measurement: String, retentionPolicy: String) {
+case class InfluxEntity[T](
+    apiType: ApiType = ApiType.scala,
+    database: String,
+    measurement: String,
+    retentionPolicy: String) {
   var scalaTagFun: T => Map[String, String] = _
   var scalaFieldFun: T => Map[String, Object] = _
 
@@ -37,14 +46,24 @@ case class InfluxEntity[T](apiType: ApiType = ApiType.scala, database: String, m
   var javaFieldFun: InfluxFieldFunction[T] = _
 
   // for java
-  def this(database: String, measurement: String, retentionPolicy: String, javaTagFun: InfluxTagFunction[T], javaFieldFun: InfluxFieldFunction[T]) {
+  def this(
+      database: String,
+      measurement: String,
+      retentionPolicy: String,
+      javaTagFun: InfluxTagFunction[T],
+      javaFieldFun: InfluxFieldFunction[T]) {
     this(ApiType.java, database, measurement, retentionPolicy)
     this.javaTagFun = javaTagFun
     this.javaFieldFun = javaFieldFun
   }
 
   // for scala
-  def this(database: String, measurement: String, retentionPolicy: String, scalaTagFun: T => Map[String, String], scalaFieldFun: T => Map[String, Object]) {
+  def this(
+      database: String,
+      measurement: String,
+      retentionPolicy: String,
+      scalaTagFun: T => Map[String, String],
+      scalaFieldFun: T => Map[String, Object]) {
     this(ApiType.scala, database, measurement, retentionPolicy)
     this.scalaTagFun = scalaTagFun
     this.scalaFieldFun = scalaFieldFun

@@ -17,15 +17,15 @@
 
 package org.apache.streampark.flink.connector.elasticsearch7.conf
 
+import org.apache.streampark.common.conf.ConfigOption
+import org.apache.streampark.common.util.ConfigUtils
+
+import org.apache.http.HttpHost
+
 import java.net.InetSocketAddress
 import java.util.{Map => JavaMap, Properties}
 
 import scala.collection.JavaConverters._
-
-import org.apache.http.HttpHost
-
-import org.apache.streampark.common.conf.ConfigOption
-import org.apache.streampark.common.util.ConfigUtils
 
 object ES7SinkConfigOption {
 
@@ -35,7 +35,10 @@ object ES7SinkConfigOption {
    * @param properties
    * @return
    */
-  def apply(prefixStr: String = ES_SINK_PREFIX, properties: Properties = new Properties): ES7SinkConfigOption = new ES7SinkConfigOption(prefixStr, properties)
+  def apply(
+      prefixStr: String = ES_SINK_PREFIX,
+      properties: Properties = new Properties): ES7SinkConfigOption =
+    new ES7SinkConfigOption(prefixStr, properties)
 
 }
 
@@ -58,11 +61,16 @@ class ES7SinkConfigOption(prefixStr: String, properties: Properties) extends Ser
     required = true,
     classType = classOf[Array[InetSocketAddress]],
     handle = key =>
-      properties.getProperty(key).split(SIGN_COMMA).map(x => {
-        x.split(SIGN_COLON) match {
-          case Array(host, port) => new HttpHost(host, port.toInt)
-        }
-      }))
+      properties
+        .getProperty(key)
+        .split(SIGN_COMMA)
+        .map(
+          x => {
+            x.split(SIGN_COLON) match {
+              case Array(host, port) => new HttpHost(host, port.toInt)
+            }
+          })
+  )
 
   val userName: ConfigOption[String] = ConfigOption(
     key = "es.auth.user",

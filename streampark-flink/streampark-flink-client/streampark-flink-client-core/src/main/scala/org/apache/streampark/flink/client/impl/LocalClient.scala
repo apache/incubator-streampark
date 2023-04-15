@@ -17,7 +17,9 @@
 
 package org.apache.streampark.flink.client.impl
 
-import java.lang.{Integer => JavaInt}
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
+import org.apache.streampark.flink.client.bean._
 
 import org.apache.flink.client.deployment.executors.RemoteExecutor
 import org.apache.flink.client.program.{ClusterClient, MiniClusterClient, PackagedProgram}
@@ -25,28 +27,28 @@ import org.apache.flink.client.program.MiniClusterClient.MiniClusterId
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 
-import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
-import org.apache.streampark.flink.client.bean._
+import java.lang.{Integer => JavaInt}
 
 object LocalClient extends FlinkClientTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig.safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
-    logInfo(
-      s"""
-         |------------------------------------------------------------------
-         |Effective submit configuration: $flinkConfig
-         |------------------------------------------------------------------
-         |""".stripMargin)
+    logInfo(s"""
+               |------------------------------------------------------------------
+               |Effective submit configuration: $flinkConfig
+               |------------------------------------------------------------------
+               |""".stripMargin)
   }
 
-  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
+  override def doSubmit(
+      submitRequest: SubmitRequest,
+      flinkConfig: Configuration): SubmitResponse = {
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[MiniClusterId] = null
     try {
       // build JobGraph
-      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
+      val packageProgramJobGraph =
+        super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
       packageProgram = packageProgramJobGraph._1
       val jobGraph = packageProgramJobGraph._2
       client = createLocalCluster(flinkConfig)
@@ -65,11 +67,15 @@ object LocalClient extends FlinkClientTrait {
     }
   }
 
-  override def doTriggerSavepoint(request: TriggerSavepointRequest, flinkConfig: Configuration): SavepointResponse = {
+  override def doTriggerSavepoint(
+      request: TriggerSavepointRequest,
+      flinkConfig: Configuration): SavepointResponse = {
     RemoteClient.doTriggerSavepoint(request, flinkConfig)
   }
 
-  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
+  override def doCancel(
+      cancelRequest: CancelRequest,
+      flinkConfig: Configuration): CancelResponse = {
     RemoteClient.doCancel(cancelRequest, flinkConfig)
   }
 

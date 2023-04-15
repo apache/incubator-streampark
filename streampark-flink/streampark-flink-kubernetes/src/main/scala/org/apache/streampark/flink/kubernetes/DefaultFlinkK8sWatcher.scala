@@ -17,20 +17,19 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import javax.annotation.Nullable
-
-import com.google.common.eventbus.Subscribe
-
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.{BuildInEvent, FlinkJobStateEvent, FlinkJobStatusChangeEvent}
 import org.apache.streampark.flink.kubernetes.model._
 import org.apache.streampark.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
-/**
- * Default K8sFlinkTrackMonitor implementation.
- */
-class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf) extends FlinkK8sWatcher {
+import com.google.common.eventbus.Subscribe
+
+import javax.annotation.Nullable
+
+/** Default K8sFlinkTrackMonitor implementation. */
+class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf)
+  extends FlinkK8sWatcher {
 
   // cache pool for storage tracking result
   implicit val watchController: FlinkK8sWatchController = new FlinkK8sWatchController()
@@ -48,7 +47,8 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   val metricsWatcher = new FlinkMetricWatcher(conf.metricWatcherConf)
   val checkpointWatcher = new FlinkCheckpointWatcher(conf.metricWatcherConf)
 
-  private[this] val allWatchers = Array[FlinkWatcher](k8sEventWatcher, jobStatusWatcher, metricsWatcher, checkpointWatcher)
+  private[this] val allWatchers =
+    Array[FlinkWatcher](k8sEventWatcher, jobStatusWatcher, metricsWatcher, checkpointWatcher)
 
   override def registerListener(listener: AnyRef): Unit = eventBus.registerListener(listener)
 
@@ -75,21 +75,27 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
 
   override def isInWatching(trackId: TrackId): Boolean = watchController.isInWatching(trackId)
 
-  override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(watchController.jobStatuses.get(trackId))
+  override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(
+    watchController.jobStatuses.get(trackId))
 
-  override def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] = watchController.jobStatuses.getAsMap(trackIds)
+  override def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] =
+    watchController.jobStatuses.getAsMap(trackIds)
 
   override def getAllJobStatus: Map[CacheKey, JobStatusCV] = watchController.jobStatuses.asMap()
 
-  override def getAccGroupMetrics(groupId: String): FlinkMetricCV = watchController.collectAccGroupMetric(groupId)
+  override def getAccGroupMetrics(groupId: String): FlinkMetricCV =
+    watchController.collectAccGroupMetric(groupId)
 
-  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(watchController.flinkMetrics.get(clusterKey))
+  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(
+    watchController.flinkMetrics.get(clusterKey))
 
   override def getAllWatchingIds: Set[TrackId] = watchController.getAllWatchingIds()
 
   override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
-    if (!trackId.isLegal) false; else {
-      val nonLost = (state: FlinkJobState.Value) => state != FlinkJobState.LOST || state != FlinkJobState.SILENT
+    if (!trackId.isLegal) false;
+    else {
+      val nonLost = (state: FlinkJobState.Value) =>
+        state != FlinkJobState.LOST || state != FlinkJobState.SILENT
       trackId.executeMode match {
         case SESSION =>
           jobStatusWatcher.touchSessionJob(trackId).exists(e => nonLost(e.jobState))
@@ -108,16 +114,15 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
     }
   }
 
-  @Nullable override def getRemoteRestUrl(trackId: TrackId): String = watchController.endpoints.get(trackId.toClusterKey)
+  @Nullable override def getRemoteRestUrl(trackId: TrackId): String =
+    watchController.endpoints.get(trackId.toClusterKey)
 
-  /**
-   * Build-in Event Listener of K8sFlinkTrackMonitor.
-   */
+  /** Build-in Event Listener of K8sFlinkTrackMonitor. */
   class BuildInEventListener {
 
     /**
-     * Watch the FlinkJobOperaEvent, then update relevant cache record and
-     * trigger a new FlinkJobStatusChangeEvent.
+     * Watch the FlinkJobOperaEvent, then update relevant cache record and trigger a new
+     * FlinkJobStatusChangeEvent.
      */
     // noinspection UnstableApiUsage
     @Subscribe def subscribeFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {

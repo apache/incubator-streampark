@@ -17,44 +17,45 @@
 
 package org.apache.streampark.common.conf
 
-/**
- * Flink kubernetes Configuration
- */
+/** Flink kubernetes Configuration */
 object K8sFlinkConfig {
 
   val jobStatusTrackTaskTimeoutSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-task-timeout-sec.job-status",
     defaultValue = 120L,
     classType = classOf[java.lang.Long],
-    description = "run timeout seconds of single flink-k8s metrics tracking task")
+    description = "run timeout seconds of single flink-k8s metrics tracking task"
+  )
 
   val metricTrackTaskTimeoutSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric",
     defaultValue = 120L,
     classType = classOf[java.lang.Long],
-    description = "run timeout seconds of single flink-k8s job status tracking task")
+    description = "run timeout seconds of single flink-k8s job status tracking task"
+  )
 
   val jobStatueTrackTaskIntervalSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-interval-sec.job-status",
     defaultValue = 5L,
     classType = classOf[java.lang.Long],
-    description = "interval seconds between two single flink-k8s metrics tracking task")
+    description = "interval seconds between two single flink-k8s metrics tracking task"
+  )
 
   val metricTrackTaskIntervalSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-interval-sec.cluster-metric",
     defaultValue = 5L,
     classType = classOf[java.lang.Long],
-    description = "interval seconds between two single flink-k8s metrics tracking task")
+    description = "interval seconds between two single flink-k8s metrics tracking task"
+  )
 
   val silentStateJobKeepTrackingSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.silent-state-keep-sec",
     defaultValue = 60,
     classType = classOf[java.lang.Integer],
-    description = "retained tracking time for SILENT state flink tasks")
+    description = "retained tracking time for SILENT state flink tasks"
+  )
 
-  /**
-   * kubernetes default namespace
-   */
+  /** kubernetes default namespace */
   val DEFAULT_KUBERNETES_NAMESPACE = "default"
 
 }

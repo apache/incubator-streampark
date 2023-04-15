@@ -17,6 +17,11 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.conf.ConfigConst
+
+import redis.clients.jedis._
+import redis.clients.jedis.exceptions.JedisConnectionException
+
 import java.util.concurrent.ConcurrentHashMap
 
 import scala.annotation.meta.getter
@@ -24,20 +29,17 @@ import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.util.Random
 
-import redis.clients.jedis._
-import redis.clients.jedis.exceptions.JedisConnectionException
-
-import org.apache.streampark.common.conf.ConfigConst
-
 object RedisClient extends Logger {
 
   @transient
   @getter
-  private lazy val pools: ConcurrentHashMap[RedisEndpoint, JedisPool] = new ConcurrentHashMap[RedisEndpoint, JedisPool]()
+  private lazy val pools: ConcurrentHashMap[RedisEndpoint, JedisPool] =
+    new ConcurrentHashMap[RedisEndpoint, JedisPool]()
 
   @transient
   @getter
-  private lazy val clusters: ConcurrentHashMap[RedisEndpoint, JedisCluster] = new ConcurrentHashMap[RedisEndpoint, JedisCluster]()
+  private lazy val clusters: ConcurrentHashMap[RedisEndpoint, JedisCluster] =
+    new ConcurrentHashMap[RedisEndpoint, JedisCluster]()
 
   /**
    * Select a random RedisEndpoint to create or get a Redis connection pool
@@ -72,7 +74,8 @@ object RedisClient extends Logger {
       try {
         conn = pool.getResource
       } catch {
-        case e: JedisConnectionException if e.getCause.toString.contains("ERR max number of clients reached") => {
+        case e: JedisConnectionException
+            if e.getCause.toString.contains("ERR max number of clients reached") => {
           if (sleepTime < 500) sleepTime *= 2
           Thread.sleep(sleepTime)
         }
@@ -91,7 +94,13 @@ object RedisClient extends Logger {
   def createJedisPool(endpoint: RedisEndpoint): JedisPool = {
     val endpointEn: RedisEndpoint = endpoint.copy(auth = ConfigConst.DEFAULT_DATAMASK_STRING)
     logInfo(s"[StreamPark] RedisClient: createJedisPool with $endpointEn ")
-    new JedisPool(poolConfig, endpoint.host, endpoint.port, endpoint.timeout, endpoint.auth, endpoint.db)
+    new JedisPool(
+      poolConfig,
+      endpoint.host,
+      endpoint.port,
+      endpoint.timeout,
+      endpoint.auth,
+      endpoint.db)
   }
 
   private lazy val poolConfig = {

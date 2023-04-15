@@ -29,9 +29,8 @@ object SqlConvertUtils extends Logger {
     "\\s*(.*?)\\s+(([a-z]+)\\((.*?)\\)|[a-z]+)(\\s*|((.*?)(comment)\\s+(['|\"](.*?)['|\"])|(.*?))),$",
     Pattern.CASE_INSENSITIVE)
 
-  private[this] val PRIMARY_REGEXP = Pattern.compile(
-    "primary\\s+key\\s+\\((.*?)\\)",
-    Pattern.CASE_INSENSITIVE)
+  private[this] val PRIMARY_REGEXP =
+    Pattern.compile("primary\\s+key\\s+\\((.*?)\\)", Pattern.CASE_INSENSITIVE)
 
   /**
    * convert to flink types
@@ -68,7 +67,8 @@ object SqlConvertUtils extends Logger {
       case "BIGINT" | "INT" =>
         length match {
           case null => "Int32"
-          case x => x.trim.toInt match {
+          case x =>
+            x.trim.toInt match {
               case x if x < 3 => "Int8"
               case x if x < 5 => "Int16"
               case x if x < 9 => "Int32"
@@ -101,7 +101,10 @@ object SqlConvertUtils extends Logger {
 
     val COMMENT_REGEXP = Pattern.compile("(comment)\\s+(['\"])", Pattern.CASE_INSENSITIVE)
 
-    @tailrec def commentJoin(map: util.Map[Integer, String], index: Integer, segment: String): (Integer, String) = {
+    @tailrec def commentJoin(
+        map: util.Map[Integer, String],
+        index: Integer,
+        segment: String): (Integer, String) = {
       val matcher = COMMENT_REGEXP.matcher(segment)
       matcher.find() match {
         case b if !b => index -> segment
@@ -132,7 +135,8 @@ object SqlConvertUtils extends Logger {
       }
     }
 
-    val body = sql.substring(sql.indexOf("("), sql.lastIndexOf(")") + 1)
+    val body = sql
+      .substring(sql.indexOf("("), sql.lastIndexOf(")") + 1)
       .replaceAll("\r|\n|\r\n", "")
       .replaceFirst("\\(", "(\n")
       .replaceFirst("\\)$", "\n)")
@@ -145,36 +149,45 @@ object SqlConvertUtils extends Logger {
     }
     val sqlBuffer = new StringBuffer(sql.substring(0, sql.indexOf("(")))
     var skipNo: Int = -1
-    map.foreach(a => {
-      if (a._1 > skipNo) {
-        val length = lengthJoin(map, a._1, a._2)
-        if (length._1 > a._1) {
-          sqlBuffer.append(length._2).append("\n")
-          skipNo = length._1
-        } else {
-          val comment = commentJoin(map, a._1, a._2)
-          if (comment._1 > a._1) {
-            sqlBuffer.append(comment._2).append("\n")
-            skipNo = comment._1
+    map.foreach(
+      a => {
+        if (a._1 > skipNo) {
+          val length = lengthJoin(map, a._1, a._2)
+          if (length._1 > a._1) {
+            sqlBuffer.append(length._2).append("\n")
+            skipNo = length._1
           } else {
-            sqlBuffer.append(a._2).append("\n")
+            val comment = commentJoin(map, a._1, a._2)
+            if (comment._1 > a._1) {
+              sqlBuffer.append(comment._2).append("\n")
+              skipNo = comment._1
+            } else {
+              sqlBuffer.append(a._2).append("\n")
+            }
           }
         }
-      }
-    })
+      })
     scanner.close()
     sqlBuffer.toString.trim.concat(sql.substring(sql.lastIndexOf(")") + 1))
 
   }
 
   /**
-   * @param sql      : original sql statement to be converted
-   * @param typeFunc : type conversion function
-   * @param keyFunc  : handle primary key function
-   * @param postfix  : suffix content
+   * @param sql
+   *   : original sql statement to be converted
+   * @param typeFunc
+   *   : type conversion function
+   * @param keyFunc
+   *   : handle primary key function
+   * @param postfix
+   *   : suffix content
    * @return
    */
-  private[this] def convertSql(sql: String, typeFunc: (String, String) => String = null, keyFunc: String => String = null, postfix: String = null): String = {
+  private[this] def convertSql(
+      sql: String,
+      typeFunc: (String, String) => String = null,
+      keyFunc: String => String = null,
+      postfix: String = null): String = {
 
     val formattedSql = formatSql(sql)
     val scanner = new Scanner(formattedSql)
@@ -212,7 +225,9 @@ object SqlConvertUtils extends Logger {
         }
       }
       if (line != null) {
-        sqlBuffer.append(line).append(if (line.toUpperCase.trim.startsWith("CREATE ")) "\n" else ",\n")
+        sqlBuffer
+          .append(line)
+          .append(if (line.toUpperCase.trim.startsWith("CREATE ")) "\n" else ",\n")
       }
     }
     scanner.close()
@@ -234,6 +249,7 @@ object SqlConvertUtils extends Logger {
     },
     postfix)
 
-  def mysqlToClickhouse(sql: String, postfix: String): String = convertSql(sql, toClickhouseDataType, postfix = postfix)
+  def mysqlToClickhouse(sql: String, postfix: String): String =
+    convertSql(sql, toClickhouseDataType, postfix = postfix)
 
 }

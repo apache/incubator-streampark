@@ -17,15 +17,17 @@
 
 package org.apache.streampark.flink.connector.kafka.bean
 
-import java.util.concurrent.atomic.AtomicInteger
-import javax.annotation.Nullable
+import org.apache.streampark.common.util.Logger
 
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
 
-import org.apache.streampark.common.util.Logger
+import javax.annotation.Nullable
+
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * <b>KafkaEqualityPartitioner</b>Equality Partitioner, the partitioner can evenly write data to each partition
+ * <b>KafkaEqualityPartitioner</b>Equality Partitioner, the partitioner can evenly write data to
+ * each partition
  *
  * @param parallelism
  * @tparam T
@@ -40,12 +42,20 @@ class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitione
     logInfo(s"KafkaEqualityPartitioner: parallelism $parallelism")
     require(
       parallelInstanceId >= 0 && parallelInstances > 0,
-      "[StreamPark] KafkaEqualityPartitioner:Id of this subtask cannot be negative,Number of subtasks must be larger than 0.")
+      "[StreamPark] KafkaEqualityPartitioner:Id of this subtask cannot be negative,Number of subtasks must be larger than 0."
+    )
     this.parallelInstanceId = parallelInstanceId
   }
 
-  override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
-    require(partitions != null && partitions.length > 0, "[StreamPark] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
+  override def partition(
+      record: T,
+      key: Array[Byte],
+      value: Array[Byte],
+      targetTopic: String,
+      partitions: Array[Int]): Int = {
+    require(
+      partitions != null && partitions.length > 0,
+      "[StreamPark] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
     (parallelism, partitions.length) match {
       // kafka have 1 partition
       case (_, 1) => 0
@@ -62,6 +72,7 @@ class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitione
 
   override def hashCode: Int = classOf[KafkaEqualityPartitioner[T]].hashCode
 
-  def checkArgument(condition: Boolean, @Nullable errorMessage: String): Unit = if (!condition) throw new IllegalArgumentException(errorMessage)
+  def checkArgument(condition: Boolean, @Nullable errorMessage: String): Unit =
+    if (!condition) throw new IllegalArgumentException(errorMessage)
 
 }

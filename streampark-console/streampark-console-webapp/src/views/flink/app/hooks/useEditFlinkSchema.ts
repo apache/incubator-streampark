@@ -16,7 +16,6 @@
  */
 import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
-import { executionModes } from '../data';
 
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { getAlertSvgIcon } from './useFlinkRender';
@@ -35,21 +34,14 @@ export const useEditFlinkSchema = (jars: Ref) => {
     getFlinkClusterSchemas,
     getFlinkFormOtherSchemas,
     getFlinkTypeSchema,
+    getExecutionModeSchema,
     suggestions,
   } = useCreateAndEditSchema(null, { appId: route.query.appId as string, mode: 'streampark' });
 
   const getEditFlinkFormSchema = computed((): FormSchema[] => {
     return [
       ...getFlinkTypeSchema.value,
-      {
-        field: 'executionMode',
-        label: 'Execution Mode',
-        component: 'Select',
-        componentProps: {
-          placeholder: 'Execution Mode',
-          options: executionModes,
-        },
-      },
+      ...getExecutionModeSchema.value,
       {
         field: 'resourceFrom',
         label: 'Resource From',

@@ -17,6 +17,18 @@
 
 package org.apache.streampark.flink.connector.clickhouse.internal
 
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{JdbcUtils, Logger}
+import org.apache.streampark.flink.connector.clickhouse.conf.ClickHouseJdbcConfig
+import org.apache.streampark.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
+import org.apache.streampark.flink.connector.function.TransformFunction
+
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
+import ru.yandex.clickhouse.ClickHouseDataSource
+import ru.yandex.clickhouse.settings.ClickHouseProperties
+
 import java.sql.{Connection, Statement}
 import java.util
 import java.util.Properties
@@ -25,19 +37,9 @@ import java.util.concurrent.atomic.AtomicLong
 import scala.collection.JavaConversions._
 import scala.util.Try
 
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
-import ru.yandex.clickhouse.ClickHouseDataSource
-import ru.yandex.clickhouse.settings.ClickHouseProperties
-
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{JdbcUtils, Logger}
-import org.apache.streampark.flink.connector.clickhouse.conf.ClickHouseJdbcConfig
-import org.apache.streampark.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
-import org.apache.streampark.flink.connector.function.TransformFunction
-
-class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Properties) extends RichSinkFunction[T] with Logger {
+class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Properties)
+  extends RichSinkFunction[T]
+  with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
   var clickHouseConf: ClickHouseJdbcConfig = new ClickHouseJdbcConfig(config)
@@ -78,21 +80,25 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
       case _ => properties.setUser(user)
     }
     // reflect set all properties...
-    clickHouseConf.sinkOption.getInternalConfig().foreach(x => {
-      Try(Option(properties.getClass.getDeclaredField(x._1))).getOrElse(None) match {
-        case Some(field) =>
-          field.setAccessible(true)
-          field.getType.getSimpleName match {
-            case "String" => field.set(properties, x._2)
-            case "int" | "Integer" => field.set(properties, x._2.toInt)
-            case "long" | "Long" => field.set(properties, x._2.toLong)
-            case "boolean" | "Boolean" => field.set(properties, x._2.toBoolean)
-            case _ =>
+    clickHouseConf.sinkOption
+      .getInternalConfig()
+      .foreach(
+        x => {
+          Try(Option(properties.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+            case Some(field) =>
+              field.setAccessible(true)
+              field.getType.getSimpleName match {
+                case "String" => field.set(properties, x._2)
+                case "int" | "Integer" => field.set(properties, x._2.toInt)
+                case "long" | "Long" => field.set(properties, x._2.toLong)
+                case "boolean" | "Boolean" => field.set(properties, x._2.toBoolean)
+                case _ =>
+              }
+            case None =>
+              logWarn(
+                s"ClickHouseProperties config error,property:${x._1} invalid,please see ru.yandex.clickhouse.settings.ClickHouseProperties")
           }
-        case None =>
-          logWarn(s"ClickHouseProperties config error,property:${x._1} invalid,please see ru.yandex.clickhouse.settings.ClickHouseProperties")
-      }
-    })
+        })
     val dataSource = new ClickHouseDataSource(clickHouseConf.jdbcUrl, properties)
     connection = dataSource.getConnection
   }
@@ -101,7 +107,8 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
     require(connection != null)
     val sql = (javaSqlFunc, scalaSqlFunc) match {
       case (null, null) => convert[T](value)
-      case _ => apiType match {
+      case _ =>
+        apiType match {
           case ApiType.java => javaSqlFunc.transform(value)
           case ApiType.scala => scalaSqlFunc(value)
         }
@@ -109,11 +116,11 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
     batchSize match {
       case 1 =>
-        Try(connection.prepareStatement(sql).executeUpdate)
-          .recover { case e =>
+        Try(connection.prepareStatement(sql).executeUpdate).recover {
+          case e =>
             logError(s"ClickHouseSink invoke error: $e")
             throw e
-          }.get
+        }.get
       case batch =>
         Try {
           sqlValues.add(sql)
@@ -144,7 +151,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
         val sql = s"$insertSqlPrefixes $valuesStr"
         // clickhouse batch insert  return num always 1
         val insertNum: Int = connection.prepareStatement(sql).executeUpdate()
-        logInfo(s"ClickHouseSink batch  successful, execute size : ${insertNum}")
+        logInfo(s"ClickHouseSink batch  successful, execute size : $insertNum")
         timestamp = System.currentTimeMillis()
       } finally {
         sqlValues.clear()

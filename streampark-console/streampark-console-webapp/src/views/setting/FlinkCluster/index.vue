@@ -16,6 +16,8 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { useTimeoutFn } from '@vueuse/core';
+  import { onUnmounted } from 'vue';
 
   export default defineComponent({
     name: 'FlinkClusterSetting',
@@ -54,7 +56,7 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const clusters = ref<FlinkCluster[]>([]);
-
+  const loading = ref(false);
   function handleIsStart(item) {
     return item.clusterState === ClusterStateEnum.STARTED;
   }
@@ -103,13 +105,29 @@
   }
 
   async function getFlinkCluster() {
-    const clusterList = await fetchFlinkCluster();
-    clusters.value = clusterList;
+    try {
+      loading.value = true;
+      const clusterList = await fetchFlinkCluster();
+      clusters.value = clusterList;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loading.value = false;
+    }
   }
+  const { start, stop } = useTimeoutFn(() => {
+    // Prevent another request from being initiated while the previous request is pending
+    if (!loading.value) {
+      getFlinkCluster();
+    }
+    start();
+  }, 1000 * 3);
 
   onMounted(() => {
     getFlinkCluster();
-    setInterval(() => getFlinkCluster(), 1000 * 3);
+  });
+  onUnmounted(() => {
+    stop();
   });
 </script>
 <template>

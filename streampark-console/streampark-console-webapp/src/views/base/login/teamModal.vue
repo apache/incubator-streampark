@@ -21,6 +21,7 @@
   import { computed, ref } from 'vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { Icon } from '/@/components/Icon';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   const emit = defineEmits(['success', 'update:visible']);
   const props = defineProps({
@@ -36,18 +37,19 @@
   const loading = ref(false);
 
   const { createMessage } = useMessage();
+  const { t } = useI18n();
   const userStore = useUserStore();
 
   const formSchema = computed((): FormSchema[] => {
     return [
       {
-        label: 'Please select a team',
+        label: t('sys.login.selectTeam'),
         field: 'teamId',
         component: 'Select',
         componentProps: {
           options: userStore.getTeamList,
           // getPopupContainer: (triggerNode) => triggerNode.parentNode,
-          placeholder: 'Please select a team',
+          placeholder: t('sys.login.selectTeam'),
         },
         required: true,
       },
@@ -81,6 +83,7 @@
 <template>
   <Modal
     :visible="props.visible"
+    centered
     @cancel="emit('update:visible', false)"
     @ok="handleUserTeamSubmit"
   >

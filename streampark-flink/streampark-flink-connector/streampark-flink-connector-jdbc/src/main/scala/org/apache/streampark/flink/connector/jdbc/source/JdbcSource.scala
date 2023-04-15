@@ -17,25 +17,28 @@
 
 package org.apache.streampark.flink.connector.jdbc.source
 
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.connector.jdbc.internal.JdbcSourceFunction
+import org.apache.streampark.flink.core.scala.StreamingContext
+
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.streaming.api.scala.DataStream
+
 import java.util.Properties
 
 import scala.annotation.meta.param
 import scala.collection.Map
 
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.scala.DataStream
-
-import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.connector.jdbc.internal.JdbcSourceFunction
-import org.apache.streampark.flink.core.scala.StreamingContext
-
 object JdbcSource {
 
-  def apply(@(transient @param) property: Properties = new Properties())(implicit ctx: StreamingContext): JdbcSource = new JdbcSource(ctx, property)
+  def apply(@(transient @param) property: Properties = new Properties())(implicit
+      ctx: StreamingContext): JdbcSource = new JdbcSource(ctx, property)
 
 }
 
-class JdbcSource(@(transient @param) val ctx: StreamingContext, property: Properties = new Properties()) {
+class JdbcSource(
+    @(transient @param) val ctx: StreamingContext,
+    property: Properties = new Properties()) {
 
   /**
    * @param sqlFun
@@ -44,8 +47,10 @@ class JdbcSource(@(transient @param) val ctx: StreamingContext, property: Proper
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: R => String, fun: Iterable[Map[String, _]] => Iterable[R], running: Unit => Boolean)(implicit
-      jdbc: Properties = new Properties()): DataStream[R] = {
+  def getDataStream[R: TypeInformation](
+      sqlFun: R => String,
+      fun: Iterable[Map[String, _]] => Iterable[R],
+      running: Unit => Boolean)(implicit jdbc: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, jdbc)
     val mysqlFun = new JdbcSourceFunction[R](jdbc, sqlFun, fun, running)
     ctx.addSource(mysqlFun)

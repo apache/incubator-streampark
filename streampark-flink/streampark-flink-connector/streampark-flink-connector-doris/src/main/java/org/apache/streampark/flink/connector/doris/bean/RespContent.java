@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.doris.bean;
 
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.streampark.shaded.com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 

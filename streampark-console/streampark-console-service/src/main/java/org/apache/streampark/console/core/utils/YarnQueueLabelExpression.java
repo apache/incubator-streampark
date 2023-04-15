@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.utils;
 
 import org.apache.streampark.common.conf.ConfigConst;
-import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +72,7 @@ public class YarnQueueLabelExpression {
         : String.format(QUEUE_LABEL_FORMAT, queue, labelExpression);
   }
 
-  private static boolean isValid(String queueLabel, boolean ignoreEmpty) {
+  public static boolean isValid(String queueLabel, boolean ignoreEmpty) {
     if (StringUtils.isEmpty(queueLabel)) {
       return ignoreEmpty;
     }
@@ -83,19 +82,6 @@ public class YarnQueueLabelExpression {
   // Visible for test.
   public static boolean isValid(String queueLabel) {
     return isValid(queueLabel, false);
-  }
-
-  /**
-   * Only check the validation of queue-labelExpression when using yarn application or yarn-session
-   * mode.
-   *
-   * @param executionMode execution mode.
-   * @param queueLabel queueLabel expression.
-   */
-  public static void checkQueueLabelIfNeed(int executionMode, String queueLabel) {
-    if (ExecutionMode.isYarnMode(executionMode)) {
-      ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
-    }
   }
 
   // Visible for test.
