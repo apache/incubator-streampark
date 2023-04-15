@@ -18,20 +18,19 @@
 package org.apache.streampark.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 
-@ApiModel(value = "AlertEmail")
+@Schema(name = "AlertEmail")
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertEmailParams implements Serializable {
 
-  @ApiModelProperty(name = "contacts", value = "email address")
+  @Schema(example = "xxx@xxx.com", description = "email address")
   @NotBlank(message = "The address of email must be not empty")
   private String contacts;
 }

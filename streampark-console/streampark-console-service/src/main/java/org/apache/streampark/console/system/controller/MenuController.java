@@ -25,6 +25,9 @@ import org.apache.streampark.console.system.service.MenuService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -38,6 +41,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Map;
 
+@Tag(name = "MENU_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -48,6 +52,7 @@ public class MenuController {
 
   @Autowired private CommonService commonService;
 
+  @Operation(summary = "List menu-routes")
   @PostMapping("router")
   public RestResponse getUserRouters(Long teamId) {
     // TODO The teamId is required, get routers should be called after choose teamId.
@@ -56,6 +61,7 @@ public class MenuController {
     return RestResponse.success(routers);
   }
 
+  @Operation(summary = "List menus")
   @PostMapping("list")
   @RequiresPermissions("menu:view")
   public RestResponse menuList(Menu menu) {
@@ -63,12 +69,14 @@ public class MenuController {
     return RestResponse.success(maps);
   }
 
+  @Operation(summary = "Create menu")
   @PostMapping("post")
   @RequiresPermissions("menu:add")
   public RestResponse addMenu(@Valid Menu menu) {
     this.menuService.createMenu(menu);
     return RestResponse.success();
   }
+
 
   @PutMapping("update")
   @RequiresPermissions("menu:update")

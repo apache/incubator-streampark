@@ -26,7 +26,6 @@ import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkEnv;
-import org.apache.streampark.console.core.enums.Operation;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -37,10 +36,11 @@ import org.apache.streampark.flink.packer.pipeline.PipelineType;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Api(tags = {"FLINK_APPLICATION_BUILD_PIPELINE_TAG"})
+@Tag(name = "FLINK_APPLICATION_BUILD_PIPELINE_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -77,28 +77,20 @@ public class ApplicationBuildPipelineController {
    * @param forceBuild forced start pipeline or not
    * @return Whether the pipeline was successfully started
    */
-  @ApiAccess
-  @ApiOperation(
-      value = "Release application",
-      notes = "Release application",
-      tags = ApiDocConstant.FLINK_APP_OP_TAG,
-      consumes = "application/x-www-form-urlencoded")
-  @ApiImplicitParams({
-    @ApiImplicitParam(
-        name = "appId",
-        value = "APP_ID",
-        required = true,
-        paramType = "query",
-        dataTypeClass = Long.class),
-    @ApiImplicitParam(
+  @Operation(
+      summary = "Release application",
+      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
+  @Parameters({
+    @Parameter(name = "appId", description = "app id", required = true, example = "100000"),
+    @Parameter(
         name = "forceBuild",
-        value = "FORCE_BUILD",
+        description = "force build",
         required = true,
-        paramType = "query",
-        dataTypeClass = Boolean.class,
-        defaultValue = "false"),
+        example = "false",
+        schema = @Schema(defaultValue = "false", implementation = boolean.class))
   })
-  @PostMapping(value = "build", consumes = "application/x-www-form-urlencoded")
+  @ApiAccess
+  @PostMapping(value = "build")
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
     try {
@@ -128,7 +120,8 @@ public class ApplicationBuildPipelineController {
       // you don't need to go through the build process)
 
       ApplicationLog applicationLog = new ApplicationLog();
-      applicationLog.setOptionName(Operation.RELEASE.getValue());
+      applicationLog.setOptionName(
+          org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
       applicationLog.setAppId(app.getId());
       applicationLog.setOptionTime(new Date());
 
@@ -157,6 +150,7 @@ public class ApplicationBuildPipelineController {
    * @param appId application id
    * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
    */
+  @Operation(summary = "Get application release pipeline")
   @ApiAccess
   @PostMapping("/detail")
   @RequiresPermissions("app:view")
