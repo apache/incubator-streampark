@@ -223,6 +223,5 @@ insert into `t_role_menu` (role_id, menu_id) values (100002, 130600);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130601);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130602);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130603);
-insert into `t_role_menu` (role_id, menu_id) values (100002, 110000);
 
 set foreign_key_checks = 1;

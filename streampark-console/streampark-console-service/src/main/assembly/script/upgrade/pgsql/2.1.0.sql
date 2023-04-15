@@ -229,5 +229,4 @@ insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130600);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130601);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130602);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130603);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110000);
 
