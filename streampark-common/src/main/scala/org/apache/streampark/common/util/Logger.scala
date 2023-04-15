@@ -141,8 +141,9 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
         configurator.setContext(loggerContext)
         val text = FileUtils
           .readString(new File(path))
-          .replaceAll("ch.qos.logback", s"$shadedPackage.ch.qos.logback")
           .replaceAll("org.slf4j", s"$shadedPackage.org.slf4j")
+          .replaceAll("ch.qos.logback", s"$shadedPackage.ch.qos.logback")
+          .replaceAll("org.apache.log4j", s"$shadedPackage.org.apache.log4j")
 
         val input = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))
         configurator.doConfigure(input)

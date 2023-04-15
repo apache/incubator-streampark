@@ -23,8 +23,8 @@ import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 import org.apache.streampark.flink.util.FlinkUtils
+import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.io.FileUtils
 import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
 

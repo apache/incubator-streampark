@@ -21,7 +21,6 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
@@ -30,7 +29,6 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -40,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,11 +60,6 @@ public class UserController {
   @Autowired private TeamService teamService;
 
   @Autowired private CommonService commonService;
-
-  @PostMapping("detail")
-  public User detail(@NotBlank(message = "{required}") @PathVariable String username) {
-    return this.userService.findByName(username);
-  }
 
   @PostMapping("list")
   @RequiresPermissions(
@@ -100,21 +92,6 @@ public class UserController {
     return RestResponse.success();
   }
 
-  @PutMapping("profile")
-  public RestResponse updateProfile(@Valid User user) throws Exception {
-    this.userService.updateProfile(user);
-    return RestResponse.success();
-  }
-
-  @PutMapping("avatar")
-  public RestResponse updateAvatar(
-      @NotBlank(message = "{required}") String username,
-      @NotBlank(message = "{required}") String avatar)
-      throws Exception {
-    this.userService.updateAvatar(username, avatar);
-    return RestResponse.success();
-  }
-
   @PostMapping("getNoTokenUser")
   public RestResponse getNoTokenUser() {
     List<User> userList = this.userService.getNoTokenUser();
@@ -124,18 +101,6 @@ public class UserController {
   @PostMapping("check/name")
   public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
     boolean result = this.userService.findByName(username) == null;
-    return RestResponse.success(result);
-  }
-
-  @PostMapping("check/password")
-  public RestResponse checkPassword(
-      @NotBlank(message = "{required}") String username,
-      @NotBlank(message = "{required}") String password) {
-
-    User user = userService.findByName(username);
-    String salt = user.getSalt();
-    String encryptPassword = ShaHashUtils.encrypt(salt, password);
-    boolean result = StringUtils.equals(user.getPassword(), encryptPassword);
     return RestResponse.success(result);
   }
 

@@ -23,7 +23,6 @@ import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
-import org.apache.streampark.console.system.security.impl.ldap.LdapService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.lang3.StringUtils;

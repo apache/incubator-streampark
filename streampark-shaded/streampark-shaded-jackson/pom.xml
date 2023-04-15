@@ -24,7 +24,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>streampark-shaded-jackson_${scala.binary.version}</artifactId>
+    <artifactId>streampark-shaded-jackson</artifactId>
     <name>StreamPark : Shaded Jackson </name>
 
     <dependencies>
@@ -40,11 +40,6 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
 
     <build>
@@ -68,20 +63,8 @@
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.fasterxml.jackson.code</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.code</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.fasterxml.jackson.module</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.fasterxml.jackson.module</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.fasterxml.jackson.databind</pattern>
-                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson.databind</shadedPattern>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>${streampark.shaded.package}.com.fasterxml.jackson</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
