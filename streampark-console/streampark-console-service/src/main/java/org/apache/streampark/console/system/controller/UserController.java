@@ -21,6 +21,7 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.core.annotation.CheckUser;
 import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
@@ -114,6 +115,7 @@ public class UserController {
   }
 
   @Operation(summary = "Update password")
+  @CheckUser("#user.userId")
   @PutMapping("password")
   public RestResponse updatePassword(User user) throws Exception {
     userService.updatePassword(user);
