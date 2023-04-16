@@ -28,7 +28,7 @@ import scala.Enumeration;
 @Getter
 public enum FlinkAppState implements Serializable {
 
-  /** added new job to database */
+  /** Added new job to database. */
   ADDED(0),
 
   /**
@@ -38,11 +38,13 @@ public enum FlinkAppState implements Serializable {
 
   /** Job is newly created, no task has started to run. */
   CREATED(2),
+
   /** Application which is currently running. */
   STARTING(3),
 
   /** Application which is currently running. */
   RESTARTING(4),
+
   /** Some tasks are scheduled or running, some may be pending, some may be finished. */
   RUNNING(5),
 
@@ -66,18 +68,20 @@ public enum FlinkAppState implements Serializable {
    * potential HA job store.
    */
   SUSPENDED(11),
+
   /** The job is currently reconciling and waits for task execution report to recover state. */
   RECONCILING(12),
-  /** 失联 */
+
+  /** Loss of mapping. */
   LOST(13),
 
-  /** 射影中... */
+  /** Mapping. */
   MAPPING(14),
 
-  /** 其他不关心的状态... */
+  /** Other statuses. */
   OTHER(15),
 
-  /** has rollback */
+  /** Has rollback. */
   REVOKED(16),
 
   /**
@@ -86,15 +90,16 @@ public enum FlinkAppState implements Serializable {
    */
   SILENT(17),
 
-  /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED */
+  /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
   TERMINATED(18),
 
-  /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED */
+  /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
   POS_TERMINATED(19),
 
-  /** job SUCCEEDED on yarn */
+  /** Job SUCCEEDED on yarn. */
   SUCCEEDED(20),
-  /** has killed in Yarn */
+
+  /** Has killed in Yarn. */
   KILLED(-9);
 
   private final int value;
