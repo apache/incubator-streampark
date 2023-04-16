@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.annotation.CheckTeam;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -81,6 +82,7 @@ public class MemberController {
   }
 
   @Operation(summary = "Create member")
+  @CheckTeam("#member.teamId")
   @PostMapping("post")
   @RequiresPermissions("member:add")
   public RestResponse create(@Valid Member member) {
@@ -89,6 +91,7 @@ public class MemberController {
   }
 
   @Operation(summary = "Delete member")
+  @CheckTeam("#member.teamId")
   @DeleteMapping("delete")
   @RequiresPermissions("member:delete")
   public RestResponse delete(Member member) {
@@ -97,6 +100,7 @@ public class MemberController {
   }
 
   @Operation(summary = "Update member")
+  @CheckTeam("#member.teamId")
   @PutMapping("update")
   @RequiresPermissions("member:update")
   public RestResponse update(Member member) {

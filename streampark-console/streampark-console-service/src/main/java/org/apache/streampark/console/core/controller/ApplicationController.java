@@ -25,6 +25,8 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.AppUpdated;
+import org.apache.streampark.console.core.annotation.CheckApp;
+import org.apache.streampark.console.core.annotation.CheckTeam;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
@@ -89,6 +91,7 @@ public class ApplicationController {
 
   @Operation(summary = "Create application")
   @ApiAccess
+  @CheckTeam("#app.teamId")
   @PostMapping("create")
   @RequiresPermissions("app:create")
   public RestResponse create(Application app) throws IOException {
@@ -114,6 +117,7 @@ public class ApplicationController {
     @Parameter(name = "args", description = "new application args", in = ParameterIn.QUERY)
   })
   @ApiAccess
+  @CheckApp("#app.id")
   @PostMapping(value = "copy")
   @RequiresPermissions("app:copy")
   public RestResponse copy(@Parameter(hidden = true) Application app) throws IOException {
@@ -127,6 +131,7 @@ public class ApplicationController {
 
   @Operation(summary = "Update application")
   @AppUpdated
+  @CheckApp("#app.id")
   @PostMapping("update")
   @RequiresPermissions("app:update")
   public RestResponse update(Application app) {
@@ -189,6 +194,7 @@ public class ApplicationController {
 
   @Operation(summary = "Revoke application")
   @AppUpdated
+  @CheckApp("#app.id")
   @PostMapping("revoke")
   @RequiresPermissions("app:release")
   public RestResponse revoke(Application app) {
@@ -227,6 +233,7 @@ public class ApplicationController {
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @ApiAccess
+  @CheckApp("#app.id")
   @PostMapping(value = "start")
   @RequiresPermissions("app:start")
   public RestResponse start(@Parameter(hidden = true) Application app) {
@@ -271,6 +278,7 @@ public class ApplicationController {
         example = "false",
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
+  @CheckApp("#app.id")
   @PostMapping(value = "cancel")
   @RequiresPermissions("app:cancel")
   public RestResponse cancel(@Parameter(hidden = true) Application app) throws Exception {
@@ -281,6 +289,7 @@ public class ApplicationController {
   @Operation(summary = "Clean application")
   @AppUpdated
   @ApiAccess
+  @CheckApp("#app.id")
   @PostMapping("clean")
   @RequiresPermissions("app:clean")
   public RestResponse clean(Application app) {
@@ -290,6 +299,7 @@ public class ApplicationController {
 
   /** force stop(stop normal start or in progress) */
   @Operation(summary = "Force stop application")
+  @CheckApp("#app.id")
   @PostMapping("forcedStop")
   @RequiresPermissions("app:cancel")
   public RestResponse forcedStop(Application app) {
@@ -346,6 +356,7 @@ public class ApplicationController {
   }
 
   @Operation(summary = "Delete application operation log")
+  @CheckApp("#applicationLog.appId")
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
   public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
@@ -354,6 +365,7 @@ public class ApplicationController {
   }
 
   @Operation(summary = "Delete application")
+  @CheckApp("#app.id")
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
@@ -362,6 +374,7 @@ public class ApplicationController {
   }
 
   @Operation(summary = "Backup application when deleted")
+  @CheckApp("#backUp.appId")
   @PostMapping("deletebak")
   public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
     Boolean deleted = backUpService.delete(backUp.getId());
