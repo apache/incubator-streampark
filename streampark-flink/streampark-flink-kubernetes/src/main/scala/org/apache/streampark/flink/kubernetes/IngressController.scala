@@ -17,13 +17,9 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import java.io.File
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import scala.collection.JavaConverters._
-import scala.language.postfixOps
-import scala.util.{Failure, Success, Try}
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.Utils._
+
 import io.fabric8.kubernetes.api.model.{IntOrString, OwnerReferenceBuilder}
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
@@ -31,8 +27,15 @@ import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
 import org.json4s.{DefaultFormats, JArray}
 import org.json4s.jackson.JsonMethods.parse
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.common.util.Utils._
+
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
+
+import scala.collection.JavaConverters._
+import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
 
 object IngressController extends Logger {
 
@@ -42,7 +45,8 @@ object IngressController extends Logger {
         val annotMap = Map[String, String](
           "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
           "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
-          "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;"))
+          "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;")
+        )
         val labelsMap = Map[String, String](
           "app" -> clusterId,
           "type" -> "flink-native-kubernetes",
@@ -58,7 +62,8 @@ object IngressController extends Logger {
         val deploymentUid = if (deployment != null) {
           deployment.getMetadata.getUid
         } else {
-          throw new RuntimeException(s"Deployment with name $clusterId not found in namespace $nameSpace")
+          throw new RuntimeException(
+            s"Deployment with name $clusterId not found in namespace $nameSpace")
         }
 
         // Create OwnerReference object
@@ -116,33 +121,41 @@ object IngressController extends Logger {
   }
 
   private[this] def determineThePodSurvivalStatus(name: String, nameSpace: String): Boolean = {
-    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
-      Try {
-        client.apps()
-          .deployments()
-          .inNamespace(nameSpace)
-          .withName(name)
-          .get()
-          .getSpec()
-          .getSelector()
-          .getMatchLabels()
-        false
-      }.getOrElse(true)
+    tryWithResource(KubernetesRetriever.newK8sClient()) {
+      client =>
+        Try {
+          client
+            .apps()
+            .deployments()
+            .inNamespace(nameSpace)
+            .withName(name)
+            .get()
+            .getSpec()
+            .getSelector()
+            .getMatchLabels()
+          false
+        }.getOrElse(true)
     }
   }
 
-  def ingressUrlAddress(nameSpace: String, clusterId: String, clusterClient: ClusterClient[_]): String = {
+  def ingressUrlAddress(
+      nameSpace: String,
+      clusterId: String,
+      clusterClient: ClusterClient[_]): String = {
     val client = new DefaultKubernetesClient
     // for kubernetes 1.22+
-    lazy val fromV1 = Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
-      .map(ingress => ingress.getSpec.getRules.get(0))
-      .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
+    lazy val fromV1 =
+      Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
+        .map(ingress => ingress.getSpec.getRules.get(0))
+        .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
     // for kubernetes 1.22-
-    lazy val fromV1beta1 = Option(client.network.v1beta1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
-      .map(ingress => ingress.getSpec.getRules.get(0))
-      .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
+    lazy val fromV1beta1 =
+      Option(client.network.v1beta1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
+        .map(ingress => ingress.getSpec.getRules.get(0))
+        .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
     Try(
-      fromV1.orElse(fromV1beta1)
+      fromV1
+        .orElse(fromV1beta1)
         .map { case (host, path) => s"https://$host$path" }
         .getOrElse(clusterClient.getWebInterfaceURL)
     ).getOrElse(throw new RuntimeException("[StreamPark] get ingressUrlAddress error."))
@@ -182,17 +195,20 @@ object IngressMeta {
       case Success(ok) =>
         ok match {
           case JArray(arr) =>
-            val list = arr.map(x => {
-              IngressMeta(
-                addresses = (x \ "addresses").extractOpt[List[String]].getOrElse(List.empty[String]),
-                port = (x \ "port").extractOpt[Integer].getOrElse(0),
-                protocol = (x \ "protocol").extractOpt[String].getOrElse(null),
-                serviceName = (x \ "serviceName").extractOpt[String].getOrElse(null),
-                ingressName = (x \ "ingressName").extractOpt[String].getOrElse(null),
-                hostname = (x \ "hostname").extractOpt[String].getOrElse(null),
-                path = (x \ "path").extractOpt[String].getOrElse(null),
-                allNodes = (x \ "allNodes").extractOpt[Boolean].getOrElse(false))
-            })
+            val list = arr.map(
+              x => {
+                IngressMeta(
+                  addresses =
+                    (x \ "addresses").extractOpt[List[String]].getOrElse(List.empty[String]),
+                  port = (x \ "port").extractOpt[Integer].getOrElse(0),
+                  protocol = (x \ "protocol").extractOpt[String].getOrElse(null),
+                  serviceName = (x \ "serviceName").extractOpt[String].getOrElse(null),
+                  ingressName = (x \ "ingressName").extractOpt[String].getOrElse(null),
+                  hostname = (x \ "hostname").extractOpt[String].getOrElse(null),
+                  path = (x \ "path").extractOpt[String].getOrElse(null),
+                  allNodes = (x \ "allNodes").extractOpt[Boolean].getOrElse(false)
+                )
+              })
             Some(list)
           case _ => None
         }

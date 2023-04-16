@@ -17,11 +17,12 @@
 
 package org.apache.streampark.flink.connector.mongo.internal
 
-import java.lang
-import java.util.Properties
-
-import scala.collection.JavaConversions._
-import scala.util.{Success, Try}
+import org.apache.streampark.common.enums.ApiType
+import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.util.{Logger, MongoConfig}
+import org.apache.streampark.flink.connector.function.RunningFunction
+import org.apache.streampark.flink.connector.mongo.function.{MongoQueryFunction, MongoResultFunction}
+import org.apache.streampark.flink.util.FlinkUtils
 
 import com.mongodb.MongoClient
 import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
@@ -34,15 +35,20 @@ import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.bson.Document
 
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{Logger, MongoConfig}
-import org.apache.streampark.flink.connector.function.RunningFunction
-import org.apache.streampark.flink.connector.mongo.function.{MongoQueryFunction, MongoResultFunction}
-import org.apache.streampark.flink.util.FlinkUtils
+import java.lang
+import java.util.Properties
 
-class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties(), collection: String) extends RichSourceFunction[R]
-    with CheckpointedFunction with CheckpointListener with Logger {
+import scala.collection.JavaConversions._
+import scala.util.{Success, Try}
+
+class MongoSourceFunction[R: TypeInformation](
+    apiType: ApiType,
+    prop: Properties = new Properties(),
+    collection: String)
+  extends RichSourceFunction[R]
+  with CheckpointedFunction
+  with CheckpointListener
+  with Logger {
 
   @volatile private[this] var running = true
   private[this] var scalaRunningFunc: Unit => Boolean = _
@@ -76,15 +82,22 @@ class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties
   }
 
   // for JAVA
-  def this(collectionName: String, prop: Properties, queryFunc: MongoQueryFunction[R], resultFunc: MongoResultFunction[R], runningFunc: RunningFunction) {
+  def this(
+      collectionName: String,
+      prop: Properties,
+      queryFunc: MongoQueryFunction[R],
+      resultFunc: MongoResultFunction[R],
+      runningFunc: RunningFunction) {
 
     this(ApiType.java, prop, collectionName)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
-    this.javaRunningFunc = if (runningFunc != null) runningFunc
-    else new RunningFunction {
-      override def running(): lang.Boolean = true
-    }
+    this.javaRunningFunc =
+      if (runningFunc != null) runningFunc
+      else
+        new RunningFunction {
+          override def running(): lang.Boolean = true
+        }
   }
 
   override def cancel(): Unit = this.running = false
@@ -105,10 +118,11 @@ class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties
             ctx.getCheckpointLock.synchronized {
               val find = scalaQueryFunc(last, mongoCollection)
               if (find != null) {
-                scalaResultFunc(find.iterator).foreach(x => {
-                  last = x
-                  ctx.collectWithTimestamp(last, System.currentTimeMillis())
-                })
+                scalaResultFunc(find.iterator).foreach(
+                  x => {
+                    last = x
+                    ctx.collectWithTimestamp(last, System.currentTimeMillis())
+                  })
               }
             }
           }
@@ -117,10 +131,13 @@ class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties
             ctx.getCheckpointLock.synchronized {
               val find = javaQueryFunc.query(last, mongoCollection)
               if (find != null) {
-                javaResultFunc.result(find.iterator).foreach(x => {
-                  last = x
-                  ctx.collectWithTimestamp(last, System.currentTimeMillis())
-                })
+                javaResultFunc
+                  .result(find.iterator)
+                  .foreach(
+                    x => {
+                      last = x
+                      ctx.collectWithTimestamp(last, System.currentTimeMillis())
+                    })
               }
             }
           }

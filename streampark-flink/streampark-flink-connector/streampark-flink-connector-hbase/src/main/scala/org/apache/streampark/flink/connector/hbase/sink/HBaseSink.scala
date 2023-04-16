@@ -17,21 +17,21 @@
 
 package org.apache.streampark.flink.connector.hbase.sink
 
-import java.lang.{Iterable => JIter}
-import java.util.Properties
-
-import scala.annotation.meta.param
-
-import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream, DataStreamSink}
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.hadoop.hbase.client._
-
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.util.{ConfigUtils, Logger, Utils}
 import org.apache.streampark.flink.connector.function.TransformFunction
 import org.apache.streampark.flink.connector.hbase.internal.HBaseSinkFunction
 import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
+
+import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream, DataStreamSink}
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.hadoop.hbase.client._
+
+import java.lang.{Iterable => JIter}
+import java.util.Properties
+
+import scala.annotation.meta.param
 
 object HBaseSink {
 
@@ -40,7 +40,8 @@ object HBaseSink {
       property: Properties = new Properties(),
       parallelism: Int = 0,
       name: String = null,
-      uid: String = null)(implicit ctx: StreamingContext): HBaseSink = new HBaseSink(ctx, property, parallelism, name, uid)
+      uid: String = null)(implicit ctx: StreamingContext): HBaseSink =
+    new HBaseSink(ctx, property, parallelism, name, uid)
 
 }
 
@@ -49,20 +50,26 @@ class HBaseSink(
     property: Properties = new Properties(),
     parallelism: Int = 0,
     name: String = null,
-    uid: String = null)(implicit alias: String = "") extends Sink with Logger {
+    uid: String = null)(implicit alias: String = "")
+  extends Sink
+  with Logger {
 
   def this(ctx: StreamingContext) {
     this(ctx, new Properties, 0, null, null)
   }
 
-  def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => JIter[Mutation]): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], tableName: String)(implicit
+      fun: T => JIter[Mutation]): DataStreamSink[T] = {
     val prop: Properties = checkProp(stream, tableName, fun)
     val sinkFun = new HBaseSinkFunction[T](tableName, prop, fun)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 
-  def sink[T](stream: JavaDataStream[T], tableName: String, fun: TransformFunction[T, JIter[Mutation]]): DataStreamSink[T] = {
+  def sink[T](
+      stream: JavaDataStream[T],
+      tableName: String,
+      fun: TransformFunction[T, JIter[Mutation]]): DataStreamSink[T] = {
     val prop: Properties = checkProp(stream, tableName, fun)
     val sinkFun = new HBaseSinkFunction[T](tableName, prop, fun)
     val sink = stream.addSink(sinkFun)
@@ -70,7 +77,8 @@ class HBaseSink(
   }
 
   private def checkProp[T](stream: Object, tableName: String, fun: Object): Properties = {
-    implicit val prop: Properties = ConfigUtils.getConf(ctx.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)(alias)
+    implicit val prop: Properties =
+      ConfigUtils.getConf(ctx.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)(alias)
     Utils.copyProperties(property, prop)
     require(stream != null, () => s"sink Stream must not null")
     require(tableName != null, () => s"sink tableName must not null")

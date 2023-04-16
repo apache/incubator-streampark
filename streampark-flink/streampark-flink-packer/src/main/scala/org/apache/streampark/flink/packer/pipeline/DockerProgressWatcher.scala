@@ -18,31 +18,23 @@
 package org.apache.streampark.flink.packer.pipeline
 
 /**
- * Trait for watching the change events of the Docker resolved progress
- * for a BuildPipeline instance.
+ * Trait for watching the change events of the Docker resolved progress for a BuildPipeline
+ * instance.
  */
 trait DockerProgressWatcher {
 
-  /**
-   * async call when pulling docker image progress is changed.
-   */
+  /** async call when pulling docker image progress is changed. */
   def onDockerPullProgressChange(snapshot: DockerPullSnapshot): Unit
 
-  /**
-   * async call when building docker image progress is changed.
-   */
+  /** async call when building docker image progress is changed. */
   def onDockerBuildProgressChange(snapshot: DockerBuildSnapshot): Unit
 
-  /**
-   * async call when pushing docker image progress is changed.
-   */
+  /** async call when pushing docker image progress is changed. */
   def onDockerPushProgressChange(snapshot: DockerPushSnapshot): Unit
 
 }
 
-/**
- * silent watcher
- */
+/** silent watcher */
 class SilentDockerProgressWatcher extends DockerProgressWatcher {
 
   override def onDockerPullProgressChange(snapshot: DockerPullSnapshot): Unit = {}

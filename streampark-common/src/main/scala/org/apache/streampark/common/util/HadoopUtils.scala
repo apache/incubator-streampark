@@ -17,15 +17,8 @@
 
 package org.apache.streampark.common.util
 
-import java.io.{File, IOException}
-import java.security.PrivilegedAction
-import java.util
-import java.util.{Timer, TimerTask}
-import java.util.concurrent._
-import javax.security.auth.kerberos.KerberosTicket
-
-import scala.collection.JavaConversions._
-import scala.util.{Failure, Success, Try}
+import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder}
+import org.apache.streampark.common.conf.ConfigConst._
 
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
@@ -38,8 +31,16 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.conf.YarnConfiguration
 
-import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder}
-import org.apache.streampark.common.conf.ConfigConst._
+import javax.security.auth.kerberos.KerberosTicket
+
+import java.io.{File, IOException}
+import java.security.PrivilegedAction
+import java.util
+import java.util.{Timer, TimerTask}
+import java.util.concurrent._
+
+import scala.collection.JavaConversions._
+import scala.util.{Failure, Success, Try}
 
 object HadoopUtils extends Logger {
 
@@ -57,24 +58,28 @@ object HadoopUtils extends Logger {
 
   private[this] var tgt: KerberosTicket = _
 
-  private lazy val hadoopUserName: String = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME)
+  private lazy val hadoopUserName: String =
+    InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME)
 
-  private[this] lazy val debugKerberos = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_DEBUG, "false")
+  private[this] lazy val debugKerberos =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_DEBUG, "false")
 
-  private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
+  private[this] lazy val configurationCache: util.Map[String, Configuration] =
+    new ConcurrentHashMap[String, Configuration]()
 
-  private[this] lazy val kerberosConf: Map[String, String] = SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME, null) match {
-    case null =>
-      getClass.getResourceAsStream("/kerberos.yml") match {
-        case x if x != null => PropertiesUtils.fromYamlFile(x)
-        case _ => null
-      }
-    case f =>
-      val file = new File(s"$f/conf/kerberos.yml")
-      if (file.exists() && file.isFile) {
-        PropertiesUtils.fromYamlFile(file.getAbsolutePath)
-      } else null
-  }
+  private[this] lazy val kerberosConf: Map[String, String] =
+    SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME, null) match {
+      case null =>
+        getClass.getResourceAsStream("/kerberos.yml") match {
+          case x if x != null => PropertiesUtils.fromYamlFile(x)
+          case _ => null
+        }
+      case f =>
+        val file = new File(s"$f/conf/kerberos.yml")
+        if (file.exists() && file.isFile) {
+          PropertiesUtils.fromYamlFile(file.getAbsolutePath)
+        } else null
+    }
 
   def getUgi(): UserGroupInformation = {
     if (ugi == null) {
@@ -91,7 +96,8 @@ object HadoopUtils extends Logger {
     ugi
   }
 
-  private[this] lazy val hadoopConfDir: String = Try(FileUtils.getPathFromEnv(HADOOP_CONF_DIR)) match {
+  private[this] lazy val hadoopConfDir: String = Try(
+    FileUtils.getPathFromEnv(HADOOP_CONF_DIR)) match {
     case Failure(_) => FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX)
     case Success(value) => value
   }
@@ -114,7 +120,9 @@ object HadoopUtils extends Logger {
           case TimeUnit.MINUTES => timeUnit._1 * 60 * 1000
           case TimeUnit.HOURS => timeUnit._1 * 60 * 60 * 1000
           case TimeUnit.DAYS => timeUnit._1 * 60 * 60 * 24 * 1000
-          case _ => throw new IllegalArgumentException(s"[StreamPark] parameter:${CommonConfig.KERBEROS_TTL.key} invalided, unit options are [s|m|h|d]")
+          case _ =>
+            throw new IllegalArgumentException(
+              s"[StreamPark] parameter:${CommonConfig.KERBEROS_TTL.key} invalided, unit options are [s|m|h|d]")
         }
     }
   }
@@ -124,7 +132,8 @@ object HadoopUtils extends Logger {
       FileUtils.exists(confDir)
       val hadoopConfDir = new File(confDir)
       val confName = List("hdfs-default.xml", "core-site.xml", "hdfs-site.xml", "yarn-site.xml")
-      val files = hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
+      val files =
+        hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
       val conf = new HadoopConfiguration()
       if (CollectionUtils.isNotEmpty(files)) {
         files.foreach(x => conf.addResource(new Path(x.getAbsolutePath)))
@@ -135,12 +144,10 @@ object HadoopUtils extends Logger {
   }
 
   /**
-   * <pre>
-   * Note: There are two ways to load a hadoop configuration file:<br>
-   * 1) Copy core-site.xml,hdfs-site.xml,yarn-site.xml of hadoop conf to the resource dir.<br>
-   * 2) Automatically goes to $HADOOP_HOME/etc/hadoop to load the configuration.<br>
-   * We recommend the second method, without copying the configuration files.<br>
-   * </pre>
+   * <pre> Note: There are two ways to load a hadoop configuration file:<br> 1) Copy
+   * core-site.xml,hdfs-site.xml,yarn-site.xml of hadoop conf to the resource dir.<br> 2)
+   * Automatically goes to $HADOOP_HOME/etc/hadoop to load the configuration.<br> We recommend the
+   * second method, without copying the configuration files.<br> </pre>
    */
   def hadoopConf: Configuration = Option(reusableConf).getOrElse {
     reusableConf = getConfigurationFromHadoopConfDir(hadoopConfDir)
@@ -188,9 +195,11 @@ object HadoopUtils extends Logger {
       principal.nonEmpty && keytab.nonEmpty,
       s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty")
 
-    val krb5 = kerberosConf.getOrElse(
-      KEY_SECURITY_KERBEROS_KRB5_CONF,
-      kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, "")).trim
+    val krb5 = kerberosConf
+      .getOrElse(
+        KEY_SECURITY_KERBEROS_KRB5_CONF,
+        kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, ""))
+      .trim
 
     if (krb5.nonEmpty) {
       System.setProperty("java.security.krb5.conf", krb5)
@@ -230,11 +239,13 @@ object HadoopUtils extends Logger {
               new TimerTask {
                 override def run(): Unit = {
                   closeHadoop()
-                  logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
+                  logInfo(
+                    s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
                 }
               },
               tgtRefreshTime,
-              tgtRefreshTime)
+              tgtRefreshTime
+            )
           }
           fs
         case Failure(e) =>
@@ -255,7 +266,9 @@ object HadoopUtils extends Logger {
   }
 
   def toApplicationId(appId: String): ApplicationId = {
-    require(appId != null, "[StreamPark] HadoopUtils.toApplicationId: applicationId muse not be null")
+    require(
+      appId != null,
+      "[StreamPark] HadoopUtils.toApplicationId: applicationId muse not be null")
     val timestampAndId = appId.split("_")
     ApplicationId.newInstance(timestampAndId(1).toLong, timestampAndId.last.toInt)
   }
@@ -284,7 +297,8 @@ object HadoopUtils extends Logger {
       "dfs.client.datanode-restart.timeout",
       "dfs.ha.log-roll.period",
       "dfs.ha.tail-edits.period",
-      "dfs.datanode.bp-ready.timeout")
+      "dfs.datanode.bp-ready.timeout"
+    )
 
     private def getHexDigits(value: String): String = {
       var negative = false

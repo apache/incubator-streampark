@@ -17,25 +17,29 @@
 
 package org.apache.streampark.flink.connector.jdbc.request
 
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.connector.jdbc.internal.JdbcASyncFunction
+
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
+
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
 import scala.annotation.meta.param
 
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
-
-import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.connector.jdbc.internal.JdbcASyncFunction
-
 object JdbcRequest {
 
-  def apply[T: TypeInformation](@(transient @param) stream: DataStream[T], property: Properties = new Properties()): JdbcRequest[T] =
+  def apply[T: TypeInformation](
+      @(transient @param) stream: DataStream[T],
+      property: Properties = new Properties()): JdbcRequest[T] =
     new JdbcRequest[T](stream, property)
 
 }
 
-class JdbcRequest[T: TypeInformation](@(transient @param) private val stream: DataStream[T], property: Properties = new Properties()) {
+class JdbcRequest[T: TypeInformation](
+    @(transient @param) private val stream: DataStream[T],
+    property: Properties = new Properties()) {
 
   /**
    * @param sqlFun

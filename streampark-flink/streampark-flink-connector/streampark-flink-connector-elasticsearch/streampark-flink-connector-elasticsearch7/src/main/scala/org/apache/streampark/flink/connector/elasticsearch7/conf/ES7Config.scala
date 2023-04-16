@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.connector.elasticsearch7.conf
 
-import java.util.Properties
-
 import org.apache.http.HttpHost
+
+import java.util.Properties
 
 class ES7Config(parameters: Properties) extends Serializable {
 

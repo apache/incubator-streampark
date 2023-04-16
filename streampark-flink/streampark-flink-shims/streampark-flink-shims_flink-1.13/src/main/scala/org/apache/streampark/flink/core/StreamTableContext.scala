@@ -31,33 +31,45 @@ import org.apache.flink.types.Row
 /**
  * Integration api of stream and table
  *
- * @param parameter parameter
- * @param streamEnv streamEnv
- * @param tableEnv tableEnv
+ * @param parameter
+ *   parameter
+ * @param streamEnv
+ *   streamEnv
+ * @param tableEnv
+ *   tableEnv
  */
-class StreamTableContext(override val parameter: ParameterTool, private val streamEnv: StreamExecutionEnvironment, private val tableEnv: StreamTableEnvironment)
-    extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
+class StreamTableContext(
+    override val parameter: ParameterTool,
+    private val streamEnv: StreamExecutionEnvironment,
+    private val tableEnv: StreamTableEnvironment)
+  extends FlinkStreamTableTrait(parameter, streamEnv, tableEnv) {
 
-  /**
-   * for scala
-   */
-  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
+  /** for scala */
+  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) =
+    this(args._1, args._2, args._3)
 
-  /**
-   * for Java
-   */
+  /** for Java */
   def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-  override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table = tableEnv.fromDataStream[T](dataStream, schema)
+  override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table =
+    tableEnv.fromDataStream[T](dataStream, schema)
 
-  override def fromChangelogStream(dataStream: DataStream[Row]): Table = tableEnv.fromChangelogStream(dataStream)
+  override def fromChangelogStream(dataStream: DataStream[Row]): Table =
+    tableEnv.fromChangelogStream(dataStream)
 
-  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema): Table = tableEnv.fromChangelogStream(dataStream, schema)
+  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema): Table =
+    tableEnv.fromChangelogStream(dataStream, schema)
 
-  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema, changelogMode: ChangelogMode): Table =
+  override def fromChangelogStream(
+      dataStream: DataStream[Row],
+      schema: Schema,
+      changelogMode: ChangelogMode): Table =
     tableEnv.fromChangelogStream(dataStream, schema, changelogMode)
 
-  override def createTemporaryView[T](path: String, dataStream: DataStream[T], schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
+  override def createTemporaryView[T](
+      path: String,
+      dataStream: DataStream[T],
+      schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
 
   override def toDataStream(table: Table): DataStream[Row] = {
     isConvertedToDataStream = true
@@ -84,7 +96,10 @@ class StreamTableContext(override val parameter: ParameterTool, private val stre
     tableEnv.toChangelogStream(table, targetSchema)
   }
 
-  override def toChangelogStream(table: Table, targetSchema: Schema, changelogMode: ChangelogMode): DataStream[Row] = {
+  override def toChangelogStream(
+      table: Table,
+      targetSchema: Schema,
+      changelogMode: ChangelogMode): DataStream[Row] = {
     isConvertedToDataStream = true
     tableEnv.toChangelogStream(table, targetSchema, changelogMode)
   }
@@ -93,23 +108,29 @@ class StreamTableContext(override val parameter: ParameterTool, private val stre
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 
-  @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
+  @deprecated override def connect(
+      connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor =
+    tableEnv.connect(connectorDescriptor)
 
   def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
 
-  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
+  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph =
+    this.streamEnv.getStreamGraph(jobName, clearTransformations)
 
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
   @deprecated def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
 
-  @deprecated def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
+  @deprecated def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
+    tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @deprecated def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
+  @deprecated def insertInto(targetPath: String, table: Table): Unit =
+    tableEnv.insertInto(targetPath, table)
 
   @deprecated def explain(table: Table): String = tableEnv.explain(table)
 
-  @deprecated def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
+  @deprecated def explain(table: Table, extended: Boolean): String =
+    tableEnv.explain(table, extended)
 
   @deprecated def explain(extended: Boolean): String = tableEnv.explain(extended)
 

@@ -17,14 +17,15 @@
 
 package org.apache.streampark.flink.connector.conf
 
-import java.util.Properties
-
 import org.apache.streampark.common.conf.ConfigOption
 import org.apache.streampark.flink.connector.conf
 import org.apache.streampark.flink.connector.conf.FailoverStorageType.FailoverStorageType
 
+import java.util.Properties
+
 object ThresholdConfigOption {
-  def apply(prefixStr: String, properties: Properties = new Properties): ThresholdConfigOption = new ThresholdConfigOption(prefixStr, properties)
+  def apply(prefixStr: String, properties: Properties = new Properties): ThresholdConfigOption =
+    new ThresholdConfigOption(prefixStr, properties)
 }
 
 class ThresholdConfigOption(prefixStr: String, properties: Properties) {
@@ -76,7 +77,8 @@ class ThresholdConfigOption(prefixStr: String, properties: Properties) {
     defaultValue = FailoverStorageType.NONE,
     handle = k => {
       FailoverStorageType.get(properties.getProperty(k))
-    })
+    }
+  )
 
   val failoverTable: ConfigOption[String] = ConfigOption(
     key = "failover.table",

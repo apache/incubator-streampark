@@ -15,21 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.security;
+package org.apache.streampark.console.core.annotation;
 
-import com.baomidou.mybatisplus.annotation.EnumValue;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/** authentication type */
-public enum AuthenticationType {
-  PASSWORD(0, "verify via user name and password"),
-  LDAP(1, "verify via LDAP server"),
-  ;
-
-  AuthenticationType(int code, String desc) {
-    this.code = code;
-    this.desc = desc;
-  }
-
-  @EnumValue private final int code;
-  private final String desc;
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CheckTeam {
+  String value() default "";
 }

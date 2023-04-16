@@ -16,9 +16,9 @@
  */
 package org.apache.streampark.common.util
 
-import java.util.concurrent.{ExecutorService, ThreadFactory, TimeUnit}
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+
+import java.util.concurrent.{ExecutorService, ThreadFactory, TimeUnit}
 
 object ThreadUtils {
 

@@ -21,18 +21,14 @@ import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 
-/**
- * Building pipeline for flink kubernetes-native session mode
- */
+/** Building pipeline for flink kubernetes-native session mode */
 class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends BuildPipeline {
 
   override def pipeType: PipelineType = PipelineType.FLINK_NATIVE_K8S_SESSION
 
   override def offerBuildParam: FlinkK8sSessionBuildRequest = request
 
-  /**
-   * The construction logic needs to be implemented by subclasses
-   */
+  /** The construction logic needs to be implemented by subclasses */
   @throws[Throwable]
   override protected def buildProcess(): ShadedBuildResponse = {
 
@@ -50,7 +46,10 @@ class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends
     // the output shaded file name like: streampark-flinkjob_myjob_20211024134822
     val shadedJar =
       execStep(2) {
-        val output = MavenTool.buildFatJar(request.mainClass, request.providedLibs, request.getShadedJarPath(buildWorkspace))
+        val output = MavenTool.buildFatJar(
+          request.mainClass,
+          request.providedLibs,
+          request.getShadedJarPath(buildWorkspace))
         logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
         output
       }.getOrElse(throw getError.exception)
@@ -60,5 +59,6 @@ class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends
 }
 
 object FlinkK8sSessionBuildPipeline {
-  def of(request: FlinkK8sSessionBuildRequest): FlinkK8sSessionBuildPipeline = new FlinkK8sSessionBuildPipeline(request)
+  def of(request: FlinkK8sSessionBuildRequest): FlinkK8sSessionBuildPipeline =
+    new FlinkK8sSessionBuildPipeline(request)
 }

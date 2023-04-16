@@ -16,15 +16,16 @@
  */
 package org.apache.streampark.flink.core
 
+import org.apache.streampark.common.conf.ConfigConst.printLogo
+
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{Table, TableEnvironment}
 import org.apache.flink.table.descriptors.{ConnectorDescriptor, ConnectTableDescriptor}
 import org.apache.flink.table.sources.TableSource
 
-import org.apache.streampark.common.conf.ConfigConst.printLogo
-
-class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment) extends FlinkTableTrait(parameter, tableEnv) {
+class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment)
+  extends FlinkTableTrait(parameter, tableEnv) {
 
   /**
    * for scala
@@ -40,23 +41,31 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
    */
   def this(args: TableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-  @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
+  @deprecated override def connect(
+      connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor =
+    tableEnv.connect(connectorDescriptor)
 
   override def execute(jobName: String): JobExecutionResult = {
     printLogo(s"FlinkTable $jobName Starting...")
     tableEnv.execute(jobName)
   }
 
-  @deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+  @deprecated override def fromTableSource(source: TableSource[_]): Table =
+    tableEnv.fromTableSource(source)
 
-  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
+  @deprecated override def insertInto(
+      table: Table,
+      sinkPath: String,
+      sinkPathContinued: String*): Unit =
     tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
+  @deprecated override def insertInto(targetPath: String, table: Table): Unit =
+    tableEnv.insertInto(targetPath, table)
 
   @deprecated override def explain(table: Table): String = tableEnv.explain(table)
 
-  @deprecated override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
+  @deprecated override def explain(table: Table, extended: Boolean): String =
+    tableEnv.explain(table, extended)
 
   @deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
 

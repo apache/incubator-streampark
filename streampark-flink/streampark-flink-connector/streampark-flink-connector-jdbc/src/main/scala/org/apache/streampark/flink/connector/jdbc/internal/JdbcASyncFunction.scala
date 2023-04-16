@@ -17,15 +17,15 @@
 
 package org.apache.streampark.flink.connector.jdbc.internal
 
-import java.util.Properties
-import java.util.concurrent.{CompletableFuture, Executors, ExecutorService}
-import java.util.function.{Consumer, Supplier}
+import org.apache.streampark.common.util.{JdbcUtils, Logger}
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
 
-import org.apache.streampark.common.util.{JdbcUtils, Logger}
+import java.util.Properties
+import java.util.concurrent.{CompletableFuture, Executors, ExecutorService}
+import java.util.function.{Consumer, Supplier}
 
 /**
  * Based on thread pool
@@ -36,8 +36,13 @@ import org.apache.streampark.common.util.{JdbcUtils, Logger}
  * @tparam T
  * @tparam R
  */
-class JdbcASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: (T, Map[String, _]) => R, jdbc: Properties, capacity: Int = 10)
-    extends RichAsyncFunction[T, R] with Logger {
+class JdbcASyncFunction[T: TypeInformation, R: TypeInformation](
+    sqlFun: T => String,
+    resultFun: (T, Map[String, _]) => R,
+    jdbc: Properties,
+    capacity: Int = 10)
+  extends RichAsyncFunction[T, R]
+  with Logger {
 
   @transient private[this] var executorService: ExecutorService = _
 
@@ -55,20 +60,22 @@ class JdbcASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => Str
 
   @throws[Exception]
   def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
-    CompletableFuture.supplyAsync(
-      new Supplier[Iterable[Map[String, _]]] {
-        override def get(): Iterable[Map[String, _]] = JdbcUtils.select(sqlFun(input))(jdbc)
-      },
-      executorService).thenAccept(new Consumer[Iterable[Map[String, _]]] {
-      override def accept(result: Iterable[Map[String, _]]): Unit = {
-        val list = result.toList
-        if (list.isEmpty) {
-          resultFuture.complete(List(resultFun(input, Map.empty[String, Any])))
-        } else {
-          resultFuture.complete(list.map(x => resultFun(input, x)))
+    CompletableFuture
+      .supplyAsync(
+        new Supplier[Iterable[Map[String, _]]] {
+          override def get(): Iterable[Map[String, _]] = JdbcUtils.select(sqlFun(input))(jdbc)
+        },
+        executorService)
+      .thenAccept(new Consumer[Iterable[Map[String, _]]] {
+        override def accept(result: Iterable[Map[String, _]]): Unit = {
+          val list = result.toList
+          if (list.isEmpty) {
+            resultFuture.complete(List(resultFun(input, Map.empty[String, Any])))
+          } else {
+            resultFuture.complete(list.map(x => resultFun(input, x)))
+          }
         }
-      }
-    })
+      })
 
   }
 

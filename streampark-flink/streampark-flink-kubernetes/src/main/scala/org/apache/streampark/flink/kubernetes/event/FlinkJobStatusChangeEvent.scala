@@ -19,7 +19,5 @@ package org.apache.streampark.flink.kubernetes.event
 
 import org.apache.streampark.flink.kubernetes.model.{JobStatusCV, TrackId}
 
-/**
- * Notification of flink job state changes from k8s clusters.
- */
+/** Notification of flink job state changes from k8s clusters. */
 case class FlinkJobStatusChangeEvent(trackId: TrackId, jobStatus: JobStatusCV) extends BuildInEvent

@@ -20,15 +20,11 @@ import java.time.LocalDateTime
 
 object ConfigConst {
 
-  /**
-   * common const
-   */
+  /** common const */
 
   val DEFAULT_DATAMASK_STRING = "********"
 
-  /**
-   * about parameter...
-   */
+  /** about parameter... */
 
   val KEY_APP_HOME = "app.home"
 
@@ -46,9 +42,7 @@ object ConfigConst {
 
   val KEY_SEMANTIC = "semantic"
 
-  /**
-   * sign....
-   */
+  /** sign.... */
   val SIGN_COLON = ":"
 
   val SIGN_SEMICOLON = ";"
@@ -57,16 +51,12 @@ object ConfigConst {
 
   val SIGN_EMPTY = ""
 
-  /**
-   * kerberos
-   */
+  /** kerberos */
   val KEY_KERBEROS = "kerberos"
 
   val KEY_HADOOP_USER_NAME = "HADOOP_USER_NAME"
 
-  /**
-   * hadoop.security.authentication
-   */
+  /** hadoop.security.authentication */
   val KEY_HADOOP_SECURITY_AUTHENTICATION = "hadoop.security.authentication"
 
   val KEY_SECURITY_KERBEROS_ENABLE = "security.kerberos.login.enable"
@@ -83,12 +73,6 @@ object ConfigConst {
 
   // spark
 
-  val KEY_SPARK_USER_ARGS = "spark.user.args"
-
-  val KEY_SPARK_CONF = "spark.conf"
-
-  val KEY_SPARK_DEBUG_CONF = "spark.debug.conf"
-
   val KEY_SPARK_MAIN_CLASS = "spark.main.class"
 
   val KEY_SPARK_APP_NAME = "spark.app.name"
@@ -98,13 +82,16 @@ object ConfigConst {
   // flink
   def KEY_APP_CONF(prefix: String = null): String = if (prefix == null) "conf" else s"${prefix}conf"
 
-  def KEY_FLINK_CONF(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
+  def KEY_FLINK_CONF(prefix: String = null): String =
+    if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
 
-  def KEY_APP_NAME(prefix: String = null): String = if (prefix == null) "app.name" else s"${prefix}app.name"
+  def KEY_APP_NAME(prefix: String = null): String =
+    if (prefix == null) "app.name" else s"${prefix}app.name"
 
   def KEY_FLINK_SQL(prefix: String = null): String = if (prefix == null) "sql" else s"${prefix}sql"
 
-  def KEY_FLINK_PARALLELISM(prefix: String = null): String = if (prefix == null) "parallelism.default" else s"${prefix}parallelism.default"
+  def KEY_FLINK_PARALLELISM(prefix: String = null): String =
+    if (prefix == null) "parallelism.default" else s"${prefix}parallelism.default"
 
   val KEY_FLINK_OPTION_PREFIX = "flink.option."
 
@@ -137,9 +124,7 @@ object ConfigConst {
 
   val KEY_FLINK_TABLE_DATABASE = "flink.table.database"
 
-  /**
-   * about config Kafka
-   */
+  /** about config Kafka */
 
   val KAFKA_SINK_PREFIX = "kafka.sink."
 
@@ -159,9 +144,7 @@ object ConfigConst {
 
   val KEY_ALIAS = "alias"
 
-  /**
-   * about config jdbc...
-   */
+  /** about config jdbc... */
   val KEY_JDBC_PREFIX = "jdbc."
 
   val KEY_JDBC_DRIVER = "driverClassName"
@@ -178,9 +161,7 @@ object ConfigConst {
 
   val MONGO_PREFIX = "mongodb."
 
-  /**
-   * about config HBase
-   */
+  /** about config HBase */
   val HBASE_PREFIX = "hbase."
 
   val KEY_HBASE_COMMIT_BATCH = "hbase.commit.batch"
@@ -193,18 +174,14 @@ object ConfigConst {
 
   val DEFAULT_HBASE_WRITE_SIZE = 1024 * 1024 * 10
 
-  /**
-   * about influx
-   */
+  /** about influx */
   val INFLUX_PREFIX = "influx."
 
   val KEY_INFLUX_ACTIONS = "actions"
 
   val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
 
-  /**
-   * flink config key
-   */
+  /** flink config key */
   val KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
 
   val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"

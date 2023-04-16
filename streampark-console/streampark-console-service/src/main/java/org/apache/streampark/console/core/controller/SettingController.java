@@ -25,6 +25,8 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "SETTING_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -42,6 +45,7 @@ public class SettingController {
 
   @Autowired private SettingService settingService;
 
+  @Operation(summary = "List settings")
   @PostMapping("all")
   @RequiresPermissions("setting:view")
   public RestResponse all() {
@@ -51,18 +55,21 @@ public class SettingController {
     return RestResponse.success(setting);
   }
 
+  @Operation(summary = "Get setting")
   @PostMapping("get")
   public RestResponse get(String key) {
     Setting setting = settingService.get(key);
     return RestResponse.success(setting);
   }
 
+  @Operation(summary = "Get streampark address")
   @PostMapping("weburl")
   public RestResponse webUrl() {
     String url = settingService.getStreamParkAddress();
     return RestResponse.success(url == null ? null : url.trim());
   }
 
+  @Operation(summary = "Update setting")
   @PostMapping("update")
   @RequiresPermissions("setting:update")
   public RestResponse update(Setting setting) {
@@ -70,6 +77,7 @@ public class SettingController {
     return RestResponse.success(updated);
   }
 
+  @Operation(summary = "Check hadoop status")
   @PostMapping("checkHadoop")
   public RestResponse checkHadoop() {
     try {

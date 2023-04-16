@@ -17,17 +17,19 @@
 
 package org.apache.streampark.flink.connector.redis.internal
 
-import java.io.IOException
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.connector.redis.bean.{RedisContainer, RedisMapper}
 
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import org.apache.flink.streaming.connectors.redis.{RedisSink => BahirRedisSink}
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.redis.bean.{RedisContainer, RedisMapper}
+import java.io.IOException
 
-class RedisSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[T], ttl: Int) extends BahirRedisSink[T](jedisConfig, mapper) with Logger {
+class RedisSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[T], ttl: Int)
+  extends BahirRedisSink[T](jedisConfig, mapper)
+  with Logger {
 
   private[this] var redisContainer: RedisContainer = _
 

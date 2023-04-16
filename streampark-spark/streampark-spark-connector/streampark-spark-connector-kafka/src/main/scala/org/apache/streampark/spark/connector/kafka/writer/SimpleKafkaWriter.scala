@@ -17,26 +17,29 @@
 
 package org.apache.streampark.spark.connector.kafka.writer
 
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+
 import java.util.Properties
 
 import scala.annotation.meta.param
 import scala.reflect.ClassTag
 
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-
-/**
- * A simple Kafka producers
- */
+/** A simple Kafka producers */
 class SimpleKafkaWriter[T: ClassTag](@(transient @param) msg: T) extends KafkaWriter[T] {
 
   /**
-   * @param producerConfig The configuration that can be used to connect to Kafka
-   * @param serializerFunc The function to convert the data from the stream into Kafka
-   *                       [[ProducerRecord]]s.
-   * @tparam K The type of the key
-   * @tparam V The type of the value
+   * @param producerConfig
+   *   The configuration that can be used to connect to Kafka
+   * @param serializerFunc
+   *   The function to convert the data from the stream into Kafka [[ProducerRecord]]s.
+   * @tparam K
+   *   The type of the key
+   * @tparam V
+   *   The type of the value
    */
-  override def writeToKafka[K, V](producerConfig: Properties, serializerFunc: (T) => ProducerRecord[K, V]): Unit = {
+  override def writeToKafka[K, V](
+      producerConfig: Properties,
+      serializerFunc: (T) => ProducerRecord[K, V]): Unit = {
     val producer: KafkaProducer[K, V] = KafkaWriter.getProducer(producerConfig)
     producer.send(serializerFunc(msg))
   }

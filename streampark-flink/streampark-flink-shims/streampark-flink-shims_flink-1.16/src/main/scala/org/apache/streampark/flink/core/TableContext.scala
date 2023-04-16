@@ -22,7 +22,7 @@ import org.apache.flink.table.api.{CompiledPlan, PlanReference, Table, TableDesc
 import org.apache.flink.table.module.ModuleEntry
 
 class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment)
-    extends FlinkTableTrait(parameter, tableEnv) {
+  extends FlinkTableTrait(parameter, tableEnv) {
 
   def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
 
@@ -44,18 +44,14 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 
-  /**
-   * @since 1.15
-   */
-  override def listTables(catalogName: String, databaseName: String): Array[String] = tableEnv.listTables(catalogName, databaseName)
+  /** @since 1.15 */
+  override def listTables(catalogName: String, databaseName: String): Array[String] =
+    tableEnv.listTables(catalogName, databaseName)
 
-  /**
-   * @since 1.15
-   */
-  override def loadPlan(planReference: PlanReference): CompiledPlan = tableEnv.loadPlan(planReference)
+  /** @since 1.15 */
+  override def loadPlan(planReference: PlanReference): CompiledPlan =
+    tableEnv.loadPlan(planReference)
 
-  /**
-   * @since 1.15
-   */
+  /** @since 1.15 */
   override def compilePlanSql(stmt: String): CompiledPlan = tableEnv.compilePlanSql(stmt)
 }

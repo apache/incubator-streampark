@@ -18,32 +18,32 @@
 package org.apache.streampark.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 
-@ApiModel(value = "AlertLark")
+@Schema(name = "AlertLark")
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertLarkParams implements Serializable {
 
-  @ApiModelProperty(name = "token", value = "lark token")
+  @Schema(description = "lark access token")
   @NotBlank(message = "The access token of Lark must be not empty")
   private String token;
 
-  @ApiModelProperty(name = "isAtAll", value = "is @all", example = "false")
+  @Schema(description = "is @all", example = "false", implementation = boolean.class)
   private Boolean isAtAll = false;
 
-  @ApiModelProperty(
-      name = "secretEnable",
-      value = "is lark robot secret enabled",
-      example = "false")
+  @Schema(
+      description = "is lark robot secret enabled",
+      example = "false",
+      defaultValue = "false",
+      implementation = boolean.class)
   private Boolean secretEnable = false;
 
-  @ApiModelProperty(name = "secretToken", value = "lark robot webhook secret token")
+  @Schema(description = "lark robot webhook secret token")
   private String secretToken;
 }

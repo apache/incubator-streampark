@@ -367,35 +367,18 @@ start() {
     -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
     -Dspring.config.location="\"${PROPER}\"" \
     -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
-    -Dpid="\"${APP_PID}\"" \
     org.apache.streampark.console.StreamParkConsoleBootstrap >> "$APP_OUT" 2>&1 "&"
 
+    local PID=$!
 
-   if [ $? -eq "0" ]; then
-      local SLEEP_INTERVAL=5
-      local STARTED=0
-      while [ $SLEEP_INTERVAL -ge 0 ]; do
-         # shellcheck disable=SC2236
-         if [ -f "$APP_PID" ]; then
-           if [ -s "$APP_PID" ]; then
-             # shellcheck disable=SC2006
-             echo_g "StreamPark start successful. pid: `cat "$APP_PID"`"
-             STARTED=1
-             break
-           fi
-         fi
-         if [ $SLEEP_INTERVAL -gt 0 ]; then
-           sleep 1
-         fi
-         # shellcheck disable=SC2006
-         SLEEP_INTERVAL=`expr $SLEEP_INTERVAL - 1 `
-      done
-      if [ $STARTED -eq 0 ] ;then
-        echo_g "StreamPark start successful."
-      fi
-   else
-      echo_r "StreamPark start failed."
-   fi
+    # Add to pid file if successful start
+    if [[ ${PID} =~ ${IS_NUMBER} ]] && kill -0 $PID > /dev/null 2>&1 ; then
+        echo $PID > "$APP_PID"
+        echo_g "StreamPark start successful. pid: `cat "$APP_PID"`"
+    else
+        echo_r "StreamPark start failed."
+        exit 1
+    fi
 }
 
 debug() {

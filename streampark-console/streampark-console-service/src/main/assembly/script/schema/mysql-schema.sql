@@ -238,20 +238,6 @@ create table `t_flink_sql` (
 
 
 -- ----------------------------
--- Table structure for t_flink_tutorial
--- ----------------------------
-drop table if exists `t_flink_tutorial`;
-create table `t_flink_tutorial` (
-  `id` int not null auto_increment,
-  `type` tinyint default null,
-  `name` varchar(255) collate utf8mb4_general_ci default null,
-  `content` text collate utf8mb4_general_ci,
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  primary key (`id`) using btree
-) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-
--- ----------------------------
 -- Table structure for t_menu
 -- ----------------------------
 drop table if exists `t_menu`;

@@ -17,14 +17,15 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-import scala.util.Try
-
 import org.apache.streampark.common.util.Utils
 
-/**
- * Pod template for flink k8s cluster
- */
-case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "", tmPodTemplate: String = "") {
+import scala.util.Try
+
+/** Pod template for flink k8s cluster */
+case class K8sPodTemplates(
+    podTemplate: String = "",
+    jmPodTemplate: String = "",
+    tmPodTemplate: String = "") {
 
   def nonEmpty: Boolean = Option(podTemplate).exists(_.trim.nonEmpty) ||
     Option(jmPodTemplate).exists(_.trim.nonEmpty) ||

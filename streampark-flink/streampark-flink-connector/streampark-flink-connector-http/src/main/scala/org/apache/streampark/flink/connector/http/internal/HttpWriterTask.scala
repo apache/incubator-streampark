@@ -17,18 +17,19 @@
 
 package org.apache.streampark.flink.connector.http.internal
 
-import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
-
-import scala.collection.JavaConversions._
-import scala.util.Try
+import org.apache.streampark.common.util.{JsonUtils, Logger}
+import org.apache.streampark.flink.connector.conf.ThresholdConf
+import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
 
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.http.client.methods._
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}
 
-import org.apache.streampark.common.util.{JsonUtils, Logger}
-import org.apache.streampark.flink.connector.conf.ThresholdConf
-import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
+import java.util
+import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
+
+import scala.collection.JavaConversions._
+import scala.util.Try
 
 case class HttpWriterTask(
     id: Int,
@@ -36,7 +37,10 @@ case class HttpWriterTask(
     asyncHttpClient: AsyncHttpClient,
     header: Map[String, String],
     queue: BlockingQueue[SinkRequest],
-    callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
+    callbackService: ExecutorService)
+  extends Runnable
+  with AutoCloseable
+  with Logger {
 
   @volatile var isWorking = false
 
@@ -47,9 +51,11 @@ case class HttpWriterTask(
     HttpPatch.METHOD_NAME,
     HttpDelete.METHOD_NAME,
     HttpOptions.METHOD_NAME,
-    HttpTrace.METHOD_NAME)
+    HttpTrace.METHOD_NAME
+  )
 
-  val failoverWriter: FailoverWriter = new FailoverWriter(thresholdConf.storageType, thresholdConf.getFailoverConfig)
+  val failoverWriter: FailoverWriter =
+    new FailoverWriter(thresholdConf.storageType, thresholdConf.getFailoverConfig)
 
   def buildRequest(url: String): Request = {
 
@@ -75,11 +81,14 @@ case class HttpWriterTask(
     Try(uriAndParams(1).trim).getOrElse(null) match {
       case null =>
       case params =>
-        var paramMap = Map[String, String]()
-        params.split("&").foreach(x => {
-          val param = x.split("=")
-          paramMap += param.head -> param.last
-        })
+        val paramMap = new util.HashMap[String, String]()
+        params
+          .split("&")
+          .foreach(
+            x => {
+              val param = x.split("=")
+              paramMap.put(param.head, param.last)
+            })
         if (paramMap.nonEmpty) {
           builder.setHeader(HttpHeaders.Names.CONTENT_TYPE, HttpHeaders.Values.APPLICATION_JSON)
           val json = JsonUtils.write(paramMap)
@@ -115,19 +124,22 @@ case class HttpWriterTask(
       logInfo(s"Task id = $id is finished")
     }
 
-  def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable = new Runnable {
-    override def run(): Unit = {
-      Try(whenResponse.get()).getOrElse(null) match {
-        case null =>
-          logError(s"""Error HttpSink executing callback, params = $thresholdConf,can not get Response. """)
-          handleFailedResponse(null, sinkRequest)
-        case resp if resp.getStatusCode != 200 =>
-          logError(s"""Error HttpSink executing callback, params = $thresholdConf, StatusCode = ${resp.getStatusCode} """)
-          handleFailedResponse(resp, sinkRequest)
-        case _ =>
+  def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable =
+    new Runnable {
+      override def run(): Unit = {
+        Try(whenResponse.get()).getOrElse(null) match {
+          case null =>
+            logError(
+              s"""Error HttpSink executing callback, params = $thresholdConf,can not get Response. """)
+            handleFailedResponse(null, sinkRequest)
+          case resp if resp.getStatusCode != 200 =>
+            logError(
+              s"""Error HttpSink executing callback, params = $thresholdConf, StatusCode = ${resp.getStatusCode} """)
+            handleFailedResponse(resp, sinkRequest)
+          case _ =>
+        }
       }
     }
-  }
 
   /**
    * if send data to Http Failed, retry maxRetries, if still failed,flush data to failoverStorage
@@ -138,11 +150,14 @@ case class HttpWriterTask(
   def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit =
     try {
       if (sinkRequest.attemptCounter >= thresholdConf.maxRetries) {
-        failoverWriter.write(sinkRequest.copy(records = sinkRequest.records.map(_.replaceFirst("^[A-Z]+///", ""))))
-        logWarn(s"""Failed to send data to Http, Http response = $response. Ready to flush data to ${thresholdConf.storageType}""")
+        failoverWriter.write(
+          sinkRequest.copy(records = sinkRequest.records.map(_.replaceFirst("^[A-Z]+///", ""))))
+        logWarn(
+          s"""Failed to send data to Http, Http response = $response. Ready to flush data to ${thresholdConf.storageType}""")
       } else {
         sinkRequest.incrementCounter()
-        logWarn(s"Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${thresholdConf.maxRetries}, response = $response")
+        logWarn(
+          s"Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${thresholdConf.maxRetries}, response = $response")
         queue.put(sinkRequest)
       }
     } catch {

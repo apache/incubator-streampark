@@ -23,8 +23,9 @@ import org.apache.streampark.flink.connector.doris.bean.LoadStatusFailedExceptio
 import org.apache.streampark.flink.connector.doris.bean.RespContent;
 import org.apache.streampark.flink.connector.doris.util.DorisDelimiterParser;
 
+import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.codec.binary.Base64;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;

@@ -125,7 +125,7 @@
           </div>
         </div>
         <template #actions>
-          <div v-if="item.type === 1">
+          <div v-if="item.type === 1" v-auth="'setting:update'">
             <a v-if="!item.submitting" @click="handleEdit(item)">
               {{ t('common.edit') }}
             </a>

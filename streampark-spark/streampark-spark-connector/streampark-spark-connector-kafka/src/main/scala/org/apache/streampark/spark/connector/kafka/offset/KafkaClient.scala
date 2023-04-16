@@ -17,10 +17,7 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
-import java.{util => ju}
-import java.lang.reflect.Constructor
-
-import scala.reflect.ClassTag
+import org.apache.streampark.common.util.Logger
 
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
@@ -30,7 +27,10 @@ import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka010._
 
-import org.apache.streampark.common.util.Logger
+import java.{util => ju}
+import java.lang.reflect.Constructor
+
+import scala.reflect.ClassTag
 
 class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
@@ -48,12 +48,11 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
         logInfo(s"Custom offset management class $clazz")
         val constructors = {
           val offsetsManagerClass = Class.forName(clazz)
-          offsetsManagerClass
-            .getConstructors
+          offsetsManagerClass.getConstructors
             .asInstanceOf[Array[Constructor[_ <: SparkConf]]]
         }
-        val constructorTakingSparkConf = constructors.find { c =>
-          c.getParameterTypes.sameElements(Array(classOf[SparkConf]))
+        val constructorTakingSparkConf = constructors.find {
+          c => c.getParameterTypes.sameElements(Array(classOf[SparkConf]))
         }
         constructorTakingSparkConf.get.newInstance(sparkConf).asInstanceOf[Offset]
     }
@@ -87,7 +86,10 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
       canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
       stream
     } else {
-      val stream = KafkaUtils.createDirectStream[K, V](ssc, LocationStrategies.PreferConsistent, ConsumerStrategies.Subscribe[K, V](topics, kafkaParams))
+      val stream = KafkaUtils.createDirectStream[K, V](
+        ssc,
+        LocationStrategies.PreferConsistent,
+        ConsumerStrategies.Subscribe[K, V](topics, kafkaParams))
       canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
       stream
     }
@@ -106,7 +108,8 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
     offsetStoreType match {
       case "kafka" => canCommitOffsets.commitAsync(offsetRanges)
       case _ =>
-        val tps = offsetRanges.map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset).toMap
+        val tps =
+          offsetRanges.map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset).toMap
         offsetManager.update(groupId, tps)
     }
   }

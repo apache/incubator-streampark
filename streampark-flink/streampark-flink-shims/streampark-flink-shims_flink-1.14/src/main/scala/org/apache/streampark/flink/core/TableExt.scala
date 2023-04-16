@@ -43,12 +43,16 @@ object TableExt {
       super.toRetractStream
     }
 
-    def toAppendStream[T](implicit typeInfo: TypeInformation[T], context: StreamTableContext): DataStream[T] = {
+    def toAppendStream[T](implicit
+        typeInfo: TypeInformation[T],
+        context: StreamTableContext): DataStream[T] = {
       context.isConvertedToDataStream = true
       super.toAppendStream
     }
 
-    def toRetractStream[T](implicit typeInfo: TypeInformation[T], context: StreamTableContext): DataStream[(Boolean, T)] = {
+    def toRetractStream[T](implicit
+        typeInfo: TypeInformation[T],
+        context: StreamTableContext): DataStream[(Boolean, T)] = {
       context.isConvertedToDataStream = true
       super.toRetractStream
     }

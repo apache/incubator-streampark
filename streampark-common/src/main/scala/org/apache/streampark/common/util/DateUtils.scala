@@ -21,6 +21,7 @@ import java.time.{Duration, LocalDateTime}
 import java.time.format.DateTimeFormatter
 import java.util._
 import java.util.concurrent.TimeUnit
+
 import scala.collection.mutable
 import scala.util._
 
@@ -32,7 +33,10 @@ object DateUtils {
 
   val fullCompact = "yyyyMMddHHmmss"
 
-  def parse(date: String, format: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Date = {
+  def parse(
+      date: String,
+      format: String = fullFormat,
+      timeZone: TimeZone = TimeZone.getDefault): Date = {
     val df: SimpleDateFormat = new SimpleDateFormat(format)
     df.setTimeZone(timeZone)
     df.parse(date)
@@ -46,7 +50,9 @@ object DateUtils {
 
   def second2Date(time: Long): Date = milliSecond2Date(time * 1000)
 
-  def now(dateFormat: String = format_yyyyMMdd, timeZone: TimeZone = TimeZone.getDefault): String = {
+  def now(
+      dateFormat: String = format_yyyyMMdd,
+      timeZone: TimeZone = TimeZone.getDefault): String = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
     df.setTimeZone(timeZone)
     df.format(new Date())
@@ -70,7 +76,10 @@ object DateUtils {
     minuteOfDay(date) * 60 + calendar.get(Calendar.SECOND)
   }
 
-  def format(date: Date = new Date(), fmt: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): String = {
+  def format(
+      date: Date = new Date(),
+      fmt: String = fullFormat,
+      timeZone: TimeZone = TimeZone.getDefault): String = {
     if (date == null) null
     else {
       val simpleDateFormat = new SimpleDateFormat(fmt)
@@ -79,17 +88,22 @@ object DateUtils {
     }
   }
 
-  def getTime(time: String, fmt: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Long = {
+  def getTime(
+      time: String,
+      fmt: String = fullFormat,
+      timeZone: TimeZone = TimeZone.getDefault): Long = {
     val simpleDateFormat = new SimpleDateFormat(fmt)
     simpleDateFormat.setTimeZone(timeZone)
     Try(simpleDateFormat.parse(time).getTime)
-      .filter(_ > 0).getOrElse(System.currentTimeMillis())
+      .filter(_ > 0)
+      .getOrElse(System.currentTimeMillis())
   }
 
-  /**
-   * Date plus and minus
-   */
-  def addAndSubtract(i: Int, date: Date = new Date, timeZone: TimeZone = TimeZone.getDefault): Date = {
+  /** Date plus and minus */
+  def addAndSubtract(
+      i: Int,
+      date: Date = new Date,
+      timeZone: TimeZone = TimeZone.getDefault): Date = {
     val cal = Calendar.getInstance
     cal.setTimeZone(timeZone)
     cal.setTime(date)
@@ -125,9 +139,7 @@ object DateUtils {
     sdf.parse(localTime)
   }
 
-  /**
-   * <p>Description: convert UTC time to local time</p>
-   */
+  /** <p>Description: convert UTC time to local time</p> */
   def utcToLocal(utcTime: String, format: String = fullFormat): Date = {
     val sdf = new SimpleDateFormat(format)
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
@@ -136,7 +148,8 @@ object DateUtils {
   }
 
   /**
-   * Convert duration in seconds to rich time duration format. e.g. 2 days 3 hours 4 minutes 5 seconds
+   * Convert duration in seconds to rich time duration format. e.g. 2 days 3 hours 4 minutes 5
+   * seconds
    *
    * @param milliseconds
    * @return
@@ -162,7 +175,9 @@ object DateUtils {
     builder.toString
   }
 
-  def getTimeUnit(time: String, default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)): (Int, TimeUnit) = {
+  def getTimeUnit(
+      time: String,
+      default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)): (Int, TimeUnit) = {
     val timeUnit = time match {
       case "" => null
       case x: String =>
@@ -185,7 +200,8 @@ object DateUtils {
     }
   }
 
-  def formatFullTime(localDateTime: LocalDateTime): String = formatFullTime(localDateTime, fullFormat)
+  def formatFullTime(localDateTime: LocalDateTime): String =
+    formatFullTime(localDateTime, fullFormat)
 
   def formatFullTime(localDateTime: LocalDateTime, pattern: String): String = {
     val dateTimeFormatter = DateTimeFormatter.ofPattern(pattern)

@@ -121,22 +121,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public void updateProfile(User user) {
-    updateById(user);
-  }
-
-  @Override
-  @Transactional(rollbackFor = Exception.class)
-  public void updateAvatar(String username, String avatar) {
-    User user = new User();
-    user.setAvatar(avatar);
-    LambdaQueryWrapper<User> queryWrapper =
-        new LambdaQueryWrapper<User>().eq(User::getUsername, username);
-    this.baseMapper.update(user, queryWrapper);
-  }
-
-  @Override
-  @Transactional(rollbackFor = Exception.class)
   public void updatePassword(User userParam) {
     User user = getById(userParam.getUserId());
     ApiAlertException.throwIfNull(user, "User is null. Update password failed.");

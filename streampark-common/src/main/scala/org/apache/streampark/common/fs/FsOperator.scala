@@ -45,17 +45,32 @@ abstract class FsOperator {
 
   def mkCleanDirs(path: String): Unit
 
-  def upload(srcPath: String, dstPath: String): Unit = upload(srcPath, dstPath, delSrc = false, overwrite = true)
+  def upload(srcPath: String, dstPath: String): Unit =
+    upload(srcPath, dstPath, delSrc = false, overwrite = true)
 
-  def copy(srcPath: String, dstPath: String): Unit = copy(srcPath, dstPath, delSrc = false, overwrite = true)
+  def copy(srcPath: String, dstPath: String): Unit =
+    copy(srcPath, dstPath, delSrc = false, overwrite = true)
 
-  def copyDir(srcPath: String, dstPath: String): Unit = copyDir(srcPath, dstPath, delSrc = false, overwrite = true)
+  def copyDir(srcPath: String, dstPath: String): Unit =
+    copyDir(srcPath, dstPath, delSrc = false, overwrite = true)
 
-  def upload(srcPath: String, dstPath: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit
+  def upload(
+      srcPath: String,
+      dstPath: String,
+      delSrc: Boolean = false,
+      overwrite: Boolean = true): Unit
 
-  def copy(srcPath: String, dstPath: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit
+  def copy(
+      srcPath: String,
+      dstPath: String,
+      delSrc: Boolean = false,
+      overwrite: Boolean = true): Unit
 
-  def copyDir(srcPath: String, dstPath: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit
+  def copyDir(
+      srcPath: String,
+      dstPath: String,
+      delSrc: Boolean = false,
+      overwrite: Boolean = true): Unit
 
   def move(srcPath: String, dstPath: String): Unit
 

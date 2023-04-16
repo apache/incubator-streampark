@@ -16,17 +16,17 @@
  */
 package org.apache.streampark.flink.packer
 
-import java.io.File
-import java.util.jar.JarFile
-
-import scala.language.postfixOps
+import org.apache.streampark.flink.packer.maven.{Artifact, DependencyInfo, MavenTool}
 
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import org.apache.streampark.flink.packer.maven.{Artifact, DependencyInfo, MavenTool}
+import java.io.File
+import java.util.jar.JarFile
+
+import scala.language.postfixOps
 
 class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
@@ -49,21 +49,39 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
         val fatJarPath = outputDir.concat("fat-1.jar")
         val fatJar = MavenTool.buildFatJar(
           null,
-          Set(
-            path("jars/commons-cli-1.4.jar"),
-            path("jars/commons-dbutils-1.7.jar")),
+          Set(path("jars/commons-cli-1.4.jar"), path("jars/commons-dbutils-1.7.jar")),
           fatJarPath)
         fatJar.exists() mustBe true
-        assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-cli-1.4.jar")), "org/apache/commons/cli/DefaultParser.class"))
-        assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-dbutils-1.7.jar")), "org/apache/commons/dbutils/DbUtils.class"))
+        assert(
+          jarEquals(
+            new JarFile(fatJarPath),
+            new JarFile(path("jars/commons-cli-1.4.jar")),
+            "org/apache/commons/cli/DefaultParser.class"))
+        assert(
+          jarEquals(
+            new JarFile(fatJarPath),
+            new JarFile(path("jars/commons-dbutils-1.7.jar")),
+            "org/apache/commons/dbutils/DbUtils.class"))
       }
       "with jarlibs under directory" in {
         val fatJarPath = outputDir.concat("fat-2.jar")
         val fatJar = MavenTool.buildFatJar(null, Set(path("jars/")), fatJarPath)
         fatJar.exists() mustBe true
-        assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-cli-1.4.jar")), "org/apache/commons/cli/DefaultParser.class"))
-        assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-dbutils-1.7.jar")), "org/apache/commons/dbutils/DbUtils.class"))
-        assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-logging-1.2.jar")), "org/apache/commons/logging/Log.class"))
+        assert(
+          jarEquals(
+            new JarFile(fatJarPath),
+            new JarFile(path("jars/commons-cli-1.4.jar")),
+            "org/apache/commons/cli/DefaultParser.class"))
+        assert(
+          jarEquals(
+            new JarFile(fatJarPath),
+            new JarFile(path("jars/commons-dbutils-1.7.jar")),
+            "org/apache/commons/dbutils/DbUtils.class"))
+        assert(
+          jarEquals(
+            new JarFile(fatJarPath),
+            new JarFile(path("jars/commons-logging-1.2.jar")),
+            "org/apache/commons/logging/Log.class"))
       }
       "with jarlibs and maven artifacts" in {
         val fatJarPath = outputDir.concat("fat-3.jar")
@@ -74,15 +92,22 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
             Set(path("jars/commons-dbutils-1.7.jar"))),
           fatJarPath)
         fatJar.exists() mustBe true
-        assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-dbutils-1.7.jar")), "org/apache/commons/dbutils/DbUtils.class"))
-        new JarFile(fatJarPath).getJarEntry("org/apache/kafka/clients/ClientUtils.class") mustNot be(null)
-        new JarFile(fatJarPath).getJarEntry("org/apache/flink/connector/base/source/reader/SourceReaderBase.class") mustNot be(null)
+        assert(
+          jarEquals(
+            new JarFile(fatJarPath),
+            new JarFile(path("jars/commons-dbutils-1.7.jar")),
+            "org/apache/commons/dbutils/DbUtils.class"))
+        new JarFile(fatJarPath).getJarEntry(
+          "org/apache/kafka/clients/ClientUtils.class") mustNot be(null)
+        new JarFile(fatJarPath).getJarEntry(
+          "org/apache/flink/connector/base/source/reader/SourceReaderBase.class") mustNot be(null)
       }
     }
 
     "resolve artifacts" should {
       "with single artifact" in {
-        val jars = MavenTool.resolveArtifacts(Set(Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")))
+        val jars = MavenTool.resolveArtifacts(
+          Set(Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")))
         val expectJars = Array(
           "force-shading-1.13.0.jar",
           "flink-connector-base-1.13.0.jar",
@@ -92,9 +117,10 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
         jars.map(jar => jar.getName).sameElements(expectJars) mustBe true
       }
       "with mutiply artifact" in {
-        val jars = MavenTool.resolveArtifacts(Set(
-          Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0"),
-          Artifact.of("org.apache.flink:flink-connector-base:1.13.0")))
+        val jars = MavenTool.resolveArtifacts(
+          Set(
+            Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0"),
+            Artifact.of("org.apache.flink:flink-connector-base:1.13.0")))
         val expectJars = Array(
           "flink-core-1.13.0.jar",
           "force-shading-1.13.0.jar",

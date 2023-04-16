@@ -26,7 +26,6 @@ drop table if exists "public"."t_role";
 drop table if exists "public"."t_role_menu";
 drop table if exists "public"."t_menu";
 drop table if exists "public"."t_message";
-drop table if exists "public"."t_flink_tutorial";
 drop table if exists "public"."t_flink_sql";
 drop table if exists "public"."t_flink_savepoint";
 drop table if exists "public"."t_flink_project";
@@ -484,21 +483,6 @@ create table "public"."t_flink_sql" (
 )
 ;
 alter table "public"."t_flink_sql" add constraint "t_flink_sql_pkey" primary key ("id");
-
-
--- ----------------------------
--- table structure for t_flink_tutorial
--- ----------------------------
-
-create table "public"."t_flink_tutorial" (
-  "id" int4 not null,
-  "type" int2,
-  "name" varchar(255) collate "pg_catalog"."default",
-  "content" text collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
-)
-;
-alter table "public"."t_flink_tutorial" add constraint "t_flink_tutorial_pkey" primary key ("id");
 
 
 -- ----------------------------

@@ -28,7 +28,10 @@ import org.apache.spark.streaming.Time
  * @param initParams
  * @tparam T
  */
-class ShowSink[T](@transient override val sc: SparkContext, initParams: Map[String, String] = Map.empty[String, String]) extends Sink[T] {
+class ShowSink[T](
+    @transient override val sc: SparkContext,
+    initParams: Map[String, String] = Map.empty[String, String])
+  extends Sink[T] {
 
   override val prefix: String = "spark.sink.show."
 

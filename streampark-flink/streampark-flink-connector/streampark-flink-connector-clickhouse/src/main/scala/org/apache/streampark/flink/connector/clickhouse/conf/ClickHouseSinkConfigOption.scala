@@ -17,14 +17,14 @@
 
 package org.apache.streampark.flink.connector.clickhouse.conf
 
-import java.util.Properties
-
-import scala.collection.JavaConverters._
+import org.apache.streampark.common.conf.ConfigOption
+import org.apache.streampark.common.util.ConfigUtils
 
 import org.asynchttpclient.config.AsyncHttpClientConfigDefaults
 
-import org.apache.streampark.common.conf.ConfigOption
-import org.apache.streampark.common.util.ConfigUtils
+import java.util.Properties
+
+import scala.collection.JavaConverters._
 
 object ClickHouseSinkConfigOption {
 
@@ -34,7 +34,9 @@ object ClickHouseSinkConfigOption {
    * @param properties
    * @return
    */
-  def apply(prefixStr: String = CLICKHOUSE_SINK_PREFIX, properties: Properties = new Properties): ClickHouseSinkConfigOption =
+  def apply(
+      prefixStr: String = CLICKHOUSE_SINK_PREFIX,
+      properties: Properties = new Properties): ClickHouseSinkConfigOption =
     new ClickHouseSinkConfigOption(prefixStr, properties)
 
 }
@@ -57,18 +59,14 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
         .filter(_.nonEmpty)
         .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
         .toList
-    })
+    }
+  )
 
-  val user: ConfigOption[String] = ConfigOption(
-    key = "user",
-    required = true,
-    classType = classOf[String])
+  val user: ConfigOption[String] =
+    ConfigOption(key = "user", required = true, classType = classOf[String])
 
-  val password: ConfigOption[String] = ConfigOption(
-    key = "password",
-    required = false,
-    defaultValue = "",
-    classType = classOf[String])
+  val password: ConfigOption[String] =
+    ConfigOption(key = "password", required = false, defaultValue = "", classType = classOf[String])
 
   val database: ConfigOption[String] = ConfigOption(
     key = "database",
@@ -100,15 +98,11 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     defaultValue = AsyncHttpClientConfigDefaults.defaultMaxConnections(),
     classType = classOf[Int])
 
-  val failoverTable: ConfigOption[String] = ConfigOption(
-    key = "failover.table",
-    required = false,
-    classType = classOf[String])
+  val failoverTable: ConfigOption[String] =
+    ConfigOption(key = "failover.table", required = false, classType = classOf[String])
 
-  val jdbcUrl: ConfigOption[String] = ConfigOption(
-    key = "jdbcUrl",
-    required = false,
-    classType = classOf[String])
+  val jdbcUrl: ConfigOption[String] =
+    ConfigOption(key = "jdbcUrl", required = false, classType = classOf[String])
 
   val driverClassName: ConfigOption[String] = ConfigOption(
     key = "driverClassName",
@@ -116,11 +110,8 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     defaultValue = null,
     classType = classOf[String])
 
-  val batchSize: ConfigOption[Int] = ConfigOption(
-    key = "batchSize",
-    required = false,
-    defaultValue = 1,
-    classType = classOf[Int])
+  val batchSize: ConfigOption[Int] =
+    ConfigOption(key = "batchSize", required = false, defaultValue = 1, classType = classOf[Int])
 
   val flushInterval: ConfigOption[Long] = ConfigOption(
     key = "flushInterval",

@@ -17,10 +17,7 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
-import java.util
-
-import scala.collection.JavaConversions._
-import scala.collection.mutable
+import org.apache.streampark.common.util.HBaseClient
 
 import org.apache.hadoop.hbase.{CellUtil, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.hadoop.hbase.client.{Delete, Put, Scan, Table}
@@ -29,22 +26,26 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
 
-import org.apache.streampark.common.util.HBaseClient
+import java.util
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
  * HBase Offset Manager
  *
  * The table model for storing offsets is as follow, please optimize and extend it by yourself,
- * please set the version of the record corresponding to each rowkey to 1(default value),
- * because it is necessary to overwrite the original saved offsets, instead of generating multiple versions.
+ * please set the version of the record corresponding to each rowkey to 1(default value), because it
+ * is necessary to overwrite the original saved offsets, instead of generating multiple versions.
  *
- * |---------------------------------------------------------------------------------------------------|
- * |rowKey                   |  column family                                                          |
- * |---------------------------------------------------------------------------------------------------|
- * |                         |  column:topic(string)  |  column:partition(int)  | column:offset(long)  |
- * |---------------------------------------------------------------------------------------------------|
- * |topic#groupId#partition  |   topic                |   partition             |    offset            |
- * |---------------------------------------------------------------------------------------------------|
+ * | --------------------------------------------------------------------------------------------------- |                      |                       |                     |
+ * |:----------------------------------------------------------------------------------------------------|:---------------------|:----------------------|:--------------------|
+ * | rowKey                                                                                              | column family        |                       |                     |
+ * | --------------------------------------------------------------------------------------------------- |                      |                       |                     |
+ * |                                                                                                     | column:topic(string) | column:partition(int) | column:offset(long) |
+ * | --------------------------------------------------------------------------------------------------- |                      |                       |                     |
+ * | topic#groupId#partition                                                                             | topic                | partition             | offset              |
+ * | --------------------------------------------------------------------------------------------------- |                      |                       |                     |
  */
 private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
 
@@ -77,36 +78,38 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
     val storedOffsetMap = new mutable.HashMap[TopicPartition, Long]()
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
 
-    topics.foreach(topic => {
-      val filter = new PrefixFilter(key(groupId, topic).getBytes)
-      val scan = new Scan().setFilter(filter)
-      val result = table.getScanner(scan)
-      result.foreach(r => {
-        var topic = ""
-        var partition = 0
-        var offset = 0L
-        while (r.advance()) {
-          val cell = r.current()
-          Bytes.toString(CellUtil.cloneQualifier(cell)) match {
-            case "topic" => topic = Bytes.toString(CellUtil.cloneValue(cell))
-            case "partition" => partition = Bytes.toInt(CellUtil.cloneValue(cell))
-            case "offset" => offset = Bytes.toLong(CellUtil.cloneValue(cell))
-            case _ =>
-          }
-        }
-        // if offset invalid, please use earliest offset to instead of
-        val topicPartition = new TopicPartition(topic, partition)
-        val finalOffset = earliestOffsets.get(topicPartition) match {
-          case Some(left) if left > offset =>
-            logWarn(
-              s"storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
-            left
-          case _ => offset
-        }
-        storedOffsetMap += topicPartition -> finalOffset
+    topics.foreach(
+      topic => {
+        val filter = new PrefixFilter(key(groupId, topic).getBytes)
+        val scan = new Scan().setFilter(filter)
+        val result = table.getScanner(scan)
+        result.foreach(
+          r => {
+            var topic = ""
+            var partition = 0
+            var offset = 0L
+            while (r.advance()) {
+              val cell = r.current()
+              Bytes.toString(CellUtil.cloneQualifier(cell)) match {
+                case "topic" => topic = Bytes.toString(CellUtil.cloneValue(cell))
+                case "partition" => partition = Bytes.toInt(CellUtil.cloneValue(cell))
+                case "offset" => offset = Bytes.toLong(CellUtil.cloneValue(cell))
+                case _ =>
+              }
+            }
+            // if offset invalid, please use earliest offset to instead of
+            val topicPartition = new TopicPartition(topic, partition)
+            val finalOffset = earliestOffsets.get(topicPartition) match {
+              case Some(left) if left > offset =>
+                logWarn(
+                  s"storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
+                left
+              case _ => offset
+            }
+            storedOffsetMap += topicPartition -> finalOffset
+          })
+        result.close()
       })
-      result.close()
-    })
 
     val offsetMaps = reset.toLowerCase() match {
       case "latest" => getLatestOffsets(topics.toSeq) ++ storedOffsetMap
@@ -147,10 +150,13 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
 
     val filterList = new FilterList(FilterList.Operator.MUST_PASS_ONE)
 
-    topics.foreach(topic => {
-      val filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new BinaryPrefixComparator(Bytes.toBytes(s"${key(groupId, topic)}#")))
-      filterList.addFilter(filter)
-    })
+    topics.foreach(
+      topic => {
+        val filter = new RowFilter(
+          CompareFilter.CompareOp.EQUAL,
+          new BinaryPrefixComparator(Bytes.toBytes(s"${key(groupId, topic)}#")))
+        filterList.addFilter(filter)
+      })
 
     val scan = new Scan()
     scan.setFilter(filterList)
@@ -165,6 +171,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
     }
     rs.close()
     table.delete(deletes)
-    logInfo(s"storeType:HBase,deleteOffsets [ $groupId,${topics.mkString(",")} ] ${deletes.mkString(" ")}")
+    logInfo(
+      s"storeType:HBase,deleteOffsets [ $groupId,${topics.mkString(",")} ] ${deletes.mkString(" ")}")
   }
 }

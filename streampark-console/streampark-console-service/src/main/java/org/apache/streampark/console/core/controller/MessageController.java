@@ -24,6 +24,8 @@ import org.apache.streampark.console.core.enums.NoticeType;
 import org.apache.streampark.console.core.service.MessageService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "MESSAGE_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -39,6 +42,7 @@ public class MessageController {
 
   @Autowired private MessageService messageService;
 
+  @Operation(summary = "List notices")
   @PostMapping("notice")
   public RestResponse notice(Integer type, RestRequest request) {
     NoticeType noticeType = NoticeType.of(type);
@@ -46,6 +50,7 @@ public class MessageController {
     return RestResponse.success(pages);
   }
 
+  @Operation(summary = "Delete notice")
   @PostMapping("delnotice")
   public RestResponse delNotice(Long id) {
     return RestResponse.success(messageService.removeById(id));

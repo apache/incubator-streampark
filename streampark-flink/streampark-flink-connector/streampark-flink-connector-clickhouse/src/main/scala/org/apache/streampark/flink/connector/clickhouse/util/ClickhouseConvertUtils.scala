@@ -22,14 +22,15 @@ object ClickhouseConvertUtils {
   def convert[T](value: T): String = {
     val buffer = new StringBuilder("(")
     val fields = value.getClass.getDeclaredFields
-    fields.foreach(f => {
-      f.setAccessible(true)
-      val v = f.get(value)
-      f.getType.getSimpleName match {
-        case "String" => buffer.append(s""""$v",""".stripMargin)
-        case _ => buffer.append(s"""$v,""".stripMargin)
-      }
-    })
+    fields.foreach(
+      f => {
+        f.setAccessible(true)
+        val v = f.get(value)
+        f.getType.getSimpleName match {
+          case "String" => buffer.append(s""""$v",""".stripMargin)
+          case _ => buffer.append(s"""$v,""".stripMargin)
+        }
+      })
     buffer.toString().replaceFirst(",$", ")")
   }
 }

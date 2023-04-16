@@ -15,20 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.security.impl.ldap;
+package org.apache.streampark.console.core.annotation;
 
-import com.baomidou.mybatisplus.annotation.EnumValue;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public enum LdapUserNotExistActionType {
-  CREATE(0, "automatically create user when user not exist"),
-  DENY(1, "deny log-in when user not exist"),
-  ;
-
-  LdapUserNotExistActionType(int code, String desc) {
-    this.code = code;
-    this.desc = desc;
-  }
-
-  @EnumValue private final int code;
-  private final String desc;
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CheckUser {
+  String value() default "";
 }

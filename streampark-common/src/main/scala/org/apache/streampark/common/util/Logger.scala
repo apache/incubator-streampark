@@ -16,38 +16,50 @@
  */
 package org.apache.streampark.common.util
 
-import org.slf4j.{Logger => SlfLogger, LoggerFactory}
-import org.slf4j.impl.StaticLoggerBinder
+import org.apache.streampark.shaded.ch.qos.logback.classic.LoggerContext
+import org.apache.streampark.shaded.ch.qos.logback.classic.joran.JoranConfigurator
+import org.apache.streampark.shaded.ch.qos.logback.classic.util.{ContextInitializer => LogBackContextInitializer}
+import org.apache.streampark.shaded.ch.qos.logback.classic.util.ContextSelectorStaticBinder
+import org.apache.streampark.shaded.ch.qos.logback.core.{CoreConstants, LogbackException}
+import org.apache.streampark.shaded.ch.qos.logback.core.status.StatusUtil
+import org.apache.streampark.shaded.ch.qos.logback.core.util.StatusPrinter
+import org.apache.streampark.shaded.org.slf4j.{ILoggerFactory, Logger => Slf4JLogger}
+import org.apache.streampark.shaded.org.slf4j.spi.LoggerFactoryBinder
+
+import java.io.{ByteArrayInputStream, File}
+import java.net.URL
+import java.nio.charset.StandardCharsets
+
+import scala.util.Try
 
 trait Logger {
 
-  @transient private[this] var _logger: SlfLogger = _
+  @transient private[this] var _logger: Slf4JLogger = _
 
   private[this] val prefix = "[StreamPark]"
 
   protected def logName: String = this.getClass.getName.stripSuffix("$")
 
-  protected def logger: SlfLogger = {
+  protected def logger: Slf4JLogger = {
     if (_logger == null) {
-      initializeLogIfNecessary(false)
-      _logger = LoggerFactory.getLogger(logName)
+      _logger = LoggerFactory.getLoggerFactory().getLogger(logName)
     }
     _logger
   }
 
-  def logInfo(msg: => String) {
+  protected def logInfo(msg: => String) {
     if (logger.isInfoEnabled) logger.info(s"$prefix $msg")
   }
 
-  def logInfo(msg: => String, throwable: Throwable) {
+  protected def logInfo(msg: => String, throwable: Throwable) {
     if (logger.isInfoEnabled) logger.info(s"$prefix $msg", throwable)
   }
 
-  def logDebug(msg: => String) {
+  protected def logDebug(msg: => String) {
     if (logger.isDebugEnabled) logger.debug(s"$prefix $msg")
   }
 
-  def logDebug(msg: => String, throwable: Throwable) {
+  protected def logDebug(msg: => String, throwable: Throwable) {
     if (logger.isDebugEnabled) logger.debug(s"$prefix $msg", throwable)
   }
 
@@ -55,7 +67,7 @@ trait Logger {
     if (logger.isTraceEnabled) logger.trace(s"$prefix $msg")
   }
 
-  def logTrace(msg: => String, throwable: Throwable) {
+  protected def logTrace(msg: => String, throwable: Throwable) {
     if (logger.isTraceEnabled) logger.trace(s"$prefix $msg", throwable)
   }
 
@@ -63,36 +75,85 @@ trait Logger {
     if (logger.isWarnEnabled) logger.warn(s"$prefix $msg")
   }
 
-  def logWarn(msg: => String, throwable: Throwable) {
+  protected def logWarn(msg: => String, throwable: Throwable) {
     if (logger.isWarnEnabled) logger.warn(s"$prefix $msg", throwable)
   }
 
-  def logError(msg: => String) {
+  protected def logError(msg: => String) {
     if (logger.isErrorEnabled) logger.error(s"$prefix $msg")
   }
 
-  def logError(msg: => String, throwable: Throwable) {
+  protected def logError(msg: => String, throwable: Throwable) {
     if (logger.isErrorEnabled) logger.error(s"$prefix $msg", throwable)
   }
 
-  protected def initializeLogIfNecessary(isInterpreter: Boolean): Unit = {
-    if (!Logger.initialized) {
-      Logger.initLock.synchronized {
-        if (!Logger.initialized) {
-          initializeLogging(isInterpreter)
-        }
-      }
-    }
+  protected def isTraceEnabled(): Boolean = {
+    logger.isTraceEnabled
   }
 
-  private def initializeLogging(isInterpreter: Boolean): Unit = {
-    StaticLoggerBinder.getSingleton.getLoggerFactoryClassStr
-    Logger.initialized = true
-    logger
-  }
 }
 
-private object Logger {
-  @volatile private var initialized = false
-  val initLock = new Object()
+private[this] object LoggerFactory extends LoggerFactoryBinder {
+
+  private lazy val contextSelectorBinder: ContextSelectorStaticBinder = {
+    val defaultLoggerContext = new LoggerContext
+
+    Try(new ContextInitializer(defaultLoggerContext).autoConfig())
+      .recover[Unit] {
+        case e =>
+          val msg = "Failed to auto configure default logger context"
+          // scalastyle:off println
+          System.err.println(msg)
+          // scalastyle:off println
+          System.err.println("Reported exception:")
+          e.printStackTrace()
+      }
+
+    if (!StatusUtil.contextHasStatusListener(defaultLoggerContext)) {
+      StatusPrinter.printInCaseOfErrorsOrWarnings(defaultLoggerContext)
+    }
+
+    val selectorBinder = new ContextSelectorStaticBinder()
+    selectorBinder.init(defaultLoggerContext, new Object())
+    selectorBinder
+  }
+
+  override def getLoggerFactory: ILoggerFactory = {
+    if (contextSelectorBinder.getContextSelector == null) {
+      throw new IllegalStateException(
+        "contextSelector cannot be null. See also " + CoreConstants.CODES_URL + "#null_CS")
+    }
+    contextSelectorBinder.getContextSelector.getLoggerContext
+  }
+
+  override def getLoggerFactoryClassStr: String = contextSelectorBinder.getClass.getName
+
+  private class ContextInitializer(loggerContext: LoggerContext)
+    extends LogBackContextInitializer(loggerContext) {
+
+    val shadedPackage = "org.apache.streampark.shaded"
+
+    override def configureByResource(url: URL): Unit = {
+      Utils.notNull(url, "URL argument cannot be null")
+      val path = url.getPath
+      if (path.endsWith("xml")) {
+        val configurator = new JoranConfigurator()
+        configurator.setContext(loggerContext)
+        val text = FileUtils
+          .readString(new File(path))
+          .replaceAll("org.slf4j", s"$shadedPackage.org.slf4j")
+          .replaceAll("ch.qos.logback", s"$shadedPackage.ch.qos.logback")
+          .replaceAll("org.apache.log4j", s"$shadedPackage.org.apache.log4j")
+
+        val input = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))
+        configurator.doConfigure(input)
+      } else
+        throw {
+          new LogbackException(
+            "Unexpected filename extension of file [" + url.toString + "]. Should be .xml")
+        }
+    }
+
+  }
+
 }

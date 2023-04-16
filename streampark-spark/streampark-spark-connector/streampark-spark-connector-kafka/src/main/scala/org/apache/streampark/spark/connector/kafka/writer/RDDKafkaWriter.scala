@@ -17,27 +17,33 @@
 
 package org.apache.streampark.spark.connector.kafka.writer
 
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.spark.rdd.RDD
+
 import java.util.Properties
 
 import scala.annotation.meta.param
 import scala.reflect.ClassTag
 
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.apache.spark.rdd.RDD
-
 class RDDKafkaWriter[T: ClassTag](@(transient @param) rdd: RDD[T]) extends KafkaWriter[T] {
 
   /**
-   * @param producerConfig The configuration that can be used to connect to Kafka
-   * @param serializerFunc The function to convert the data from the stream into Kafka
-   *                       [[ProducerRecord]]s.
-   * @tparam K The type of the key
-   * @tparam V The type of the value
+   * @param producerConfig
+   *   The configuration that can be used to connect to Kafka
+   * @param serializerFunc
+   *   The function to convert the data from the stream into Kafka [[ProducerRecord]]s.
+   * @tparam K
+   *   The type of the key
+   * @tparam V
+   *   The type of the value
    */
-  override def writeToKafka[K, V](producerConfig: Properties, serializerFunc: (T) => ProducerRecord[K, V]): Unit = {
-    rdd.foreachPartition(events => {
-      val producer: KafkaProducer[K, V] = KafkaWriter.getProducer(producerConfig)
-      events.map(serializerFunc).foreach(producer.send)
-    })
+  override def writeToKafka[K, V](
+      producerConfig: Properties,
+      serializerFunc: (T) => ProducerRecord[K, V]): Unit = {
+    rdd.foreachPartition(
+      events => {
+        val producer: KafkaProducer[K, V] = KafkaWriter.getProducer(producerConfig)
+        events.map(serializerFunc).foreach(producer.send)
+      })
   }
 }

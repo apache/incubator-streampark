@@ -17,11 +17,11 @@
 
 package org.apache.streampark.flink.packer
 
-import scala.util.{Failure, Success, Try}
-
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.listener.{BuildImageCallbackListener, PullImageCallbackListener, PushImageCallbackListener}
 import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
+
+import scala.util.{Failure, Success, Try}
 
 package object docker {
 

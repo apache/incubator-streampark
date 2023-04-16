@@ -38,21 +38,25 @@ object FlinkClientHandler {
   def submit(request: SubmitRequest): SubmitResponse = {
     clients.get(request.executionMode) match {
       case Some(client) => client.submit(request)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} submit ")
+      case _ =>
+        throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} submit ")
     }
   }
 
   def cancel(request: CancelRequest): CancelResponse = {
     clients.get(request.executionMode) match {
       case Some(client) => client.cancel(request)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} cancel ")
+      case _ =>
+        throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} cancel ")
     }
   }
 
   def triggerSavepoint(request: TriggerSavepointRequest): SavepointResponse = {
     clients.get(request.executionMode) match {
       case Some(client) => client.triggerSavepoint(request)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} triggerSavepoint ")
+      case _ =>
+        throw new UnsupportedOperationException(
+          s"Unsupported ${request.executionMode} triggerSavepoint ")
     }
   }
 
@@ -60,7 +64,9 @@ object FlinkClientHandler {
     request.executionMode match {
       case YARN_SESSION => YarnSessionClient.deploy(request)
       case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.deploy(request)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} deploy cluster ")
+      case _ =>
+        throw new UnsupportedOperationException(
+          s"Unsupported ${request.executionMode} deploy cluster ")
     }
   }
 
@@ -68,7 +74,9 @@ object FlinkClientHandler {
     request.executionMode match {
       case YARN_SESSION => YarnSessionClient.shutdown(request)
       case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.shutdown(request)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} shutdown cluster ")
+      case _ =>
+        throw new UnsupportedOperationException(
+          s"Unsupported ${request.executionMode} shutdown cluster ")
     }
   }
 

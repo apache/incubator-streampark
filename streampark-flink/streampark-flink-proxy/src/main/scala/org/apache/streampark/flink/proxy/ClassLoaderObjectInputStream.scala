@@ -23,23 +23,26 @@ import java.lang.reflect.Proxy
 import scala.util.Try
 
 /**
- * A special ObjectInputStream that loads a class based on a specified
- * <code>ClassLoader</code> rather than the system default.
- * <p>
- * This is useful in dynamic container environments.
+ * A special ObjectInputStream that loads a class based on a specified <code>ClassLoader</code>
+ * rather than the system default. <p> This is useful in dynamic container environments.
  *
  * @since 1.1
  */
-class ClassLoaderObjectInputStream(classLoader: ClassLoader, inputStream: InputStream) extends ObjectInputStream(inputStream) {
+class ClassLoaderObjectInputStream(classLoader: ClassLoader, inputStream: InputStream)
+  extends ObjectInputStream(inputStream) {
 
   /**
-   * Resolve a class specified by the descriptor using the
-   * specified ClassLoader or the super ClassLoader.
+   * Resolve a class specified by the descriptor using the specified ClassLoader or the super
+   * ClassLoader.
    *
-   * @param objectStreamClass descriptor of the class
-   * @return the Class object described by the ObjectStreamClass
-   * @throws IOException            in case of an I/O error
-   * @throws ClassNotFoundException if the Class cannot be found
+   * @param objectStreamClass
+   *   descriptor of the class
+   * @return
+   *   the Class object described by the ObjectStreamClass
+   * @throws IOException
+   *   in case of an I/O error
+   * @throws ClassNotFoundException
+   *   if the Class cannot be found
    */
   @throws[IOException]
   @throws[ClassNotFoundException]
@@ -50,14 +53,19 @@ class ClassLoaderObjectInputStream(classLoader: ClassLoader, inputStream: InputS
   }
 
   /**
-   * Create a proxy class that implements the specified interfaces using
-   * the specified ClassLoader or the super ClassLoader.
+   * Create a proxy class that implements the specified interfaces using the specified ClassLoader
+   * or the super ClassLoader.
    *
-   * @param interfaces the interfaces to implement
-   * @return a proxy class implementing the interfaces
-   * @throws IOException            in case of an I/O error
-   * @throws ClassNotFoundException if the Class cannot be found
-   * @see ObjectInputStream#resolveProxyClass(String[])
+   * @param interfaces
+   *   the interfaces to implement
+   * @return
+   *   a proxy class implementing the interfaces
+   * @throws IOException
+   *   in case of an I/O error
+   * @throws ClassNotFoundException
+   *   if the Class cannot be found
+   * @see
+   *   ObjectInputStream#resolveProxyClass(String[])
    * @since 2.1
    */
   @throws[IOException]

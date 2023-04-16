@@ -16,16 +16,16 @@
  */
 package org.apache.streampark.common.util
 
-import java.io.{ByteArrayOutputStream, FileWriter, IOException}
-import java.net.InetSocketAddress
-
-import scala.util.{Failure, Success, Try}
-
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.hadoop.io.IOUtils
 import org.apache.hadoop.ipc.RPC
+
+import java.io.{ByteArrayOutputStream, FileWriter, IOException}
+import java.net.InetSocketAddress
+
+import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
 
@@ -37,28 +37,61 @@ object HdfsUtils extends Logger {
 
   def mkdirs(path: String): Unit = HadoopUtils.hdfs.mkdirs(getPath(path))
 
-  def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
+  def copyHdfs(
+      src: String,
+      dst: String,
+      delSrc: Boolean = false,
+      overwrite: Boolean = true): Unit = {
     val srcPath = getPath(src)
     val dstPath = getPath(dst)
     val dstStatus = HadoopUtils.hdfs.getFileStatus(dstPath)
-    val dstFinalPath = if (dstStatus.isFile) dstPath
-    else {
-      getPath(s"$dst/${srcPath.getName}")
-    }
-    FileUtil.copy(HadoopUtils.hdfs, srcPath, HadoopUtils.hdfs, dstFinalPath, delSrc, overwrite, HadoopUtils.hadoopConf)
+    val dstFinalPath =
+      if (dstStatus.isFile) dstPath
+      else {
+        getPath(s"$dst/${srcPath.getName}")
+      }
+    FileUtil.copy(
+      HadoopUtils.hdfs,
+      srcPath,
+      HadoopUtils.hdfs,
+      dstFinalPath,
+      delSrc,
+      overwrite,
+      HadoopUtils.hadoopConf)
   }
 
-  def copyHdfsDir(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
-    list(src).foreach(x => FileUtil.copy(HadoopUtils.hdfs, x, HadoopUtils.hdfs, getPath(dst), delSrc, overwrite, HadoopUtils.hadoopConf))
+  def copyHdfsDir(
+      src: String,
+      dst: String,
+      delSrc: Boolean = false,
+      overwrite: Boolean = true): Unit = {
+    list(src).foreach(
+      x =>
+        FileUtil.copy(
+          HadoopUtils.hdfs,
+          x,
+          HadoopUtils.hdfs,
+          getPath(dst),
+          delSrc,
+          overwrite,
+          HadoopUtils.hadoopConf))
   }
 
   def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     HadoopUtils.hdfs.copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst))
 
-  def uploadMulti(src: Array[String], dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
+  def uploadMulti(
+      src: Array[String],
+      dst: String,
+      delSrc: Boolean = false,
+      overwrite: Boolean = true): Unit =
     HadoopUtils.hdfs.copyFromLocalFile(delSrc, overwrite, src.map(getPath), getPath(dst))
 
-  def download(src: String, dst: String, delSrc: Boolean = false, useRawLocalFileSystem: Boolean = false): Unit =
+  def download(
+      src: String,
+      dst: String,
+      delSrc: Boolean = false,
+      useRawLocalFileSystem: Boolean = false): Unit =
     HadoopUtils.hdfs.copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem)
 
   def getNameNode: String = Try(getAddressOfActive(HadoopUtils.hdfs).getHostString) match {
@@ -71,7 +104,7 @@ object HdfsUtils extends Logger {
    *
    * @param fileName
    * @param content
-   * @throws
+   *   \@throws
    */
   def create(fileName: String, content: String): Unit = {
     val path: Path = getPath(fileName)
@@ -86,7 +119,9 @@ object HdfsUtils extends Logger {
 
   def read(fileName: String): String = {
     val path: Path = getPath(fileName)
-    require(HadoopUtils.hdfs.exists(path) && !HadoopUtils.hdfs.isDirectory(path), s"[StreamPark] HdfsUtils.read: path($fileName) not exists or isDirectory ")
+    require(
+      HadoopUtils.hdfs.exists(path) && !HadoopUtils.hdfs.isDirectory(path),
+      s"[StreamPark] HdfsUtils.read: path($fileName) not exists or isDirectory ")
     val in = HadoopUtils.hdfs.open(path)
     val out = new ByteArrayOutputStream()
     IOUtils.copyBytes(in, out, 4096, false)

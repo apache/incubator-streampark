@@ -16,19 +16,16 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.streampark.shaded.com.fasterxml.jackson.annotation.JsonInclude
+import org.apache.streampark.shaded.com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
+
 import java.text.SimpleDateFormat
 
 import scala.reflect.ClassTag
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-
 object JsonUtils extends Serializable {
 
   private val mapper = new ObjectMapper()
-
-  mapper.registerModule(DefaultScalaModule)
 
   // ignore fields that exist in the json string and do not exist in the java obj
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -51,7 +48,8 @@ object JsonUtils extends Serializable {
     }
   }
 
-  def read[T](obj: AnyRef)(implicit classTag: ClassTag[T]): T = this.read(obj, classTag.runtimeClass).asInstanceOf[T]
+  def read[T](obj: AnyRef)(implicit classTag: ClassTag[T]): T =
+    this.read(obj, classTag.runtimeClass).asInstanceOf[T]
 
   def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
 

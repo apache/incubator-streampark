@@ -27,7 +27,10 @@ object HttpConfigOption {
    * @param properties
    * @return
    */
-  def apply(prefixStr: String = HTTP_SINK_PREFIX, properties: Properties = new Properties): HttpConfigOption = new HttpConfigOption(prefixStr, properties)
+  def apply(
+      prefixStr: String = HTTP_SINK_PREFIX,
+      properties: Properties = new Properties): HttpConfigOption =
+    new HttpConfigOption(prefixStr, properties)
 
 }
 

@@ -17,20 +17,22 @@
 
 package org.apache.streampark.flink.connector.jdbc.internal
 
-import java.sql.{Connection, PreparedStatement, Statement}
-import java.util.Properties
-import java.util.concurrent.atomic.AtomicLong
-
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
-
 import org.apache.streampark.common.conf.ConfigConst.{DEFAULT_JDBC_INSERT_BATCH, KEY_JDBC_INSERT_BATCH}
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.{JdbcUtils, Logger}
 import org.apache.streampark.flink.connector.function.TransformFunction
 
-class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSinkFunction[T] with Logger {
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
+
+import java.sql.{Connection, PreparedStatement, Statement}
+import java.util.Properties
+import java.util.concurrent.atomic.AtomicLong
+
+class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
+  extends RichSinkFunction[T]
+  with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
   private var scalaToSQLFn: T => String = _
@@ -79,7 +81,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
           connection.commit()
         } catch {
           case e: Exception =>
-            logError(s"JdbcSink invoke error:${sql}")
+            logError(s"JdbcSink invoke error:$sql")
             throw e
           case _: Throwable =>
         }
@@ -93,7 +95,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
           }
         } catch {
           case e: Exception =>
-            logError(s"JdbcSink batch invoke error:${sql}")
+            logError(s"JdbcSink batch invoke error:$sql")
             throw e
           case _: Throwable =>
         }

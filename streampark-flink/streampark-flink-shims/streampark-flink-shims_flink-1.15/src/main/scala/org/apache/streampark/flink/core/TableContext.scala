@@ -17,14 +17,15 @@
 
 package org.apache.streampark.flink.core
 
+import org.apache.streampark.common.conf.ConfigConst.printLogo
+
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{CompiledPlan, PlanReference, Table, TableDescriptor, TableEnvironment}
 import org.apache.flink.table.module.ModuleEntry
 
-import org.apache.streampark.common.conf.ConfigConst.printLogo
-
-class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment) extends FlinkTableTrait(parameter, tableEnv) {
+class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment)
+  extends FlinkTableTrait(parameter, tableEnv) {
 
   def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
 
@@ -49,18 +50,14 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
     null
   }
 
-  /**
-   * @since 1.15
-   */
-  override def listTables(catalogName: String, databaseName: String): Array[String] = tableEnv.listTables(catalogName, databaseName)
+  /** @since 1.15 */
+  override def listTables(catalogName: String, databaseName: String): Array[String] =
+    tableEnv.listTables(catalogName, databaseName)
 
-  /**
-   * @since 1.15
-   */
-  override def loadPlan(planReference: PlanReference): CompiledPlan = tableEnv.loadPlan(planReference)
+  /** @since 1.15 */
+  override def loadPlan(planReference: PlanReference): CompiledPlan =
+    tableEnv.loadPlan(planReference)
 
-  /**
-   * @since 1.15
-   */
+  /** @since 1.15 */
   override def compilePlanSql(stmt: String): CompiledPlan = tableEnv.compilePlanSql(stmt)
 }

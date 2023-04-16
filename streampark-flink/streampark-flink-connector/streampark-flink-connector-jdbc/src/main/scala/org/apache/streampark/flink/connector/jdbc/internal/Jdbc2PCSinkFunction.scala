@@ -17,34 +17,36 @@
 
 package org.apache.streampark.flink.connector.jdbc.internal
 
-import java.sql.{Connection, SQLException, Statement}
-import java.util.{Optional, Properties}
-
-import org.apache.flink.api.common.ExecutionConfig
-import org.apache.flink.api.common.typeutils.base.VoidSerializer
-import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
-import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
-
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.{JdbcUtils, Logger}
 import org.apache.streampark.flink.connector.function.TransformFunction
 import org.apache.streampark.flink.connector.jdbc.bean.Transaction
 
+import org.apache.flink.api.common.ExecutionConfig
+import org.apache.flink.api.common.typeutils.base.VoidSerializer
+import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
+import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
+
+import java.sql.{Connection, SQLException, Statement}
+import java.util.{Optional, Properties}
+
 /**
- * (flink checkpoint + db transactionId) Simulates commit read. Use of flink's checkpoint mechanism, and only submit data that has been confirmed
+ * (flink checkpoint + db transactionId) Simulates commit read. Use of flink's checkpoint mechanism,
+ * and only submit data that has been confirmed
  *
  * @param apiType
  * @param jdbc
  * @tparam T
  */
 class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
-    extends TwoPhaseCommitSinkFunction[T, Transaction, Void](
-      new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig),
-      VoidSerializer.INSTANCE)
-    with Logger {
+  extends TwoPhaseCommitSinkFunction[T, Transaction, Void](
+    new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig),
+    VoidSerializer.INSTANCE)
+  with Logger {
 
-  private[this] val buffer: collection.mutable.Map[String, Transaction] = collection.mutable.Map.empty[String, Transaction]
+  private[this] val buffer: collection.mutable.Map[String, Transaction] =
+    collection.mutable.Map.empty[String, Transaction]
 
   private var scalaToSQLFn: T => String = _
   private var javaToSQLFunc: TransformFunction[T, String] = _
@@ -94,11 +96,11 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
 
   /**
    * When the data checkpoint is completed or the recovery is finished, this method will be called,
-   * here use the transaction feature of db. The current operation is at the second stage:
-   * If the current batch of data is saved successfully, the whole process is successful;
-   * If it fails, will be thrown an exception, resulting in the checkpoint will also be rolled back,
-   * at the same time, the next time to started, it will start from the last consumption location,
-   * ensuring that end-to-end exactly once.
+   * here use the transaction feature of db. The current operation is at the second stage: If the
+   * current batch of data is saved successfully, the whole process is successful; If it fails, will
+   * be thrown an exception, resulting in the checkpoint will also be rolled back, at the same time,
+   * the next time to started, it will start from the last consumption location, ensuring that
+   * end-to-end exactly once.
    */
   override def commit(transaction: Transaction): Unit = {
     if (transaction.invoked && transaction.sql.nonEmpty) {
