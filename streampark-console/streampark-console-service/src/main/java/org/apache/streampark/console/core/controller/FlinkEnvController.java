@@ -100,9 +100,10 @@ public class FlinkEnvController {
     return RestResponse.success();
   }
 
-  @PostMapping("checkForUpdateOrDelete")
-  public RestResponse checkForUpdateOrDelete(FlinkEnv version) {
-    flinkEnvService.checkForUpdateOrDelete(version.getId());
+  @Operation(summary = "Check flink environment is valid, else throw exception")
+  @PostMapping("validity")
+  public RestResponse validity(FlinkEnv version) {
+    flinkEnvService.validity(version.getId());
     return RestResponse.success(true);
   }
 
