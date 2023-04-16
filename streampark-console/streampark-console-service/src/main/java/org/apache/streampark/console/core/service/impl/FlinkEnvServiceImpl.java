@@ -90,20 +90,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
   @Override
   public void delete(Long id) {
-    FlinkEnv flinkEnv = getById(id);
-
-    // 1.check exists
-    ApiAlertException.throwIfNull(flinkEnv, "The flink home does not exist, please check.");
-
-    // 2.check if it is being used by any flink cluster
-    ApiAlertException.throwIfFalse(
-        !flinkClusterService.existsByFlinkEnvId(id),
-        "The flink home is still in use by some flink cluster, please check.");
-
-    // 3.check if it is being used by any application
-    ApiAlertException.throwIfFalse(
-        !applicationService.existsJobByFlinkEnvId(id),
-        "The flink home is still in use by some application, please check.");
+    FlinkEnv flinkEnv = checkForUpdateOrDelete(id);
 
     Long count = this.baseMapper.selectCount(null);
     ApiAlertException.throwIfFalse(
@@ -115,10 +102,8 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
   @Override
   public void update(FlinkEnv version) throws IOException {
-    FlinkEnv flinkEnv = super.getById(version.getId());
-    ApiAlertException.throwIfNull(
-        flinkEnv,
-        "Flink home message lost, update flink env failed, please check database status!");
+    FlinkEnv flinkEnv = checkForUpdateOrDelete(version.getId());
+
     flinkEnv.setDescription(version.getDescription());
     flinkEnv.setFlinkName(version.getFlinkName());
     if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
@@ -159,5 +144,24 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     FlinkEnv flinkEnv = getById(id);
     flinkEnv.doSetFlinkConf();
     updateById(flinkEnv);
+  }
+
+  public FlinkEnv checkForUpdateOrDelete(Long id) {
+    FlinkEnv flinkEnv = getById(id);
+
+    // 1.check exists
+    ApiAlertException.throwIfNull(flinkEnv, "The flink home does not exist, please check.");
+
+    // 2.check if it is being used by any flink cluster
+    ApiAlertException.throwIfFalse(
+        !flinkClusterService.existsByFlinkEnvId(id),
+        "The flink home is still in use by some flink cluster, please check.");
+
+    // 3.check if it is being used by any application
+    ApiAlertException.throwIfFalse(
+        !applicationService.existsJobByFlinkEnvId(id),
+        "The flink home is still in use by some application, please check.");
+
+    return flinkEnv;
   }
 }

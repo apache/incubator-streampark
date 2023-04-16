@@ -100,6 +100,12 @@ public class FlinkEnvController {
     return RestResponse.success();
   }
 
+  @PostMapping("checkForUpdateOrDelete")
+  public RestResponse checkForUpdateOrDelete(FlinkEnv version) {
+    flinkEnvService.checkForUpdateOrDelete(version.getId());
+    return RestResponse.success(true);
+  }
+
   @Operation(summary = "Update flink environment as default")
   @PostMapping("default")
   public RestResponse setDefault(Long id) {

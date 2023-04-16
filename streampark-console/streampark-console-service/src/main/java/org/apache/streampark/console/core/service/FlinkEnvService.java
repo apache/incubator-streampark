@@ -91,4 +91,11 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
    * @param id
    */
   void syncConf(Long id) throws IOException;
+
+  /**
+   * check for update or delete operation
+   *
+   * @param id
+   */
+  FlinkEnv checkForUpdateOrDelete(Long id);
 }
