@@ -89,13 +89,13 @@
             </a-button>
           </a-popconfirm>
         </a-tooltip>
+        <a-tooltip :title="t('flink.project.operationTips.updateProject')">
+          <a-button v-auth="'project:update'" @click="handleEdit" shape="circle" class="ml-8px">
+            <EditOutlined />
+          </a-button>
+        </a-tooltip>
       </template>
 
-      <a-tooltip :title="t('flink.project.operationTips.updateProject')">
-        <a-button v-auth="'project:update'" @click="handleEdit" shape="circle" class="ml-8px">
-          <EditOutlined />
-        </a-button>
-      </a-tooltip>
       <a-tooltip :title="t('flink.project.operationTips.deleteProject')">
         <a-popconfirm
           :title="t('flink.project.operationTips.deleteProjectMessage')"

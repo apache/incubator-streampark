@@ -115,49 +115,45 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   @Transactional(rollbackFor = {Exception.class})
   public boolean update(Project projectParam) {
-    try {
-      Project project = getById(projectParam.getId());
-      Utils.notNull(project);
-      ApiAlertException.throwIfFalse(
-          project.getTeamId().equals(projectParam.getTeamId()),
-          "TeamId can't be changed, update project failed.");
-      project.setName(projectParam.getName());
-      project.setUrl(projectParam.getUrl());
-      project.setBranches(projectParam.getBranches());
-      project.setGitCredential(projectParam.getGitCredential());
-      project.setPrvkeyPath(projectParam.getPrvkeyPath());
-      project.setUserName(projectParam.getUserName());
-      project.setPassword(projectParam.getPassword());
-      project.setPom(projectParam.getPom());
-      project.setDescription(projectParam.getDescription());
-      project.setBuildArgs(projectParam.getBuildArgs());
-      if (GitCredential.isSSH(project.getGitCredential())) {
-        project.setUserName(null);
-      } else {
-        project.setPrvkeyPath(null);
-      }
-      if (projectParam.getBuildState() != null) {
-        project.setBuildState(projectParam.getBuildState());
-        if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
-          List<Application> applications = getApplications(project);
-          // Update deployment status
-          applications.forEach(
-              (app) -> {
-                log.info(
-                    "update deploy by project: {}, appName:{}",
-                    project.getName(),
-                    app.getJobName());
-                app.setRelease(ReleaseState.NEED_CHECK.get());
-                applicationService.updateRelease(app);
-              });
-        }
-      }
-      baseMapper.updateById(project);
-      return true;
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return false;
+    Project project = getById(projectParam.getId());
+    Utils.notNull(project);
+    ApiAlertException.throwIfFalse(
+        project.getTeamId().equals(projectParam.getTeamId()),
+        "TeamId can't be changed, update project failed.");
+    ApiAlertException.throwIfFalse(
+        !project.getBuildState().equals(BuildState.BUILDING.get()),
+        "The project is being built, update project failed.");
+    project.setName(projectParam.getName());
+    project.setUrl(projectParam.getUrl());
+    project.setBranches(projectParam.getBranches());
+    project.setGitCredential(projectParam.getGitCredential());
+    project.setPrvkeyPath(projectParam.getPrvkeyPath());
+    project.setUserName(projectParam.getUserName());
+    project.setPassword(projectParam.getPassword());
+    project.setPom(projectParam.getPom());
+    project.setDescription(projectParam.getDescription());
+    project.setBuildArgs(projectParam.getBuildArgs());
+    if (GitCredential.isSSH(project.getGitCredential())) {
+      project.setUserName(null);
+    } else {
+      project.setPrvkeyPath(null);
     }
+    if (projectParam.getBuildState() != null) {
+      project.setBuildState(projectParam.getBuildState());
+      if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
+        List<Application> applications = getApplications(project);
+        // Update deployment status
+        applications.forEach(
+            (app) -> {
+              log.info(
+                  "update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
+              app.setRelease(ReleaseState.NEED_CHECK.get());
+              applicationService.updateRelease(app);
+            });
+      }
+    }
+    baseMapper.updateById(project);
+    return true;
   }
 
   @Override
