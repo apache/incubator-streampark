@@ -201,11 +201,7 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.scala-lang</groupId>
-                        <artifactId>scala-library</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala-reflect</artifactId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -259,7 +255,7 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.scala-lang</groupId>
-                        <artifactId>scala-reflect</artifactId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
