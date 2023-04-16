@@ -78,6 +78,9 @@ management:
       show-details: always
       probes:
         enabled: true
+  health:
+    ldap:
+      enabled: false
 
 streampark:
   proxy:
@@ -130,6 +133,8 @@ streampark:
     anonUrl: >
 
 ldap:
+  # Is ldap enabled? If so, please modify the urls
+  enable: false
   ## AD server IP, default port 389
   urls: ldap://99.99.99.99:389
   ## Login Account

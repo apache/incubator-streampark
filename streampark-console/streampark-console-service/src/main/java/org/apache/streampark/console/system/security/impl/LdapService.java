@@ -40,6 +40,9 @@ import java.util.Properties;
 @Slf4j
 public class LdapService {
 
+  @Value("${ldap.enable:#{false}}")
+  private Boolean enable;
+
   @Value("${ldap.urls:#{null}}")
   private String ldapUrls;
 
@@ -66,35 +69,37 @@ public class LdapService {
    * @return user email
    */
   public String ldapLogin(String userId, String userPwd) {
-    Properties searchEnv = getManagerLdapEnv();
-    try {
-      LdapContext ctx = new InitialLdapContext(searchEnv, null);
-      SearchControls sc = new SearchControls();
-      sc.setReturningAttributes(new String[] {ldapEmailAttribute});
-      sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-      EqualsFilter filter = new EqualsFilter(ldapUserIdentifyingAttribute, userId);
-      NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, filter.toString(), sc);
-      if (results.hasMore()) {
-        SearchResult result = results.next();
-        NamingEnumeration attrs = result.getAttributes().getAll();
-        while (attrs.hasMore()) {
-          searchEnv.put(Context.SECURITY_PRINCIPAL, result.getNameInNamespace());
-          searchEnv.put(Context.SECURITY_CREDENTIALS, userPwd);
-          try {
-            new InitialDirContext(searchEnv);
-          } catch (Exception e) {
-            log.warn("invalid ldap credentials or ldap search error", e);
-            return null;
-          }
-          Attribute attr = (Attribute) attrs.next();
-          if (attr.getID().equals(ldapEmailAttribute)) {
-            return (String) attr.get();
+    if (enable) {
+      Properties searchEnv = getManagerLdapEnv();
+      try {
+        LdapContext ctx = new InitialLdapContext(searchEnv, null);
+        SearchControls sc = new SearchControls();
+        sc.setReturningAttributes(new String[] {ldapEmailAttribute});
+        sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        EqualsFilter filter = new EqualsFilter(ldapUserIdentifyingAttribute, userId);
+        NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, filter.toString(), sc);
+        if (results.hasMore()) {
+          SearchResult result = results.next();
+          NamingEnumeration<? extends Attribute> attrs = result.getAttributes().getAll();
+          while (attrs.hasMore()) {
+            searchEnv.put(Context.SECURITY_PRINCIPAL, result.getNameInNamespace());
+            searchEnv.put(Context.SECURITY_CREDENTIALS, userPwd);
+            try {
+              new InitialDirContext(searchEnv);
+            } catch (Exception e) {
+              log.warn("invalid ldap credentials or ldap search error", e);
+              return null;
+            }
+            Attribute attr = attrs.next();
+            if (attr.getID().equals(ldapEmailAttribute)) {
+              return (String) attr.get();
+            }
           }
         }
+      } catch (NamingException e) {
+        log.error("ldap search error", e);
+        return null;
       }
-    } catch (NamingException e) {
-      log.error("ldap search error", e);
-      return null;
     }
     return null;
   }
