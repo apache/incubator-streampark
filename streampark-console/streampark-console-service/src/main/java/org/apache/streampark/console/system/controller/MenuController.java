@@ -27,7 +27,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -76,7 +75,6 @@ public class MenuController {
     this.menuService.createMenu(menu);
     return RestResponse.success();
   }
-
 
   @PutMapping("update")
   @RequiresPermissions("menu:update")

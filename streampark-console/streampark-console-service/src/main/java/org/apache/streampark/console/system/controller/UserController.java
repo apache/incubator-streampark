@@ -34,7 +34,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -65,7 +63,6 @@ public class UserController {
   @Autowired private TeamService teamService;
 
   @Autowired private CommonService commonService;
-
 
   @Operation(summary = "List users")
   @PostMapping("list")
@@ -101,7 +98,6 @@ public class UserController {
     this.userService.deleteUser(userId);
     return RestResponse.success();
   }
-
 
   @Operation(summary = "List without token users")
   @PostMapping("getNoTokenUser")

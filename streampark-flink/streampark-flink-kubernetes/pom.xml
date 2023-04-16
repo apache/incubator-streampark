@@ -29,7 +29,7 @@
 
     <properties>
         <apache.httpclient5.version>5.1</apache.httpclient5.version>
-        <snakeyaml.version>1.32</snakeyaml.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
         <scalatest.skiptests>true</scalatest.skiptests>
     </properties>
 
@@ -39,6 +39,20 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients${scala.binary.flink.version}</artifactId>
             <version>${flink.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.flink</groupId>
+                    <artifactId>flink-shaded-*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
