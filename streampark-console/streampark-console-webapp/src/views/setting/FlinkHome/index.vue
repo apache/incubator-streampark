@@ -42,7 +42,7 @@
   } from '@ant-design/icons-vue';
   import { FlinkEnvModal, FlinkEnvDrawer } from './components';
   import {
-    fetchCheckForUpdateOrDelete,
+    fetchValidity,
     fetchDefaultSet,
     fetchFlinkEnv,
     fetchFlinkEnvRemove,
@@ -65,7 +65,7 @@
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
   /* Edit button */
   async function handleEditFlink(item: FlinkEnv) {
-    const resp = await fetchCheckForUpdateOrDelete(item.id);
+    const resp = await fetchValidity(item.id);
     if (resp.data.code == 200) {
       versionId.value = item.id;
       openFlinkModal(true, {
