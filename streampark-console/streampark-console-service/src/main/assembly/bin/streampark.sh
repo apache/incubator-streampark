@@ -369,11 +369,11 @@ start() {
     -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
     org.apache.streampark.console.StreamParkConsoleBootstrap >> "$APP_OUT" 2>&1 "&"
 
-    mypid=$!
+    local PID=$!
 
     # Add to pid file if successful start
-    if [[ ${mypid} =~ ${IS_NUMBER} ]] && kill -0 $mypid > /dev/null 2>&1 ; then
-        echo $mypid >> "$APP_PID"
+    if [[ ${PID} =~ ${IS_NUMBER} ]] && kill -0 $PID > /dev/null 2>&1 ; then
+        echo $PID > "$APP_PID"
         echo_g "StreamPark start successful. pid: `cat "$APP_PID"`"
     else
         echo_r "StreamPark start failed."
