@@ -57,4 +57,10 @@ public class ApiAlertException extends AbstractApiException {
       throw new ApiAlertException(errorMessage);
     }
   }
+
+  public static void throwIfTrue(boolean expression, String errorMessage) {
+    if (expression) {
+      throw new ApiAlertException(errorMessage);
+    }
+  }
 }
