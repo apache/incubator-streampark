@@ -214,7 +214,7 @@ create table "public"."t_flink_app" (
   "cluster_id" varchar(255) collate "pg_catalog"."default",
   "k8s_namespace" varchar(255) collate "pg_catalog"."default",
   "flink_image" varchar(255) collate "pg_catalog"."default",
-  "state" int4 collate "pg_catalog"."default",
+  "state" int2,
   "restart_size" int4,
   "restart_count" int4,
   "cp_threshold" int4,
@@ -256,7 +256,7 @@ create index "inx_job_type" on "public"."t_flink_app" using btree (
   "job_type" "pg_catalog"."int2_ops" asc nulls last
 );
 create index "inx_state" on "public"."t_flink_app" using btree (
-  "state" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
+  "state" "pg_catalog"."int2_ops" asc nulls last
 );
 create index "inx_track" on "public"."t_flink_app" using btree (
   "tracking" "pg_catalog"."int2_ops" asc nulls last
