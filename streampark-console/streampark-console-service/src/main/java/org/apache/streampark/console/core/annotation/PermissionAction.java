@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.annotation;
 
+import org.apache.streampark.console.core.enums.PermissionType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,6 +26,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CheckTeam {
-  String value() default "";
+public @interface PermissionAction {
+  String id();
+
+  PermissionType type();
 }
