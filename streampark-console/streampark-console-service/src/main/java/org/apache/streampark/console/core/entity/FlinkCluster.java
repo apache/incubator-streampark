@@ -145,6 +145,11 @@ public class FlinkCluster implements Serializable {
     return null;
   }
 
+  /**
+   * Verify the cluster connection whether is valid.
+   *
+   * @return <code>false</code> if the connection of the cluster is invalid, <code>true</code> else.
+   */
   public boolean verifyClusterConnection() {
     if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
       if (address == null) {
@@ -167,7 +172,8 @@ public class FlinkCluster implements Serializable {
         //
       }
       return false;
-    } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+    }
+    if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
       try {
         String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
         String result =
