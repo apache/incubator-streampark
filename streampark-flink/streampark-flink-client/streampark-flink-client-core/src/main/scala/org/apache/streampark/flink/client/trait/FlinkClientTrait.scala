@@ -181,7 +181,6 @@ trait FlinkClientTrait extends Logger {
          |     clusterId         : ${cancelRequest.clusterId}
          |     withSavePoint     : ${cancelRequest.withSavepoint}
          |     savePointPath     : ${cancelRequest.savepointPath}
-         |     savePointTimeout  : ${cancelRequest.savePointTimeout}
          |     withDrain         : ${cancelRequest.withDrain}
          |     k8sNamespace      : ${cancelRequest.kubernetesNamespace}
          |     appId             : ${cancelRequest.clusterId}
@@ -189,9 +188,6 @@ trait FlinkClientTrait extends Logger {
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     val flinkConf = new Configuration()
-    flinkConf.safeSet(
-      ClientOptions.CLIENT_TIMEOUT,
-      Duration.ofSeconds(cancelRequest.savePointTimeout))
     doCancel(cancelRequest, flinkConf)
   }
 
@@ -531,11 +527,11 @@ trait FlinkClientTrait extends Logger {
       case (true, false) =>
         clientWrapper
           .cancelWithSavepoint(jobID, savePointDir)
-          .get(cancelRequest.savePointTimeout, TimeUnit.SECONDS)
+          .get()
       case (_, _) =>
         clientWrapper
           .stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir)
-          .get(cancelRequest.savePointTimeout, TimeUnit.SECONDS)
+          .get()
     }
   }
 
