@@ -30,6 +30,7 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
+import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
 
@@ -104,44 +105,46 @@ public class StreamParkAspect {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
     PermissionAction permissionAction =
         methodSignature.getMethod().getAnnotation(PermissionAction.class);
-    String spELString = permissionAction.id();
-    PermissionType permissionType = permissionAction.type();
 
     User currentUser = commonService.getCurrentUser();
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
-    Long paramId = getId(joinPoint, methodSignature, spELString);
-    switch (permissionType) {
-      case USER:
-        ApiAlertException.throwIfFalse(
-            !(currentUser.getUserType() != UserType.ADMIN
-                && !currentUser.getUserId().equals(paramId)),
-            "Permission denied, only ADMIN user or user himself can access this permission");
-        break;
-      case TEAM:
-        ApiAlertException.throwIfFalse(
-            !(currentUser.getUserType() != UserType.ADMIN
-                && memberService.findByUserName(paramId, currentUser.getUsername()) == null),
-            "Permission denied, only ADMIN user or user belongs to this team can access this permission");
-        break;
-      case APP:
-        Application app = applicationService.getById(paramId);
-        ApiAlertException.throwIfFalse(
-            !(app != null
-                && currentUser.getUserType() != UserType.ADMIN
-                && memberService.findByUserName(app.getTeamId(), currentUser.getUsername())
-                    == null),
-            "Permission denied, only ADMIN user or user belongs to this team can access this permission");
-        break;
-      default:
-        throw new IllegalArgumentException(
-            String.format("Permission type %s is not supported.", permissionType));
+    boolean isAdmin = currentUser.getUserType() == UserType.ADMIN;
+
+    if (!isAdmin) {
+      PermissionType permissionType = permissionAction.type();
+      Long paramId = getParamId(joinPoint, methodSignature, permissionAction.id());
+
+      switch (permissionType) {
+        case USER:
+          ApiAlertException.throwIfTrue(
+              !currentUser.getUserId().equals(paramId),
+              "Permission denied, only user himself can access this permission");
+          break;
+        case TEAM:
+          Member member = memberService.findByUserName(paramId, currentUser.getUsername());
+          ApiAlertException.throwIfTrue(
+              member == null,
+              "Permission denied, only user belongs to this team can access this permission");
+          break;
+        case APP:
+          Application app = applicationService.getById(paramId);
+          ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
+          member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
+          ApiAlertException.throwIfTrue(
+              member == null,
+              "Permission denied, only user belongs to this team can access this permission");
+          break;
+        default:
+          throw new IllegalArgumentException(
+              String.format("Permission type %s is not supported.", permissionType));
+      }
     }
 
     return (RestResponse) joinPoint.proceed();
   }
 
-  private Long getId(
+  private Long getParamId(
       ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String spELString) {
     SpelExpressionParser parser = new SpelExpressionParser();
     Expression expression = parser.parseExpression(spELString);
