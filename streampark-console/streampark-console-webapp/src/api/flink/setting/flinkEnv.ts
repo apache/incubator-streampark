@@ -69,10 +69,13 @@ export function fetchFlinkInfo(id: string): Promise<FlinkEnv> {
  * @returns {Promise<Boolean>}
  */
 export function fetchFlinkEnvRemove(id: string): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.post({
-    url: FLINK_API.DELETE,
-    data: { id },
-  }, { isReturnNativeResponse: true });
+  return defHttp.post(
+    {
+      url: FLINK_API.DELETE,
+      data: { id },
+    },
+    { isReturnNativeResponse: true },
+  );
 }
 
 /**
@@ -84,7 +87,7 @@ export function fetchCheckEnv(data: {
   id: string | null;
   flinkName: string;
   flinkHome: string;
-}): Promise<AxiosResponse<Result<boolean>>> {
+}): Promise<AxiosResponse<Result<number>>> {
   return defHttp.post({ url: FLINK_API.CHECK, data }, { isReturnNativeResponse: true });
 }
 
@@ -94,10 +97,13 @@ export function fetchCheckEnv(data: {
  * @returns {Promise<Boolean>}
  */
 export function fetchValidity(id: string): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.post({
-    url: FLINK_API.VALIDITY,
-    data: { id },
-  }, { isReturnNativeResponse: true });
+  return defHttp.post(
+    {
+      url: FLINK_API.VALIDITY,
+      data: { id },
+    },
+    { isReturnNativeResponse: true },
+  );
 }
 
 /**

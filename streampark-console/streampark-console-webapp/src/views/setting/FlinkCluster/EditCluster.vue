@@ -76,7 +76,7 @@
             showConfirmButton: false,
             timer: 2000,
           });
-          go('/flink/setting?activeKey=cluster');
+          go('/setting/flinkCluster');
         } else {
           Swal.fire('Failed', res.msg, 'error');
         }
