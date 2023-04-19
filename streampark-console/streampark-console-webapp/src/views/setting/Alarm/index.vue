@@ -169,7 +169,7 @@
 
 <template>
   <PageWrapper contentFullHeight>
-    <div v-auth="'project:create'" class="bg-white pt-10px px-24px">
+    <div v-auth="'project:create'" class="bg-white py-10px px-24px">
       <span class="alarm-title">{{ t('setting.alarm.alertSetting') }}</span>
       <a-button
         type="dashed"
@@ -182,7 +182,7 @@
     </div>
 
     <List
-      class="alert-card-list"
+      class="alert-card-list !mt-10px"
       :grid="{ gutter: 40, xs: 1, sm: 2, md: 4, lg: 4, xl: 4, xxl: 4 }"
       :data-source="alerts"
       :pagination="false"
