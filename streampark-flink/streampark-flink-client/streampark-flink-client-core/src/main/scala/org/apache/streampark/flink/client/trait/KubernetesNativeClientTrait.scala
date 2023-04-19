@@ -19,7 +19,6 @@ package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
 import org.apache.streampark.flink.client.bean._
-import org.apache.streampark.flink.kubernetes.IngressController
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 
 import org.apache.commons.lang3.StringUtils
