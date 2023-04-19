@@ -404,7 +404,7 @@ create table "public"."t_flink_log" (
   "app_id" int8,
   "yarn_app_id" varchar(50) collate "pg_catalog"."default",
   "job_manager_url" varchar(255) collate "pg_catalog"."default",
-  "success" int2,
+  "success" boolean,
   "exception" text collate "pg_catalog"."default",
   "option_time" timestamp(6),
   "option_name" int2
