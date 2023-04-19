@@ -32,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -63,7 +62,7 @@ public class YarnQueueController {
   @Operation(summary = "Check yarn queue valid")
   @ApiAccess
   @PostMapping("check")
-  public RestResponse check(@RequestBody YarnQueue yarnQueue) {
+  public RestResponse check(YarnQueue yarnQueue) {
     return RestResponse.success(yarnQueueService.checkYarnQueue(yarnQueue));
   }
 
@@ -71,7 +70,7 @@ public class YarnQueueController {
   @ApiAccess
   @PostMapping("create")
   @RequiresPermissions("yarnQueue:create")
-  public RestResponse create(@RequestBody YarnQueue yarnQueue) {
+  public RestResponse create(YarnQueue yarnQueue) {
     return RestResponse.success(yarnQueueService.createYarnQueue(yarnQueue));
   }
 
@@ -79,7 +78,7 @@ public class YarnQueueController {
   @ApiAccess
   @PostMapping("update")
   @RequiresPermissions("yarnQueue:update")
-  public RestResponse update(@RequestBody YarnQueue yarnQueue) {
+  public RestResponse update(YarnQueue yarnQueue) {
     yarnQueueService.updateYarnQueue(yarnQueue);
     return RestResponse.success();
   }
@@ -90,7 +89,7 @@ public class YarnQueueController {
   @ApiAccess
   @PostMapping("delete")
   @RequiresPermissions("yarnQueue:delete")
-  public RestResponse delete(@RequestBody YarnQueue yarnQueue) {
+  public RestResponse delete(YarnQueue yarnQueue) {
     yarnQueueService.deleteYarnQueue(yarnQueue);
     return RestResponse.success();
   }
