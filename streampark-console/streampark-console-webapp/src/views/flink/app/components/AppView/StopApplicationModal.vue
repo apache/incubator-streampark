@@ -155,5 +155,6 @@
       <SvgIcon name="shutdown" style="color: red" />
       {{ t('flink.app.view.stop') }}
     </template>
+    <BasicForm @register="registerForm" class="!pt-30px" />
   </BasicModal>
 </template>
