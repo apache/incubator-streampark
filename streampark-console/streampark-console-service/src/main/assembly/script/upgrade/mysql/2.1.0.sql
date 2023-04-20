@@ -48,6 +48,7 @@ alter table `t_user` add column `login_type` tinyint default 0 after `user_type`
 alter table `t_flink_app` change column `launch` `release` tinyint default 1;
 alter table `t_flink_log` add column `option_name` tinyint default null;
 alter table `t_flink_savepoint` modify column `path` varchar(1024) collate utf8mb4_general_ci default null;
+alter table `t_flink_cluster` add column `job_manager_url` varchar(255) default null comment 'url address of jobmanager' after `address`;
 
 -- menu script
 delete from t_menu;

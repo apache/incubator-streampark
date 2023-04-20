@@ -17,6 +17,7 @@
 
 alter table "public"."t_flink_savepoint" alter column "path" type varchar(1024) collate "pg_catalog"."default";
 alter table "public"."t_flink_app" rename "launch" to "release";
+alter table "public"."t_flink_cluster" add column "job_manager_url" varchar(255) collate "pg_catalog"."default";
 drop table if exists "public"."t_external_link";
 drop sequence if exists "public"."streampark_t_external_link_id_seq";
 create sequence "public"."streampark_t_external_link_id_seq" increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;

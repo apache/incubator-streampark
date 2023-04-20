@@ -274,6 +274,7 @@ create sequence "public"."streampark_t_flink_cluster_id_seq"
 create table "public"."t_flink_cluster" (
   "id" int8 not null default nextval('streampark_t_flink_cluster_id_seq'::regclass),
   "address" varchar(255) collate "pg_catalog"."default",
+  "job_manager_url" varchar(255) collate "pg_catalog"."default",
   "cluster_id" varchar(255) collate "pg_catalog"."default",
   "cluster_name" varchar(255) collate "pg_catalog"."default" not null,
   "options" text collate "pg_catalog"."default",
@@ -295,7 +296,8 @@ create table "public"."t_flink_cluster" (
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
-comment on column "public"."t_flink_cluster"."address" is 'url address of jobmanager';
+comment on column "public"."t_flink_cluster"."address" is 'url address of cluster';
+comment on column "public"."t_flink_cluster"."job_manager_url" is 'url address of jobmanager';
 comment on column "public"."t_flink_cluster"."cluster_id" is 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)';
 comment on column "public"."t_flink_cluster"."cluster_name" is 'cluster name';
 comment on column "public"."t_flink_cluster"."options" is 'parameter collection json form';
