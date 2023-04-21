@@ -50,7 +50,35 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.flink</groupId>
-                    <artifactId>flink-shaded-*</artifactId>
+                    <artifactId>flink-shaded-asm-7</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.flink</groupId>
+                    <artifactId>flink-shaded-force-shading</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.flink</groupId>
+                    <artifactId>flink-shaded-guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.flink</groupId>
+                    <artifactId>flink-shaded-zookeeper-3</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>flink-queryable-state-client-java</artifactId>
+                    <groupId>org.apache.flink</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>flink-metrics-core</artifactId>
+                    <groupId>org.apache.flink</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>flink-file-sink-common</artifactId>
+                    <groupId>org.apache.flink</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>flink-hadoop-fs</artifactId>
+                    <groupId>org.apache.flink</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -59,6 +87,12 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-kubernetes${scala.binary.flink.version}</artifactId>
             <version>${flink.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>flink-shaded-force-shading</artifactId>
+                    <groupId>org.apache.flink</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

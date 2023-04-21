@@ -400,6 +400,11 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>force-shading</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
