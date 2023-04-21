@@ -35,7 +35,7 @@ drop table if exists `t_yarn_queue`;
 create table `t_yarn_queue` (
   `id` bigint not null primary key auto_increment comment 'queue id',
   `team_id` bigint not null comment 'team id',
-  `queue_label` varchar(255) collate utf8mb4_general_ci not null comment 'queue and label expression',
+  `queue_label` varchar(150) collate utf8mb4_general_ci not null comment 'queue and label expression',
   `description` varchar(512) collate utf8mb4_general_ci default null comment 'description of the queue label',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
