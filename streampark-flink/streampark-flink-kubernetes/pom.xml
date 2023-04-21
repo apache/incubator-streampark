@@ -58,10 +58,6 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.flink</groupId>
-                    <artifactId>flink-shaded-guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.flink</groupId>
                     <artifactId>flink-shaded-zookeeper-3</artifactId>
                 </exclusion>
                 <exclusion>

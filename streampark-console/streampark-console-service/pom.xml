@@ -54,6 +54,7 @@
         <xml-apis.version>1.4.01</xml-apis.version>
         <ivy.version>2.5.0</ivy.version>
         <eclipse.jgit.version>5.13.1.202206130422-r</eclipse.jgit.version>
+        <flink.shaded.guava.version>30.1.1-jre-14.0</flink.shaded.guava.version>
     </properties>
 
     <dependencyManagement>
@@ -403,6 +404,13 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>force-shading</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-guava</artifactId>
+            <version>${flink.shaded.guava.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
