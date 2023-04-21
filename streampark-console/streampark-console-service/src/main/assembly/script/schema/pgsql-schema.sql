@@ -273,7 +273,7 @@ create sequence "public"."streampark_t_flink_cluster_id_seq"
 
 create table "public"."t_flink_cluster" (
   "id" int8 not null default nextval('streampark_t_flink_cluster_id_seq'::regclass),
-  "address" varchar(100) collate "pg_catalog"."default",
+  "address" varchar(150) collate "pg_catalog"."default",
   "cluster_id" varchar(100) collate "pg_catalog"."default",
   "cluster_name" varchar(100) collate "pg_catalog"."default" not null,
   "options" text collate "pg_catalog"."default",
