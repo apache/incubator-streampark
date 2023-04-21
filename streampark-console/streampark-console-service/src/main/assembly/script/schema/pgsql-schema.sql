@@ -273,9 +273,9 @@ create sequence "public"."streampark_t_flink_cluster_id_seq"
 
 create table "public"."t_flink_cluster" (
   "id" int8 not null default nextval('streampark_t_flink_cluster_id_seq'::regclass),
-  "address" varchar(255) collate "pg_catalog"."default",
-  "cluster_id" varchar(255) collate "pg_catalog"."default",
-  "cluster_name" varchar(255) collate "pg_catalog"."default" not null,
+  "address" varchar(150) collate "pg_catalog"."default",
+  "cluster_id" varchar(100) collate "pg_catalog"."default",
+  "cluster_name" varchar(100) collate "pg_catalog"."default" not null,
   "options" text collate "pg_catalog"."default",
   "yarn_queue" varchar(100) collate "pg_catalog"."default",
   "execution_mode" int2 not null default 1,
@@ -668,10 +668,10 @@ create sequence "public"."streampark_t_user_id_seq"
 
 create table "public"."t_user" (
   "user_id" int8 not null default nextval('streampark_t_user_id_seq'::regclass),
-  "username" varchar(255) collate "pg_catalog"."default" not null,
+  "username" varchar(50) collate "pg_catalog"."default" not null,
   "nick_name" varchar(50) collate "pg_catalog"."default" not null,
-  "salt" varchar(255) collate "pg_catalog"."default",
-  "password" varchar(128) collate "pg_catalog"."default" not null,
+  "salt" varchar(64) collate "pg_catalog"."default",
+  "password" varchar(64) collate "pg_catalog"."default" not null,
   "email" varchar(128) collate "pg_catalog"."default",
   "user_type" int4,
   "login_type" int2 default 0,
@@ -760,8 +760,8 @@ create sequence "public"."streampark_t_yarn_queue_id_seq"
 create table "public"."t_yarn_queue" (
   "id" int8 not null default nextval('streampark_t_yarn_queue_id_seq'::regclass),
   "team_id" int8 not null,
-  "queue_label" varchar(255) not null collate "pg_catalog"."default",
-  "description" varchar(512) collate "pg_catalog"."default",
+  "queue_label" varchar(128) not null collate "pg_catalog"."default",
+  "description" varchar(256) collate "pg_catalog"."default",
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )

@@ -357,10 +357,10 @@ create table `t_setting` (
 drop table if exists `t_user`;
 create table `t_user` (
   `user_id` bigint not null auto_increment comment 'user id',
-  `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
+  `username` varchar(50) collate utf8mb4_general_ci not null comment 'user name',
   `nick_name` varchar(50) collate utf8mb4_general_ci not null comment 'nick name',
-  `salt` varchar(255) collate utf8mb4_general_ci default null comment 'salt',
-  `password` varchar(128) collate utf8mb4_general_ci not null comment 'password',
+  `salt` varchar(64) collate utf8mb4_general_ci default null comment 'salt',
+  `password` varchar(64) collate utf8mb4_general_ci not null comment 'password',
   `email` varchar(128) collate utf8mb4_general_ci default null comment 'email',
   `user_type` int  not null comment 'user type 1:admin 2:user',
   `login_type` tinyint default 0 comment 'login type 0:password 1:ldap',
@@ -418,9 +418,9 @@ create table `t_app_build_pipe`(
 drop table if exists `t_flink_cluster`;
 create table `t_flink_cluster` (
   `id` bigint not null auto_increment,
-  `address` varchar(255) default null comment 'url address of jobmanager',
-  `cluster_id` varchar(255) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
-  `cluster_name` varchar(255) not null comment 'cluster name',
+  `address` varchar(150) default null comment 'url address of jobmanager',
+  `cluster_id` varchar(100) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
+  `cluster_name` varchar(100) not null comment 'cluster name',
   `options` text comment 'json form of parameter collection ',
   `yarn_queue` varchar(100) default null comment 'the yarn queue where the task is located',
   `execution_mode` tinyint not null default 1 comment 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)',
@@ -501,8 +501,8 @@ drop table if exists `t_yarn_queue`;
 create table `t_yarn_queue` (
   `id` bigint not null primary key auto_increment comment 'queue id',
   `team_id` bigint not null comment 'team id',
-  `queue_label` varchar(255) collate utf8mb4_general_ci not null comment 'queue label expression',
-  `description` varchar(512) collate utf8mb4_general_ci default null comment 'description of the queue label',
+  `queue_label` varchar(128) collate utf8mb4_general_ci not null comment 'queue label expression',
+  `description` varchar(256) collate utf8mb4_general_ci default null comment 'description of the queue label',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
    unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree
