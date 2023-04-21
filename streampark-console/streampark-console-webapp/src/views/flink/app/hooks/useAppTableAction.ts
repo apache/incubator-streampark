@@ -107,14 +107,6 @@ export const useAppTableAction = (
         onClick: handleCancel.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.operation.savepoint') },
-        ifShow:
-          record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
-        auth: 'savepoint:trigger',
-        icon: 'ant-design:camera-outlined',
-        onClick: handleSavepoint.bind(null, record),
-      },
-      {
         tooltip: { title: t('flink.app.operation.detail') },
         auth: 'app:detail',
         icon: 'carbon:data-view-alt',
@@ -128,6 +120,14 @@ export const useAppTableAction = (
         auth: 'app:detail',
         icon: 'ant-design:code-outlined',
         onClick: () => openLogModal(true, { app: record }),
+      },
+      {
+        tooltip: { title: t('flink.app.operation.savepoint') },
+        ifShow:
+          record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
+        auth: 'savepoint:trigger',
+        icon: 'ant-design:camera-outlined',
+        onClick: handleSavepoint.bind(null, record),
       },
       {
         tooltip: { title: t('flink.app.operation.force') },
