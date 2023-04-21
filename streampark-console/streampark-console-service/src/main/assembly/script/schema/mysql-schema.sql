@@ -359,8 +359,8 @@ create table `t_user` (
   `user_id` bigint not null auto_increment comment 'user id',
   `username` varchar(50) collate utf8mb4_general_ci not null comment 'user name',
   `nick_name` varchar(50) collate utf8mb4_general_ci not null comment 'nick name',
-  `salt` varchar(255) collate utf8mb4_general_ci default null comment 'salt',
-  `password` varchar(128) collate utf8mb4_general_ci not null comment 'password',
+  `salt` varchar(64) collate utf8mb4_general_ci default null comment 'salt',
+  `password` varchar(64) collate utf8mb4_general_ci not null comment 'password',
   `email` varchar(128) collate utf8mb4_general_ci default null comment 'email',
   `user_type` int  not null comment 'user type 1:admin 2:user',
   `login_type` tinyint default 0 comment 'login type 0:password 1:ldap',
@@ -501,8 +501,8 @@ drop table if exists `t_yarn_queue`;
 create table `t_yarn_queue` (
   `id` bigint not null primary key auto_increment comment 'queue id',
   `team_id` bigint not null comment 'team id',
-  `queue_label` varchar(150) collate utf8mb4_general_ci not null comment 'queue label expression',
-  `description` varchar(512) collate utf8mb4_general_ci default null comment 'description of the queue label',
+  `queue_label` varchar(128) collate utf8mb4_general_ci not null comment 'queue label expression',
+  `description` varchar(256) collate utf8mb4_general_ci default null comment 'description of the queue label',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
    unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree

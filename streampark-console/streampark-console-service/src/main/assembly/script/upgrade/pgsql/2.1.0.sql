@@ -40,8 +40,8 @@ create sequence "public"."streampark_t_yarn_queue_id_seq" increment 1 start 1000
 create table "public"."t_yarn_queue" (
     "id" int8 not null default nextval('streampark_t_yarn_queue_id_seq'::regclass),
     "team_id" int8 not null,
-    "queue_label" varchar(150) not null collate "pg_catalog"."default",
-    "description" varchar(512) collate "pg_catalog"."default",
+    "queue_label" varchar(128) not null collate "pg_catalog"."default",
+    "description" varchar(256) collate "pg_catalog"."default",
     "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
     "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 );
