@@ -26,6 +26,7 @@ import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
@@ -210,13 +211,18 @@ public class AppBuildPipeServiceImpl
               }
             } else {
               if (!app.getDependencyObject().getJar().isEmpty()) {
+                String localUploads = Workspace.local().APP_UPLOADS();
                 // copy jar to local upload dir
                 for (String jar : app.getDependencyObject().getJar()) {
                   File localJar = new File(WebUtils.getAppTempDir(), jar);
-                  Utils.required(localJar.exists());
-                  String localUploads = Workspace.local().APP_UPLOADS();
-                  String uploadJar = localUploads.concat("/").concat(jar);
-                  checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploads);
+                  File uploadJar = new File(localUploads, jar);
+                  if (!localJar.exists() && !uploadJar.exists()) {
+                    throw new ApiAlertException("Missing file: " + jar + ", please upload again");
+                  }
+                  if (localJar.exists()) {
+                    checkOrElseUploadJar(
+                        FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(), localUploads);
+                  }
                 }
               }
             }

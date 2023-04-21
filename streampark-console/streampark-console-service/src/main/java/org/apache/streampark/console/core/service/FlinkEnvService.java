@@ -91,4 +91,6 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
    * @param id
    */
   void syncConf(Long id) throws IOException;
+
+  void validity(Long id);
 }

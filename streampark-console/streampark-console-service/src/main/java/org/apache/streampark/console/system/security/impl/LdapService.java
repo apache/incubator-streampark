@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.system.security.impl;
 
+import org.apache.streampark.console.base.exception.ApiAlertException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -61,6 +63,8 @@ public class LdapService {
   @Value("${ldap.user.email-attribute:#{null}}")
   private String ldapEmailAttribute;
 
+  private Properties ldapEnv = null;
+
   /**
    * login by userId and return user email
    *
@@ -69,53 +73,49 @@ public class LdapService {
    * @return user email
    */
   public String ldapLogin(String userId, String userPwd) {
-    if (enable) {
-      Properties searchEnv = getManagerLdapEnv();
-      try {
-        LdapContext ctx = new InitialLdapContext(searchEnv, null);
-        SearchControls sc = new SearchControls();
-        sc.setReturningAttributes(new String[] {ldapEmailAttribute});
-        sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        EqualsFilter filter = new EqualsFilter(ldapUserIdentifyingAttribute, userId);
-        NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, filter.toString(), sc);
-        if (results.hasMore()) {
-          SearchResult result = results.next();
-          NamingEnumeration<? extends Attribute> attrs = result.getAttributes().getAll();
-          while (attrs.hasMore()) {
-            searchEnv.put(Context.SECURITY_PRINCIPAL, result.getNameInNamespace());
-            searchEnv.put(Context.SECURITY_CREDENTIALS, userPwd);
-            try {
-              new InitialDirContext(searchEnv);
-            } catch (Exception e) {
-              log.warn("invalid ldap credentials or ldap search error", e);
-              return null;
-            }
-            Attribute attr = attrs.next();
-            if (attr.getID().equals(ldapEmailAttribute)) {
-              return (String) attr.get();
-            }
+    if (!enable) {
+      throw new ApiAlertException(
+          "ldap is not enabled, Please check the configuration: ldap.enable");
+    }
+
+    if (ldapEnv == null) {
+      ldapEnv = new Properties();
+      ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+      ldapEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
+      ldapEnv.put(Context.SECURITY_PRINCIPAL, ldapSecurityPrincipal);
+      ldapEnv.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
+      ldapEnv.put(Context.PROVIDER_URL, ldapUrls);
+    }
+
+    try {
+      LdapContext ctx = new InitialLdapContext(ldapEnv, null);
+      SearchControls sc = new SearchControls();
+      sc.setReturningAttributes(new String[] {ldapEmailAttribute});
+      sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+      EqualsFilter filter = new EqualsFilter(ldapUserIdentifyingAttribute, userId);
+      NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, filter.toString(), sc);
+      if (results.hasMore()) {
+        SearchResult result = results.next();
+        NamingEnumeration<? extends Attribute> attrs = result.getAttributes().getAll();
+        while (attrs.hasMore()) {
+          ldapEnv.put(Context.SECURITY_PRINCIPAL, result.getNameInNamespace());
+          ldapEnv.put(Context.SECURITY_CREDENTIALS, userPwd);
+          try {
+            new InitialDirContext(ldapEnv);
+          } catch (Exception e) {
+            log.warn("invalid ldap credentials or ldap search error", e);
+            return null;
+          }
+          Attribute attr = attrs.next();
+          if (attr.getID().equals(ldapEmailAttribute)) {
+            return (String) attr.get();
           }
         }
-      } catch (NamingException e) {
-        log.error("ldap search error", e);
-        return null;
       }
+    } catch (NamingException e) {
+      log.error("ldap search error", e);
+      return null;
     }
     return null;
-  }
-
-  /**
-   * * get ldap env fot ldap server search
-   *
-   * @return Properties
-   */
-  Properties getManagerLdapEnv() {
-    Properties env = new Properties();
-    env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-    env.put(Context.SECURITY_AUTHENTICATION, "simple");
-    env.put(Context.SECURITY_PRINCIPAL, ldapSecurityPrincipal);
-    env.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
-    env.put(Context.PROVIDER_URL, ldapUrls);
-    return env;
   }
 }

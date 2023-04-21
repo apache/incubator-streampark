@@ -100,6 +100,13 @@ public class FlinkEnvController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "Check flink environment is valid, else throw exception")
+  @PostMapping("validity")
+  public RestResponse validity(FlinkEnv version) {
+    flinkEnvService.validity(version.getId());
+    return RestResponse.success(true);
+  }
+
   @Operation(summary = "Update flink environment as default")
   @PostMapping("default")
   public RestResponse setDefault(Long id) {
