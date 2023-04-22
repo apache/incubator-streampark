@@ -95,8 +95,7 @@ alter table `t_role`
     drop column `role_code`;
 
 alter table `t_setting`
-    modify column `setting_key` varchar(64) collate utf8mb4_general_ci not null,
-    modify column `setting_name` varchar(255) collate utf8mb4_general_ci default null;
+    modify column `setting_key` varchar(64) collate utf8mb4_general_ci not null;
 
 alter table `t_user`
     modify column `username` varchar(64) collate utf8mb4_general_ci not null comment 'user name',

@@ -306,7 +306,7 @@ create table if not exists `t_setting` (
   `order_num` int default null,
   `setting_key` varchar(64) primary key not null,
   `setting_value` text  default null,
-  `setting_name` varchar(64)  default null,
+  `setting_name` varchar(255)  default null,
   `description` varchar(255)  default null,
   `type` tinyint not null comment '1: input 2: boolean 3: number'
 );
