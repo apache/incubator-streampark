@@ -132,7 +132,7 @@ insert into "public"."t_menu" values (130603, 130600, 'delete yarn queue', null,
 -- Records of t_role
 -- ----------------------------
 insert into "public"."t_role" values (100001, 'developer', now(), now(), 'developer');
-insert into "public"."t_role" values (100002, 'team admin', now(), now(), 'Team Admin has all permissions inside the team.', );
+insert into "public"."t_role" values (100002, 'team admin', now(), now(), 'Team Admin has all permissions inside the team.');
 
 -- ----------------------------
 -- Records of t_role_menu

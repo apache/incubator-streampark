@@ -51,8 +51,8 @@ alter table `t_flink_app`
     change column `launch` `release` tinyint default 1,
     modify column `project_id` bigint default null,
     modify column `app_id` varchar(64) collate utf8mb4_general_ci default null,
-    modify column `cluster_id` varchar(64) collate utf8mb4_general_ci default null,
-    modify column `k8s_namespace` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `cluster_id` varchar(45) collate utf8mb4_general_ci default null,
+    modify column `k8s_namespace` varchar(63) collate utf8mb4_general_ci default null,
     modify column `flink_image` varchar(128) collate utf8mb4_general_ci default null,
     modify column `state` int default null,
     drop index `inx_state`;
@@ -101,7 +101,7 @@ alter table `t_setting`
 alter table `t_user`
     modify column `username` varchar(64) collate utf8mb4_general_ci not null comment 'user name',
     modify column `nick_name` varchar(64) collate utf8mb4_general_ci not null comment 'nick name',
-    modify column `salt` varchar(32) collate utf8mb4_general_ci default null comment 'salt',
+    modify column `salt` varchar(26) collate utf8mb4_general_ci default null comment 'salt',
     modify column `password` varchar(64) collate utf8mb4_general_ci not null comment 'password',
     modify column `email` varchar(64) collate utf8mb4_general_ci default null comment 'email',
     modify column `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
@@ -109,11 +109,11 @@ alter table `t_user`
     drop column `avatar`;
 
 alter table `t_flink_cluster`
-    modify column `cluster_id` varchar(128) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
+    modify column `cluster_id` varchar(45) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
     modify column `cluster_name` varchar(128) not null comment 'cluster name',
     modify column `options` text comment 'json form of parameter collection ',
     modify column `yarn_queue` varchar(128) default null comment 'the yarn queue where the task is located',
-    modify column `k8s_namespace` varchar(64) default 'default' comment 'k8s namespace',
+    modify column `k8s_namespace` varchar(63) default 'default' comment 'k8s namespace',
     modify column `service_account` varchar(64) default null comment 'k8s service account',
     modify column `description` varchar(255) default null,
     modify column `user_id` bigint default null,
