@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-alter table "public"."t_flink_savepoint" alter column "path" type varchar(1024) collate "pg_catalog"."default";
-alter table "public"."t_flink_app" rename "launch" to "release";
 drop table if exists "public"."t_external_link";
 drop sequence if exists "public"."streampark_t_external_link_id_seq";
 create sequence "public"."streampark_t_external_link_id_seq" increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
@@ -54,11 +52,92 @@ comment on column "public"."t_yarn_queue"."modify_time" is 'modify time';
 
 alter table "public"."t_yarn_queue" add constraint "t_yarn_queue_pkey" primary key ("id");
 alter table "public"."t_yarn_queue" add constraint "unique_team_id_queue_label" unique("team_id", "queue_label");
-alter table "public"."t_flink_log" add column "option_name" int2;
-alter table "public"."t_user" add column "login_type" int2 default 0;
-ALTER TABLE public.t_flink_app ALTER COLUMN state TYPE int4 USING state::int4;
+
 
 drop table if exists "public"."t_flink_tutorial";
+
+-- type change
+alter table "public"."t_app_backup" modify column "path" varchar(128) collate utf8mb4_general_ci default null;
+
+alter table "public"."t_flink_app"
+    rename column "launch" to "release",
+    alter column "state" TYPE int4 USING state::int4;
+    alter column "app_id" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "cluster_id" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "k8s_namespace" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "flink_image" TYPE varchar(128) collate "pg_catalog"."default";
+
+
+alter table "public"."t_flink_env"
+    alter column "version" TYPE varchar(64) collate "pg_catalog"."default" not null,
+    alter column "scala_version" TYPE varchar(64) collate "pg_catalog"."default" not null;
+
+
+alter table "public"."t_flink_log"
+    alter column "yarn_app_id" TYPE varchar(64) collate "pg_catalog"."default",
+    add column "option_name" int2;
+
+
+alter table "public"."t_flink_project"
+    alter column "url" TYPE varchar(255) collate "pg_catalog"."default",
+    alter column "branches" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "user_name" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "password" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "prvkey_path" TYPE varchar(128) collate "pg_catalog"."default";
+
+
+alter table "public"."t_flink_savepoint"
+    alter column "path" TYPE varchar(255) collate "pg_catalog"."default";
+
+
+alter table "public"."t_menu"
+    alter column "menu_name" TYPE varchar(64) collate "pg_catalog"."default" not null,
+    alter column "path" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "component" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "perms" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "icon" TYPE varchar(64) collate "pg_catalog"."default";
+
+alter table "public"."t_team"
+    alter column "team_name" TYPE varchar(64) collate "pg_catalog"."default" not null;
+
+alter table "public"."t_variable"
+    alter column "variable_code" TYPE varchar(128) collate "pg_catalog"."default" not null;
+
+alter table "public"."t_role"
+    alter column "role_name" TYPE varchar(64) collate "pg_catalog"."default" not null,
+    rename column "remark" to "description",
+    drop column "role_code";
+
+alter table "public"."t_role"
+    alter column "description" TYPE varchar(255) collate "pg_catalog"."default";
+
+
+alter table "public"."t_setting"
+    alter column "setting_key" TYPE varchar(64) collate "pg_catalog"."default" not null,
+    alter column "setting_value" TYPE text collate "pg_catalog"."default";
+
+alter table "public"."t_user"
+    alter column "username" TYPE varchar(64) collate "pg_catalog"."default" not null,
+    alter column "nick_name" TYPE varchar(64) collate "pg_catalog"."default" not null,
+    alter column "salt" TYPE varchar(32) collate "pg_catalog"."default"  not null,
+    alter column "password" TYPE varchar(64) collate "pg_catalog"."default" not null,
+    alter column "email" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "description" TYPE varchar(255) collate "pg_catalog"."default",
+    add column "login_type" TYPE int2 default 0;
+    drop column "avatar";
+
+alter table "public"."t_flink_cluster"
+    alter column "cluster_id" TYPE varchar(128) collate "pg_catalog"."default",
+    alter column "cluster_name" TYPE varchar(128) collate "pg_catalog"."default" not null,
+    alter column "yarn_queue" TYPE varchar(128) collate "pg_catalog"."default",
+    alter column "k8s_namespace" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "service_account" TYPE varchar(64) collate "pg_catalog"."default",
+    alter column "flink_image" TYPE varchar(128) collate "pg_catalog"."default",
+    alter column "description" TYPE varchar(255) collate "pg_catalog"."default";
+
+alter table "public"."t_access_token"
+    alter column "description" TYPE varchar(255) collate "pg_catalog"."default";
+
 
 delete from "public"."t_menu";
 insert into "public"."t_menu" values (110000, 0, 'menu.system', '/system', 'PageView', null, 'desktop', '0', '1', 1, now(), now());
