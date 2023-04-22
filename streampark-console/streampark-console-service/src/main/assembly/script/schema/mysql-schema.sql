@@ -313,7 +313,7 @@ create table `t_variable` (
 drop table if exists `t_role`;
 create table `t_role` (
   `role_id` bigint not null auto_increment comment 'user id',
-  `role_name` varchar(64) collate utf8mb4_general_ci not null comment 'user name',
+  `role_name` varchar(64) collate utf8mb4_general_ci not null comment 'role name',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
@@ -342,7 +342,7 @@ create table `t_setting` (
   `order_num` int default null,
   `setting_key` varchar(64) collate utf8mb4_general_ci not null,
   `setting_value` text collate utf8mb4_general_ci default null,
-  `setting_name` varchar(64) collate utf8mb4_general_ci default null,
+  `setting_name` varchar(255) collate utf8mb4_general_ci default null,
   `description` varchar(255) collate utf8mb4_general_ci default null,
   `type` tinyint not null comment '1: input 2: boolean 3: number',
   primary key (`setting_key`) using btree

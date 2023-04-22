@@ -647,7 +647,7 @@ create table "public"."t_setting" (
   "order_num" int4,
   "setting_key" varchar(64) collate "pg_catalog"."default" not null,
   "setting_value" text collate "pg_catalog"."default",
-  "setting_name" varchar(64) collate "pg_catalog"."default",
+  "setting_name" varchar(255) collate "pg_catalog"."default",
   "description" varchar(255) collate "pg_catalog"."default",
   "type" int2 not null
 )

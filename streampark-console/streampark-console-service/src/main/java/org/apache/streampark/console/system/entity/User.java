@@ -43,9 +43,8 @@ public class User implements Serializable {
 
   public static final String STATUS_LOCK = "0";
 
-  public static final String DEFAULT_AVATAR = "default.jpg";
-
   public static final String SEX_MALE = "0";
+
 
   public static final String SEX_FEMALE = "1";
 
@@ -83,8 +82,6 @@ public class User implements Serializable {
 
   @Size(max = 100, message = "{noMoreThan}")
   private String description;
-
-  private String avatar;
 
   private transient String oldPassword;
 
