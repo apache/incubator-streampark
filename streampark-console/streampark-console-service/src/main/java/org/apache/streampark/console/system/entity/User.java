@@ -45,7 +45,6 @@ public class User implements Serializable {
 
   public static final String SEX_MALE = "0";
 
-
   public static final String SEX_FEMALE = "1";
 
   public static final String SEX_UNKNOWN = "2";
