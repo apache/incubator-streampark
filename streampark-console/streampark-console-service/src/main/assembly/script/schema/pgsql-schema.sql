@@ -608,18 +608,16 @@ create sequence "public"."streampark_t_role_id_seq"
 create table "public"."t_role" (
   "role_id" int8 not null default nextval('streampark_t_role_id_seq'::regclass),
   "role_name" varchar(64) collate "pg_catalog"."default" not null,
-  "remark" varchar(128) collate "pg_catalog"."default",
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "role_code" varchar(255) collate "pg_catalog"."default"
+  "description" varchar(255) collate "pg_catalog"."default"
 )
 ;
 comment on column "public"."t_role"."role_id" is 'role id';
 comment on column "public"."t_role"."role_name" is 'role name';
-comment on column "public"."t_role"."remark" is 'role description';
+comment on column "public"."t_role"."description" is 'role description';
 comment on column "public"."t_role"."create_time" is 'creation time';
 comment on column "public"."t_role"."modify_time" is 'modify time';
-comment on column "public"."t_role"."role_code" is 'role code';
 alter table "public"."t_role" add constraint "t_role_pkey" primary key ("role_id");
 
 

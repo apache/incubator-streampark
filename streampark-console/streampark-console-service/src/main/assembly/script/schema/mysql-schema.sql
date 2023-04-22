@@ -314,10 +314,9 @@ drop table if exists `t_role`;
 create table `t_role` (
   `role_id` bigint not null auto_increment comment 'user id',
   `role_name` varchar(64) collate utf8mb4_general_ci not null comment 'user name',
-  `remark` varchar(128) collate utf8mb4_general_ci default null comment 'remark',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
-  `role_code` varchar(255) collate utf8mb4_general_ci default null comment 'role code',
+  `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
   primary key (`role_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 

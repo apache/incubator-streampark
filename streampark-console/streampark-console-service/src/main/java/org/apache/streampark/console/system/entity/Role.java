@@ -41,10 +41,8 @@ public class Role implements Serializable {
   @Size(max = 10, message = "{noMoreThan}")
   private String roleName;
 
-  private String roleCode;
-
-  @Size(max = 50, message = "{noMoreThan}")
-  private String remark;
+  @Size(max = 255, message = "{noMoreThan}")
+  private String description;
 
   private Date createTime;
 

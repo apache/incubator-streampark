@@ -135,8 +135,8 @@ insert into `t_menu` values (130603, 130600, 'delete yarn queue', null, null, 'y
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
-insert into `t_role` values (100001, 'developer', 'developer', now(), now(), null);
-insert into `t_role` values (100002, 'team admin', 'Team Admin has all permissions inside the team.', now(), now(), null);
+insert into `t_role` values (100001, 'developer', now(), now(), 'developer');
+insert into `t_role` values (100002, 'team admin', now(), now(), 'Team Admin has all permissions inside the team.', );
 
 -- ----------------------------
 -- Records of t_role_menu

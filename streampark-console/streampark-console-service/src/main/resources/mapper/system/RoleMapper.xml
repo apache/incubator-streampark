@@ -20,10 +20,9 @@
     <resultMap id="roleMap" type="org.apache.streampark.console.system.entity.Role">
         <result column="role_id" jdbcType="BIGINT" property="roleId"/>
         <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
-        <result column="role_code" jdbcType="VARCHAR" property="roleCode"/>
-        <result column="remark" jdbcType="VARCHAR" property="remark"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
     </resultMap>
 
     <select id="findRole" resultType="org.apache.streampark.console.system.entity.Role" parameterType="org.apache.streampark.console.system.entity.Role">
