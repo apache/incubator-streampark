@@ -334,6 +334,7 @@ start() {
   local workspace=$(echo "$conf_streampark_workspace_local" | sed 's/#.*$//g')
   if [[ ! -d $workspace ]]; then
     echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in application.yml"
+    echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
     exit 1;
   fi
   if [[ ! -w $workspace ]] || [[ ! -r $workspace ]]; then
