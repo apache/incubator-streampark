@@ -18,11 +18,11 @@ package org.apache.streampark.common.util
 
 import org.apache.streampark.common.fs.LfsOperator
 
-import com.google.common.collect.Maps
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
 import java.io.File
-import java.util.{Collections, Map => JavaMap, Optional => JOption}
+import java.nio.charset.StandardCharsets
+import java.util.{Collections, Map => JavaMap, Optional}
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -48,13 +48,14 @@ object HadoopConfigUtils {
     }
   }
 
-  def getSystemHadoopConfDirAsJava: JOption[String] =
-    JOption.ofNullable(getSystemHadoopConfDir.orNull)
+  def getSystemHadoopConfDirAsJava: Optional[String] =
+    Optional.ofNullable(getSystemHadoopConfDir.orNull)
 
   /** Get Hive configuration directory path from system. */
   def getSystemHiveConfDir: Option[String] = Try(FileUtils.getPathFromEnv("HIVE_CONF_DIR")).toOption
 
-  def getSystemHiveConfDirAsJava: JOption[String] = JOption.ofNullable(getSystemHiveConfDir.orNull)
+  def getSystemHiveConfDirAsJava: Optional[String] =
+    Optional.ofNullable(getSystemHiveConfDir.orNull)
 
   /**
    * Replace host information with ip of hadoop config file or hive config file. Such as
@@ -115,7 +116,7 @@ object HadoopConfigUtils {
           LfsOperator
             .listDir(confDir)
             .filter(f => HADOOP_CLIENT_CONF_FILES.contains(f.getName))
-            .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+            .map(f => f.getName -> ApacheFileUtils.readFileToString(f, StandardCharsets.UTF_8))
             .toMap
             .asJava)
       .getOrElse(Collections.emptyMap[String, String]())
@@ -128,7 +129,7 @@ object HadoopConfigUtils {
           LfsOperator
             .listDir(confDir)
             .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
-            .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+            .map(f => f.getName -> ApacheFileUtils.readFileToString(f, StandardCharsets.UTF_8))
             .toMap
             .asJava)
       .getOrElse(Collections.emptyMap[String, String]())

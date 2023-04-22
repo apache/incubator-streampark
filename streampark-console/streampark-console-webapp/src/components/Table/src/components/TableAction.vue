@@ -142,7 +142,7 @@
         return actionColumn?.align ?? 'left';
       });
 
-      function getTooltip(data: string | TooltipProps): TooltipProps {
+      function getTooltip(data: string | TooltipProps) {
         return {
           getPopupContainer: () => unref((table as any)?.wrapRef.value) ?? document.body,
           placement: 'bottom',
