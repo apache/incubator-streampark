@@ -96,7 +96,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Transactional(rollbackFor = Exception.class)
   public void createUser(User user) {
     user.setCreateTime(new Date());
-    user.setAvatar(User.DEFAULT_AVATAR);
     String salt = ShaHashUtils.getRandomSalt();
     String password = ShaHashUtils.encrypt(salt, user.getPassword());
     user.setSalt(salt);

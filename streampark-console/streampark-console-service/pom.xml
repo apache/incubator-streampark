@@ -33,8 +33,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <postgresql.version>42.5.0</postgresql.version>
-        <mybatis-plus.version>3.5.2</mybatis-plus.version>
+        <postgresql.version>42.5.1</postgresql.version>
+        <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
         <frontend.project.name>streampark-console-webapp</frontend.project.name>
         <PermGen>64m</PermGen>
@@ -54,6 +54,7 @@
         <xml-apis.version>1.4.01</xml-apis.version>
         <ivy.version>2.5.0</ivy.version>
         <eclipse.jgit.version>5.13.1.202206130422-r</eclipse.jgit.version>
+        <flink.shaded.guava.version>30.1.1-jre-14.0</flink.shaded.guava.version>
     </properties>
 
     <dependencyManagement>
@@ -61,7 +62,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.7.10</version>
+                <version>2.7.11</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -112,6 +113,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>${commons-compress.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
         </dependency>
 
         <dependency>
@@ -283,44 +289,18 @@
         <!-- hadoop -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-client</artifactId>
+            <artifactId>hadoop-client-api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-auth</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <artifactId>hadoop-client-runtime</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit.ssh.jsch</artifactId>
             <version>${eclipse.jgit.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.ivy</groupId>
-            <artifactId>ivy</artifactId>
-            <version>${ivy.version}</version>
         </dependency>
 
         <dependency>
@@ -415,6 +395,18 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>force-shading</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-guava</artifactId>
+            <version>${flink.shaded.guava.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

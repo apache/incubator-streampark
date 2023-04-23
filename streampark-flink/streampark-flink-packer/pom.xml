@@ -74,8 +74,8 @@
             <artifactId>aether-impl</artifactId>
             <version>${eclipse.aether.version}</version>
         </dependency>
-        <dependency>
 
+        <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-connector-basic</artifactId>
             <version>${eclipse.aether.version}</version>

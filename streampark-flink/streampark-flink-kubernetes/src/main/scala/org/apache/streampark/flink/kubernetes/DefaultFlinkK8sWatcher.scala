@@ -23,7 +23,7 @@ import org.apache.streampark.flink.kubernetes.event.{BuildInEvent, FlinkJobState
 import org.apache.streampark.flink.kubernetes.model._
 import org.apache.streampark.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
-import com.google.common.eventbus.Subscribe
+import com.google.common.eventbus.{AllowConcurrentEvents, Subscribe}
 
 import javax.annotation.Nullable
 
@@ -125,7 +125,9 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
      * FlinkJobStatusChangeEvent.
      */
     // noinspection UnstableApiUsage
-    @Subscribe def subscribeFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {
+    @Subscribe
+    @AllowConcurrentEvents
+    def subscribeFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {
       if (event.trackId.isLegal) {
         val latest = watchController.jobStatuses.get(event.trackId)
         // determine if the current event should be ignored

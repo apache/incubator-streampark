@@ -62,15 +62,13 @@
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-core</artifactId>
-            <version>${hadoop.version}</version>
+            <artifactId>hadoop-client-api</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${hadoop.version}</version>
+            <artifactId>hadoop-client-runtime</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

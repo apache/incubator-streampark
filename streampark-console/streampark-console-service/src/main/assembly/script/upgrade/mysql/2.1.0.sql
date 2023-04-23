@@ -23,10 +23,10 @@ set foreign_key_checks = 0;
 drop table if exists `t_external_link`;
 CREATE TABLE `t_external_link` (
   `id` bigint not null auto_increment primary key,
-  `badge_label` varchar(100) collate utf8mb4_general_ci default null,
-  `badge_name` varchar(100) collate utf8mb4_general_ci default null,
-  `badge_color` varchar(100) collate utf8mb4_general_ci default null,
-  `link_url` varchar(1000) collate utf8mb4_general_ci default null,
+  `badge_label` varchar(64) collate utf8mb4_general_ci default null,
+  `badge_name` varchar(64) collate utf8mb4_general_ci default null,
+  `badge_color` varchar(64) collate utf8mb4_general_ci default null,
+  `link_url` varchar(255) collate utf8mb4_general_ci default null,
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
   `modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'modify time'
 ) engine = innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -35,8 +35,8 @@ drop table if exists `t_yarn_queue`;
 create table `t_yarn_queue` (
   `id` bigint not null primary key auto_increment comment 'queue id',
   `team_id` bigint not null comment 'team id',
-  `queue_label` varchar(255) collate utf8mb4_general_ci not null comment 'queue and label expression',
-  `description` varchar(512) collate utf8mb4_general_ci default null comment 'description of the queue label',
+  `queue_label` varchar(128) collate utf8mb4_general_ci not null comment 'queue and label expression',
+  `description` varchar(255) collate utf8mb4_general_ci default null comment 'description of the queue label',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree
@@ -44,13 +44,86 @@ create table `t_yarn_queue` (
 
 drop table if exists t_flink_tutorial;
 
-alter table `t_user` add column `login_type` tinyint default 0 after `user_type`;
-alter table `t_flink_app` change column `launch` `release` tinyint default 1;
-alter table `t_flink_log` add column `option_name` tinyint default null;
-alter table `t_flink_savepoint` modify column `path` varchar(1024) collate utf8mb4_general_ci default null;
+-- type change
+alter table `t_app_backup` modify column `path` varchar(128) collate utf8mb4_general_ci default null;
+
+alter table `t_flink_app`
+    change column `launch` `release` tinyint default 1,
+    modify column `project_id` bigint default null,
+    modify column `app_id` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `cluster_id` varchar(45) collate utf8mb4_general_ci default null,
+    modify column `k8s_namespace` varchar(63) collate utf8mb4_general_ci default null,
+    modify column `flink_image` varchar(128) collate utf8mb4_general_ci default null,
+    modify column `state` int default null,
+    drop index `inx_state`;
+
+alter table `t_flink_env`
+    modify column `version` varchar(64) collate utf8mb4_general_ci not null comment 'flink version',
+    modify column `scala_version` varchar(64) collate utf8mb4_general_ci not null comment 'scala version of flink';
+
+alter table `t_flink_log`
+    modify column `yarn_app_id` varchar(64) collate utf8mb4_general_ci default null,
+    add column `option_name` tinyint default null;
+
+alter table `t_flink_project`
+    modify column `url` varchar(255) collate utf8mb4_general_ci default null,
+    modify column `branches` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `user_name` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `password` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `prvkey_path` varchar(128) collate utf8mb4_general_ci default null;
+
+alter table `t_flink_savepoint`
+    modify column `path` varchar(255) collate utf8mb4_general_ci default null;
+
+
+alter table `t_menu`
+    modify column `menu_name` varchar(64) collate utf8mb4_general_ci not null comment 'menu button name',
+    modify column `path` varchar(64) collate utf8mb4_general_ci default null comment 'routing path',
+    modify column `component` varchar(64) collate utf8mb4_general_ci default null comment 'routing component component',
+    modify column `perms` varchar(64) collate utf8mb4_general_ci default null comment 'authority id',
+    modify column `icon` varchar(64) collate utf8mb4_general_ci default null comment 'icon';
+
+alter table `t_team`
+    modify column `team_name` varchar(64) collate utf8mb4_general_ci not null comment 'team name';
+
+alter table `t_variable`
+    modify column `variable_code` varchar(128) collate utf8mb4_general_ci not null comment 'Variable code is used for parameter names passed to the program or as placeholders';
+
+alter table `t_role`
+    modify column `role_name` varchar(64) collate utf8mb4_general_ci not null comment 'role name',
+    change column `remark` `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
+    drop column `role_code`;
+
+alter table `t_setting`
+    modify column `setting_key` varchar(64) collate utf8mb4_general_ci not null;
+
+alter table `t_user`
+    modify column `username` varchar(64) collate utf8mb4_general_ci not null comment 'user name',
+    modify column `nick_name` varchar(64) collate utf8mb4_general_ci not null comment 'nick name',
+    modify column `salt` varchar(26) collate utf8mb4_general_ci default null comment 'salt',
+    modify column `password` varchar(64) collate utf8mb4_general_ci not null comment 'password',
+    modify column `email` varchar(64) collate utf8mb4_general_ci default null comment 'email',
+    modify column `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
+    add column `login_type` tinyint default 0 after `user_type`,
+    drop column `avatar`;
+
+alter table `t_flink_cluster`
+    modify column `cluster_id` varchar(45) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
+    modify column `cluster_name` varchar(128) not null comment 'cluster name',
+    modify column `options` text comment 'json form of parameter collection ',
+    modify column `yarn_queue` varchar(128) default null comment 'the yarn queue where the task is located',
+    modify column `k8s_namespace` varchar(63) default 'default' comment 'k8s namespace',
+    modify column `service_account` varchar(64) default null comment 'k8s service account',
+    modify column `description` varchar(255) default null,
+    modify column `user_id` bigint default null,
+    modify column `flink_image` varchar(128) default null comment 'flink image';
+
+alter table `t_access_token`
+    modify column `description` varchar(255) character set utf8mb4 collate utf8mb4_general_ci default null comment 'description';
+
 
 -- menu script
-delete from t_menu;
+delete from `t_menu`;
 -- menu level 1
 insert into `t_menu` values (110000, 0, 'menu.system', '/system', 'PageView', null, 'desktop', '0', 1, 1, now(), now());
 insert into `t_menu` values (120000, 0, 'StreamPark', '/flink', 'PageView', null, 'build', '0', 1, 2, now(), now());
@@ -204,18 +277,76 @@ update `t_role_menu` set menu_id=130000 where menu_id=100033;
 update `t_role_menu` set menu_id=130401 where menu_id=100040;
 update `t_role_menu` set menu_id=130402 where menu_id=100041;
 
+delete from `t_role_menu` where role_id=100001 and menu_id=120000;
+delete from `t_role_menu` where role_id=100001 and menu_id=120100;
+delete from `t_role_menu` where role_id=100001 and menu_id=120101;
+delete from `t_role_menu` where role_id=100001 and menu_id=120102;
 delete from `t_role_menu` where role_id=100001 and menu_id=120104;
+delete from `t_role_menu` where role_id=100001 and menu_id=120105;
+delete from `t_role_menu` where role_id=100001 and menu_id=120200;
+delete from `t_role_menu` where role_id=100001 and menu_id=120201;
+delete from `t_role_menu` where role_id=100001 and menu_id=120202;
+delete from `t_role_menu` where role_id=100001 and menu_id=120203;
+delete from `t_role_menu` where role_id=100001 and menu_id=120204;
+delete from `t_role_menu` where role_id=100001 and menu_id=120206;
+delete from `t_role_menu` where role_id=100001 and menu_id=120207;
+delete from `t_role_menu` where role_id=100001 and menu_id=120208;
+delete from `t_role_menu` where role_id=100001 and menu_id=120209;
+delete from `t_role_menu` where role_id=100001 and menu_id=120210;
+delete from `t_role_menu` where role_id=100001 and menu_id=120211;
+delete from `t_role_menu` where role_id=100001 and menu_id=120212;
+delete from `t_role_menu` where role_id=100001 and menu_id=120213;
 delete from `t_role_menu` where role_id=100001 and menu_id=120215;
+delete from `t_role_menu` where role_id=100001 and menu_id=120216;
 delete from `t_role_menu` where role_id=100001 and menu_id=120217;
+delete from `t_role_menu` where role_id=100001 and menu_id=120300;
+delete from `t_role_menu` where role_id=100001 and menu_id=120304;
+delete from `t_role_menu` where role_id=100001 and menu_id=120306;
+delete from `t_role_menu` where role_id=100001 and menu_id=120307;
 delete from `t_role_menu` where role_id=100001 and menu_id=130000;
 delete from `t_role_menu` where role_id=100001 and menu_id=130100;
 delete from `t_role_menu` where role_id=100001 and menu_id=130101;
+delete from `t_role_menu` where role_id=100002 and menu_id=110000;
+delete from `t_role_menu` where role_id=100002 and menu_id=110600;
+delete from `t_role_menu` where role_id=100002 and menu_id=110601;
+delete from `t_role_menu` where role_id=100002 and menu_id=110602;
+delete from `t_role_menu` where role_id=100002 and menu_id=110603;
+delete from `t_role_menu` where role_id=100002 and menu_id=110604;
+delete from `t_role_menu` where role_id=100002 and menu_id=110605;
+delete from `t_role_menu` where role_id=100002 and menu_id=120000;
+delete from `t_role_menu` where role_id=100002 and menu_id=120100;
+delete from `t_role_menu` where role_id=100002 and menu_id=120101;
+delete from `t_role_menu` where role_id=100002 and menu_id=120102;
 delete from `t_role_menu` where role_id=100002 and menu_id=120103;
 delete from `t_role_menu` where role_id=100002 and menu_id=120104;
+delete from `t_role_menu` where role_id=100002 and menu_id=120105;
+delete from `t_role_menu` where role_id=100002 and menu_id=120200;
+delete from `t_role_menu` where role_id=100002 and menu_id=120201;
+delete from `t_role_menu` where role_id=100002 and menu_id=120202;
+delete from `t_role_menu` where role_id=100002 and menu_id=120203;
+delete from `t_role_menu` where role_id=100002 and menu_id=120204;
 delete from `t_role_menu` where role_id=100002 and menu_id=120205;
+delete from `t_role_menu` where role_id=100002 and menu_id=120206;
+delete from `t_role_menu` where role_id=100002 and menu_id=120207;
+delete from `t_role_menu` where role_id=100002 and menu_id=120208;
+delete from `t_role_menu` where role_id=100002 and menu_id=120209;
+delete from `t_role_menu` where role_id=100002 and menu_id=120210;
+delete from `t_role_menu` where role_id=100002 and menu_id=120211;
+delete from `t_role_menu` where role_id=100002 and menu_id=120212;
+delete from `t_role_menu` where role_id=100002 and menu_id=120213;
+delete from `t_role_menu` where role_id=100002 and menu_id=120214;
 delete from `t_role_menu` where role_id=100002 and menu_id=120215;
+delete from `t_role_menu` where role_id=100002 and menu_id=120216;
 delete from `t_role_menu` where role_id=100002 and menu_id=120217;
 delete from `t_role_menu` where role_id=100002 and menu_id=120218;
+delete from `t_role_menu` where role_id=100002 and menu_id=120300;
+delete from `t_role_menu` where role_id=100002 and menu_id=120301;
+delete from `t_role_menu` where role_id=100002 and menu_id=120302;
+delete from `t_role_menu` where role_id=100002 and menu_id=120303;
+delete from `t_role_menu` where role_id=100002 and menu_id=120304;
+delete from `t_role_menu` where role_id=100002 and menu_id=120305;
+delete from `t_role_menu` where role_id=100002 and menu_id=120306;
+delete from `t_role_menu` where role_id=100002 and menu_id=120307;
 delete from `t_role_menu` where role_id=100002 and menu_id=130000;
 delete from `t_role_menu` where role_id=100002 and menu_id=130100;
 delete from `t_role_menu` where role_id=100002 and menu_id=130101;
@@ -234,18 +365,76 @@ delete from `t_role_menu` where role_id=100002 and menu_id=130601;
 delete from `t_role_menu` where role_id=100002 and menu_id=130602;
 delete from `t_role_menu` where role_id=100002 and menu_id=130603;
 
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120000);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120100);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120101);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120102);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 120104);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120105);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120200);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120201);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120202);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120203);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120204);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120206);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120207);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120208);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120209);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120210);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120211);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120212);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120213);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 120215);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120216);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 120217);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120300);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120304);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120306);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120307);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 130000);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 130100);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 130101);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 110000);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 110600);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 110601);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 110602);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 110603);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 110604);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 110605);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120000);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120100);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120101);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120102);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120103);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120104);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120105);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120200);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120201);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120202);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120203);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120204);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120205);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120206);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120207);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120208);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120209);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120210);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120211);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120212);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120213);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120214);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120215);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120216);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120217);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120218);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120300);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120301);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120302);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120303);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120304);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120305);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120306);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120307);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130000);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130100);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130101);

@@ -100,7 +100,7 @@
         <spark.version>3.2.0</spark.version>
         <scalikejdbc.version>4.0.0</scalikejdbc.version>
         <hive.version>2.3.4</hive.version>
-        <hadoop.version>2.10.2</hadoop.version>
+        <hadoop.version>3.3.4</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
         <redis.version>3.3.0</redis.version>
         <es.version>6.2.3</es.version>
@@ -109,7 +109,7 @@
         <slf4j.version>1.7.32</slf4j.version>
         <logback.version>1.2.11</logback.version>
         <grpc.version>1.15.0</grpc.version>
-        <jackson.version>2.13.4</jackson.version>
+        <jackson.version>2.13.5</jackson.version>
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.8.6</caffeine.version>
         <mysql.version>8.0.27</mysql.version>
@@ -117,8 +117,8 @@
         <snakeyaml.version>2.0</snakeyaml.version>
         <typesafe-conf.version>1.4.2</typesafe-conf.version>
         <json4s-jackson.version>4.0.6</json4s-jackson.version>
-        <hbase-client.version>1.3.5</hbase-client.version>
         <commons-cli.version>1.3.1</commons-cli.version>
+        <commons-net.version>3.9.0</commons-net.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
 
@@ -298,6 +298,12 @@
             </dependency>
 
             <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons-net.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient.version}</version>
@@ -305,205 +311,37 @@
 
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-common</artifactId>
+                <artifactId>hadoop-client-api</artifactId>
                 <version>${hadoop.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.reload4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>commons-cli</groupId>
-                        <artifactId>commons-cli</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.zookeeper</groupId>
-                        <artifactId>zookeeper</artifactId>
+                        <groupId>org.xerial.snappy</groupId>
+                        <artifactId>snappy-java</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-yarn-client</artifactId>
+                <artifactId>hadoop-client-runtime</artifactId>
                 <version>${hadoop.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>*</artifactId>
+                        <groupId>com.google.code.findbugs</groupId>
+                        <artifactId>jsr305</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.reload4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>commons-cli</groupId>
-                        <artifactId>commons-cli</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-hdfs</artifactId>
-                <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.reload4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>commons-cli</groupId>
-                        <artifactId>commons-cli</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.netty</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-yarn-api</artifactId>
-                <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>ch.qos.reload4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-auth</artifactId>
-                <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.reload4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.zookeeper</groupId>
-                        <artifactId>zookeeper</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-mapreduce-client-core</artifactId>
-                <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-cli</groupId>
-                        <artifactId>commons-cli</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.reload4j</groupId>
-                        <artifactId>*</artifactId>
+                        <groupId>org.xerial.snappy</groupId>
+                        <artifactId>snappy-java</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
 
             <!--hbase-->
             <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-client</artifactId>
-                <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>xml-apis</groupId>
-                        <artifactId>xml-apis</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.reload4j</groupId>
-                        <artifactId>reload4j</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.hbase</groupId>
                 <artifactId>hbase-client</artifactId>
-                <version>${hbase-client.version}</version>
+                <version>${hbase.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>log4j</groupId>
@@ -913,16 +751,6 @@
     </build>
 
     <profiles>
-        <profile>
-            <id>flink-1.15</id>
-            <properties>
-                <streampark.flink.shims.version>1.15</streampark.flink.shims.version>
-                <flink.version>1.15.0</flink.version>
-                <scala.binary.flink.version />
-                <flink.table.uber.artifact.id>flink-table-api-java-uber</flink.table.uber.artifact.id>
-            </properties>
-        </profile>
-
         <profile>
             <id>scala-2.11</id>
             <properties>

@@ -57,23 +57,23 @@ export default defineComponent({
             <InputNumber
               min={1}
               step={1}
-              name="cpMaxFailureInterval"
+              name="cpFailureRateInterval"
               placeholder={t('flink.app.noteInfo.checkpointFailureRateInterval')}
               allow-clear
               class="!w-260px mr-10px"
-              value={props.value?.cpMaxFailureInterval}
-              onChange={(value: any) => handleCpMaxFailureIntervalChange(value)}
+              value={props.value?.cpFailureRateInterval}
+              onChange={(value: any) => handleCpFailureRateIntervalChange(value)}
             />
             <Button style="width: 70px"> {t('flink.app.noteInfo.minute')} </Button>
             <InputNumber
               style="margin-left: 1%"
-              name="cpFailureRateInterval"
+              name="cpMaxFailureInterval"
               min={1}
               step={1}
               placeholder={t('flink.app.noteInfo.maxFailuresPerInterval')}
               class="!mb-0 !w-200px"
-              value={props.value?.cpFailureRateInterval}
-              onChange={(value: any) => handleCpFailureRateIntervalChange(value)}
+              value={props.value?.cpMaxFailureInterval}
+              onChange={(value: any) => handleCpMaxFailureIntervalChange(value)}
             />
 
             <Button style="width: 70px"> {t('flink.app.noteInfo.count')} </Button>
