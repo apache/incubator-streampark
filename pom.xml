@@ -752,16 +752,6 @@
 
     <profiles>
         <profile>
-            <id>flink-1.15</id>
-            <properties>
-                <streampark.flink.shims.version>1.15</streampark.flink.shims.version>
-                <flink.version>1.15.0</flink.version>
-                <scala.binary.flink.version />
-                <flink.table.uber.artifact.id>flink-table-api-java-uber</flink.table.uber.artifact.id>
-            </properties>
-        </profile>
-
-        <profile>
             <id>scala-2.11</id>
             <properties>
                 <scala.version>2.11.12</scala.version>
