@@ -214,8 +214,6 @@ public class FlinkClusterWatcher {
           updateWrapper
               .set(FlinkCluster::getAddress, null)
               .set(FlinkCluster::getJobManagerUrl, null);
-          removeFlinkCluster(flinkCluster);
-          break;
         }
       case UNKNOWN:
       case LOST:
