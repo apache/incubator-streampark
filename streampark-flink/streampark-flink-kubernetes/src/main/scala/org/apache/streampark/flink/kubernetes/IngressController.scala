@@ -21,7 +21,7 @@ import org.apache.streampark.common.util.Logger
 import org.apache.streampark.common.util.Utils._
 
 import io.fabric8.kubernetes.api.model.{IntOrString, OwnerReferenceBuilder}
-import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
+import io.fabric8.kubernetes.api.model.networking.v1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
@@ -89,23 +89,34 @@ object IngressController extends Logger {
           .withNewHttp()
           .addNewPath()
           .withPath(s"/$nameSpace/$clusterId/")
+          .withPathType("ImplementationSpecific")
           .withNewBackend()
-          .withServiceName(s"$clusterId-rest")
-          .withServicePort(new IntOrString("rest"))
+          .withNewService()
+          .withName(s"$clusterId-rest")
+          .withNewPort()
+          .withName("rest")
+          .endPort()
+          .endService()
           .endBackend()
           .endPath()
           .addNewPath()
           .withPath(s"/$nameSpace/$clusterId" + "(/|$)(.*)")
+          .withPathType("ImplementationSpecific")
           .withNewBackend()
-          .withServiceName(s"$clusterId-rest")
-          .withServicePort(new IntOrString("rest"))
+          .withNewService()
+          .withName(s"$clusterId-rest")
+          .withNewPort()
+          .withName("rest")
+          .endPort()
+          .endService()
           .endBackend()
           .endPath()
           .endHttp()
           .endRule()
           .endSpec()
           .build();
-        client.network.ingress.inNamespace(nameSpace).create(ingress)
+        client.network.v1.ingresses().inNamespace(nameSpace).create(ingress)
+
       case _ =>
     }
   }
