@@ -29,7 +29,6 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
         <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
         <result column="sex" jdbcType="CHAR" property="sex"/>
-        <result column="avatar" jdbcType="VARCHAR" property="avatar"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="last_team_id" jdbcType="BIGINT" property="lastTeamId"/>
         <result column="login_type" jdbcType="INTEGER" property="loginType"/>

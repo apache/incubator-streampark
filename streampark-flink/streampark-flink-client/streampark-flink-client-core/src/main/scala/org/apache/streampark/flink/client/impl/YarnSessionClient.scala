@@ -33,6 +33,8 @@ import org.apache.hadoop.yarn.api.records.{ApplicationId, FinalApplicationStatus
 import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
 import org.apache.hadoop.yarn.util.ConverterUtils
 
+import java.util
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -72,21 +74,15 @@ object YarnSessionClient extends YarnClientTrait {
           s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
       }
     }
-    val providedLibs = {
-      val array = ListBuffer(
-        deployRequest.hdfsWorkspace.flinkLib,
-        deployRequest.hdfsWorkspace.flinkPlugins,
-        deployRequest.hdfsWorkspace.appJars,
-        deployRequest.hdfsWorkspace.appPlugins
-      )
-      array.toList
-    }
+
+    val shipFiles = new util.ArrayList[String]()
+    shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/lib")
 
     flinkConfig
-      // yarn.provided.lib.dirs
-      .safeSet(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
       // flinkDistJar
       .safeSet(YarnConfigOptions.FLINK_DIST_JAR, deployRequest.hdfsWorkspace.flinkDistJar)
+      // flink lib
+      .safeSet(YarnConfigOptions.SHIP_FILES, shipFiles)
       // yarnDeployment Target
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
       // conf dir

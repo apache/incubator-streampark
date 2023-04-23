@@ -19,7 +19,6 @@
   import { Descriptions, Tag } from 'ant-design-vue';
   import { computed, toRefs } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { BasicTitle } from '/@/components/Basic';
   import { alertTypes } from '../index.data';
   import { useI18n } from '/@/hooks/web/useI18n';
 
@@ -56,14 +55,14 @@
 </script>
 
 <template>
-  <BasicTitle class="mt-10px border-dot">
+  <div class="mt-10px border-dot text-16px cursor-pointer flex items-center">
     <div class="flex items-center">
       <SvgIcon :name="alertTypes[alertType].icon" :size="20" class="!align-middle" />
       <span class="pl-10px">
         {{ alertTypes[alertType].name }}
       </span>
     </div>
-  </BasicTitle>
+  </div>
   <Descriptions size="small" :column="1" class="pl-15px mt-10px">
     <template v-if="alertType === '1'">
       <DescriptionsItem :label="t('setting.alarm.alertEmail')">

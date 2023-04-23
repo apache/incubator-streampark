@@ -22,15 +22,15 @@ package org.apache.streampark.console.core.aspect;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
-import org.apache.streampark.console.core.annotation.CheckApp;
-import org.apache.streampark.console.core.annotation.CheckTeam;
-import org.apache.streampark.console.core.annotation.CheckUser;
+import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
+import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
 
@@ -97,72 +97,54 @@ public class StreamParkAspect {
     return target;
   }
 
-  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.CheckUser)")
-  public void checkUser() {}
+  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.PermissionAction)")
+  public void permissionAction() {}
 
-  @Around("checkUser()")
-  public RestResponse checkUser(ProceedingJoinPoint joinPoint) throws Throwable {
+  @Around("permissionAction()")
+  public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    CheckUser checkUser = methodSignature.getMethod().getAnnotation(CheckUser.class);
-    String spELString = checkUser.value();
+    PermissionAction permissionAction =
+        methodSignature.getMethod().getAnnotation(PermissionAction.class);
 
-    Long paramUserId = getId(joinPoint, methodSignature, spELString);
     User currentUser = commonService.getCurrentUser();
-    if (currentUser == null
-        || (currentUser.getUserType() != UserType.ADMIN
-            && !currentUser.getUserId().equals(paramUserId))) {
-      throw new ApiAlertException(
-          "Permission denied, only ADMIN user or user himself can access this permission");
+    ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
+
+    boolean isAdmin = currentUser.getUserType() == UserType.ADMIN;
+
+    if (!isAdmin) {
+      PermissionType permissionType = permissionAction.type();
+      Long paramId = getParamId(joinPoint, methodSignature, permissionAction.id());
+
+      switch (permissionType) {
+        case USER:
+          ApiAlertException.throwIfTrue(
+              !currentUser.getUserId().equals(paramId),
+              "Permission denied, only user himself can access this permission");
+          break;
+        case TEAM:
+          Member member = memberService.findByUserName(paramId, currentUser.getUsername());
+          ApiAlertException.throwIfTrue(
+              member == null,
+              "Permission denied, only user belongs to this team can access this permission");
+          break;
+        case APP:
+          Application app = applicationService.getById(paramId);
+          ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
+          member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
+          ApiAlertException.throwIfTrue(
+              member == null,
+              "Permission denied, only user belongs to this team can access this permission");
+          break;
+        default:
+          throw new IllegalArgumentException(
+              String.format("Permission type %s is not supported.", permissionType));
+      }
     }
 
     return (RestResponse) joinPoint.proceed();
   }
 
-  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.CheckTeam)")
-  public void checkTeam() {}
-
-  @Around("checkTeam()")
-  public RestResponse checkTeam(ProceedingJoinPoint joinPoint) throws Throwable {
-    MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    CheckTeam checkTeam = methodSignature.getMethod().getAnnotation(CheckTeam.class);
-    String spELString = checkTeam.value();
-
-    Long paramTeamId = getId(joinPoint, methodSignature, spELString);
-    User currentUser = commonService.getCurrentUser();
-    if (currentUser == null
-        || (currentUser.getUserType() != UserType.ADMIN
-            && memberService.findByUserName(paramTeamId, currentUser.getUsername()) == null)) {
-      throw new ApiAlertException(
-          "Permission denied, only ADMIN user or user belongs to this team can access this permission");
-    }
-
-    return (RestResponse) joinPoint.proceed();
-  }
-
-  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.CheckApp)")
-  public void checkApp() {}
-
-  @Around("checkApp()")
-  public RestResponse checkApp(ProceedingJoinPoint joinPoint) throws Throwable {
-    MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    CheckApp checkApp = methodSignature.getMethod().getAnnotation(CheckApp.class);
-    String spELString = checkApp.value();
-
-    Long paramAppId = getId(joinPoint, methodSignature, spELString);
-    Application app = applicationService.getById(paramAppId);
-    User currentUser = commonService.getCurrentUser();
-    if (currentUser == null
-        || (app != null
-            && currentUser.getUserType() != UserType.ADMIN
-            && memberService.findByUserName(app.getTeamId(), currentUser.getUsername()) == null)) {
-      throw new ApiAlertException(
-          "Permission denied, only ADMIN user or user belongs to this team can access this permission");
-    }
-
-    return (RestResponse) joinPoint.proceed();
-  }
-
-  private Long getId(
+  private Long getParamId(
       ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String spELString) {
     SpelExpressionParser parser = new SpelExpressionParser();
     Expression expression = parser.parseExpression(spELString);

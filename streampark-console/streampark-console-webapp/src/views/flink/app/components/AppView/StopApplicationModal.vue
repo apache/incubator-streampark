@@ -70,16 +70,6 @@
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
-        field: 'savePointTimeout',
-        label: 'Savepoint Timeout',
-        component: 'Select',
-        afterItem: () => h('span', { class: 'conf-switch' }, 'savepoint timeout, Unit: second'),
-        slot: 'savePointTimeout',
-        defaultValue: 60,
-        ifShow: ({ values }) => !!values.stopSavePointed,
-        required: true,
-      },
-      {
         field: 'drain',
         label: 'Drain',
         component: 'Switch',
@@ -101,13 +91,12 @@
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, customSavepoint, savePointTimeout, drain } =
+      const { stopSavePointed, customSavepoint, drain } =
         (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
         savePointed: stopSavePointed,
         savePoint: customSavepoint,
-        savePointTimeout: savePointTimeout,
         drain: drain,
       };
 
@@ -166,10 +155,6 @@
       <SvgIcon name="shutdown" style="color: red" />
       {{ t('flink.app.view.stop') }}
     </template>
-    <BasicForm @register="registerForm" class="!pt-30px">
-      <template #savePointTimeout="{ model, field }">
-        <InputNumber v-model:value="model[field]" :min="10" :max="7200" step="10" />
-      </template>
-    </BasicForm>
+    <BasicForm @register="registerForm" class="!pt-30px" />
   </BasicModal>
 </template>

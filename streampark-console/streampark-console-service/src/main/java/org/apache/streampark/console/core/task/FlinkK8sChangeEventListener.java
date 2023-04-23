@@ -35,6 +35,7 @@ import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -76,6 +77,7 @@ public class FlinkK8sChangeEventListener {
    * org.apache.streampark.console.core.entity.Application records.
    */
   @SuppressWarnings("UnstableApiUsage")
+  @AllowConcurrentEvents
   @Subscribe
   public void subscribeJobStatusChange(FlinkJobStatusChangeEvent event) {
     JobStatusCV jobStatus = event.jobStatus();
@@ -104,6 +106,7 @@ public class FlinkK8sChangeEventListener {
    * org.apache.streampark.console.core.entity.Application records.
    */
   @SuppressWarnings("UnstableApiUsage")
+  @AllowConcurrentEvents
   @Subscribe
   public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
     TrackId trackId = event.trackId();
@@ -129,6 +132,7 @@ public class FlinkK8sChangeEventListener {
   }
 
   @SuppressWarnings("UnstableApiUsage")
+  @AllowConcurrentEvents
   @Subscribe
   public void subscribeCheckpointChange(FlinkJobCheckpointChangeEvent event) {
     CheckPoints.CheckPoint completed = new CheckPoints.CheckPoint();
