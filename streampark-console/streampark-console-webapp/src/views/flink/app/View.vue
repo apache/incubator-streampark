@@ -216,7 +216,7 @@
 
           <template v-if="record['jobType'] === JobTypeEnum.JAR">
             <Badge
-              v-if="record.release == ReleaseStateEnum.NEED_CHECK"
+              v-if="record.release === ReleaseStateEnum.NEED_CHECK"
               class="build-badge"
               count="NEW"
               :title="t('flink.app.view.recheck')"

@@ -23,10 +23,10 @@ set foreign_key_checks = 0;
 drop table if exists `t_external_link`;
 CREATE TABLE `t_external_link` (
   `id` bigint not null auto_increment primary key,
-  `badge_label` varchar(100) collate utf8mb4_general_ci default null,
-  `badge_name` varchar(100) collate utf8mb4_general_ci default null,
-  `badge_color` varchar(100) collate utf8mb4_general_ci default null,
-  `link_url` varchar(1000) collate utf8mb4_general_ci default null,
+  `badge_label` varchar(64) collate utf8mb4_general_ci default null,
+  `badge_name` varchar(64) collate utf8mb4_general_ci default null,
+  `badge_color` varchar(64) collate utf8mb4_general_ci default null,
+  `link_url` varchar(255) collate utf8mb4_general_ci default null,
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
   `modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'modify time'
 ) engine = innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -36,7 +36,7 @@ create table `t_yarn_queue` (
   `id` bigint not null primary key auto_increment comment 'queue id',
   `team_id` bigint not null comment 'team id',
   `queue_label` varchar(128) collate utf8mb4_general_ci not null comment 'queue and label expression',
-  `description` varchar(256) collate utf8mb4_general_ci default null comment 'description of the queue label',
+  `description` varchar(255) collate utf8mb4_general_ci default null comment 'description of the queue label',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree
@@ -44,11 +44,84 @@ create table `t_yarn_queue` (
 
 drop table if exists t_flink_tutorial;
 
-alter table `t_user` add column `login_type` tinyint default 0 after `user_type`;
-alter table `t_flink_app` change column `launch` `release` tinyint default 1;
-alter table `t_flink_log` add column `option_name` tinyint default null;
-alter table `t_flink_savepoint` modify column `path` varchar(1024) collate utf8mb4_general_ci default null;
+-- type change
+alter table `t_app_backup` modify column `path` varchar(128) collate utf8mb4_general_ci default null;
+
+alter table `t_flink_app`
+    change column `launch` `release` tinyint default 1,
+    modify column `project_id` bigint default null,
+    modify column `app_id` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `cluster_id` varchar(45) collate utf8mb4_general_ci default null,
+    modify column `k8s_namespace` varchar(63) collate utf8mb4_general_ci default null,
+    modify column `flink_image` varchar(128) collate utf8mb4_general_ci default null,
+    modify column `state` int default null,
+    drop index `inx_state`;
+
+alter table `t_flink_env`
+    modify column `version` varchar(64) collate utf8mb4_general_ci not null comment 'flink version',
+    modify column `scala_version` varchar(64) collate utf8mb4_general_ci not null comment 'scala version of flink';
+
+alter table `t_flink_log`
+    modify column `yarn_app_id` varchar(64) collate utf8mb4_general_ci default null,
+    add column `option_name` tinyint default null;
+
+alter table `t_flink_project`
+    modify column `url` varchar(255) collate utf8mb4_general_ci default null,
+    modify column `branches` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `user_name` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `password` varchar(64) collate utf8mb4_general_ci default null,
+    modify column `prvkey_path` varchar(128) collate utf8mb4_general_ci default null;
+
+alter table `t_flink_savepoint`
+    modify column `path` varchar(255) collate utf8mb4_general_ci default null;
+
+
+alter table `t_menu`
+    modify column `menu_name` varchar(64) collate utf8mb4_general_ci not null comment 'menu button name',
+    modify column `path` varchar(64) collate utf8mb4_general_ci default null comment 'routing path',
+    modify column `component` varchar(64) collate utf8mb4_general_ci default null comment 'routing component component',
+    modify column `perms` varchar(64) collate utf8mb4_general_ci default null comment 'authority id',
+    modify column `icon` varchar(64) collate utf8mb4_general_ci default null comment 'icon';
+
+alter table `t_team`
+    modify column `team_name` varchar(64) collate utf8mb4_general_ci not null comment 'team name';
+
+alter table `t_variable`
+    modify column `variable_code` varchar(128) collate utf8mb4_general_ci not null comment 'Variable code is used for parameter names passed to the program or as placeholders';
+
+alter table `t_role`
+    modify column `role_name` varchar(64) collate utf8mb4_general_ci not null comment 'role name',
+    change column `remark` `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
+    drop column `role_code`;
+
+alter table `t_setting`
+    modify column `setting_key` varchar(64) collate utf8mb4_general_ci not null;
+
+alter table `t_user`
+    modify column `username` varchar(64) collate utf8mb4_general_ci not null comment 'user name',
+    modify column `nick_name` varchar(64) collate utf8mb4_general_ci not null comment 'nick name',
+    modify column `salt` varchar(26) collate utf8mb4_general_ci default null comment 'salt',
+    modify column `password` varchar(64) collate utf8mb4_general_ci not null comment 'password',
+    modify column `email` varchar(64) collate utf8mb4_general_ci default null comment 'email',
+    modify column `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
+    add column `login_type` tinyint default 0 after `user_type`,
+    drop column `avatar`;
+
+alter table `t_flink_cluster`
+    modify column `cluster_id` varchar(45) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
+    modify column `cluster_name` varchar(128) not null comment 'cluster name',
+    modify column `options` text comment 'json form of parameter collection ',
+    modify column `yarn_queue` varchar(128) default null comment 'the yarn queue where the task is located',
+    modify column `k8s_namespace` varchar(63) default 'default' comment 'k8s namespace',
+    modify column `service_account` varchar(64) default null comment 'k8s service account',
+    modify column `description` varchar(255) default null,
+    modify column `user_id` bigint default null,
+    modify column `flink_image` varchar(128) default null comment 'flink image';
+ 
 alter table `t_flink_cluster` add column `job_manager_url` varchar(255) default null comment 'url address of jobmanager' after `address`;
+
+alter table `t_access_token`
+    modify column `description` varchar(255) character set utf8mb4 collate utf8mb4_general_ci default null comment 'description';
 
 -- menu script
 delete from `t_menu`;
