@@ -183,7 +183,7 @@
 
     <List
       class="alert-card-list !mt-10px"
-      :grid="{ gutter: 40, xs: 1, sm: 2, md: 4, lg: 4, xl: 4, xxl: 4 }"
+      :grid="{ gutter: 40, xs: 1, sm: 2, md: 4, lg: 4, xl: 4, xxl: 4, xxxl: 4 }"
       :data-source="alerts"
       :pagination="false"
     >
