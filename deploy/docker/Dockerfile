@@ -28,8 +28,6 @@ COPY --from=deps-stage /streampark /streampark
 ENV NODE_VERSION=16.1.0
 ENV NPM_VERSION=7.11.2
 
-RUN bin/streampark.sh startDocker
-
 RUN apk add openjdk8 \
     && apk add maven \
     && apk add wget \
