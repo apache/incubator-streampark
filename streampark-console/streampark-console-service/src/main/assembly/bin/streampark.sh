@@ -398,12 +398,12 @@ start() {
   $DEBUG_OPTS
   """
 
-  eval $NOHUP "\"$_RUNJAVA\"" $JAVA_OPTS \
-    -classpath "\"$APP_CLASSPATH\"" \
-    -Dapp.home="\"${APP_HOME}\"" \
-    -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
-    -Dspring.config.location="\"${PROPER}\"" \
-    -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
+  eval $NOHUP $_RUNJAVA $JAVA_OPTS \
+    -classpath "$APP_CLASSPATH" \
+    -Dapp.home="${APP_HOME}" \
+    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
+    -Dspring.config.location="${PROPER}" \
+    -Djava.io.tmpdir="$APP_TMPDIR" \
     $APP_MAIN >> "$APP_OUT" 2>&1 "&"
 
     local PID=$!
@@ -479,11 +479,11 @@ startDocker() {
     """
 
   $_RUNJAVA $JAVA_OPTS \
-    -classpath "\"$APP_CLASSPATH\"" \
-    -Dapp.home="\"${APP_HOME}\"" \
-    -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
-    -Dspring.config.location="\"${PROPER}\"" \
-    -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
+    -classpath "$APP_CLASSPATH" \
+    -Dapp.home="${APP_HOME}" \
+    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
+    -Dspring.config.location="${PROPER}" \
+    -Djava.io.tmpdir="$APP_TMPDIR" \
     $APP_MAIN
 
 }
