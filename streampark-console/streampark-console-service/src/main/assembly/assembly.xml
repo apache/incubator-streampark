@@ -90,6 +90,11 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>${project.build.directory}/../src/main/assembly/workspace</directory>
+            <outputDirectory>workspace</outputDirectory>
+            <fileMode>0777</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.directory}/../src/main/resources</directory>
             <outputDirectory>conf</outputDirectory>
             <lineEnding>unix</lineEnding>
