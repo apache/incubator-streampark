@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
+import io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
@@ -24,10 +25,12 @@ import org.apache.flink.client.program.ClusterClient
 import java.io.File
 
 trait IngressStrategy {
+
   def ingressUrlAddress(
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String
+
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit
 
   def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {
@@ -58,8 +61,31 @@ trait IngressStrategy {
     )
   }
 
-  def getDeployment(nameSpace: String, clusterId: String, client: DefaultKubernetesClient) = {
-    client.apps().deployments().inNamespace(nameSpace).withName(clusterId).get()
+  def getOwnerReference(
+      nameSpace: String,
+      clusterId: String,
+      client: DefaultKubernetesClient): OwnerReference = {
+
+    val deployment = client
+      .apps()
+      .deployments()
+      .inNamespace(nameSpace)
+      .withName(clusterId)
+      .get()
+
+    require(
+      deployment != null,
+      s"Deployment with name $clusterId not found in namespace $nameSpace")
+
+    val uid = deployment.getMetadata.getUid
+    new OwnerReferenceBuilder()
+      .withApiVersion("apps/v1")
+      .withKind("Deployment")
+      .withName(clusterId)
+      .withUid(uid)
+      .withController(true)
+      .withBlockOwnerDeletion(true)
+      .build()
   }
 
 }

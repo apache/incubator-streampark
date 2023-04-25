@@ -110,7 +110,7 @@ object Utils {
   /*
    * Mimicking the try-with-resource syntax of Java-8+
    */
-  def tryWithResource[R, T <: AutoCloseable](handle: T)(func: T => R)(implicit
+  def using[R, T <: AutoCloseable](handle: T)(func: T => R)(implicit
       excFunc: Throwable => R = null): R = {
     try {
       func(handle)
@@ -134,16 +134,6 @@ object Utils {
           case e: Throwable if func != null => func(e)
         }
       })
-  }
-
-  def using[T <: AutoCloseable, V](resource: T)(block: T => V): V = {
-    try {
-      block(resource)
-    } finally {
-      if (resource != null) {
-        resource.close()
-      }
-    }
   }
 
   /**
