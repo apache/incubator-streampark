@@ -241,6 +241,24 @@ if [ "$USE_NOHUP" = "true" ]; then
   NOHUP="nohup"
 fi
 
+
+PARAM_CLI="org.apache.streampark.flink.core.conf.ParameterCli"
+
+APP_MAIN="org.apache.streampark.console.StreamParkConsoleBootstrap"
+
+DEFAULT_OPTS="""
+  -ea
+  -server
+  -Xms1024m
+  -Xmx1024m
+  -Xmn256m
+  -XX:NewSize=100m
+  -XX:+UseConcMarkSweepGC
+  -XX:CMSInitiatingOccupancyFraction=70
+  -XX:ThreadStackSize=512
+  -Xloggc:${APP_HOME}/logs/gc.log
+  """
+
 # ----- Execute The Requested Command -----------------------------------------
 
 print_logo() {
@@ -370,35 +388,26 @@ start() {
     APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
   fi
 
-  PARAM_CLI="org.apache.streampark.flink.core.conf.ParameterCli"
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
   vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
 
   JAVA_OPTS="""
   $vmOption
-  -ea
-  -server
-  -Xms1024m
-  -Xmx1024m
-  -Xmn256m
-  -XX:NewSize=100m
-  -XX:+UseConcMarkSweepGC
-  -XX:CMSInitiatingOccupancyFraction=70
-  -XX:ThreadStackSize=512
-  -Xloggc:${APP_HOME}/logs/gc.log
+  $DEFAULT_OPTS
   $DEBUG_OPTS
   """
 
-  eval $NOHUP "\"$_RUNJAVA\"" $JAVA_OPTS \
-    -classpath "\"$APP_CLASSPATH\"" \
-    -Dapp.home="\"${APP_HOME}\"" \
-    -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
-    -Dspring.config.location="\"${PROPER}\"" \
-    -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
-    org.apache.streampark.console.StreamParkConsoleBootstrap >> "$APP_OUT" 2>&1 "&"
+  eval $NOHUP $_RUNJAVA $JAVA_OPTS \
+    -classpath "$APP_CLASSPATH" \
+    -Dapp.home="${APP_HOME}" \
+    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
+    -Dspring.config.location="${PROPER}" \
+    -Djava.io.tmpdir="$APP_TMPDIR" \
+    $APP_MAIN >> "$APP_OUT" 2>&1 "&"
 
     local PID=$!
+    local IS_NUMBER="^[0-9]+$"
 
     # Add to pid file if successful start
     if [[ ${PID} =~ ${IS_NUMBER} ]] && kill -0 $PID > /dev/null 2>&1 ; then
@@ -408,6 +417,75 @@ start() {
         echo_r "StreamPark start failed."
         exit 1
     fi
+}
+
+# shellcheck disable=SC2120
+startDocker() {
+  # Bugzilla 37848: only output this if we have a TTY
+  if [[ ${have_tty} -eq 1 ]]; then
+    echo_w "Using APP_BASE:   $APP_BASE"
+    echo_w "Using APP_HOME:   $APP_HOME"
+    if [[ "$1" = "debug" ]] ; then
+      echo_w "Using JAVA_HOME:   $JAVA_HOME"
+    else
+      echo_w "Using JRE_HOME:   $JRE_HOME"
+    fi
+    echo_w "Using APP_PID:   $APP_PID"
+  fi
+
+  PROPER="${APP_CONF}/application.yml"
+  if [[ ! -f "$PROPER" ]] ; then
+    echo_r "ERROR: config file application.yml invalid or not found! ";
+    exit 1;
+  else
+    echo_g "Usage: config file: $PROPER ";
+  fi
+
+  if [ "${HADOOP_HOME}"x == ""x ]; then
+    echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
+  else
+    echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
+  fi
+
+  # classpath options:
+  # 1): java env (lib and jre/lib)
+  # 2): StreamPark
+  # 3): hadoop conf
+  # shellcheck disable=SC2091
+  APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
+  # shellcheck disable=SC2206
+  # shellcheck disable=SC2010
+  JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
+  # shellcheck disable=SC2128
+  for jar in $JARS;do
+    APP_CLASSPATH=$APP_CLASSPATH:$jar
+  done
+
+  if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
+    echo_w "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
+    APP_CLASSPATH+=":${HADOOP_CONF_DIR}"
+  else
+    APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
+  fi
+
+  # shellcheck disable=SC2034
+  # shellcheck disable=SC2006
+  vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
+
+  JAVA_OPTS="""
+    $vmOption
+    $DEFAULT_OPTS
+    $DEBUG_OPTS
+    """
+
+  $_RUNJAVA $JAVA_OPTS \
+    -classpath "$APP_CLASSPATH" \
+    -Dapp.home="${APP_HOME}" \
+    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
+    -Dspring.config.location="${PROPER}" \
+    -Djava.io.tmpdir="$APP_TMPDIR" \
+    $APP_MAIN
+
 }
 
 debug() {
@@ -577,6 +655,9 @@ main() {
         ;;
     "start")
         start
+        ;;
+    "startDocker")
+        startDocker
         ;;
     "stop")
         stop
