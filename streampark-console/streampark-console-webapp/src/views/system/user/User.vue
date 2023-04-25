@@ -164,8 +164,8 @@
           if (resp.data.code == 200) {
             Swal.fire({
               icon: 'success',
-              title: t('sys.login.newPassword'),
-              text: resp.data.data,
+              title: t('system.user.resetSucceeded'),
+              text: t('system.user.newPasswordTip') + resp.data.data,
             });
           }
         } catch (error) {
