@@ -160,8 +160,14 @@
       async function handleReset(record: Recordable) {
         const hide = createMessage.loading('reseting');
         try {
-          await resetPassword({ usernames: record.username });
-          Swal.fire(t('system.user.table.resetSuccess', [record.username]), '', 'success');
+          const resp = await resetPassword({ username: record.username });
+          if (resp.data.code == 200) {
+            Swal.fire({
+              icon: 'success',
+              title: 'New Password',
+              html: '<pre class="api-exception"> The new password is: ' + resp.data.data + '</pre>',
+            });
+          }
         } catch (error) {
           console.error('user password fail:', error);
         } finally {
