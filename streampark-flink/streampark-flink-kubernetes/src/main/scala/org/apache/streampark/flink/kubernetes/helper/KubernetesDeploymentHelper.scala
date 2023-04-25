@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.helper
 
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
-import org.apache.streampark.common.util.Utils.tryWithResource
+import org.apache.streampark.common.util.Utils.using
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 
 import com.google.common.base.Charsets
@@ -34,7 +34,7 @@ import scala.util.{Success, Try}
 object KubernetesDeploymentHelper extends Logger {
 
   private[this] def getPods(nameSpace: String, deploymentName: String): List[Pod] = {
-    tryWithResource(KubernetesRetriever.newK8sClient()) {
+    using(KubernetesRetriever.newK8sClient()) {
       client =>
         Try {
           client.pods
@@ -68,7 +68,7 @@ object KubernetesDeploymentHelper extends Logger {
   }
 
   def deleteTaskDeployment(nameSpace: String, deploymentName: String): Boolean = {
-    tryWithResource(KubernetesRetriever.newK8sClient()) {
+    using(KubernetesRetriever.newK8sClient()) {
       client =>
         Try {
           val r = client.apps.deployments
@@ -90,7 +90,7 @@ object KubernetesDeploymentHelper extends Logger {
   }
 
   def watchDeploymentLog(nameSpace: String, jobName: String, jobId: String): String = {
-    tryWithResource(KubernetesRetriever.newK8sClient()) {
+    using(KubernetesRetriever.newK8sClient()) {
       client =>
         val path = KubernetesDeploymentHelper.getJobLog(jobId)
         val file = new File(path)
@@ -101,7 +101,7 @@ object KubernetesDeploymentHelper extends Logger {
   }
 
   def watchPodTerminatedLog(nameSpace: String, jobName: String, jobId: String): String = {
-    tryWithResource(KubernetesRetriever.newK8sClient()) {
+    using(KubernetesRetriever.newK8sClient()) {
       client =>
         Try {
           val podName = getPods(nameSpace, jobName).head.getMetadata.getName
@@ -120,7 +120,7 @@ object KubernetesDeploymentHelper extends Logger {
   }
 
   def deleteTaskConfigMap(nameSpace: String, deploymentName: String): Boolean = {
-    tryWithResource(KubernetesRetriever.newK8sClient()) {
+    using(KubernetesRetriever.newK8sClient()) {
       client =>
         Try {
           val r = client

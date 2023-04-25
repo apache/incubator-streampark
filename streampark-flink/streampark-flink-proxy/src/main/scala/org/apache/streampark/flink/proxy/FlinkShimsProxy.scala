@@ -196,12 +196,11 @@ object FlinkShimsProxy extends Logger {
   @throws[Exception]
   def getObject[T](loader: ClassLoader, obj: Object): T = {
     val arrayOutputStream = new ByteArrayOutputStream
-    val result = Utils.tryWithResource(new ObjectOutputStream(arrayOutputStream))(
+    val result = Utils.using(new ObjectOutputStream(arrayOutputStream))(
       objectOutputStream => {
         objectOutputStream.writeObject(obj)
         val byteArrayInputStream = new ByteArrayInputStream(arrayOutputStream.toByteArray)
-        Utils.tryWithResource(new ClassLoaderObjectInputStream(loader, byteArrayInputStream))(
-          _.readObject)
+        Utils.using(new ClassLoaderObjectInputStream(loader, byteArrayInputStream))(_.readObject)
       })
     result.asInstanceOf[T]
   }

@@ -88,7 +88,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
         case FsOperator.hdfs =>
           val uploadFile = s"${Workspace.remote.APP_UPLOADS}/${originFile.getName}"
           if (fsOperator.exists(uploadFile)) {
-            Utils.tryWithResource(new FileInputStream(originFile))(
+            Utils.using(new FileInputStream(originFile))(
               inputStream => {
                 if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadFile)) {
                   fsOperator.upload(originFile.getAbsolutePath, uploadFile)

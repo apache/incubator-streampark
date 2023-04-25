@@ -17,14 +17,15 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
-import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder
+import org.apache.streampark.common.util.Utils
+
 import io.fabric8.kubernetes.api.model.networking.v1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
 
 import scala.collection.JavaConverters._
 import scala.language.postfixOps
-import scala.util.{Success, Try}
+import scala.util.Try
 
 class IngressStrategyV1 extends IngressStrategy {
 
@@ -32,40 +33,26 @@ class IngressStrategyV1 extends IngressStrategy {
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
-    val client = new DefaultKubernetesClient
-    val fromV1 =
-      Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
-        .map(ingress => ingress.getSpec.getRules.get(0))
-        .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
-    Try(
-      fromV1
-        .map { case (host, path) => s"https://$host$path" }
-        .getOrElse(clusterClient.getWebInterfaceURL)
-    ).getOrElse(throw new RuntimeException("[StreamPark] get ingressUrlAddress error."))
+
+    Utils.using(new DefaultKubernetesClient) {
+      client =>
+        val hosts =
+          Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
+            .map(ingress => ingress.getSpec.getRules.get(0))
+            .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
+        Try(
+          hosts
+            .map { case (host, path) => s"https://$host$path" }
+            .getOrElse(clusterClient.getWebInterfaceURL)
+        ).getOrElse(throw new RuntimeException("[StreamPark] get ingressUrlAddress error."))
+    }
+
   }
 
   override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    Try(new DefaultKubernetesClient) match {
-      case Success(client) =>
-        val deployment = getDeployment(nameSpace, clusterId, client)
-
-        val deploymentUid = if (deployment != null) {
-          deployment.getMetadata.getUid
-        } else {
-          throw new RuntimeException(
-            s"Deployment with name $clusterId not found in namespace $nameSpace")
-        }
-
-        // Create OwnerReference object
-        val ownerReference = new OwnerReferenceBuilder()
-          .withApiVersion("apps/v1")
-          .withKind("Deployment")
-          .withName(clusterId)
-          .withUid(deploymentUid)
-          .withController(true)
-          .withBlockOwnerDeletion(true)
-          .build()
-
+    Utils.using(new DefaultKubernetesClient) {
+      client =>
+        val ownerReference = getOwnerReference(nameSpace, clusterId, client)
         val ingress = new IngressBuilder()
           .withNewMetadata()
           .withName(clusterId)
@@ -104,9 +91,8 @@ class IngressStrategyV1 extends IngressStrategy {
           .endHttp()
           .endRule()
           .endSpec()
-          .build();
+          .build()
         client.network.v1.ingresses().inNamespace(nameSpace).create(ingress)
-      case _ =>
     }
   }
 }
