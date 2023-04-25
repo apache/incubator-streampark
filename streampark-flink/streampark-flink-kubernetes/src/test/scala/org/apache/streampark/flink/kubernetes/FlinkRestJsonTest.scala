@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
-import org.apache.streampark.flink.kubernetes.ingress.{IngressStrategyV1, IngressStrategyV1beta1}
 import org.apache.streampark.flink.kubernetes.watcher.{Checkpoint, FlinkRestJmConfigItem, FlinkRestOverview, JobDetails}
 
 import com.google.common.base.Charsets
@@ -295,7 +295,7 @@ class FlinkRestJsonTest {
         |]
         |""".stripMargin
 
-    val ingressMeta = new IngressStrategyV1().IngressMeta.as(json)
+    val ingressMeta = new IngressMetaTestUtil().IngressMeta.as(json)
     println(ingressMeta.get)
   }
 

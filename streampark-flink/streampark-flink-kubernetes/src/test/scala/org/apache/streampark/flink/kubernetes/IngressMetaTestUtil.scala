@@ -15,69 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.ingress
+package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.util.Utils._
-
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
-import org.apache.commons.io.FileUtils
-import org.apache.flink.client.program.ClusterClient
-import org.json4s.{DefaultFormats, JArray}
+import org.json4s.{DefaultFormats, JArray, JsonAST}
 import org.json4s.jackson.JsonMethods.parse
 
-import java.io.File
-import java.nio.file.{Files, Paths}
-
-import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-abstract class BaseIngressStrategy extends IngressStrategy {
-  override def ingressUrlAddress(
-      nameSpace: String,
-      clusterId: String,
-      clusterClient: ClusterClient[_]): String = {
-    val client = new DefaultKubernetesClient
-    // for kubernetes 1.19+
-    lazy val fromV1 =
-      Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
-        .map(ingress => ingress.getSpec.getRules.get(0))
-        .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
-    // for kubernetes 1.19-
-    lazy val fromV1beta1 =
-      Option(client.network.v1beta1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
-        .map(ingress => ingress.getSpec.getRules.get(0))
-        .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
-    Try(
-      fromV1
-        .orElse(fromV1beta1)
-        .map { case (host, path) => s"https://$host$path" }
-        .getOrElse(clusterClient.getWebInterfaceURL)
-    ).getOrElse(throw new RuntimeException("[StreamPark] get ingressUrlAddress error."))
-  }
-
-  override def prepareIngressTemplateFiles(
-      buildWorkspace: String,
-      ingressTemplates: String): String = {
-    val workspaceDir = new File(buildWorkspace)
-    if (!workspaceDir.exists) workspaceDir.mkdir
-    if (ingressTemplates.isEmpty) null
-    else {
-      val outputPath = buildWorkspace + "/ingress.yaml"
-      val outputFile = new File(outputPath)
-      FileUtils.write(outputFile, ingressTemplates, "UTF-8")
-      outputPath
-    }
-  }
-
-  def configureIngress(ingressOutput: String): Unit = {
-    close {
-      val client = new DefaultKubernetesClient
-      client.network.ingress
-        .load(Files.newInputStream(Paths.get(ingressOutput)))
-        .get()
-      client
-    }
-  }
+class IngressMetaTestUtil {
 
   case class IngressMeta(
       addresses: List[String],
@@ -118,6 +63,6 @@ abstract class BaseIngressStrategy extends IngressStrategy {
         case Failure(_) => None
       }
     }
-
   }
+
 }

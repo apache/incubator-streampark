@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.kubernetes.ingress
 
 import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.Utils.using
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
@@ -26,9 +27,17 @@ import scala.language.postfixOps
 
 object IngressController extends Logger {
 
-  val ingressStrategy: IngressStrategy = {
-    if (getKubernetesVersion() >= 1.19) new IngressStrategyV1()
-    else new IngressStrategyV1beta1()
+  private lazy val ingressStrategy: IngressStrategy = {
+    using(new DefaultKubernetesClient()) {
+      client =>
+        val versionInfo = client.getVersion
+        val version = s"${versionInfo.getMajor}.${versionInfo.getMinor}".toDouble
+        if (version >= 1.19) {
+          new IngressStrategyV1()
+        } else {
+          new IngressStrategyV1beta1()
+        }
+    }
   }
 
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
@@ -44,12 +53,5 @@ object IngressController extends Logger {
 
   def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {
     ingressStrategy.prepareIngressTemplateFiles(buildWorkspace, ingressTemplates)
-  }
-
-  def getKubernetesVersion(): Double = {
-    val client = new DefaultKubernetesClient()
-    val versionInfo = client.getVersion
-    val version = versionInfo.getMajor.toDouble + versionInfo.getMinor.toDouble / 10
-    version
   }
 }

@@ -17,14 +17,49 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient
+import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
+
+import java.io.File
 
 trait IngressStrategy {
   def ingressUrlAddress(
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String
-  def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String
-
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit
+
+  def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {
+    val workspaceDir = new File(buildWorkspace)
+    if (!workspaceDir.exists) workspaceDir.mkdir
+    if (ingressTemplates.isEmpty) null
+    else {
+      val outputPath = buildWorkspace + "/ingress.yaml"
+      val outputFile = new File(outputPath)
+      FileUtils.write(outputFile, ingressTemplates, "UTF-8")
+      outputPath
+    }
+  }
+
+  def buildIngressAnnotations(clusterId: String): Map[String, String] = {
+    Map(
+      "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
+      "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
+      "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;")
+    )
+  }
+
+  def buildIngressLabels(clusterId: String): Map[String, String] = {
+    Map(
+      "app" -> clusterId,
+      "type" -> "flink-native-kubernetes",
+      "component" -> "ingress"
+    )
+  }
+
+  def getDeployment(nameSpace: String, clusterId: String, client: DefaultKubernetesClient) = {
+    client.apps().deployments().inNamespace(nameSpace).withName(clusterId).get()
+  }
+
 }
