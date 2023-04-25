@@ -51,8 +51,6 @@ public class User implements Serializable {
 
   public static final Integer DEFAULT_PASSWORD_LENGTH = 8;
 
-  public static final String DEFAULT_PASSWORD = "streampark666";
-
   @TableId(type = IdType.AUTO)
   private Long userId;
 

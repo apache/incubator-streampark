@@ -164,8 +164,8 @@
           if (resp.data.code == 200) {
             Swal.fire({
               icon: 'success',
-              title: 'New Password',
-              html: '<pre class="api-exception"> The new password is: ' + resp.data.data + '</pre>',
+              title: t('sys.login.newPassword'),
+              text: resp.data.data,
             });
           }
         } catch (error) {
