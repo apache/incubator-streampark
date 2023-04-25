@@ -90,7 +90,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class NoK8sApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
+public class YarnApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements YarnApplicationService {
 
   private final ExecutorService executorService =
