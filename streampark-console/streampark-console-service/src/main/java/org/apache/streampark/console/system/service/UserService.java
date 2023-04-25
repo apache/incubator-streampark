@@ -90,9 +90,9 @@ public interface UserService extends IService<User> {
   /**
    * reset password
    *
-   * @param usernames user list
+   * @param username user name
    */
-  void resetPassword(String[] usernames) throws Exception;
+  String resetPassword(String username) throws Exception;
 
   /**
    * Get the permissions of current userId.

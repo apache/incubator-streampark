@@ -35,7 +35,6 @@ import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -126,11 +125,10 @@ public class UserController {
   @Operation(summary = "Reset password")
   @PutMapping("password/reset")
   @RequiresPermissions("user:reset")
-  public RestResponse resetPassword(@NotBlank(message = "{required}") String usernames)
+  public RestResponse resetPassword(@NotBlank(message = "{required}") String username)
       throws Exception {
-    String[] usernameArr = usernames.split(StringPool.COMMA);
-    this.userService.resetPassword(usernameArr);
-    return RestResponse.success();
+    String newPass = this.userService.resetPassword(username);
+    return RestResponse.success(newPass);
   }
 
   @Operation(summary = "List user types")

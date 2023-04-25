@@ -148,17 +148,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public void resetPassword(String[] usernames) {
-    for (String username : usernames) {
-      User user = new User();
-      String salt = ShaHashUtils.getRandomSalt();
-      String password = ShaHashUtils.encrypt(salt, User.DEFAULT_PASSWORD);
-      user.setSalt(salt);
-      user.setPassword(password);
-      LambdaQueryWrapper<User> queryWrapper =
-          new LambdaQueryWrapper<User>().eq(User::getUsername, username);
-      this.baseMapper.update(user, queryWrapper);
-    }
+  public String resetPassword(String username) {
+    User user = new User();
+    String salt = ShaHashUtils.getRandomSalt();
+    String newPassword = ShaHashUtils.getRandomSalt(User.DEFAULT_PASSWORD_LENGTH);
+    String password = ShaHashUtils.encrypt(salt, newPassword);
+    user.setSalt(salt);
+    user.setPassword(password);
+    LambdaQueryWrapper<User> queryWrapper =
+        new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+    this.baseMapper.update(user, queryWrapper);
+    return newPassword;
   }
 
   @Override

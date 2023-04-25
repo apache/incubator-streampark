@@ -104,8 +104,9 @@ export function deleteUser(data) {
   return defHttp.delete({ url: Api.UserDelete, data });
 }
 
-export function resetPassword(data) {
-  return defHttp.put({ url: Api.ResetPassword, data });
+export function resetPassword(data): Promise<AxiosResponse<Result<string>>> {
+  return defHttp.put({ url: Api.ResetPassword, data },
+    { isReturnNativeResponse: true },);
 }
 
 export function checkUserName(data) {
