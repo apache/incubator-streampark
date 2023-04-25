@@ -136,6 +136,16 @@ object Utils {
       })
   }
 
+  def using[T <: AutoCloseable, V](resource: T)(block: T => V): V = {
+    try {
+      block(resource)
+    } finally {
+      if (resource != null) {
+        resource.close()
+      }
+    }
+  }
+
   /**
    * calculate the percentage of num1 / num2, the result range from 0 to 100, with one small digit
    * reserve.

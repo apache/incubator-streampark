@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
@@ -294,7 +295,7 @@ class FlinkRestJsonTest {
         |]
         |""".stripMargin
 
-    val ingressMeta = IngressMeta.as(json)
+    val ingressMeta = new IngressMetaTestUtil().IngressMeta.as(json)
     println(ingressMeta.get)
   }
 

@@ -72,10 +72,6 @@
                     <artifactId>flink-file-sink-common</artifactId>
                     <groupId>org.apache.flink</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>flink-hadoop-fs</artifactId>
-                    <groupId>org.apache.flink</groupId>
-                </exclusion>
             </exclusions>
         </dependency>
 
