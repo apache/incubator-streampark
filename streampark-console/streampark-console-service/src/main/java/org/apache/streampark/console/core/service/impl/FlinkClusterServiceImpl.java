@@ -73,8 +73,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
+          Runtime.getRuntime.availableProcessors() * 5,
+          Runtime.getRuntime.availableProcessors() * 10,
           60L,
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(1024),

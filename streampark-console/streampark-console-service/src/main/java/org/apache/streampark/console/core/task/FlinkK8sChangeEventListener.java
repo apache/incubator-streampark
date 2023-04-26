@@ -64,8 +64,8 @@ public class FlinkK8sChangeEventListener {
 
   private final ExecutorService executor =
       new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
+          Runtime.getRuntime.availableProcessors() * 5,
+          Runtime.getRuntime.availableProcessors() * 10,
           20L,
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(1024),

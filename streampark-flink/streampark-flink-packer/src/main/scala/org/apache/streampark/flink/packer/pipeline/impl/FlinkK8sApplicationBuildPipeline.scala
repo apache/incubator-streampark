@@ -243,7 +243,7 @@ object FlinkK8sApplicationBuildPipeline {
 
   val execPool = new ThreadPoolExecutor(
     Runtime.getRuntime.availableProcessors * 5,
-    Runtime.getRuntime().availableProcessors() * 10,
+    Runtime.getRuntime.availableProcessors() * 10,
     60L,
     TimeUnit.SECONDS,
     new LinkedBlockingQueue[Runnable](2048),
