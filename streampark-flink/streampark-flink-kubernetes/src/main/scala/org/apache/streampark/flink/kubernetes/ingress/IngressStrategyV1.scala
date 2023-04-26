@@ -36,15 +36,16 @@ class IngressStrategyV1 extends IngressStrategy {
 
     Utils.using(new DefaultKubernetesClient) {
       client =>
-        val hosts =
+        Try {
           Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
             .map(ingress => ingress.getSpec.getRules.get(0))
             .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
-        Try(
-          hosts
             .map { case (host, path) => s"https://$host$path" }
             .getOrElse(clusterClient.getWebInterfaceURL)
-        ).getOrElse(throw new RuntimeException("[StreamPark] get ingressUrlAddress error."))
+        }.recover {
+          case e =>
+            throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
+        }.get
     }
 
   }

@@ -77,12 +77,11 @@ trait IngressStrategy {
       deployment != null,
       s"Deployment with name $clusterId not found in namespace $nameSpace")
 
-    val uid = deployment.getMetadata.getUid
     new OwnerReferenceBuilder()
+      .withUid(deployment.getMetadata.getUid)
       .withApiVersion("apps/v1")
       .withKind("Deployment")
       .withName(clusterId)
-      .withUid(uid)
       .withController(true)
       .withBlockOwnerDeletion(true)
       .build()
