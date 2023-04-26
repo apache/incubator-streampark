@@ -144,8 +144,8 @@ public class FlinkRESTAPIWatcher {
 
   private static final ExecutorService EXECUTOR =
       new ThreadPoolExecutor(
-          Runtime.getRuntime.availableProcessors() * 5,
-          Runtime.getRuntime.availableProcessors() * 10,
+          Runtime.getRuntime().availableProcessors() * 5,
+          Runtime.getRuntime().availableProcessors() * 10,
           60L,
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(1024),
