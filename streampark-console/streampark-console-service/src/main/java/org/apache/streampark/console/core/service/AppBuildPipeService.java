@@ -33,9 +33,25 @@ import java.util.Optional;
 
 public interface AppBuildPipeService extends IService<AppBuildPipeline> {
 
-  /** Build application. This is an async call method. */
-  boolean buildApplication(@Nonnull Application app, ApplicationLog applicationLog)
-      throws Exception;
+    /**
+     * Build application. This is an async call method.
+     *
+     * @param appId      application id
+     * @param forceBuild forced start pipeline or not
+     * @return Whether the pipeline was successfully started
+     */
+    boolean buildApplication(@Nonnull Long appId, boolean forceBuild)
+        throws Exception;
+
+
+    /**
+     * check the build environment
+     *
+     * @param appId application id
+     * @param forceBuild forced start pipeline or not
+     * @return
+     */
+    void checkBuildEnv(Long appId, boolean forceBuild);
 
   /**
    * Get current build pipeline instance of specified application

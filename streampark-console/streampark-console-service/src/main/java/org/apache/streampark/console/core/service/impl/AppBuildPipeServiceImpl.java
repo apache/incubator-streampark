@@ -87,10 +87,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -124,6 +121,9 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationConfigService applicationConfigService;
 
+  @Autowired private AppBuildPipeService appBuildPipeService;
+
+
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,
@@ -143,90 +143,121 @@ public class AppBuildPipeServiceImpl
   private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS =
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
+  /**
+   * Build application. This is an async call method.
+   *
+   * @param appId      application id
+   * @param forceBuild forced start pipeline or not
+   * @return Whether the pipeline was successfully started
+   */
   @Override
-  public boolean buildApplication(@Nonnull Application app, ApplicationLog applicationLog) {
-    // 1) flink sql setDependency
-    FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
-    FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
-    if (app.isFlinkSqlJob()) {
-      FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
-      Utils.notNull(flinkSql);
-      app.setDependency(flinkSql.getDependency());
-    }
+  public boolean buildApplication(Long appId, boolean forceBuild) {
+      // check the build environment
+      checkBuildEnv(appId,forceBuild);
 
-    // create pipeline instance
-    BuildPipeline pipeline = createPipelineInstance(app);
+      Application app = applicationService.getById(appId);
+      ApplicationLog applicationLog = new ApplicationLog();
+      applicationLog.setOptionName(
+          org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
+      applicationLog.setAppId(app.getId());
+      applicationLog.setOptionTime(new Date());
 
-    // clear history
-    removeApp(app.getId());
-    // register pipeline progress event watcher.
-    // save snapshot of pipeline to db when status of pipeline was changed.
-    pipeline.registerWatcher(
-        new PipeWatcher() {
-          @Override
-          public void onStart(PipeSnapshot snapshot) {
-            AppBuildPipeline buildPipeline =
-                AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
-            saveEntity(buildPipeline);
+      // check if you need to go through the build process (if the jar and pom have changed,
+      // you need to go through the build process, if other common parameters are modified,
+      // you don't need to go through the build process)
+      boolean needBuild = applicationService.checkBuildAndUpdate(app);
+      if (!needBuild) {
+          applicationLog.setSuccess(true);
+          applicationLogService.save(applicationLog);
+          return true;
+      }
+      // rollback
+      if (app.isNeedRollback() && app.isFlinkSqlJob()) {
+          flinkSqlService.rollback(app);
+      }
 
-            app.setRelease(ReleaseState.RELEASING.get());
-            applicationService.updateRelease(app);
+      // 1) flink sql setDependency
+      FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
+      FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
+      if (app.isFlinkSqlJob()) {
+          FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
+          Utils.notNull(flinkSql);
+          app.setDependency(flinkSql.getDependency());
+      }
 
-            if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
-              flinkRESTAPIWatcher.init();
-            }
+      // create pipeline instance
+      BuildPipeline pipeline = createPipelineInstance(app);
 
-            // 1) checkEnv
-            applicationService.checkEnv(app);
+      // clear history
+      removeApp(app.getId());
+      // register pipeline progress event watcher.
+      // save snapshot of pipeline to db when status of pipeline was changed.
+      pipeline.registerWatcher(
+          new PipeWatcher() {
+              @Override
+              public void onStart(PipeSnapshot snapshot) {
+                  AppBuildPipeline buildPipeline =
+                      AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                  saveEntity(buildPipeline);
 
-            // 2) some preparatory work
-            String appUploads = app.getWorkspace().APP_UPLOADS();
+                  app.setRelease(ReleaseState.RELEASING.get());
+                  applicationService.updateRelease(app);
 
-            if (app.isCustomCodeJob()) {
-              // customCode upload jar to appHome...
-              String appHome = app.getAppHome();
-              FsOperator fsOperator = app.getFsOperator();
-              fsOperator.delete(appHome);
-              if (app.isUploadJob()) {
-                File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
-                // upload jar copy to appHome
-                String uploadJar = appUploads.concat("/").concat(app.getJar());
-                checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
-                switch (app.getApplicationType()) {
-                  case STREAMPARK_FLINK:
-                    fsOperator.mkdirs(app.getAppLib());
-                    fsOperator.copy(uploadJar, app.getAppLib(), false, true);
-                    break;
-                  case APACHE_FLINK:
-                    fsOperator.mkdirs(appHome);
-                    fsOperator.copy(uploadJar, appHome, false, true);
-                    break;
-                  default:
-                    throw new IllegalArgumentException(
-                        "[StreamPark] unsupported ApplicationType of custom code: "
-                            + app.getApplicationType());
-                }
-              } else {
-                fsOperator.upload(app.getDistHome(), appHome);
-              }
-            } else {
-              if (!app.getDependencyObject().getJar().isEmpty()) {
-                String localUploads = Workspace.local().APP_UPLOADS();
-                // copy jar to local upload dir
-                for (String jar : app.getDependencyObject().getJar()) {
-                  File localJar = new File(WebUtils.getAppTempDir(), jar);
-                  File uploadJar = new File(localUploads, jar);
-                  if (!localJar.exists() && !uploadJar.exists()) {
-                    throw new ApiAlertException("Missing file: " + jar + ", please upload again");
+                  if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
+                      flinkRESTAPIWatcher.init();
                   }
-                  if (localJar.exists()) {
-                    checkOrElseUploadJar(
-                        FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(), localUploads);
+
+                  // 1) checkEnv
+                  applicationService.checkEnv(app);
+
+                  // 2) some preparatory work
+                  String appUploads = app.getWorkspace().APP_UPLOADS();
+
+                  if (app.isCustomCodeJob()) {
+                      // customCode upload jar to appHome...
+                      String appHome = app.getAppHome();
+                      FsOperator fsOperator = app.getFsOperator();
+                      fsOperator.delete(appHome);
+                      if (app.isUploadJob()) {
+                          File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
+                          // upload jar copy to appHome
+                          String uploadJar = appUploads.concat("/").concat(app.getJar());
+                          checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
+                          switch (app.getApplicationType()) {
+                              case STREAMPARK_FLINK:
+                                  fsOperator.mkdirs(app.getAppLib());
+                                  fsOperator.copy(uploadJar, app.getAppLib(), false, true);
+                                  break;
+                              case APACHE_FLINK:
+                                  fsOperator.mkdirs(appHome);
+                                  fsOperator.copy(uploadJar, appHome, false, true);
+                                  break;
+                              default:
+                                  throw new IllegalArgumentException(
+                                      "[StreamPark] unsupported ApplicationType of custom code: "
+                                          + app.getApplicationType());
+                          }
+                      } else {
+                          fsOperator.upload(app.getDistHome(), appHome);
+                      }
+                  } else {
+                      if (!app.getDependencyObject().getJar().isEmpty()) {
+                          String localUploads = Workspace.local().APP_UPLOADS();
+                          // copy jar to local upload dir
+                          for (String jar : app.getDependencyObject().getJar()) {
+                              File localJar = new File(WebUtils.getAppTempDir(), jar);
+                              File uploadJar = new File(localUploads, jar);
+                              if (!localJar.exists() && !uploadJar.exists()) {
+                                  throw new ApiAlertException("Missing file: " + jar + ", please upload again");
+                              }
+                              if (localJar.exists()) {
+                                  checkOrElseUploadJar(
+                                      FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(), localUploads);
+                              }
+                          }
+                      }
                   }
-                }
               }
-            }
-          }
 
           @Override
           public void onStepStateChange(PipeSnapshot snapshot) {
@@ -330,7 +361,41 @@ public class AppBuildPipeServiceImpl
     return saved;
   }
 
-  /** create building pipeline instance */
+    /**
+     * check the build environment
+     *
+     * @param appId      application id
+     * @param forceBuild forced start pipeline or not
+     * @return
+     */
+    @Override
+    public void checkBuildEnv(Long appId, boolean forceBuild) {
+        Application app = applicationService.getById(appId);
+
+        // 1) check flink version
+        FlinkEnv env = flinkEnvService.getById(app.getVersionId());
+        boolean checkVersion = env.getFlinkVersion().checkVersion(false);
+        if (!checkVersion) {
+            throw new ApiAlertException(
+                "Unsupported flink version: " + env.getFlinkVersion().version());
+        }
+
+        // 2) check env
+        boolean envOk = applicationService.checkEnv(app);
+        if (!envOk) {
+            throw new ApiAlertException(
+                "Check flink env failed, please check the flink version of this job");
+        }
+
+        // 3) Whether the application can currently start a new building progress
+        if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
+            throw new ApiAlertException(
+                "The job is invalid, or the job cannot be built while it is running");
+        }
+
+    }
+
+    /** create building pipeline instance */
   private BuildPipeline createPipelineInstance(@Nonnull Application app) {
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
     String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
