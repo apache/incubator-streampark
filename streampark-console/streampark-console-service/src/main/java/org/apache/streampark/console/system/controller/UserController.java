@@ -24,7 +24,6 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.PermissionType;
-import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -129,13 +128,6 @@ public class UserController {
       throws Exception {
     String newPass = this.userService.resetPassword(username);
     return RestResponse.success(newPass);
-  }
-
-  @Operation(summary = "List user types")
-  @PostMapping("types")
-  @RequiresPermissions("user:types")
-  public RestResponse userTypes() {
-    return RestResponse.success(UserType.values());
   }
 
   @Operation(summary = "Init the user teams")
