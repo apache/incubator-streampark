@@ -473,6 +473,7 @@ create table "public"."t_flink_sql" (
   "id" int8 not null default nextval('streampark_t_flink_sql_id_seq'::regclass),
   "app_id" int8,
   "sql" text collate "pg_catalog"."default",
+  "team_dependency" varchar(64) collate "pg_catalog"."default",
   "dependency" text collate "pg_catalog"."default",
   "version" int4,
   "candidate" int2 default 1 not null,
@@ -598,6 +599,39 @@ create index "un_team_vcode_inx" on "public"."t_variable" using btree (
   "variable_code" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
 );
 
+-- ----------------------------
+-- Table of t_dependency
+-- ----------------------------
+create sequence "public"."streampark_t_dependency_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+
+create table "public"."t_dependency" (
+                                       "id" int8 not null default nextval('streampark_t_dependency_id_seq'::regclass),
+                                       "dependency_name" varchar(128) collate "pg_catalog"."default" not null,
+                                       "resource_type" int4,
+                                       "main_class" varchar(255) collate "pg_catalog"."default",
+                                       "description" text collate "pg_catalog"."default" default null,
+                                       "creator_id" int8  not null,
+                                       "team_id" int8  not null,
+                                       "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+                                       "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+)
+;
+comment on column "public"."t_dependency"."id" is 'Dependency id';
+comment on column "public"."t_dependency"."dependency_name" is 'Dependency name';
+comment on column "public"."t_dependency"."resource_type" is '0:app 1:common 2:connector 3:format 4:udf';
+comment on column "public"."t_dependency"."main_class" is 'The program main class';
+comment on column "public"."t_dependency"."description" is 'More detailed description of dependency';
+comment on column "public"."t_dependency"."creator_id" is 'user id of creator';
+comment on column "public"."t_dependency"."team_id" is 'team id';
+comment on column "public"."t_dependency"."create_time" is 'creation time';
+comment on column "public"."t_dependency"."modify_time" is 'modify time';
+
+alter table "public"."t_dependency" add constraint "t_dependency_pkey" primary key ("id");
+create index "un_team_dname_inx" on "public"."t_dependency" using btree (
+    "team_id" "pg_catalog"."int8_ops" asc nulls last,
+    "dependency_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
+    );
 
 -- ----------------------------
 -- table structure for t_role

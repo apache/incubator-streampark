@@ -31,7 +31,10 @@ public enum ChangedType implements Serializable {
   SQL(2),
 
   /** both */
-  ALL(3);
+  ALL(3),
+
+  /** team dependency has changed */
+  TEAM_DEPENDENCY(4);
 
   private final int value;
 
@@ -56,7 +59,7 @@ public enum ChangedType implements Serializable {
   }
 
   public boolean isDependencyChanged() {
-    return this.equals(ALL) || this.equals(DEPENDENCY);
+    return this.equals(ALL) || this.equals(DEPENDENCY) || this.equals(TEAM_DEPENDENCY);
   }
 
   @Override

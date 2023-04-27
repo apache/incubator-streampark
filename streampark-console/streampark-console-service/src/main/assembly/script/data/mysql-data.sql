@@ -45,7 +45,7 @@ insert into `t_flink_project` values (100000, 100000, 'streampark-quickstart', '
 -- ----------------------------
 -- Records of t_flink_sql
 -- ----------------------------
-insert into `t_flink_sql` values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', null, 1, 1, now());
+insert into `t_flink_sql` values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', null, null, 1, 1, now());
 
 -- ----------------------------
 -- Records of t_menu
@@ -62,6 +62,7 @@ insert into `t_menu` values (110600, 110000, 'menu.memberManagement', '/system/m
 insert into `t_menu` values (120100, 120000, 'menu.project', '/flink/project', 'flink/project/View', null, 'github', '0', 1, 1, now(), now());
 insert into `t_menu` values (120200, 120000, 'menu.application', '/flink/app', 'flink/app/View', null, 'mobile', '0', 1, 2, now(), now());
 insert into `t_menu` values (120300, 120000, 'menu.variable', '/flink/variable', 'flink/variable/View', null, 'code', '0', 1, 3, now(), now());
+insert into `t_menu` values (120400, 120000, 'menu.dependency', '/flink/dependency', 'flink/dependency/View', null, 'apartment', '0', 1, 3, now(), now());
 insert into `t_menu` values (130100, 130000, 'setting.system', '/setting/system', 'setting/System/index', null, 'database', '0', 1, 1, now(), now());
 insert into `t_menu` values (130200, 130000, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'alert', '0', 1, 2, now(), now());
 insert into `t_menu` values (130300, 130000, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'desktop', '0', 1, 3, now(), now());
@@ -120,6 +121,9 @@ insert into `t_menu` values (120304, 120300, 'depend apps', '/flink/variable/dep
 insert into `t_menu` values (120305, 120300, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (120306, 120300, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
 insert into `t_menu` values (120307, 120300, 'depend view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
+insert into `t_menu` values (120401, 120400, 'add', NULL, NULL, 'dependency:add', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (120402, 120400, 'update', NULL, NULL, 'dependency:update', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (120403, 120400, 'delete', NULL, NULL, 'dependency:delete', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (130101, 130100, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (130102, 130100, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (130401, 130400, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
@@ -167,6 +171,10 @@ insert into `t_role_menu` (role_id, menu_id) values (100001, 120300);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 120304);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 120306);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 120307);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120400);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120401);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120402);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120403);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 130000);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 130100);
 insert into `t_role_menu` (role_id, menu_id) values (100001, 130101);
@@ -211,6 +219,10 @@ insert into `t_role_menu` (role_id, menu_id) values (100002, 120304);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120305);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120306);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120307);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120400);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120401);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120402);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120403);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130000);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130100);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 130101);

@@ -208,7 +208,7 @@
         Object.assign(params, {
           resourceFrom: ResourceFromEnum.UPLOAD,
           appType: AppTypeEnum.APACHE_FLINK,
-          jar: unref(uploadJar),
+          jar: values.uploadJobJar,
           mainClass: values.mainClass,
         });
         handleCreateApp(params);
@@ -248,6 +248,7 @@
       appType: AppTypeEnum.STREAMPARK_FLINK,
       config,
       format: values.isSetConfig ? 1 : null,
+      teamDependency: JSON.stringify(values.teamDependency),
       dependency:
         dependency.pom === undefined && dependency.jar === undefined
           ? null
@@ -335,19 +336,6 @@
           two-tone-color="#4a9ff5"
           @click="handleSQLConf(true, model)"
         />
-      </template>
-      <template #uploadJobJar>
-        <UploadJobJar :custom-request="handleCustomJobRequest" v-model:loading="uploadLoading">
-          <template #uploadInfo>
-            <Alert v-if="uploadJar" class="uploadjar-box" type="info">
-              <template #message>
-                <span class="tag-dependency-pom">
-                  {{ uploadJar }}
-                </span>
-              </template>
-            </Alert>
-          </template>
-        </UploadJobJar>
       </template>
       <template #podTemplate>
         <PomTemplateTab

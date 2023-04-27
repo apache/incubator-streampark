@@ -43,6 +43,7 @@ import { CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/flink/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
+import {ResourceTypeEnum} from "/@/views/flink/dependency/dependency.data";
 
 const { t } = useI18n();
 /* render input dropdown component */
@@ -525,5 +526,94 @@ export const renderResourceFrom = (model: Recordable) => {
         <span class="gray">(upload local job)</span>
       </Select.Option>
     </Select>
+  );
+};
+
+export const renderStreamParkResource = ({ model, resources },) => {
+
+  const renderOptions = () => {
+    console.log('resources', resources);
+    return (resources || [])
+      .filter((item) => item.resourceType !== ResourceTypeEnum.APP )
+      .map((resource) => {
+      return (
+        <Select.Option
+          key={resource.id}
+          label={ resource.resourceType + '-' + resource.dependencyName}>
+          <div>
+            <Tag color="green" style=";margin-left: 5px;" size="small">
+              {resource.resourceType}
+            </Tag>
+            <span style="color: darkgrey">
+              {resource.dependencyName}
+            </span>
+          </div>
+        </Select.Option>
+      );
+    });
+  };
+
+  return (
+    <div>
+      <Select
+        show-search
+        allow-clear
+        optionFilterProp="label"
+        mode="multiple"
+        max-tag-count={3}
+        onChange={(value) => (model.teamDependency = value)}
+        value={model.teamDependency}
+        placeholder={t('flink.app.teamDependencyPlaceHolder')}
+        style="width: calc(100% - 60px)"
+      >
+        {renderOptions()}
+      </Select>
+    </div>
+  );
+};
+
+export const renderStreamParkJarApp = ({ model, resources },) => {
+
+  function handleAppChange(value: SelectValue) {
+    const res = resources.filter((item) => item.id == value)[0];
+    model.mainClass = res.mainClass
+    model.uploadJobJar = res.dependencyName;
+  }
+
+  const renderOptions = () => {
+    console.log('resources', resources);
+    return (resources || [])
+      .filter((item) => item.resourceType == ResourceTypeEnum.APP )
+      .map((resource) => {
+      return (
+        <Select.Option
+          key={resource.id}
+          label={resource.dependencyName}>
+          <div>
+            <Tag color="green" style=";margin-left: 5px;" size="small">
+              {resource.resourceType}
+            </Tag>
+            <span style="color: darkgrey">
+              {resource.dependencyName}
+            </span>
+          </div>
+        </Select.Option>
+      );
+    });
+  };
+
+  return (
+    <div>
+      <Select
+        show-search
+        allow-clear
+        optionFilterProp="label"
+        onChange={handleAppChange}
+        value={model.uploadJobJar}
+        placeholder={t('flink.app.selectAppPlaceHolder')}
+      >
+        {renderOptions()}
+      </Select>
+    </div>
   );
 };

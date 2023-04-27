@@ -14,27 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export default {
-  menu: {
-    system: 'System',
-    userManagement: 'User Management',
-    roleManagement: 'Role Management',
-    menuManagement: 'Menu Management',
-    tokenManagement: 'Token Management',
-    teamManagement: 'Team Management',
-    memberManagement: 'Member Management',
-    project: 'Project',
-    application: 'Application',
-    variable: 'Variable',
-    dependency: 'Resource',
-    setting: 'Settings',
-  },
-  setting: {
-    system: 'System Setting',
-    alarm: 'Alarm Setting',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Flink Cluster',
-    externalLink: 'External Link',
-    yarnQueue: 'Yarn Queue',
-  },
-};
+export interface DependencyListRecord {
+  id: string;
+  dependencyName: string;
+  resourceType: string;
+  mainClass: string;
+  description: string;
+  creatorId: string;
+  creatorName: string;
+  teamId: string;
+  createTime: string;
+  modifyTime: string;
+  sortField?: string;
+  sortOrder?: string;
+}
+
+export interface DependencyParam {
+  id?: string;
+  dependencyName: string;
+  description: string;
+}
+
+export interface DependencyDeleteParam {
+  id: string;
+  dependencyName: string;
+  teamId: string;
+}
+
+export interface BasicTableParams {
+  page: number;
+  pageSize: number;
+  teamId: string;
+  [key: string]: Nullable<string | number>;
+}

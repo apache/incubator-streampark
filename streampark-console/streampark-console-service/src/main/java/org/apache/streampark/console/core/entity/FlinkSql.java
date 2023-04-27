@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.core.enums.ChangedType;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -41,6 +42,7 @@ public class FlinkSql {
   @TableField("`sql`")
   private String sql;
 
+  private String teamDependency;
   private String dependency;
   private Integer version = 1;
 
@@ -63,6 +65,7 @@ public class FlinkSql {
   public FlinkSql(Application application) {
     this.appId = application.getId();
     this.sql = application.getFlinkSql();
+    this.teamDependency = application.getTeamDependency();
     this.dependency = application.getDependency();
     this.createTime = new Date();
   }
@@ -75,6 +78,7 @@ public class FlinkSql {
     String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
     application.setFlinkSql(encode);
     application.setDependency(this.dependency);
+    application.setTeamDependency(this.teamDependency);
     application.setSqlId(this.id);
   }
 
@@ -86,9 +90,11 @@ public class FlinkSql {
         Application.Dependency.toDependency(this.getDependency());
     Application.Dependency targetDependency =
         Application.Dependency.toDependency(target.getDependency());
-
     boolean depDifference = !thisDependency.eq(targetDependency);
-    if (sqlDifference && depDifference) {
+    // 3) determine if team dependency has changed
+    boolean teamDepDifference =
+        !ObjectUtils.safeEquals(this.teamDependency, target.getTeamDependency());
+    if (sqlDifference && depDifference && teamDepDifference) {
       return ChangedType.ALL;
     }
     if (sqlDifference) {
@@ -96,6 +102,9 @@ public class FlinkSql {
     }
     if (depDifference) {
       return ChangedType.DEPENDENCY;
+    }
+    if (teamDepDifference) {
+      return ChangedType.TEAM_DEPENDENCY;
     }
     return ChangedType.NONE;
   }

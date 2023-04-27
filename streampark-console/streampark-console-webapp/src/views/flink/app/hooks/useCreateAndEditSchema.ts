@@ -25,6 +25,7 @@ import {
   renderInputGroup,
   renderIsSetConfig,
   renderOptionsItems,
+  renderStreamParkResource,
   renderTotalMemory,
   renderYarnQueue,
 } from './useFlinkRender';
@@ -53,6 +54,7 @@ import { ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum'
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
+import { fetchTeamDependency } from "/@/api/flink/dependency";
 const { t } = useI18n();
 export interface HistoryRecord {
   k8sNamespace: Array<string>;
@@ -67,6 +69,7 @@ export const useCreateAndEditSchema = (
   const alerts = ref<AlertSetting[]>([]);
   const flinkClusters = ref<FlinkCluster[]>([]);
   const projectList = ref<Array<any>>([]);
+  const teamDependency = ref<Array<any>>([]);
   const historyRecord = reactive<HistoryRecord>({
     k8sNamespace: [],
     k8sSessionClusterId: [],
@@ -118,6 +121,20 @@ export const useCreateAndEditSchema = (
           }
         },
         rules: [{ required: true, message: t('flink.app.addAppTips.flinkSqlIsRequiredMessage') }],
+      },
+      {
+        field: 'teamDependency',
+        label: t('flink.app.teamDependency'),
+        component: 'Select',
+        render: ({ model }) =>
+          renderStreamParkResource( { model, resources: unref(teamDependency) }, ),
+        ifShow: ({ values }) => {
+          if (edit?.appId) {
+            return values.jobType == JobTypeEnum.SQL;
+          } else {
+            return values?.jobType == 'sql';
+          }
+        },
       },
       {
         field: 'dependency',
@@ -617,6 +634,11 @@ export const useCreateAndEditSchema = (
         };
       });
     });
+
+    /* Get team dependencies */
+    fetchTeamDependency({}).then((res) => {
+      teamDependency.value = res;
+    });
   });
   return {
     projectList,
@@ -625,6 +647,7 @@ export const useCreateAndEditSchema = (
     flinkClusters,
     historyRecord,
     suggestions,
+    teamDependency,
     getFlinkSqlSchema,
     getFlinkClusterSchemas,
     getFlinkFormOtherSchemas,
