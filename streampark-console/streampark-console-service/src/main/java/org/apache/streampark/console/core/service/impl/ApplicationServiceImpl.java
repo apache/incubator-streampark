@@ -804,7 +804,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       if (newApp.isFlinkSqlJob()) {
         FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
         newApp.setFlinkSql(copyFlinkSql.getSql());
-        newApp.setTeamDependency(copyFlinkSql.getTeamDependency());
+        newApp.setTeamResource(copyFlinkSql.getTeamResource());
         newApp.setDependency(copyFlinkSql.getDependency());
         FlinkSql flinkSql = new FlinkSql(newApp);
         flinkSqlService.create(flinkSql);

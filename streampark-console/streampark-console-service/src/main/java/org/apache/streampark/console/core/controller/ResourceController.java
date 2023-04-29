@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.entity.Dependency;
-import org.apache.streampark.console.core.service.DependencyService;
+import org.apache.streampark.console.core.entity.Resource;
+import org.apache.streampark.console.core.service.ResourceService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -41,50 +41,50 @@ import javax.validation.Valid;
 
 import java.util.List;
 
-@Tag(name = "DEPENDENCY_TAG")
+@Tag(name = "RESOURCE_TAG")
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("dependency")
-public class DependencyController {
+@RequestMapping("resource")
+public class ResourceController {
 
-  @Autowired private DependencyService dependencyService;
+  @Autowired private ResourceService resourceService;
 
-  @Operation(summary = "add dependency")
+  @Operation(summary = "add resource")
   @PostMapping("add")
-  @RequiresPermissions("dependency:add")
-  public RestResponse addDependency(@Valid Dependency dependency) {
-    this.dependencyService.addDependency(dependency);
+  @RequiresPermissions("resource:add")
+  public RestResponse addResource(@Valid Resource resource) {
+    this.resourceService.addResource(resource);
     return RestResponse.success();
   }
 
-  @Operation(summary = "List dependencies")
+  @Operation(summary = "List resources")
   @PostMapping("page")
-  public RestResponse page(RestRequest restRequest, Dependency dependency) {
-    IPage<Dependency> page = dependencyService.page(dependency, restRequest);
+  public RestResponse page(RestRequest restRequest, Resource resource) {
+    IPage<Resource> page = resourceService.page(resource, restRequest);
     return RestResponse.success(page);
   }
 
-  @Operation(summary = "Update dependency")
+  @Operation(summary = "Update resource")
   @PutMapping("update")
-  @RequiresPermissions("dependency:update")
-  public RestResponse updateDependency(@Valid Dependency dependency) {
-    dependencyService.updateDependency(dependency);
+  @RequiresPermissions("resource:update")
+  public RestResponse updateResource(@Valid Resource resource) {
+    resourceService.updateResource(resource);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Delete dependency")
+  @Operation(summary = "Delete resource")
   @DeleteMapping("delete")
-  @RequiresPermissions("dependency:delete")
-  public RestResponse deleteDependency(@Valid Dependency dependency) {
-    this.dependencyService.deleteDependency(dependency);
+  @RequiresPermissions("resource:delete")
+  public RestResponse deleteResource(@Valid Resource resource) {
+    this.resourceService.deleteResource(resource);
     return RestResponse.success();
   }
 
-  @Operation(summary = "List dependency")
+  @Operation(summary = "List resource")
   @PostMapping("list")
-  public RestResponse listDependency(@RequestParam Long teamId) {
-    List<Dependency> dependencyList = dependencyService.findByTeamId(teamId);
-    return RestResponse.success(dependencyList);
+  public RestResponse listResource(@RequestParam Long teamId) {
+    List<Resource> resourceList = resourceService.findByTeamId(teamId);
+    return RestResponse.success(resourceList);
   }
 }

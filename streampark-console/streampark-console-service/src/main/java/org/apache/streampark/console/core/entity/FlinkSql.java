@@ -42,7 +42,7 @@ public class FlinkSql {
   @TableField("`sql`")
   private String sql;
 
-  private String teamDependency;
+  private String teamResource;
   private String dependency;
   private Integer version = 1;
 
@@ -65,7 +65,7 @@ public class FlinkSql {
   public FlinkSql(Application application) {
     this.appId = application.getId();
     this.sql = application.getFlinkSql();
-    this.teamDependency = application.getTeamDependency();
+    this.teamResource = application.getTeamResource();
     this.dependency = application.getDependency();
     this.createTime = new Date();
   }
@@ -78,7 +78,7 @@ public class FlinkSql {
     String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
     application.setFlinkSql(encode);
     application.setDependency(this.dependency);
-    application.setTeamDependency(this.teamDependency);
+    application.setTeamResource(this.teamResource);
     application.setSqlId(this.id);
   }
 
@@ -91,10 +91,10 @@ public class FlinkSql {
     Application.Dependency targetDependency =
         Application.Dependency.toDependency(target.getDependency());
     boolean depDifference = !thisDependency.eq(targetDependency);
-    // 3) determine if team dependency has changed
-    boolean teamDepDifference =
-        !ObjectUtils.safeEquals(this.teamDependency, target.getTeamDependency());
-    if (sqlDifference && depDifference && teamDepDifference) {
+    // 3) determine if team resource has changed
+    boolean teamResDifference =
+        !ObjectUtils.safeEquals(this.teamResource, target.getTeamResource());
+    if (sqlDifference && depDifference && teamResDifference) {
       return ChangedType.ALL;
     }
     if (sqlDifference) {
@@ -103,8 +103,8 @@ public class FlinkSql {
     if (depDifference) {
       return ChangedType.DEPENDENCY;
     }
-    if (teamDepDifference) {
-      return ChangedType.TEAM_DEPENDENCY;
+    if (teamResDifference) {
+      return ChangedType.TEAM_RESOURCE;
     }
     return ChangedType.NONE;
   }

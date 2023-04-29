@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.mapper;
 
-import org.apache.streampark.console.core.entity.Dependency;
+import org.apache.streampark.console.core.entity.Resource;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -25,7 +25,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
-public interface DependencyMapper extends BaseMapper<Dependency> {
+public interface ResourceMapper extends BaseMapper<Resource> {
 
-  IPage<Dependency> page(Page<Dependency> page, @Param("dependency") Dependency dependency);
+  IPage<Resource> page(Page<Resource> page, @Param("resource") Resource resource);
 }

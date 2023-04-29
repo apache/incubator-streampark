@@ -18,57 +18,57 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.entity.Dependency;
+import org.apache.streampark.console.core.entity.Resource;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-public interface DependencyService extends IService<Dependency> {
+public interface ResourceService extends IService<Resource> {
 
   /**
-   * list dependency
+   * list resource
    *
-   * @param dependency dependency
+   * @param resource resource
    * @param restRequest queryRequest
    * @return IPage
    */
-  IPage<Dependency> page(Dependency dependency, RestRequest restRequest);
+  IPage<Resource> page(Resource resource, RestRequest restRequest);
 
   /**
-   * add dependency
+   * add resource
    *
-   * @param dependency dependency
+   * @param resource resource
    */
-  void addDependency(Dependency dependency);
+  void addResource(Resource resource);
 
   /**
    * @param teamId team id
-   * @param name dependency name
-   * @return the found dependency
+   * @param name resource name
+   * @return the found resource
    */
-  Dependency findByDependencyName(Long teamId, String name);
+  Resource findByResourceName(Long teamId, String name);
 
   /**
-   * update dependency
+   * update resource
    *
-   * @param dependency the updated dependency
+   * @param resource the updated resource
    */
-  void updateDependency(Dependency dependency);
+  void updateResource(Resource resource);
 
   /**
-   * delete dependency
+   * delete resource
    *
-   * @param dependency
+   * @param resource
    */
-  void deleteDependency(Dependency dependency);
+  void deleteResource(Resource resource);
 
   /**
-   * Get dependency through team id.
+   * Get resource through team id.
    *
    * @param teamId
-   * @return team dependencies
+   * @return team resources
    */
-  List<Dependency> findByTeamId(Long teamId);
+  List<Resource> findByTeamId(Long teamId);
 }

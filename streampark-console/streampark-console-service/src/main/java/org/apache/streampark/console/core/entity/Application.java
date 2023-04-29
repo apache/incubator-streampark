@@ -220,7 +220,7 @@ public class Application implements Serializable {
   /** running job */
   private transient JobsOverview.Task overview;
 
-  private transient String teamDependency;
+  private transient String teamResource;
   private transient String dependency;
   private transient Long sqlId;
   private transient String flinkSql;

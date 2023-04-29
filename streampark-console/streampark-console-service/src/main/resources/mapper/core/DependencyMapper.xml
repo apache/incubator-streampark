@@ -16,10 +16,10 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.apache.streampark.console.core.mapper.DependencyMapper">
-    <resultMap id="DependencyMap" type="org.apache.streampark.console.core.entity.Dependency">
+<mapper namespace="org.apache.streampark.console.core.mapper.ResourceMapper">
+    <resultMap id="ResourceMap" type="org.apache.streampark.console.core.entity.Resource">
         <result column="id" jdbcType="BIGINT" property="id"/>
-        <result column="dependency_name" jdbcType="VARCHAR" property="dependencyName"/>
+        <result column="resource_name" jdbcType="VARCHAR" property="resourceName"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="resource_type" jdbcType="BIGINT" property="resourceType"/>
         <result column="creator_id" jdbcType="BIGINT" property="creatorId"/>
@@ -28,19 +28,19 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="page" resultType="org.apache.streampark.console.core.entity.Dependency" parameterType="org.apache.streampark.console.core.entity.Dependency">
+    <select id="page" resultType="org.apache.streampark.console.core.entity.Resource" parameterType="org.apache.streampark.console.core.entity.Resource">
         select
         v.*,
         u.username as creatorName
-        from t_dependency v
+        from t_resource v
         inner join t_user u
         on v.creator_id = u.user_id
-        and v.team_id = ${dependency.teamId}
-        <if test="dependency.dependencyName != null and dependency.dependencyName != ''">
-            and v.dependencyName like '%${dependency.dependencyName}%'
+        and v.team_id = ${resource.teamId}
+        <if test="resource.resourceName != null and resource.resourceName != ''">
+            and v.resourceName like '%${resource.resourceName}%'
         </if>
-        <if test="dependency.description != null and dependency.description != ''">
-            and v.description like '%${dependency.description}%'
+        <if test="resource.description != null and resource.description != ''">
+            and v.description like '%${resource.description}%'
         </if>
     </select>
 

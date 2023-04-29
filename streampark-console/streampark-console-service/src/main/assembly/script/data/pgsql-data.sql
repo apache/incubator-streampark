@@ -58,7 +58,7 @@ insert into "public"."t_menu" values (110600, 110000, 'menu.memberManagement', '
 insert into "public"."t_menu" values (120100, 120000, 'menu.project', '/flink/project', 'flink/project/View', null, 'github', '0', '1', 1, now(), now());
 insert into "public"."t_menu" values (120200, 120000, 'menu.application', '/flink/app', 'flink/app/View', null, 'mobile', '0', '1', 2, now(), now());
 insert into "public"."t_menu" values (120300, 120000, 'menu.variable', '/flink/variable', 'flink/variable/View', null, 'code', '0', '1', 3, now(), now());
-insert into "public"."t_menu" values (120400, 120000, 'menu.dependency', '/flink/dependency', 'flink/dependency/View', null, 'apartment', '0', '1', 3, now(), now());
+insert into "public"."t_menu" values (120400, 120000, 'menu.resource', '/flink/resource', 'flink/resource/View', null, 'apartment', '0', '1', 3, now(), now());
 insert into "public"."t_menu" values (130100, 130000, 'setting.system', '/setting/system', 'setting/System/index', null, 'database', '0', '1', 1, now(), now());
 insert into "public"."t_menu" values (130200, 130000, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'alert', '0', '1', 2, now(), now());
 insert into "public"."t_menu" values (130300, 130000, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'desktop', '0', '1', 3, now(), now());
@@ -117,9 +117,9 @@ insert into "public"."t_menu" values (120304, 120300, 'depend apps', '/flink/var
 insert into "public"."t_menu" values (120305, 120300, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (120306, 120300, 'view', NULL, NULL, 'variable:view', NULL, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (120307, 120300, 'depend view', null, null, 'variable:depend_apps', null, '1', '1', NULL, now(), now());
-insert into "public"."t_menu" values (120401, 120400, 'add', NULL, NULL, 'dependency:add', NULL, '1', '1', NULL, now(), now());
-insert into "public"."t_menu" values (120402, 120400, 'update', NULL, NULL, 'dependency:update', NULL, '1', '1', NULL, now(), now());
-insert into "public"."t_menu" values (120403, 120400, 'delete', NULL, NULL, 'dependency:delete', NULL, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (120401, 120400, 'add', NULL, NULL, 'resource:add', NULL, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (120402, 120400, 'update', NULL, NULL, 'resource:update', NULL, '1', '1', NULL, now(), now());
+insert into "public"."t_menu" values (120403, 120400, 'delete', NULL, NULL, 'resource:delete', NULL, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (130101, 130100, 'view', null, null, 'setting:view', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (130102, 130100, 'setting update', null, null, 'setting:update', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (130401, 130400, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', '0', null, now(), now());

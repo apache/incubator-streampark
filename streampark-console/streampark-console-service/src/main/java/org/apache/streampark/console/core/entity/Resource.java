@@ -31,15 +31,15 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Data
-@TableName("t_dependency")
-public class Dependency implements Serializable {
+@TableName("t_resource")
+public class Resource implements Serializable {
 
   private static final long serialVersionUID = -7720746591258904369L;
 
   @TableId(type = IdType.AUTO)
   private Long id;
 
-  private String dependencyName;
+  private String resourceName;
 
   @Size(max = 100, message = "{noMoreThan}")
   private String description;

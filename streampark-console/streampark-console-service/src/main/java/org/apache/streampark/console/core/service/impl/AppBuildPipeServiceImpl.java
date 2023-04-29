@@ -47,10 +47,10 @@ import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
-import org.apache.streampark.console.core.service.DependencyService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
+import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
@@ -128,7 +128,7 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationConfigService applicationConfigService;
 
-  @Autowired private DependencyService dependencyService;
+  @Autowired private ResourceService resourceService;
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
@@ -158,7 +158,7 @@ public class AppBuildPipeServiceImpl
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
       Utils.notNull(flinkSql);
       app.setDependency(flinkSql.getDependency());
-      app.setTeamDependency(flinkSql.getTeamDependency());
+      app.setTeamResource(flinkSql.getTeamResource());
     }
 
     // create pipeline instance
@@ -522,13 +522,10 @@ public class AppBuildPipeServiceImpl
     DependencyInfo dependencyInfo = application.getDependencyInfo();
 
     try {
-      String[] teamJarIds = JacksonUtils.read(application.getTeamDependency(), String[].class);
+      String[] teamJarIds = JacksonUtils.read(application.getTeamResource(), String[].class);
       List<String> teamJarsFullPath =
           Arrays.stream(teamJarIds)
-              .map(
-                  jarId -> {
-                    return dependencyService.getById(jarId).getDependencyName();
-                  })
+              .map(jarId -> resourceService.getById(jarId).getResourceName())
               .map(
                   jar ->
                       String.format(

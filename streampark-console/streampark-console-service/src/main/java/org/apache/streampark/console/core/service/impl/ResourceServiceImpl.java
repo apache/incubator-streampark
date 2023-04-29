@@ -24,13 +24,13 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.Dependency;
 import org.apache.streampark.console.core.entity.FlinkSql;
-import org.apache.streampark.console.core.mapper.DependencyMapper;
+import org.apache.streampark.console.core.entity.Resource;
+import org.apache.streampark.console.core.mapper.ResourceMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
-import org.apache.streampark.console.core.service.DependencyService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.ResourceService;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -53,125 +53,125 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class DependencyServiceImpl extends ServiceImpl<DependencyMapper, Dependency>
-    implements DependencyService {
+public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
+    implements ResourceService {
 
   @Autowired private ApplicationService applicationService;
   @Autowired private CommonService commonService;
   @Autowired private FlinkSqlService flinkSqlService;
 
   @Override
-  public IPage<Dependency> page(Dependency dependency, RestRequest restRequest) {
-    if (dependency.getTeamId() == null) {
+  public IPage<Resource> page(Resource resource, RestRequest restRequest) {
+    if (resource.getTeamId() == null) {
       return null;
     }
-    Page<Dependency> page = new MybatisPager<Dependency>().getDefaultPage(restRequest);
-    return this.baseMapper.page(page, dependency);
+    Page<Resource> page = new MybatisPager<Resource>().getDefaultPage(restRequest);
+    return this.baseMapper.page(page, resource);
   }
 
   @Override
-  public void addDependency(Dependency dependency) {
-    String dependencyName = dependency.getDependencyName();
-    ApiAlertException.throwIfNull(dependencyName, "No dependency uploaded.");
+  public void addResource(Resource resource) {
+    String resourceName = resource.getResourceName();
+    ApiAlertException.throwIfNull(resourceName, "No resource uploaded.");
 
-    Long teamId = dependency.getTeamId();
+    Long teamId = resource.getTeamId();
     ApiAlertException.throwIfTrue(
-        this.findByDependencyName(teamId, dependencyName) != null,
-        String.format("Sorry, the dependency %s already exists.", dependency.getDependencyName()));
+        this.findByResourceName(teamId, resourceName) != null,
+        String.format("Sorry, the resource %s already exists.", resource.getResourceName()));
 
     // copy jar to team upload directory
-    transferTeamDependency(teamId, dependencyName);
+    transferTeamResource(teamId, resourceName);
 
-    dependency.setCreatorId(commonService.getUserId());
-    this.save(dependency);
+    resource.setCreatorId(commonService.getUserId());
+    this.save(resource);
   }
 
   @Override
-  public Dependency findByDependencyName(Long teamId, String name) {
-    LambdaQueryWrapper<Dependency> queryWrapper =
-        new LambdaQueryWrapper<Dependency>()
-            .eq(Dependency::getDependencyName, name)
-            .eq(Dependency::getTeamId, teamId);
+  public Resource findByResourceName(Long teamId, String name) {
+    LambdaQueryWrapper<Resource> queryWrapper =
+        new LambdaQueryWrapper<Resource>()
+            .eq(Resource::getResourceName, name)
+            .eq(Resource::getTeamId, teamId);
     return baseMapper.selectOne(queryWrapper);
   }
 
   @Override
-  public void updateDependency(Dependency dependency) {
-    Dependency findDependency = getById(dependency.getId());
-    checkOrElseAlert(findDependency);
+  public void updateResource(Resource resource) {
+    Resource findResource = getById(resource.getId());
+    checkOrElseAlert(findResource);
 
-    String dependencyName = dependency.getDependencyName();
-    if (dependencyName != null) {
+    String resourceName = resource.getResourceName();
+    if (resourceName != null) {
       ApiAlertException.throwIfFalse(
-          dependencyName.equals(findDependency.getDependencyName()),
-          "Please make sure the dependency name is not changed.");
-      transferTeamDependency(findDependency.getTeamId(), dependencyName);
+          resourceName.equals(findResource.getResourceName()),
+          "Please make sure the resource name is not changed.");
+      transferTeamResource(findResource.getTeamId(), resourceName);
     }
 
-    findDependency.setDescription(dependency.getDescription());
-    baseMapper.updateById(findDependency);
+    findResource.setDescription(resource.getDescription());
+    baseMapper.updateById(findResource);
   }
 
   @Override
-  public void deleteDependency(Dependency dependency) {
-    Dependency findDependency = getById(dependency.getId());
-    checkOrElseAlert(findDependency);
+  public void deleteResource(Resource resource) {
+    Resource findResource = getById(resource.getId());
+    checkOrElseAlert(findResource);
 
     FsOperator.lfs()
         .delete(
             String.format(
                 "%s/%d/%s",
                 Workspace.local().APP_UPLOADS(),
-                findDependency.getTeamId(),
-                findDependency.getDependencyName()));
+                findResource.getTeamId(),
+                findResource.getResourceName()));
 
-    this.removeById(dependency);
+    this.removeById(resource);
   }
 
-  public List<Dependency> findByTeamId(Long teamId) {
-    LambdaQueryWrapper<Dependency> queryWrapper =
-        new LambdaQueryWrapper<Dependency>().eq(Dependency::getTeamId, teamId);
+  public List<Resource> findByTeamId(Long teamId) {
+    LambdaQueryWrapper<Resource> queryWrapper =
+        new LambdaQueryWrapper<Resource>().eq(Resource::getTeamId, teamId);
     return baseMapper.selectList(queryWrapper);
   }
 
-  private void transferTeamDependency(Long teamId, String dependencyName) {
+  private void transferTeamResource(Long teamId, String resourceName) {
     String teamUploads = String.format("%s/%d", Workspace.local().APP_UPLOADS(), teamId);
     if (!FsOperator.lfs().exists(teamUploads)) {
       FsOperator.lfs().mkdirs(teamUploads);
     }
-    File localJar = new File(WebUtils.getAppTempDir(), dependencyName);
-    File teamUploadJar = new File(teamUploads, dependencyName);
+    File localJar = new File(WebUtils.getAppTempDir(), resourceName);
+    File teamUploadJar = new File(teamUploads, resourceName);
     ApiAlertException.throwIfFalse(
-        localJar.exists(), "Missing file: " + dependencyName + ", please upload again");
+        localJar.exists(), "Missing file: " + resourceName + ", please upload again");
     FsOperator.lfs()
         .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
   }
 
-  private void checkOrElseAlert(Dependency dependency) {
-    ApiAlertException.throwIfNull(dependency, "The dependency does not exist.");
+  private void checkOrElseAlert(Resource resource) {
+    ApiAlertException.throwIfNull(resource, "The resource does not exist.");
 
     ApiAlertException.throwIfTrue(
-        isDependByApplications(dependency),
-        "Sorry, the dependency is still in use, cannot be removed.");
+        isDependByApplications(resource),
+        "Sorry, the resource is still in use, cannot be removed.");
   }
 
-  private boolean isDependByApplications(Dependency dependency) {
-    return CollectionUtils.isNotEmpty(getDependencyApplicationsById(dependency));
+  private boolean isDependByApplications(Resource resource) {
+    return CollectionUtils.isNotEmpty(getResourceApplicationsById(resource));
   }
 
-  private List<Application> getDependencyApplicationsById(Dependency dependency) {
+  private List<Application> getResourceApplicationsById(Resource resource) {
     List<Application> dependApplications = new ArrayList<>();
-    List<Application> applications = applicationService.getByTeamId(dependency.getTeamId());
+    List<Application> applications = applicationService.getByTeamId(resource.getTeamId());
     Map<Long, Application> applicationMap =
         applications.stream()
             .collect(Collectors.toMap(Application::getId, application -> application));
 
-    // Get the application that depends on this dependency
-    List<FlinkSql> flinkSqls = flinkSqlService.getByTeamId(dependency.getTeamId());
+    // Get the application that depends on this resource
+    List<FlinkSql> flinkSqls = flinkSqlService.getByTeamId(resource.getTeamId());
     for (FlinkSql flinkSql : flinkSqls) {
-      String sqlTeamDependency = flinkSql.getTeamDependency();
-      if (sqlTeamDependency != null
-          && sqlTeamDependency.contains(String.valueOf(dependency.getTeamId()))) {
+      String sqlTeamResource = flinkSql.getTeamResource();
+      if (sqlTeamResource != null
+          && sqlTeamResource.contains(String.valueOf(resource.getTeamId()))) {
         Application app = applicationMap.get(flinkSql.getAppId());
         if (!dependApplications.contains(app)) {
           dependApplications.add(applicationMap.get(flinkSql.getAppId()));

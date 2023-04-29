@@ -32,21 +32,21 @@ CREATE TABLE `t_external_link` (
 ) engine = innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
--- Table of t_dependency
+-- Table of t_resource
 -- ----------------------------
-drop table if exists `t_dependency`;
-create table `t_dependency` (
+drop table if exists `t_resource`;
+create table `t_resource` (
                                 `id` bigint not null auto_increment,
-                                `dependency_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the dependency file',
+                                `resource_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the resource file',
                                 `resource_type` int  not null comment '0:app 1:common 2:connector 3:format 4:udf',
                                 `main_class` varchar(255) collate utf8mb4_general_ci default null,
-                                `description` text collate utf8mb4_general_ci default null comment 'More detailed description of dependency',
+                                `description` text collate utf8mb4_general_ci default null comment 'More detailed description of resource',
                                 `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
                                 `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
                                 `create_time` datetime not null default current_timestamp comment 'create time',
                                 `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
                                 primary key (`id`) using btree,
-                                unique key `un_team_vcode_inx` (`team_id`,`dependency_name`) using btree
+                                unique key `un_team_vcode_inx` (`team_id`,`resource_name`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 drop table if exists `t_yarn_queue`;
@@ -76,7 +76,7 @@ alter table `t_flink_app`
     drop index `inx_state`;
 
 alter table `t_flink_sql`
-    add column `team_dependency` varchar(64) default null;
+    add column `team_resource` varchar(64) default null;
 
 alter table `t_flink_env`
     modify column `version` varchar(64) collate utf8mb4_general_ci not null comment 'flink version',
@@ -159,7 +159,7 @@ insert into `t_menu` values (110600, 110000, 'menu.memberManagement', '/system/m
 insert into `t_menu` values (120100, 120000, 'menu.project', '/flink/project', 'flink/project/View', null, 'github', '0', 1, 1, now(), now());
 insert into `t_menu` values (120200, 120000, 'menu.application', '/flink/app', 'flink/app/View', null, 'mobile', '0', 1, 2, now(), now());
 insert into `t_menu` values (120300, 120000, 'menu.variable', '/flink/variable', 'flink/variable/View', null, 'code', '0', 1, 3, now(), now());
-insert into `t_menu` values (120400, 120000, 'menu.dependency', '/flink/dependency', 'flink/dependency/View', null, 'apartment', '0', 1, 3, now(), now());
+insert into `t_menu` values (120400, 120000, 'menu.resource', '/flink/resource', 'flink/resource/View', null, 'apartment', '0', 1, 3, now(), now());
 insert into `t_menu` values (130100, 130000, 'setting.system', '/setting/system', 'setting/System/index', null, 'database', '0', 1, 1, now(), now());
 insert into `t_menu` values (130200, 130000, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, 'alert', '0', 1, 2, now(), now());
 insert into `t_menu` values (130300, 130000, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'desktop', '0', 1, 3, now(), now());
@@ -219,9 +219,9 @@ insert into `t_menu` values (120304, 120300, 'depend apps', '/flink/variable/dep
 insert into `t_menu` values (120305, 120300, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (120306, 120300, 'view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
 insert into `t_menu` values (120307, 120300, 'depend view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());
-insert into `t_menu` values (120401, 120400, 'add', NULL, NULL, 'dependency:add', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (120402, 120400, 'update', NULL, NULL, 'dependency:update', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (120403, 120400, 'delete', NULL, NULL, 'dependency:delete', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (120401, 120400, 'add', NULL, NULL, 'resource:add', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (120402, 120400, 'update', NULL, NULL, 'resource:update', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (120403, 120400, 'delete', NULL, NULL, 'resource:delete', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (130101, 130100, 'view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (130102, 130100, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (130401, 130400, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());

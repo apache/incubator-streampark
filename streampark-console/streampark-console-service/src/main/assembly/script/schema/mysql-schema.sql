@@ -228,7 +228,7 @@ create table `t_flink_sql` (
   `id` bigint not null auto_increment,
   `app_id` bigint default null,
   `sql` text collate utf8mb4_general_ci,
-  `team_dependency` varchar(64) collate utf8mb4_general_ci,
+  `team_resource` varchar(64) collate utf8mb4_general_ci,
   `dependency` text collate utf8mb4_general_ci,
   `version` int default null,
   `candidate` tinyint not null default 1,
@@ -309,21 +309,21 @@ create table `t_variable` (
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
--- Table of t_dependency
+-- Table of t_resource
 -- ----------------------------
-drop table if exists `t_dependency`;
-create table `t_dependency` (
+drop table if exists `t_resource`;
+create table `t_resource` (
   `id` bigint not null auto_increment,
-  `dependency_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the dependency file',
+  `resource_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the resource file',
   `resource_type` int  not null comment '0:app 1:common 2:connector 3:format 4:udf',
   `main_class` varchar(255) collate utf8mb4_general_ci default null,
-  `description` text collate utf8mb4_general_ci default null comment 'More detailed description of dependency',
+  `description` text collate utf8mb4_general_ci default null comment 'More detailed description of resource',
   `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   primary key (`id`) using btree,
-  unique key `un_team_vcode_inx` (`team_id`,`dependency_name`) using btree
+  unique key `un_team_vcode_inx` (`team_id`,`resource_name`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
