@@ -210,7 +210,7 @@ fi
 
 # Add on extra jar files to CLASSPATH
 # shellcheck disable=SC2236
-if [[ ! -z "$CLASSPATH" ]] ; then
+if [ ! -z "$CLASSPATH" ]; then
   CLASSPATH="$CLASSPATH":
 fi
 CLASSPATH="$CLASSPATH"
@@ -259,6 +259,8 @@ DEFAULT_OPTS="""
   -Xloggc:${APP_HOME}/logs/gc.log
   """
 
+DEBUG_OPTS=""
+
 # ----- Execute The Requested Command -----------------------------------------
 
 print_logo() {
@@ -293,34 +295,60 @@ parse_yaml() {
 }
 
 # shellcheck disable=SC2120
-running() {
+getPid() {
   if [ -f "$APP_PID" ]; then
     if [ -s "$APP_PID" ]; then
-        # shellcheck disable=SC2046
-        # shellcheck disable=SC2006
-        kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-        # shellcheck disable=SC2181
-        if [ $? -eq 0 ]; then
-          return 1
-        else
-          rm -f "$APP_PID" >/dev/null 2>&1
-          return 0
-        fi
+      # shellcheck disable=SC2155
+      # shellcheck disable=SC2006
+      local PID=`cat "$APP_PID"`
+      kill -0 $PID >/dev/null 2>&1
+      # shellcheck disable=SC2181
+      if [ $? -eq 0 ]; then
+        echo $PID
+        exit 0
+      fi
     else
-      return 0
+      rm -f "$APP_PID" >/dev/null 2>&1
+    fi
+  fi
+
+  # shellcheck disable=SC2006
+  local PROPER="${APP_CONF}/application.yml"
+  if [[ ! -f "$PROPER" ]] ; then
+    echo 0
+    exit 0
+  fi
+
+  # shellcheck disable=SC2046
+  eval $(parse_yaml "${PROPER}" "conf_")
+  # shellcheck disable=SC2154
+  # shellcheck disable=SC2155
+  # shellcheck disable=SC2116
+  local serverPort=$(echo "$conf_server_port")
+  # shellcheck disable=SC2006
+  # shellcheck disable=SC2155
+  local used=`lsof -i:"$serverPort" | wc -l`
+  if [ "$used" -gt 0 ]; then
+    # shellcheck disable=SC2006
+    local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
+    if [ ! -z $PID ]; then
+      echo $PID
+    else
+      echo 0
     fi
   else
-    return 0
+    echo 0
   fi
 }
 
 # shellcheck disable=SC2120
 start() {
-  running
-  # shellcheck disable=SC2181
-  if [ $? -eq "1" ]; then
+  # shellcheck disable=SC2006
+  local PID=$(getPid)
+
+  if [ $PID -gt 0 ]; then
     # shellcheck disable=SC2006
-    echo_r "StreamPark is already running pid: `cat "$APP_PID"`"
+    echo_r "StreamPark is already running pid: $PID , start aborted!"
     exit 1
   fi
 
@@ -336,7 +364,7 @@ start() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  PROPER="${APP_CONF}/application.yml"
+  local PROPER="${APP_CONF}/application.yml"
   if [[ ! -f "$PROPER" ]] ; then
     echo_r "ERROR: config file application.yml invalid or not found! ";
     exit 1;
@@ -412,7 +440,8 @@ start() {
     # Add to pid file if successful start
     if [[ ${PID} =~ ${IS_NUMBER} ]] && kill -0 $PID > /dev/null 2>&1 ; then
         echo $PID > "$APP_PID"
-        echo_g "StreamPark start successful. pid: `cat "$APP_PID"`"
+        # shellcheck disable=SC2006
+        echo_g "StreamPark start successful. pid: $PID"
     else
         echo_r "StreamPark start failed."
         exit 1
@@ -433,7 +462,7 @@ startDocker() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  PROPER="${APP_CONF}/application.yml"
+  local PROPER="${APP_CONF}/application.yml"
   if [[ ! -f "$PROPER" ]] ; then
     echo_r "ERROR: config file application.yml invalid or not found! ";
     exit 1;
@@ -501,141 +530,63 @@ debug() {
 
 # shellcheck disable=SC2120
 stop() {
-  running
-  # shellcheck disable=SC2181
-  if [ $? -eq "0" ]; then
-    echo_r "StreamPark is not running."
+  # shellcheck disable=SC2155
+  # shellcheck disable=SC2006
+  local PID=$(getPid)
+
+  if [[ $PID -eq 0 ]]; then
+    echo_r "StreamPark is not running. stop aborted."
     exit 1
   fi
 
   shift
 
   local SLEEP=5
-  if [ ! -z "$1" ]; then
-    echo $1 | grep "[^0-9]" >/dev/null 2>&1
+
+  # shellcheck disable=SC2006
+  echo_g "StreamPark stopping with the PID: $PID"
+
+  kill -9 $PID
+
+  while [ $SLEEP -ge 0 ]; do
+    # shellcheck disable=SC2046
+    # shellcheck disable=SC2006
+    kill -0 $PID >/dev/null 2>&1
+    # shellcheck disable=SC2181
     if [ $? -gt 0 ]; then
-      SLEEP=$1
-      shift
-    fi
-  fi
-
-  local FORCE=0
-  if [ "$1" = "-force" ]; then
-    shift
-    FORCE=1
-  fi
-
-  local STOPPED=0
-  # shellcheck disable=SC2236
-  if [ -f "$APP_PID" ]; then
-    if [ -s "$APP_PID" ]; then
-      # shellcheck disable=SC2046
-      # shellcheck disable=SC2006
-      kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-      # shellcheck disable=SC2181
-      if [ $? -gt 0 ]; then
-        echo "PID file found but either no matching process was found or the current user does not have permission to stop the process. Stop aborted."
-        exit 1
-      else
-        # shellcheck disable=SC2046
-        # shellcheck disable=SC2006
-        kill -15 `cat "$APP_PID"` >/dev/null 2>&1
-        if [ -f "$APP_PID" ]; then
-          while [ $SLEEP -ge 0 ]; do
-             if [ -f "$APP_PID" ]; then
-               # shellcheck disable=SC2046
-               # shellcheck disable=SC2006
-               kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-               if [ $? -gt 0 ]; then
-                 rm -f "$APP_PID" >/dev/null 2>&1
-                 if [ $? != 0 ]; then
-                   if [ -w "$APP_PID" ]; then
-                     cat /dev/null > "$APP_PID"
-                     # If StreamPark has stopped don't try and force a stop with an empty PID file
-                     FORCE=0
-                   else
-                     echo "The PID file could not be removed or cleared."
-                   fi
-                 fi
-                 STOPPED=1
-                 break
-               fi
-             else
-               STOPPED=1
-               break
-             fi
-             SLEEP=`expr $SLEEP - 1 `
-          done
-
-          #stop failed.normal kill failed? Try a force kill.
-          if [ -f "$APP_PID" ]; then
-            if [ -s "$APP_PID" ]; then
-              # shellcheck disable=SC2046
-              kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-              if [ $? -eq 0 ]; then
-                FORCE=1
-              fi
-            fi
-          fi
-
-          if [ $FORCE -eq 1 ]; then
-            KILL_SLEEP_INTERVAL=5
-            if [ -f "$APP_PID" ]; then
-              # shellcheck disable=SC2006
-              PID=`cat "$APP_PID"`
-              echo_y "Killing StreamPark with the PID: $PID"
-              kill -9 "$PID" >/dev/null 2>&1
-              while [ $KILL_SLEEP_INTERVAL -ge 0 ]; do
-                kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-                if [ $? -gt 0 ]; then
-                  rm -f "$APP_PID" >/dev/null 2>&1
-                  if [ $? != 0 ]; then
-                    if [ -w "$APP_PID" ]; then
-                      cat /dev/null > "$APP_PID"
-                    else
-                      echo_r "The PID file could not be removed."
-                    fi
-                  fi
-                  echo_y "The StreamPark process has been killed."
-                  break
-                fi
-                if [ $KILL_SLEEP_INTERVAL -gt 0 ]; then
-                  sleep 1
-                fi
-                KILL_SLEEP_INTERVAL=`expr $KILL_SLEEP_INTERVAL - 1 `
-              done
-              if [ $KILL_SLEEP_INTERVAL -lt 0 ]; then
-                echo "StreamPark has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
-              fi
-            fi
-          fi
+      rm -f "$APP_PID" >/dev/null 2>&1
+      if [ $? != 0 ]; then
+        if [ -w "$APP_PID" ]; then
+          cat /dev/null > "$APP_PID"
         else
-          STOPPED=1
+          echo_r "The PID file could not be removed."
         fi
       fi
-    else
-      echo "PID file is empty and has been ignored."
-      exit 1
+      echo_g "StreamPark stopped."
+      break
     fi
-  else
-    echo "\$APP_PID was set but the specified file does not exist. Is StreamPark running? Stop aborted."
-    exit 1
-  fi
 
-  if [ $STOPPED -eq 1 ]; then
-     echo_r "StreamPark stopped."
-  fi
+    if [ $SLEEP -gt 0 ]; then
+       sleep 1
+    fi
+    # shellcheck disable=SC2006
+    # shellcheck disable=SC2003
+    SLEEP=`expr $SLEEP - 1 `
+  done
 
+  if [ "$SLEEP" -lt 0 ]; then
+     echo_r "StreamPark has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
+  fi
 }
 
 status() {
-  running
-  # shellcheck disable=SC2181
-  if [ $? -eq "1" ]; then
-    # shellcheck disable=SC2006
-    echo_g "StreamPark is running pid is: `cat "$APP_PID"`"
-  else
+  # shellcheck disable=SC2155
+  # shellcheck disable=SC2006
+  local PID=$(getPid)
+  if [ $PID -eq 0 ]; then
     echo_r "StreamPark is not running"
+  else
+    echo_g "StreamPark is running pid is: $PID"
   fi
 }
 
@@ -673,7 +624,7 @@ main() {
         echo_w "Usage: streampark.sh ( commands ... )"
         echo_w "commands:"
         echo_w "  start \$conf               Start StreamPark with application config."
-        echo_w "  stop n -force             Stop StreamPark, wait up to n seconds and then use kill -KILL if still running"
+        echo_w "  stop                      Stop StreamPark, wait up to 5 seconds and then use kill -KILL if still running"
         echo_w "  status                    StreamPark status"
         echo_w "  debug                     StreamPark start with debug mode,start debug mode, like: bash streampark.sh debug 10002"
         echo_w "  restart \$conf             restart StreamPark with application config."
