@@ -65,8 +65,8 @@ import org.apache.streampark.flink.client.bean.KubernetesSubmitParam;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
-import org.apache.streampark.flink.kubernetes.IngressController;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
+import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 
