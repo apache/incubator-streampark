@@ -131,7 +131,7 @@ export const getBackupColumns = (): BasicColumn[] => [
 ];
 
 export const getOptionLogColumns = (): BasicColumn[] => [
-  { title: 'Operation Name', dataIndex: 'optionName' },
+  { title: 'Operation Name', dataIndex: 'optionName', width: 150 },
   { title: 'Application Id', dataIndex: 'yarnAppId' },
   { title: 'JobManager URL', dataIndex: 'jobManagerUrl' },
   { title: 'Start Status', dataIndex: 'success', width: 120 },
