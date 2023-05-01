@@ -295,7 +295,7 @@ parse_yaml() {
 }
 
 # shellcheck disable=SC2120
-getPid() {
+get_pid() {
   if [ -f "$APP_PID" ]; then
     if [ -s "$APP_PID" ]; then
       # shellcheck disable=SC2155
@@ -315,8 +315,8 @@ getPid() {
   # shellcheck disable=SC2006
   local PROPER="${APP_CONF}/application.yml"
   if [[ ! -f "$PROPER" ]] ; then
-    echo 0
-    exit 0
+    echo_r "ERROR: config file application.yml invalid or not found! ";
+    exit 1;
   fi
 
   # shellcheck disable=SC2046
@@ -344,7 +344,7 @@ getPid() {
 # shellcheck disable=SC2120
 start() {
   # shellcheck disable=SC2006
-  local PID=$(getPid)
+  local PID=$(get_pid)
 
   if [ $PID -gt 0 ]; then
     # shellcheck disable=SC2006
@@ -400,10 +400,10 @@ start() {
   # 2): StreamPark
   # 3): hadoop conf
   # shellcheck disable=SC2091
-  APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
+  local APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
   # shellcheck disable=SC2206
   # shellcheck disable=SC2010
-  JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
+  local JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
   # shellcheck disable=SC2128
   for jar in $JARS;do
     APP_CLASSPATH=$APP_CLASSPATH:$jar
@@ -418,9 +418,9 @@ start() {
 
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
-  vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
+  local vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
 
-  JAVA_OPTS="""
+  local JAVA_OPTS="""
   $vmOption
   $DEFAULT_OPTS
   $DEBUG_OPTS
@@ -449,7 +449,7 @@ start() {
 }
 
 # shellcheck disable=SC2120
-startDocker() {
+start_docker() {
   # Bugzilla 37848: only output this if we have a TTY
   if [[ ${have_tty} -eq 1 ]]; then
     echo_w "Using APP_BASE:   $APP_BASE"
@@ -481,10 +481,10 @@ startDocker() {
   # 2): StreamPark
   # 3): hadoop conf
   # shellcheck disable=SC2091
-  APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
+  local APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
   # shellcheck disable=SC2206
   # shellcheck disable=SC2010
-  JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
+  local JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
   # shellcheck disable=SC2128
   for jar in $JARS;do
     APP_CLASSPATH=$APP_CLASSPATH:$jar
@@ -499,9 +499,9 @@ startDocker() {
 
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
-  vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
+  local vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
 
-  JAVA_OPTS="""
+  local JAVA_OPTS="""
     $vmOption
     $DEFAULT_OPTS
     $DEBUG_OPTS
@@ -532,7 +532,7 @@ debug() {
 stop() {
   # shellcheck disable=SC2155
   # shellcheck disable=SC2006
-  local PID=$(getPid)
+  local PID=$(get_pid)
 
   if [[ $PID -eq 0 ]]; then
     echo_r "StreamPark is not running. stop aborted."
@@ -541,7 +541,7 @@ stop() {
 
   shift
 
-  local SLEEP=5
+  local SLEEP=3
 
   # shellcheck disable=SC2006
   echo_g "StreamPark stopping with the PID: $PID"
@@ -582,7 +582,7 @@ stop() {
 status() {
   # shellcheck disable=SC2155
   # shellcheck disable=SC2006
-  local PID=$(getPid)
+  local PID=$(get_pid)
   if [ $PID -eq 0 ]; then
     echo_r "StreamPark is not running"
   else
@@ -607,8 +607,8 @@ main() {
     "start")
         start
         ;;
-    "startDocker")
-        startDocker
+    "start_docker")
+        start_docker
         ;;
     "stop")
         stop
@@ -624,7 +624,7 @@ main() {
         echo_w "Usage: streampark.sh ( commands ... )"
         echo_w "commands:"
         echo_w "  start \$conf               Start StreamPark with application config."
-        echo_w "  stop                      Stop StreamPark, wait up to 5 seconds and then use kill -KILL if still running"
+        echo_w "  stop                      Stop StreamPark, wait up to 3 seconds and then use kill -KILL if still running"
         echo_w "  status                    StreamPark status"
         echo_w "  debug                     StreamPark start with debug mode,start debug mode, like: bash streampark.sh debug 10002"
         echo_w "  restart \$conf             restart StreamPark with application config."
