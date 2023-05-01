@@ -40,8 +40,8 @@ import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
-import java.util.{Collections, List => JavaList, Map => JavaMap}
 import java.lang.{Boolean => JavaBool}
+import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
