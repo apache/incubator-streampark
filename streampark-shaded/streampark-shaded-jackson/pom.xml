@@ -39,7 +39,6 @@
             <artifactId>jackson-core</artifactId>
             <optional>true</optional>
         </dependency>
-
     </dependencies>
 
     <build>
