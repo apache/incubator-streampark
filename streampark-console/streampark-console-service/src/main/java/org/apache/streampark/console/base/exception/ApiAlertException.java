@@ -23,6 +23,7 @@ import java.util.Objects;
 
 /**
  *
+ *
  * <pre>
  * To notify the frontend of an exception message,
  * it is usually a <strong> clear </strong> and <strong> concise </strong> message, e.g:
