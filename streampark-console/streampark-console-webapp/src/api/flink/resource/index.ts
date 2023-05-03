@@ -18,17 +18,18 @@ import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
 import { Result } from '/#/axios';
 import {
-  BasicTableParams, DependencyDeleteParam,
-  DependencyListRecord,
-  DependencyParam,
-} from './model/dependencyModel';
+  BasicTableParams,
+  ResourceDeleteParam,
+  ResourceListRecord,
+  ResourceParam,
+} from './model/resourceModel';
 
-enum DEPENDENCY_API {
-  PAGE = '/dependency/page',
-  POST = '/dependency/add',
-  UPDATE = '/dependency/update',
-  DELETE = '/dependency/delete',
-  LIST = '/dependency/list',
+enum RESOURCE_API {
+  PAGE = '/resource/page',
+  POST = '/resource/add',
+  UPDATE = '/resource/update',
+  DELETE = '/resource/delete',
+  LIST = '/resource/list',
 }
 
 /**
@@ -36,35 +37,35 @@ enum DEPENDENCY_API {
  * @param data
  * @returns
  */
-export function fetchDependencyList(data: BasicTableParams): Promise<DependencyListRecord[]> {
-  return defHttp.post({ url: DEPENDENCY_API.PAGE, data });
+export function fetchResourceList(data: BasicTableParams): Promise<ResourceListRecord[]> {
+  return defHttp.post({ url: RESOURCE_API.PAGE, data });
 }
 
 /**
  * add dependency
- * @param {DependencyParam} data
+ * @param {ResourceParam} data
  * @returns {Promise<boolean>}
  */
-export function fetchAddDependency(data: DependencyParam): Promise<boolean> {
-  return defHttp.post({ url: DEPENDENCY_API.POST, data });
+export function fetchAddResource(data: ResourceParam): Promise<boolean> {
+  return defHttp.post({ url: RESOURCE_API.POST, data });
 }
 
 /**
  * update dependency
- * @param {DependencyParam} data
+ * @param {ResourceParam} data
  * @returns {Promise<boolean|undefined>}
  */
-export function fetchUpdateDependency(data: DependencyParam): Promise<boolean | undefined> {
-  return defHttp.put({ url: DEPENDENCY_API.UPDATE, data });
+export function fetchUpdateResource(data: ResourceParam): Promise<boolean | undefined> {
+  return defHttp.put({ url: RESOURCE_API.UPDATE, data });
 }
 
 /**
  * delete
- * @param {DependencyDeleteParam} data
+ * @param {ResourceDeleteParam} data
  * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchDependencyDelete(data: DependencyDeleteParam): Promise<AxiosResponse<Result>> {
-  return defHttp.delete({ url: DEPENDENCY_API.DELETE, data }, { isReturnNativeResponse: true });
+export function fetchResourceDelete(data: ResourceDeleteParam): Promise<AxiosResponse<Result>> {
+  return defHttp.delete({ url: RESOURCE_API.DELETE, data }, { isReturnNativeResponse: true });
 }
 
 /**
@@ -72,7 +73,7 @@ export function fetchDependencyDelete(data: DependencyDeleteParam): Promise<Axio
  * @param data
  * @returns
  */
-export function fetchTeamDependency(data: Recordable): Promise<DependencyListRecord[]> {
-  return defHttp.post({ url: DEPENDENCY_API.LIST, data });
+export function fetchTeamResource(data: Recordable): Promise<ResourceListRecord[]> {
+  return defHttp.post({ url: RESOURCE_API.LIST, data });
 }
 

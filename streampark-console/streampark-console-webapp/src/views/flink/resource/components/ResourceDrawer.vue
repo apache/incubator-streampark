@@ -26,7 +26,7 @@
       <Icon icon="ant-design:code-outlined" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getDependencyFormSchema">
+    <BasicForm @register="registerForm" :schemas="getResourceFormSchema">
       <template #uploadJobJar>
         <UploadJobJar :custom-request="handleCustomJobRequest" v-model:loading="uploadLoading">
           <template #uploadInfo>
@@ -45,7 +45,7 @@
 </template>
 <script lang="ts">
   export default {
-    name: 'DependencyDrawer',
+    name: 'ResourceDrawer',
   };
 </script>
 
@@ -58,8 +58,8 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
   import { fetchUpload } from "/@/api/flink/app/app";
-  import { fetchAddDependency, fetchUpdateDependency } from "/@/api/flink/dependency";
-  import { ResourceTypeEnum } from "/@/views/flink/dependency/dependency.data";
+  import { fetchAddResource, fetchUpdateResource } from "/@/api/flink/resource";
+  import { ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
 
   const emit = defineEmits(['success', 'register']);
 
@@ -68,13 +68,13 @@
   const isUpdate = ref(false);
   const uploadLoading = ref(false);
   const uploadJar = ref('');
-  const dependencyId = ref<Nullable<number>>(null);
+  const resourceId = ref<Nullable<number>>(null);
 
-  const getDependencyFormSchema = computed((): FormSchema[] => {
+  const getResourceFormSchema = computed((): FormSchema[] => {
     return [
       {
         field: 'resourceType',
-        label: t('flink.dependency.resourceType'),
+        label: t('flink.resource.resourceType'),
         component: 'Select',
         componentProps: {
           options: [
@@ -87,8 +87,8 @@
         },
       },
       {
-        field: 'dependencyName',
-        label: t('flink.dependency.uploadResource'),
+        field: 'resourceName',
+        label: t('flink.resource.uploadResource'),
         component: 'Select',
         slot: 'uploadJobJar',
       },
@@ -105,13 +105,13 @@
         label: t('common.description'),
         component: 'InputTextArea',
         componentProps: { rows: 4 },
-        rules: [{ max: 100, message: t('flink.dependency.form.descriptionMessage') }],
+        rules: [{ max: 100, message: t('flink.resource.form.descriptionMessage') }],
       },
     ];
   });
 
   const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
-    name: 'DependencyForm',
+    name: 'ResourceForm',
     colon: true,
     showActionButtonGroup: false,
     baseColProps: { span: 24 },
@@ -125,14 +125,14 @@
       setDrawerProps({ confirmLoading: false });
       isUpdate.value = !!data?.isUpdate;
       if (unref(isUpdate)) {
-        dependencyId.value = data.record.id;
+        resourceId.value = data.record.id;
         setFieldsValue(data.record);
       }
     },
   );
 
   const getTitle = computed(() =>
-    !unref(isUpdate) ? t('flink.dependency.addDependency') : t('flink.dependency.modifyDependency'),
+    !unref(isUpdate) ? t('flink.resource.addResource') : t('flink.resource.modifyResource'),
   );
 
   // form submit
@@ -141,8 +141,8 @@
       const values = await validate();
       setDrawerProps({ confirmLoading: true });
       await (isUpdate.value
-        ? fetchUpdateDependency({ id: dependencyId.value, ...values })
-        : fetchAddDependency(values));
+        ? fetchUpdateResource({ id: resourceId.value, ...values })
+        : fetchAddResource(values));
       uploadJar.value = ''
       closeDrawer();
       emit('success', isUpdate.value);
@@ -159,7 +159,7 @@
       const path = await fetchUpload(formData);
       uploadJar.value = data.file.name;
       uploadLoading.value = false;
-      setFieldsValue({ dependencyName: uploadJar.value });
+      setFieldsValue({ resourceName: uploadJar.value });
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;

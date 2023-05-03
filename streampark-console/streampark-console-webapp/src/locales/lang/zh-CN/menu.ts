@@ -26,7 +26,7 @@ export default {
     project: '项目管理',
     application: '作业管理',
     variable: '变量管理',
-    dependency: '资源管理',
+    resource: '资源管理',
     setting: '设置中心',
   },
   setting: {

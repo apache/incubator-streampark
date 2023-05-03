@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface DependencyListRecord {
+export interface ResourceListRecord {
   id: string;
-  dependencyName: string;
+  resourceName: string;
   resourceType: string;
   mainClass: string;
   description: string;
@@ -29,15 +29,15 @@ export interface DependencyListRecord {
   sortOrder?: string;
 }
 
-export interface DependencyParam {
+export interface ResourceParam {
   id?: string;
-  dependencyName: string;
+  resourceName: string;
   description: string;
 }
 
-export interface DependencyDeleteParam {
+export interface ResourceDeleteParam {
   id: string;
-  dependencyName: string;
+  resourceName: string;
   teamId: string;
 }
 

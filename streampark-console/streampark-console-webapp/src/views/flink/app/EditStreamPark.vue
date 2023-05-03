@@ -27,7 +27,11 @@
   import configOptions from './data/option';
   import { fetchMain, fetchUpload, fetchUpdate, fetchGet } from '/@/api/flink/app/app';
   import { useRoute } from 'vue-router';
-  import { getAppConfType, handleSubmitParams, handleTeamDependency } from './utils';
+  import {
+    getAppConfType,
+    handleSubmitParams,
+    handleTeamResource
+  } from './utils';
   import { fetchFlinkHistory } from '/@/api/flink/app/flinkSql';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
@@ -110,7 +114,7 @@
         dynamicProperties: app.dynamicProperties,
         resolveOrder: app.resolveOrder,
         versionId: app.versionId || null,
-        teamDependency: handleTeamDependency(app.teamDependency),
+        teamResource: handleTeamResource(app.teamResource),
         k8sRestExposedType: app.k8sRestExposedType,
         yarnQueue: app.yarnQueue,
         restartSize: app.restartSize,
@@ -207,7 +211,7 @@
         flinkSql: values.flinkSql,
         config,
         format: values.isSetConfig ? 1 : null,
-        teamDependency: JSON.stringify(values.teamDependency),
+        teamResource: JSON.stringify(values.teamResource),
         dependency:
           dependency.pom === undefined && dependency.jar === undefined
             ? null

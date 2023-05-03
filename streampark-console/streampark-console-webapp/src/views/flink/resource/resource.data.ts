@@ -28,8 +28,8 @@ export enum ResourceTypeEnum {
 
 export const columns: BasicColumn[] = [
   {
-    title: t('flink.dependency.table.dependencyName'),
-    dataIndex: 'dependencyName',
+    title: t('flink.resource.table.resourceName'),
+    dataIndex: 'resourceName',
     sorter: true,
   },
   {
@@ -37,7 +37,7 @@ export const columns: BasicColumn[] = [
     dataIndex: 'description',
   },
   {
-    title: t('flink.dependency.resourceType'),
+    title: t('flink.resource.resourceType'),
     dataIndex: 'resourceType',
   },
   {
@@ -54,17 +54,17 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
   {
-    field: 'dependencyName',
-    label: t('flink.dependency.table.dependencyName'),
+    field: 'resourceName',
+    label: t('flink.resource.table.resourceName'),
     component: 'Input',
-    componentProps: { placeholder: t('flink.dependency.table.dependencyNamePlaceholder') },
+    componentProps: { placeholder: t('flink.resource.table.resourceNamePlaceholder') },
     colProps: { span: 8 },
   },
   {
     field: 'description',
     label: t('common.description'),
     component: 'Input',
-    componentProps: { placeholder: t('flink.dependency.table.descriptionPlaceholder') },
+    componentProps: { placeholder: t('flink.resource.table.descriptionPlaceholder') },
     colProps: { span: 8 },
   },
 ];

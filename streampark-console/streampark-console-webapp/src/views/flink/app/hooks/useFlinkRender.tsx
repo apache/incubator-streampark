@@ -43,7 +43,7 @@ import { CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/flink/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
-import {ResourceTypeEnum} from "/@/views/flink/dependency/dependency.data";
+import {ResourceTypeEnum} from "/@/views/flink/resource/resource.data";
 
 const { t } = useI18n();
 /* render input dropdown component */
@@ -539,13 +539,13 @@ export const renderStreamParkResource = ({ model, resources },) => {
       return (
         <Select.Option
           key={resource.id}
-          label={ resource.resourceType + '-' + resource.dependencyName}>
+          label={ resource.resourceType + '-' + resource.resourceName}>
           <div>
             <Tag color="green" style=";margin-left: 5px;" size="small">
               {resource.resourceType}
             </Tag>
             <span style="color: darkgrey">
-              {resource.dependencyName}
+              {resource.resourceName}
             </span>
           </div>
         </Select.Option>
@@ -561,9 +561,9 @@ export const renderStreamParkResource = ({ model, resources },) => {
         optionFilterProp="label"
         mode="multiple"
         max-tag-count={3}
-        onChange={(value) => (model.teamDependency = value)}
-        value={model.teamDependency}
-        placeholder={t('flink.app.teamDependencyPlaceHolder')}
+        onChange={(value) => (model.teamResource = value)}
+        value={model.teamResource}
+        placeholder={t('flink.app.teamResourcePlaceHolder')}
         style="width: calc(100% - 60px)"
       >
         {renderOptions()}
@@ -577,7 +577,7 @@ export const renderStreamParkJarApp = ({ model, resources },) => {
   function handleAppChange(value: SelectValue) {
     const res = resources.filter((item) => item.id == value)[0];
     model.mainClass = res.mainClass
-    model.uploadJobJar = res.dependencyName;
+    model.uploadJobJar = res.resourceName;
   }
 
   const renderOptions = () => {
@@ -588,13 +588,13 @@ export const renderStreamParkJarApp = ({ model, resources },) => {
       return (
         <Select.Option
           key={resource.id}
-          label={resource.dependencyName}>
+          label={resource.resourceName}>
           <div>
             <Tag color="green" style=";margin-left: 5px;" size="small">
               {resource.resourceType}
             </Tag>
             <span style="color: darkgrey">
-              {resource.dependencyName}
+              {resource.resourceName}
             </span>
           </div>
         </Select.Option>

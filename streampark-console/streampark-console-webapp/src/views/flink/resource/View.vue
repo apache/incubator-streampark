@@ -18,7 +18,7 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'dependency:add'">
+        <a-button type="primary" @click="handleCreate" v-auth="'resource:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -56,7 +56,7 @@
           </Tag>
           <Tag
             class="bold-tag"
-            color="#2db7f5"
+            color="#79f379"
             v-if="record.resourceType == ResourceTypeEnum.UDF"
           >
             UDF
@@ -67,17 +67,17 @@
             :actions="[
               {
                 icon: 'clarity:note-edit-line',
-                auth: 'dependency:update',
-                tooltip: t('flink.dependency.modifyDependency'),
+                auth: 'resource:update',
+                tooltip: t('flink.resource.modifyResource'),
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
-                tooltip: t('flink.dependency.deleteDependency'),
-                auth: 'dependency:delete',
+                tooltip: t('flink.resource.deleteResource'),
+                auth: 'resource:delete',
                 popConfirm: {
-                  title: t('flink.dependency.deletePopConfirm'),
+                  title: t('flink.resource.deletePopConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },
               },
@@ -86,27 +86,27 @@
         </template>
       </template>
     </BasicTable>
-    <DependencyDrawer @register="registerDrawer" @success="handleSuccess" />
+    <ResourceDrawer @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
   export default defineComponent({
-    name: 'Dependency',
+    name: 'Resource',
   });
 </script>
 
 <script lang="ts" setup>
   import {defineComponent, ref} from 'vue';
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
-  import DependencyDrawer from './components/DependencyDrawer.vue';
+  import ResourceDrawer from './components/ResourceDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { columns, searchFormSchema } from './dependency.data';
+  import { columns, searchFormSchema } from './resource.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
-  import { fetchDependencyDelete, fetchDependencyList } from "/@/api/flink/dependency";
-  import { ResourceTypeEnum } from "/@/views/flink/dependency/dependency.data";
+  import { fetchResourceDelete, fetchResourceList } from "/@/api/flink/resource";
+  import { ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
   import { Tag } from 'ant-design-vue';
 
   const router = useRouter();
@@ -115,8 +115,8 @@
   const { createMessage } = useMessage();
   const { t } = useI18n();
   const [registerTable, { reload }] = useTable({
-    title: t('flink.dependency.table.title'),
-    api: fetchDependencyList,
+    title: t('flink.resource.table.title'),
+    api: fetchResourceList,
     columns,
     formConfig: {
       baseColProps: { style: { paddingRight: '30px' } },
@@ -161,24 +161,24 @@
     });
   }
 
-  /* Delete the dependency */
+  /* Delete the resource */
   async function handleDelete(record: Recordable) {
-    const { data } = await fetchDependencyDelete({
+    const { data } = await fetchResourceDelete({
       id: record.id,
       teamId: record.teamId,
-      dependencyName: record.dependencyName,
+      resourceName: record.resourceName,
     });
     if (data.status === 'success') {
-      createMessage.success(t('flink.dependency.deleteDependency') + t('flink.dependency.success'));
+      createMessage.success(t('flink.resource.deleteResource') + t('flink.resource.success'));
       reload();
     } else {
-      createMessage.error(t('flink.dependency.deleteDependency') + t('flink.dependency.fail'));
+      createMessage.error(t('flink.resource.deleteResource') + t('flink.resource.fail'));
     }
   }
 
   function handleSuccess(isUpdate: boolean) {
     createMessage.success(
-      `${isUpdate ? t('common.edit') : t('flink.dependency.add')}${t('flink.dependency.success')}`,
+      `${isUpdate ? t('common.edit') : t('flink.resource.add')}${t('flink.resource.success')}`,
     );
     reload();
   }

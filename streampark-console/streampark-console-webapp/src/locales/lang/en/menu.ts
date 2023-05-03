@@ -26,7 +26,7 @@ export default {
     project: 'Project',
     application: 'Application',
     variable: 'Variable',
-    dependency: 'Resource',
+    resource: 'Resource',
     setting: 'Settings',
   },
   setting: {

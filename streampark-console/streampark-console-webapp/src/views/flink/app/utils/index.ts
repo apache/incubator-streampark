@@ -312,9 +312,9 @@ export function isK8sExecMode(mode: number): boolean {
   return [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(mode);
 }
 
-export function handleTeamDependency(teamDependency: string) {
-    if (teamDependency != null && teamDependency !== '') {
-      return JSON.parse(teamDependency);
+export function handleTeamResource(resource: string) {
+    if (resource != null && resource !== '') {
+      return JSON.parse(resource);
     }
     return [];
 }

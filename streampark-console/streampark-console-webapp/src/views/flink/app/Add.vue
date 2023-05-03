@@ -248,7 +248,7 @@
       appType: AppTypeEnum.STREAMPARK_FLINK,
       config,
       format: values.isSetConfig ? 1 : null,
-      teamDependency: JSON.stringify(values.teamDependency),
+      teamResource: JSON.stringify(values.teamResource),
       dependency:
         dependency.pom === undefined && dependency.jar === undefined
           ? null
