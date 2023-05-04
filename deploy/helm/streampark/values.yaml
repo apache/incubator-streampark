@@ -23,7 +23,7 @@ timezone: "Asia/Shanghai"
 image:
   repository: "apache/streampark"
   pullPolicy: "IfNotPresent"
-  tag: "2.1.0-SNAPSHOT"
+  tag: "2.2.0-SNAPSHOT"
   pullSecret: ""
 
 rbac:

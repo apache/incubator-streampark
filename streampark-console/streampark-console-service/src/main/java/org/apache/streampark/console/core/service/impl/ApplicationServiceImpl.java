@@ -718,7 +718,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
       String jarPath =
-          WebUtils.getAppTempDir().getAbsolutePath().concat("/").concat(appParam.getJar());
+          String.format(
+              "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
       appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
     }
 
@@ -803,6 +804,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       if (newApp.isFlinkSqlJob()) {
         FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
         newApp.setFlinkSql(copyFlinkSql.getSql());
+        newApp.setTeamResource(copyFlinkSql.getTeamResource());
         newApp.setDependency(copyFlinkSql.getDependency());
         FlinkSql flinkSql = new FlinkSql(newApp);
         flinkSqlService.create(flinkSql);

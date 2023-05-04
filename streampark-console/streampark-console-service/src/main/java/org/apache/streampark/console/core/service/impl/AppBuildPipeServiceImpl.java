@@ -27,6 +27,7 @@ import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
@@ -49,9 +50,11 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
+import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
+import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.DockerBuildSnapshot;
@@ -87,6 +90,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -124,6 +128,8 @@ public class AppBuildPipeServiceImpl
   @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
 
   @Autowired private ApplicationConfigService applicationConfigService;
+
+  @Autowired private ResourceService resourceService;
 
   @Autowired private AppBuildPipeService appBuildPipeService;
 
@@ -186,6 +192,7 @@ public class AppBuildPipeServiceImpl
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
       Utils.notNull(flinkSql);
       app.setDependency(flinkSql.getDependency());
+      app.setTeamResource(flinkSql.getTeamResource());
     }
 
     // create pipeline instance
@@ -222,10 +229,15 @@ public class AppBuildPipeServiceImpl
               FsOperator fsOperator = app.getFsOperator();
               fsOperator.delete(appHome);
               if (app.isUploadJob()) {
-                File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
+                File localJar =
+                    new File(
+                        String.format(
+                            "%s/%d/%s",
+                            Workspace.local().APP_UPLOADS(), app.getTeamId(), app.getJar()));
                 // upload jar copy to appHome
                 String uploadJar = appUploads.concat("/").concat(app.getJar());
                 checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
+
                 switch (app.getApplicationType()) {
                   case STREAMPARK_FLINK:
                     fsOperator.mkdirs(app.getAppLib());
@@ -418,7 +430,7 @@ public class AppBuildPipeServiceImpl
                 localWorkspace,
                 yarnProvidedPath,
                 app.getDevelopmentMode(),
-                app.getDependencyInfo());
+                getMergedDependencyInfo(app));
         log.info("Submit params to building pipeline : {}", yarnAppRequest);
         return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
       case YARN_PER_JOB:
@@ -434,7 +446,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo());
+                getMergedDependencyInfo(app));
         log.info("Submit params to building pipeline : {}", buildRequest);
         return FlinkRemoteBuildPipeline.of(buildRequest);
       case KUBERNETES_NATIVE_SESSION:
@@ -447,7 +459,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo(),
+                getMergedDependencyInfo(app),
                 app.getClusterId(),
                 app.getK8sNamespace());
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
@@ -462,7 +474,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo(),
+                getMergedDependencyInfo(app),
                 app.getClusterId(),
                 app.getK8sNamespace(),
                 app.getFlinkImage(),
@@ -569,6 +581,27 @@ public class AppBuildPipeServiceImpl
       if (!FileUtils.equals(localJar, new File(targetJar))) {
         fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
       }
+    }
+  }
+
+  private DependencyInfo getMergedDependencyInfo(Application application) {
+    DependencyInfo dependencyInfo = application.getDependencyInfo();
+
+    try {
+      String[] teamJarIds = JacksonUtils.read(application.getTeamResource(), String[].class);
+      List<String> teamJarsFullPath =
+          Arrays.stream(teamJarIds)
+              .map(jarId -> resourceService.getById(jarId).getResourceName())
+              .map(
+                  jar ->
+                      String.format(
+                          "%s/%d/%s",
+                          Workspace.local().APP_UPLOADS(), application.getTeamId(), jar))
+              .collect(Collectors.toList());
+      return dependencyInfo.merge(teamJarsFullPath);
+    } catch (Exception e) {
+      log.warn("Merge team dependency failed.");
+      return dependencyInfo;
     }
   }
 }

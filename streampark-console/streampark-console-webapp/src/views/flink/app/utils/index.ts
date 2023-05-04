@@ -311,3 +311,10 @@ export const filterOption = (input: string, options: Recordable) => {
 export function isK8sExecMode(mode: number): boolean {
   return [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(mode);
 }
+
+export function handleTeamResource(resource: string) {
+    if (resource != null && resource !== '') {
+      return JSON.parse(resource);
+    }
+    return [];
+}

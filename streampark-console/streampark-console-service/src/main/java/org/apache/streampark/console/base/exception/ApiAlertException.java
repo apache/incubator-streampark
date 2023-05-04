@@ -25,10 +25,10 @@ import java.util.Objects;
  *
  *
  * <pre>
- * An exception message that needs to be notified to front-end,
- * usually a <strong>simple</strong>, clear</strong> message, e.g:
- * <p>1. Username already exists</p>
- * <p>2. No permission, please contact the administrator</p>
+ * To notify the frontend of an exception message,
+ * it is usually a <strong> clear </strong> and <strong> concise </strong> message, e.g:
+ * <p> 1. The username already exists.</p>
+ * <p> 2. No permission, please contact the administrator.</p>
  * ...
  * </pre>
  */

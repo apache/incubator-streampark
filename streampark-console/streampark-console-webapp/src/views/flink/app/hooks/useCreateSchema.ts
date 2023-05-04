@@ -24,7 +24,10 @@ import { fetchMain, fetchName } from '/@/api/flink/app/app';
 import { modules, fetchListConf, fetchListJars } from '/@/api/flink/project';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
-import { renderResourceFrom } from './useFlinkRender';
+import {
+  renderResourceFrom,
+  renderStreamParkJarApp
+} from './useFlinkRender';
 import { filterOption, getAppConfType } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
@@ -56,6 +59,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     flinkEnvs,
     flinkClusters,
     projectList,
+    teamResource,
     getFlinkSqlSchema,
     getFlinkClusterSchemas,
     getExecutionModeSchema,
@@ -120,9 +124,10 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       {
         field: 'uploadJobJar',
-        label: t('flink.app.uploadJobJar'),
+        label: t('flink.app.selectJobJar'),
         component: 'Select',
-        slot: 'uploadJobJar',
+        render: ({ model }) =>
+          renderStreamParkJarApp( { model, resources: unref(teamResource) }, ),
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
       },
       {

@@ -41,7 +41,6 @@ enum Api {
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
   CheckName = '/user/check/name',
-  TYPES = '/user/types',
   SET_TEAM = '/user/setTeam',
   INIT_TEAM = '/user/initTeam',
   APP_OWNERS = '/user/appOwners',
@@ -114,17 +113,6 @@ export function checkUserName(data) {
     url: Api.CheckName,
     data,
   });
-}
-
-export function fetchUserTypes() {
-  return defHttp
-    .post({
-      url: Api.TYPES,
-      data: {},
-    })
-    .then((res) => {
-      return res.map((t: string) => ({ label: t, value: t }));
-    });
 }
 
 /**

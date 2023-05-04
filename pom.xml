@@ -26,7 +26,7 @@
 
     <groupId>org.apache.streampark</groupId>
     <artifactId>streampark</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>StreamPark Project Parent POM</name>
 
@@ -132,6 +132,7 @@
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
         <spotless.scalafmt.version>3.4.3</spotless.scalafmt.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
+        <owasp-dependency-check-maven.version>8.2.1</owasp-dependency-check-maven.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
@@ -145,6 +146,7 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
         <MaxMetaspace>512m</MaxMetaspace>
+        <skipDependencyCheck>true</skipDependencyCheck>
     </properties>
 
     <dependencyManagement>
@@ -687,6 +689,7 @@
                     <version>${maven-javadoc-plugin.version}</version>
                     <configuration>
                         <quiet>true</quiet>
+                        <additionalparam>-Xdoclint:none</additionalparam>
                     </configuration>
                     <executions>
                         <execution>
@@ -718,6 +721,26 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
                 </plugin>
+
+                <plugin>
+                    <!-- run via "mvn -Pscala-2.12 -DskipDependencyCheck=false org.owasp:dependency-check-maven:aggregate" -->
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>${owasp-dependency-check-maven.version}</version>
+                    <configuration>
+                        <skip>${skipDependencyCheck}</skip>
+                        <format>ALL</format>
+                        <skipProvidedScope>true</skipProvidedScope>
+                        <skipSystemScope>true</skipSystemScope>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>aggregate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -745,6 +768,11 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
             </plugin>
         </plugins>
 
