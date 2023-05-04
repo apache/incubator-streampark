@@ -534,7 +534,7 @@ export const renderStreamParkResource = ({ model, resources },) => {
   const renderOptions = () => {
     console.log('resources', resources);
     return (resources || [])
-      .filter((item) => item.resourceType !== ResourceTypeEnum.APP )
+      .filter((item) => item.resourceType !== ResourceTypeEnum.FLINK_APP )
       .map((resource) => {
       return (
         <Select.Option
@@ -583,7 +583,7 @@ export const renderStreamParkJarApp = ({ model, resources },) => {
   const renderOptions = () => {
     console.log('resources', resources);
     return (resources || [])
-      .filter((item) => item.resourceType == ResourceTypeEnum.APP )
+      .filter((item) => item.resourceType == ResourceTypeEnum.FLINK_APP )
       .map((resource) => {
       return (
         <Select.Option

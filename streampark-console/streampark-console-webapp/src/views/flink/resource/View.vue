@@ -29,16 +29,16 @@
           <Tag
             class="bold-tag"
             color="#52c41a"
-            v-if="record.resourceType == ResourceTypeEnum.APP"
+            v-if="record.resourceType == ResourceTypeEnum.FLINK_APP"
           >
-            APP
+            FLINK_APP
           </Tag>
           <Tag
             class="bold-tag"
             color="#2db7f5"
-            v-if="record.resourceType == ResourceTypeEnum.COMMON"
+            v-if="record.resourceType == ResourceTypeEnum.NORMAL_JAR"
           >
-            COMMON
+            NORMAL_JAR
           </Tag>
           <Tag
             class="bold-tag"
@@ -49,17 +49,26 @@
           </Tag>
           <Tag
             class="bold-tag"
-            color="#102541"
-            v-if="record.resourceType == ResourceTypeEnum.FORMAT"
+            color="#79f379"
+            v-if="record.resourceType == ResourceTypeEnum.UDXF"
           >
-            FORMAT
+            UDXF
+          </Tag>
+        </template>
+        <template v-if="column.dataIndex === 'engineType'">
+          <Tag
+            class="bold-tag"
+            color="#e65270"
+            v-if="record.engineType == EngineTypeEnum.FLINK"
+          >
+            FLINK
           </Tag>
           <Tag
             class="bold-tag"
-            color="#79f379"
-            v-if="record.resourceType == ResourceTypeEnum.UDF"
+            color="#f5be07"
+            v-if="record.engineType == EngineTypeEnum.SPARK"
           >
-            UDF
+            SPARK
           </Tag>
         </template>
         <template v-if="column.dataIndex === 'action'">
@@ -106,7 +115,7 @@
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
   import { fetchResourceDelete, fetchResourceList } from "/@/api/flink/resource";
-  import { ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
+  import { EngineTypeEnum, ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
   import { Tag } from 'ant-design-vue';
 
   const router = useRouter();

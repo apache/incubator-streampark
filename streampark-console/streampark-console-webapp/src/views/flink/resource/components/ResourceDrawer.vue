@@ -59,7 +59,7 @@
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
   import { fetchUpload } from "/@/api/flink/app/app";
   import { fetchAddResource, fetchUpdateResource } from "/@/api/flink/resource";
-  import { ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
+  import { EngineTypeEnum, ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
 
   const emit = defineEmits(['success', 'register']);
 
@@ -78,13 +78,27 @@
         component: 'Select',
         componentProps: {
           options: [
-            { label: 'APP', value: ResourceTypeEnum.APP },
-            { label: 'COMMON', value: ResourceTypeEnum.COMMON },
+            { label: 'FLINK_APP', value: ResourceTypeEnum.FLINK_APP },
             { label: 'CONNECTOR', value: ResourceTypeEnum.CONNECTOR },
-            { label: 'FORMAT', value: ResourceTypeEnum.FORMAT },
-            { label: 'UDF', value: ResourceTypeEnum.UDF },
+            { label: 'UDXF', value: ResourceTypeEnum.UDXF },
+            { label: 'NORMAL_JAR', value: ResourceTypeEnum.NORMAL_JAR },
           ],
         },
+        rules: [{ required: true, message: t('flink.resource.form.resourceTypeIsRequiredMessage') }],
+      },
+      {
+        field: 'engineType',
+        label: t('flink.resource.engineType'),
+        component: 'Select',
+        defaultValue: EngineTypeEnum.FLINK,
+        componentProps: {
+          placeholder: t('flink.resource.engineTypePlaceholder'),
+          options: [
+            { label: 'apache flink', value: EngineTypeEnum.FLINK, disabled: false },
+            { label: 'apache spark', value: EngineTypeEnum.SPARK, disabled: true },
+          ],
+        },
+        rules: [{ required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }],
       },
       {
         field: 'resourceName',
@@ -97,7 +111,7 @@
         label: t('flink.app.mainClass'),
         component: 'Input',
         componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
-        ifShow: ({ values }) => values?.resourceType == 'APP',
+        ifShow: ({ values }) => values?.resourceType == 'FLINK_APP',
         rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {

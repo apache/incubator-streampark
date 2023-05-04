@@ -22,6 +22,7 @@
         <result column="resource_name" jdbcType="VARCHAR" property="resourceName"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="resource_type" jdbcType="BIGINT" property="resourceType"/>
+        <result column="engine_type" jdbcType="BIGINT" property="engineType"/>
         <result column="creator_id" jdbcType="BIGINT" property="creatorId"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
