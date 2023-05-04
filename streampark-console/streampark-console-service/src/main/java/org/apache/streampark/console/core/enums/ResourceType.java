@@ -24,18 +24,17 @@ import java.util.Arrays;
 /** The resource type. */
 public enum ResourceType {
 
-  /** User app */
-  APP(0),
+  /** Flink application */
+  FLINK_APP(0),
+
+  /** connector plugin */
+  CONNECTOR(1),
+
+  /** User defined function, including udf/udaf/udtf */
+  UDXF(2),
+
   /** Common resource, like mysql-jdbc */
-  COMMON(1),
-
-  /** Flink connector plugin */
-  CONNECTOR(2),
-  /** Flink format plugin */
-  FORMAT(3),
-
-  /** User designed function, including udf/udaf/udtf */
-  UDF(4);
+  NORMAL_JAR(3);
 
   @EnumValue private final int code;
 

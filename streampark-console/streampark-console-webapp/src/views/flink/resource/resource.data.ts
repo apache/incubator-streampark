@@ -19,11 +19,15 @@ import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 
 export enum ResourceTypeEnum {
-  APP = 'APP',
-  COMMON = 'COMMON',
+  FLINK_APP = 'FLINK_APP',
   CONNECTOR = 'CONNECTOR',
-  FORMAT = 'FORMAT',
-  UDF = 'UDF',
+  UDXF = 'UDXF',
+  NORMAL_JAR = 'NORMAL_JAR',
+}
+
+export enum EngineTypeEnum {
+  FLINK = 'FLINK',
+  SPARK = 'SPARK',
 }
 
 export const columns: BasicColumn[] = [
@@ -39,6 +43,10 @@ export const columns: BasicColumn[] = [
   {
     title: t('flink.resource.resourceType'),
     dataIndex: 'resourceType',
+  },
+  {
+    title: t('flink.resource.engineType'),
+    dataIndex: 'engineType',
   },
   {
     title: t('common.createTime'),

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.console.core.enums.EngineType;
 import org.apache.streampark.console.core.enums.ResourceType;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -48,6 +49,8 @@ public class Resource implements Serializable {
   private Long creatorId;
 
   private ResourceType resourceType;
+
+  private EngineType engineType;
 
   private String mainClass;
 

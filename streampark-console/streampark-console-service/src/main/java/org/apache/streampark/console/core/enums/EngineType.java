@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,38 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface ResourceListRecord {
-  id: string;
-  resourceName: string;
-  resourceType: string;
-  engineType: string;
-  mainClass: string;
-  description: string;
-  creatorId: string;
-  creatorName: string;
-  teamId: string;
-  createTime: string;
-  modifyTime: string;
-  sortField?: string;
-  sortOrder?: string;
-}
 
-export interface ResourceParam {
-  id?: string;
-  resourceName: string;
-  engineType: string;
-  description: string;
-}
+package org.apache.streampark.console.core.enums;
 
-export interface ResourceDeleteParam {
-  id: string;
-  resourceName: string;
-  teamId: string;
-}
+import com.baomidou.mybatisplus.annotation.EnumValue;
 
-export interface BasicTableParams {
-  page: number;
-  pageSize: number;
-  teamId: string;
-  [key: string]: Nullable<string | number>;
+import java.util.Arrays;
+
+/** Compute engine type. */
+public enum EngineType {
+
+  /** Apache Flink: activated by default */
+  FLINK(0),
+
+  /** Apache Spark */
+  SPARK(1);
+
+  @EnumValue private final int code;
+
+  EngineType(int code) {
+    this.code = code;
+  }
+
+  public int getCode() {
+    return code;
+  }
+
+  public static EngineType of(Integer code) {
+    return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+  }
 }

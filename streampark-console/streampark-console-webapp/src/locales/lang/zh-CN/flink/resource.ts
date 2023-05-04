@@ -22,6 +22,8 @@ export default {
   deletePopConfirm: '你确定要删除这个资源?',
   uploadResource: '上传资源',
   resourceType: '资源类型',
+  engineType: '计算引擎类型',
+  engineTypePlaceholder: '请选择计算引擎类型',
   add: '添加',
   success: '成功',
   fail: '失败',
@@ -37,6 +39,8 @@ export default {
   },
   form: {
     descriptionMessage: '超过 100 个字符的最大长度限制',
+    engineTypeIsRequiredMessage: '计算引擎类型必选',
+    resourceTypeIsRequiredMessage: '资源类型必选',
     exists: '资源已存在',
     empty: '资源不能为空',
   },

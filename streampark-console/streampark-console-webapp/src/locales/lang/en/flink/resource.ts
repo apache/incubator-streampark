@@ -22,6 +22,8 @@ export default {
   deletePopConfirm: 'Are you sure delete this resource ?',
   uploadResource: 'Upload Resource',
   resourceType: 'Resource Type',
+  engineType: 'Engine Type',
+  engineTypePlaceholder: 'Please select compute engine type',
   add: 'Add',
   success: ' successful',
   fail: ' failed',
@@ -37,6 +39,8 @@ export default {
   },
   form: {
     descriptionMessage: 'exceeds maximum length limit of 100 characters',
+    engineTypeIsRequiredMessage: 'compute engine type is required',
+    resourceTypeIsRequiredMessage: 'resource type is required',
     exists: 'Sorry, the Resource already exists',
     empty: 'Resource cannot be empty',
   },
