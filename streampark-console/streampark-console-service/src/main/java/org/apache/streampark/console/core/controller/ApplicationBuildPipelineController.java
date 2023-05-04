@@ -19,14 +19,10 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.ApplicationLog;
-import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
@@ -50,7 +46,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -96,12 +91,12 @@ public class ApplicationBuildPipelineController {
   @PostMapping(value = "build")
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
-      try {
-          boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
-          return RestResponse.success(actionResult);
-      } catch (Exception e) {
-          return RestResponse.success(false).message(e.getMessage());
-      }
+    try {
+      boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
+      return RestResponse.success(actionResult);
+    } catch (Exception e) {
+      return RestResponse.success(false).message(e.getMessage());
+    }
   }
 
   /**
