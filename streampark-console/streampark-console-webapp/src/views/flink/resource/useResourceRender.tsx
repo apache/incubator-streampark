@@ -29,10 +29,10 @@ export const renderResourceType = ({ model },) => {
 
   const renderOptions = () => {
     const options = [
-      { label: 'FLINK_APP', value: ResourceTypeEnum.FLINK_APP, src: flinkAppSvg },
-      { label: 'CONNECTOR', value: ResourceTypeEnum.CONNECTOR, src: connectorSvg },
+      { label: 'Flink App', value: ResourceTypeEnum.FLINK_APP, src: flinkAppSvg },
+      { label: 'Connector', value: ResourceTypeEnum.CONNECTOR, src: connectorSvg },
       { label: 'UDXF', value: ResourceTypeEnum.UDXF, src: udxfSvg },
-      { label: 'NORMAL_JAR', value: ResourceTypeEnum.NORMAL_JAR, src: normalJarSvg },
+      { label: 'Normal Jar', value: ResourceTypeEnum.NORMAL_JAR, src: normalJarSvg },
     ];
     return options
       .map(( {label,value, src} ) => {
