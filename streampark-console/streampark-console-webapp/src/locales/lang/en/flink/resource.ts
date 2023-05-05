@@ -41,6 +41,7 @@ export default {
     descriptionMessage: 'exceeds maximum length limit of 100 characters',
     engineTypeIsRequiredMessage: 'compute engine type is required',
     resourceTypeIsRequiredMessage: 'resource type is required',
+    resourceTypePlaceholder: 'Please select resource type',
     exists: 'Sorry, the Resource already exists',
     empty: 'Resource cannot be empty',
   },

@@ -60,6 +60,7 @@
   import { fetchUpload } from "/@/api/flink/app/app";
   import { fetchAddResource, fetchUpdateResource } from "/@/api/flink/resource";
   import { EngineTypeEnum, ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
+  import {renderResourceType} from "/@/views/flink/resource/useResourceRender";
 
   const emit = defineEmits(['success', 'register']);
 
@@ -76,14 +77,8 @@
         field: 'resourceType',
         label: t('flink.resource.resourceType'),
         component: 'Select',
-        componentProps: {
-          options: [
-            { label: 'FLINK_APP', value: ResourceTypeEnum.FLINK_APP },
-            { label: 'CONNECTOR', value: ResourceTypeEnum.CONNECTOR },
-            { label: 'UDXF', value: ResourceTypeEnum.UDXF },
-            { label: 'NORMAL_JAR', value: ResourceTypeEnum.NORMAL_JAR },
-          ],
-        },
+        render: ({ model }) =>
+          renderResourceType( { model, }, ),
         rules: [{ required: true, message: t('flink.resource.form.resourceTypeIsRequiredMessage') }],
       },
       {

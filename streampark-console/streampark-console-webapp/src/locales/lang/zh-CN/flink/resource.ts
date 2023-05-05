@@ -41,6 +41,7 @@ export default {
     descriptionMessage: '超过 100 个字符的最大长度限制',
     engineTypeIsRequiredMessage: '计算引擎类型必选',
     resourceTypeIsRequiredMessage: '资源类型必选',
+    resourceTypePlaceholder: '请选择资源类型',
     exists: '资源已存在',
     empty: '资源不能为空',
   },
