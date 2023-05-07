@@ -302,7 +302,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       File file = new File(project.getDistHome(), project.getModule());
       File unzipFile = new File(file.getAbsolutePath().replaceAll(".tar.gz", ""));
       if (!unzipFile.exists()) {
-        GZipUtils.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
+        GZipUtils.deCompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
       }
       List<Map<String, Object>> list = new ArrayList<>();
       File[] files = unzipFile.listFiles(x -> "conf".equals(x.getName()));

@@ -34,6 +34,11 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+
         <!-- provided -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
