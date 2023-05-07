@@ -28,24 +28,45 @@
     </template>
     <BasicForm @register="registerForm" />
   </BasicDrawer>
+  <Modal
+    :visible="transferModalVisible"
+    :confirm-loading="transferModalLoading"
+    :ok-text="t('common.okText')"
+    centered
+    @ok="handleTransfer"
+    @cancel="transferModalVisible=false"
+  >
+    <template #title>
+      <SvgIcon name="alarm" size="25"/>
+      {{ t('system.user.form.transferResource') }}
+    </template>
+    <BasicForm @register="transferForm" class="!mt-30px"/>
+  </Modal>
 </template>
 <script lang="ts">
-  import { computed, defineComponent, ref, unref } from 'vue';
+import {computed, defineComponent, nextTick, ref, unref} from 'vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { formSchema } from '../user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-  import { addUser, updateUser } from '/@/api/system/user';
-  import Icon from '/@/components/Icon';
+import {addUser, getUserList, transferUserResource, updateUser} from '/@/api/system/user';
+  import { Icon, SvgIcon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { useFormValidate } from "/@/hooks/web/useFormValidate";
+  import { useUserStoreWithOut } from "/@/store/modules/user";
+  import { Modal } from 'ant-design-vue';
 
   export default defineComponent({
     name: 'MenuDrawer',
-    components: { BasicDrawer, Icon, BasicForm },
+    components: { Modal, BasicDrawer, Icon, SvgIcon, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();
+      const userStore = useUserStoreWithOut();
       const formType = ref(FormTypeEnum.Edit);
+      const userInfo = ref<Recordable>({});
+      const transferModalVisible = ref(false);
+      const transferModalLoading = ref(false);
 
       const [registerForm, { resetFields, setFieldsValue, updateSchema, validate, clearValidate }] =
         useForm({
@@ -58,6 +79,7 @@
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
         formType.value = data.formType;
+        userInfo.value = data.record || {}
         resetFields();
         clearValidate();
         updateSchema(formSchema(unref(formType)));
@@ -73,6 +95,38 @@
         }
       });
 
+      const [transferForm, { resetFields: resetTransferFields,validate: transferValidate }] = useForm({
+        colon: true,
+        labelWidth: 120,
+        showActionButtonGroup: false,
+        baseColProps: { lg: 22, md: 22 },
+        schemas: [
+          {
+            field: 'userId',
+            label: t('system.user.form.userName'),
+            component: 'ApiSelect',
+            componentProps: {
+              api: async () =>  {
+                let {records} = await getUserList({ page: 1, pageSize: 999999, teamId: userStore.getTeamId || '' })
+                return records.filter( user => user.userId !== userInfo.value.userId )
+              },
+              labelField: 'username',
+              valueField: 'userId',
+              showSearch: false,
+              optionFilterGroup: 'username',
+              placeholder: t('system.member.userNameRequire'),
+            },
+            rules: [
+              {
+                required: true,
+                message: t('system.member.userNameRequire'),
+                trigger: 'blur',
+              },
+            ],
+          }
+        ],
+      });
+
       const getTitle = computed(() => {
         return {
           [FormTypeEnum.Create]: t('system.user.form.create'),
@@ -85,7 +139,16 @@
         try {
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
-          unref(formType) === FormTypeEnum.Edit ? await updateUser(values) : await addUser(values);
+          if (unref(formType) === FormTypeEnum.Edit) {
+            const res: { needTransferResource: Boolean } = await updateUser(values)
+            if (res?.needTransferResource) {
+              transferModalVisible.value = true
+              nextTick(resetTransferFields)
+              return
+            }
+          }else{
+            await addUser(values);
+          }
           closeDrawer();
           emit('success');
         } finally {
@@ -93,7 +156,21 @@
         }
       }
 
-      return { t, registerDrawer, registerForm, getTitle, handleSubmit };
+      async function handleTransfer() {
+        try {
+          const values = await transferValidate();
+          transferModalLoading.value = true
+          await transferUserResource({ userId:userInfo.value.userId, targetUserId: values.userId })
+          emit('success');
+          transferModalVisible.value = false
+        } catch (e) {
+          console.error(e);
+        } finally {
+          transferModalLoading.value = false
+        }
+      }
+
+      return { t, registerDrawer, registerForm, transferForm, transferModalLoading, transferModalVisible, getTitle, handleSubmit, handleTransfer, closeDrawer };
     },
   });
 </script>

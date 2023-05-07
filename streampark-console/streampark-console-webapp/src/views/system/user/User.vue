@@ -40,7 +40,7 @@
   import UserDrawer from './components/UserDrawer.vue';
   import UserModal from './components/UserModal.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { deleteUser, getUserList, resetPassword } from '/@/api/system/user';
+  import { getUserList, resetPassword } from '/@/api/system/user';
   import { columns, searchFormSchema } from './user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -82,7 +82,7 @@
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
-          width: 200,
+          width: 150,
           title: t('component.table.operation'),
           dataIndex: 'action',
         },
@@ -113,17 +113,6 @@
               confirm: handleReset.bind(null, record),
             },
           },
-          {
-            icon: 'ant-design:delete-outlined',
-            color: 'error',
-            auth: 'user:delete',
-            ifShow: record.username !== 'admin',
-            tooltip: t('system.user.table.delete'),
-            popConfirm: {
-              title: t('system.user.table.deleteTip'),
-              confirm: handleDelete.bind(null, record),
-            },
-          },
         ];
       }
       // user create
@@ -141,20 +130,6 @@
       // see detail
       function handleView(record: UserListRecord) {
         openModal(true, record);
-      }
-
-      // delete current user
-      async function handleDelete(record: UserListRecord) {
-        const hide = createMessage.loading('deleteing');
-        try {
-          await deleteUser({ userId: record.userId });
-          createMessage.success(t('system.user.table.deleteSuccess'));
-          reload();
-        } catch (error) {
-          console.error('user delete fail:', error);
-        } finally {
-          hide();
-        }
       }
 
       async function handleReset(record: Recordable) {
@@ -189,7 +164,6 @@
         registerModal,
         handleCreate,
         handleEdit,
-        handleDelete,
         handleSuccess,
         handleView,
         handleReset,

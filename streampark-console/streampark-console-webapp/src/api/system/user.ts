@@ -37,13 +37,13 @@ enum Api {
   NoTokenUsers = '/user/getNoTokenUser',
   UserUpdate = '/user/update',
   UserAdd = '/user/post',
-  UserDelete = '/user/delete',
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
   CheckName = '/user/check/name',
   SET_TEAM = '/user/setTeam',
   INIT_TEAM = '/user/initTeam',
   APP_OWNERS = '/user/appOwners',
+  TransferUserResource = '/user/transferResource',
 }
 
 /**
@@ -99,10 +99,6 @@ export function addUser(data: Recordable) {
   return defHttp.post({ url: Api.UserAdd, data });
 }
 
-export function deleteUser(data) {
-  return defHttp.delete({ url: Api.UserDelete, data });
-}
-
 export function resetPassword(data): Promise<AxiosResponse<Result<string>>> {
   return defHttp.put({ url: Api.ResetPassword, data },
     { isReturnNativeResponse: true },);
@@ -149,4 +145,8 @@ export function fetchSetUserTeam(data: { teamId: string }): Promise<TeamSetRespo
     url: Api.SET_TEAM,
     data,
   });
+}
+
+export function transferUserResource(data: { userId: string, targetUserId: string }): Promise<TeamSetResponse> {
+  return defHttp.put({ url: Api.TransferUserResource, data });
 }
