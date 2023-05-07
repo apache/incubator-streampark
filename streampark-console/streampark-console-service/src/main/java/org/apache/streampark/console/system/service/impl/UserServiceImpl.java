@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -111,24 +112,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public void updateUser(User user) {
+  public RestResponse updateUser(User user) {
     User existsUser = getById(user.getUserId());
     user.setPassword(null);
     user.setModifyTime(new Date());
-    checkLockUser(existsUser, user);
+    if (needTransferResource(existsUser, user)) {
+      return RestResponse.success(Collections.singletonMap("needTransferResource", true));
+    }
     updateById(user);
+    return RestResponse.success();
   }
 
-  private void checkLockUser(User existsUser, User user) {
-    if (User.STATUS_VALID.equals(existsUser.getStatus())
-        && User.STATUS_LOCK.equals(user.getStatus())) {
-      if (applicationService.existsByUserId(user.getUserId())) {
-        throw new ApiAlertException("User has application, can't lock.");
-      }
-      if (resourceService.existsByUserId(user.getUserId())) {
-        throw new ApiAlertException("User has resource, can't lock.");
-      }
+  private boolean needTransferResource(User existsUser, User user) {
+    if (User.STATUS_LOCK.equals(existsUser.getStatus())
+        || User.STATUS_VALID.equals(user.getStatus())) {
+      return false;
     }
+    return applicationService.existsByUserId(user.getUserId())
+        || resourceService.existsByUserId(user.getUserId());
   }
 
   @Override

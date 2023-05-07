@@ -86,8 +86,7 @@ public class UserController {
   @PutMapping("update")
   @RequiresPermissions("user:update")
   public RestResponse updateUser(@Valid User user) throws Exception {
-    this.userService.updateUser(user);
-    return RestResponse.success();
+    return this.userService.updateUser(user);
   }
 
   @Operation(summary = "List without token users")
