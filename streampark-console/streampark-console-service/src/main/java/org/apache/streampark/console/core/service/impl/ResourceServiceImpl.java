@@ -69,6 +69,17 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     return this.baseMapper.page(page, resource);
   }
 
+  /**
+   * check resource exists by user id
+   *
+   * @param userId user id
+   * @return true if exists
+   */
+  @Override
+  public boolean existsByUserId(Long userId) {
+    return this.baseMapper.existsByUserId(userId);
+  }
+
   @Override
   public void addResource(Resource resource) {
     String resourceName = resource.getResourceName();

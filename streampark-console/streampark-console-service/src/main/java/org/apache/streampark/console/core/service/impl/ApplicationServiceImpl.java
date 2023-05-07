@@ -519,6 +519,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public boolean existsByUserId(Long userId) {
+    return baseMapper.existsByUserId(userId);
+  }
+
+  @Override
   public boolean existsRunningJobByClusterId(Long clusterId) {
     boolean exists = baseMapper.existsRunningJobByClusterId(clusterId);
     if (exists) {

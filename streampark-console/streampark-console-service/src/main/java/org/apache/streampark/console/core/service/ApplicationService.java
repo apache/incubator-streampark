@@ -39,6 +39,8 @@ public interface ApplicationService extends IService<Application> {
 
   boolean existsByTeamId(Long teamId);
 
+  boolean existsByUserId(Long userId);
+
   boolean create(Application app) throws IOException;
 
   Long copy(Application app) throws IOException;

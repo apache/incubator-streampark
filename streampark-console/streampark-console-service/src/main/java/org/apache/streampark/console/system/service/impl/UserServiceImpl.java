@@ -21,6 +21,8 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -60,6 +62,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private MemberService memberService;
 
   @Autowired private MenuService menuService;
+
+  @Autowired private ApplicationService applicationService;
+
+  @Autowired private ResourceService resourceService;
 
   @Override
   public User findByName(String username) {
@@ -106,9 +112,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void updateUser(User user) {
+    User existsUser = getById(user.getUserId());
     user.setPassword(null);
     user.setModifyTime(new Date());
+    checkLockUser(existsUser, user);
     updateById(user);
+  }
+
+  private void checkLockUser(User existsUser, User user) {
+    if (User.STATUS_VALID.equals(existsUser.getStatus())
+        && User.STATUS_LOCK.equals(user.getStatus())) {
+      if (applicationService.existsByUserId(user.getUserId())) {
+        throw new ApiAlertException("User has application, can't lock.");
+      }
+      if (resourceService.existsByUserId(user.getUserId())) {
+        throw new ApiAlertException("User has resource, can't lock.");
+      }
+    }
   }
 
   @Override

@@ -58,6 +58,8 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
   Boolean existsByJobName(@Param("jobName") String jobName);
 
+  Boolean existsByUserId(@Param("userId") Long userId);
+
   List<Application> getByProjectId(@Param("projectId") Long id);
 
   boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
