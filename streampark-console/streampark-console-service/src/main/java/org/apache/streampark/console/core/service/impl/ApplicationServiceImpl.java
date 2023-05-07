@@ -637,6 +637,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public void changeUser(Long userId, Long targetUserId) {
+    LambdaUpdateWrapper<Application> updateWrapper =
+        new LambdaUpdateWrapper<Application>()
+            .eq(Application::getUserId, userId)
+            .set(Application::getUserId, targetUserId);
+    this.baseMapper.update(null, updateWrapper);
+  }
+
+  @Override
   public String getYarnName(Application appParam) {
     String[] args = new String[2];
     args[0] = "--name";

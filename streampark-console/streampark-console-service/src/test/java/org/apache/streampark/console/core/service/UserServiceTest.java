@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineType;
 import org.apache.streampark.console.core.enums.ResourceType;
@@ -26,7 +27,6 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.extension.toolkit.Db;
-import lombok.val;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +37,13 @@ import java.util.Map;
 /** org.apache.streampark.console.core.service.UserServiceTest. */
 class UserServiceTest extends SpringTestBase {
   @Autowired private UserService userService;
+  @Autowired private ApplicationService applicationService;
+  @Autowired private ResourceService resourceService;
 
   @Test
   @SuppressWarnings("unchecked")
   void testLockUser() throws Exception {
-    val user = new User();
+    User user = new User();
     user.setUsername("test");
     user.setNickName("test");
     user.setPassword("test");
@@ -61,7 +63,7 @@ class UserServiceTest extends SpringTestBase {
             userService.updateUser(user).getOrDefault("data", Collections.emptyMap());
     Assertions.assertNotEquals(true, data1.get("needTransferResource"));
 
-    val resource = new Resource();
+    Resource resource = new Resource();
     resource.setResourceName("test");
     resource.setResourceType(ResourceType.FLINK_APP);
     resource.setEngineType(EngineType.FLINK);
@@ -74,5 +76,48 @@ class UserServiceTest extends SpringTestBase {
         (Map<String, Object>)
             userService.updateUser(user).getOrDefault("data", Collections.emptyMap());
     Assertions.assertEquals(true, data2.get("needTransferResource"));
+  }
+
+  @Test
+  void testTransferResource() {
+    User user = new User();
+    user.setUsername("test");
+    user.setNickName("test");
+    user.setPassword("test");
+    user.setUserType(UserType.USER);
+    user.setStatus(User.STATUS_VALID);
+    Db.save(user);
+
+    Resource resource = new Resource();
+    resource.setResourceName("test");
+    resource.setResourceType(ResourceType.FLINK_APP);
+    resource.setEngineType(EngineType.FLINK);
+    resource.setTeamId(1L);
+    resource.setCreatorId(user.getUserId());
+    Db.save(resource);
+
+    Application app = new Application();
+    app.setUserId(user.getUserId());
+    app.setTeamId(1L);
+    Db.save(app);
+
+    User targetUser = new User();
+    targetUser.setUsername("test0");
+    targetUser.setNickName("test0");
+    targetUser.setPassword("test0");
+    targetUser.setUserType(UserType.USER);
+    targetUser.setStatus(User.STATUS_VALID);
+    Db.save(targetUser);
+
+    Assertions.assertTrue(applicationService.existsByUserId(user.getUserId()));
+    Assertions.assertTrue(resourceService.existsByUserId(user.getUserId()));
+
+    userService.transferResource(user.getUserId(), targetUser.getUserId());
+
+    Assertions.assertFalse(applicationService.existsByUserId(user.getUserId()));
+    Assertions.assertFalse(resourceService.existsByUserId(user.getUserId()));
+
+    Assertions.assertTrue(applicationService.existsByUserId(targetUser.getUserId()));
+    Assertions.assertTrue(resourceService.existsByUserId(targetUser.getUserId()));
   }
 }

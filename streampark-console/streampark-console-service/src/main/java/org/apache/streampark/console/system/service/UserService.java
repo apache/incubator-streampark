@@ -111,4 +111,6 @@ public interface UserService extends IService<User> {
   List<User> findByAppOwner(Long teamId);
 
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
+
+  void transferResource(Long userId, Long targetUserId);
 }

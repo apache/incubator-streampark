@@ -89,6 +89,14 @@ public class UserController {
     return this.userService.updateUser(user);
   }
 
+  @Operation(summary = "Transfer User's Resource")
+  @PutMapping("transferResource")
+  @RequiresPermissions("user:update")
+  public RestResponse transferResource(Long userId, Long targetUserId) {
+    this.userService.transferResource(userId, targetUserId);
+    return RestResponse.success();
+  }
+
   @Operation(summary = "List without token users")
   @PostMapping("getNoTokenUser")
   public RestResponse getNoTokenUser() {

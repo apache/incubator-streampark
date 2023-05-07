@@ -79,4 +79,12 @@ public interface ResourceService extends IService<Resource> {
    * @return team resources
    */
   List<Resource> findByTeamId(Long teamId);
+
+  /**
+   * change resource owner
+   *
+   * @param userId original user id
+   * @param targetUserId target user id
+   */
+  void changeUser(Long userId, Long targetUserId);
 }

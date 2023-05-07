@@ -260,4 +260,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     return userInfo;
   }
+
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void transferResource(Long userId, Long targetUserId) {
+    applicationService.changeUser(userId, targetUserId);
+    resourceService.changeUser(userId, targetUserId);
+  }
 }
