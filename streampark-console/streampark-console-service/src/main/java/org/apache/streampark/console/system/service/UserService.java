@@ -71,13 +71,6 @@ public interface UserService extends IService<User> {
   void updateUser(User user) throws Exception;
 
   /**
-   * delete user
-   *
-   * @param userId user id
-   */
-  void deleteUser(Long userId) throws Exception;
-
-  /**
    * update password
    *
    * @param user

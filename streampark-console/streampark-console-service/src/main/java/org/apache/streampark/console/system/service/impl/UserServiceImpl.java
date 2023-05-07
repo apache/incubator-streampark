@@ -113,13 +113,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public void deleteUser(Long userId) {
-    removeById(userId);
-    this.memberService.deleteByUserId(userId);
-  }
-
-  @Override
-  @Transactional(rollbackFor = Exception.class)
   public void updatePassword(User userParam) {
     User user = getById(userParam.getUserId());
     ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
