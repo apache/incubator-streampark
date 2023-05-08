@@ -16,8 +16,7 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.hadoop.shaded.org.apache.http.client.config.AuthSchemes
-import org.apache.hc.client5.http.auth.{AuthSchemeFactory, AuthScope, Credentials}
+import org.apache.hc.client5.http.auth.{AuthSchemeFactory, AuthScope, Credentials, StandardAuthScheme}
 import org.apache.hc.client5.http.classic.methods.{HttpGet, HttpPost, HttpUriRequestBase}
 import org.apache.hc.client5.http.config.RequestConfig
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity
@@ -138,7 +137,7 @@ object HttpClientUtils {
 
       val authSchemeRegistry = RegistryBuilder
         .create[AuthSchemeFactory]
-        .register(AuthSchemes.SPNEGO, SPNegoSchemeFactory.DEFAULT)
+        .register(StandardAuthScheme.SPNEGO, SPNegoSchemeFactory.DEFAULT)
         .build
 
       HttpClientBuilder
@@ -156,17 +155,13 @@ object HttpClientUtils {
   private[this] def getHttpResult(
       request: HttpUriRequestBase,
       httpClient: CloseableHttpClient = getHttpClient): String = {
-    try {
-      val response = httpClient.execute(request)
-      val entity = response.getEntity
-      if (entity != null) {
-        val result = EntityUtils.toString(entity)
-        response.close()
-        result
-      } else null
-    } catch {
-      case e: Exception => throw e
-    }
+    val response = httpClient.execute(request)
+    val entity = response.getEntity
+    if (entity != null) {
+      val result = EntityUtils.toString(entity)
+      response.close()
+      result
+    } else null
   }
 
 }
