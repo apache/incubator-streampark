@@ -153,7 +153,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
    * @param targetUserId target user id
    */
   @Override
-  public void changeUser(Long userId, Long targetUserId) {
+  public void changeOwnership(Long userId, Long targetUserId) {
     LambdaUpdateWrapper<Resource> updateWrapper =
         new LambdaUpdateWrapper<Resource>()
             .eq(Resource::getCreatorId, userId)

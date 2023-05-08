@@ -264,7 +264,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void transferResource(Long userId, Long targetUserId) {
-    applicationService.changeUser(userId, targetUserId);
-    resourceService.changeUser(userId, targetUserId);
+    applicationService.changeOwnership(userId, targetUserId);
+    resourceService.changeOwnership(userId, targetUserId);
   }
 }

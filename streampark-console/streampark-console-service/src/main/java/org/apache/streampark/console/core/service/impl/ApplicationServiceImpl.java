@@ -637,7 +637,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public void changeUser(Long userId, Long targetUserId) {
+  public void changeOwnership(Long userId, Long targetUserId) {
     LambdaUpdateWrapper<Application> updateWrapper =
         new LambdaUpdateWrapper<Application>()
             .eq(Application::getUserId, userId)

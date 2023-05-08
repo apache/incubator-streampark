@@ -123,5 +123,5 @@ public interface ApplicationService extends IService<Application> {
 
   String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception;
 
-  void changeUser(Long userId, Long targetUserId);
+  void changeOwnership(Long userId, Long targetUserId);
 }

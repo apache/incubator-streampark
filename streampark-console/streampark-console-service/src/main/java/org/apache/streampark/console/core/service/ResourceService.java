@@ -86,5 +86,5 @@ public interface ResourceService extends IService<Resource> {
    * @param userId original user id
    * @param targetUserId target user id
    */
-  void changeUser(Long userId, Long targetUserId);
+  void changeOwnership(Long userId, Long targetUserId);
 }
