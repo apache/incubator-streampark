@@ -23,9 +23,12 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.bean.Dependency;
+import org.apache.streampark.console.core.bean.Pom;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
+import org.apache.streampark.console.core.enums.ResourceType;
 import org.apache.streampark.console.core.mapper.ResourceMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
@@ -33,6 +36,7 @@ import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -83,16 +87,50 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   @Override
   public void addResource(Resource resource) {
-    String resourceName = resource.getResourceName();
-    ApiAlertException.throwIfNull(resourceName, "No resource uploaded.");
+    String resourceStr = resource.getResource();
+    ApiAlertException.throwIfNull(resourceStr, "Please add pom or jar resource.");
+
+    Dependency dependency = Dependency.toDependency(resourceStr);
+    List<String> jars = dependency.getJar();
+    List<Pom> poms = dependency.getPom();
+
+    ApiAlertException.throwIfTrue(
+        jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
+    ApiAlertException.throwIfTrue(
+        resource.getResourceType() != ResourceType.GROUP && ((jars.size() + poms.size() > 1)),
+        "Please do not add multi dependency at one time.");
+    ApiAlertException.throwIfTrue(
+        resource.getResourceType() == ResourceType.FLINK_APP && jars.isEmpty(),
+        "Please upload jar for Flink_App resource");
 
     Long teamId = resource.getTeamId();
-    ApiAlertException.throwIfTrue(
-        this.findByResourceName(teamId, resourceName) != null,
-        String.format("Sorry, the resource %s already exists.", resource.getResourceName()));
 
-    // copy jar to team upload directory
-    transferTeamResource(teamId, resourceName);
+    String resourceName = null;
+    if (resource.getResourceType() == ResourceType.GROUP) {
+      // TODO: will support latter
+    } else {
+      if (poms.isEmpty()) {
+        resourceName = jars.get(0);
+        ApiAlertException.throwIfTrue(
+            this.findByResourceName(teamId, resourceName) != null,
+            String.format("Sorry, the resource %s already exists.", resourceName));
+
+        // copy jar to team upload directory
+        transferTeamResource(teamId, resourceName);
+      } else {
+        Pom pom = poms.get(0);
+        resourceName =
+            String.format("%s:%s:%s", pom.getGroupId(), pom.getArtifactId(), pom.getVersion());
+        if (StringUtils.isNotBlank(pom.getClassifier())) {
+          resourceName = resourceName + ":" + pom.getClassifier();
+        }
+        ApiAlertException.throwIfTrue(
+            this.findByResourceName(teamId, resourceName) != null,
+            String.format("Sorry, the resource %s already exists.", resourceName));
+      }
+
+      resource.setResourceName(resourceName);
+    }
 
     resource.setCreatorId(commonService.getUserId());
     this.save(resource);

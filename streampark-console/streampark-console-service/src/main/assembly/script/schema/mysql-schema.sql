@@ -316,6 +316,7 @@ create table `t_resource` (
   `id` bigint not null auto_increment,
   `resource_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the resource file',
   `resource_type` int not null comment '0:app 1:common 2:connector 3:format 4:udf',
+  `resource` text collate utf8mb4_general_ci comment 'resource content, including jars and poms',
   `engine_type` int not null comment 'compute engine type, 0:apache flink 1:apache spark',
   `main_class` varchar(255) collate utf8mb4_general_ci default null,
   `description` text collate utf8mb4_general_ci default null comment 'More detailed description of resource',
