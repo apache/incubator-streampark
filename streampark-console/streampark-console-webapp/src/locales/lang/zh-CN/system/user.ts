@@ -43,6 +43,7 @@ export default {
     create: '创建用户',
     edit: '编辑用户',
     view: '查看用户',
+    notice: '提示',
     transferResource: '请将需要被禁用的用户资源转移到新的用户上'
   },
   roleInfo: '角色信息',

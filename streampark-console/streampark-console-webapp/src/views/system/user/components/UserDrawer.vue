@@ -38,9 +38,9 @@
   >
     <template #title>
       <Icon icon="ant-design:swap-outlined" />
-      {{ t('system.user.form.transferResource') }}
+      {{ t('system.user.form.notice') }}
     </template>
-    <BasicForm @register="transferForm" class="!mt-30px"/>
+    <BasicForm @register="transferForm" class="!mt-30px !ml-36px"/>
   </Modal>
 </template>
 <script lang="ts">
@@ -94,15 +94,14 @@ import {computed, defineComponent, nextTick, ref, unref} from 'vue';
         }
       });
 
-      const [transferForm, { resetFields: resetTransferFields,validate: transferValidate }] = useForm({
-        colon: true,
-        labelWidth: 120,
+      const [transferForm, { resetFields: resetTransferFields, validate: transferValidate }] = useForm({
+        layout: 'vertical',
         showActionButtonGroup: false,
         baseColProps: { lg: 22, md: 22 },
         schemas: [
           {
             field: 'userId',
-            label: t('system.user.form.userName'),
+            label: t('system.user.form.transferResource'),
             component: 'ApiSelect',
             componentProps: {
               api: async () =>  {

@@ -43,7 +43,8 @@ export default {
     create: 'Create User',
     edit: 'Edit User',
     view: 'View User',
-    transferResource: 'please transfer the resources of the user who needs to be disabled to a new user'
+    notice: 'Notice',
+    transferResource: 'Please transfer the resources of the user who needs to be disabled to a new user'
   },
   roleInfo: 'Role Info',
   modifyTime: 'Not yet modified',
