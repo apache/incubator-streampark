@@ -32,7 +32,7 @@ import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CoreOptions;
-import org.apache.http.client.config.RequestConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Data
 @TableName("t_flink_cluster")
@@ -135,7 +136,8 @@ public class FlinkCluster implements Serializable {
   public URI getRemoteURI() {
     try {
       HttpClientUtils.httpGetRequest(
-          this.address, RequestConfig.custom().setSocketTimeout(2000).build());
+          this.address,
+          RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
       return new URI(address);
     } catch (Exception ignored) {
       //
@@ -157,7 +159,8 @@ public class FlinkCluster implements Serializable {
         String restUrl = address + "/overview";
         String result =
             HttpClientUtils.httpGetRequest(
-                restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                restUrl,
+                RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
         JacksonUtils.read(result, Overview.class);
         return true;
       } catch (Exception ignored) {
@@ -169,7 +172,8 @@ public class FlinkCluster implements Serializable {
         String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
         String result =
             HttpClientUtils.httpGetRequest(
-                restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                restUrl,
+                RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
         JacksonUtils.read(result, Overview.class);
         return true;
       } catch (Exception ignored) {
@@ -185,7 +189,7 @@ public class FlinkCluster implements Serializable {
     String restUrl = this.address + "/jobmanager/config";
     String json =
         HttpClientUtils.httpGetRequest(
-            restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+            restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
     if (StringUtils.isEmpty(json)) {
       return Collections.emptyMap();
     }
