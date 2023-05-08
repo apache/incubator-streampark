@@ -519,6 +519,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public boolean existsByUserId(Long userId) {
+    return baseMapper.existsByUserId(userId);
+  }
+
+  @Override
   public boolean existsRunningJobByClusterId(Long clusterId) {
     boolean exists = baseMapper.existsRunningJobByClusterId(clusterId);
     if (exists) {
@@ -629,6 +634,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       throw new ApiAlertException(
           "Job executionMode must be kubernetes-session|kubernetes-application.");
     }
+  }
+
+  @Override
+  public void changeOwnership(Long userId, Long targetUserId) {
+    LambdaUpdateWrapper<Application> updateWrapper =
+        new LambdaUpdateWrapper<Application>()
+            .eq(Application::getUserId, userId)
+            .set(Application::getUserId, targetUserId);
+    this.baseMapper.update(null, updateWrapper);
   }
 
   @Override

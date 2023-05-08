@@ -28,4 +28,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 public interface ResourceMapper extends BaseMapper<Resource> {
 
   IPage<Resource> page(Page<Resource> page, @Param("resource") Resource resource);
+
+  boolean existsByUserId(@Param("userId") Long userId);
 }

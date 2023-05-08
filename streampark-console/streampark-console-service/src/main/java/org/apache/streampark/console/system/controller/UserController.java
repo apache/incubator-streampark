@@ -39,7 +39,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,15 +86,14 @@ public class UserController {
   @PutMapping("update")
   @RequiresPermissions("user:update")
   public RestResponse updateUser(@Valid User user) throws Exception {
-    this.userService.updateUser(user);
-    return RestResponse.success();
+    return this.userService.updateUser(user);
   }
 
-  @Operation(summary = "Delete user")
-  @DeleteMapping("delete")
-  @RequiresPermissions("user:delete")
-  public RestResponse deleteUser(Long userId) throws Exception {
-    this.userService.deleteUser(userId);
+  @Operation(summary = "Transfer User's Resource")
+  @PutMapping("transferResource")
+  @RequiresPermissions("user:update")
+  public RestResponse transferResource(Long userId, Long targetUserId) {
+    this.userService.transferResource(userId, targetUserId);
     return RestResponse.success();
   }
 

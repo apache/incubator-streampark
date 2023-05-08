@@ -37,6 +37,14 @@ public interface ResourceService extends IService<Resource> {
   IPage<Resource> page(Resource resource, RestRequest restRequest);
 
   /**
+   * check resource exists by user id
+   *
+   * @param userId user id
+   * @return true if exists
+   */
+  boolean existsByUserId(Long userId);
+
+  /**
    * add resource
    *
    * @param resource resource
@@ -71,4 +79,12 @@ public interface ResourceService extends IService<Resource> {
    * @return team resources
    */
   List<Resource> findByTeamId(Long teamId);
+
+  /**
+   * change resource owner
+   *
+   * @param userId original user id
+   * @param targetUserId target user id
+   */
+  void changeOwnership(Long userId, Long targetUserId);
 }

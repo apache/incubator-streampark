@@ -35,6 +35,7 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -67,6 +68,17 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
     Page<Resource> page = new MybatisPager<Resource>().getDefaultPage(restRequest);
     return this.baseMapper.page(page, resource);
+  }
+
+  /**
+   * check resource exists by user id
+   *
+   * @param userId user id
+   * @return true if exists
+   */
+  @Override
+  public boolean existsByUserId(Long userId) {
+    return this.baseMapper.existsByUserId(userId);
   }
 
   @Override
@@ -132,6 +144,21 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     LambdaQueryWrapper<Resource> queryWrapper =
         new LambdaQueryWrapper<Resource>().eq(Resource::getTeamId, teamId);
     return baseMapper.selectList(queryWrapper);
+  }
+
+  /**
+   * change resource owner
+   *
+   * @param userId original user id
+   * @param targetUserId target user id
+   */
+  @Override
+  public void changeOwnership(Long userId, Long targetUserId) {
+    LambdaUpdateWrapper<Resource> updateWrapper =
+        new LambdaUpdateWrapper<Resource>()
+            .eq(Resource::getCreatorId, userId)
+            .set(Resource::getCreatorId, targetUserId);
+    this.baseMapper.update(null, updateWrapper);
   }
 
   private void transferTeamResource(Long teamId, String resourceName) {

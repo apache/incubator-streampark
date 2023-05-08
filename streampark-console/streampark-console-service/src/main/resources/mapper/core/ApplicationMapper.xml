@@ -102,6 +102,16 @@
         limit 1
     </select>
 
+    <select id="existsByUserId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+        select
+            CASE
+                WHEN  count(1) > 0 THEN true ELSE false
+            END
+        from t_flink_app
+        where user_id = #{userId}
+        limit 1
+    </select>
+
     <select id="existsJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
         SELECT
             CASE
