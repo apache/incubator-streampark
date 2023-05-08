@@ -44,7 +44,7 @@
   </Modal>
 </template>
 <script lang="ts">
-import {computed, defineComponent, nextTick, ref, unref} from 'vue';
+  import { computed, defineComponent, nextTick, ref, unref } from 'vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { formSchema } from '../user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
