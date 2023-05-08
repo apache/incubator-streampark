@@ -37,7 +37,7 @@
     @cancel="transferModalVisible=false"
   >
     <template #title>
-      <SvgIcon name="alarm" size="25"/>
+      <Icon icon="ant-design:swap-outlined" />
       {{ t('system.user.form.transferResource') }}
     </template>
     <BasicForm @register="transferForm" class="!mt-30px"/>
@@ -49,10 +49,9 @@ import {computed, defineComponent, nextTick, ref, unref} from 'vue';
   import { formSchema } from '../user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-import {addUser, getUserList, transferUserResource, updateUser} from '/@/api/system/user';
-  import { Icon, SvgIcon } from '/@/components/Icon';
+  import {addUser, getUserList, transferUserResource, updateUser} from '/@/api/system/user';
+  import Icon from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { useFormValidate } from "/@/hooks/web/useFormValidate";
   import { useUserStoreWithOut } from "/@/store/modules/user";
   import { Modal } from 'ant-design-vue';
 
