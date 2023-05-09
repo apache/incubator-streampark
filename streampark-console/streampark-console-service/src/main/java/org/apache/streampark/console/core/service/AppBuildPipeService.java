@@ -41,15 +41,6 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
   boolean buildApplication(@Nonnull Long appId, boolean forceBuild) throws Exception;
 
   /**
-   * check the build environment
-   *
-   * @param appId application id
-   * @param forceBuild forced start pipeline or not
-   * @return
-   */
-  void checkBuildEnv(Long appId, boolean forceBuild);
-
-  /**
    * Get current build pipeline instance of specified application
    *
    * @param appId application id

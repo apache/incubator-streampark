@@ -131,8 +131,6 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ResourceService resourceService;
 
-  @Autowired private AppBuildPipeService appBuildPipeService;
-
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,
@@ -383,26 +381,22 @@ public class AppBuildPipeServiceImpl
    * @param forceBuild forced start pipeline or not
    * @return
    */
-  @Override
-  public void checkBuildEnv(Long appId, boolean forceBuild) {
+  private void checkBuildEnv(Long appId, boolean forceBuild) {
     Application app = applicationService.getById(appId);
 
     // 1) check flink version
     FlinkEnv env = flinkEnvService.getById(app.getVersionId());
     boolean checkVersion = env.getFlinkVersion().checkVersion(false);
-    if (!checkVersion) {
-      throw new ApiAlertException("Unsupported flink version: " + env.getFlinkVersion().version());
-    }
+    ApiAlertException.throwIfFalse(
+        checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
 
     // 2) check env
     boolean envOk = applicationService.checkEnv(app);
-    if (!envOk) {
-      throw new ApiAlertException(
-          "Check flink env failed, please check the flink version of this job");
-    }
+    ApiAlertException.throwIfFalse(
+        envOk, "Check flink env failed, please check the flink version of this job");
 
     // 3) Whether the application can currently start a new building progress
-    if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
+    if (!forceBuild && allowToBuildNow(appId)) {
       throw new ApiAlertException(
           "The job is invalid, or the job cannot be built while it is running");
     }
