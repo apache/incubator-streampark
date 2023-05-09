@@ -27,18 +27,12 @@
       {{ getTitle }}
     </template>
     <BasicForm @register="registerForm" :schemas="getResourceFormSchema">
-      <template #uploadJobJar>
-        <UploadJobJar :custom-request="handleCustomJobRequest" v-model:loading="uploadLoading">
-          <template #uploadInfo>
-            <Alert v-if="uploadJar" class="uploadjar-box" type="info">
-              <template #message>
-                <span class="tag-dependency-pom">
-                  {{ uploadJar }}
-                </span>
-              </template>
-            </Alert>
-          </template>
-        </UploadJobJar>
+      <template #resource="{ model, field }">
+        <Resource
+          ref="resourceRef"
+          v-model:value="model[field]"
+          :form-model="model"
+        />
       </template>
     </BasicForm>
   </BasicDrawer>
@@ -51,25 +45,24 @@
 
 <script lang="ts" setup>
   import { ref, h, computed, unref } from 'vue';
-  import { Alert } from 'ant-design-vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
-  import { fetchUpload } from "/@/api/flink/app/app";
+  import Resource from '/@/views/flink/resource/components/Resource.vue';
   import { fetchAddResource, fetchUpdateResource } from "/@/api/flink/resource";
-  import { EngineTypeEnum, ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
-  import {renderResourceType} from "/@/views/flink/resource/useResourceRender";
+  import { EngineTypeEnum } from "/@/views/flink/resource/resource.data";
+  import { renderResourceType } from "/@/views/flink/resource/useResourceRender";
+  import { useMessage } from "/@/hooks/web/useMessage";
 
   const emit = defineEmits(['success', 'register']);
 
   const { t } = useI18n();
+  const { Swal } = useMessage();
 
   const isUpdate = ref(false);
-  const uploadLoading = ref(false);
-  const uploadJar = ref('');
   const resourceId = ref<Nullable<number>>(null);
+  const resourceRef = ref();
 
   const getResourceFormSchema = computed((): FormSchema[] => {
     return [
@@ -96,10 +89,10 @@
         rules: [{ required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }],
       },
       {
-        field: 'resourceName',
-        label: t('flink.resource.uploadResource'),
-        component: 'Select',
-        slot: 'uploadJobJar',
+        field: 'dependency',
+        label: t('flink.resource.addResource'),
+        component: 'Input',
+        slot: 'resource',
       },
       {
         field: 'mainClass',
@@ -136,6 +129,7 @@
       if (unref(isUpdate)) {
         resourceId.value = data.record.id;
         setFieldsValue(data.record);
+        unref(resourceRef)?.setDefaultValue(JSON.parse(data.record.resource || '{}'));
       }
     },
   );
@@ -146,13 +140,45 @@
 
   // form submit
   async function handleSubmit() {
+    const resource: { pom?: string; jar?: string } = {};
+    unref(resourceRef).handleApplyPom();
+    const dependencyRecords = unref(resourceRef)?.dependencyRecords;
+    const uploadJars = unref(resourceRef)?.uploadJars;
+
+    if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
+      if (unref(dependencyRecords).length > 1) {
+        Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
+        return;
+      }
+      Object.assign(resource, {
+        pom: unref(dependencyRecords),
+      });
+    }
+
+    if (uploadJars && unref(uploadJars).length > 0) {
+      Object.assign(resource, {
+        jar: unref(uploadJars),
+      });
+    }
+
+    if (resource.pom === undefined && resource.jar === undefined) {
+      Swal.fire('Failed', t('flink.resource.addResourceTip'), 'error');
+      return;
+    }
+
+    if (resource.pom?.length > 0 && resource.jar?.length > 0) {
+      Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
+      return;
+    }
+
     try {
       const values = await validate();
       setDrawerProps({ confirmLoading: true });
       await (isUpdate.value
-        ? fetchUpdateResource({ id: resourceId.value, ...values })
-        : fetchAddResource(values));
-      uploadJar.value = ''
+        ? fetchUpdateResource({ id: resourceId.value, resource: JSON.stringify(resource), ...values })
+        : fetchAddResource({ resource: JSON.stringify(resource), ...values }));
+      unref(resourceRef)?.setDefaultValue({});
+      resetFields();
       closeDrawer();
       emit('success', isUpdate.value);
     } finally {
@@ -160,20 +186,6 @@
     }
   }
 
-  /* Custom job upload */
-  async function handleCustomJobRequest(data) {
-    const formData = new FormData();
-    formData.append('file', data.file);
-    try {
-      const path = await fetchUpload(formData);
-      uploadJar.value = data.file.name;
-      uploadLoading.value = false;
-      setFieldsValue({ resourceName: uploadJar.value });
-    } catch (error) {
-      console.error(error);
-      uploadLoading.value = false;
-    }
-  }
 </script>
 
 <style lang="less">

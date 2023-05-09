@@ -24,6 +24,8 @@ export default {
   resourceType: '资源类型',
   engineType: '计算引擎类型',
   engineTypePlaceholder: '请选择计算引擎类型',
+  multiPomTip: '不支持同时添加多个依赖',
+  addResourceTip: '请添加资源',
   add: '添加',
   success: '成功',
   fail: '失败',

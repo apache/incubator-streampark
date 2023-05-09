@@ -18,6 +18,7 @@ export interface ResourceListRecord {
   id: string;
   resourceName: string;
   resourceType: string;
+  resource: string;
   engineType: string;
   mainClass: string;
   description: string;

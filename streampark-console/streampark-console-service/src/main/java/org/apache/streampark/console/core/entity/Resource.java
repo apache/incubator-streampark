@@ -42,6 +42,8 @@ public class Resource implements Serializable {
 
   private String resourceName;
 
+  private String resource;
+
   @Size(max = 100, message = "{noMoreThan}")
   private String description;
 

@@ -29,6 +29,7 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -36,6 +37,7 @@ import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
+import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CandidateType;
 import org.apache.streampark.console.core.enums.NoticeType;
 import org.apache.streampark.console.core.enums.OptionState;
@@ -54,6 +56,7 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
+import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -90,6 +93,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -522,17 +526,38 @@ public class AppBuildPipeServiceImpl
     DependencyInfo dependencyInfo = application.getDependencyInfo();
 
     try {
-      String[] teamJarIds = JacksonUtils.read(application.getTeamResource(), String[].class);
-      List<String> teamJarsFullPath =
-          Arrays.stream(teamJarIds)
-              .map(jarId -> resourceService.getById(jarId).getResourceName())
-              .map(
-                  jar ->
-                      String.format(
-                          "%s/%d/%s",
-                          Workspace.local().APP_UPLOADS(), application.getTeamId(), jar))
-              .collect(Collectors.toList());
-      return dependencyInfo.merge(teamJarsFullPath);
+      String[] resourceIds = JacksonUtils.read(application.getTeamResource(), String[].class);
+
+      List<Artifact> mvnArtifacts = new ArrayList<Artifact>();
+      List<String> jarLibs = new ArrayList<String>();
+
+      Arrays.stream(resourceIds)
+          .forEach(
+              resourceId -> {
+                Resource resource = resourceService.getById(resourceId);
+                Dependency dependency = Dependency.toDependency(resource.getResource());
+                dependency
+                    .getPom()
+                    .forEach(
+                        pom -> {
+                          mvnArtifacts.add(
+                              new Artifact(
+                                  pom.getGroupId(),
+                                  pom.getArtifactId(),
+                                  pom.getVersion(),
+                                  pom.getClassifier()));
+                        });
+                dependency
+                    .getJar()
+                    .forEach(
+                        jar -> {
+                          jarLibs.add(
+                              String.format(
+                                  "%s/%d/%s",
+                                  Workspace.local().APP_UPLOADS(), application.getTeamId(), jar));
+                        });
+              });
+      return dependencyInfo.merge(mvnArtifacts, jarLibs);
     } catch (Exception e) {
       log.warn("Merge team dependency failed.");
       return dependencyInfo;
