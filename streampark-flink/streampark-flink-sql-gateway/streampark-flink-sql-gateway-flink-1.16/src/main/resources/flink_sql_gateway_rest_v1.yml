@@ -425,6 +425,28 @@ components:
                 properties:
                   type:
                     $ref: '#/components/schemas/LogicalTypeRoot'
+                  fields:
+                    type: array
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        fieldType:
+                          type: object
+                          properties:
+                            type:
+                              $ref: '#/components/schemas/LogicalTypeRoot'
+                            nullable:
+                              type: boolean
+                            length:
+                              type: integer
+                              format: int32
+                            precision:
+                              type: integer
+                              format: int32
+                            scale:
+                              type: integer
+                              format: int32
                   nullable:
                     type: boolean
                   length:

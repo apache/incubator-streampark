@@ -31,11 +31,59 @@ public class FlinkSqlGatewayExample {
 
   private FlinkSqlGatewayExample() {}
 
-  public static void main(String[] args) throws ApiException {
+  public static void main(String[] args) throws Exception {
     DefaultApi api = FlinkSqlGateway.sqlGatewayApi("http://192.168.20.144:8083");
-    runOnLocal(api);
+    runOnRemote(api);
     //    runOnYarn(api);
     //    runOnKubernetes(api);
+  }
+
+  public static void runOnRemote(DefaultApi api) throws ApiException, InterruptedException {
+    OpenSessionResponseBody response =
+        api.openSession(
+            new OpenSessionRequestBody()
+                .putPropertiesItem("jobmanager", "192.168.20.239:8081")
+                .putPropertiesItem("rest.address", "192.168.20.239")
+                .putPropertiesItem("rest.port", "8081")
+                .putPropertiesItem("execution.target", "remote"));
+    String sessionHandle = response.getSessionHandle();
+    System.out.println("SessionHandle: " + sessionHandle);
+
+    ExecuteStatementResponseBody statement1 =
+        api.executeStatement(
+            UUID.fromString(sessionHandle),
+            new ExecuteStatementRequestBody()
+                .statement(
+                    "CREATE TABLE Orders (\n"
+                        + "    order_number BIGINT,\n"
+                        + "    price        DECIMAL(32,2),\n"
+                        + "    buyer        ROW<first_name STRING, last_name STRING>,\n"
+                        + "    order_time   TIMESTAMP(3)\n"
+                        + ") WITH (\n"
+                        + "  'connector' = 'datagen',\n"
+                        + "  'number-of-rows' = '2'\n"
+                        + ")")
+                .putExecutionConfigItem(
+                    "pipeline.name", "Flink SQL Gateway SDK on flink cluster Example"));
+
+    System.out.println("create table: " + statement1.getOperationHandle());
+
+    ExecuteStatementResponseBody statement2 =
+        api.executeStatement(
+            UUID.fromString(sessionHandle),
+            new ExecuteStatementRequestBody()
+                .statement("select * from Orders;")
+                .putExecutionConfigItem(
+                    "pipeline.name", "Flink SQL Gateway SDK on flink cluster Example"));
+
+    System.out.println("select * from Orders: " + statement2.getOperationHandle());
+
+    Thread.sleep(1000 * 10);
+
+    FetchResultsResponseBody fetchResultsResponseBody =
+        api.fetchResults(
+            UUID.fromString(sessionHandle), UUID.fromString(statement2.getOperationHandle()), 0L);
+    fetchResultsResponseBody.getResults().getColumns().forEach(System.out::println);
   }
 
   private static void runOnKubernetes(DefaultApi api) throws ApiException {
@@ -143,54 +191,6 @@ public class FlinkSqlGatewayExample {
                 .statement("select 1")
                 .putExecutionConfigItem("pipeline.name", "Flink SQL Gateway SDK on YARN Example"));
     System.out.println(executeStatementResponseBody.getOperationHandle());
-  }
-
-  public static void runOnLocal(DefaultApi api) throws ApiException {
-    OpenSessionResponseBody response = api.openSession(new OpenSessionRequestBody());
-    System.out.println(response.getSessionHandle());
-
-    ExecuteStatementResponseBody statement1 =
-        api.executeStatement(
-            UUID.fromString(response.getSessionHandle()),
-            new ExecuteStatementRequestBody()
-                .statement(
-                    "CREATE TABLE datagen (\n"
-                        + " f_sequence INT,\n"
-                        + " result DECIMAL(10,3),\n"
-                        + " f_random_str STRING\n"
-                        + ") WITH (\n"
-                        + " 'connector' = 'datagen',\n"
-                        + " 'rows-per-second'='10',\n"
-                        + " 'fields.f_sequence.kind'='sequence',\n"
-                        + " 'fields.f_sequence.start'='1',\n"
-                        + " 'fields.f_sequence.end'='1000',\n"
-                        + " 'fields.f_random.min'='1',\n"
-                        + " 'fields.f_random.max'='1000',\n"
-                        + " 'fields.f_random_str.length'='10'\n"
-                        + ")")
-                .putExecutionConfigItem("pipeline.name", "Flink SQL Gateway SDK on K8S Example"));
-
-    System.out.println(statement1.getOperationHandle());
-
-    ExecuteStatementResponseBody statement5 =
-        api.executeStatement(
-            UUID.fromString(response.getSessionHandle()),
-            new ExecuteStatementRequestBody()
-                .statement("select * from datagen;")
-                .putExecutionConfigItem("pipeline.name", "Flink SQL Gateway SDK on K8S Example"));
-
-    System.out.println(statement5.getOperationHandle());
-    try {
-      Thread.sleep(10000);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-    FetchResultsResponseBody fetchResultsResponseBody =
-        api.fetchResults(
-            UUID.fromString(response.getSessionHandle()),
-            UUID.fromString(statement1.getOperationHandle()),
-            0L);
-    System.out.println(fetchResultsResponseBody);
   }
 
   public static void runOnYarnWithUDF(DefaultApi api) throws ApiException {
