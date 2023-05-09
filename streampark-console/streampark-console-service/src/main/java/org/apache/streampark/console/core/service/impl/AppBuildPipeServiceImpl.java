@@ -396,7 +396,7 @@ public class AppBuildPipeServiceImpl
         envOk, "Check flink env failed, please check the flink version of this job");
 
     // 3) Whether the application can currently start a new building progress
-    if (!forceBuild && allowToBuildNow(appId)) {
+    if (!forceBuild && !allowToBuildNow(appId)) {
       throw new ApiAlertException(
           "The job is invalid, or the job cannot be built while it is running");
     }
