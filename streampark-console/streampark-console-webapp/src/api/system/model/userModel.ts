@@ -57,6 +57,10 @@ export interface TeamSetResponse {
   user: GetUserInfoModel;
 }
 
+export interface UserLockResponse {
+  needTransferResource: boolean;
+}
+
 // user list api response
 export interface UserListRecord {
   userId: string;

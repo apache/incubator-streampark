@@ -34,7 +34,7 @@
     :ok-text="t('common.okText')"
     centered
     @ok="handleTransfer"
-    @cancel="transferModalVisible=false"
+    @cancel="transferModalVisible = false"
   >
     <template #title>
       <Icon icon="ant-design:swap-outlined" />
@@ -49,7 +49,7 @@
   import { formSchema } from '../user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-  import {addUser, getUserList, transferUserResource, updateUser} from '/@/api/system/user';
+  import { addUser, getUserList, updateUser } from '/@/api/system/user';
   import Icon from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useUserStoreWithOut } from "/@/store/modules/user";

@@ -22,7 +22,7 @@ import {
   LoginResultModel,
   GetUserInfoModel,
   TeamSetResponse,
-  UserListRecord,
+  UserListRecord, UserLockResponse,
 } from './model/userModel';
 
 import { ErrorMessageMode, Result } from '/#/axios';
@@ -37,13 +37,13 @@ enum Api {
   NoTokenUsers = '/user/getNoTokenUser',
   UserUpdate = '/user/update',
   UserAdd = '/user/post',
+  UserLock = '/user/lockUser',
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
   CheckName = '/user/check/name',
   SET_TEAM = '/user/setTeam',
   INIT_TEAM = '/user/initTeam',
   APP_OWNERS = '/user/appOwners',
-  TransferUserResource = '/user/transferResource',
 }
 
 /**
@@ -147,6 +147,9 @@ export function fetchSetUserTeam(data: { teamId: string }): Promise<TeamSetRespo
   });
 }
 
-export function transferUserResource(data: { userId: string, targetUserId: string }): Promise<TeamSetResponse> {
-  return defHttp.put({ url: Api.TransferUserResource, data });
+export function lockUser(data: {
+  userId: string;
+  transferToUserId: string | null;
+}): Promise<UserLockResponse> {
+  return defHttp.delete({ url: Api.UserLock, data });
 }

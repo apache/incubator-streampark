@@ -34,13 +34,13 @@
   </div>
 </template>
 <script lang="ts">
-  import { computed, defineComponent } from 'vue';
+  import {computed, defineComponent, ref} from 'vue';
 
   import { BasicTable, useTable, TableAction, ActionItem } from '/@/components/Table';
   import UserDrawer from './components/UserDrawer.vue';
   import UserModal from './components/UserModal.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { getUserList, resetPassword } from '/@/api/system/user';
+  import { lockUser, getUserList, resetPassword } from '/@/api/system/user';
   import { columns, searchFormSchema } from './user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -55,6 +55,7 @@
     name: 'User',
     components: { BasicTable, UserModal, UserDrawer, TableAction, Icon },
     setup() {
+      const transferToUserId = ref();
       const { t } = useI18n();
       const userStore = useUserStoreWithOut();
       const userName = computed(() => {
@@ -82,7 +83,7 @@
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
-          width: 150,
+          width: 200,
           title: t('component.table.operation'),
           dataIndex: 'action',
         },
@@ -113,6 +114,17 @@
               confirm: handleReset.bind(null, record),
             },
           },
+          {
+            icon: 'ant-design:lock-outlined',
+            color: 'error',
+            auth: 'user:delete',
+            ifShow: record.username !== 'admin',
+            tooltip: t('system.user.table.lock'),
+            popConfirm: {
+              title: t('system.user.table.lockTip'),
+              confirm: handleLock.bind(null, record),
+            },
+          },
         ];
       }
       // user create
@@ -130,6 +142,26 @@
       // see detail
       function handleView(record: UserListRecord) {
         openModal(true, record);
+      }
+
+      // lock current user
+      async function handleLock(record: UserListRecord) {
+        const hide = createMessage.loading('locking');
+        try {
+          const resp = await lockUser({
+            userId: record.userId,
+            transferToUserId: transferToUserId.value,
+          });
+          if (resp.needTransferResource) {
+            return;
+          }
+          createMessage.success(t('system.user.table.lockSuccess'));
+          reload();
+        } catch (error) {
+          console.error('user lock fail:', error);
+        } finally {
+          hide();
+        }
       }
 
       async function handleReset(record: Recordable) {

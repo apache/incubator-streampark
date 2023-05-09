@@ -21,6 +21,9 @@ export default {
     modify: 'modify user',
     reset: 'reset password',
     resetTip: 'reset password, are you sure',
+    lock: 'lock user',
+    lockTip: 'lock user, are you sure',
+    lockSuccess: 'lock successful',
     resetSuccess: 'reset password successful, user [ {0} ] new password is streampark666',
   },
   form: {
