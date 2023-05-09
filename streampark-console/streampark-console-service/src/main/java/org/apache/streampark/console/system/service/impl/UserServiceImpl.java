@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -37,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -112,24 +112,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public RestResponse updateUser(User user) {
-    User existsUser = getById(user.getUserId());
+  public void updateUser(User user) {
     user.setPassword(null);
     user.setModifyTime(new Date());
-    if (needTransferResource(existsUser, user)) {
-      return RestResponse.success(Collections.singletonMap("needTransferResource", true));
-    }
     updateById(user);
-    return RestResponse.success();
-  }
-
-  private boolean needTransferResource(User existsUser, User user) {
-    if (User.STATUS_LOCK.equals(existsUser.getStatus())
-        || User.STATUS_VALID.equals(user.getStatus())) {
-      return false;
-    }
-    return applicationService.existsByUserId(user.getUserId())
-        || resourceService.existsByUserId(user.getUserId());
   }
 
   @Override
@@ -263,8 +249,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public void transferResource(Long userId, Long targetUserId) {
-    applicationService.changeOwnership(userId, targetUserId);
-    resourceService.changeOwnership(userId, targetUserId);
+  public boolean lockUser(Long userId, Long transferToUserId) {
+    boolean hasResource =
+        applicationService.existsByUserId(userId) || resourceService.existsByUserId(userId);
+    if (hasResource && transferToUserId == null) {
+      return true;
+    }
+    if (transferToUserId != null) {
+      applicationService.changeOwnership(userId, transferToUserId);
+      resourceService.changeOwnership(userId, transferToUserId);
+    }
+    this.baseMapper.update(
+        null,
+        Wrappers.lambdaUpdate(User.class)
+            .set(User::getStatus, User.STATUS_LOCK)
+            .eq(User::getUserId, userId));
+    return false;
   }
 }

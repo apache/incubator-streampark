@@ -39,6 +39,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -86,15 +88,17 @@ public class UserController {
   @PutMapping("update")
   @RequiresPermissions("user:update")
   public RestResponse updateUser(@Valid User user) throws Exception {
-    return this.userService.updateUser(user);
+    this.userService.updateUser(user);
+    return RestResponse.success();
   }
 
-  @Operation(summary = "Transfer User's Resource")
-  @PutMapping("transferResource")
-  @RequiresPermissions("user:update")
-  public RestResponse transferResource(Long userId, Long targetUserId) {
-    this.userService.transferResource(userId, targetUserId);
-    return RestResponse.success();
+  @Operation(summary = "Lock user")
+  @DeleteMapping("lockUser")
+  @RequiresPermissions("user:delete")
+  public RestResponse lockUser(Long userId, Long transferToUserId) {
+    boolean needTransferResource = userService.lockUser(userId, transferToUserId);
+    return RestResponse.success(
+        Collections.singletonMap("needTransferResource", needTransferResource));
   }
 
   @Operation(summary = "List without token users")

@@ -18,7 +18,6 @@
 package org.apache.streampark.console.system.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.User;
 
@@ -70,7 +69,7 @@ public interface UserService extends IService<User> {
    * @param user user
    * @return
    */
-  RestResponse updateUser(User user) throws Exception;
+  void updateUser(User user) throws Exception;
 
   /**
    * update password
@@ -112,5 +111,5 @@ public interface UserService extends IService<User> {
 
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 
-  void transferResource(Long userId, Long targetUserId);
+  boolean lockUser(Long userId, Long transferToUserId);
 }
