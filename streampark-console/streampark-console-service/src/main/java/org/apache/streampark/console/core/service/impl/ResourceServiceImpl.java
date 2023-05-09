@@ -90,25 +90,24 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     String resourceStr = resource.getResource();
     ApiAlertException.throwIfNull(resourceStr, "Please add pom or jar resource.");
 
-    Dependency dependency = Dependency.toDependency(resourceStr);
-    List<String> jars = dependency.getJar();
-    List<Pom> poms = dependency.getPom();
-
-    ApiAlertException.throwIfTrue(
-        jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
-    ApiAlertException.throwIfTrue(
-        resource.getResourceType() != ResourceType.GROUP && ((jars.size() + poms.size() > 1)),
-        "Please do not add multi dependency at one time.");
-    ApiAlertException.throwIfTrue(
-        resource.getResourceType() == ResourceType.FLINK_APP && jars.isEmpty(),
-        "Please upload jar for Flink_App resource");
-
-    Long teamId = resource.getTeamId();
-
-    String resourceName = null;
     if (resource.getResourceType() == ResourceType.GROUP) {
-      // TODO: will support latter
+      // TODO: will support later
     } else {
+      Dependency dependency = Dependency.toDependency(resourceStr);
+      List<String> jars = dependency.getJar();
+      List<Pom> poms = dependency.getPom();
+
+      ApiAlertException.throwIfTrue(
+          jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
+      ApiAlertException.throwIfTrue(
+          jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
+      ApiAlertException.throwIfTrue(
+          resource.getResourceType() == ResourceType.FLINK_APP && jars.isEmpty(),
+          "Please upload jar for Flink_App resource");
+
+      Long teamId = resource.getTeamId();
+      String resourceName = null;
+
       if (poms.isEmpty()) {
         resourceName = jars.get(0);
         ApiAlertException.throwIfTrue(

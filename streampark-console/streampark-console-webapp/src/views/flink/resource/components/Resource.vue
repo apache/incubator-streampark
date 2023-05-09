@@ -70,63 +70,68 @@
     language: 'xml',
     code: props.value || defaultValue,
     options: {
-      minimap: { enabled: true },
+      minimap: { enabled: false },
       ...(getMonacoOptions(false) as any),
     },
   });
 
   async function handleApplyPom() {
+    dependency.pom = {};
+    dependencyRecords.value = [];
+
     if (props.value == null || props.value.trim() === '') {
       return;
     }
+
     const groupExp = /<groupId>([\s\S]*?)<\/groupId>/;
     const artifactExp = /<artifactId>([\s\S]*?)<\/artifactId>/;
     const versionExp = /<version>([\s\S]*?)<\/version>/;
     const classifierExp = /<classifier>([\s\S]*?)<\/classifier>/;
     const exclusionsExp = /<exclusions>([\s\S]*?)<\/exclusions>/;
-    props.value
+
+    const poms = props.value
       .split('</dependency>')
-      .filter((x) => x.replace(/\\s+/, '') !== '')
-      .forEach((dep) => {
-        const groupId = dep.match(groupExp) ? groupExp.exec(dep)![1].trim() : null;
-        const artifactId = dep.match(artifactExp) ? artifactExp.exec(dep)![1].trim() : null;
-        const version = dep.match(versionExp) ? versionExp.exec(dep)![1].trim() : null;
-        const classifier = dep.match(classifierExp) ? classifierExp.exec(dep)![1].trim() : null;
-        const exclusion = dep.match(exclusionsExp) ? exclusionsExp.exec(dep)![1].trim() : null;
-        if (groupId != null && artifactId != null && version != null) {
-          const mvnPom: Recordable = {
-            groupId: groupId,
-            artifactId: artifactId,
-            version: version,
-          };
-          if (classifier != null) {
-            mvnPom.classifier = classifier;
-          }
-          const id = getId(mvnPom);
-          const pomExclusion = {};
-          if (exclusion != null) {
-            const exclusions = exclusion.split('<exclusion>');
-            exclusions.forEach((e) => {
-              if (e != null && e.length > 0) {
-                const e_group = e.match(groupExp) ? groupExp.exec(e)![1].trim() : null;
-                const e_artifact = e.match(artifactExp) ? artifactExp.exec(e)![1].trim() : null;
-                const id = e_group + '_' + e_artifact;
-                pomExclusion[id] = {
-                  groupId: e_group,
-                  artifactId: e_artifact,
-                };
-              }
-            });
-          }
-          mvnPom.exclusions = pomExclusion;
-          dependency.pom[id] = mvnPom;
-        } else {
-          console.error('dependency error...');
+      .filter((x) => x.trim().replace(/\\s+/, '') !== '');
+
+    poms.forEach((dep) => {
+      const groupId = dep.match(groupExp) ? groupExp.exec(dep)![1].trim() : null;
+      const artifactId = dep.match(artifactExp) ? artifactExp.exec(dep)![1].trim() : null;
+      const version = dep.match(versionExp) ? versionExp.exec(dep)![1].trim() : null;
+      const classifier = dep.match(classifierExp) ? classifierExp.exec(dep)![1].trim() : null;
+      const exclusion = dep.match(exclusionsExp) ? exclusionsExp.exec(dep)![1].trim() : null;
+      if (groupId != null && artifactId != null && version != null) {
+        const mvnPom: Recordable = {
+          groupId: groupId,
+          artifactId: artifactId,
+          version: version,
+        };
+        if (classifier != null) {
+          mvnPom.classifier = classifier;
         }
-      });
+        const id = getId(mvnPom);
+        const pomExclusion = {};
+        if (exclusion != null) {
+          const exclusions = exclusion.split('<exclusion>');
+          exclusions.forEach((e) => {
+            if (e != null && e.length > 0) {
+              const e_group = e.match(groupExp) ? groupExp.exec(e)![1].trim() : null;
+              const e_artifact = e.match(artifactExp) ? artifactExp.exec(e)![1].trim() : null;
+              const id = e_group + '_' + e_artifact;
+              pomExclusion[id] = {
+                groupId: e_group,
+                artifactId: e_artifact,
+              };
+            }
+          });
+        }
+        mvnPom.exclusions = pomExclusion;
+        dependency.pom[id] = mvnPom;
+      } else {
+        console.error('dependency error...');
+      }
+    });
 
     handleUpdateDependency();
-    setContent(defaultValue);
   }
 
   /* custom http  */
@@ -136,6 +141,7 @@
       const formData = new FormData();
       formData.append('file', data.file);
       await fetchUpload(formData);
+      dependency.jar = {}
       dependency.jar[data.file.name] = data.file.name;
       handleUpdateDependency();
     } catch (error) {
@@ -165,27 +171,19 @@
     handleUpdateDependency();
   }
 
-  function handleRemovePom(pom: Recordable) {
-    const id = getId(pom);
-    delete dependency.pom[id];
-    handleUpdateDependency();
-  }
-
-  function handleEditPom(pom: DependencyType) {
-    const pomString = toPomString(pom);
-    activeTab.value = 'pom';
-    setContent(pomString);
-  }
-
   // set default value
   function setDefaultValue(dataSource: { pom?: DependencyType[]; jar?: string[] }) {
     dependencyRecords.value = dataSource.pom || [];
     uploadJars.value = dataSource.jar || [];
     dependency.pom = {};
     dependency.jar = {};
+    if (dataSource.pom === undefined) {
+      setContent(defaultValue)
+    }
     dataSource.pom?.map((pomRecord: DependencyType) => {
       const id = getId(pomRecord);
       dependency.pom[id] = pomRecord;
+      setContent(toPomString(pomRecord))
     });
     dataSource.jar?.map((fileName: string) => {
       dependency.jar[fileName] = fileName;
@@ -232,39 +230,13 @@
     <TabPane key="pom" tab="Maven pom">
       <div class="relative">
         <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
-        <a-button type="primary" class="apply-pom" @click="handleApplyPom()">
-          {{ t('common.apply') }}
-        </a-button>
       </div>
     </TabPane>
     <TabPane key="jar" tab="Upload Jar">
       <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
     </TabPane>
   </Tabs>
-  <div class="dependency-box" v-if="dependencyRecords.length > 0 || uploadJars.length > 0">
-    <Alert
-      class="dependency-item"
-      v-for="(dept, index) in dependencyRecords"
-      :key="`dependency_${index}`"
-      type="info"
-      @click="handleEditPom(dept)"
-    >
-      <template #message>
-        <Space @click="handleEditPom(dept)" class="tag-dependency-pom">
-          <Tag class="tag-dependency" color="#2db7f5">POM</Tag>
-          <template v-if="dept.classifier != null">
-            {{ dept.artifactId }}-{{ dept.version }}-{{ dept.classifier }}.jar
-          </template>
-          <template v-else> {{ dept.artifactId }}-{{ dept.version }}.jar </template>
-          <Icon
-            :size="12"
-            icon="ant-design:close-outlined"
-            class="icon-close cursor-pointer"
-            @click.stop="handleRemovePom(dept)"
-          />
-        </Space>
-      </template>
-    </Alert>
+  <div class="dependency-box" v-if="uploadJars.length > 0">
     <Alert
       class="dependency-item"
       v-for="jar in uploadJars"

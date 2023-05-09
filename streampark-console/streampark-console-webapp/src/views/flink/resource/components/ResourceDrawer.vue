@@ -53,10 +53,12 @@
   import { fetchAddResource, fetchUpdateResource } from "/@/api/flink/resource";
   import { EngineTypeEnum } from "/@/views/flink/resource/resource.data";
   import { renderResourceType } from "/@/views/flink/resource/useResourceRender";
+  import { useMessage } from "/@/hooks/web/useMessage";
 
   const emit = defineEmits(['success', 'register']);
 
   const { t } = useI18n();
+  const { Swal } = useMessage();
 
   const isUpdate = ref(false);
   const resourceId = ref<Nullable<number>>(null);
@@ -87,7 +89,7 @@
         rules: [{ required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }],
       },
       {
-        field: 'resource',
+        field: 'dependency',
         label: t('flink.resource.addResource'),
         component: 'Input',
         slot: 'resource',
@@ -122,7 +124,7 @@
   const [registerDrawer, { setDrawerProps, changeLoading, closeDrawer }] = useDrawerInner(
     async (data: Recordable) => {
       resetFields();
-      setDrawerProps({ confirmLoading: false, destroyOnClose: true });
+      setDrawerProps({ confirmLoading: false });
       isUpdate.value = !!data?.isUpdate;
       if (unref(isUpdate)) {
         resourceId.value = data.record.id;
@@ -139,30 +141,44 @@
   // form submit
   async function handleSubmit() {
     const resource: { pom?: string; jar?: string } = {};
+    unref(resourceRef).handleApplyPom();
     const dependencyRecords = unref(resourceRef)?.dependencyRecords;
     const uploadJars = unref(resourceRef)?.uploadJars;
+
     if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
+      if (unref(dependencyRecords).length > 1) {
+        Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
+        return;
+      }
       Object.assign(resource, {
         pom: unref(dependencyRecords),
       });
     }
+
     if (uploadJars && unref(uploadJars).length > 0) {
       Object.assign(resource, {
         jar: unref(uploadJars),
       });
     }
 
-    setFieldsValue({
-      resource: resource.pom === undefined && resource.jar === undefined
-        ? null : JSON.stringify(resource)
-    });
+    if (resource.pom === undefined && resource.jar === undefined) {
+      Swal.fire('Failed', t('flink.resource.addResourceTip'), 'error');
+      return;
+    }
+
+    if (resource.pom?.length > 0 && resource.jar?.length > 0) {
+      Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
+      return;
+    }
 
     try {
       const values = await validate();
       setDrawerProps({ confirmLoading: true });
       await (isUpdate.value
-        ? fetchUpdateResource({ id: resourceId.value, ...values })
-        : fetchAddResource(values));
+        ? fetchUpdateResource({ id: resourceId.value, resource: JSON.stringify(resource), ...values })
+        : fetchAddResource({ resource: JSON.stringify(resource), ...values }));
+      unref(resourceRef)?.setDefaultValue({});
+      resetFields();
       closeDrawer();
       emit('success', isUpdate.value);
     } finally {
