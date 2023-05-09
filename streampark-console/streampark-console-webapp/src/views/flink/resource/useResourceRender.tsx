@@ -62,7 +62,6 @@ export const renderResourceType = ({ model },) => {
       <Select
         allow-clear
         placeholder={t('flink.resource.form.resourceTypePlaceholder')}
-        style="width: calc(100% - 60px)"
         value={model.resourceType}
         onChange={(value) => (model.resourceType = value)}
       >
