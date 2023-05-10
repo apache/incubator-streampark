@@ -121,6 +121,7 @@
         <commons-net.version>3.9.0</commons-net.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
+        <assertj.version>3.23.1</assertj.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
