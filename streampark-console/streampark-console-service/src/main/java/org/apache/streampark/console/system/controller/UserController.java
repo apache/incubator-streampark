@@ -96,6 +96,8 @@ public class UserController {
   @DeleteMapping("lockUser")
   @RequiresPermissions("user:delete")
   public RestResponse lockUser(Long userId, Long transferToUserId) {
+    ApiAlertException.throwIfTrue(
+        commonService.getUserId().equals(userId), "can not lock yourself");
     boolean needTransferResource = userService.lockUser(userId, transferToUserId);
     return RestResponse.success(
         Collections.singletonMap("needTransferResource", needTransferResource));

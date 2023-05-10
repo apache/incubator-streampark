@@ -173,7 +173,7 @@
             icon: 'ant-design:lock-outlined',
             color: 'error',
             auth: 'user:delete',
-            ifShow: record.username !== 'admin' && record.status === "1",
+            ifShow: record.username !== 'admin' && record.status === '1',
             tooltip: t('system.user.table.lock'),
             popConfirm: {
               title: t('system.user.table.lockTip'),
@@ -183,7 +183,7 @@
           {
             icon: 'ant-design:unlock-outlined',
             auth: 'user:delete',
-            ifShow: record.username !== 'admin' && record.status === "0",
+            ifShow: record.username !== 'admin' && record.status === '0',
             tooltip: t('system.user.table.unlock'),
             onClick: handleUnLock.bind(null, record),
           },

@@ -114,6 +114,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Transactional(rollbackFor = Exception.class)
   public void updateUser(User user) {
     user.setPassword(null);
+    user.setStatus(null);
     user.setModifyTime(new Date());
     updateById(user);
   }
