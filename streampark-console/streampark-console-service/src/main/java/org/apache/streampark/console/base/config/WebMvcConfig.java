@@ -18,6 +18,7 @@
 package org.apache.streampark.console.base.config;
 
 import org.apache.streampark.console.base.interceptor.UploadFileTypeInterceptor;
+import org.apache.streampark.console.base.interceptor.UserStatusCheckInterceptor;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -40,6 +41,7 @@ import java.util.List;
 public class WebMvcConfig implements WebMvcConfigurer {
 
   @Autowired private UploadFileTypeInterceptor uploadFileTypeInterceptor;
+  @Autowired private UserStatusCheckInterceptor userStatusCheckInterceptor;
 
   @Override
   public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -71,5 +73,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
+    registry
+        .addInterceptor(userStatusCheckInterceptor)
+        .addPathPatterns("/**")
+        .excludePathPatterns("/passport/**")
+        .excludePathPatterns("/member/teams")
+        .excludePathPatterns("/menu/router")
+        .excludePathPatterns("/user/initTeam");
   }
 }
