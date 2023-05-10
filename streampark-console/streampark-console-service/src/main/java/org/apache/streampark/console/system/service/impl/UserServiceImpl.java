@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -113,16 +112,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public RestResponse updateUser(User user) {
-    User existsUser = getById(user.getUserId());
+  public void updateUser(User user) {
     user.setPassword(null);
     user.setStatus(null);
     user.setModifyTime(new Date());
-    if (needTransferResource(existsUser, user)) {
-      return RestResponse.success(Collections.singletonMap("needTransferResource", true));
-    }
     updateById(user);
-    return RestResponse.success();
   }
 
   @Override
