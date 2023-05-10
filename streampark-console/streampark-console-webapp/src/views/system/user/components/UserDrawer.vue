@@ -35,14 +35,13 @@
   import { formSchema } from '../user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-  import { addUser, updateUser} from '/@/api/system/user';
+  import { addUser, updateUser } from '/@/api/system/user';
   import Icon from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { Modal } from 'ant-design-vue';
 
   export default defineComponent({
     name: 'MenuDrawer',
-    components: { Modal, BasicDrawer, Icon, BasicForm },
+    components: { BasicDrawer, Icon, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();
