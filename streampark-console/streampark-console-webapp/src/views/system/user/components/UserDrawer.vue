@@ -28,20 +28,6 @@
     </template>
     <BasicForm @register="registerForm" />
   </BasicDrawer>
-  <Modal
-    :visible="transferModalVisible"
-    :confirm-loading="transferModalLoading"
-    :ok-text="t('common.okText')"
-    centered
-    @ok="handleTransfer"
-    @cancel="transferModalVisible=false"
-  >
-    <template #title>
-      <Icon icon="ant-design:swap-outlined" />
-      {{ t('system.user.form.notice') }}
-    </template>
-    <BasicForm @register="transferForm" class="!mt-30px !ml-36px"/>
-  </Modal>
 </template>
 <script lang="ts">
   import { computed, defineComponent, nextTick, ref, unref } from 'vue';
@@ -49,7 +35,7 @@
   import { formSchema } from '../user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-  import {addUser, getUserList, transferUserResource, updateUser} from '/@/api/system/user';
+  import { addUser, getUserList, updateUser} from '/@/api/system/user';
   import Icon from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useUserStoreWithOut } from "/@/store/modules/user";
@@ -137,16 +123,7 @@
         try {
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
-          if (unref(formType) === FormTypeEnum.Edit) {
-            const res: { needTransferResource: Boolean } = await updateUser(values)
-            if (res?.needTransferResource) {
-              transferModalVisible.value = true
-              nextTick(resetTransferFields)
-              return
-            }
-          }else{
-            await addUser(values);
-          }
+          unref(formType) === FormTypeEnum.Edit ? await updateUser(values) : await addUser(values);
           closeDrawer();
           emit('success');
         } finally {
@@ -154,21 +131,7 @@
         }
       }
 
-      async function handleTransfer() {
-        try {
-          const values = await transferValidate();
-          transferModalLoading.value = true
-          await transferUserResource({ userId:userInfo.value.userId, targetUserId: values.userId })
-          emit('success');
-          transferModalVisible.value = false
-        } catch (e) {
-          console.error(e);
-        } finally {
-          transferModalLoading.value = false
-        }
-      }
-
-      return { t, registerDrawer, registerForm, transferForm, transferModalLoading, transferModalVisible, getTitle, handleSubmit, handleTransfer, closeDrawer };
+      return { t, registerDrawer, registerForm, transferForm, getTitle, handleSubmit, closeDrawer };
     },
   });
 </script>
