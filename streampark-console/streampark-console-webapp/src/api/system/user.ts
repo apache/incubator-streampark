@@ -155,9 +155,6 @@ export function lockUser(data: {
   return defHttp.delete({ url: Api.UserLock, data });
 }
 
-export function unlockUser(data: {
-  userId: string;
-  transferToUserId: string | null;
-}): Promise<UserLockResponse> {
+export function unlockUser(data: { userId: string }): Promise<UserLockResponse> {
   return defHttp.put({ url: Api.UserUnlock, data });
 }
