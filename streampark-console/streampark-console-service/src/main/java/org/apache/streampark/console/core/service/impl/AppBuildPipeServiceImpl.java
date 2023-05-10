@@ -96,6 +96,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,8 +154,39 @@ public class AppBuildPipeServiceImpl
   private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS =
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
+  /**
+   * Build application. This is an async call method.
+   *
+   * @param appId application id
+   * @param forceBuild forced start pipeline or not
+   * @return Whether the pipeline was successfully started
+   */
   @Override
-  public boolean buildApplication(@Nonnull Application app, ApplicationLog applicationLog) {
+  public boolean buildApplication(Long appId, boolean forceBuild) {
+    // check the build environment
+    checkBuildEnv(appId, forceBuild);
+
+    Application app = applicationService.getById(appId);
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(
+        org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
+    applicationLog.setAppId(app.getId());
+    applicationLog.setOptionTime(new Date());
+
+    // check if you need to go through the build process (if the jar and pom have changed,
+    // you need to go through the build process, if other common parameters are modified,
+    // you don't need to go through the build process)
+    boolean needBuild = applicationService.checkBuildAndUpdate(app);
+    if (!needBuild) {
+      applicationLog.setSuccess(true);
+      applicationLogService.save(applicationLog);
+      return true;
+    }
+    // rollback
+    if (app.isNeedRollback() && app.isFlinkSqlJob()) {
+      flinkSqlService.rollback(app);
+    }
+
     // 1) flink sql setDependency
     FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
@@ -344,6 +376,34 @@ public class AppBuildPipeServiceImpl
     // async release pipeline
     executorService.submit((Runnable) pipeline::launch);
     return saved;
+  }
+
+  /**
+   * check the build environment
+   *
+   * @param appId application id
+   * @param forceBuild forced start pipeline or not
+   * @return
+   */
+  private void checkBuildEnv(Long appId, boolean forceBuild) {
+    Application app = applicationService.getById(appId);
+
+    // 1) check flink version
+    FlinkEnv env = flinkEnvService.getById(app.getVersionId());
+    boolean checkVersion = env.getFlinkVersion().checkVersion(false);
+    ApiAlertException.throwIfFalse(
+        checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
+
+    // 2) check env
+    boolean envOk = applicationService.checkEnv(app);
+    ApiAlertException.throwIfFalse(
+        envOk, "Check flink env failed, please check the flink version of this job");
+
+    // 3) Whether the application can currently start a new building progress
+    if (!forceBuild && !allowToBuildNow(appId)) {
+      throw new ApiAlertException(
+          "The job is invalid, or the job cannot be built while it is running");
+    }
   }
 
   /** create building pipeline instance */
