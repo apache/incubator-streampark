@@ -54,7 +54,7 @@
   import UserDrawer from './components/UserDrawer.vue';
   import UserModal from './components/UserModal.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { getUserList, lockUser, resetPassword } from '/@/api/system/user';
+  import { getUserList, lockUser, resetPassword, unlockUser } from '/@/api/system/user';
   import { columns, searchFormSchema } from './user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -173,12 +173,19 @@
             icon: 'ant-design:lock-outlined',
             color: 'error',
             auth: 'user:delete',
-            ifShow: record.username !== 'admin',
+            ifShow: record.username !== 'admin' && record.status === "1",
             tooltip: t('system.user.table.lock'),
             popConfirm: {
               title: t('system.user.table.lockTip'),
               confirm: handleLock.bind(null, record),
             },
+          },
+          {
+            icon: 'ant-design:unlock-outlined',
+            auth: 'user:delete',
+            ifShow: record.username !== 'admin' && record.status === "0",
+            tooltip: t('system.user.table.unlock'),
+            onClick: handleUnLock.bind(null, record),
           },
         ];
       }
@@ -238,6 +245,19 @@
           console.error(e);
         } finally {
           transferModalLoading.value = false;
+        }
+      }
+
+      async function handleUnLock(record: UserListRecord) {
+        try {
+          await unlockUser({
+            userId:record.userId
+          });
+          createMessage.success(t('system.user.table.unlockSuccess'));
+          reload();
+        } catch (e) {
+          console.error(e);
+        } finally {
         }
       }
 

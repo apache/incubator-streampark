@@ -38,6 +38,7 @@ enum Api {
   UserUpdate = '/user/update',
   UserAdd = '/user/post',
   UserLock = '/user/lockUser',
+  UserUnlock = '/user/unlockUser',
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
   CheckName = '/user/check/name',
@@ -152,4 +153,11 @@ export function lockUser(data: {
   transferToUserId: string | null;
 }): Promise<UserLockResponse> {
   return defHttp.delete({ url: Api.UserLock, data });
+}
+
+export function unlockUser(data: {
+  userId: string;
+  transferToUserId: string | null;
+}): Promise<UserLockResponse> {
+  return defHttp.put({ url: Api.UserUnlock, data });
 }

@@ -47,8 +47,7 @@ class UserServiceTest extends SpringTestBase {
     Assertions.assertFalse(userService.lockUser(user.getUserId(), null));
     Assertions.assertEquals(User.STATUS_LOCK, Db.getById(user.getUserId(), User.class).getStatus());
     // unlock user
-    user.setStatus(User.STATUS_VALID);
-    Db.updateById(user);
+    userService.unlockUser(user.getUserId());
 
     Resource resource = new Resource();
     resource.setResourceName("test");

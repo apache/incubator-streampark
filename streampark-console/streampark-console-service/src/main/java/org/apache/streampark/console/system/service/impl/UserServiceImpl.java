@@ -266,4 +266,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             .eq(User::getUserId, userId));
     return false;
   }
+
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void unlockUser(Long userId) {
+    this.baseMapper.update(
+        null,
+        Wrappers.lambdaUpdate(User.class)
+            .set(User::getStatus, User.STATUS_VALID)
+            .eq(User::getUserId, userId));
+  }
 }

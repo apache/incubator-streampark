@@ -101,6 +101,14 @@ public class UserController {
         Collections.singletonMap("needTransferResource", needTransferResource));
   }
 
+  @Operation(summary = "Unlock user")
+  @PutMapping("unlockUser")
+  @RequiresPermissions("user:delete")
+  public RestResponse unlockUser(Long userId, Long transferToUserId) {
+    userService.unlockUser(userId);
+    return RestResponse.success();
+  }
+
   @Operation(summary = "List without token users")
   @PostMapping("getNoTokenUser")
   public RestResponse getNoTokenUser() {

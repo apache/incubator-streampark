@@ -112,4 +112,6 @@ public interface UserService extends IService<User> {
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 
   boolean lockUser(Long userId, Long transferToUserId);
+
+  void unlockUser(Long userId);
 }

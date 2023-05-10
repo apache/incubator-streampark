@@ -22,8 +22,10 @@ export default {
     reset: '重置密码',
     resetTip: '你确定要重置密码吗?',
     lock: '锁定用户',
+    unlock: '解锁用户',
     lockTip: '你确定要锁定用户吗',
     lockSuccess: '用户锁定成功',
+    unlockSuccess: '用户解锁成功',
     resetSuccess: '重置密码成功，用户 [ {0} ] 新密码为 streampark666',
   },
   form: {
