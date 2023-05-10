@@ -250,14 +250,11 @@
 
       async function handleUnLock(record: UserListRecord) {
         try {
-          await unlockUser({
-            userId:record.userId
-          });
+          await unlockUser({ userId: record.userId });
           createMessage.success(t('system.user.table.unlockSuccess'));
           reload();
         } catch (e) {
           console.error(e);
-        } finally {
         }
       }
 

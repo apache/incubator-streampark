@@ -22,7 +22,8 @@ import {
   LoginResultModel,
   GetUserInfoModel,
   TeamSetResponse,
-  UserListRecord, UserLockResponse,
+  UserListRecord,
+  UserLockResponse,
 } from './model/userModel';
 
 import { ErrorMessageMode, Result } from '/#/axios';
@@ -155,9 +156,6 @@ export function lockUser(data: {
   return defHttp.delete({ url: Api.UserLock, data });
 }
 
-export function unlockUser(data: {
-  userId: string;
-  transferToUserId: string | null;
-}): Promise<UserLockResponse> {
+export function unlockUser(data: { userId: string }): Promise<UserLockResponse> {
   return defHttp.put({ url: Api.UserUnlock, data });
 }
