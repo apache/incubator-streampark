@@ -159,19 +159,6 @@ export const formSchema = (formType: string): FormSchema[] => {
       rules: [{ required: true }],
     },
     {
-      field: 'status',
-      label: t('system.user.form.status'),
-      component: 'RadioGroup',
-      defaultValue: StatusEnum.Effective,
-      componentProps: {
-        options: [
-          { label: t('system.user.locked'), value: StatusEnum.Locked },
-          { label: t('system.user.effective'), value: StatusEnum.Effective },
-        ],
-      },
-      rules: [{ required: true }],
-    },
-    {
       field: 'sex',
       label: t('system.user.form.gender'),
       component: 'RadioGroup',
