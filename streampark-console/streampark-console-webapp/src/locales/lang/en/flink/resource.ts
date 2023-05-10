@@ -24,6 +24,8 @@ export default {
   resourceType: 'Resource Type',
   engineType: 'Engine Type',
   engineTypePlaceholder: 'Please select compute engine type',
+  multiPomTip: 'Do not add multiple dependencies at one time',
+  addResourceTip: 'Please add a resource',
   add: 'Add',
   success: ' successful',
   fail: ' failed',

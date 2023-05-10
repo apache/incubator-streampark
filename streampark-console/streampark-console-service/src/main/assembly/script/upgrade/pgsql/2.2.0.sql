@@ -25,6 +25,7 @@ create table "public"."t_resource" (
                                        "id" int8 not null default nextval('streampark_t_resource_id_seq'::regclass),
                                        "resource_name" varchar(128) collate "pg_catalog"."default" not null,
                                        "resource_type" int4,
+                                       "resource" text collate "pg_catalog"."default",
                                        "engine_type" int4,
                                        "main_class" varchar(255) collate "pg_catalog"."default",
                                        "description" text collate "pg_catalog"."default" default null,
@@ -37,6 +38,7 @@ create table "public"."t_resource" (
 comment on column "public"."t_resource"."id" is 'Resource id';
 comment on column "public"."t_resource"."resource_name" is 'Resource name';
 comment on column "public"."t_resource"."resource_type" is '0:app 1:common 2:connector 3:format 4:udf';
+comment on column "public"."t_resource"."resource" is 'resource content, including jars and poms';
 comment on column "public"."t_resource"."engine_type" is 'compute engine type, 0:apache flink 1:apache spark';
 comment on column "public"."t_resource"."main_class" is 'The program main class';
 comment on column "public"."t_resource"."description" is 'More detailed description of resource';

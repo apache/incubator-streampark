@@ -39,7 +39,7 @@ public final class GZipUtils {
    * @param tarZipSource source dir
    * @param targetDir target dir
    */
-  public static File decompress(String tarZipSource, String targetDir) {
+  public static void deCompress(String tarZipSource, String targetDir) {
     File unFile = null;
     // tar compress format
     ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
@@ -74,8 +74,6 @@ public final class GZipUtils {
     } catch (Exception e) {
       log.error(e.getMessage(), e);
     }
-
-    return unFile;
   }
 
   /**

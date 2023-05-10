@@ -16,23 +16,22 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.http.NameValuePair
-import org.apache.http.auth.{AuthSchemeProvider, AuthScope, Credentials}
-import org.apache.http.client.config.{AuthSchemes, RequestConfig}
-import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods._
-import org.apache.http.client.utils.URIBuilder
-import org.apache.http.config.RegistryBuilder
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.auth.SPNegoSchemeFactory
-import org.apache.http.impl.client.{BasicCredentialsProvider, CloseableHttpClient, HttpClientBuilder, HttpClients}
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
-import org.apache.http.message.BasicNameValuePair
-import org.apache.http.util.EntityUtils
+import org.apache.hc.client5.http.auth.{AuthSchemeFactory, AuthScope, Credentials, StandardAuthScheme}
+import org.apache.hc.client5.http.classic.methods.{HttpGet, HttpPost, HttpUriRequestBase}
+import org.apache.hc.client5.http.config.RequestConfig
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity
+import org.apache.hc.client5.http.impl.auth.{BasicCredentialsProvider, SPNegoSchemeFactory}
+import org.apache.hc.client5.http.impl.classic.{CloseableHttpClient, HttpClientBuilder, HttpClients}
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.core5.http.NameValuePair
+import org.apache.hc.core5.http.config.RegistryBuilder
+import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.message.BasicNameValuePair
+import org.apache.hc.core5.net.URIBuilder
 
 import java.nio.charset.{Charset, StandardCharsets}
 import java.security.Principal
-import java.util
+import java.util.{List => JavaList, Map => JavaMap}
 
 import scala.collection.JavaConversions._
 
@@ -52,8 +51,9 @@ object HttpClientUtils {
 
   private[this] def getHttpGet(
       url: String,
-      params: util.Map[String, AnyRef] = null,
+      params: JavaMap[String, AnyRef] = null,
       config: RequestConfig = null): HttpGet = {
+
     val httpGet = params match {
       case null => new HttpGet(url)
       case _ =>
@@ -78,15 +78,15 @@ object HttpClientUtils {
   def httpGetRequest(
       url: String,
       config: RequestConfig,
-      params: util.Map[String, AnyRef]): String = {
+      params: JavaMap[String, AnyRef]): String = {
     getHttpResult(getHttpGet(url, params, config))
   }
 
   def httpGetRequest(
       url: String,
       config: RequestConfig,
-      headers: util.Map[String, AnyRef],
-      params: util.Map[String, AnyRef]): String = {
+      headers: JavaMap[String, AnyRef],
+      params: JavaMap[String, AnyRef]): String = {
     val httpGet = getHttpGet(url, params, config)
     headers.entrySet.foreach(p => httpGet.addHeader(p.getKey, String.valueOf(p.getValue)))
     getHttpResult(httpGet)
@@ -97,83 +97,47 @@ object HttpClientUtils {
     getHttpResult(httpPost)
   }
 
-  def httpPatchRequest(url: String): String = {
-    val httpPatch = new HttpPatch(url)
-    getHttpResult(httpPatch)
-  }
-
-  def httpPostRequest(url: String, params: util.Map[String, AnyRef]): String = {
+  def httpPostRequest(url: String, params: JavaMap[String, AnyRef]): String = {
     val httpPost = new HttpPost(url)
     httpPost.setEntity(new UrlEncodedFormEntity(paramsToNameValuePairs(params), defaultChart))
     getHttpResult(httpPost)
   }
 
-  def httpPatchRequest(url: String, params: util.Map[String, AnyRef]): String = {
-    val httpPatch = new HttpPatch(url)
-    httpPatch.setEntity(new UrlEncodedFormEntity(paramsToNameValuePairs(params), defaultChart))
-    getHttpResult(httpPatch)
-  }
-
-  def httpPostRequest(url: String, params: String): String = httpRequest(new HttpPost(url), params)
-
-  def httpPatchRequest(url: String, params: String): String =
-    httpRequest(new HttpPatch(url), params)
-
   def httpPostRequest(
       url: String,
-      params: util.Map[String, AnyRef],
-      headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
+      params: JavaMap[String, AnyRef],
+      headers: JavaMap[String, AnyRef] = Map.empty[String, AnyRef]): String = {
     httpRequest(new HttpPost(url), headers, params)
   }
 
-  def httpPatchRequest(
-      url: String,
-      params: util.Map[String, AnyRef],
-      headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
-    httpRequest(new HttpPatch(url), headers, params)
-  }
-
   private[this] def httpRequest(
-      httpEntity: HttpEntityEnclosingRequestBase,
-      params: String): String = {
-    val entity = new StringEntity(params, defaultChart)
-    entity.setContentEncoding("UTF-8")
-    entity.setContentType("application/json")
-    httpEntity.setEntity(entity)
-    getHttpResult(httpEntity)
-  }
-
-  private[this] def httpRequest(
-      httpPatch: HttpEntityEnclosingRequestBase,
-      headers: util.Map[String, AnyRef],
-      params: util.Map[String, AnyRef]) = {
-    headers.entrySet.foreach(p => httpPatch.addHeader(p.getKey, String.valueOf(p.getValue)))
-    httpPatch.setEntity(new UrlEncodedFormEntity(paramsToNameValuePairs(params), defaultChart))
-    getHttpResult(httpPatch)
+      httpUri: HttpUriRequestBase,
+      headers: JavaMap[String, AnyRef],
+      params: JavaMap[String, AnyRef]) = {
+    headers.entrySet.foreach(p => httpUri.addHeader(p.getKey, String.valueOf(p.getValue)))
+    httpUri.setEntity(new UrlEncodedFormEntity(paramsToNameValuePairs(params), defaultChart))
+    getHttpResult(httpUri)
   }
 
   private[this] def paramsToNameValuePairs(
-      params: util.Map[String, AnyRef]): util.List[NameValuePair] = {
-    val pairs = new util.ArrayList[NameValuePair]
-    params.entrySet.foreach(
-      p => pairs.add(new BasicNameValuePair(p.getKey, String.valueOf(p.getValue))))
-    pairs
+      params: JavaMap[String, AnyRef]): JavaList[NameValuePair] = {
+    params.entrySet.map(p => new BasicNameValuePair(p.getKey, p.getValue.toString)).toList
   }
 
   def httpAuthGetRequest(url: String, config: RequestConfig): String = {
     def getHttpAuthClient: CloseableHttpClient = {
       val credentialsProvider = new BasicCredentialsProvider
-      credentialsProvider.setCredentials(
-        new AuthScope(null, -1, null),
-        new Credentials {
-          override def getUserPrincipal: Principal = null
 
-          override def getPassword: String = null
-        })
+      val credentials = new Credentials() {
+        def getPassword: Array[Char] = null
+        def getUserPrincipal: Principal = null
+      }
+
+      credentialsProvider.setCredentials(new AuthScope(null, -1), credentials)
 
       val authSchemeRegistry = RegistryBuilder
-        .create[AuthSchemeProvider]
-        .register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true))
+        .create[AuthSchemeFactory]
+        .register(StandardAuthScheme.SPNEGO, SPNegoSchemeFactory.DEFAULT)
         .build
 
       HttpClientBuilder
@@ -189,19 +153,15 @@ object HttpClientUtils {
 
   /** process http request */
   private[this] def getHttpResult(
-      request: HttpRequestBase,
+      request: HttpUriRequestBase,
       httpClient: CloseableHttpClient = getHttpClient): String = {
-    try {
-      val response = httpClient.execute(request)
-      val entity = response.getEntity
-      if (entity != null) {
-        val result = EntityUtils.toString(entity)
-        response.close()
-        result
-      } else null
-    } catch {
-      case e: Exception => throw e
-    }
+    val response = httpClient.execute(request)
+    val entity = response.getEntity
+    if (entity != null) {
+      val result = EntityUtils.toString(entity)
+      response.close()
+      result
+    } else null
   }
 
 }

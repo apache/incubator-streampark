@@ -18,8 +18,6 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
@@ -33,9 +31,14 @@ import java.util.Optional;
 
 public interface AppBuildPipeService extends IService<AppBuildPipeline> {
 
-  /** Build application. This is an async call method. */
-  boolean buildApplication(@Nonnull Application app, ApplicationLog applicationLog)
-      throws Exception;
+  /**
+   * Build application. This is an async call method.
+   *
+   * @param appId application id
+   * @param forceBuild forced start pipeline or not
+   * @return Whether the pipeline was successfully started
+   */
+  boolean buildApplication(@Nonnull Long appId, boolean forceBuild) throws Exception;
 
   /**
    * Get current build pipeline instance of specified application

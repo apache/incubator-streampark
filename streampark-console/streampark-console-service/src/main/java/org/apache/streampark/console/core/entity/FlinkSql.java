@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
+import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.enums.ChangedType;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -86,10 +87,8 @@ public class FlinkSql {
     // 1) determine if sql statement has changed
     boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
     // 2) determine if dependency has changed
-    Application.Dependency thisDependency =
-        Application.Dependency.toDependency(this.getDependency());
-    Application.Dependency targetDependency =
-        Application.Dependency.toDependency(target.getDependency());
+    Dependency thisDependency = Dependency.toDependency(this.getDependency());
+    Dependency targetDependency = Dependency.toDependency(target.getDependency());
     boolean depDifference = !thisDependency.eq(targetDependency);
     // 3) determine if team resource has changed
     boolean teamResDifference =

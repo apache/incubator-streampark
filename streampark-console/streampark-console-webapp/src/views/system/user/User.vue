@@ -101,7 +101,7 @@
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
-          width: 200,
+          width: 150,
           title: t('component.table.operation'),
           dataIndex: 'action',
         },
