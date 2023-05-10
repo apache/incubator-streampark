@@ -25,15 +25,13 @@ import org.apache.hadoop.yarn.api.records._
 import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.conf.{HAUtil, YarnConfiguration}
 import org.apache.hadoop.yarn.util.{ConverterUtils, RMHAUtils}
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.protocol.HttpClientContext
-import org.apache.http.impl.client.HttpClients
+import org.apache.hc.client5.http.config.RequestConfig
 
 import java.net.InetAddress
 import java.security.PrivilegedExceptionAction
 import java.util
 import java.util.{HashMap => JavaHashMap, List => JavaList}
+import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -230,19 +228,11 @@ object YarnUtils extends Logger {
   }
 
   private[this] def httpTestYarnRMUrl(url: String, timeout: Int): String = {
-    val httpClient = HttpClients.createDefault();
-    val context = HttpClientContext.create()
-    val httpGet = new HttpGet(url)
-    val requestConfig = RequestConfig
+    val config = RequestConfig
       .custom()
-      .setSocketTimeout(timeout)
-      .setConnectTimeout(timeout)
+      .setConnectTimeout(timeout, TimeUnit.MILLISECONDS)
       .build()
-    httpGet.setConfig(requestConfig)
-    Try(httpClient.execute(httpGet, context)) match {
-      case Success(_) => context.getTargetHost.toString
-      case _ => null
-    }
+    HttpClientUtils.httpGetRequest(url, config)
   }
 
   def getYarnAppTrackingUrl(applicationId: ApplicationId): String =
@@ -258,7 +248,7 @@ object YarnUtils extends Logger {
 
     def request(url: String): String = {
       logDebug("request url is " + url);
-      val config = RequestConfig.custom.setConnectTimeout(5000).build
+      val config = RequestConfig.custom.setConnectTimeout(5000, TimeUnit.MILLISECONDS).build
       if (hasYarnHttpKerberosAuth) {
         HadoopUtils
           .getUgi()

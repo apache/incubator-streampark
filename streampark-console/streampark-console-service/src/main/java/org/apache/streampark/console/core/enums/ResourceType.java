@@ -34,7 +34,10 @@ public enum ResourceType {
   UDXF(2),
 
   /** Common resource, like mysql-jdbc */
-  NORMAL_JAR(3);
+  NORMAL_JAR(3),
+
+  /** Reserved for resource group */
+  GROUP(4);
 
   @EnumValue private final int code;
 

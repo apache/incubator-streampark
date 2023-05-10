@@ -41,6 +41,11 @@
             <artifactId>streampark-flink-connector-base_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

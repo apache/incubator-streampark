@@ -25,8 +25,6 @@ import org.apache.streampark.console.core.bean.AlertLarkRobotResponse;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
-import org.apache.commons.net.util.Base64;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
@@ -44,6 +42,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -159,7 +158,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
       Mac mac = Mac.getInstance("HmacSHA256");
       mac.init(new SecretKeySpec(stringToSign.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
       byte[] signData = mac.doFinal(new byte[] {});
-      String sign = new String(Base64.encodeBase64(signData));
+      String sign = new String(Base64.getEncoder().encode(signData));
       if (log.isDebugEnabled()) {
         log.debug("Calculate the signature success, sign:{}", sign);
       }

@@ -106,7 +106,7 @@ public class UserController {
   @Operation(summary = "Unlock user")
   @PutMapping("unlockUser")
   @RequiresPermissions("user:delete")
-  public RestResponse unlockUser(Long userId, Long transferToUserId) {
+  public RestResponse unlockUser(Long userId) {
     userService.unlockUser(userId);
     return RestResponse.success();
   }

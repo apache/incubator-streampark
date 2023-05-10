@@ -43,6 +43,7 @@
 
     <properties>
         <async.client.version>2.12.3</async.client.version>
+        <httpclient4.version>4.5.13</httpclient4.version>
     </properties>
 
     <dependencyManagement>
@@ -52,6 +53,13 @@
                 <artifactId>async-http-client</artifactId>
                 <version>${async.client.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient4.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

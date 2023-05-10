@@ -45,6 +45,7 @@ enum Api {
   SET_TEAM = '/user/setTeam',
   INIT_TEAM = '/user/initTeam',
   APP_OWNERS = '/user/appOwners',
+  TransferUserResource = '/user/transferResource',
 }
 
 /**

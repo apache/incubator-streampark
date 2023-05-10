@@ -38,7 +38,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.config.RequestConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -754,7 +754,8 @@ public class FlinkRESTAPIWatcher {
 
   private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
     String result =
-        HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        HttpClientUtils.httpGetRequest(
+            url, RequestConfig.custom().setConnectTimeout(5000, TimeUnit.MILLISECONDS).build());
     if (null == result) {
       return null;
     }
