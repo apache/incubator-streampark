@@ -31,16 +31,30 @@
     </BasicTable>
     <UserDrawer @register="registerDrawer" @success="handleSuccess" />
     <UserModal @register="registerModal" />
+    <Modal
+      :visible="transferModalVisible"
+      :confirm-loading="transferModalLoading"
+      :ok-text="t('common.okText')"
+      centered
+      @ok="handleLockAndTransfer"
+      @cancel="handleCancelTransfer"
+    >
+      <template #title>
+        <Icon icon="ant-design:swap-outlined" />
+        {{ t('system.user.form.notice') }}
+      </template>
+      <BasicForm @register="transferForm" class="!mt-30px !ml-36px" />
+    </Modal>
   </div>
 </template>
 <script lang="ts">
-  import {computed, defineComponent, ref} from 'vue';
+  import { computed, defineComponent, nextTick, ref } from 'vue';
 
-  import { BasicTable, useTable, TableAction, ActionItem } from '/@/components/Table';
+  import { ActionItem, BasicTable, TableAction, useTable } from '/@/components/Table';
   import UserDrawer from './components/UserDrawer.vue';
   import UserModal from './components/UserModal.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { lockUser, getUserList, resetPassword } from '/@/api/system/user';
+  import { getUserList, lockUser, resetPassword } from '/@/api/system/user';
   import { columns, searchFormSchema } from './user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -50,12 +64,16 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { LoginTypeEnum } from '/@/views/base/login/useLogin';
+  import { BasicForm, useForm } from '/@/components/Form';
+  import { Modal } from 'ant-design-vue';
 
   export default defineComponent({
     name: 'User',
-    components: { BasicTable, UserModal, UserDrawer, TableAction, Icon },
+    components: { BasicForm, Modal, BasicTable, UserModal, UserDrawer, TableAction, Icon },
     setup() {
-      const transferToUserId = ref();
+      const transferModalVisible = ref(false);
+      const transferModalLoading = ref(false);
+      const curUserId = ref();
       const { t } = useI18n();
       const userStore = useUserStoreWithOut();
       const userName = computed(() => {
@@ -88,6 +106,43 @@
           dataIndex: 'action',
         },
       });
+
+      const [transferForm, { resetFields: resetTransferFields, validate: transferValidate }] =
+        useForm({
+          layout: 'vertical',
+          showActionButtonGroup: false,
+          baseColProps: { lg: 22, md: 22 },
+          schemas: [
+            {
+              field: 'userId',
+              label: t('system.user.form.transferResource'),
+              component: 'ApiSelect',
+              componentProps: {
+                api: async () => {
+                  let { records } = await getUserList({
+                    page: 1,
+                    pageSize: 999999,
+                    teamId: userStore.getTeamId || '',
+                  });
+                  return records.filter((user) => user.username !== userName.value);
+                },
+                labelField: 'username',
+                valueField: 'userId',
+                showSearch: false,
+                optionFilterGroup: 'username',
+                placeholder: t('system.member.userNameRequire'),
+              },
+              rules: [
+                {
+                  required: true,
+                  message: t('system.member.userNameRequire'),
+                  trigger: 'blur',
+                },
+              ],
+            },
+          ],
+        });
+
       function getUserAction(record: UserListRecord): ActionItem[] {
         return [
           {
@@ -150,9 +205,12 @@
         try {
           const resp = await lockUser({
             userId: record.userId,
-            transferToUserId: transferToUserId.value,
+            transferToUserId: null,
           });
           if (resp.needTransferResource) {
+            curUserId.value = record.userId;
+            transferModalVisible.value = true;
+            nextTick(resetTransferFields);
             return;
           }
           createMessage.success(t('system.user.table.lockSuccess'));
@@ -162,6 +220,30 @@
         } finally {
           hide();
         }
+      }
+
+      async function handleLockAndTransfer() {
+        try {
+          const { userId } = await transferValidate();
+          transferModalLoading.value = true;
+          await lockUser({
+            userId: curUserId.value,
+            transferToUserId: userId,
+          });
+          curUserId.value = null;
+          createMessage.success(t('system.user.table.lockSuccess'));
+          reload();
+          transferModalVisible.value = false;
+        } catch (e) {
+          console.error(e);
+        } finally {
+          transferModalLoading.value = false;
+        }
+      }
+
+      async function handleCancelTransfer() {
+        transferModalVisible.value = false;
+        curUserId.value = null;
       }
 
       async function handleReset(record: Recordable) {
@@ -194,12 +276,17 @@
         registerTable,
         registerDrawer,
         registerModal,
+        transferForm,
         handleCreate,
         handleEdit,
         handleSuccess,
         handleView,
         handleReset,
         getUserAction,
+        handleLockAndTransfer,
+        handleCancelTransfer,
+        transferModalVisible,
+        transferModalLoading,
       };
     },
   });
