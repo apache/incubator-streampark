@@ -122,8 +122,5 @@ export const formSchema: FormSchema[] = [
     label: t('system.token.table.expireTime'),
     component: 'DatePicker',
     defaultValue: dayjs('9999-01-01'),
-    componentProps: {
-      disabled: true,
-    },
   },
 ];
