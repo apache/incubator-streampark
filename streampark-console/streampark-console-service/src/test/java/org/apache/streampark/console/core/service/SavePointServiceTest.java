@@ -115,10 +115,12 @@ class SavePointServiceTest extends SpringTestBase {
     configService.save(appCfg);
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
 
-    // Test for (StreamPark job Or FlinkSQL job) with application config and enabled checkpoint and
+    // Test for (StreamPark job or FlinkSQL job) with application config and enabled checkpoint and
     // configured value.
 
     // Test for non-value for CHECKPOINTING_INTERVAL
+    appCfg.setContent("");
+    configService.updateById(appCfg);
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
 
     // Test for configured CHECKPOINTING_INTERVAL

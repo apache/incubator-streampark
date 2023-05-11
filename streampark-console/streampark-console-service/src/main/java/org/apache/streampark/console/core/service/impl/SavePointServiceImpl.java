@@ -203,8 +203,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       if (CommonUtils.notEmpty(savePoint.getPath())) {
         application.getFsOperator().delete(savePoint.getPath());
       }
-      removeById(id);
-      return true;
+      return removeById(id);
     } catch (Exception e) {
       throw new InternalException(e.getMessage());
     }
