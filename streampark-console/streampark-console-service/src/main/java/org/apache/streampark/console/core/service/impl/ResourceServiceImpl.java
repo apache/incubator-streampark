@@ -91,7 +91,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     ApiAlertException.throwIfNull(resourceStr, "Please add pom or jar resource.");
 
     if (resource.getResourceType() == ResourceType.GROUP) {
-      // TODO: will support later
+      ApiAlertException.throwIfNull(
+          resource.getResourceName(), "The name of resource group is required.");
     } else {
       Dependency dependency = Dependency.toDependency(resourceStr);
       List<String> jars = dependency.getJar();

@@ -54,6 +54,13 @@
           >
             UDXF
           </Tag>
+          <Tag
+            class="bold-tag"
+            color="#fcaa80"
+            v-if="record.resourceType == ResourceTypeEnum.GROUP"
+          >
+            GROUP
+          </Tag>
         </template>
         <template v-if="column.dataIndex === 'engineType'">
           <Tag
@@ -95,7 +102,7 @@
         </template>
       </template>
     </BasicTable>
-    <ResourceDrawer @register="registerDrawer" @success="handleSuccess" />
+    <ResourceDrawer :teamResource="teamResource" @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
@@ -105,7 +112,7 @@
 </script>
 
 <script lang="ts" setup>
-  import {defineComponent, ref} from 'vue';
+import {defineComponent, onMounted, ref} from 'vue';
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
   import ResourceDrawer from './components/ResourceDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
@@ -114,10 +121,15 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
-  import { fetchResourceDelete, fetchResourceList } from "/@/api/flink/resource";
+  import {
+    fetchResourceDelete,
+    fetchResourceList,
+    fetchTeamResource
+  } from "/@/api/flink/resource";
   import { EngineTypeEnum, ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
   import { Tag } from 'ant-design-vue';
 
+  const teamResource = ref<Array<any>>([]);
   const router = useRouter();
   const [registerDrawer, { openDrawer }] = useDrawer();
   const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
@@ -180,6 +192,7 @@
     if (data.status === 'success') {
       createMessage.success(t('flink.resource.deleteResource') + t('flink.resource.success'));
       reload();
+      updateTeamResource();
     } else {
       createMessage.error(t('flink.resource.deleteResource') + t('flink.resource.fail'));
     }
@@ -190,6 +203,18 @@
       `${isUpdate ? t('common.edit') : t('flink.resource.add')}${t('flink.resource.success')}`,
     );
     reload();
+    updateTeamResource();
   }
+
+  function updateTeamResource() {
+    /* Get team dependencies */
+    fetchTeamResource({}).then((res) => {
+      teamResource.value = res;
+    });
+  }
+
+  onMounted(async () => {
+    updateTeamResource();
+  });
 
 </script>

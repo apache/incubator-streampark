@@ -42,6 +42,7 @@ import org.apache.streampark.console.core.enums.CandidateType;
 import org.apache.streampark.console.core.enums.NoticeType;
 import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.ResourceType;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -82,6 +83,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
@@ -595,32 +597,58 @@ public class AppBuildPipeServiceImpl
           .forEach(
               resourceId -> {
                 Resource resource = resourceService.getById(resourceId);
-                Dependency dependency = Dependency.toDependency(resource.getResource());
-                dependency
-                    .getPom()
-                    .forEach(
-                        pom -> {
-                          mvnArtifacts.add(
-                              new Artifact(
-                                  pom.getGroupId(),
-                                  pom.getArtifactId(),
-                                  pom.getVersion(),
-                                  pom.getClassifier()));
-                        });
-                dependency
-                    .getJar()
-                    .forEach(
-                        jar -> {
-                          jarLibs.add(
-                              String.format(
-                                  "%s/%d/%s",
-                                  Workspace.local().APP_UPLOADS(), application.getTeamId(), jar));
-                        });
+
+                if (resource.getResourceType() != ResourceType.GROUP) {
+                  mergeDependency(application, mvnArtifacts, jarLibs, resource);
+                } else {
+                  try {
+                    String[] groupElements =
+                        JacksonUtils.read(resource.getResource(), String[].class);
+                    Arrays.stream(groupElements)
+                        .forEach(
+                            resourceIdInGroup -> {
+                              mergeDependency(
+                                  application,
+                                  mvnArtifacts,
+                                  jarLibs,
+                                  resourceService.getById(resourceIdInGroup));
+                            });
+                  } catch (JsonProcessingException e) {
+                    throw new ApiAlertException("Parse resource group failed.", e);
+                  }
+                }
               });
       return dependencyInfo.merge(mvnArtifacts, jarLibs);
     } catch (Exception e) {
-      log.warn("Merge team dependency failed.");
+      log.warn("Merge team dependency failed.", e);
       return dependencyInfo;
     }
+  }
+
+  private static void mergeDependency(
+      Application application,
+      List<Artifact> mvnArtifacts,
+      List<String> jarLibs,
+      Resource resource) {
+    Dependency dependency = Dependency.toDependency(resource.getResource());
+    dependency
+        .getPom()
+        .forEach(
+            pom -> {
+              mvnArtifacts.add(
+                  new Artifact(
+                      pom.getGroupId(),
+                      pom.getArtifactId(),
+                      pom.getVersion(),
+                      pom.getClassifier()));
+            });
+    dependency
+        .getJar()
+        .forEach(
+            jar -> {
+              jarLibs.add(
+                  String.format(
+                      "%s/%d/%s", Workspace.local().APP_UPLOADS(), application.getTeamId(), jar));
+            });
   }
 }
