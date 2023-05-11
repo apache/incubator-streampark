@@ -37,7 +37,7 @@
         class="fix-auto-fill"
       >
         <template #prefix>
-          <user-outlined type="user" />
+          <user-outlined />
         </template>
       </Input>
     </FormItem>
@@ -49,7 +49,7 @@
         :placeholder="t('sys.login.password')"
       >
         <template #prefix>
-          <lock-outlined type="user" />
+          <lock-outlined />
         </template>
       </InputPassword>
     </FormItem>
@@ -66,7 +66,12 @@
       </Button>
     </FormItem>
     <FormItem class="enter-x text-left">
-      <Button type="link" @click="changeLoginType"> {{ loginText.linkText }} </Button>
+      <Button :href="SSO_LOGIN_PATH" type="link">
+        {{ t('sys.login.ssoSignIn') }}
+      </Button>
+      <Button type="link" class="float-right" @click="changeLoginType">
+        {{ loginText.linkText }}
+      </Button>
     </FormItem>
   </Form>
   <TeamModal v-model:visible="modelVisible" :userId="userId" @success="handleTeamSuccess" />
@@ -79,7 +84,6 @@
 
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
-
   import { useUserStore } from '/@/store/modules/user';
   import {
     LoginStateEnum,
@@ -95,8 +99,11 @@
   import { fetchUserTeam } from '/@/api/system/member';
   import { LoginResultModel } from '/@/api/system/model/userModel';
   import { Result } from '/#/axios';
+  import { PageEnum } from '/@/enums/pageEnum';
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
+
+  const SSO_LOGIN_PATH = PageEnum.SSO_LOGIN;
 
   const { t } = useI18n();
   const { createErrorModal, createMessage } = useMessage();

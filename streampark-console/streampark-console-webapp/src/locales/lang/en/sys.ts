@@ -104,6 +104,7 @@ export default {
     rememberMe: 'Remember me',
     forgetPassword: 'Forget Password?',
     otherSignIn: 'Sign in with',
+    ssoSignIn: 'Sign in with SSO',
 
     ldapTip: 'Sign in with LDAP',
     passwordTip: 'Sign in with password',

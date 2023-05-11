@@ -44,6 +44,7 @@ enum Api {
   INIT_TEAM = '/user/initTeam',
   APP_OWNERS = '/user/appOwners',
   TransferUserResource = '/user/transferResource',
+  SSO_TOKEN = '/sso/token',
 }
 
 /**
@@ -100,8 +101,7 @@ export function addUser(data: Recordable) {
 }
 
 export function resetPassword(data): Promise<AxiosResponse<Result<string>>> {
-  return defHttp.put({ url: Api.ResetPassword, data },
-    { isReturnNativeResponse: true },);
+  return defHttp.put({ url: Api.ResetPassword, data }, { isReturnNativeResponse: true });
 }
 
 export function checkUserName(data) {
@@ -147,6 +147,15 @@ export function fetchSetUserTeam(data: { teamId: string }): Promise<TeamSetRespo
   });
 }
 
-export function transferUserResource(data: { userId: string, targetUserId: string }): Promise<TeamSetResponse> {
+export function transferUserResource(data: {
+  userId: string;
+  targetUserId: string;
+}): Promise<TeamSetResponse> {
   return defHttp.put({ url: Api.TransferUserResource, data });
+}
+
+export function fetchSsoToken(): Promise<LoginResultModel> {
+  return defHttp.get({
+    url: Api.SSO_TOKEN,
+  });
 }
