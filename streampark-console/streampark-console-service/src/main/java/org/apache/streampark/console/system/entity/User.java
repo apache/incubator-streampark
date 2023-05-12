@@ -67,7 +67,6 @@ public class User implements Serializable {
 
   private LoginType loginType;
 
-  @NotBlank(message = "{required}")
   private String status;
 
   private Date createTime;
@@ -99,6 +98,8 @@ public class User implements Serializable {
 
   /** The last set teamId */
   private Long lastTeamId;
+
+  private transient Long teamId;
 
   public void dataMasking() {
     String dataMask = ConfigConst.DEFAULT_DATAMASK_STRING();
