@@ -72,7 +72,7 @@
     name: 'User',
     components: { BasicForm, Modal, BasicTable, UserModal, UserDrawer, TableAction, Icon },
     setup() {
-      const transferModalVisible = ref(true);
+      const transferModalVisible = ref(false);
       const transferModalLoading = ref(false);
       const curUserId = ref();
       const { t } = useI18n();
