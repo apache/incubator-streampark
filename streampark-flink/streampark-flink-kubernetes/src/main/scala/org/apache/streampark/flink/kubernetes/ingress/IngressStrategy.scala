@@ -37,10 +37,10 @@ trait IngressStrategy {
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit
 
   /**
-   * The version information of kubernetes is based on the gitVersion field
-   * ParseSemantic parses a version string that exactly obeys the syntax and semantics of
-   * the "Semantic Versioning" specification (http://semver.org/) (although it ignores
-   * leading and trailing whitespace, and allows the version to be preceded by "v").
+   * The version information of kubernetes is based on the gitVersion field ParseSemantic parses a
+   * version string that exactly obeys the syntax and semantics of the "Semantic Versioning"
+   * specification (http://semver.org/) (although it ignores leading and trailing whitespace, and
+   * allows the version to be preceded by "v").
    */
   def parseSemantic(getGitVersion: String): Double = {
     val numbers = VERSION_MATCH_RE.findFirstMatchIn(getGitVersion).get.group(1).split('.')
