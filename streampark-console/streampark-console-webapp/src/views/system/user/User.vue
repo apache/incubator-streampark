@@ -55,6 +55,7 @@
   import UserModal from './components/UserModal.vue';
   import { useDrawer } from '/@/components/Drawer';
   import { getUserList, lockUser, resetPassword, unlockUser } from '/@/api/system/user';
+  import { fetchMemberList } from "/@/api/system/member";
   import { columns, searchFormSchema } from './user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -71,7 +72,7 @@
     name: 'User',
     components: { BasicForm, Modal, BasicTable, UserModal, UserDrawer, TableAction, Icon },
     setup() {
-      const transferModalVisible = ref(false);
+      const transferModalVisible = ref(true);
       const transferModalLoading = ref(false);
       const curUserId = ref();
       const { t } = useI18n();
@@ -119,17 +120,17 @@
               component: 'ApiSelect',
               componentProps: {
                 api: async () => {
-                  let { records } = await getUserList({
+                  let { records } = await fetchMemberList({
                     page: 1,
                     pageSize: 999999,
                     teamId: userStore.getTeamId || '',
                   });
-                  return records.filter((user) => user.username !== userName.value);
+                  return records.filter((user) => user.userName !== userName.value);
                 },
-                labelField: 'username',
+                labelField: 'userName',
                 valueField: 'userId',
                 showSearch: false,
-                optionFilterGroup: 'username',
+                optionFilterGroup: 'userName',
                 placeholder: t('system.member.userNameRequire'),
               },
               rules: [
