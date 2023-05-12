@@ -75,10 +75,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
     registry
         .addInterceptor(userStatusCheckInterceptor)
-        .addPathPatterns("/**")
-        .excludePathPatterns("/passport/**")
-        .excludePathPatterns("/member/teams")
-        .excludePathPatterns("/menu/router")
-        .excludePathPatterns("/user/initTeam");
+        .addPathPatterns("/user/**")
+        .addPathPatterns("/flink/**")
+        .addPathPatterns("/resource/**")
+        .addPathPatterns("/variable/**");
   }
 }
