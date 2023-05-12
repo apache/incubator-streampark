@@ -27,10 +27,12 @@ import scala.language.postfixOps
 
 object IngressController extends Logger {
 
+  private[this] val VERSION_REGEXP = "(\\d+\\.\\d+)".r
+
   private lazy val ingressStrategy: IngressStrategy = {
     using(new DefaultKubernetesClient()) {
       client =>
-        val version = ingressStrategy.parseSemantic(client.getVersion.getGitVersion)
+        val version = VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
         if (version >= 1.19) {
           new IngressStrategyV1()
         } else {

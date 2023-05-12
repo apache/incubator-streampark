@@ -26,26 +26,12 @@ import java.io.File
 
 trait IngressStrategy {
 
-  // splits a version string into numeric and "extra" parts
-  private val VERSION_MATCH_RE = "^\\s*v?([0-9]+(?:\\.[0-9]+)*)(.*)*$".r
-
   def ingressUrlAddress(
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String
 
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit
-
-  /**
-   * The version information of kubernetes is based on the gitVersion field ParseSemantic parses a
-   * version string that exactly obeys the syntax and semantics of the "Semantic Versioning"
-   * specification (http://semver.org/) (although it ignores leading and trailing whitespace, and
-   * allows the version to be preceded by "v").
-   */
-  def parseSemantic(getGitVersion: String): Double = {
-    val numbers = VERSION_MATCH_RE.findFirstMatchIn(getGitVersion).get.group(1).split('.')
-    s"${numbers(0)}.${numbers(1)}".toDouble
-  }
 
   def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {
     val workspaceDir = new File(buildWorkspace)
