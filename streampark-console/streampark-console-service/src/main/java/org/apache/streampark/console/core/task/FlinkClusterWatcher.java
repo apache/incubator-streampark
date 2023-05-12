@@ -215,10 +215,12 @@ public class FlinkClusterWatcher {
               .set(FlinkCluster::getAddress, null)
               .set(FlinkCluster::getJobManagerUrl, null);
         }
-      case UNKNOWN:
+        // fall through
       case LOST:
+      case UNKNOWN:
         {
           removeFlinkCluster(flinkCluster);
+          break;
         }
     }
     flinkClusterService.update(updateWrapper);
