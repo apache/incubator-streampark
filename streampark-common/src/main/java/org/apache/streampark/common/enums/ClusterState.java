@@ -49,4 +49,8 @@ public enum ClusterState implements Serializable {
   public Integer getValue() {
     return value;
   }
+
+  public static boolean isStarted(ClusterState state) {
+    return STARTED.equals(state);
+  }
 }
