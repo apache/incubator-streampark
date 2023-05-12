@@ -21,7 +21,7 @@ import flinkAppSvg from '/@/assets/icons/flink2.svg';
 import connectorSvg from '/@/assets/icons/connector.svg';
 import udxfSvg from '/@/assets/icons/fx.svg';
 import normalJarSvg from '/@/assets/icons/jar.svg';
-import streamSvg from '/@/assets/icons/stream.svg';
+import groupSvg from '/@/assets/icons/group.svg';
 
 const { t } = useI18n();
 
@@ -34,7 +34,7 @@ export const renderResourceType = ({ model },) => {
       { label: 'Connector', value: ResourceTypeEnum.CONNECTOR, src: connectorSvg },
       { label: 'UDXF', value: ResourceTypeEnum.UDXF, src: udxfSvg },
       { label: 'Normal Jar', value: ResourceTypeEnum.NORMAL_JAR, src: normalJarSvg },
-      { label: 'Group', value: ResourceTypeEnum.GROUP, src: streamSvg },
+      { label: 'Group', value: ResourceTypeEnum.GROUP, src: groupSvg },
     ];
     return options
       .map(( {label,value, src} ) => {
