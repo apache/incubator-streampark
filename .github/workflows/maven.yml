@@ -72,7 +72,7 @@ jobs:
             markdown-link-check -c .dlc.json -q "$file"
           done
   build:
-    name: "maven-compile ( ${{ matrix.scala }}, java-${{ matrix.java }})"
+    name: "maven-compile (java-${{ matrix.java }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
