@@ -57,10 +57,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Check codestyle for scala 2.11
-        run: ./mvnw -B -q -nsu -Pscala-2.11 checkstyle:check spotless:check
-      - name: Check codestyle for scala 2.12
-        run: ./mvnw -B -q -nsu -Pscala-2.12 checkstyle:check spotless:check
+      - name: Check codestyle
+        run: ./mvnw -B -q -nsu checkstyle:check spotless:check
   dead-link:
     if: github.repository == 'apache/incubator-streampark'
     name: Dead links
@@ -79,7 +77,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: [ scala-2.11, scala-2.12 ]
         java: [ 8 , 11 ]
     steps:
       - name: Checkout
@@ -91,7 +88,7 @@ jobs:
           distribution: "adopt"
           cache: "maven"
       - name: Build with Maven
-        run: ./mvnw -B clean install -P${{ matrix.scala }},shaded -DskipTests
+        run: ./mvnw -B clean install -Pshaded -DskipTests
       - name: Test with Maven
-        run: ./mvnw -B test -P${{ matrix.scala }}
+        run: ./mvnw -B test
 

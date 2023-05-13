@@ -78,6 +78,7 @@
     <modules>
         <module>streampark-common</module>
         <module>streampark-flink</module>
+        <module>streampark-spark</module>
         <module>streampark-storage</module>
         <module>streampark-console</module>
     </modules>
@@ -734,7 +735,7 @@
                 </plugin>
 
                 <plugin>
-                    <!-- run via "mvn -Pscala-2.12 -DskipDependencyCheck=false org.owasp:dependency-check-maven:aggregate" -->
+                    <!-- run via "mvn -DskipDependencyCheck=false org.owasp:dependency-check-maven:aggregate" -->
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
                     <version>${owasp-dependency-check-maven.version}</version>
@@ -790,25 +791,6 @@
     </build>
 
     <profiles>
-        <profile>
-            <id>scala-2.11</id>
-            <properties>
-                <scala.version>2.11.12</scala.version>
-                <scala.binary.version>2.11</scala.binary.version>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>scala-2.12</id>
-            <modules>
-                <module>streampark-spark</module>
-            </modules>
-            <properties>
-                <scala.version>2.12.8</scala.version>
-                <scala.binary.version>2.12</scala.binary.version>
-            </properties>
-        </profile>
-
         <profile>
             <id>shaded</id>
             <modules>
