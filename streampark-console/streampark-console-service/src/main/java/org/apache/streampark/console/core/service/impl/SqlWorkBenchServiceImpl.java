@@ -41,7 +41,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -85,8 +84,8 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
   @Override
   public SessionHandle openSession(Long flinkClusterId) {
     SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkClusterId);
+    // TODO: 2023/4/30 judge flink cluster type and generate session conf for sessionEnvironment
     Map<String, String> streamParkConf = new HashMap<>();
-    // TODO: 2023/4/30 read flink conf from streampark
     return sqlGateWayService.openSession(
         new SessionEnvironment("test-adien", null, streamParkConf));
   }
@@ -94,7 +93,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
   @Override
   public void closeSession(Long flinkClusterId, String sessionHandleUUIDStr) {
     SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkClusterId);
-    sqlGateWayService.closeSession(new SessionHandle(UUID.fromString(sessionHandleUUIDStr)));
+    sqlGateWayService.closeSession(new SessionHandle(sessionHandleUUIDStr));
   }
 
   @Override
@@ -102,18 +101,14 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
       Long flinkClusterId, String sessionHandleUUIDStr, String operationId) {
 
     getSqlGateWayService(flinkClusterId)
-        .cancelOperation(
-            new SessionHandle(UUID.fromString(sessionHandleUUIDStr)),
-            new OperationHandle(UUID.fromString(operationId)));
+        .cancelOperation(new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
   }
 
   @Override
   public void closeOperation(Long flinkClusterId, String sessionHandleUUIDStr, String operationId) {
 
     getSqlGateWayService(flinkClusterId)
-        .closeOperation(
-            new SessionHandle(UUID.fromString(sessionHandleUUIDStr)),
-            new OperationHandle(UUID.fromString(operationId)));
+        .closeOperation(new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
   }
 
   @Override
@@ -122,8 +117,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
 
     return getSqlGateWayService(flinkClusterId)
         .getOperationInfo(
-            new SessionHandle(UUID.fromString(sessionHandleUUIDStr)),
-            new OperationHandle(UUID.fromString(operationId)));
+            new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
   }
 
   @Override
@@ -132,8 +126,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
 
     return getSqlGateWayService(flinkClusterId)
         .getOperationResultSchema(
-            new SessionHandle(UUID.fromString(sessionHandleUUIDStr)),
-            new OperationHandle(UUID.fromString(operationId)));
+            new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
   }
 
   @Override
@@ -141,8 +134,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
       Long flinkClusterId, String sessionHandleUUIDStr, String statement) {
 
     return getSqlGateWayService(flinkClusterId)
-        .executeStatement(
-            new SessionHandle(UUID.fromString(sessionHandleUUIDStr)), statement, 10000L, null);
+        .executeStatement(new SessionHandle(sessionHandleUUIDStr), statement, 10000L, null);
   }
 
   @Override
@@ -153,14 +145,13 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
       ResultQueryCondition resultQueryCondition) {
     return getSqlGateWayService(flinkClusterId)
         .fetchResults(
-            new SessionHandle(UUID.fromString(sessionHandleUUIDStr)),
-            new OperationHandle(UUID.fromString(operationId)),
+            new SessionHandle(sessionHandleUUIDStr),
+            new OperationHandle(operationId),
             resultQueryCondition);
   }
 
   @Override
   public void heartbeat(Long flinkClusterId, String sessionHandle) {
-    getSqlGateWayService(flinkClusterId)
-        .heartbeat(new SessionHandle(UUID.fromString(sessionHandle)));
+    getSqlGateWayService(flinkClusterId).heartbeat(new SessionHandle(sessionHandle));
   }
 }
