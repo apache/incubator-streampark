@@ -40,48 +40,48 @@ import java.util.List;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Autowired private UploadFileTypeInterceptor uploadFileTypeInterceptor;
-    @Autowired private UserStatusCheckInterceptor userStatusCheckInterceptor;
+  @Autowired private UploadFileTypeInterceptor uploadFileTypeInterceptor;
+  @Autowired private UserStatusCheckInterceptor userStatusCheckInterceptor;
 
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(new ByteArrayHttpMessageConverter());
-        converters.add(new StringHttpMessageConverter());
-        converters.add(new ResourceHttpMessageConverter());
-        converters.add(new AllEncompassingFormHttpMessageConverter());
-    }
+  @Override
+  public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+    converters.add(new ByteArrayHttpMessageConverter());
+    converters.add(new StringHttpMessageConverter());
+    converters.add(new ResourceHttpMessageConverter());
+    converters.add(new AllEncompassingFormHttpMessageConverter());
+  }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry
-            .addMapping("/**")
-            .allowedOriginPatterns("*")
-            .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
-            .allowedHeaders("*")
-            .allowCredentials(true)
-            .maxAge(3600);
-    }
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry
+        .addMapping("/**")
+        .allowedOriginPatterns("*")
+        .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
+        .allowedHeaders("*")
+        .allowCredentials(true)
+        .maxAge(3600);
+  }
 
-    @Bean
-    public Module jacksonModule() {
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(Long.class, ToStringSerializer.instance);
-        module.addSerializer(Long.TYPE, ToStringSerializer.instance);
-        return module;
-    }
+  @Bean
+  public Module jacksonModule() {
+    SimpleModule module = new SimpleModule();
+    module.addSerializer(Long.class, ToStringSerializer.instance);
+    module.addSerializer(Long.TYPE, ToStringSerializer.instance);
+    return module;
+  }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
-        registry
-            .addInterceptor(userStatusCheckInterceptor)
-            .addPathPatterns("/user/**")
-            .addPathPatterns("/flink/**")
-            .addPathPatterns("/resource/**")
-            .addPathPatterns("/variable/**")
-            .excludePathPatterns("/passport/**")
-            .excludePathPatterns("/member/teams")
-            .excludePathPatterns("/menu/router")
-            .excludePathPatterns("/user/initTeam");
-    }
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
+    registry
+        .addInterceptor(userStatusCheckInterceptor)
+        .addPathPatterns("/user/**")
+        .addPathPatterns("/flink/**")
+        .addPathPatterns("/resource/**")
+        .addPathPatterns("/variable/**")
+        .excludePathPatterns("/passport/**")
+        .excludePathPatterns("/member/teams")
+        .excludePathPatterns("/menu/router")
+        .excludePathPatterns("/user/initTeam");
+  }
 }
