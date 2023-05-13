@@ -70,7 +70,7 @@ jobs:
     # - run: |
     #   echo "Run, Build Application using script"
     #   ./location_of_script_within_repo/buildscript.sh
-    - run: ./mvnw -q -Dmaven.test.skip=true -Pscala-2.12 clean install || ./mvnw -q -Dmaven.test.skip=true clean install
+    - run: ./mvnw -q -Dmaven.test.skip=true clean install || ./mvnw -q -Dmaven.test.skip=true clean install
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
