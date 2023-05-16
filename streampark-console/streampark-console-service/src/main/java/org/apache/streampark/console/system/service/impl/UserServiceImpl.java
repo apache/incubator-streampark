@@ -107,6 +107,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     String password = ShaHashUtils.encrypt(salt, user.getPassword());
     user.setSalt(salt);
     user.setPassword(password);
+    user.setStatus(User.STATUS_VALID);
     save(user);
   }
 
