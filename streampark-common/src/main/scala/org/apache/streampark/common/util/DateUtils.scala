@@ -16,8 +16,10 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.commons.lang3.StringUtils
+
 import java.text.{ParseException, SimpleDateFormat}
-import java.time.{Duration, LocalDateTime}
+import java.time.{Duration, LocalDateTime, ZonedDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.util._
 import java.util.concurrent.TimeUnit
@@ -218,6 +220,36 @@ object DateUtils {
     val sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US)
     val d = sdf.parse(date)
     DateUtils.getDateFormat(d, format)
+  }
+
+  def transformTimezoneDate(
+      date: Date,
+      sourceTimezoneId: String,
+      targetTimezoneId: String): Date = {
+    Option(sourceTimezoneId)
+      .filter(StringUtils.isNotEmpty)
+      .flatMap(_ => Option(targetTimezoneId))
+      .filter(StringUtils.isNotEmpty)
+      .map(
+        _ => {
+          val dateToString = dateToString(date, sourceTimezoneId)
+          val localDateTime =
+            LocalDateTime.parse(dateToString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+          val zonedDateTime =
+            ZonedDateTime.of(localDateTime, TimeZone.getTimeZone(targetTimezoneId).toZoneId)
+          Date.from(zonedDateTime.toInstant)
+        })
+      .getOrElse(date)
+  }
+
+  def transformTimezoneDate(date: Date, targetTimezoneId: String): Date = {
+    transformTimezoneDate(date, ZoneId.systemDefault().getId, targetTimezoneId)
+  }
+
+  def getTimezone(timezoneId: String): Option[TimeZone] = {
+    Option(timezoneId)
+      .filter(StringUtils.isNotEmpty)
+      .map(TimeZone.getTimeZone)
   }
 
 }

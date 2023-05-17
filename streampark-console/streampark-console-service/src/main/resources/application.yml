@@ -66,6 +66,27 @@ spring:
   mvc:
     converters:
       preferred-json-mapper: jackson
+  quartz:
+    auto-startup: false
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org.quartz.threadPool.threadPriority: 5
+      org.quartz.jobStore.isClustered: true
+      org.quartz.jobStore.class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+      org.quartz.scheduler.instanceId: AUTO
+      org.quartz.jobStore.tablePrefix: QRTZ_
+      org.quartz.jobStore.acquireTriggersWithinLock: true
+      org.quartz.scheduler.instanceName: StreamPark
+      org.quartz.threadPool.class: org.quartz.simpl.SimpleThreadPool
+      org.quartz.jobStore.useProperties: false
+      org.quartz.threadPool.makeThreadsDaemons: true
+      org.quartz.threadPool.threadCount: 25
+      org.quartz.jobStore.misfireThreshold: 60000
+      org.quartz.scheduler.makeSchedulerThreadDaemon: true
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+      org.quartz.jobStore.clusterCheckinInterval: 5000
 
 management:
   endpoints:
