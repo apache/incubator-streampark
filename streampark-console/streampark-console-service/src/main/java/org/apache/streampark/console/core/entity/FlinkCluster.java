@@ -230,9 +230,4 @@ public class FlinkCluster implements Serializable {
     }
     return map;
   }
-
-  public String getGatewayAddress() {
-    // todo get gateway address
-    return this.address.replace("8081", "8083");
-  }
 }

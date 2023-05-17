@@ -40,12 +40,22 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/sqlWorkBench/{flinkClusterId}")
+@RequestMapping("flink/sqlWorkBench/{flinkGatewayId}")
 public class SqlWorkBenchController {
   private final SqlWorkBenchService sqlWorkBenchService;
 
   public SqlWorkBenchController(SqlWorkBenchService sqlWorkBenchService) {
     this.sqlWorkBenchService = sqlWorkBenchService;
+  }
+
+  // -------------------------------------------------------------------------------------------
+  // Validation API
+  // -------------------------------------------------------------------------------------------
+  @ApiAccess
+  @ApiOperation(value = "Check Support", notes = "Check Support", tags = "FLINK_GATEWAY_TAG")
+  @GetMapping("{flinkClusterId}/check")
+  public RestResponse check(@PathVariable Long flinkGatewayId, @PathVariable Long flinkClusterId) {
+    return RestResponse.success(sqlWorkBenchService.check(flinkGatewayId, flinkClusterId));
   }
 
   // -------------------------------------------------------------------------------------------
@@ -55,8 +65,8 @@ public class SqlWorkBenchController {
   @ApiAccess
   @ApiOperation(value = "Get gateway info", notes = "Get gateway info", tags = "FLINK_GATEWAY_TAG")
   @GetMapping("getGatewayInfo")
-  public RestResponse getGatewayInfo(@PathVariable Long flinkClusterId) {
-    return RestResponse.success(sqlWorkBenchService.getGatewayInfo(flinkClusterId));
+  public RestResponse getGatewayInfo(@PathVariable Long flinkGatewayId) {
+    return RestResponse.success(sqlWorkBenchService.getGatewayInfo(flinkGatewayId));
   }
 
   // -------------------------------------------------------------------------------------------
@@ -65,9 +75,10 @@ public class SqlWorkBenchController {
 
   @ApiAccess
   @ApiOperation(value = "Open sessions", notes = "Open sessions", tags = "FLINK_GATEWAY_TAG")
-  @PostMapping("sessions")
-  public RestResponse openSession(@PathVariable Long flinkClusterId, String serviceType) {
-    SessionHandle sessionHandle = sqlWorkBenchService.openSession(flinkClusterId);
+  @PostMapping("/{flinkClusterId}/sessions")
+  public RestResponse openSession(
+      @PathVariable Long flinkGatewayId, @PathVariable Long flinkClusterId) {
+    SessionHandle sessionHandle = sqlWorkBenchService.openSession(flinkGatewayId, flinkClusterId);
     return RestResponse.success(sessionHandle);
   }
 
@@ -75,8 +86,8 @@ public class SqlWorkBenchController {
   @ApiOperation(value = "Heartbeat", notes = "Heartbeat", tags = "FLINK_GATEWAY_TAG")
   @PostMapping("sessions/{sessionHandle}/heartbeat")
   public RestResponse heartbeat(
-      @PathVariable Long flinkClusterId, @PathVariable String sessionHandle) {
-    sqlWorkBenchService.heartbeat(flinkClusterId, sessionHandle);
+      @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
+    sqlWorkBenchService.heartbeat(flinkGatewayId, sessionHandle);
     return RestResponse.success();
   }
 
@@ -84,8 +95,8 @@ public class SqlWorkBenchController {
   @ApiOperation(value = "Close session", notes = "Close session", tags = "FLINK_GATEWAY_TAG")
   @DeleteMapping("sessions/{sessionHandle}")
   public RestResponse closeSession(
-      @PathVariable Long flinkClusterId, @PathVariable String sessionHandle) {
-    sqlWorkBenchService.closeSession(flinkClusterId, sessionHandle);
+      @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
+    sqlWorkBenchService.closeSession(flinkGatewayId, sessionHandle);
     return RestResponse.success();
   }
 
@@ -97,10 +108,10 @@ public class SqlWorkBenchController {
   @ApiOperation(value = "Cancel operation", notes = "Cancel operation", tags = "FLINK_GATEWAY_TAG")
   @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/cancel")
   public RestResponse cancelOperation(
-      @PathVariable Long flinkClusterId,
+      @PathVariable Long flinkGatewayId,
       @PathVariable String sessionHandle,
       @PathVariable String operationHandle) {
-    sqlWorkBenchService.cancelOperation(flinkClusterId, sessionHandle, operationHandle);
+    sqlWorkBenchService.cancelOperation(flinkGatewayId, sessionHandle, operationHandle);
     return RestResponse.success();
   }
 
@@ -108,10 +119,10 @@ public class SqlWorkBenchController {
   @ApiOperation(value = "Close operation", notes = "Close operation", tags = "FLINK_GATEWAY_TAG")
   @DeleteMapping("sessions/{sessionHandle}/operations/{operationHandle}/close")
   public RestResponse closeOperation(
-      @PathVariable Long flinkClusterId,
+      @PathVariable Long flinkGatewayId,
       @PathVariable String sessionHandle,
       @PathVariable String operationHandle) {
-    sqlWorkBenchService.closeOperation(flinkClusterId, sessionHandle, operationHandle);
+    sqlWorkBenchService.closeOperation(flinkGatewayId, sessionHandle, operationHandle);
     return RestResponse.success();
   }
 
@@ -122,11 +133,11 @@ public class SqlWorkBenchController {
       tags = "FLINK_GATEWAY_TAG")
   @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/info")
   public RestResponse getOperationInfo(
-      @PathVariable Long flinkClusterId,
+      @PathVariable Long flinkGatewayId,
       @PathVariable String sessionHandle,
       @PathVariable String operationHandle) {
     return RestResponse.success(
-        sqlWorkBenchService.getOperationInfo(flinkClusterId, sessionHandle, operationHandle));
+        sqlWorkBenchService.getOperationInfo(flinkGatewayId, sessionHandle, operationHandle));
   }
 
   @ApiAccess
@@ -136,12 +147,12 @@ public class SqlWorkBenchController {
       tags = "FLINK_GATEWAY_TAG")
   @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/resultSchema")
   public RestResponse getOperationResultSchema(
-      @PathVariable Long flinkClusterId,
+      @PathVariable Long flinkGatewayId,
       @PathVariable String sessionHandle,
       @PathVariable String operationHandle) {
     return RestResponse.success(
         sqlWorkBenchService.getOperationResultSchema(
-            flinkClusterId, sessionHandle, operationHandle));
+            flinkGatewayId, sessionHandle, operationHandle));
   }
 
   // -------------------------------------------------------------------------------------------
@@ -155,24 +166,24 @@ public class SqlWorkBenchController {
       tags = "FLINK_GATEWAY_TAG")
   @PostMapping("sessions/{sessionHandle}/statements")
   public RestResponse executeStatement(
-      @PathVariable Long flinkClusterId,
+      @PathVariable Long flinkGatewayId,
       @PathVariable String sessionHandle,
       @RequestParam String statement) {
     return RestResponse.success(
-        sqlWorkBenchService.executeStatement(flinkClusterId, sessionHandle, statement));
+        sqlWorkBenchService.executeStatement(flinkGatewayId, sessionHandle, statement));
   }
 
   @ApiAccess
   @ApiOperation(value = "Fetch results", notes = "Fetch results", tags = "FLINK_GATEWAY_TAG")
   @PostMapping("sessions/{sessionHandle}/statements/{operationHandle}/info")
   public RestResponse fetchResults(
-      @PathVariable Long flinkClusterId,
+      @PathVariable Long flinkGatewayId,
       @PathVariable String sessionHandle,
       @PathVariable String operationHandle,
       @RequestBody ResultQueryCondition resultQueryCondition) {
     return RestResponse.success(
         sqlWorkBenchService.fetchResults(
-            flinkClusterId, sessionHandle, operationHandle, resultQueryCondition));
+            flinkGatewayId, sessionHandle, operationHandle, resultQueryCondition));
   }
 
   // -------------------------------------------------------------------------------------------

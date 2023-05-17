@@ -386,7 +386,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-sql-gateway-flink-1.16</artifactId>
+            <artifactId>streampark-flink-sql-gateway-flink-v1</artifactId>
             <version>${project.version}</version>
         </dependency>
 

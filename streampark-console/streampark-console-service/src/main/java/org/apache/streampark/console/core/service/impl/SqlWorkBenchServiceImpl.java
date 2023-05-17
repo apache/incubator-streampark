@@ -17,10 +17,13 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.FlinkCluster;
-import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.entity.FlinkGateWay;
+import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
+import org.apache.streampark.console.core.service.FlinkGateWayService;
 import org.apache.streampark.console.core.service.SqlWorkBenchService;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.factories.FactoryUtil;
@@ -35,39 +38,40 @@ import org.apache.streampark.gateway.service.SqlGatewayService;
 import org.apache.streampark.gateway.session.SessionEnvironment;
 import org.apache.streampark.gateway.session.SessionHandle;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import static org.apache.streampark.common.enums.ExecutionMode.KUBERNETES_NATIVE_SESSION;
+import static org.apache.streampark.common.enums.ExecutionMode.LOCAL;
+import static org.apache.streampark.common.enums.ExecutionMode.REMOTE;
+import static org.apache.streampark.common.enums.ExecutionMode.YARN_SESSION;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
 
   private final FlinkClusterService flinkClusterService;
-
+  private final FlinkGateWayService flinkGateWayService;
   private final FlinkEnvService flinkEnvService;
 
-  public SqlWorkBenchServiceImpl(
-      FlinkClusterService flinkClusterService, FlinkEnvService flinkEnvService) {
-    this.flinkClusterService = flinkClusterService;
-    this.flinkEnvService = flinkEnvService;
-  }
+  //
 
-  /** Get SqlGatewayService instance by flinkClusterId */
-  private SqlGatewayService getSqlGateWayService(Long flinkClusterId) {
-    FlinkCluster flinkCluster = flinkClusterService.getById(flinkClusterId);
-    FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
-
-    Map<String, String> config = new HashMap<>(8);
+  /** Get SqlGatewayService instance by flinkGatewayId */
+  private SqlGatewayService getSqlGateWayService(Long flinkGatewayId) {
+    FlinkGateWay flinkGateWay = flinkGateWayService.getById(flinkGatewayId);
+    Map<String, String> config = new HashMap<>(2);
     config.put(
-        FactoryUtil.SQL_GATEWAY_SERVICE_TYPE.getKey(), "flink-" + flinkEnv.getLargeVersion());
-    config.put(FlinkSqlGatewayServiceFactory.BASE_URI.getKey(), flinkCluster.getGatewayAddress());
-
-    // support read flink conf from streampark and set, sql gateway also support use `set xxx = xxx`
-    // in code editor to set session conf.
+        FactoryUtil.SQL_GATEWAY_SERVICE_TYPE.getKey(),
+        GatewayTypeEnum.of(flinkGateWay.getGatewayType()).getIdentifier());
+    config.put(FlinkSqlGatewayServiceFactory.BASE_URI.getKey(), flinkGateWay.getAddress());
     List<SqlGatewayService> actual = SqlGatewayServiceFactoryUtils.createSqlGatewayService(config);
     if (actual.size() > 1) {
       log.warn("There are more than one SqlGatewayService instance, please check your config");
@@ -77,73 +81,102 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
 
   @Override
   public GatewayInfo getGatewayInfo(Long flinkClusterId) {
-    SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkClusterId);
+    SqlGatewayService sqlGateWayService = getSqlGateWayService(null);
     return sqlGateWayService.getGatewayInfo();
   }
 
   @Override
-  public SessionHandle openSession(Long flinkClusterId) {
-    SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkClusterId);
-    // TODO: 2023/4/30 judge flink cluster type and generate session conf for sessionEnvironment
+  public SessionHandle openSession(Long flinkGatewayId, Long flinkClusterId) {
+    SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkGatewayId);
+    FlinkCluster flinkCluster = flinkClusterService.getById(flinkClusterId);
+    ExecutionMode executionMode = ExecutionMode.of(flinkCluster.getExecutionMode());
     Map<String, String> streamParkConf = new HashMap<>();
+    URI remoteURI = flinkCluster.getRemoteURI();
+    String host = remoteURI.getHost();
+    String port = String.valueOf(remoteURI.getPort());
+    switch (executionMode) {
+      case LOCAL:
+        streamParkConf.put("execution.target", LOCAL.getName());
+        break;
+      case REMOTE:
+        streamParkConf.put("execution.target", REMOTE.getName());
+        streamParkConf.put("rest.address", host);
+        streamParkConf.put("rest.port", port);
+        break;
+      case YARN_SESSION:
+        streamParkConf.put("execution.target", YARN_SESSION.getName());
+        streamParkConf.put("flink.hadoop.yarn.resourcemanager.ha.enabled", "true");
+        streamParkConf.put("flink.hadoop.yarn.resourcemanager.ha.rm-ids", "rm1,rm2");
+        streamParkConf.put("flink.hadoop.yarn.resourcemanager.hostname.rm1", "yarn01");
+        streamParkConf.put("flink.hadoop.yarn.resourcemanager.hostname.rm2", "yarn01");
+        streamParkConf.put("flink.hadoop.yarn.resourcemanager.cluster-id", "yarn-cluster");
+        break;
+      case KUBERNETES_NATIVE_SESSION:
+        streamParkConf.put("execution.target", KUBERNETES_NATIVE_SESSION.getName());
+        streamParkConf.put("kubernetes.cluster-id", "custom-flink-cluster");
+        streamParkConf.put("kubernetes.jobmanager.service-account", "flink");
+        streamParkConf.put("kubernetes.namespace", "flink-cluster");
+        streamParkConf.put("rest.address", "127.0.0.1");
+        streamParkConf.put("rest.port", "8081");
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported execution mode: " + executionMode);
+    }
+
     return sqlGateWayService.openSession(
-        new SessionEnvironment("test-adien", null, streamParkConf));
+        new SessionEnvironment(
+            flinkGatewayId + flinkClusterId + UUID.randomUUID().toString(), null, streamParkConf));
   }
 
   @Override
-  public void closeSession(Long flinkClusterId, String sessionHandleUUIDStr) {
-    SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkClusterId);
+  public void closeSession(Long flinkGatewayId, String sessionHandleUUIDStr) {
+    SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkGatewayId);
     sqlGateWayService.closeSession(new SessionHandle(sessionHandleUUIDStr));
   }
 
   @Override
   public void cancelOperation(
-      Long flinkClusterId, String sessionHandleUUIDStr, String operationId) {
-
-    getSqlGateWayService(flinkClusterId)
+      Long flinkGatewayId, String sessionHandleUUIDStr, String operationId) {
+    getSqlGateWayService(flinkGatewayId)
         .cancelOperation(new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
   }
 
   @Override
-  public void closeOperation(Long flinkClusterId, String sessionHandleUUIDStr, String operationId) {
-
-    getSqlGateWayService(flinkClusterId)
+  public void closeOperation(Long flinkGatewayId, String sessionHandleUUIDStr, String operationId) {
+    getSqlGateWayService(flinkGatewayId)
         .closeOperation(new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
   }
 
   @Override
   public OperationInfo getOperationInfo(
-      Long flinkClusterId, String sessionHandleUUIDStr, String operationId) {
-
-    return getSqlGateWayService(flinkClusterId)
+      Long flinkGatewayId, String sessionHandleUUIDStr, String operationId) {
+    return getSqlGateWayService(flinkGatewayId)
         .getOperationInfo(
             new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
   }
 
   @Override
   public Column getOperationResultSchema(
-      Long flinkClusterId, String sessionHandleUUIDStr, String operationId) {
-
-    return getSqlGateWayService(flinkClusterId)
+      Long flinkGatewayId, String sessionHandleUUIDStr, String operationId) {
+    return getSqlGateWayService(flinkGatewayId)
         .getOperationResultSchema(
             new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
   }
 
   @Override
   public OperationHandle executeStatement(
-      Long flinkClusterId, String sessionHandleUUIDStr, String statement) {
-
-    return getSqlGateWayService(flinkClusterId)
+      Long flinkGatewayId, String sessionHandleUUIDStr, String statement) {
+    return getSqlGateWayService(flinkGatewayId)
         .executeStatement(new SessionHandle(sessionHandleUUIDStr), statement, 10000L, null);
   }
 
   @Override
   public ResultSet fetchResults(
-      Long flinkClusterId,
+      Long flinkGatewayId,
       String sessionHandleUUIDStr,
       String operationId,
       ResultQueryCondition resultQueryCondition) {
-    return getSqlGateWayService(flinkClusterId)
+    return getSqlGateWayService(flinkGatewayId)
         .fetchResults(
             new SessionHandle(sessionHandleUUIDStr),
             new OperationHandle(operationId),
@@ -151,7 +184,13 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
   }
 
   @Override
-  public void heartbeat(Long flinkClusterId, String sessionHandle) {
-    getSqlGateWayService(flinkClusterId).heartbeat(new SessionHandle(sessionHandle));
+  public void heartbeat(Long flinkGatewayId, String sessionHandle) {
+    getSqlGateWayService(flinkGatewayId).heartbeat(new SessionHandle(sessionHandle));
+  }
+
+  @Override
+  public boolean check(Long flinkGatewayId, Long flinkClusterId) {
+    // TODO: 2023/5/17  check support
+    return true;
   }
 }

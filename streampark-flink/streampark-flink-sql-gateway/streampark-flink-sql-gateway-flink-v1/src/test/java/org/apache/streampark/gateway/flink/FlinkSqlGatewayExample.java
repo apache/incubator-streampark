@@ -42,7 +42,6 @@ public class FlinkSqlGatewayExample {
     OpenSessionResponseBody response =
         api.openSession(
             new OpenSessionRequestBody()
-                .putPropertiesItem("jobmanager", "192.168.20.239:8081")
                 .putPropertiesItem("rest.address", "192.168.20.239")
                 .putPropertiesItem("rest.port", "8081")
                 .putPropertiesItem("execution.target", "remote"));
@@ -90,7 +89,6 @@ public class FlinkSqlGatewayExample {
     OpenSessionResponseBody response =
         api.openSession(
             new OpenSessionRequestBody()
-                .putPropertiesItem("jobmanager", "127.0.0.1:8081")
                 .putPropertiesItem("kubernetes.cluster-id", "custom-flink-cluster")
                 .putPropertiesItem("kubernetes.jobmanager.service-account", "flink")
                 .putPropertiesItem("kubernetes.namespace", "flink-cluster")

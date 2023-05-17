@@ -30,89 +30,90 @@ public interface SqlWorkBenchService {
   /**
    * Open a session for a flink cluster
    *
+   * @param flinkGatewayId flink gateway id
    * @param flinkClusterId flink cluster id
    * @return session handle
    */
-  SessionHandle openSession(Long flinkClusterId);
+  SessionHandle openSession(Long flinkGatewayId, Long flinkClusterId);
 
   /**
    * Close a session
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @param sessionHandleUUIDStr session handle uuid string
    */
-  void closeSession(Long flinkClusterId, String sessionHandleUUIDStr);
+  void closeSession(Long flinkGatewayId, String sessionHandleUUIDStr);
 
   /**
    * Get the gateway info
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @return gateway info
    */
-  GatewayInfo getGatewayInfo(Long flinkClusterId);
+  GatewayInfo getGatewayInfo(Long flinkGatewayId);
 
   /**
    * Get the session info
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @param sessionHandleUUIDStr session handle uuid string
    * @param operationId operation id
    */
-  void cancelOperation(Long flinkClusterId, String sessionHandleUUIDStr, String operationId);
+  void cancelOperation(Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
 
   /**
    * Close the operation
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @param sessionHandleUUIDStr session handle uuid string
    * @param operationId operation id
    */
-  void closeOperation(Long flinkClusterId, String sessionHandleUUIDStr, String operationId);
+  void closeOperation(Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
 
   /**
    * Get operation info
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @param sessionHandleUUIDStr session handle uuid string
    * @param operationId operation id
    * @return operation info
    */
   OperationInfo getOperationInfo(
-      Long flinkClusterId, String sessionHandleUUIDStr, String operationId);
+      Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
 
   /**
    * Get operation result schema
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @param sessionHandleUUIDStr session handle uuid string
    * @param operationId operation id
    * @return operation result schema
    */
   Column getOperationResultSchema(
-      Long flinkClusterId, String sessionHandleUUIDStr, String operationId);
+      Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
 
   /**
    * Execute statement
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @param sessionHandleUUIDStr session handle uuid string
    * @param statement statement
    * @return operation handle
    */
   OperationHandle executeStatement(
-      Long flinkClusterId, String sessionHandleUUIDStr, String statement);
+      Long flinkGatewayId, String sessionHandleUUIDStr, String statement);
 
   /**
    * Fetch results
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @param sessionHandleUUIDStr session handle uuid string
    * @param operationId operation id
    * @param resultQueryCondition result query condition
    * @return result set
    */
   ResultSet fetchResults(
-      Long flinkClusterId,
+      Long flinkGatewayId,
       String sessionHandleUUIDStr,
       String operationId,
       ResultQueryCondition resultQueryCondition);
@@ -120,8 +121,17 @@ public interface SqlWorkBenchService {
   /**
    * Send heartbeat
    *
-   * @param flinkClusterId flink cluster id
+   * @param flinkGatewayId flink gateway id
    * @param sessionHandle session handle
    */
-  void heartbeat(Long flinkClusterId, String sessionHandle);
+  void heartbeat(Long flinkGatewayId, String sessionHandle);
+
+  /**
+   * check flink cluster version is supported
+   *
+   * @param flinkGatewayId flink gateway id
+   * @param flinkClusterId flink cluster id
+   * @return true if supported
+   */
+  boolean check(Long flinkGatewayId, Long flinkClusterId);
 }

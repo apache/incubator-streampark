@@ -37,7 +37,7 @@ public class FlinkSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
 
   @Override
   public String factoryIdentifier() {
-    return "flink-1.16";
+    return "flink-v1";
   }
 
   @Override

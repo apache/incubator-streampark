@@ -59,7 +59,7 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-sql-gateway-flink-1.16</artifactId>
+    <artifactId>streampark-flink-sql-gateway-flink-v1</artifactId>
     <name>StreamPark : Flink SQL Gateway 1.16</name>
 
     <properties>
