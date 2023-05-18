@@ -28,6 +28,7 @@ create table `t_flink_gateway` (
                                 `id` bigint not null auto_increment,
                                 `gateway_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the gateway',
                                 `description` text collate utf8mb4_general_ci default null comment 'More detailed description of resource',
+                                `gateway_type` int not null comment 'The type of the gateway',
                                 `address` varchar(150) default null comment 'url address of gateway endpoint',
                                 `create_time` datetime not null default current_timestamp comment 'create time',
                                 `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',

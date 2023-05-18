@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.console.core.enums.GatewayTypeEnum;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -35,7 +37,7 @@ public class FlinkGateWay {
 
   private String description;
 
-  private int gatewayType;
+  private GatewayTypeEnum gatewayType;
 
   private String address;
 

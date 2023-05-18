@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkGateWay;
-import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
@@ -62,15 +62,13 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
   private final FlinkGateWayService flinkGateWayService;
   private final FlinkEnvService flinkEnvService;
 
-  //
-
   /** Get SqlGatewayService instance by flinkGatewayId */
   private SqlGatewayService getSqlGateWayService(Long flinkGatewayId) {
     FlinkGateWay flinkGateWay = flinkGateWayService.getById(flinkGatewayId);
     Map<String, String> config = new HashMap<>(2);
     config.put(
         FactoryUtil.SQL_GATEWAY_SERVICE_TYPE.getKey(),
-        GatewayTypeEnum.of(flinkGateWay.getGatewayType()).getIdentifier());
+        flinkGateWay.getGatewayType().getIdentifier());
     config.put(FlinkSqlGatewayServiceFactory.BASE_URI.getKey(), flinkGateWay.getAddress());
     List<SqlGatewayService> actual = SqlGatewayServiceFactoryUtils.createSqlGatewayService(config);
     if (actual.size() > 1) {
@@ -80,8 +78,8 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
   }
 
   @Override
-  public GatewayInfo getGatewayInfo(Long flinkClusterId) {
-    SqlGatewayService sqlGateWayService = getSqlGateWayService(null);
+  public GatewayInfo getGatewayInfo(Long flinkGatewayId) {
+    SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkGatewayId);
     return sqlGateWayService.getGatewayInfo();
   }
 
@@ -94,6 +92,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
     URI remoteURI = flinkCluster.getRemoteURI();
     String host = remoteURI.getHost();
     String port = String.valueOf(remoteURI.getPort());
+    // todo need to check flink config and yarn/k8s config
     switch (executionMode) {
       case LOCAL:
         streamParkConf.put("execution.target", LOCAL.getName());
@@ -190,7 +189,14 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
 
   @Override
   public boolean check(Long flinkGatewayId, Long flinkClusterId) {
-    // TODO: 2023/5/17  check support
-    return true;
+    FlinkCluster flinkCluster = flinkClusterService.getById(flinkClusterId);
+    if (flinkCluster == null) {
+      throw new IllegalArgumentException("FlinkCluster not found");
+    }
+    FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
+    if (flinkEnv == null) {
+      throw new IllegalArgumentException("FlinkEnv not found");
+    }
+    return getSqlGateWayService(flinkGatewayId).check(flinkEnv.getFlinkVersion().majorVersion());
   }
 }

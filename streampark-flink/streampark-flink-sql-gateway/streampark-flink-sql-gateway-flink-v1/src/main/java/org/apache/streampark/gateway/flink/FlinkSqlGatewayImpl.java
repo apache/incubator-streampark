@@ -59,6 +59,12 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
   }
 
   @Override
+  public boolean check(String flinkMajorVersion) {
+    // flink gateway v1 api is supported from flink 1.16
+    return Double.parseDouble(flinkMajorVersion) >= 1.16;
+  }
+
+  @Override
   public GatewayInfo getGatewayInfo() throws SqlGatewayException {
     GetInfoResponseBody info = null;
     try {
@@ -227,7 +233,7 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
           null,
           resultKind);
     } catch (ApiException e) {
-      throw new RuntimeException(e);
+      throw new SqlGatewayException("Flink native SqlGateWay fetchResults failed!", e);
     }
   }
 }
