@@ -19,8 +19,11 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -60,6 +63,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private MemberService memberService;
 
   @Autowired private MenuService menuService;
+
+  @Autowired private ApplicationService applicationService;
+
+  @Autowired private ResourceService resourceService;
 
   @Override
   public User findByName(String username) {
@@ -105,17 +112,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public void updateUser(User user) {
+  public RestResponse updateUser(User user) {
+    User existsUser = getById(user.getUserId());
     user.setPassword(null);
     user.setModifyTime(new Date());
+    if (needTransferResource(existsUser, user)) {
+      return RestResponse.success(Collections.singletonMap("needTransferResource", true));
+    }
     updateById(user);
+    return RestResponse.success();
   }
 
-  @Override
-  @Transactional(rollbackFor = Exception.class)
-  public void deleteUser(Long userId) {
-    removeById(userId);
-    this.memberService.deleteByUserId(userId);
+  private boolean needTransferResource(User existsUser, User user) {
+    if (User.STATUS_LOCK.equals(existsUser.getStatus())
+        || User.STATUS_VALID.equals(user.getStatus())) {
+      return false;
+    }
+    return applicationService.existsByUserId(user.getUserId())
+        || resourceService.existsByUserId(user.getUserId());
   }
 
   @Override
@@ -148,17 +162,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public void resetPassword(String[] usernames) {
-    for (String username : usernames) {
-      User user = new User();
-      String salt = ShaHashUtils.getRandomSalt();
-      String password = ShaHashUtils.encrypt(salt, User.DEFAULT_PASSWORD);
-      user.setSalt(salt);
-      user.setPassword(password);
-      LambdaQueryWrapper<User> queryWrapper =
-          new LambdaQueryWrapper<User>().eq(User::getUsername, username);
-      this.baseMapper.update(user, queryWrapper);
-    }
+  public String resetPassword(String username) {
+    User user = new User();
+    String salt = ShaHashUtils.getRandomSalt();
+    String newPassword = ShaHashUtils.getRandomSalt(User.DEFAULT_PASSWORD_LENGTH);
+    String password = ShaHashUtils.encrypt(salt, newPassword);
+    user.setSalt(salt);
+    user.setPassword(password);
+    LambdaQueryWrapper<User> queryWrapper =
+        new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+    this.baseMapper.update(user, queryWrapper);
+    return newPassword;
   }
 
   @Override
@@ -245,5 +259,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     userInfo.put("permissions", permissions);
 
     return userInfo;
+  }
+
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void transferResource(Long userId, Long targetUserId) {
+    applicationService.changeOwnership(userId, targetUserId);
+    resourceService.changeOwnership(userId, targetUserId);
   }
 }

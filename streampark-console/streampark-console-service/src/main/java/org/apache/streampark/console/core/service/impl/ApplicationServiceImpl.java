@@ -86,8 +86,8 @@ import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
-import org.apache.streampark.flink.kubernetes.IngressController;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
+import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -519,6 +519,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public boolean existsByUserId(Long userId) {
+    return baseMapper.existsByUserId(userId);
+  }
+
+  @Override
   public boolean existsRunningJobByClusterId(Long clusterId) {
     boolean exists = baseMapper.existsRunningJobByClusterId(clusterId);
     if (exists) {
@@ -632,6 +637,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public void changeOwnership(Long userId, Long targetUserId) {
+    LambdaUpdateWrapper<Application> updateWrapper =
+        new LambdaUpdateWrapper<Application>()
+            .eq(Application::getUserId, userId)
+            .set(Application::getUserId, targetUserId);
+    this.baseMapper.update(null, updateWrapper);
+  }
+
+  @Override
   public String getYarnName(Application appParam) {
     String[] args = new String[2];
     args[0] = "--name";
@@ -718,7 +732,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
       String jarPath =
-          WebUtils.getAppTempDir().getAbsolutePath().concat("/").concat(appParam.getJar());
+          String.format(
+              "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
       appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
     }
 
@@ -803,6 +818,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       if (newApp.isFlinkSqlJob()) {
         FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
         newApp.setFlinkSql(copyFlinkSql.getSql());
+        newApp.setTeamResource(copyFlinkSql.getTeamResource());
         newApp.setDependency(copyFlinkSql.getDependency());
         FlinkSql flinkSql = new FlinkSql(newApp);
         flinkSqlService.create(flinkSql);

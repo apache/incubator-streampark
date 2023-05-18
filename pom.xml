@@ -26,7 +26,7 @@
 
     <groupId>org.apache.streampark</groupId>
     <artifactId>streampark</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>StreamPark Project Parent POM</name>
 
@@ -78,6 +78,7 @@
     <modules>
         <module>streampark-common</module>
         <module>streampark-flink</module>
+        <module>streampark-spark</module>
         <module>streampark-storage</module>
         <module>streampark-console</module>
     </modules>
@@ -121,6 +122,7 @@
         <commons-net.version>3.9.0</commons-net.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
+        <assertj.version>3.23.1</assertj.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
@@ -132,10 +134,11 @@
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
         <spotless.scalafmt.version>3.4.3</spotless.scalafmt.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
+        <owasp-dependency-check-maven.version>8.2.1</owasp-dependency-check-maven.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
-        <httpclient.version>4.5.13</httpclient.version>
+        <httpclient5.version>5.1</httpclient5.version>
         <lombok.version>1.18.24</lombok.version>
         <jupiter.version>5.9.1</jupiter.version>
         <mockito.version>3.4.6</mockito.version>
@@ -145,6 +148,7 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
         <MaxMetaspace>512m</MaxMetaspace>
+        <skipDependencyCheck>true</skipDependencyCheck>
     </properties>
 
     <dependencyManagement>
@@ -190,6 +194,10 @@
                     <exclusion>
                         <groupId>com.google.code.findbugs</groupId>
                         <artifactId>jsr305</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.errorprone</groupId>
+                        <artifactId>error_prone_annotations</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -304,9 +312,15 @@
             </dependency>
 
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>${httpclient5.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5-fluent</artifactId>
+                <version>${httpclient5.version}</version>
             </dependency>
 
             <dependency>
@@ -687,6 +701,7 @@
                     <version>${maven-javadoc-plugin.version}</version>
                     <configuration>
                         <quiet>true</quiet>
+                        <additionalparam>-Xdoclint:none</additionalparam>
                     </configuration>
                     <executions>
                         <execution>
@@ -718,6 +733,26 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
                 </plugin>
+
+                <plugin>
+                    <!-- run via "mvn -DskipDependencyCheck=false org.owasp:dependency-check-maven:aggregate" -->
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>${owasp-dependency-check-maven.version}</version>
+                    <configuration>
+                        <skip>${skipDependencyCheck}</skip>
+                        <format>ALL</format>
+                        <skipProvidedScope>true</skipProvidedScope>
+                        <skipSystemScope>true</skipSystemScope>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>aggregate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -746,40 +781,16 @@
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+            </plugin>
         </plugins>
 
     </build>
 
     <profiles>
-        <profile>
-            <id>flink-1.15</id>
-            <properties>
-                <streampark.flink.shims.version>1.15</streampark.flink.shims.version>
-                <flink.version>1.15.0</flink.version>
-                <scala.binary.flink.version />
-                <flink.table.uber.artifact.id>flink-table-api-java-uber</flink.table.uber.artifact.id>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>scala-2.11</id>
-            <properties>
-                <scala.version>2.11.12</scala.version>
-                <scala.binary.version>2.11</scala.binary.version>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>scala-2.12</id>
-            <modules>
-                <module>streampark-spark</module>
-            </modules>
-            <properties>
-                <scala.version>2.12.8</scala.version>
-                <scala.binary.version>2.12</scala.binary.version>
-            </properties>
-        </profile>
-
         <profile>
             <id>shaded</id>
             <modules>

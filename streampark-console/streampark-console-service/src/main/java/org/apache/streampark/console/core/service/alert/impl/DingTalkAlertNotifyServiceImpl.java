@@ -26,7 +26,6 @@ import org.apache.streampark.console.core.bean.RobotResponse;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.net.util.Base64;
 
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +44,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -187,7 +187,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
       Mac mac = Mac.getInstance("HmacSHA256");
       mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
       byte[] signData = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
-      String sign = URLEncoder.encode(new String(Base64.encodeBase64(signData)), "UTF-8");
+      String sign = URLEncoder.encode(new String(Base64.getEncoder().encode(signData)), "UTF-8");
       if (log.isDebugEnabled()) {
         log.debug("Calculate the signature success, sign:{}", sign);
       }

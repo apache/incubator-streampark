@@ -210,7 +210,7 @@ fi
 
 # Add on extra jar files to CLASSPATH
 # shellcheck disable=SC2236
-if [[ ! -z "$CLASSPATH" ]] ; then
+if [ ! -z "$CLASSPATH" ]; then
   CLASSPATH="$CLASSPATH":
 fi
 CLASSPATH="$CLASSPATH"
@@ -241,6 +241,26 @@ if [ "$USE_NOHUP" = "true" ]; then
   NOHUP="nohup"
 fi
 
+
+PARAM_CLI="org.apache.streampark.flink.core.conf.ParameterCli"
+
+APP_MAIN="org.apache.streampark.console.StreamParkConsoleBootstrap"
+
+DEFAULT_OPTS="""
+  -ea
+  -server
+  -Xms1024m
+  -Xmx1024m
+  -Xmn256m
+  -XX:NewSize=100m
+  -XX:+UseConcMarkSweepGC
+  -XX:CMSInitiatingOccupancyFraction=70
+  -XX:ThreadStackSize=512
+  -Xloggc:${APP_HOME}/logs/gc.log
+  """
+
+DEBUG_OPTS=""
+
 # ----- Execute The Requested Command -----------------------------------------
 
 print_logo() {
@@ -251,7 +271,7 @@ print_logo() {
   printf '      %s  ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        %s\n'          $PRIMARY $RESET
   printf '      %s /____/\__/_/   \___/\__,_/_/ /_/ /_/ ____/\__,_/_/  /_/|_|       %s\n'          $PRIMARY $RESET
   printf '      %s                                   /_/                            %s\n\n'        $PRIMARY $RESET
-  printf '      %s   Version:  2.1.0-SNAPSHOT %s\n'                                                $BLUE   $RESET
+  printf '      %s   Version:  2.2.0-SNAPSHOT %s\n'                                                $BLUE   $RESET
   printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                   $BLUE   $RESET
   printf '      %s   GitHub :  http://github.com/apache/streampark%s\n\n'                          $BLUE   $RESET
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
@@ -275,34 +295,60 @@ parse_yaml() {
 }
 
 # shellcheck disable=SC2120
-running() {
+get_pid() {
   if [ -f "$APP_PID" ]; then
     if [ -s "$APP_PID" ]; then
-        # shellcheck disable=SC2046
-        # shellcheck disable=SC2006
-        kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-        # shellcheck disable=SC2181
-        if [ $? -eq 0 ]; then
-          return 1
-        else
-          rm -f "$APP_PID" >/dev/null 2>&1
-          return 0
-        fi
+      # shellcheck disable=SC2155
+      # shellcheck disable=SC2006
+      local PID=`cat "$APP_PID"`
+      kill -0 $PID >/dev/null 2>&1
+      # shellcheck disable=SC2181
+      if [ $? -eq 0 ]; then
+        echo $PID
+        exit 0
+      fi
     else
-      return 0
+      rm -f "$APP_PID" >/dev/null 2>&1
+    fi
+  fi
+
+  # shellcheck disable=SC2006
+  local PROPER="${APP_CONF}/application.yml"
+  if [[ ! -f "$PROPER" ]] ; then
+    echo_r "ERROR: config file application.yml invalid or not found! ";
+    exit 1;
+  fi
+
+  # shellcheck disable=SC2046
+  eval $(parse_yaml "${PROPER}" "conf_")
+  # shellcheck disable=SC2154
+  # shellcheck disable=SC2155
+  # shellcheck disable=SC2116
+  local serverPort=$(echo "$conf_server_port")
+  # shellcheck disable=SC2006
+  # shellcheck disable=SC2155
+  local used=`lsof -i:"$serverPort" | wc -l`
+  if [ "$used" -gt 0 ]; then
+    # shellcheck disable=SC2006
+    local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
+    if [ ! -z $PID ]; then
+      echo $PID
+    else
+      echo 0
     fi
   else
-    return 0
+    echo 0
   fi
 }
 
 # shellcheck disable=SC2120
 start() {
-  running
-  # shellcheck disable=SC2181
-  if [ $? -eq "1" ]; then
+  # shellcheck disable=SC2006
+  local PID=$(get_pid)
+
+  if [ $PID -gt 0 ]; then
     # shellcheck disable=SC2006
-    echo_r "StreamPark is already running pid: `cat "$APP_PID"`"
+    echo_r "StreamPark is already running pid: $PID , start aborted!"
     exit 1
   fi
 
@@ -318,7 +364,7 @@ start() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  PROPER="${APP_CONF}/application.yml"
+  local PROPER="${APP_CONF}/application.yml"
   if [[ ! -f "$PROPER" ]] ; then
     echo_r "ERROR: config file application.yml invalid or not found! ";
     exit 1;
@@ -354,10 +400,10 @@ start() {
   # 2): StreamPark
   # 3): hadoop conf
   # shellcheck disable=SC2091
-  APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
+  local APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
   # shellcheck disable=SC2206
   # shellcheck disable=SC2010
-  JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
+  local JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
   # shellcheck disable=SC2128
   for jar in $JARS;do
     APP_CLASSPATH=$APP_CLASSPATH:$jar
@@ -370,44 +416,105 @@ start() {
     APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
   fi
 
-  PARAM_CLI="org.apache.streampark.flink.core.conf.ParameterCli"
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
-  vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
+  local vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
 
-  JAVA_OPTS="""
+  local JAVA_OPTS="""
   $vmOption
-  -ea
-  -server
-  -Xms1024m
-  -Xmx1024m
-  -Xmn256m
-  -XX:NewSize=100m
-  -XX:+UseConcMarkSweepGC
-  -XX:CMSInitiatingOccupancyFraction=70
-  -XX:ThreadStackSize=512
-  -Xloggc:${APP_HOME}/logs/gc.log
+  $DEFAULT_OPTS
   $DEBUG_OPTS
   """
 
-  eval $NOHUP "\"$_RUNJAVA\"" $JAVA_OPTS \
-    -classpath "\"$APP_CLASSPATH\"" \
-    -Dapp.home="\"${APP_HOME}\"" \
-    -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
-    -Dspring.config.location="\"${PROPER}\"" \
-    -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
-    org.apache.streampark.console.StreamParkConsoleBootstrap >> "$APP_OUT" 2>&1 "&"
+  eval $NOHUP $_RUNJAVA $JAVA_OPTS \
+    -classpath "$APP_CLASSPATH" \
+    -Dapp.home="${APP_HOME}" \
+    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
+    -Dspring.config.location="${PROPER}" \
+    -Djava.io.tmpdir="$APP_TMPDIR" \
+    $APP_MAIN >> "$APP_OUT" 2>&1 "&"
 
     local PID=$!
+    local IS_NUMBER="^[0-9]+$"
 
     # Add to pid file if successful start
     if [[ ${PID} =~ ${IS_NUMBER} ]] && kill -0 $PID > /dev/null 2>&1 ; then
         echo $PID > "$APP_PID"
-        echo_g "StreamPark start successful. pid: `cat "$APP_PID"`"
+        # shellcheck disable=SC2006
+        echo_g "StreamPark start successful. pid: $PID"
     else
         echo_r "StreamPark start failed."
         exit 1
     fi
+}
+
+# shellcheck disable=SC2120
+start_docker() {
+  # Bugzilla 37848: only output this if we have a TTY
+  if [[ ${have_tty} -eq 1 ]]; then
+    echo_w "Using APP_BASE:   $APP_BASE"
+    echo_w "Using APP_HOME:   $APP_HOME"
+    if [[ "$1" = "debug" ]] ; then
+      echo_w "Using JAVA_HOME:   $JAVA_HOME"
+    else
+      echo_w "Using JRE_HOME:   $JRE_HOME"
+    fi
+    echo_w "Using APP_PID:   $APP_PID"
+  fi
+
+  local PROPER="${APP_CONF}/application.yml"
+  if [[ ! -f "$PROPER" ]] ; then
+    echo_r "ERROR: config file application.yml invalid or not found! ";
+    exit 1;
+  else
+    echo_g "Usage: config file: $PROPER ";
+  fi
+
+  if [ "${HADOOP_HOME}"x == ""x ]; then
+    echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
+  else
+    echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
+  fi
+
+  # classpath options:
+  # 1): java env (lib and jre/lib)
+  # 2): StreamPark
+  # 3): hadoop conf
+  # shellcheck disable=SC2091
+  local APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
+  # shellcheck disable=SC2206
+  # shellcheck disable=SC2010
+  local JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
+  # shellcheck disable=SC2128
+  for jar in $JARS;do
+    APP_CLASSPATH=$APP_CLASSPATH:$jar
+  done
+
+  if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
+    echo_w "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
+    APP_CLASSPATH+=":${HADOOP_CONF_DIR}"
+  else
+    APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
+  fi
+
+  # shellcheck disable=SC2034
+  # shellcheck disable=SC2006
+  local vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
+
+  local JAVA_OPTS="""
+    $vmOption
+    $DEFAULT_OPTS
+    $DEBUG_OPTS
+    """
+
+  $_RUNJAVA $JAVA_OPTS \
+    -classpath "$APP_CLASSPATH" \
+    -Dapp.home="${APP_HOME}" \
+    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
+    -Dspring.config.location="${PROPER}" \
+    -Djava.io.tmpdir="$APP_TMPDIR" \
+    $APP_MAIN
+
 }
 
 debug() {
@@ -423,141 +530,63 @@ debug() {
 
 # shellcheck disable=SC2120
 stop() {
-  running
-  # shellcheck disable=SC2181
-  if [ $? -eq "0" ]; then
-    echo_r "StreamPark is not running."
+  # shellcheck disable=SC2155
+  # shellcheck disable=SC2006
+  local PID=$(get_pid)
+
+  if [[ $PID -eq 0 ]]; then
+    echo_r "StreamPark is not running. stop aborted."
     exit 1
   fi
 
   shift
 
-  local SLEEP=5
-  if [ ! -z "$1" ]; then
-    echo $1 | grep "[^0-9]" >/dev/null 2>&1
+  local SLEEP=3
+
+  # shellcheck disable=SC2006
+  echo_g "StreamPark stopping with the PID: $PID"
+
+  kill -9 $PID
+
+  while [ $SLEEP -ge 0 ]; do
+    # shellcheck disable=SC2046
+    # shellcheck disable=SC2006
+    kill -0 $PID >/dev/null 2>&1
+    # shellcheck disable=SC2181
     if [ $? -gt 0 ]; then
-      SLEEP=$1
-      shift
-    fi
-  fi
-
-  local FORCE=0
-  if [ "$1" = "-force" ]; then
-    shift
-    FORCE=1
-  fi
-
-  local STOPPED=0
-  # shellcheck disable=SC2236
-  if [ -f "$APP_PID" ]; then
-    if [ -s "$APP_PID" ]; then
-      # shellcheck disable=SC2046
-      # shellcheck disable=SC2006
-      kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-      # shellcheck disable=SC2181
-      if [ $? -gt 0 ]; then
-        echo "PID file found but either no matching process was found or the current user does not have permission to stop the process. Stop aborted."
-        exit 1
-      else
-        # shellcheck disable=SC2046
-        # shellcheck disable=SC2006
-        kill -15 `cat "$APP_PID"` >/dev/null 2>&1
-        if [ -f "$APP_PID" ]; then
-          while [ $SLEEP -ge 0 ]; do
-             if [ -f "$APP_PID" ]; then
-               # shellcheck disable=SC2046
-               # shellcheck disable=SC2006
-               kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-               if [ $? -gt 0 ]; then
-                 rm -f "$APP_PID" >/dev/null 2>&1
-                 if [ $? != 0 ]; then
-                   if [ -w "$APP_PID" ]; then
-                     cat /dev/null > "$APP_PID"
-                     # If StreamPark has stopped don't try and force a stop with an empty PID file
-                     FORCE=0
-                   else
-                     echo "The PID file could not be removed or cleared."
-                   fi
-                 fi
-                 STOPPED=1
-                 break
-               fi
-             else
-               STOPPED=1
-               break
-             fi
-             SLEEP=`expr $SLEEP - 1 `
-          done
-
-          #stop failed.normal kill failed? Try a force kill.
-          if [ -f "$APP_PID" ]; then
-            if [ -s "$APP_PID" ]; then
-              # shellcheck disable=SC2046
-              kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-              if [ $? -eq 0 ]; then
-                FORCE=1
-              fi
-            fi
-          fi
-
-          if [ $FORCE -eq 1 ]; then
-            KILL_SLEEP_INTERVAL=5
-            if [ -f "$APP_PID" ]; then
-              # shellcheck disable=SC2006
-              PID=`cat "$APP_PID"`
-              echo_y "Killing StreamPark with the PID: $PID"
-              kill -9 "$PID" >/dev/null 2>&1
-              while [ $KILL_SLEEP_INTERVAL -ge 0 ]; do
-                kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-                if [ $? -gt 0 ]; then
-                  rm -f "$APP_PID" >/dev/null 2>&1
-                  if [ $? != 0 ]; then
-                    if [ -w "$APP_PID" ]; then
-                      cat /dev/null > "$APP_PID"
-                    else
-                      echo_r "The PID file could not be removed."
-                    fi
-                  fi
-                  echo_y "The StreamPark process has been killed."
-                  break
-                fi
-                if [ $KILL_SLEEP_INTERVAL -gt 0 ]; then
-                  sleep 1
-                fi
-                KILL_SLEEP_INTERVAL=`expr $KILL_SLEEP_INTERVAL - 1 `
-              done
-              if [ $KILL_SLEEP_INTERVAL -lt 0 ]; then
-                echo "StreamPark has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
-              fi
-            fi
-          fi
+      rm -f "$APP_PID" >/dev/null 2>&1
+      if [ $? != 0 ]; then
+        if [ -w "$APP_PID" ]; then
+          cat /dev/null > "$APP_PID"
         else
-          STOPPED=1
+          echo_r "The PID file could not be removed."
         fi
       fi
-    else
-      echo "PID file is empty and has been ignored."
-      exit 1
+      echo_g "StreamPark stopped."
+      break
     fi
-  else
-    echo "\$APP_PID was set but the specified file does not exist. Is StreamPark running? Stop aborted."
-    exit 1
-  fi
 
-  if [ $STOPPED -eq 1 ]; then
-     echo_r "StreamPark stopped."
-  fi
+    if [ $SLEEP -gt 0 ]; then
+       sleep 1
+    fi
+    # shellcheck disable=SC2006
+    # shellcheck disable=SC2003
+    SLEEP=`expr $SLEEP - 1 `
+  done
 
+  if [ "$SLEEP" -lt 0 ]; then
+     echo_r "StreamPark has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
+  fi
 }
 
 status() {
-  running
-  # shellcheck disable=SC2181
-  if [ $? -eq "1" ]; then
-    # shellcheck disable=SC2006
-    echo_g "StreamPark is running pid is: `cat "$APP_PID"`"
-  else
+  # shellcheck disable=SC2155
+  # shellcheck disable=SC2006
+  local PID=$(get_pid)
+  if [ $PID -eq 0 ]; then
     echo_r "StreamPark is not running"
+  else
+    echo_g "StreamPark is running pid is: $PID"
   fi
 }
 
@@ -578,6 +607,9 @@ main() {
     "start")
         start
         ;;
+    "start_docker")
+        start_docker
+        ;;
     "stop")
         stop
         ;;
@@ -592,7 +624,7 @@ main() {
         echo_w "Usage: streampark.sh ( commands ... )"
         echo_w "commands:"
         echo_w "  start \$conf               Start StreamPark with application config."
-        echo_w "  stop n -force             Stop StreamPark, wait up to n seconds and then use kill -KILL if still running"
+        echo_w "  stop                      Stop StreamPark, wait up to 3 seconds and then use kill -KILL if still running"
         echo_w "  status                    StreamPark status"
         echo_w "  debug                     StreamPark start with debug mode,start debug mode, like: bash streampark.sh debug 10002"
         echo_w "  restart \$conf             restart StreamPark with application config."

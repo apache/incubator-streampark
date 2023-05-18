@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.apache.streampark.console.core.mapper.ResourceMapper">
+    <resultMap id="ResourceMap" type="org.apache.streampark.console.core.entity.Resource">
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="resource_name" jdbcType="VARCHAR" property="resourceName"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="resource_type" jdbcType="BIGINT" property="resourceType"/>
+        <result column="resource" jdbcType="VARCHAR" property="resource"/>
+        <result column="engine_type" jdbcType="BIGINT" property="engineType"/>
+        <result column="creator_id" jdbcType="BIGINT" property="creatorId"/>
+        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+
+    <select id="page" resultType="org.apache.streampark.console.core.entity.Resource" parameterType="org.apache.streampark.console.core.entity.Resource">
+        select
+        v.*,
+        u.username as creatorName
+        from t_resource v
+        inner join t_user u
+        on v.creator_id = u.user_id
+        and v.team_id = ${resource.teamId}
+        <if test="resource.resourceName != null and resource.resourceName != ''">
+            and v.resourceName like '%${resource.resourceName}%'
+        </if>
+        <if test="resource.description != null and resource.description != ''">
+            and v.description like '%${resource.description}%'
+        </if>
+    </select>
+
+    <select id="existsByUserId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+        select
+            CASE
+                WHEN  count(1) > 0 THEN true ELSE false
+                END
+        from t_resource
+        where creator_id = #{userId}
+        limit 1
+    </select>
+
+
+</mapper>

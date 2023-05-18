@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
@@ -260,42 +261,6 @@ class FlinkRestJsonTest {
         |""".stripMargin
     val checkpoint = Checkpoint.as(json)
     println(checkpoint)
-  }
-
-  @Test def testIngress(): Unit = {
-    val json =
-      """
-        |[
-        |    {
-        |        "addresses":[
-        |            "192.168.0.1",
-        |            "192.168.0.2",
-        |            "192.168.0.3"
-        |        ],
-        |        "port":80,
-        |        "protocol":"HTTP",
-        |        "serviceName":"native-flink:statebackend12788-rest",
-        |        "ingressName":"native-flink:statebackend12788",
-        |        "hostname":"streampark.com",
-        |        "path":"/native-flink/statebackend12788/",
-        |        "allNodes":false
-        |    },
-        |    {
-        |        "addresses":[
-        |        ],
-        |        "port":80,
-        |        "protocol":"HTTP",
-        |        "serviceName":"native-flink:statebackend12788-rest",
-        |        "ingressName":"native-flink:statebackend12788",
-        |        "hostname":"streampark.com",
-        |        "path":"/native-flink/statebackend12788(/|$)(.*)",
-        |        "allNodes":false
-        |    }
-        |]
-        |""".stripMargin
-
-    val ingressMeta = IngressMeta.as(json)
-    println(ingressMeta.get)
   }
 
   @Test def testHistoryArchives(): Unit = {

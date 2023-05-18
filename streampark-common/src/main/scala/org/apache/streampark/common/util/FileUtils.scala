@@ -44,7 +44,7 @@ object FileUtils {
     if (input == null) {
       throw new RuntimeException("The inputStream can not be null")
     }
-    Utils.tryWithResource(input) {
+    Utils.using(input) {
       in =>
         val b = new Array[Byte](4)
         in.read(b, 0, b.length)

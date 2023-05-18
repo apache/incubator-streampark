@@ -18,8 +18,8 @@
 FROM alpine:3.16 as deps-stage
 COPY . /
 WORKDIR /
-RUN tar zxvf dist/apache-streampark_*-*-bin.tar.gz \
-&& mv apache-streampark_*-*-bin streampark
+RUN tar zxvf dist/apache-streampark*-*-bin.tar.gz \
+&& mv apache-streampark*-*-bin streampark
 
 FROM docker:dind
 WORKDIR /streampark
@@ -27,9 +27,6 @@ COPY --from=deps-stage /streampark /streampark
 
 ENV NODE_VERSION=16.1.0
 ENV NPM_VERSION=7.11.2
-
-RUN sed -i -e 's/eval $NOHUP/eval/' bin/streampark.sh \
-    && sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' bin/streampark.sh
 
 RUN apk add openjdk8 \
     && apk add maven \

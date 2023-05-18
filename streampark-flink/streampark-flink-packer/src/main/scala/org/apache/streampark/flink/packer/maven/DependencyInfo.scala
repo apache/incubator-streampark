@@ -36,6 +36,14 @@ case class DependencyInfo(mavenArts: Set[Artifact] = Set(), extJarLibs: Set[Stri
   def merge(jarLibs: Set[String]): DependencyInfo =
     if (jarLibs != null) DependencyInfo(mavenArts, extJarLibs ++ jarLibs) else this.copy()
 
+  def merge(mvnPoms: JavaList[Artifact], jarLibs: JavaList[String]): DependencyInfo =
+    if (mvnPoms != null && jarLibs != null)
+      DependencyInfo(mavenArts ++ mvnPoms.toSet, extJarLibs ++ jarLibs.toSet)
+    else if (mvnPoms != null)
+      DependencyInfo(mavenArts ++ mvnPoms.toSet, extJarLibs)
+    else if (jarLibs != null)
+      DependencyInfo(mavenArts, extJarLibs ++ jarLibs.toSet)
+    else this.copy()
 }
 
 object DependencyInfo {

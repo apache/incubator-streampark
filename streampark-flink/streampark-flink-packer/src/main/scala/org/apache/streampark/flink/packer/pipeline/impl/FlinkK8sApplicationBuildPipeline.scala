@@ -20,7 +20,8 @@ package org.apache.streampark.flink.packer.pipeline.impl
 import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.common.util.ThreadUtils
-import org.apache.streampark.flink.kubernetes.{IngressController, PodTemplateTool}
+import org.apache.streampark.flink.kubernetes.PodTemplateTool
+import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.packer.docker._
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
@@ -242,7 +243,7 @@ object FlinkK8sApplicationBuildPipeline {
 
   val execPool = new ThreadPoolExecutor(
     Runtime.getRuntime.availableProcessors * 5,
-    Runtime.getRuntime().availableProcessors() * 10,
+    Runtime.getRuntime.availableProcessors() * 10,
     60L,
     TimeUnit.SECONDS,
     new LinkedBlockingQueue[Runnable](2048),

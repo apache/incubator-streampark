@@ -101,6 +101,7 @@ export interface AppListRecord {
   resourceFrom?: number;
   k8sHadoopIntegration: boolean;
   overview?: any;
+  teamResource?: any;
   dependency?: any;
   sqlId?: any;
   flinkSql?: any;

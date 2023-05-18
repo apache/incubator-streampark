@@ -39,6 +39,8 @@ public interface ApplicationService extends IService<Application> {
 
   boolean existsByTeamId(Long teamId);
 
+  boolean existsByUserId(Long userId);
+
   boolean create(Application app) throws IOException;
 
   Long copy(Application app) throws IOException;
@@ -120,4 +122,6 @@ public interface ApplicationService extends IService<Application> {
   List<String> historyUploadJars();
 
   String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception;
+
+  void changeOwnership(Long userId, Long targetUserId);
 }

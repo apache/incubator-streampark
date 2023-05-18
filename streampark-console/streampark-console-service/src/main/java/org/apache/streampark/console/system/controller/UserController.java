@@ -24,7 +24,6 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.PermissionType;
-import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -35,13 +34,11 @@ import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -89,15 +86,14 @@ public class UserController {
   @PutMapping("update")
   @RequiresPermissions("user:update")
   public RestResponse updateUser(@Valid User user) throws Exception {
-    this.userService.updateUser(user);
-    return RestResponse.success();
+    return this.userService.updateUser(user);
   }
 
-  @Operation(summary = "Delete user")
-  @DeleteMapping("delete")
-  @RequiresPermissions("user:delete")
-  public RestResponse deleteUser(Long userId) throws Exception {
-    this.userService.deleteUser(userId);
+  @Operation(summary = "Transfer User's Resource")
+  @PutMapping("transferResource")
+  @RequiresPermissions("user:update")
+  public RestResponse transferResource(Long userId, Long targetUserId) {
+    this.userService.transferResource(userId, targetUserId);
     return RestResponse.success();
   }
 
@@ -126,18 +122,10 @@ public class UserController {
   @Operation(summary = "Reset password")
   @PutMapping("password/reset")
   @RequiresPermissions("user:reset")
-  public RestResponse resetPassword(@NotBlank(message = "{required}") String usernames)
+  public RestResponse resetPassword(@NotBlank(message = "{required}") String username)
       throws Exception {
-    String[] usernameArr = usernames.split(StringPool.COMMA);
-    this.userService.resetPassword(usernameArr);
-    return RestResponse.success();
-  }
-
-  @Operation(summary = "List user types")
-  @PostMapping("types")
-  @RequiresPermissions("user:types")
-  public RestResponse userTypes() {
-    return RestResponse.success(UserType.values());
+    String newPass = this.userService.resetPassword(username);
+    return RestResponse.success(newPass);
   }
 
   @Operation(summary = "Init the user teams")

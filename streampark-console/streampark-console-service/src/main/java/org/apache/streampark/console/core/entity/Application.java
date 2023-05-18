@@ -26,19 +26,16 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
-import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
+import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.enums.ResourceFrom;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
-import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,24 +46,19 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nonnull;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.enums.FlinkAppState.of;
 
@@ -220,6 +212,7 @@ public class Application implements Serializable {
   /** running job */
   private transient JobsOverview.Task overview;
 
+  private transient String teamResource;
   private transient String dependency;
   private transient Long sqlId;
   private transient String flinkSql;
@@ -495,7 +488,7 @@ public class Application implements Serializable {
 
   @JsonIgnore
   public DependencyInfo getDependencyInfo() {
-    return Application.Dependency.toDependency(getDependency()).toJarPackDeps();
+    return Dependency.toDependency(getDependency()).toJarPackDeps();
   }
 
   @JsonIgnore
@@ -652,65 +645,6 @@ public class Application implements Serializable {
     return ExecutionMode.YARN_PER_JOB.equals(mode) || ExecutionMode.YARN_APPLICATION.equals(mode);
   }
 
-  @Data
-  public static class Dependency {
-    private List<Pom> pom = Collections.emptyList();
-    private List<String> jar = Collections.emptyList();
-
-    @SneakyThrows
-    public static Dependency toDependency(String dependency) {
-      if (Utils.notEmpty(dependency)) {
-        return JacksonUtils.read(dependency, new TypeReference<Dependency>() {});
-      }
-      return new Dependency();
-    }
-
-    public boolean isEmpty() {
-      return pom.isEmpty() && jar.isEmpty();
-    }
-
-    public boolean eq(Dependency other) {
-      if (other == null) {
-        return false;
-      }
-      if (this.isEmpty() && other.isEmpty()) {
-        return true;
-      }
-
-      if (this.pom.size() != other.pom.size() || this.jar.size() != other.jar.size()) {
-        return false;
-      }
-      File localJar = WebUtils.getAppTempDir();
-      File localUploads = new File(Workspace.local().APP_UPLOADS());
-      HashSet<String> otherJars = new HashSet<>(other.jar);
-      for (String jarName : jar) {
-        if (!otherJars.contains(jarName)
-            || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
-          return false;
-        }
-      }
-      return new HashSet<>(pom).containsAll(other.pom);
-    }
-
-    public DependencyInfo toJarPackDeps() {
-      List<Artifact> mvnArts =
-          this.pom.stream()
-              .map(
-                  pom ->
-                      new Artifact(
-                          pom.getGroupId(),
-                          pom.getArtifactId(),
-                          pom.getVersion(),
-                          pom.getClassifier()))
-              .collect(Collectors.toList());
-      List<String> extJars =
-          this.jar.stream()
-              .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
-              .collect(Collectors.toList());
-      return new DependencyInfo(mvnArts, extJars);
-    }
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -725,38 +659,5 @@ public class Application implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(id);
-  }
-
-  @Data
-  public static class Pom {
-    private String groupId;
-    private String artifactId;
-    private String version;
-    private String classifier;
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      return this.toString().equals(o.toString());
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(groupId, artifactId, version, classifier);
-    }
-
-    @Override
-    public String toString() {
-      return groupId + ":" + artifactId + ":" + version + getClassifier(":");
-    }
-
-    private String getClassifier(String joiner) {
-      return StringUtils.isEmpty(classifier) ? "" : joiner + classifier;
-    }
   }
 }

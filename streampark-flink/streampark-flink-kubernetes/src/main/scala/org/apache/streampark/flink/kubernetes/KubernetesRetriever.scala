@@ -18,8 +18,9 @@
 package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.common.util.{Logger, Utils}
-import org.apache.streampark.common.util.Utils.tryWithResource
+import org.apache.streampark.common.util.Utils.using
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
@@ -106,7 +107,7 @@ object KubernetesRetriever extends Logger {
    *   deployment namespace
    */
   def isDeploymentExists(name: String, namespace: String): Boolean = {
-    tryWithResource(KubernetesRetriever.newK8sClient()) {
+    using(KubernetesRetriever.newK8sClient()) {
       client =>
         client
           .apps()
@@ -122,7 +123,7 @@ object KubernetesRetriever extends Logger {
 
   /** retrieve flink jobManager rest url */
   def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
-    Utils.tryWithResource(
+    Utils.using(
       KubernetesRetriever
         .newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
         .getOrElse(return None)) {

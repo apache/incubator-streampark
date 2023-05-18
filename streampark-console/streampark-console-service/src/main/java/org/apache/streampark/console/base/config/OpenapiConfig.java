@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.config;
 
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 
 import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import io.swagger.v3.oas.models.Components;
@@ -52,7 +52,7 @@ public class OpenapiConfig implements WebMvcConfigurer {
                         .name("Apache StreamPark")
                         .url("https://streampark.apache.org/")
                         .email("dev@streampark.apache.org"))
-                .version("2.1.0-SNAPSHOT")
+                .version("2.2.0-SNAPSHOT")
                 .license(new License().name("Apache-2.0 license")))
         .components(
             new Components()

@@ -17,7 +17,7 @@
 import { BasicColumn, FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
-import { checkUserName, fetchUserTypes } from '/@/api/system/user';
+import { checkUserName } from '/@/api/system/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
@@ -32,6 +32,12 @@ export const enum GenderEnum {
   Male = '0',
   Female = '1',
   Other = '2',
+}
+
+// user type
+export const enum UserTypeEnum {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
 }
 
 export const columns: BasicColumn[] = [
@@ -142,10 +148,13 @@ export const formSchema = (formType: string): FormSchema[] => {
     {
       label: t('system.user.form.userType'),
       field: 'userType',
-      component: 'ApiSelect',
+      component: 'Select',
       componentProps: {
         disabled: isView,
-        api: fetchUserTypes,
+        options:  [
+          { label: t('ADMIN'), value: UserTypeEnum.ADMIN },
+          { label: t('USER'), value: UserTypeEnum.USER },
+        ]
       },
       rules: [{ required: true }],
     },

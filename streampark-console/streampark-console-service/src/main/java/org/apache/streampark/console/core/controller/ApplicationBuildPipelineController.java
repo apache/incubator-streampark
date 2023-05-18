@@ -19,14 +19,10 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.ApplicationLog;
-import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
@@ -50,7 +46,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -97,50 +92,7 @@ public class ApplicationBuildPipelineController {
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
     try {
-      Application app = applicationService.getById(appId);
-
-      // 1) check flink version
-      FlinkEnv env = flinkEnvService.getById(app.getVersionId());
-      boolean checkVersion = env.getFlinkVersion().checkVersion(false);
-      if (!checkVersion) {
-        throw new ApiAlertException(
-            "Unsupported flink version: " + env.getFlinkVersion().version());
-      }
-
-      // 2) check env
-      boolean envOk = applicationService.checkEnv(app);
-      if (!envOk) {
-        throw new ApiAlertException(
-            "Check flink env failed, please check the flink version of this job");
-      }
-
-      if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
-        throw new ApiAlertException(
-            "The job is invalid, or the job cannot be built while it is running");
-      }
-      // check if you need to go through the build process (if the jar and pom have changed,
-      // you need to go through the build process, if other common parameters are modified,
-      // you don't need to go through the build process)
-
-      ApplicationLog applicationLog = new ApplicationLog();
-      applicationLog.setOptionName(
-          org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
-      applicationLog.setAppId(app.getId());
-      applicationLog.setOptionTime(new Date());
-
-      boolean needBuild = applicationService.checkBuildAndUpdate(app);
-      if (!needBuild) {
-        applicationLog.setSuccess(true);
-        applicationLogService.save(applicationLog);
-        return RestResponse.success(true);
-      }
-
-      // rollback
-      if (app.isNeedRollback() && app.isFlinkSqlJob()) {
-        flinkSqlService.rollback(app);
-      }
-
-      boolean actionResult = appBuildPipeService.buildApplication(app, applicationLog);
+      boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
       return RestResponse.success(actionResult);
     } catch (Exception e) {
       return RestResponse.success(false).message(e.getMessage());

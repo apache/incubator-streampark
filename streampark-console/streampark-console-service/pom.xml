@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-console</artifactId>
-        <version>2.1.0-SNAPSHOT</version>
+        <version>2.2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>streampark-console-service</artifactId>
@@ -54,7 +54,6 @@
         <xml-apis.version>1.4.01</xml-apis.version>
         <ivy.version>2.5.0</ivy.version>
         <eclipse.jgit.version>5.13.1.202206130422-r</eclipse.jgit.version>
-        <flink.shaded.guava.version>30.1.1-jre-14.0</flink.shaded.guava.version>
     </properties>
 
     <dependencyManagement>
@@ -62,7 +61,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.7.10</version>
+                <version>2.7.11</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -113,11 +112,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>${commons-compress.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
         </dependency>
 
         <dependency>
@@ -183,6 +177,12 @@
             <groupId>org.apache.shiro</groupId>
             <artifactId>shiro-spring</artifactId>
             <version>${shiro.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-beanutils</artifactId>
+                    <groupId>commons-beanutils</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- spring cache -->
@@ -304,12 +304,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.ivy</groupId>
-            <artifactId>ivy</artifactId>
-            <version>${ivy.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-common_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
@@ -406,13 +400,6 @@
             <artifactId>force-shading</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-shaded-guava</artifactId>
-            <version>${flink.shaded.guava.version}</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -452,6 +439,100 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <excludeTransitive>false</excludeTransitive>
+                    <stripVersion>false</stripVersion>
+                    <artifactItems>
+                        <!-- flink 1.12 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-1.12_${scala.binary.version}</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink 1.13 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-1.13_${scala.binary.version}</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink 1.14 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-1.14_${scala.binary.version}</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink 1.15 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-1.15_${scala.binary.version}</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink 1.16 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-1.16_${scala.binary.version}</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink 1.17 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-1.17_${scala.binary.version}</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink-submit-core -->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                        </dependency>
+                    </artifactItems>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>dist</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <tarLongFileMode>gnu</tarLongFileMode>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <skipAssembly>false</skipAssembly>
+                            <attach>false</attach>
+                            <finalName>apache-streampark-${project.version}-incubating-bin</finalName>
+                            <descriptors>
+                                <descriptor>${basedir}/src/main/assembly/assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -479,7 +560,7 @@
                                 </goals>
                                 <configuration>
                                     <nodeVersion>v16.16.0</nodeVersion>
-                                    <pnpmVersion>7.3.0</pnpmVersion>
+                                    <pnpmVersion>8.5.0</pnpmVersion>
                                 </configuration>
                             </execution>
                             <execution>
@@ -531,188 +612,6 @@
         </profile>
 
         <profile>
-            <id>scala-2.12</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.0.2</version>
-                        <configuration>
-                            <excludeTransitive>false</excludeTransitive>
-                            <stripVersion>false</stripVersion>
-                            <artifactItems>
-                                <!-- flink 1.12 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.12_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink 1.13 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.13_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink 1.14 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.14_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink 1.15 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.15_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink 1.16 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.16_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink 1.17 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.17_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink-submit-core -->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                                </dependency>
-                            </artifactItems>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <executions>
-                            <execution>
-                                <id>dist</id>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <phase>package</phase>
-                                <configuration>
-                                    <tarLongFileMode>gnu</tarLongFileMode>
-                                    <appendAssemblyId>false</appendAssemblyId>
-                                    <skipAssembly>false</skipAssembly>
-                                    <attach>false</attach>
-                                    <finalName>apache-streampark_${scala.binary.version}-${project.version}-incubating-bin</finalName>
-                                    <descriptors>
-                                        <descriptor>${basedir}/src/main/assembly/assembly.xml</descriptor>
-                                    </descriptors>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>scala-2.11</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.0.2</version>
-                        <configuration>
-                            <excludeTransitive>false</excludeTransitive>
-                            <stripVersion>false</stripVersion>
-                            <artifactItems>
-                                <!-- flink 1.12 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.12_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink 1.13 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.13_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink 1.14 support-->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-shims_flink-1.14_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                                </dependency>
-                                <!-- flink-submit-core -->
-                                <dependency>
-                                    <groupId>org.apache.streampark</groupId>
-                                    <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                                </dependency>
-                            </artifactItems>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <executions>
-                            <execution>
-                                <id>dist</id>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <phase>package</phase>
-                                <configuration>
-                                    <tarLongFileMode>gnu</tarLongFileMode>
-                                    <appendAssemblyId>false</appendAssemblyId>
-                                    <skipAssembly>false</skipAssembly>
-                                    <attach>false</attach>
-                                    <finalName>apache-streampark_${scala.binary.version}-${project.version}-incubating-bin</finalName>
-                                    <descriptors>
-                                        <descriptor>${basedir}/src/main/assembly/assembly.xml</descriptor>
-                                    </descriptors>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
             <id>dist</id>
             <build>
                 <plugins>
@@ -727,7 +626,7 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <target>
-                                        <copy file="${project.build.directory}/apache-streampark_${scala.binary.version}-${project.version}-incubating-bin.tar.gz" overwrite="true" tofile="${project.basedir}/../../dist/apache-streampark_${scala.binary.version}-${project.version}-incubating-bin.tar.gz" />
+                                        <copy file="${project.build.directory}/apache-streampark-${project.version}-incubating-bin.tar.gz" overwrite="true" tofile="${project.basedir}/../../dist/apache-streampark-${project.version}-incubating-bin.tar.gz" />
                                     </target>
                                 </configuration>
                             </execution>

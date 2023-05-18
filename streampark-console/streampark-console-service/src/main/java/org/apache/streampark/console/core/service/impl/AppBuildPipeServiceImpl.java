@@ -27,7 +27,9 @@ import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -35,6 +37,7 @@ import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
+import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CandidateType;
 import org.apache.streampark.console.core.enums.NoticeType;
 import org.apache.streampark.console.core.enums.OptionState;
@@ -49,9 +52,12 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
+import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
+import org.apache.streampark.flink.packer.maven.Artifact;
+import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.DockerBuildSnapshot;
@@ -87,7 +93,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -124,6 +133,8 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationConfigService applicationConfigService;
 
+  @Autowired private ResourceService resourceService;
+
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,
@@ -143,8 +154,39 @@ public class AppBuildPipeServiceImpl
   private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS =
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
+  /**
+   * Build application. This is an async call method.
+   *
+   * @param appId application id
+   * @param forceBuild forced start pipeline or not
+   * @return Whether the pipeline was successfully started
+   */
   @Override
-  public boolean buildApplication(@Nonnull Application app, ApplicationLog applicationLog) {
+  public boolean buildApplication(Long appId, boolean forceBuild) {
+    // check the build environment
+    checkBuildEnv(appId, forceBuild);
+
+    Application app = applicationService.getById(appId);
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(
+        org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
+    applicationLog.setAppId(app.getId());
+    applicationLog.setOptionTime(new Date());
+
+    // check if you need to go through the build process (if the jar and pom have changed,
+    // you need to go through the build process, if other common parameters are modified,
+    // you don't need to go through the build process)
+    boolean needBuild = applicationService.checkBuildAndUpdate(app);
+    if (!needBuild) {
+      applicationLog.setSuccess(true);
+      applicationLogService.save(applicationLog);
+      return true;
+    }
+    // rollback
+    if (app.isNeedRollback() && app.isFlinkSqlJob()) {
+      flinkSqlService.rollback(app);
+    }
+
     // 1) flink sql setDependency
     FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
@@ -152,6 +194,7 @@ public class AppBuildPipeServiceImpl
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
       Utils.notNull(flinkSql);
       app.setDependency(flinkSql.getDependency());
+      app.setTeamResource(flinkSql.getTeamResource());
     }
 
     // create pipeline instance
@@ -188,10 +231,15 @@ public class AppBuildPipeServiceImpl
               FsOperator fsOperator = app.getFsOperator();
               fsOperator.delete(appHome);
               if (app.isUploadJob()) {
-                File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
+                File localJar =
+                    new File(
+                        String.format(
+                            "%s/%d/%s",
+                            Workspace.local().APP_UPLOADS(), app.getTeamId(), app.getJar()));
                 // upload jar copy to appHome
                 String uploadJar = appUploads.concat("/").concat(app.getJar());
                 checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
+
                 switch (app.getApplicationType()) {
                   case STREAMPARK_FLINK:
                     fsOperator.mkdirs(app.getAppLib());
@@ -330,6 +378,34 @@ public class AppBuildPipeServiceImpl
     return saved;
   }
 
+  /**
+   * check the build environment
+   *
+   * @param appId application id
+   * @param forceBuild forced start pipeline or not
+   * @return
+   */
+  private void checkBuildEnv(Long appId, boolean forceBuild) {
+    Application app = applicationService.getById(appId);
+
+    // 1) check flink version
+    FlinkEnv env = flinkEnvService.getById(app.getVersionId());
+    boolean checkVersion = env.getFlinkVersion().checkVersion(false);
+    ApiAlertException.throwIfFalse(
+        checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
+
+    // 2) check env
+    boolean envOk = applicationService.checkEnv(app);
+    ApiAlertException.throwIfFalse(
+        envOk, "Check flink env failed, please check the flink version of this job");
+
+    // 3) Whether the application can currently start a new building progress
+    if (!forceBuild && !allowToBuildNow(appId)) {
+      throw new ApiAlertException(
+          "The job is invalid, or the job cannot be built while it is running");
+    }
+  }
+
   /** create building pipeline instance */
   private BuildPipeline createPipelineInstance(@Nonnull Application app) {
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
@@ -352,7 +428,7 @@ public class AppBuildPipeServiceImpl
                 localWorkspace,
                 yarnProvidedPath,
                 app.getDevelopmentMode(),
-                app.getDependencyInfo());
+                getMergedDependencyInfo(app));
         log.info("Submit params to building pipeline : {}", yarnAppRequest);
         return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
       case YARN_PER_JOB:
@@ -368,7 +444,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo());
+                getMergedDependencyInfo(app));
         log.info("Submit params to building pipeline : {}", buildRequest);
         return FlinkRemoteBuildPipeline.of(buildRequest);
       case KUBERNETES_NATIVE_SESSION:
@@ -381,7 +457,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo(),
+                getMergedDependencyInfo(app),
                 app.getClusterId(),
                 app.getK8sNamespace());
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
@@ -396,7 +472,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo(),
+                getMergedDependencyInfo(app),
                 app.getClusterId(),
                 app.getK8sNamespace(),
                 app.getFlinkImage(),
@@ -503,6 +579,48 @@ public class AppBuildPipeServiceImpl
       if (!FileUtils.equals(localJar, new File(targetJar))) {
         fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
       }
+    }
+  }
+
+  private DependencyInfo getMergedDependencyInfo(Application application) {
+    DependencyInfo dependencyInfo = application.getDependencyInfo();
+
+    try {
+      String[] resourceIds = JacksonUtils.read(application.getTeamResource(), String[].class);
+
+      List<Artifact> mvnArtifacts = new ArrayList<Artifact>();
+      List<String> jarLibs = new ArrayList<String>();
+
+      Arrays.stream(resourceIds)
+          .forEach(
+              resourceId -> {
+                Resource resource = resourceService.getById(resourceId);
+                Dependency dependency = Dependency.toDependency(resource.getResource());
+                dependency
+                    .getPom()
+                    .forEach(
+                        pom -> {
+                          mvnArtifacts.add(
+                              new Artifact(
+                                  pom.getGroupId(),
+                                  pom.getArtifactId(),
+                                  pom.getVersion(),
+                                  pom.getClassifier()));
+                        });
+                dependency
+                    .getJar()
+                    .forEach(
+                        jar -> {
+                          jarLibs.add(
+                              String.format(
+                                  "%s/%d/%s",
+                                  Workspace.local().APP_UPLOADS(), application.getTeamId(), jar));
+                        });
+              });
+      return dependencyInfo.merge(mvnArtifacts, jarLibs);
+    } catch (Exception e) {
+      log.warn("Merge team dependency failed.");
+      return dependencyInfo;
     }
   }
 }
