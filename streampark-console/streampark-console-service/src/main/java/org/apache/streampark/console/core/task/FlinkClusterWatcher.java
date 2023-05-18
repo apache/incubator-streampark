@@ -30,7 +30,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.http.client.config.RequestConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -152,7 +152,8 @@ public class FlinkClusterWatcher {
     try {
       String res =
           HttpClientUtils.httpGetRequest(
-              flinkUrl, RequestConfig.custom().setConnectTimeout(5000).build());
+              flinkUrl,
+              RequestConfig.custom().setConnectTimeout(5000, TimeUnit.MILLISECONDS).build());
 
       JacksonUtils.read(res, Overview.class);
       return ClusterState.RUNNING;

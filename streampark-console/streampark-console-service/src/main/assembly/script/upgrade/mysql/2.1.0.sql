@@ -116,9 +116,8 @@ alter table `t_flink_cluster`
     modify column `service_account` varchar(64) default null comment 'k8s service account',
     modify column `description` varchar(255) default null,
     modify column `user_id` bigint default null,
-    modify column `flink_image` varchar(128) default null comment 'flink image';
- 
-alter table `t_flink_cluster` add column `job_manager_url` varchar(255) default null comment 'url address of jobmanager' after `address`;
+    modify column `flink_image` varchar(128) default null comment 'flink image',
+    add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`;
 
 alter table `t_access_token`
     modify column `description` varchar(255) character set utf8mb4 collate utf8mb4_general_ci default null comment 'description';
