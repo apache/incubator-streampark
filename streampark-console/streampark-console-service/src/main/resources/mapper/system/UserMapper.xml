@@ -60,7 +60,7 @@
 
     <select id="getNoTokenUser" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
         select u.* from t_user u left join t_access_token t
-                                           on u.user_id = t.user_id
+        on u.user_id = t.user_id
         where t.user_id is null
     </select>
 
@@ -70,7 +70,7 @@
             from t_flink_app
             where team_id = #{teamId}
         ) t
-                                            on u.user_id = t.user_id
+        on u.user_id = t.user_id
     </select>
 
     <update id="clearLastTeamByUserId" parameterType="java.lang.Long">
