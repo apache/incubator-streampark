@@ -15,13 +15,23 @@
  *  limitations under the License.
  */
 
-package org.apache.streampark.console.api.exception;
+package org.apache.streampark.console.api.v2.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-public class ForbiddenException extends ApiV2Exception {
+@Getter
+public abstract class ApiV2Exception extends RuntimeException {
 
-  public ForbiddenException(String message) {
-    super(HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN.value(), message);
+  protected final HttpStatus status;
+
+  protected final int code;
+
+  protected final String message;
+
+  public ApiV2Exception(HttpStatus status, int code, String message) {
+    this.status = status;
+    this.code = code;
+    this.message = message;
   }
 }

@@ -15,13 +15,13 @@
  *  limitations under the License.
  */
 
-package org.apache.streampark.console.api.exception;
+package org.apache.streampark.console.api.v2.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class BadRequestException extends ApiV2Exception {
+public class ForbiddenException extends ApiV2Exception {
 
-  public BadRequestException(String message) {
-    super(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value(), message);
+  public ForbiddenException(String message) {
+    super(HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN.value(), message);
   }
 }

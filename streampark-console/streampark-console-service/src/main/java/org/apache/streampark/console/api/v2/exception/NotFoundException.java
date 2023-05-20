@@ -15,23 +15,13 @@
  *  limitations under the License.
  */
 
-package org.apache.streampark.console.api.exception;
+package org.apache.streampark.console.api.v2.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-@Getter
-public abstract class ApiV2Exception extends RuntimeException {
+public class NotFoundException extends ApiV2Exception {
 
-  protected final HttpStatus status;
-
-  protected final int code;
-
-  protected final String message;
-
-  public ApiV2Exception(HttpStatus status, int code, String message) {
-    this.status = status;
-    this.code = code;
-    this.message = message;
+  public NotFoundException(String message) {
+    super(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value(), message);
   }
 }

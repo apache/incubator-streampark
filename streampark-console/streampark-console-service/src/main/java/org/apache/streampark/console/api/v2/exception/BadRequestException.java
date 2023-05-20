@@ -15,13 +15,13 @@
  *  limitations under the License.
  */
 
-package org.apache.streampark.console.api.exception;
+package org.apache.streampark.console.api.v2.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class NotFoundException extends ApiV2Exception {
+public class BadRequestException extends ApiV2Exception {
 
-  public NotFoundException(String message) {
-    super(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value(), message);
+  public BadRequestException(String message) {
+    super(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value(), message);
   }
 }
