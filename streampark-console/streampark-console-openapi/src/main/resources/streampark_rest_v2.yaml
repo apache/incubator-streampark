@@ -77,7 +77,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FlinkApplication'
+                $ref: '#/components/schemas/AlertConfigInfo'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
