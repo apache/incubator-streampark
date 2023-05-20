@@ -21,8 +21,6 @@ import org.apache.streampark.console.api.controller.FlinkApplicationsApi;
 import org.apache.streampark.console.api.controller.model.CreateFlinkApplicationRequest;
 import org.apache.streampark.console.api.controller.model.FlinkApplication;
 import org.apache.streampark.console.api.controller.model.ListFlinkApplication;
-import org.apache.streampark.console.api.controller.model.MappingApplicationRequest;
-import org.apache.streampark.console.api.controller.model.UpdateFlinkApplicationRequest;
 import org.apache.streampark.console.core.service.ApplicationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,12 +167,6 @@ public class FlinkApplicationsApiImpl implements FlinkApplicationsApi {
   }
 
   @Override
-  public ResponseEntity<Void> mappingApplication(
-      Long applicationId, MappingApplicationRequest mappingApplicationRequest) {
-    return FlinkApplicationsApi.super.mappingApplication(applicationId, mappingApplicationRequest);
-  }
-
-  @Override
   public ResponseEntity<Void> releaseApplication(Long applicationId) {
     return FlinkApplicationsApi.super.releaseApplication(applicationId);
   }
@@ -195,10 +187,13 @@ public class FlinkApplicationsApiImpl implements FlinkApplicationsApi {
   }
 
   @Override
-  public ResponseEntity<FlinkApplication> updateFlinkApplication(
-      Long applicationId, UpdateFlinkApplicationRequest updateFlinkApplicationRequest) {
-    return FlinkApplicationsApi.super.updateFlinkApplication(
-        applicationId, updateFlinkApplicationRequest);
+  public ResponseEntity<Void> mappingApplication(Long applicationId) {
+    return FlinkApplicationsApi.super.mappingApplication(applicationId);
+  }
+
+  @Override
+  public ResponseEntity<FlinkApplication> updateFlinkApplication(Long applicationId) {
+    return FlinkApplicationsApi.super.updateFlinkApplication(applicationId);
   }
 
   @Override
