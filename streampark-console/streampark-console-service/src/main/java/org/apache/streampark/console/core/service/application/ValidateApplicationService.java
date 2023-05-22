@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 /** Application validation service */
 public interface ValidateApplicationService extends IService<Application> {
 
-  // region check application
   boolean checkEnv(Application app) throws ApplicationException;
 
   boolean checkAlter(Application application);
@@ -39,6 +38,6 @@ public interface ValidateApplicationService extends IService<Application> {
   boolean existsByJobName(String jobName);
 
   boolean existsJobByFlinkEnvId(Long flinkEnvId);
-  // endregion
 
+  boolean existsByUserId(Long userId);
 }

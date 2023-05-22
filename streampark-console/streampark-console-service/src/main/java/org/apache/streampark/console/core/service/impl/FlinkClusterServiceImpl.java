@@ -268,7 +268,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     ApiAlertException.throwIfTrue(
-        applicationService.existsJobByClusterId(id),
+        validateApplicationService.existsJobByClusterId(id),
         "Some app on this cluster, the cluster cannot be delete, please check.");
     removeById(id);
   }

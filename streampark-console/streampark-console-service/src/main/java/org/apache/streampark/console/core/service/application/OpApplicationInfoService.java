@@ -68,4 +68,6 @@ public interface OpApplicationInfoService extends IService<Application> {
   Map<Long, CompletableFuture<CancelResponse>> getCancelFutureMap();
 
   boolean checkBuildAndUpdate(Application app);
+
+  void changeOwnership(Long userId, Long targetUserId);
 }

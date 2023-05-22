@@ -438,7 +438,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private void expire(SavePoint entity) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
-    Application application = applicationService.getById(entity.getAppId());
+    Application application = applicationInfoService.getById(entity.getAppId());
     Utils.notNull(flinkEnv);
     Utils.notNull(application);
 

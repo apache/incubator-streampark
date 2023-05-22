@@ -95,6 +95,11 @@ public class ValidateApplicationServiceImpl extends ServiceImpl<ApplicationMappe
   }
 
   @Override
+  public boolean existsByUserId(Long userId) {
+    return baseMapper.existsByUserId(userId);
+  }
+
+  @Override
   public boolean checkEnv(Application appParam) throws ApplicationException {
     Application application = getById(appParam.getId());
     try {

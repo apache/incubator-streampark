@@ -686,6 +686,15 @@ public class OpApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper,
     }
   }
 
+  @Override
+  public void changeOwnership(Long userId, Long targetUserId) {
+    LambdaUpdateWrapper<Application> updateWrapper =
+        new LambdaUpdateWrapper<Application>()
+            .eq(Application::getUserId, userId)
+            .set(Application::getUserId, targetUserId);
+    this.baseMapper.update(null, updateWrapper);
+  }
+
   private void removeApp(Application application) {
     Long appId = application.getId();
     removeById(appId);
