@@ -169,6 +169,9 @@
       })[0] || null;
     if (cluster) {
       Object.assign(values, { flinkClusterId: cluster.id });
+      if (values.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
+        Object.assign(values, { clusterId: cluster.clusterId });
+      }
     }
   }
 
