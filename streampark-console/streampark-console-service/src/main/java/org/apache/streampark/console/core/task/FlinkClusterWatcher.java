@@ -64,7 +64,7 @@ public class FlinkClusterWatcher {
   private static final Duration WATCHER_INTERVAL = Duration.ofSeconds(30);
 
   /** Watcher cluster lists */
-  private static final Map<Long, FlinkCluster> WATCHER_CLUSTERS = new ConcurrentHashMap<>(0);
+  private static final Map<Long, FlinkCluster> WATCHER_CLUSTERS = new ConcurrentHashMap<>(8);
 
   /** Thread pool for processing status monitoring for each cluster */
   private static final ExecutorService EXECUTOR =
