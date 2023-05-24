@@ -95,11 +95,9 @@
                                 <requestMappingMode>api_interface</requestMappingMode>
                                 <serializableModel>true</serializableModel>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
-                                <!-- <sourceFolder>src/gen/java/main</sourceFolder> -->
                                 <swagger2AnnotationLibrary>true</swagger2AnnotationLibrary>
                                 <!--suppress UnresolvedMavenProperty -->
-                                <additionalModelTypeAnnotations>@lombok.Builder;@lombok.NoArgsConstructor;@lombok.AllArgsConstructor;</additionalModelTypeAnnotations>
-                                <!-- <unhandledException>true</unhandledException> -->
+                                <additionalModelTypeAnnotations>@lombok.Builder;@lombok.NoArgsConstructor;@lombok.AllArgsConstructor;@lombok.Data</additionalModelTypeAnnotations>
                             </configOptions>
                         </configuration>
                     </execution>

@@ -23,18 +23,19 @@ import org.apache.streampark.console.api.controller.model.DingTalk;
 import org.apache.streampark.console.api.controller.model.Email;
 import org.apache.streampark.console.api.controller.model.HttpCallback;
 import org.apache.streampark.console.api.controller.model.Lark;
+import org.apache.streampark.console.api.controller.model.UpdateAlertConfigRequest;
 import org.apache.streampark.console.api.controller.model.WeCom;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.AlertConfig;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
+import java.util.Objects;
 
 @Mapper(componentModel = "spring")
 public interface AlertConfigConvert {
@@ -56,16 +57,21 @@ public interface AlertConfigConvert {
   @Mapping(source = "lark", target = "larkParams", qualifiedByName = "toJson")
   AlertConfig toPo(CreateAlertConfigRequest request);
 
+  @Mapping(source = "email", target = "emailParams", qualifiedByName = "toJson")
+  @Mapping(source = "dingTalk", target = "dingTalkParams", qualifiedByName = "toJson")
+  @Mapping(source = "weCom", target = "weComParams", qualifiedByName = "toJson")
+  @Mapping(source = "httpCallback", target = "httpCallbackParams", qualifiedByName = "toJson")
+  @Mapping(source = "lark", target = "larkParams", qualifiedByName = "toJson")
+  AlertConfig toPo(UpdateAlertConfigRequest request);
+
   List<AlertConfigInfo> toVo(List<AlertConfig> configs);
 
   @Named("toJson")
   static String toJson(Object object) {
-    try {
-      return JacksonUtils.write(object);
-    } catch (JsonProcessingException e) {
-
+    if (Objects.isNull(object)) {
+      return null;
     }
-    return null;
+    return JacksonUtils.writeIgnored(object);
   }
 
   @Named("toLark")

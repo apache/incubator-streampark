@@ -150,8 +150,8 @@ paths:
   /alert_configs/{config_id}/test_send:
     # TODO /flink/alert/send
     post:
-      summary: Test a alert config send
-      operationId: TestAlertConfigSend
+      summary: Test send a alert config
+      operationId: TestSendAlertConfig
       tags:
         - ALERT_TAG
       parameters:
@@ -2702,6 +2702,7 @@ components:
         - code
         - message
 
+    # temp leave
     RestResponse:
       type: object
       properties:
@@ -2759,11 +2760,25 @@ components:
 
     CreateAlertConfigRequest:
       type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseAlertConfig'
+        - type: object
+          properties:
+            userId:
+              type: integer
+              format: int64
+              example: 100000
+
+    UpdateAlertConfigRequest:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseAlertConfig'
+
+    BaseAlertConfig:
+      type: object
       properties:
-        userId:
-          type: integer
-          format: int64
-          example: 100000
+        email:
+          $ref: '#/components/schemas/Email'
         alertName:
           type: string
         alertType:
@@ -2772,8 +2787,6 @@ components:
             also support the combination, e.g. 3 means, email and dink talk
           type: integer
           example: 1
-        email:
-          $ref: '#/components/schemas/Email'
         dingTalk:
           $ref: '#/components/schemas/DingTalk'
         weCom:
@@ -2783,12 +2796,6 @@ components:
         lark:
           $ref: '#/components/schemas/Lark'
 
-    UpdateAlertConfigRequest:
-      description: ''
-      type: object
-      properties:
-        alertName:
-          type: string
 
     Email:
       description: 'email parameters'
@@ -2893,27 +2900,16 @@ components:
 
     AlertConfigInfo:
       type: object
-      properties:
-        id:
-          format: int64
-          type: integer
-        userId:
-          type: integer
-          format: int64
-        alertName:
-          type: string
-        alertType:
-          type: integer
-        email:
-          $ref: '#/components/schemas/Email'
-        dingTalk:
-          $ref: '#/components/schemas/DingTalk'
-        weCom:
-            $ref: '#/components/schemas/WeCom'
-        httpCallback:
-          $ref: '#/components/schemas/HttpCallback'
-        lark:
-          $ref: '#/components/schemas/Lark'
+      allOf:
+        - $ref: '#/components/schemas/BaseAlertConfig'
+        - type: object
+          properties:
+            id:
+              format: int64
+              type: integer
+            userId:
+              type: integer
+              format: int64
 
 
   securitySchemes:
@@ -2941,7 +2937,6 @@ components:
       required: false
       schema:
         type: integer
-        default: 10
       explode: true
 
     AlertConfigId:

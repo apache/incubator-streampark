@@ -65,4 +65,12 @@ public final class JacksonUtils {
   public static String write(Object object) throws JsonProcessingException {
     return MAPPER.writeValueAsString(object);
   }
+
+  public static String writeIgnored(Object object) {
+    try {
+      return MAPPER.writeValueAsString(object);
+    } catch (JsonProcessingException e) {
+      return null;
+    }
+  }
 }

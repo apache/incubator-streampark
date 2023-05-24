@@ -25,12 +25,14 @@ import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.TimeZone;
 
 @Data
+@Accessors(chain = true)
 public class AlertTemplate implements Serializable {
   private String title;
   private String subject;
