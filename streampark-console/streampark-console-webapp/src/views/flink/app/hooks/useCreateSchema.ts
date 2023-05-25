@@ -199,11 +199,12 @@ export const useCreateSchema = (dependencyRef: Ref) => {
               { label: 'StreamPark Flink', value: String(AppTypeEnum.STREAMPARK_FLINK) },
               { label: 'Apache Flink', value: String(AppTypeEnum.APACHE_FLINK) },
             ],
-            onChange: () => {
+            onChange: (value) => {
               Object.assign(formModel, {
                 config: undefined,
                 jobName: undefined,
                 configOverride: null,
+                appType: value,
               });
               fetchListJars({
                 id: formModel.project,
