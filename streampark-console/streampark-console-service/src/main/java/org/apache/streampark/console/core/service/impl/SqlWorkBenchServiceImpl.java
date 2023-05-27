@@ -25,6 +25,9 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
 import org.apache.streampark.console.core.service.SqlWorkBenchService;
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.factories.FactoryUtil;
 import org.apache.streampark.gateway.factories.SqlGatewayServiceFactoryUtils;
@@ -37,6 +40,8 @@ import org.apache.streampark.gateway.results.ResultSet;
 import org.apache.streampark.gateway.service.SqlGatewayService;
 import org.apache.streampark.gateway.session.SessionEnvironment;
 import org.apache.streampark.gateway.session.SessionHandle;
+
+import org.apache.flink.client.program.ClusterClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +97,8 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
     URI remoteURI = flinkCluster.getRemoteURI();
     String host = remoteURI.getHost();
     String port = String.valueOf(remoteURI.getPort());
-    // todo need to check flink config and yarn/k8s config
+    // todo need to check flink config and yarn config
+    String clusterId = flinkCluster.getClusterId();
     switch (executionMode) {
       case LOCAL:
         streamParkConf.put("execution.target", LOCAL.getName());
@@ -104,19 +110,30 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
         break;
       case YARN_SESSION:
         streamParkConf.put("execution.target", YARN_SESSION.getName());
+        streamParkConf.put("yarn.application.id", clusterId);
         streamParkConf.put("flink.hadoop.yarn.resourcemanager.ha.enabled", "true");
         streamParkConf.put("flink.hadoop.yarn.resourcemanager.ha.rm-ids", "rm1,rm2");
         streamParkConf.put("flink.hadoop.yarn.resourcemanager.hostname.rm1", "yarn01");
         streamParkConf.put("flink.hadoop.yarn.resourcemanager.hostname.rm2", "yarn01");
-        streamParkConf.put("flink.hadoop.yarn.resourcemanager.cluster-id", "yarn-cluster");
+        streamParkConf.put("flink.hadoop.yarn.resourcemanager.cluster-id", clusterId);
         break;
       case KUBERNETES_NATIVE_SESSION:
+        String k8sNamespace = flinkCluster.getK8sNamespace();
+        String restAddress;
+        try (ClusterClient<?> clusterClient =
+            (ClusterClient<?>)
+                KubernetesRetriever.newFinkClusterClient(
+                    clusterId, k8sNamespace, FlinkK8sExecuteMode.of(executionMode))) {
+          restAddress = IngressController.ingressUrlAddress(k8sNamespace, clusterId, clusterClient);
+        } catch (Exception e) {
+          throw new IllegalArgumentException("get k8s rest address error", e);
+        }
         streamParkConf.put("execution.target", KUBERNETES_NATIVE_SESSION.getName());
-        streamParkConf.put("kubernetes.cluster-id", "custom-flink-cluster");
-        streamParkConf.put("kubernetes.jobmanager.service-account", "flink");
-        streamParkConf.put("kubernetes.namespace", "flink-cluster");
-        streamParkConf.put("rest.address", "127.0.0.1");
-        streamParkConf.put("rest.port", "8081");
+        streamParkConf.put("kubernetes.cluster-id", clusterId);
+        streamParkConf.put(
+            "kubernetes.jobmanager.service-account", flinkCluster.getServiceAccount());
+        streamParkConf.put("kubernetes.namespace", k8sNamespace);
+        streamParkConf.put("rest.address", restAddress);
         break;
       default:
         throw new IllegalArgumentException("Unsupported execution mode: " + executionMode);
