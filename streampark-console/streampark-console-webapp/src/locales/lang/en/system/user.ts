@@ -22,7 +22,7 @@ export default {
     reset: 'reset password',
     resetTip: 'reset password, are you sure',
     lock: 'lock user',
-    lockTip: 'lock user, are you sure',
+    lockTip: 'Are you sure to lock this user ?',
     unlock: 'unlock user',
     lockSuccess: 'lock successful',
     unlockSuccess: 'unlock successful',
