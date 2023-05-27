@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import net.sf.jsqlparser.schema.Database;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.AlertException;
@@ -49,7 +48,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -248,19 +254,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public boolean lockUser(Long userId, Long transferToUserId) {
-      AlertException.throwIfTrue(Objects.equals(userId,transferToUserId),
-          "UserId and transferToUserId cannot be same.");
+    AlertException.throwIfTrue(
+        Objects.equals(userId, transferToUserId), "UserId and transferToUserId cannot be same.");
     boolean hasResource =
         applicationService.existsByUserId(userId) || resourceService.existsByUserId(userId);
     if (hasResource && transferToUserId == null) {
       return true;
     }
     if (transferToUserId != null) {
-        User transferToUser = this.baseMapper.selectById(transferToUserId);
-        AlertException.throwIfNull(transferToUser,
-            "The user to whom the transfer needs to be made does not exist.");
-        AlertException.throwIfTrue(Objects.equals(transferToUser.getStatus(),User.STATUS_LOCK),
-            "The user to whom the transfer cannot be a locked user.");
+      User transferToUser = this.baseMapper.selectById(transferToUserId);
+      AlertException.throwIfNull(
+          transferToUser, "The user to whom the transfer needs to be made does not exist.");
+      AlertException.throwIfTrue(
+          Objects.equals(transferToUser.getStatus(), User.STATUS_LOCK),
+          "The user to whom the transfer cannot be a locked user.");
       applicationService.changeOwnership(userId, transferToUserId);
       resourceService.changeOwnership(userId, transferToUserId);
     }
