@@ -49,7 +49,7 @@ export default {
     edit: 'Edit User',
     view: 'View User',
     notice: 'Notice',
-    transferResource: 'Please transfer the resources to a new user',
+    transferResource: 'Please transfer the resources to another user',
   },
   roleInfo: 'Role Info',
   modifyTime: 'Not yet modified',
