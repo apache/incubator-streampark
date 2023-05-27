@@ -259,6 +259,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User transferToUser = this.baseMapper.selectById(transferToUserId);
         AlertException.throwIfNull(transferToUser,
             "The user to whom the transfer needs to be made does not exist.");
+        AlertException.throwIfTrue(Objects.equals(transferToUser.getStatus(),User.STATUS_LOCK),
+            "The user to whom the transfer cannot be a locked user.");
       applicationService.changeOwnership(userId, transferToUserId);
       resourceService.changeOwnership(userId, transferToUserId);
     }
