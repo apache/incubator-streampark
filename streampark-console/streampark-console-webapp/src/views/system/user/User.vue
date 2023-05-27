@@ -35,6 +35,7 @@
       :visible="transferModalVisible"
       :confirm-loading="transferModalLoading"
       :ok-text="t('common.okText')"
+      destroyOnClose
       centered
       @ok="handleLockAndTransfer"
       @cancel="handleCancelTransfer"
@@ -125,7 +126,7 @@
                     pageSize: 999999,
                     teamId: userStore.getTeamId || '',
                   });
-                  return records.filter((user) => user.userName !== userName.value);
+                  return records.filter((user) => user.userId !== curUserId.value);
                 },
                 labelField: 'userName',
                 valueField: 'userId',
