@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.base.exception;
 
-public class UserLogoutException extends ApiAlertException {
-  public UserLogoutException(String message) {
+public class UserLockedException extends ApiAlertException {
+  public UserLockedException(String message) {
     super(message);
   }
 }

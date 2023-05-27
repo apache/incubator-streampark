@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.interceptor;
 
-import org.apache.streampark.console.base.exception.UserLogoutException;
+import org.apache.streampark.console.base.exception.UserLockedException;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.User;
 
@@ -39,7 +39,7 @@ public class UserStatusCheckInterceptor implements HandlerInterceptor {
       throws Exception {
     User currentUser = commonService.getCurrentUser();
     if (User.STATUS_LOCK.equals(currentUser.getStatus())) {
-      throw new UserLogoutException("User has been locked");
+      throw new UserLockedException("User has been locked");
     }
     return true;
   }

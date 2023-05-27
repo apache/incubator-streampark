@@ -20,7 +20,7 @@ package org.apache.streampark.console.base.handler;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.AbstractApiException;
-import org.apache.streampark.console.base.exception.UserLogoutException;
+import org.apache.streampark.console.base.exception.UserLockedException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -116,9 +116,9 @@ public class GlobalExceptionHandler {
     log.info("Permission denied，{}", e.getMessage());
   }
 
-  @ExceptionHandler(value = UserLogoutException.class)
+  @ExceptionHandler(value = UserLockedException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  public void handleUserLogoutException(Exception e) {
+  public void handleUserLockedException(Exception e) {
     log.info("User locked，{}", e.getMessage());
   }
 }
