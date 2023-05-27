@@ -151,7 +151,7 @@
             icon: 'clarity:note-edit-line',
             tooltip: t('system.user.table.modify'),
             auth: 'user:update',
-            ifShow: () => record.username !== 'admin' || userName.value === 'admin',
+            ifShow: () => record.username !== userName.value || userName.value === 'admin',
             onClick: handleEdit.bind(null, record),
           },
           {
