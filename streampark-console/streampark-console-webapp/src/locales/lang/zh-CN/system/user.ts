@@ -49,7 +49,7 @@ export default {
     edit: '编辑用户',
     view: '查看用户',
     notice: '提示',
-    transferResource: '请将资源转移到新的用户上',
+    transferResource: '请将资源转移到其他用户',
   },
   roleInfo: '角色信息',
   modifyTime: '尚未修改',
