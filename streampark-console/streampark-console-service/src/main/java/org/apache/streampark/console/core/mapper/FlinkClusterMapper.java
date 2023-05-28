@@ -28,4 +28,6 @@ public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
   Boolean existsByClusterId(@Param("clusterId") String clusterId, @Param("id") Long id);
 
   Boolean existsByClusterName(@Param("clusterName") String clusterName, @Param("id") Long id);
+
+  Boolean existsByUserId(@Param("userId") Long userId);
 }

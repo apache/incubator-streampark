@@ -25,4 +25,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 public interface AlertConfigMapper extends BaseMapper<AlertConfig> {
   AlertConfig getAlertConfByName(@Param("alertConfig") AlertConfig alertConfig);
+
+  Boolean existsByUserId(@Param("userId") Long userId);
 }

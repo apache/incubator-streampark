@@ -34,4 +34,6 @@ public interface VariableMapper extends BaseMapper<Variable> {
   List<Variable> selectByTeamId(@Param("teamId") Long teamId, @Param("keyword") String keyword);
 
   Boolean existsByTeamId(@Param("teamId") Long teamId);
+
+  Boolean existsByUserId(@Param("userId") Long userId);
 }

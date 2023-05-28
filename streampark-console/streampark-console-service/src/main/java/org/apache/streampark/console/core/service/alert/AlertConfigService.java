@@ -31,4 +31,8 @@ public interface AlertConfigService extends IService<AlertConfig> {
   boolean exist(AlertConfig alertConfig);
 
   boolean deleteById(Long id) throws AlertException;
+
+  boolean existsByUserId(Long userId);
+
+  void changeOwnership(Long userId, Long targetUserId);
 }

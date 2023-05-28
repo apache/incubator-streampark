@@ -30,6 +30,7 @@ import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -87,5 +88,19 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
               id));
     }
     return removeById(id);
+  }
+
+  @Override
+  public boolean existsByUserId(Long userId) {
+    return this.baseMapper.existsByUserId(userId);
+  }
+
+  @Override
+  public void changeOwnership(Long userId, Long targetUserId) {
+    LambdaUpdateWrapper<AlertConfig> updateWrapper =
+        new LambdaUpdateWrapper<AlertConfig>()
+            .eq(AlertConfig::getUserId, userId)
+            .set(AlertConfig::getUserId, targetUserId);
+    this.baseMapper.update(null, updateWrapper);
   }
 }

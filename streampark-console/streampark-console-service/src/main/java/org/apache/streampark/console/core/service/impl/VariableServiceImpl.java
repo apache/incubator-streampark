@@ -35,6 +35,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -144,6 +145,20 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
                   applications.stream().map(Application::getId).collect(Collectors.toList()))
               .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
     }
+  }
+
+  @Override
+  public boolean existsByUserId(Long userId) {
+    return this.baseMapper.existsByUserId(userId);
+  }
+
+  @Override
+  public void changeOwnership(Long userId, Long targetUserId) {
+    LambdaUpdateWrapper<Variable> updateWrapper =
+        new LambdaUpdateWrapper<Variable>()
+            .eq(Variable::getCreatorId, userId)
+            .set(Variable::getCreatorId, targetUserId);
+    this.baseMapper.update(null, updateWrapper);
   }
 
   @Override

@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
@@ -340,6 +341,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
+  public Boolean existsByUserId(Long userId) {
+    return this.baseMapper.existsByUserId(userId);
+  }
+
+  @Override
   public List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes) {
     return getBaseMapper()
         .selectList(
@@ -349,6 +355,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                     executionModes.stream()
                         .map(ExecutionMode::getMode)
                         .collect(Collectors.toSet())));
+  }
+
+  @Override
+  public void changeOwnership(Long userId, Long targetUserId) {
+    LambdaUpdateWrapper<FlinkCluster> updateWrapper =
+        new LambdaUpdateWrapper<FlinkCluster>()
+            .eq(FlinkCluster::getUserId, userId)
+            .set(FlinkCluster::getUserId, targetUserId);
+    this.baseMapper.update(null, updateWrapper);
   }
 
   @Override

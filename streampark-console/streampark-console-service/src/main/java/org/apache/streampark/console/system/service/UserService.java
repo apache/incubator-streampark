@@ -111,6 +111,13 @@ public interface UserService extends IService<User> {
 
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 
+  /**
+   * Lock user or transfer resources and lock.
+   *
+   * @param userId user id to lock
+   * @param transferToUserId user id to transfer resources to
+   * @return true if need transfer resources , No user is currently locked.
+   */
   boolean lockUser(Long userId, Long transferToUserId);
 
   void unlockUser(Long userId);

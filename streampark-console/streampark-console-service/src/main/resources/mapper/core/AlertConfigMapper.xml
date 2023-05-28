@@ -37,4 +37,15 @@
         where t.alert_name = #{alertConfig.alertName}
         limit 1
     </select>
+
+    <select id="existsByUserId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+        select
+            CASE
+                WHEN  count(1) > 0 THEN true ELSE false
+                END
+        from t_alert_config
+        where user_id = #{userId}
+        limit 1
+    </select>
+
 </mapper>

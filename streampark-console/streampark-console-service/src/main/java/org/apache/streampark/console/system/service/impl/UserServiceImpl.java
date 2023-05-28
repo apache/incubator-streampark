@@ -23,7 +23,10 @@ import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.VariableService;
+import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -41,6 +44,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -67,6 +71,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private MenuService menuService;
 
   @Autowired private ApplicationService applicationService;
+
+  @Autowired private VariableService variableService;
+
+  @Autowired private FlinkClusterService flinkClusterService;
+
+  @Autowired private AlertConfigService alertConfigService;
 
   @Autowired private ResourceService resourceService;
 
@@ -256,9 +266,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   public boolean lockUser(Long userId, Long transferToUserId) {
     AlertException.throwIfTrue(
         Objects.equals(userId, transferToUserId), "UserId and transferToUserId cannot be same.");
-    boolean hasResource =
-        applicationService.existsByUserId(userId) || resourceService.existsByUserId(userId);
-    if (hasResource && transferToUserId == null) {
+    val hasApplication = applicationService.existsByUserId(userId);
+    val hasResource = resourceService.existsByUserId(userId);
+    val hasVariable = variableService.existsByUserId(userId);
+    val hasAlertConfig = alertConfigService.existsByUserId(userId);
+    val hasFlinkCluster = flinkClusterService.existsByUserId(userId);
+    boolean needTransferResource =
+        hasApplication || hasResource || hasVariable || hasAlertConfig || hasFlinkCluster;
+    if (needTransferResource && transferToUserId == null) {
       return true;
     }
     if (transferToUserId != null) {
@@ -268,8 +283,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
       AlertException.throwIfTrue(
           Objects.equals(transferToUser.getStatus(), User.STATUS_LOCK),
           "The user to whom the transfer cannot be a locked user.");
-      applicationService.changeOwnership(userId, transferToUserId);
-      resourceService.changeOwnership(userId, transferToUserId);
+      if (hasApplication) {
+        applicationService.changeOwnership(userId, transferToUserId);
+      }
+      if (hasResource) {
+        resourceService.changeOwnership(userId, transferToUserId);
+      }
+      if (hasVariable) {
+        variableService.changeOwnership(userId, transferToUserId);
+      }
+      if (hasAlertConfig) {
+        alertConfigService.changeOwnership(userId, transferToUserId);
+      }
+      if (hasFlinkCluster) {
+        flinkClusterService.changeOwnership(userId, transferToUserId);
+      }
     }
     this.baseMapper.update(
         null,

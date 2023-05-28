@@ -46,5 +46,9 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   Boolean existsByFlinkEnvId(Long id);
 
+  Boolean existsByUserId(Long userId);
+
   List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes);
+
+  void changeOwnership(Long userId, Long targetUserId);
 }

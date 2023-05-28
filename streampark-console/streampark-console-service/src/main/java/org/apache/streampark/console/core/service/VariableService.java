@@ -72,4 +72,8 @@ public interface VariableService extends IService<Variable> {
   IPage<Application> dependAppsPage(Variable variable, RestRequest request);
 
   void updateVariable(Variable variable);
+
+  boolean existsByUserId(Long userId);
+
+  void changeOwnership(Long userId, Long targetUserId);
 }
