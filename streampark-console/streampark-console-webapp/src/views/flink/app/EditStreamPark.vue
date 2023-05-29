@@ -301,6 +301,7 @@
 
     setFieldsValue({
       jobType: res.jobType,
+      appType: res.appType,
       executionMode: res.executionMode,
       flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
       dependency: '',
