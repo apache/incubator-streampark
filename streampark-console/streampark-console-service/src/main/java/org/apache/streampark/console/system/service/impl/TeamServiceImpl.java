@@ -20,10 +20,10 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.enums.UserType;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.VariableService;
+import org.apache.streampark.console.core.service.application.ValidateApplicationService;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.TeamMapper;
@@ -52,7 +52,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
   @Autowired private UserService userService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ValidateApplicationService validateApplicationService;
 
   @Autowired private ProjectService projectService;
 
@@ -99,7 +99,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     if (team == null) {
       throw new ApiAlertException(String.format("The team[Id=%s] doesn't exists.", teamId));
     }
-    if (applicationService.existsByTeamId(teamId)) {
+    if (validateApplicationService.existsByTeamId(teamId)) {
       throw new ApiAlertException(
           String.format(
               "Please delete the applications under the team[name=%s] first!", team.getTeamName()));

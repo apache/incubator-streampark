@@ -47,13 +47,14 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ValidateApplicationService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
@@ -125,7 +126,9 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private MessageService messageService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private OpApplicationInfoService opApplicationInfoService;
+
+  @Autowired private ValidateApplicationService validateApplicationService;
 
   @Autowired private ApplicationLogService applicationLogService;
 
@@ -166,7 +169,7 @@ public class AppBuildPipeServiceImpl
     // check the build environment
     checkBuildEnv(appId, forceBuild);
 
-    Application app = applicationService.getById(appId);
+    Application app = opApplicationInfoService.getById(appId);
     ApplicationLog applicationLog = new ApplicationLog();
     applicationLog.setOptionName(
         org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
@@ -176,7 +179,7 @@ public class AppBuildPipeServiceImpl
     // check if you need to go through the build process (if the jar and pom have changed,
     // you need to go through the build process, if other common parameters are modified,
     // you don't need to go through the build process)
-    boolean needBuild = applicationService.checkBuildAndUpdate(app);
+    boolean needBuild = opApplicationInfoService.checkBuildAndUpdate(app);
     if (!needBuild) {
       applicationLog.setSuccess(true);
       applicationLogService.save(applicationLog);
@@ -213,14 +216,14 @@ public class AppBuildPipeServiceImpl
             saveEntity(buildPipeline);
 
             app.setRelease(ReleaseState.RELEASING.get());
-            applicationService.updateRelease(app);
+            opApplicationInfoService.updateRelease(app);
 
             if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
               flinkRESTAPIWatcher.init();
             }
 
             // 1) checkEnv
-            applicationService.checkEnv(app);
+            validateApplicationService.checkEnv(app);
 
             // 2) some preparatory work
             String appUploads = app.getWorkspace().APP_UPLOADS();
@@ -300,7 +303,7 @@ public class AppBuildPipeServiceImpl
                 // If the current task is not running, or the task has just been added, directly set
                 // the candidate version to the official version
                 if (app.isFlinkSqlJob()) {
-                  applicationService.toEffective(app);
+                  opApplicationInfoService.toEffective(app);
                 } else {
                   if (app.isStreamParkJob()) {
                     ApplicationConfig config = applicationConfigService.getLatest(app.getId());
@@ -337,7 +340,7 @@ public class AppBuildPipeServiceImpl
               applicationLog.setException(Utils.stringifyException(snapshot.error().exception()));
               applicationLog.setSuccess(false);
             }
-            applicationService.updateRelease(app);
+            opApplicationInfoService.updateRelease(app);
             applicationLogService.save(applicationLog);
             if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
               flinkRESTAPIWatcher.init();
@@ -386,7 +389,7 @@ public class AppBuildPipeServiceImpl
    * @return
    */
   private void checkBuildEnv(Long appId, boolean forceBuild) {
-    Application app = applicationService.getById(appId);
+    Application app = opApplicationInfoService.getById(appId);
 
     // 1) check flink version
     FlinkEnv env = flinkEnvService.getById(app.getVersionId());
@@ -395,7 +398,7 @@ public class AppBuildPipeServiceImpl
         checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
 
     // 2) check env
-    boolean envOk = applicationService.checkEnv(app);
+    boolean envOk = validateApplicationService.checkEnv(app);
     ApiAlertException.throwIfFalse(
         envOk, "Check flink env failed, please check the flink version of this job");
 
@@ -492,7 +495,11 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
+  /**
+   * copy from {@link
+   * org.apache.streampark.console.core.service.application.impl.ApplicationServiceImpl#start(Application,
+   * boolean)}
+   */
   private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
     switch (app.getDevelopmentMode()) {
       case CUSTOM_CODE:

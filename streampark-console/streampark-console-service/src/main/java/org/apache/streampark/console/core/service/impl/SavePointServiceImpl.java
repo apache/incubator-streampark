@@ -39,10 +39,10 @@ import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.mapper.SavePointMapper;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
@@ -93,7 +93,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Autowired private FlinkEnvService flinkEnvService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private OpApplicationInfoService applicationInfoService;
 
   @Autowired private ApplicationConfigService configService;
 
@@ -140,7 +140,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Override
   public String getSavePointPath(Application appParam) throws Exception {
-    Application application = applicationService.getById(appParam.getId());
+    Application application = applicationInfoService.getById(appParam.getId());
 
     // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
     String savepointPath = getSavepointFromDynamicProps(application.getDynamicProperties());
@@ -167,7 +167,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   @Override
   public void trigger(Long appId, @Nullable String savepointPath) {
     log.info("Start to trigger savepoint for app {}", appId);
-    Application application = applicationService.getById(appId);
+    Application application = applicationInfoService.getById(appId);
 
     ApplicationLog applicationLog = new ApplicationLog();
     applicationLog.setOptionName(Operation.SAVEPOINT.getValue());
@@ -180,7 +180,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     application.setOptionState(OptionState.SAVEPOINTING.getValue());
     application.setOptionTime(new Date());
-    this.applicationService.updateById(application);
+    this.applicationInfoService.updateById(application);
     flinkRESTAPIWatcher.init();
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
@@ -265,7 +265,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               applicationLogService.save(applicationLog);
               application.setOptionState(OptionState.NONE.getValue());
               application.setOptionTime(new Date());
-              applicationService.update(application);
+              applicationInfoService.update(application);
               flinkRESTAPIWatcher.init();
             });
   }
@@ -438,7 +438,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private void expire(SavePoint entity) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
-    Application application = applicationService.getById(entity.getAppId());
+    Application application = applicationInfoService.getById(entity.getAppId());
     Utils.notNull(flinkEnv);
     Utils.notNull(application);
 

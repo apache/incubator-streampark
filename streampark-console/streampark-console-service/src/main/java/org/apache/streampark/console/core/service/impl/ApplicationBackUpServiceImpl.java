@@ -31,9 +31,9 @@ import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ApplicationBackUpMapper;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -53,7 +53,7 @@ public class ApplicationBackUpServiceImpl
     extends ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp>
     implements ApplicationBackUpService {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private OpApplicationInfoService applicationInfoService;
 
   @Autowired private ApplicationConfigService configService;
 
@@ -74,7 +74,7 @@ public class ApplicationBackUpServiceImpl
   @Transactional(rollbackFor = {Exception.class})
   public void rollback(ApplicationBackUp backParam) {
 
-    Application application = applicationService.getById(backParam.getAppId());
+    Application application = applicationInfoService.getById(backParam.getAppId());
 
     FsOperator fsOperator = application.getFsOperator();
     // backup files not exist
@@ -119,7 +119,7 @@ public class ApplicationBackUpServiceImpl
     fsOperator.copyDir(backParam.getPath(), application.getAppHome());
 
     // update restart status
-    applicationService.update(
+    applicationInfoService.update(
         new UpdateWrapper<Application>()
             .lambda()
             .eq(Application::getId, application.getId())
@@ -194,7 +194,7 @@ public class ApplicationBackUpServiceImpl
   public Boolean delete(Long id) throws InternalException {
     ApplicationBackUp backUp = getById(id);
     try {
-      Application application = applicationService.getById(backUp.getAppId());
+      Application application = applicationInfoService.getById(backUp.getAppId());
       application.getFsOperator().delete(backUp.getPath());
       removeById(id);
       return true;

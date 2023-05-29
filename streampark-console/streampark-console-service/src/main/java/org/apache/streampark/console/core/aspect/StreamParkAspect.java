@@ -26,8 +26,8 @@ import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.enums.UserType;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.application.QueryApplicationInfoService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.Member;
@@ -61,7 +61,7 @@ public class StreamParkAspect {
   @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
   @Autowired private CommonService commonService;
   @Autowired private MemberService memberService;
-  @Autowired private ApplicationService applicationService;
+  @Autowired private QueryApplicationInfoService queryApplicationInfoService;
 
   @Pointcut(
       "execution(public"
@@ -128,7 +128,7 @@ public class StreamParkAspect {
               "Permission denied, only user belongs to this team can access this permission");
           break;
         case APP:
-          Application app = applicationService.getById(paramId);
+          Application app = queryApplicationInfoService.getById(paramId);
           ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
           member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
           ApiAlertException.throwIfTrue(

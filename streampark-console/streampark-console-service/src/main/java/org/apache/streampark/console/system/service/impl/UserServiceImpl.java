@@ -22,8 +22,9 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.application.OpApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ValidateApplicationService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -64,7 +65,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Autowired private MenuService menuService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ValidateApplicationService validateApplicationService;
+
+  @Autowired private OpApplicationInfoService opApplicationInfoService;
 
   @Autowired private ResourceService resourceService;
 
@@ -128,7 +131,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         || User.STATUS_VALID.equals(user.getStatus())) {
       return false;
     }
-    return applicationService.existsByUserId(user.getUserId())
+    return validateApplicationService.existsByUserId(user.getUserId())
         || resourceService.existsByUserId(user.getUserId());
   }
 
@@ -264,7 +267,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void transferResource(Long userId, Long targetUserId) {
-    applicationService.changeOwnership(userId, targetUserId);
+    opApplicationInfoService.changeOwnership(userId, targetUserId);
     resourceService.changeOwnership(userId, targetUserId);
   }
 }

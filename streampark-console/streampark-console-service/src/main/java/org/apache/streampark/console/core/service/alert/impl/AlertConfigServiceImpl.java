@@ -24,8 +24,8 @@ import org.apache.streampark.console.core.bean.AlertConfigWithParams;
 import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.mapper.AlertConfigMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
+import org.apache.streampark.console.core.service.application.QueryApplicationInfoService;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, AlertConfig>
     implements AlertConfigService {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private QueryApplicationInfoService queryApplicationInfoService;
 
   @Override
   public IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request) {
@@ -78,7 +78,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
   @Override
   public boolean deleteById(Long id) throws AlertException {
     long count =
-        applicationService.count(
+        queryApplicationInfoService.count(
             new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
     if (count > 0) {
       throw new AlertException(

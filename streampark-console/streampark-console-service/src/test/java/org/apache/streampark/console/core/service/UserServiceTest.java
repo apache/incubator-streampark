@@ -23,6 +23,7 @@ import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineType;
 import org.apache.streampark.console.core.enums.ResourceType;
 import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.application.ValidateApplicationService;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -37,7 +38,7 @@ import java.util.Map;
 /** org.apache.streampark.console.core.service.UserServiceTest. */
 class UserServiceTest extends SpringTestBase {
   @Autowired private UserService userService;
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ValidateApplicationService validateApplicationService;
   @Autowired private ResourceService resourceService;
 
   @Test
@@ -109,15 +110,15 @@ class UserServiceTest extends SpringTestBase {
     targetUser.setStatus(User.STATUS_VALID);
     Db.save(targetUser);
 
-    Assertions.assertTrue(applicationService.existsByUserId(user.getUserId()));
+    Assertions.assertTrue(validateApplicationService.existsByUserId(user.getUserId()));
     Assertions.assertTrue(resourceService.existsByUserId(user.getUserId()));
 
     userService.transferResource(user.getUserId(), targetUser.getUserId());
 
-    Assertions.assertFalse(applicationService.existsByUserId(user.getUserId()));
+    Assertions.assertFalse(validateApplicationService.existsByUserId(user.getUserId()));
     Assertions.assertFalse(resourceService.existsByUserId(user.getUserId()));
 
-    Assertions.assertTrue(applicationService.existsByUserId(targetUser.getUserId()));
+    Assertions.assertTrue(validateApplicationService.existsByUserId(targetUser.getUserId()));
     Assertions.assertTrue(resourceService.existsByUserId(targetUser.getUserId()));
   }
 }
