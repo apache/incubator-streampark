@@ -49,7 +49,7 @@ import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
-import { ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
+import { AppTypeEnum, ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
@@ -533,7 +533,17 @@ export const useCreateAndEditSchema = (
         field: 'appType',
         label: t('flink.app.appType'),
         component: 'Input',
-        render: () => getAlertSvgIcon('flink', 'StreamPark Flink'),
+        render: ({ model }) => {
+          if (model.appType == AppTypeEnum.APACHE_FLINK) {
+            return getAlertSvgIcon('flink', 'Apache Flink');
+          } else if (model.appType == AppTypeEnum.STREAMPARK_FLINK) {
+            return getAlertSvgIcon('flink', 'StreamPark Flink');
+          } else if (model.appType == AppTypeEnum.APACHE_SPARK) {
+            return getAlertSvgIcon('spark', 'Apache Spark');
+          } else if (model.appType == AppTypeEnum.STREAMPARK_SPARK) {
+            return getAlertSvgIcon('spark', 'StreamPark Spark');
+          }
+        },
       },
     ];
   });
