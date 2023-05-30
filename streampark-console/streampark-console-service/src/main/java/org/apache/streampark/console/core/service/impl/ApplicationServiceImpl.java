@@ -22,6 +22,7 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
+import org.apache.streampark.common.enums.RestoreMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
@@ -1551,6 +1552,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appConf,
             application.getApplicationType(),
             getSavePointed(appParam),
+            RestoreMode.of(appParam.getRestoreMode()),
             applicationArgs,
             buildResult,
             kubernetesSubmitParam,

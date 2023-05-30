@@ -32,6 +32,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRouter } from 'vue-router';
   import { fetchStart } from '/@/api/flink/app/app';
+  import { RestoreModeEnum } from '/@/enums/flinkEnum';
 
   const SelectOption = Select.Option;
 
@@ -90,6 +91,26 @@
         required: true,
       },
       {
+        field: 'restoreMode',
+        label: 'restore mode',
+        component: 'Select',
+        defaultValue: RestoreModeEnum.NO_CLAIM,
+        componentProps: {
+          options: [
+            { label: 'CLAIM', value: RestoreModeEnum.CLAIM },
+            { label: 'NO_CLAIM', value: RestoreModeEnum.NO_CLAIM },
+            { label: 'LEGACY', value: RestoreModeEnum.LEGACY },
+          ],
+        },
+        afterItem: () =>
+          h(
+            'span',
+            { class: 'conf-switch' },
+            'restore mode is supported since flink 1.15, usually, you do not have to set this parameter',
+          ),
+        ifShow: ({ values }) => values.startSavePointed,
+      },
+      {
         field: 'allowNonRestoredState',
         label: 'ignore restored',
         component: 'Switch',
@@ -116,8 +137,10 @@
       const formValue = (await validate()) as Recordable;
       const savePointed = formValue.startSavePointed;
       const savePointPath = savePointed ? formValue['startSavePoint'] : null;
+      const restoreMode = savePointed ? formValue['restoreMode'] : RestoreModeEnum.NO_CLAIM;
       const { data } = await fetchStart({
         id: receiveData.application.id,
+        restoreMode,
         savePointed,
         savePoint: savePointPath,
         allowNonRestored: formValue.allowNonRestoredState || false,
