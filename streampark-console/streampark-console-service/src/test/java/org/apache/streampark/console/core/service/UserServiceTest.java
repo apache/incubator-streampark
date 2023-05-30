@@ -63,7 +63,7 @@ class UserServiceTest extends SpringTestBase {
         User.STATUS_VALID, Db.getById(user.getUserId(), User.class).getStatus());
 
     // transfer resources
-    Assertions.assertFalse(userService.lockUser(user.getUserId(), 10001L));
+    Assertions.assertFalse(userService.lockUser(user.getUserId(), 100001L));
     Assertions.assertEquals(User.STATUS_LOCK, Db.getById(user.getUserId(), User.class).getStatus());
   }
 }
