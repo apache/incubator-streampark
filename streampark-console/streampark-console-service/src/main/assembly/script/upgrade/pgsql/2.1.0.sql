@@ -144,8 +144,7 @@ alter table "public"."t_flink_cluster"
     alter column "k8s_namespace" TYPE varchar(63) collate "pg_catalog"."default",
     alter column "service_account" TYPE varchar(64) collate "pg_catalog"."default",
     alter column "flink_image" TYPE varchar(128) collate "pg_catalog"."default",
-    alter column "description" TYPE varchar(255) collate "pg_catalog"."default",
-    add column "job_manager_url" varchar(150) collate "pg_catalog"."default";
+    alter column "description" TYPE varchar(255) collate "pg_catalog"."default";
 
 alter table "public"."t_flink_cluster" alter column "cluster_name" set not null;
 
