@@ -61,6 +61,7 @@ case class SubmitRequest(
     appConf: String,
     applicationType: ApplicationType,
     savePoint: String,
+    restoreMode: RestoreMode,
     args: String,
     @Nullable buildResult: BuildResult,
     @Nullable k8sSubmitParam: KubernetesSubmitParam,

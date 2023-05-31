@@ -19,7 +19,7 @@ package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
+import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, RestoreMode}
 import org.apache.streampark.common.util.{DeflaterUtils, Logger}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
@@ -115,6 +115,12 @@ trait FlinkClientTrait extends Logger {
       flinkConfig.setBoolean(
         SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
         submitRequest.allowNonRestoredState)
+      if (
+        submitRequest.flinkVersion.checkVersion(
+          RestoreMode.SINCE_FLINK_VERSION) && submitRequest.restoreMode != null
+      ) {
+        flinkConfig.setString(RestoreMode.RESTORE_MODE, submitRequest.restoreMode.getName);
+      }
     }
 
     // set JVMOptions..
