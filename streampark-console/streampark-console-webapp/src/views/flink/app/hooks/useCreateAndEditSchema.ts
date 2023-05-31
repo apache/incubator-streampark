@@ -285,13 +285,13 @@ export const useCreateAndEditSchema = (
         ],
       },
       {
-        field: 'clusterId',
+        field: 'flinkClusterId',
         label: t('flink.app.kubernetesClusterId'),
         component: 'Select',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         componentProps: {
           placeholder: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder'),
-          options: getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION, 'clusterId'),
+          options: getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION, 'id'),
         },
         rules: [
           {
