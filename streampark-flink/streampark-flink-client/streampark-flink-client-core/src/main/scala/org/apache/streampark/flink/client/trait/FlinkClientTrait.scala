@@ -115,7 +115,12 @@ trait FlinkClientTrait extends Logger {
       flinkConfig.setBoolean(
         SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
         submitRequest.allowNonRestoredState)
-      flinkConfig.setString(RestoreMode.RESTORE_MODE, submitRequest.restoreMode.getName);
+      if (
+        submitRequest.flinkVersion.checkVersion(
+          RestoreMode.SINCE_FLINK_VERSION) && submitRequest.restoreMode != null
+      ) {
+        flinkConfig.setString(RestoreMode.RESTORE_MODE, submitRequest.restoreMode.getName);
+      }
     }
 
     // set JVMOptions..

@@ -24,7 +24,7 @@
   });
 </script>
 <script setup lang="ts" name="StartApplicationModal">
-  import { h } from 'vue';
+  import { h, onMounted, ref, unref } from 'vue';
   import { Select, Input, Tag } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon, Icon } from '/@/components/Icon';
@@ -33,6 +33,8 @@
   import { useRouter } from 'vue-router';
   import { fetchStart } from '/@/api/flink/app/app';
   import { RestoreModeEnum } from '/@/enums/flinkEnum';
+  import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
+  import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
 
   const SelectOption = Select.Option;
 
@@ -42,6 +44,8 @@
 
   const emits = defineEmits(['register', 'updateOption']);
   const receiveData = reactive<Recordable>({});
+
+  const flinkEnvs = ref<FlinkEnv[]>([]);
 
   const [registerModal, { closeModal }] = useModalInner((data) => {
     if (data) {
@@ -108,7 +112,8 @@
             { class: 'conf-switch' },
             'restore mode is supported since flink 1.15, usually, you do not have to set this parameter',
           ),
-        ifShow: ({ values }) => values.startSavePointed,
+        ifShow: ({ values }) =>
+          values.startSavePointed && checkFlinkVersion(receiveData.application.versionId),
       },
       {
         field: 'allowNonRestoredState',
@@ -137,7 +142,7 @@
       const formValue = (await validate()) as Recordable;
       const savePointed = formValue.startSavePointed;
       const savePointPath = savePointed ? formValue['startSavePoint'] : null;
-      const restoreMode = savePointed ? formValue['restoreMode'] : RestoreModeEnum.NO_CLAIM;
+      const restoreMode = savePointed ? formValue['restoreMode'] : null;
       const { data } = await fetchStart({
         id: receiveData.application.id,
         restoreMode,
@@ -185,6 +190,17 @@
       console.error(error);
     }
   }
+
+  function checkFlinkVersion(versionId: string) {
+    let env = unref(flinkEnvs).filter((env) => env.id == versionId)[0];
+    return parseInt(env.version.split('.')[1]) >= 15;
+  }
+
+  onMounted(() => {
+    fetchFlinkEnv().then((res) => {
+      flinkEnvs.value = res;
+    });
+  });
 </script>
 <template>
   <BasicModal

@@ -1552,7 +1552,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appConf,
             application.getApplicationType(),
             getSavePointed(appParam),
-            RestoreMode.of(appParam.getRestoreMode()),
+            appParam.getRestoreMode() == null ? null : RestoreMode.of(appParam.getRestoreMode()),
             applicationArgs,
             buildResult,
             kubernetesSubmitParam,

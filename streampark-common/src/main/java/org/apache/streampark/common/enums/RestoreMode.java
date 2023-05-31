@@ -26,6 +26,7 @@ public enum RestoreMode implements Serializable {
   LEGACY(3);
 
   public static final String RESTORE_MODE = "execution.savepoint-restore-mode";
+  public static final int SINCE_FLINK_VERSION = 15;
 
   private final int value;
 

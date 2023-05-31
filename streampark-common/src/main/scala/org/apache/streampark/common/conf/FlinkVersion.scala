@@ -125,6 +125,13 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
     }
   }
 
+  def checkVersion(sinceVersion: Int): Boolean = {
+    version.split("\\.").map(_.trim.toInt) match {
+      case Array(1, v, _) if v >= sinceVersion => true
+      case _ => false
+    }
+  }
+
   // StreamPark flink shims version, like "streampark-flink-shims_flink-1.13"
   lazy val shimsVersion: String = s"streampark-flink-shims_flink-$majorVersion"
 
