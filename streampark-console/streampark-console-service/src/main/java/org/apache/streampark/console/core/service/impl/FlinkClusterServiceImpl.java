@@ -31,6 +31,7 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.task.FlinkClusterWatcher;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
@@ -141,11 +142,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         successful, String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()));
     flinkCluster.setCreateTime(new Date());
     if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
-      flinkCluster.setClusterState(ClusterState.STARTED.getValue());
+      flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
     } else {
       flinkCluster.setClusterState(ClusterState.CREATED.getValue());
     }
-    return save(flinkCluster);
+    boolean ret = save(flinkCluster);
+    if (ret && ExecutionMode.isRemoteMode(flinkCluster.getExecutionMode())) {
+      FlinkClusterWatcher.addFlinkCluster(flinkCluster);
+    }
+    return ret;
   }
 
   @Override
@@ -160,16 +165,20 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
         String address = YarnUtils.getRMWebAppURL() + "/proxy/" + deployResponse.clusterId() + "/";
         flinkCluster.setAddress(address);
+        flinkCluster.setJobManagerUrl(deployResponse.address());
       } else {
         flinkCluster.setAddress(deployResponse.address());
       }
       flinkCluster.setClusterId(deployResponse.clusterId());
-      flinkCluster.setClusterState(ClusterState.STARTED.getValue());
+      flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
       flinkCluster.setException(null);
+      FlinkClusterWatcher.addFlinkCluster(flinkCluster);
       updateById(flinkCluster);
       FlinkRESTAPIWatcher.removeFlinkCluster(flinkCluster);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
+      flinkCluster.setAddress(null);
+      flinkCluster.setJobManagerUrl(null);
       flinkCluster.setClusterState(ClusterState.STOPPED.getValue());
       flinkCluster.setException(e.toString());
       updateById(flinkCluster);
@@ -214,6 +223,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
       flinkCluster.setAddress(null);
       flinkCluster.setClusterState(ClusterState.STOPPED.getValue());
+      FlinkClusterWatcher.removeFlinkCluster(flinkCluster);
       updateById(flinkCluster);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -262,7 +272,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())
         || ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode())) {
       ApiAlertException.throwIfTrue(
-          ClusterState.isStarted(flinkCluster.getClusterStateEnum()),
+          ClusterState.isRunningState(flinkCluster.getClusterStateEnum()),
           "Flink cluster is running, cannot be delete, please check.");
     }
 
@@ -353,10 +363,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   private void checkActiveIfNeeded(FlinkCluster flinkCluster) {
     if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
       ApiAlertException.throwIfFalse(
-          ClusterState.isStarted(flinkCluster.getClusterStateEnum()),
+          ClusterState.isRunningState(flinkCluster.getClusterStateEnum()),
           "Current cluster is not active, please check!");
       if (!flinkCluster.verifyClusterConnection()) {
         flinkCluster.setAddress(null);
+        flinkCluster.setJobManagerUrl(null);
         flinkCluster.setClusterState(ClusterState.LOST.getValue());
         updateById(flinkCluster);
         throw new ApiAlertException("Current cluster is not active, please check!");
@@ -369,8 +380,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     flinkCluster.setDescription(cluster.getDescription());
     if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
       flinkCluster.setAddress(cluster.getAddress());
+      flinkCluster.setJobManagerUrl(cluster.getAddress());
     } else {
       flinkCluster.setAddress(null);
+      flinkCluster.setJobManagerUrl(null);
       flinkCluster.setClusterId(cluster.getClusterId());
       flinkCluster.setVersionId(cluster.getVersionId());
       flinkCluster.setDynamicProperties(cluster.getDynamicProperties());

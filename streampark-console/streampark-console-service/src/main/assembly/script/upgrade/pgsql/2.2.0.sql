@@ -56,6 +56,9 @@ create index "un_team_dname_inx" on "public"."t_resource" using btree (
 alter table "public"."t_flink_sql"
     add column "team_resource" varchar(64) default null;
 
+alter table "public"."t_flink_cluster"
+    add column "job_manager_url" varchar(150) collate "pg_catalog"."default";
+
 insert into "public"."t_menu" values (120400, 120000, 'menu.resource', '/flink/resource', 'flink/resource/View', null, 'apartment', '0', '1', 3, now(), now());
 insert into "public"."t_menu" values (110401, 110400, 'add', null, null, 'token:add', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (110402, 110400, 'delete', null, null, 'token:delete', null, '1', '1', null, now(), now());

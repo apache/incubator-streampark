@@ -437,7 +437,8 @@ create table `t_app_build_pipe`(
 drop table if exists `t_flink_cluster`;
 create table `t_flink_cluster` (
   `id` bigint not null auto_increment,
-  `address` varchar(150) default null comment 'url address of jobmanager',
+  `address` varchar(150) default null comment 'url address of cluster',
+  `job_manager_url` varchar(150) default null comment 'url address of jobmanager',
   `cluster_id` varchar(45) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
   `cluster_name` varchar(128) not null comment 'cluster name',
   `options` text comment 'json form of parameter collection ',

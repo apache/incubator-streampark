@@ -24,12 +24,13 @@ public enum ClusterState implements Serializable {
   /** The cluster was just created but not started */
   CREATED(0),
   /** cluster started */
-  STARTED(1),
+  RUNNING(1),
   /** cluster stopped */
   STOPPED(2),
-
   /** cluster lost */
-  LOST(3);
+  LOST(3),
+  /** cluster unknown */
+  UNKNOWN(4);
 
   private final Integer value;
 
@@ -43,14 +44,35 @@ public enum ClusterState implements Serializable {
         return clusterState;
       }
     }
-    return null;
+    return ClusterState.UNKNOWN;
+  }
+
+  public static ClusterState of(String value) {
+    for (ClusterState clusterState : values()) {
+      if (clusterState.name().equals(value)) {
+        return clusterState;
+      }
+    }
+    return ClusterState.UNKNOWN;
   }
 
   public Integer getValue() {
     return value;
   }
 
-  public static boolean isStarted(ClusterState state) {
-    return STARTED.equals(state);
+  public static boolean isCreateState(ClusterState state) {
+    return CREATED.equals(state);
+  }
+
+  public static boolean isRunningState(ClusterState state) {
+    return RUNNING.equals(state);
+  }
+
+  public static boolean isStoppedState(ClusterState state) {
+    return STOPPED.equals(state);
+  }
+
+  public static boolean isLostState(ClusterState state) {
+    return LOST.equals(state);
   }
 }
