@@ -23,6 +23,7 @@ export enum ResourceTypeEnum {
   CONNECTOR = 'CONNECTOR',
   UDXF = 'UDXF',
   NORMAL_JAR = 'NORMAL_JAR',
+  GROUP = 'GROUP',
 }
 
 export enum EngineTypeEnum {

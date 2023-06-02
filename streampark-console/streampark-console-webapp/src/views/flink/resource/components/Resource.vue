@@ -32,6 +32,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchUpload } from '/@/api/flink/app/app';
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
+  import {onMounted, unref} from "vue";
 
   interface DependencyType {
     artifactId: string;
@@ -199,6 +200,10 @@
 
   onChange((data) => {
     emit('update:value', data);
+  });
+
+  onMounted(async () => {
+    setDefaultValue(JSON.parse(props?.formModel?.dependency || '{}'));
   });
 
   defineExpose({
