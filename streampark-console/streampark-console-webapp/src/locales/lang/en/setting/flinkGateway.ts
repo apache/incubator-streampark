@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: '系统管理',
-    userManagement: '用户管理',
-    roleManagement: '角色管理',
-    menuManagement: '菜单管理',
-    tokenManagement: 'Token 管理',
-    teamManagement: '团队管理',
-    memberManagement: '成员管理',
-    project: '项目管理',
-    application: '作业管理',
-    variable: '变量管理',
-    resource: '资源管理',
-    setting: '设置中心',
+  tableTitle: 'Flink Gateway List',
+  createGateway: 'Create Flink Gateway',
+  success: 'Success',
+  gatewayType: 'Gateway Type',
+  gatewayAddress: 'Gateway Address',
+  modifyGateway: 'Edit Flink Gateway',
+  deleteGateway: 'Delete Flink Gateway',
+  deleteConfirm: 'Are you sure to delete this Flink Gateway ?',
+  name: "Gateway Name",
+  placeholder: {
+    gatewayType: 'Please select gateway type',
   },
-  setting: {
-    system: '系统设置',
-    alarm: '告警设置',
-    flinkHome: 'Flink 版本',
-    flinkCluster: 'Flink 集群',
-    externalLink: '扩展链接',
-    yarnQueue: 'Yarn 队列',
-    flinkGateway: 'FLink 网关',
+  checkResult: {
+    emptyHint: 'Flink gateway name can not be empty.',
+    emptyType: 'Flink gateway type can not be empty.',
+    emptyAddress: 'Flink gateway address can not be empty.',
   },
+  operation: {
+    updateSuccess: 'Update Flink gateway successfully.',
+    deleteSuccess: 'Delete Flink gateway successfully.',
+    createSuccess: 'Create Flink gateway successfully.',
+    deleteFailed: 'Delete Flink gateway failed.',
+  }
 };

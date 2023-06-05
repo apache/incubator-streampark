@@ -39,3 +39,18 @@ comment on column "public"."t_flink_gateway"."create_time" is 'create time';
 comment on column "public"."t_flink_gateway"."modify_time" is 'modify time';
 
 alter table "public"."t_flink_gateway" add constraint "t_flink_gateway_pkey" primary key ("id");
+
+insert into "public"."t_menu" values (120500, 130000, 'setting.flinkGateway', '/setting/FlinkGateway', 'setting/FlinkGateway/index', null, 'apartment', '0', '1', 3, now(), now());
+insert into "public"."t_menu" values (110501, 110500, 'add', null, null, 'gateway:add', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (110502, 110500, 'update', null, null, 'gateway:update', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (110503, 110500, 'delete', null, null, 'gateway:delete', null, '1', '1', null, now(), now());
+
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120500);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120501);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120502);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120503);
+
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120500);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120501);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120502);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120503);

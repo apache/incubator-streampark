@@ -26,14 +26,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.constraints.NotNull;
 
 @Tag(name = "FLINK_GATEWAY_TAG")
 @Slf4j
@@ -72,8 +67,8 @@ public class FlinkGateWayController {
   }
 
   @Operation(summary = "Delete flink gateway by id")
-  @DeleteMapping("delete/{id}")
-  public RestResponse delete(@PathVariable Long id) {
+  @DeleteMapping("delete")
+  public RestResponse delete(@NotNull(message = "The Gateway id cannot be null") @RequestParam("id") Long id) {
     flinkGatewayService.removeById(id);
     return RestResponse.success();
   }
