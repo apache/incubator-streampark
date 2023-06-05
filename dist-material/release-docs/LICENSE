@@ -491,9 +491,9 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://mvnrepository.com/artifact/org.objenesis/objenesis/2.1 Apache-2.0
     https://mvnrepository.com/artifact/org.objenesis/objenesis/3.2 Apache-2.0
     https://mvnrepository.com/artifact/org.quartz-scheduler/quartz/2.3.2 Apache-2.0
-    https://mvnrepository.com/artifact/org.scala-lang/scala-compiler/2.12.8 Apache-2.0
-    https://mvnrepository.com/artifact/org.scala-lang/scala-library/2.12.8 Apache-2.0
-    https://mvnrepository.com/artifact/org.scala-lang/scala-reflect/2.12.8 Apache-2.0
+    https://mvnrepository.com/artifact/org.scala-lang/scala-compiler/2.12.17 Apache-2.0
+    https://mvnrepository.com/artifact/org.scala-lang/scala-library/2.12.17 Apache-2.0
+    https://mvnrepository.com/artifact/org.scala-lang/scala-reflect/2.12.17 Apache-2.0
     https://mvnrepository.com/artifact/org.scalaj/scalaj-http_2.12/2.4.2 Apache-2.0
     https://mvnrepository.com/artifact/org.slf4j/jcl-over-slf4j/1.7.36 Apache-2.0
     https://mvnrepository.com/artifact/org.slf4j/log4j-over-slf4j/1.7.30 Apache-2.0
