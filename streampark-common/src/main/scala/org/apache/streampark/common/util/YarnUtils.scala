@@ -54,6 +54,11 @@ object YarnUtils extends Logger {
     "kerberos".equalsIgnoreCase(yarnHttpAuth)
   }
 
+  lazy val hasYarnHttpSampleAuth: Boolean = {
+    val yarnHttpAuth: String = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_YARN_AUTH)
+    "sample".equalsIgnoreCase(yarnHttpAuth)
+  }
+
   /**
    * @param appName
    * @return
@@ -246,15 +251,15 @@ object YarnUtils extends Logger {
   def restRequest(url: String): String = {
     if (url == null) return null
 
-    def request(url: String): String = {
-      logDebug("request url is " + url);
+    def request(reqUrl: String): String = {
+      logDebug("request url is " + reqUrl)
       val config = RequestConfig.custom.setConnectTimeout(5000, TimeUnit.MILLISECONDS).build
       if (hasYarnHttpKerberosAuth) {
         HadoopUtils
           .getUgi()
           .doAs(new PrivilegedExceptionAction[String] {
             override def run(): String = {
-              Try(HttpClientUtils.httpAuthGetRequest(url, config)) match {
+              Try(HttpClientUtils.httpAuthGetRequest(reqUrl, config)) match {
                 case Success(v) => v
                 case Failure(e) =>
                   logError("yarnUtils authRestRequest error, detail: ", e)
@@ -263,6 +268,9 @@ object YarnUtils extends Logger {
             }
           })
       } else {
+        val url = if (hasYarnHttpSampleAuth) {
+          s"$reqUrl?user.name=${HadoopUtils.hadoopUserName}"
+        } else reqUrl
         Try(HttpClientUtils.httpGetRequest(url, config)) match {
           case Success(v) => v
           case Failure(e) =>
