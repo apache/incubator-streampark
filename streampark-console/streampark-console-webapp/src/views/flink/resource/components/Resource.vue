@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { computed, defineComponent, onMounted, reactive, ref } from 'vue';
+  import { defineComponent, onMounted, reactive, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { toPomString } from '/@/views/flink/app/utils/Pom';
 
@@ -28,11 +28,11 @@
   import { getMonacoOptions } from '/@/views/flink/app/data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  import { Select, Tabs, Alert, Tag, Space, Form } from 'ant-design-vue';
+  import { Tabs, Alert, Tag, Space, Form } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchUpload } from '/@/api/flink/app/app';
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
-  import {onMounted, unref} from "vue";
+  import { onMounted } from 'vue';
 
   interface DependencyType {
     artifactId: string;
@@ -216,31 +216,37 @@
 </script>
 
 <style lang="less">
-@import url('/@/views/flink/app/styles/Add.less');
-.apply-pom {
-  z-index: 99;
-  position: absolute;
-  bottom: 20px;
-  float: right;
-  right: 20px;
-  cursor: pointer;
-  height: 26px;
-  padding: 0 12px;
-  font-size: 12px;
-}
+  @import url('/@/views/flink/app/styles/Add.less');
+  .apply-pom {
+    z-index: 99;
+    position: absolute;
+    bottom: 20px;
+    float: right;
+    right: 20px;
+    cursor: pointer;
+    height: 26px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
 </style>
 
 <template>
-  <Tabs type="card" v-model:activeKey="activeTab" class="pom-card">
-    <TabPane key="pom" tab="Maven pom">
-      <div class="relative">
-        <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
-      </div>
-    </TabPane>
-    <TabPane key="jar" tab="Upload Jar">
-      <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
-    </TabPane>
-  </Tabs>
+  <template v-if="props.formModel.resourceType == 'FLINK_APP'">
+    <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
+  </template>
+  <template v-else>
+    <Tabs type="card" v-model:activeKey="activeTab" class="pom-card">
+      <TabPane key="pom" tab="Maven pom">
+        <div class="relative">
+          <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
+        </div>
+      </TabPane>
+      <TabPane key="jar" tab="Upload Jar">
+        <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
+      </TabPane>
+    </Tabs>
+  </template>
+
   <div class="dependency-box" v-if="uploadJars.length > 0">
     <Alert
       class="dependency-item"
