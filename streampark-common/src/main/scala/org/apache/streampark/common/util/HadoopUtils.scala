@@ -58,7 +58,7 @@ object HadoopUtils extends Logger {
 
   private[this] var tgt: KerberosTicket = _
 
-  private lazy val hadoopUserName: String =
+  lazy val hadoopUserName: String =
     InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME)
 
   private[this] lazy val debugKerberos =
