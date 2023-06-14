@@ -128,9 +128,8 @@ object YarnUtils extends Logger {
    * @return
    *   </pre>
    */
-  def getRMWebAppURL(): String = {
-
-    if (rmHttpURL == null) {
+  def getRMWebAppURL(getLatest: Boolean = false): String = {
+    if (rmHttpURL == null || getLatest) {
       synchronized {
         val conf = HadoopUtils.hadoopConf
         val useHttps = YarnConfiguration.useHttps(conf)
@@ -290,9 +289,14 @@ object YarnUtils extends Logger {
       }
     }
 
-    if (url.startsWith("http://") || url.startsWith("https://")) request(url)
-    else {
-      request(s"${getRMWebAppURL()}/$url")
+    url match {
+      case u if u.matches("^http(|s)://.*") => request(url)
+      case _ =>
+        val resp = request(s"${getRMWebAppURL()}/$url")
+        if (resp != null) resp;
+        else {
+          request(s"${getRMWebAppURL(true)}/$url")
+        }
     }
   }
 

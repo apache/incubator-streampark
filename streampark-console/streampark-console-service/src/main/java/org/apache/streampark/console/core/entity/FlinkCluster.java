@@ -166,7 +166,7 @@ public class FlinkCluster implements Serializable {
       return false;
     } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
       try {
-        String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
+        String restUrl = YarnUtils.getRMWebAppURL(true) + "/proxy/" + this.clusterId + "/overview";
         String result =
             HttpClientUtils.httpGetRequest(
                 restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
