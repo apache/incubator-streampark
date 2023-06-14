@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test
 
 import java.io.File
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 // scalastyle:off println

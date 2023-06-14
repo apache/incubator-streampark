@@ -40,8 +40,8 @@ import java.io.File
 import java.lang.reflect.Method
 import java.util
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 /** perJob to submit jobs programmatically, */
 object YarnPerJobTestCase extends Logger {

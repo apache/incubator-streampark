@@ -20,7 +20,7 @@ import org.apache.streampark.common.conf.ConfigConst._
 
 import java.util.{Map => JavaMap, Properties}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.immutable.{Map => ScalaMap}
 import scala.util.Try
 

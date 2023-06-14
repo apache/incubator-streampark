@@ -24,7 +24,7 @@ import java.net.URL
 import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
 import java.util.jar.{JarFile, JarInputStream}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object Utils {

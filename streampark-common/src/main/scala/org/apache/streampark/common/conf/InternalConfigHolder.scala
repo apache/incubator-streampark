@@ -25,7 +25,7 @@ import javax.annotation.{Nonnull, Nullable}
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.language.postfixOps
 
 /**

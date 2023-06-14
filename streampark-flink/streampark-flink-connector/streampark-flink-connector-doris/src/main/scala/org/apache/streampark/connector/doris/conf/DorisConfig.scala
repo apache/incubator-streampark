@@ -20,7 +20,7 @@ import org.apache.streampark.common.conf.ConfigConst
 
 import java.util.Properties
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 object DorisConfig {
 

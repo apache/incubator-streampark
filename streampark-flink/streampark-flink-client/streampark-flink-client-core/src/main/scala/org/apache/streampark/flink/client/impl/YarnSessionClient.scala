@@ -35,8 +35,8 @@ import org.apache.hadoop.yarn.util.ConverterUtils
 
 import java.util
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable.ListBuffer
 
 /** Submit Job to YARN Session Cluster */

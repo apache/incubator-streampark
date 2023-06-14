@@ -20,7 +20,7 @@ import org.apache.commons.cli.{CommandLine, DefaultParser, Option, Options}
 
 import java.lang.{Boolean => JavaBoolean}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 /** Applies to all optional parameters under flink run */

@@ -33,9 +33,9 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceCont
 import java.lang
 import java.util.Properties
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.Map
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Success, Try}
 
 class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties)

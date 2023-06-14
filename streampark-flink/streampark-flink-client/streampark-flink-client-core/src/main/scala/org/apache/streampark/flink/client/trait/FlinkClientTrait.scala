@@ -43,8 +43,8 @@ import java.io.File
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.annotation.tailrec
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
