@@ -78,7 +78,6 @@ jobs:
         with:
           images: apache/streampark
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=tag
             type=ref,event=branch
 
