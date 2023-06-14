@@ -132,10 +132,6 @@ class PodTemplateParserTest {
           |  name: pod-template
           |spec:
           |  hostAliases:
-          |  - ip: 192.168.3.114
-          |    hostnames:
-          |    - hdp01
-          |    - hdp01.assad.site
           |  - ip: 192.168.3.116
           |    hostnames:
           |    - hdp03.assad.site
@@ -143,6 +139,10 @@ class PodTemplateParserTest {
           |    hostnames:
           |    - hdp02
           |    - hdp02.assad.site
+          |  - ip: 192.168.3.114
+          |    hostnames:
+          |    - hdp01
+          |    - hdp01.assad.site
           |""".stripMargin,
       """apiVersion: v1
         |kind: Pod
@@ -156,10 +156,6 @@ class PodTemplateParserTest {
           |  name: pod-template
           |spec:
           |  hostAliases:
-          |  - ip: 192.168.3.114
-          |    hostnames:
-          |    - hdp01
-          |    - hdp01.assad.site
           |  - ip: 192.168.3.116
           |    hostnames:
           |    - hdp03.assad.site
@@ -167,6 +163,10 @@ class PodTemplateParserTest {
           |    hostnames:
           |    - hdp02
           |    - hdp02.assad.site
+          |  - ip: 192.168.3.114
+          |    hostnames:
+          |    - hdp01
+          |    - hdp01.assad.site
           |""".stripMargin,
       """apiVersion: v1
         |kind: Pod
@@ -185,10 +185,6 @@ class PodTemplateParserTest {
           |  name: pod-template
           |spec:
           |  hostAliases:
-          |  - ip: 192.168.3.114
-          |    hostnames:
-          |    - hdp01
-          |    - hdp01.assad.site
           |  - ip: 192.168.3.116
           |    hostnames:
           |    - hdp03.assad.site
@@ -196,6 +192,10 @@ class PodTemplateParserTest {
           |    hostnames:
           |    - hdp02
           |    - hdp02.assad.site
+          |  - ip: 192.168.3.114
+          |    hostnames:
+          |    - hdp01
+          |    - hdp01.assad.site
           |""".stripMargin,
       """apiVersion: v1
         |kind: Pod
@@ -237,10 +237,6 @@ class PodTemplateParserTest {
           |    persistentVolumeClaim:
           |      claimName: flink-savepoint
           |  hostAliases:
-          |  - ip: 192.168.3.114
-          |    hostnames:
-          |    - hdp01
-          |    - hdp01.assad.site
           |  - ip: 192.168.3.116
           |    hostnames:
           |    - hdp03.assad.site
@@ -248,11 +244,15 @@ class PodTemplateParserTest {
           |    hostnames:
           |    - hdp02
           |    - hdp02.assad.site
+          |  - ip: 192.168.3.114
+          |    hostnames:
+          |    - hdp01
+          |    - hdp01.assad.site
           |""".stripMargin
     )
     for (expect <- expected) {
       val result = PodTemplateParser.completeHostAliasSpec(hostMap, expect._1)
-      assertEquals(result, expect._2)
+      assertEquals(expect._2, result)
     }
   }
 
