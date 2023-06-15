@@ -77,6 +77,7 @@ object YarnSessionClient extends YarnClientTrait {
 
     val shipFiles = new util.ArrayList[String]()
     shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/lib")
+    shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/plugins")
 
     flinkConfig
       // flinkDistJar
