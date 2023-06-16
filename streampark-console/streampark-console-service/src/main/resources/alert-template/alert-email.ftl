@@ -967,6 +967,60 @@
                                                                     </tr>
                                                                 </#if>
 
+                                                                <#if  mail.type == 3 >
+                                                                    <tr>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Cluster Name
+                                                                        </td>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5);border-right-style:solid; border-right-width: 1px; border-right-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.jobName}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Cluster Status
+                                                                        </td>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5);border-right-style:solid; border-right-width: 1px; border-right-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            <span style="font-size: 1.25em;font-weight: bold;color: RED;">${mail.status}</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Start Time
+                                                                        </td>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5);border-right-style:solid; border-right-width: 1px; border-right-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.startTime}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            End Time
+                                                                        </td>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5);border-right-style:solid; border-right-width: 1px; border-right-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.endTime}
+                                                                        </td>
+                                                                    </tr>
+
+                                                                    <tr>
+                                                                        <td style="border-bottom-style:solid; border-bottom-width: 1px; border-bottom-color: rgba(169,169,169,.5); border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Duration
+                                                                        </td>
+                                                                        <td style="border: 1px solid rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.duration}
+                                                                        </td>
+                                                                    </tr>
+
+                                                                    <tr>
+                                                                        <td style="border-bottom-style:solid; border-bottom-width: 1px; border-bottom-color: rgba(169,169,169,.5); border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Affected Jobs
+                                                                        </td>
+                                                                        <td style="border: 1px solid rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.affectedJobs}
+                                                                        </td>
+                                                                    </tr>
+
+                                                                </#if>
+
                                                                 <tr>
                                                                     <td colspan="2" style="height: 3rem;">
                                                                         <div style="margin: 1.5em 0;">Best Wishes!

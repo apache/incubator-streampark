@@ -17,10 +17,12 @@
 
 package org.apache.streampark.console.core.bean;
 
+import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 
@@ -47,61 +49,181 @@ public class AlertTemplate implements Serializable {
   private Integer restartIndex;
   private Integer totalRestart;
   private boolean atAll = false;
-
-  private static AlertTemplate of(Application application) {
-    long duration;
-    if (application.getEndTime() == null) {
-      duration = System.currentTimeMillis() - application.getStartTime().getTime();
-    } else {
-      duration = application.getEndTime().getTime() - application.getStartTime().getTime();
-    }
-    AlertTemplate template = new AlertTemplate();
-    template.setJobName(application.getJobName());
-
-    if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      String format = "%s/proxy/%s/";
-      String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
-      template.setLink(url);
-    } else {
-      template.setLink(null);
-    }
-
-    template.setStartTime(
-        DateUtils.format(
-            application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-    template.setEndTime(
-        DateUtils.format(
-            application.getEndTime() == null ? new Date() : application.getEndTime(),
-            DateUtils.fullFormat(),
-            TimeZone.getDefault()));
-    template.setDuration(DateUtils.toDuration(duration));
-    boolean needRestart = application.isNeedRestartOnFailed() && application.getRestartCount() > 0;
-    template.setRestart(needRestart);
-    if (needRestart) {
-      template.setRestartIndex(application.getRestartCount());
-      template.setTotalRestart(application.getRestartSize());
-    }
-    return template;
-  }
+  private Integer affectedJobs;
 
   public static AlertTemplate of(Application application, FlinkAppState appState) {
-    AlertTemplate template = of(application);
-    template.setType(1);
-    template.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
-    template.setSubject(String.format("StreamPark Alert: %s %s", template.getJobName(), appState));
-    template.setStatus(appState.name());
-    return template;
+    return new AlertTemplateBuilder()
+        .setDuration(application.getStartTime(), application.getEndTime())
+        .setJobName(application.getJobName())
+        .setLink(application.getExecutionModeEnum(), application.getAppId())
+        .setStartTime(application.getStartTime())
+        .setEndTime(application.getEndTime())
+        .setRestart(application.isNeedRestartOnFailed(), application.getRestartCount())
+        .setRestartIndex(application.getRestartCount())
+        .setTotalRestart(application.getRestartSize())
+        .setType(1)
+        .setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()))
+        .setSubject(String.format("StreamPark Alert: %s %s", application.getJobName(), appState))
+        .setStatus(appState.name())
+        .build();
   }
 
   public static AlertTemplate of(Application application, CheckPointStatus checkPointStatus) {
-    AlertTemplate template = of(application);
-    template.setType(2);
-    template.setCpFailureRateInterval(
-        DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
-    template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
-    template.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
-    template.setSubject(
-        String.format("StreamPark Alert: %s, checkPoint is Failed", template.getJobName()));
-    return template;
+    return new AlertTemplateBuilder()
+        .setDuration(application.getStartTime(), application.getEndTime())
+        .setJobName(application.getJobName())
+        .setLink(application.getExecutionModeEnum(), application.getAppId())
+        .setStartTime(application.getStartTime())
+        .setType(2)
+        .setCpFailureRateInterval(
+            DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60))
+        .setCpMaxFailureInterval(application.getCpMaxFailureInterval())
+        .setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()))
+        .setSubject(
+            String.format("StreamPark Alert: %s, checkPoint is Failed", application.getJobName()))
+        .build();
+  }
+
+  public static AlertTemplate of(FlinkCluster cluster, ClusterState clusterState) {
+    return new AlertTemplateBuilder()
+        .setDuration(cluster.getStartTime(), cluster.getEndTime())
+        .setJobName(cluster.getClusterName())
+        .setLink(ExecutionMode.YARN_SESSION, cluster.getClusterId())
+        .setStartTime(cluster.getStartTime())
+        .setEndTime(cluster.getEndTime())
+        .setType(3)
+        .setTitle(String.format("Notify: %s %s", cluster.getClusterName(), clusterState.name()))
+        .setSubject(
+            String.format("StreamPark Alert: %s %s", cluster.getClusterName(), clusterState))
+        .setStatus(clusterState.name())
+        .setAffectedJobs(cluster.getJobs())
+        .build();
+  }
+
+  private static class AlertTemplateBuilder {
+    private AlertTemplate alertTemplate = new AlertTemplate();
+
+    public AlertTemplateBuilder setTitle(String title) {
+      alertTemplate.setTitle(title);
+      return this;
+    }
+
+    public AlertTemplateBuilder setSubject(String subject) {
+      alertTemplate.setSubject(subject);
+      return this;
+    }
+
+    public AlertTemplateBuilder setJobName(String jobName) {
+      alertTemplate.setJobName(jobName);
+      return this;
+    }
+
+    public AlertTemplateBuilder setType(Integer type) {
+      alertTemplate.setType(type);
+      return this;
+    }
+
+    public AlertTemplateBuilder setStatus(String status) {
+      alertTemplate.setStatus(status);
+      return this;
+    }
+
+    public AlertTemplateBuilder setStartTime(Date startTime) {
+      alertTemplate.setStartTime(
+          DateUtils.format(startTime, DateUtils.fullFormat(), TimeZone.getDefault()));
+      return this;
+    }
+
+    public AlertTemplateBuilder setEndTime(Date endTime) {
+      alertTemplate.setEndTime(
+          DateUtils.format(
+              endTime == null ? new Date() : endTime,
+              DateUtils.fullFormat(),
+              TimeZone.getDefault()));
+      return this;
+    }
+
+    public AlertTemplateBuilder setDuration(String duration) {
+      alertTemplate.setDuration(duration);
+      return this;
+    }
+
+    public AlertTemplateBuilder setDuration(Date start, Date end) {
+      long duration;
+      if (start == null && end == null) {
+        duration = 0L;
+      } else if (end == null) {
+        duration = System.currentTimeMillis() - start.getTime();
+      } else {
+        duration = end.getTime() - start.getTime();
+      }
+      alertTemplate.setDuration(DateUtils.toDuration(duration));
+      return this;
+    }
+
+    public AlertTemplateBuilder setLink(String link) {
+      alertTemplate.setLink(link);
+      return this;
+    }
+
+    public AlertTemplateBuilder setLink(ExecutionMode mode, String appId) {
+      if (ExecutionMode.isYarnMode(mode)) {
+        String format = "%s/proxy/%s/";
+        String url = String.format(format, YarnUtils.getRMWebAppURL(), appId);
+        alertTemplate.setLink(url);
+      } else {
+        alertTemplate.setLink(null);
+      }
+      return this;
+    }
+
+    public AlertTemplateBuilder setCpFailureRateInterval(String cpFailureRateInterval) {
+      alertTemplate.setCpFailureRateInterval(cpFailureRateInterval);
+      return this;
+    }
+
+    public AlertTemplateBuilder setCpMaxFailureInterval(Integer cpMaxFailureInterval) {
+      alertTemplate.setCpMaxFailureInterval(cpMaxFailureInterval);
+      return this;
+    }
+
+    public AlertTemplateBuilder setRestart(Boolean restart) {
+      alertTemplate.setRestart(restart);
+      return this;
+    }
+
+    public AlertTemplateBuilder setRestart(Boolean needRestartOnFailed, Integer restartCount) {
+      boolean needRestart = needRestartOnFailed && restartCount > 0;
+      alertTemplate.setRestart(needRestart);
+      return this;
+    }
+
+    public AlertTemplateBuilder setRestartIndex(Integer restartIndex) {
+      if (alertTemplate.getRestart()) {
+        alertTemplate.setRestartIndex(restartIndex);
+      }
+      return this;
+    }
+
+    public AlertTemplateBuilder setTotalRestart(Integer totalRestart) {
+      if (alertTemplate.getRestart()) {
+        alertTemplate.setTotalRestart(totalRestart);
+      }
+      return this;
+    }
+
+    public AlertTemplateBuilder setAtAll(Boolean atAll) {
+      alertTemplate.setAtAll(atAll);
+      return this;
+    }
+
+    public AlertTemplateBuilder setAffectedJobs(Integer jobs) {
+      alertTemplate.setAffectedJobs(jobs);
+      return this;
+    }
+
+    public AlertTemplate build() {
+      return this.alertTemplate;
+    }
   }
 }

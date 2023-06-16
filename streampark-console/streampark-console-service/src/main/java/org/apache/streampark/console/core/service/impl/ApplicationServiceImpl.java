@@ -545,6 +545,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public Integer getJobByClusterId(Long clusterId) {
+    return baseMapper.getJobByClusterId(clusterId);
+  }
+
+  @Override
   public boolean existsJobByFlinkEnvId(Long flinkEnvId) {
     LambdaQueryWrapper<Application> lambdaQueryWrapper =
         new LambdaQueryWrapper<Application>().eq(Application::getVersionId, flinkEnvId);

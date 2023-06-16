@@ -80,6 +80,8 @@ public class FlinkRESTAPIWatcher {
 
   @Autowired private SavePointService savePointService;
 
+  @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
   // track interval  every 5 seconds
   private static final long WATCHING_INTERVAL = 1000L * 5;
   // option interval within 10 seconds
@@ -225,7 +227,7 @@ public class FlinkRESTAPIWatcher {
                     if (StopFrom.NONE.equals(stopFrom)) {
                       savePointService.expire(application.getId());
                       application.setState(FlinkAppState.LOST.getValue());
-                      alertService.alert(application, FlinkAppState.LOST);
+                      alert(application, FlinkAppState.LOST);
                     } else {
                       application.setState(FlinkAppState.CANCELED.getValue());
                     }
@@ -242,7 +244,7 @@ public class FlinkRESTAPIWatcher {
                   FlinkAppState appState = FlinkAppState.of(application.getState());
                   if (appState.equals(FlinkAppState.FAILED)
                       || appState.equals(FlinkAppState.LOST)) {
-                    alertService.alert(application, FlinkAppState.of(application.getState()));
+                    alert(application, FlinkAppState.of(application.getState()));
                     if (appState.equals(FlinkAppState.FAILED)) {
                       try {
                         applicationService.start(application, true);
@@ -458,7 +460,7 @@ public class FlinkRESTAPIWatcher {
             savePointService.expire(application.getId());
           }
           stopCanceledJob(application.getId());
-          alertService.alert(application, FlinkAppState.CANCELED);
+          alert(application, FlinkAppState.CANCELED);
         }
         STOP_FROM_MAP.remove(application.getId());
         doPersistMetrics(application, true);
@@ -469,7 +471,7 @@ public class FlinkRESTAPIWatcher {
         STOP_FROM_MAP.remove(application.getId());
         application.setState(FlinkAppState.FAILED.getValue());
         doPersistMetrics(application, true);
-        alertService.alert(application, FlinkAppState.FAILED);
+        alert(application, FlinkAppState.FAILED);
         applicationService.start(application, true);
         break;
       case RESTARTING:
@@ -546,7 +548,7 @@ public class FlinkRESTAPIWatcher {
               || flinkAppState.equals(FlinkAppState.LOST)
               || (flinkAppState.equals(FlinkAppState.CANCELED) && StopFrom.NONE.equals(stopFrom))
               || applicationService.checkAlter(application)) {
-            alertService.alert(application, flinkAppState);
+            alert(application, flinkAppState);
             stopCanceledJob(application.getId());
             if (flinkAppState.equals(FlinkAppState.FAILED)) {
               applicationService.start(application, true);
@@ -764,5 +766,31 @@ public class FlinkRESTAPIWatcher {
 
   public boolean isWatchingApp(Long id) {
     return WATCHING_APPS.containsKey(id);
+  }
+
+  /**
+   * The situation of abnormal operation alarm is as follows: When the job running mode is yarn per
+   * job or yarn application, when the job is abnormal, an alarm will be triggered directly; The job
+   * running mode is yarn session or reome: a. If the flink cluster is not configured with an alarm
+   * information, it will directly alarm when the job is abnormal. b. If the flink cluster is
+   * configured with alarm information: if the abnormal behavior of the job is caused by an
+   * abnormality in the flink cluster, block the alarm of the job and wait for the flink cluster
+   * alarm; If the abnormal behavior of the job is caused by itself and the flink cluster is running
+   * normally, the job will an alarm
+   */
+  private void alert(Application app, FlinkAppState appState) {
+    if (ExecutionMode.isYarnPerJobOrAppMode(app.getExecutionModeEnum())
+        || !flinkClusterWatcher.checkAlert(app.getFlinkClusterId())) {
+      alertService.alert(app, appState);
+      return;
+    }
+    boolean isValid = flinkClusterWatcher.verifyClusterValidByClusterId(app.getFlinkClusterId());
+    if (isValid) {
+      log.info(
+          "application with id {} is yarn session or remote and flink cluster with id {} is alive, application send alert",
+          app.getId(),
+          app.getFlinkClusterId());
+      alertService.alert(app, appState);
+    }
   }
 }
