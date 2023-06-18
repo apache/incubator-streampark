@@ -36,7 +36,7 @@ import java.util
 import java.util.Properties
 
 import scala.annotation.meta.param
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.Try
 
 object RedisSink {

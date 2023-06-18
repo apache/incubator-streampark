@@ -20,7 +20,7 @@ package org.apache.streampark.flink.connector.failover
 import java.util
 import java.util.regex.Pattern
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) {
   def incrementCounter(): Unit = attemptCounter += 1

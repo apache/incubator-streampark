@@ -34,7 +34,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 import java.io.File
 import java.lang.{Boolean => JavaBool}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 /** yarn PerJob mode submit */
 object YarnPerJobClient extends YarnClientTrait {

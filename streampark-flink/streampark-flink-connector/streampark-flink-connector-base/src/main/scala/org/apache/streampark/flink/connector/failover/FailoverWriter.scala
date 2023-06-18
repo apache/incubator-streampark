@@ -26,7 +26,7 @@ import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecor
 import java.util._
 import java.util.concurrent.locks.ReentrantLock
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 class FailoverWriter(failoverStorage: FailoverStorageType, properties: Properties)
   extends AutoCloseable

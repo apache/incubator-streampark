@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import scala.annotation.meta.getter
 import scala.annotation.tailrec
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.Random
 
 object RedisClient extends Logger {

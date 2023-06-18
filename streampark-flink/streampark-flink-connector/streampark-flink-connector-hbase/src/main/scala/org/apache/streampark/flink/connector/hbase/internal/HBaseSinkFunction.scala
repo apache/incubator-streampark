@@ -33,7 +33,7 @@ import java.util.Properties
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable.ArrayBuffer
 
 class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, prop: Properties)

@@ -23,7 +23,7 @@ import org.apache.streampark.flink.connector.conf.ThresholdConf
 import java.util.{Base64, Properties}
 import java.util.concurrent.ThreadLocalRandom
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 /**
  * Flink sink for Clickhouse database. Powered by Async Http Client.

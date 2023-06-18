@@ -21,7 +21,7 @@ import java.net.URL
 import java.util
 import java.util.Scanner
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 object FileUtils {

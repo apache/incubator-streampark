@@ -26,7 +26,7 @@ import org.asynchttpclient.{AsyncHttpClient, DefaultAsyncHttpClientConfig, Dsl}
 
 import java.util.concurrent._
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable.ListBuffer
 
 case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseHttpConfig)
