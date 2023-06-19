@@ -29,7 +29,10 @@ public enum LoginType {
   PASSWORD(0),
 
   /** sign in with ldap */
-  LDAP(1);
+  LDAP(1),
+
+  /** sign in with SSO */
+  SSO(2);
 
   @EnumValue private final int code;
 

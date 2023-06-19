@@ -44,11 +44,16 @@ public class AuthenticatorImpl implements Authenticator {
       throw new ApiAlertException(
           String.format("the login type [%s] is not supported.", loginType));
     }
-
-    if (loginTypeEnum.equals(LoginType.PASSWORD)) {
-      return passwordAuthenticate(username, password);
-    } else {
-      return ldapAuthenticate(username, password);
+    switch (loginTypeEnum) {
+      case PASSWORD:
+        return passwordAuthenticate(username, password);
+      case LDAP:
+        return ldapAuthenticate(username, password);
+      case SSO:
+        return ssoAuthenticate(username);
+      default:
+        throw new ApiAlertException(
+            String.format("the login type [%s] is not supported.", loginType));
     }
   }
 
@@ -93,16 +98,35 @@ public class AuthenticatorImpl implements Authenticator {
       }
       return user;
     }
+    return this.newUserCreate(LoginType.LDAP, username, password);
+  }
 
+  private User ssoAuthenticate(String username) throws Exception {
+    // check if user exist
+    User user = usersService.findByName(username);
+    if (user != null) {
+      if (user.getLoginType() != LoginType.SSO) {
+        throw new ApiAlertException(
+            String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
+      }
+      return user;
+    }
+    return this.newUserCreate(LoginType.SSO, username, null);
+  }
+
+  private User newUserCreate(LoginType loginType, String username, String password)
+      throws Exception {
     User newUser = new User();
     newUser.setCreateTime(new Date());
     newUser.setUsername(username);
     newUser.setNickName(username);
+    newUser.setLoginType(loginType);
     newUser.setUserType(UserType.USER);
-    newUser.setLoginType(LoginType.LDAP);
     newUser.setStatus(User.STATUS_VALID);
     newUser.setSex(User.SEX_UNKNOWN);
-    newUser.setPassword(password);
+    if (password != null) {
+      newUser.setPassword(password);
+    }
     usersService.createUser(newUser);
     return newUser;
   }
