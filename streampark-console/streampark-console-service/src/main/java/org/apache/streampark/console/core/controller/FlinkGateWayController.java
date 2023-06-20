@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.FlinkGateWay;
+import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,14 +58,31 @@ public class FlinkGateWayController {
   @Operation(summary = "Create flink gateway")
   @PostMapping("create")
   public RestResponse create(@RequestBody FlinkGateWay flinkGateWay) {
-    flinkGatewayService.save(flinkGateWay);
+    flinkGatewayService.create(flinkGateWay);
     return RestResponse.success();
+  }
+
+  @Operation(summary = "Check flink gateway name")
+  @GetMapping("check/name")
+  public RestResponse checkName(
+      @NotNull(message = "The Gateway name cannot be null") @RequestParam("name") String name) {
+    return RestResponse.success(flinkGatewayService.existsByGatewayName(name));
+  }
+
+  @Operation(summary = "Check flink gateway address")
+  @GetMapping("check/address")
+  public RestResponse checkAddress(
+      @NotNull(message = "The Gateway address cannot be null") @RequestParam("address")
+          String address)
+      throws Exception {
+    GatewayTypeEnum gatewayVersion = flinkGatewayService.getGatewayVersion(address);
+    return RestResponse.success(gatewayVersion);
   }
 
   @Operation(summary = "Update flink gateway")
   @PutMapping("update")
   public RestResponse update(@RequestBody FlinkGateWay flinkGateWay) {
-    flinkGatewayService.updateById(flinkGateWay);
+    flinkGatewayService.update(flinkGateWay);
     return RestResponse.success();
   }
 

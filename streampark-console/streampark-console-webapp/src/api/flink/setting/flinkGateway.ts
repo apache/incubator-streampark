@@ -25,11 +25,12 @@ enum GATEWAY_API {
   LIST = '/flink/gateway/list',
   DELETE = '/flink/gateway/delete',
   GET = '/flink/gateway/get',
-  CHECK_YARN_QUEUE = '/flink/gateway/check',
+  CHECK_NAME = '/flink/gateway/check/name',
+  CHECK_ADDRESS = '/flink/gateway/check/address',
 }
 
 /**
- * fetch gateway list in the specified team.
+ * fetch gateway list.
  */
 export function fetchGatewayList() {
   return defHttp.get({
@@ -48,16 +49,6 @@ export function fetchGatewayDelete(id: string): Promise<AxiosResponse<Result>> {
   );
 }
 
-/**
- * fetch gateway existed check result.
- */
-export function fetchCheckGateway(data: Recordable) {
-  return defHttp.postJson({
-    url: GATEWAY_API.CHECK_YARN_QUEUE,
-    data,
-  });
-}
-
 export function fetchGatewayCreate(data: Recordable) {
   return defHttp.postJson({
     url: GATEWAY_API.CREATE,
@@ -69,5 +60,19 @@ export function fetchGatewayUpdate(data: Recordable) {
   return defHttp.postJson({
     url: GATEWAY_API.UPDATE,
     data,
+  });
+}
+
+export function fetchGatewayCheckName(name: string) {
+  return defHttp.get({
+    url: GATEWAY_API.CHECK_NAME,
+    params: { name },
+  });
+}
+
+export function fetchGatewayCheckAddress(address: string) {
+  return defHttp.get({
+    url: GATEWAY_API.CHECK_ADDRESS,
+    params: { address },
   });
 }

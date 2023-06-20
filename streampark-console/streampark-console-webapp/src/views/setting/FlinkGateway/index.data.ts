@@ -16,7 +16,6 @@
  */
 import {BasicColumn, FormSchema} from '/@/components/Table';
 import { useI18n } from '/@/hooks/web/useI18n';
-import {GatewayTypeEnum} from "/@/enums/GatewayTypeEnum";
 const { t } = useI18n();
 
 export const searchFormSchema: FormSchema[] = [
@@ -34,20 +33,6 @@ export const formSchema: FormSchema[] = [
     label: t('setting.flinkGateway.name'),
     component: 'Input',
     rules: [{ required: true, message: t('setting.flinkGateway.checkResult.emptyHint') }],
-  },
-  {
-    field: 'gatewayType',
-    label: t('setting.flinkGateway.gatewayType'),
-    component: 'Select',
-    componentProps: {
-      placeholder: t('setting.flinkGateway.placeholder.gatewayType'),
-      options: [
-        { label: GatewayTypeEnum.FLINK_V1, value: GatewayTypeEnum.FLINK_V1 },
-        { label: GatewayTypeEnum.FLINK_V2, value: GatewayTypeEnum.FLINK_V2 },
-        { label: GatewayTypeEnum.KYUUBI, value: GatewayTypeEnum.KYUUBI }
-      ],
-    },
-    rules: [{ required: true, message: t('setting.flinkGateway.checkResult.emptyType') }],
   },
   {
     field: 'address',

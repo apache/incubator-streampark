@@ -18,7 +18,17 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.FlinkGateWay;
+import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
-public interface FlinkGateWayService extends IService<FlinkGateWay> {}
+public interface FlinkGateWayService extends IService<FlinkGateWay> {
+  void create(FlinkGateWay flinkGateWay);
+
+  void update(FlinkGateWay flinkGateWay);
+
+  boolean existsByGatewayName(String name);
+
+  GatewayTypeEnum getGatewayVersion(String address) throws JsonProcessingException;
+}

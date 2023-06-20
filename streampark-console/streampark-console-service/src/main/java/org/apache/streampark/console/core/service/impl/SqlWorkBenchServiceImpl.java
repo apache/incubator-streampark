@@ -71,6 +71,10 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
   /** Get SqlGatewayService instance by flinkGatewayId */
   private SqlGatewayService getSqlGateWayService(Long flinkGatewayId) {
     FlinkGateWay flinkGateWay = flinkGateWayService.getById(flinkGatewayId);
+    if (flinkGateWay == null) {
+      throw new IllegalArgumentException(
+          "flinkGateWay is not exist, please check your config, id: " + flinkGatewayId);
+    }
     Map<String, String> config = new HashMap<>(2);
     config.put(
         FactoryUtil.SQL_GATEWAY_SERVICE_TYPE.getKey(),

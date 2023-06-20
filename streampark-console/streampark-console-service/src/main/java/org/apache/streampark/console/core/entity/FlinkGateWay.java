@@ -24,6 +24,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
 import java.util.Date;
 
 @Data
@@ -33,12 +35,14 @@ public class FlinkGateWay {
   @TableId(type = IdType.AUTO)
   private Long id;
 
+  @NotBlank(message = "{required}")
   private String gatewayName;
 
   private String description;
 
   private GatewayTypeEnum gatewayType;
 
+  @NotBlank(message = "{required}")
   private String address;
 
   private Date createTime;

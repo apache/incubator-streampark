@@ -33,9 +33,7 @@ import { formSchema } from '../index.data';
 import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
 import {
-  fetchCheckGateway,
   fetchGatewayCreate,
-  fetchGatewayUpdate,
 } from '/@/api/flink/setting/flinkGateway';
 import { useI18n } from '/@/hooks/web/useI18n';
 
