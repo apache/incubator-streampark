@@ -76,3 +76,7 @@ insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120400);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120401);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120402);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120403);
+
+-- add sso as login type
+alter table "public"."t_user" alter column "password" TYPE varchar(64) collate "pg_catalog"."default";
+comment on column "public"."t_user"."login_type" is 'login type 0:password 1:ldap 2:sso';

@@ -33,7 +33,7 @@ import java.nio.charset.{Charset, StandardCharsets}
 import java.security.Principal
 import java.util.{List => JavaList, Map => JavaMap}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 object HttpClientUtils {
 

@@ -33,7 +33,7 @@ import java.util
 import java.util.{HashMap => JavaHashMap, List => JavaList}
 import java.util.concurrent.TimeUnit
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 import scala.util.control.Breaks.{break, breakable}
@@ -120,15 +120,8 @@ object YarnUtils extends Logger {
     if (StringUtils.isNotBlank(PROXY_YARN_URL)) PROXY_YARN_URL else getRMWebAppURL()
   }
 
-  /**
-   * <pre>
-   *
-   * @return
-   *   </pre>
-   */
-  def getRMWebAppURL(): String = {
-
-    if (rmHttpURL == null) {
+  def getRMWebAppURL(getLatest: Boolean = false): String = {
+    if (rmHttpURL == null || getLatest) {
       synchronized {
         val conf = HadoopUtils.hadoopConf
         val useHttps = YarnConfiguration.useHttps(conf)
@@ -249,7 +242,6 @@ object YarnUtils extends Logger {
    * @return
    */
   def restRequest(url: String): String = {
-    if (url == null) return null
 
     def request(reqUrl: String): String = {
       logDebug("request url is " + reqUrl)
@@ -280,10 +272,16 @@ object YarnUtils extends Logger {
       }
     }
 
-    if (url.startsWith("http://") || url.startsWith("https://")) request(url)
-    else {
-      request(s"${getRMWebAppURL()}/$url")
+    url match {
+      case u if u.matches("^http(|s)://.*") => request(url)
+      case _ =>
+        val resp = request(s"${getRMWebAppURL()}/$url")
+        if (resp != null) resp;
+        else {
+          request(s"${getRMWebAppURL(true)}/$url")
+        }
     }
+
   }
 
 }

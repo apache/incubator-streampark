@@ -23,7 +23,7 @@ import java.util
 import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 case class SinkBuffer(writer: SinkWriter, flushInterval: Long, bufferSize: Int)
   extends AutoCloseable

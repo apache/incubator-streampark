@@ -67,4 +67,8 @@ insert into `t_role_menu` (role_id, menu_id) values (100002, 120401);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120402);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120403);
 
+-- add sso as login type
+alter table `t_user` modify column `password` varchar(64) collate utf8mb4_general_ci default null comment 'password';
+alter table `t_user` modify column `login_type` tinyint default 0 comment 'login type 0:password 1:ldap 2:sso';
+
 set foreign_key_checks = 1;

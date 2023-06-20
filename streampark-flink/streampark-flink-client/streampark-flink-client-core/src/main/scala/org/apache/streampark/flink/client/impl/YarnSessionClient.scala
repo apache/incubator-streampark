@@ -35,8 +35,8 @@ import org.apache.hadoop.yarn.util.ConverterUtils
 
 import java.util
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable.ListBuffer
 
 /** Submit Job to YARN Session Cluster */
@@ -60,7 +60,7 @@ object YarnSessionClient extends YarnClientTrait {
    * @param deployRequest
    * @param flinkConfig
    */
-  def setConfig(deployRequest: DeployRequest, flinkConfig: Configuration): Unit = {
+  def deployClusterConfig(deployRequest: DeployRequest, flinkConfig: Configuration): Unit = {
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
       deployRequest.flinkVersion.flinkHome)
     val currentUser = UserGroupInformation.getCurrentUser
@@ -77,6 +77,7 @@ object YarnSessionClient extends YarnClientTrait {
 
     val shipFiles = new util.ArrayList[String]()
     shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/lib")
+    shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/plugins")
 
     flinkConfig
       // flinkDistJar
@@ -203,7 +204,7 @@ object YarnSessionClient extends YarnClientTrait {
     try {
       val flinkConfig =
         extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
-      setConfig(deployRequest, flinkConfig)
+      deployClusterConfig(deployRequest, flinkConfig)
       val yarnClusterDescriptor = getSessionClusterDeployDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       if (null != deployRequest.clusterId && deployRequest.clusterId.nonEmpty) {

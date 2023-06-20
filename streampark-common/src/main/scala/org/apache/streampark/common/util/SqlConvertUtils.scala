@@ -21,7 +21,7 @@ import java.util.Scanner
 import java.util.regex.Pattern
 
 import scala.annotation.tailrec
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 object SqlConvertUtils extends Logger {
 

@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 /** @param flinkHome actual flink home that must be a readable local path */

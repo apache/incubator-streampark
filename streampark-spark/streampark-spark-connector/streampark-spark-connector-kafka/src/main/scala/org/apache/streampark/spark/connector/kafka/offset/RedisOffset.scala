@@ -23,7 +23,7 @@ import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
 import redis.clients.jedis.Protocol
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.Try
 
 /** Redis Offset Manager */

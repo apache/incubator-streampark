@@ -43,7 +43,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.concurrent.duration.DurationLong
 import scala.language.{implicitConversions, postfixOps}

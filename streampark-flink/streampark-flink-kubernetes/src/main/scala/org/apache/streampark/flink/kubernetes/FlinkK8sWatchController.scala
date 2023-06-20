@@ -24,7 +24,7 @@ import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 
 import java.util.concurrent.TimeUnit
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 /** Tracking info cache pool on flink kubernetes mode. */
 class FlinkK8sWatchController extends Logger with AutoCloseable {

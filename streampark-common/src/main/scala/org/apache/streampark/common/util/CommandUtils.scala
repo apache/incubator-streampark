@@ -21,7 +21,7 @@ import java.lang.{Iterable => JavaIterable}
 import java.util.Scanner
 import java.util.function.Consumer
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object CommandUtils extends Logger {

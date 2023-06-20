@@ -22,7 +22,7 @@ import com.mongodb._
 
 import java.util.Properties
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 object MongoConfig {
 

@@ -28,7 +28,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient
 
 import java.io.File
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Success, Try}
 
 object KubernetesDeploymentHelper extends Logger {

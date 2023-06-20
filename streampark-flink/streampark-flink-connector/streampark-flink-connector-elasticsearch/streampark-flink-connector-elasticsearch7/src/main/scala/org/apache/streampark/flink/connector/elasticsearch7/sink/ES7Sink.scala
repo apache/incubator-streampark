@@ -38,7 +38,7 @@ import org.elasticsearch.action.ActionRequest
 import java.util.Properties
 
 import scala.annotation.meta.param
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 object ES7Sink {
   def apply(
