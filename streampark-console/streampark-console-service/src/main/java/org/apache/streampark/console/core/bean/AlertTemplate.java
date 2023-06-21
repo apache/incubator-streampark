@@ -169,7 +169,7 @@ public class AlertTemplate implements Serializable {
     public AlertTemplateBuilder setLink(ExecutionMode mode, String appId) {
       if (ExecutionMode.isYarnMode(mode)) {
         String format = "%s/proxy/%s/";
-        String url = String.format(format, YarnUtils.getRMWebAppURL(), appId);
+        String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
         alertTemplate.setLink(url);
       } else {
         alertTemplate.setLink(null);
