@@ -196,66 +196,67 @@ public class FlinkRESTAPIWatcher {
   private void doWatch() {
     lastWatchingTime = System.currentTimeMillis();
     for (Map.Entry<Long, Application> entry : WATCHING_APPS.entrySet()) {
-      EXECUTOR.execute(
-          () -> {
-            long key = entry.getKey();
-            Application application = entry.getValue();
-            final StopFrom stopFrom =
-                STOP_FROM_MAP.getOrDefault(key, null) == null
-                    ? StopFrom.NONE
-                    : STOP_FROM_MAP.get(key);
-            final OptionState optionState = OPTIONING.get(key);
+      watch(entry.getKey(), entry.getValue());
+    }
+  }
+
+  private void watch(Long key, Application application) {
+    EXECUTOR.execute(
+        () -> {
+          final StopFrom stopFrom =
+              STOP_FROM_MAP.getOrDefault(key, null) == null
+                  ? StopFrom.NONE
+                  : STOP_FROM_MAP.get(key);
+          final OptionState optionState = OPTIONING.get(key);
+          try {
+            // query status from flink rest api
+            getFromFlinkRestApi(application, stopFrom);
+          } catch (Exception flinkException) {
+            // query status from yarn rest api
             try {
-              // query status from flink rest api
-              getFromFlinkRestApi(application, stopFrom);
-            } catch (Exception flinkException) {
-              // query status from yarn rest api
-              try {
-                getFromYarnRestApi(application, stopFrom);
-              } catch (Exception yarnException) {
-                /*
-                 Query from flink's restAPI and yarn's restAPI both failed.
-                 In this case, it is necessary to decide whether to return to the final state depending on the state being operated
-                */
-                if (optionState == null || !optionState.equals(OptionState.STARTING)) {
-                  // non-mapping
-                  if (application.getState() != FlinkAppState.MAPPING.getValue()) {
-                    log.error(
-                        "FlinkRESTAPIWatcher getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
-                    if (StopFrom.NONE.equals(stopFrom)) {
-                      savePointService.expire(application.getId());
-                      application.setState(FlinkAppState.LOST.getValue());
-                      alertService.alert(application, FlinkAppState.LOST);
-                    } else {
-                      application.setState(FlinkAppState.CANCELED.getValue());
-                    }
+              getFromYarnRestApi(application, stopFrom);
+            } catch (Exception yarnException) {
+              /*
+               Query from flink's restAPI and yarn's restAPI both failed.
+               In this case, it is necessary to decide whether to return to the final state depending on the state being operated
+              */
+              if (optionState == null || !optionState.equals(OptionState.STARTING)) {
+                // non-mapping
+                if (application.getState() != FlinkAppState.MAPPING.getValue()) {
+                  log.error(
+                      "FlinkRESTAPIWatcher getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
+                  if (StopFrom.NONE.equals(stopFrom)) {
+                    savePointService.expire(application.getId());
+                    application.setState(FlinkAppState.LOST.getValue());
+                    alertService.alert(application, FlinkAppState.LOST);
+                  } else {
+                    application.setState(FlinkAppState.CANCELED.getValue());
                   }
-                  /*
-                   This step means that the above two ways to get information have failed, and this step is the last step,
-                   which will directly identify the mission as cancelled or lost.
-                   Need clean savepoint.
-                  */
-                  application.setEndTime(new Date());
-                  cleanSavepoint(application);
-                  cleanOptioning(optionState, key);
-                  doPersistMetrics(application, true);
-                  FlinkAppState appState = FlinkAppState.of(application.getState());
-                  if (appState.equals(FlinkAppState.FAILED)
-                      || appState.equals(FlinkAppState.LOST)) {
-                    alertService.alert(application, FlinkAppState.of(application.getState()));
-                    if (appState.equals(FlinkAppState.FAILED)) {
-                      try {
-                        applicationService.start(application, true);
-                      } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                      }
+                }
+                /*
+                 This step means that the above two ways to get information have failed, and this step is the last step,
+                 which will directly identify the mission as cancelled or lost.
+                 Need clean savepoint.
+                */
+                application.setEndTime(new Date());
+                cleanSavepoint(application);
+                cleanOptioning(optionState, key);
+                doPersistMetrics(application, true);
+                FlinkAppState appState = FlinkAppState.of(application.getState());
+                if (appState.equals(FlinkAppState.FAILED) || appState.equals(FlinkAppState.LOST)) {
+                  alertService.alert(application, FlinkAppState.of(application.getState()));
+                  if (appState.equals(FlinkAppState.FAILED)) {
+                    try {
+                      applicationService.start(application, true);
+                    } catch (Exception e) {
+                      log.error(e.getMessage(), e);
                     }
                   }
                 }
               }
             }
-          });
-    }
+          }
+        });
   }
 
   /**
@@ -637,15 +638,6 @@ public class FlinkRESTAPIWatcher {
     return FlinkK8sWatcherWrapper.isKubernetesApp(app);
   }
 
-  private FlinkCluster getFlinkCluster(Long clusterId, boolean flush) {
-    FlinkCluster flinkCluster = FLINK_CLUSTER_MAP.get(clusterId);
-    if (flinkCluster == null || flush) {
-      flinkCluster = flinkClusterService.getById(clusterId);
-      FLINK_CLUSTER_MAP.put(clusterId, flinkCluster);
-    }
-    return flinkCluster;
-  }
-
   private YarnAppInfo httpYarnAppInfo(Application application) throws Exception {
     String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
     return yarnRestRequest(reqURL, YarnAppInfo.class);
@@ -683,23 +675,23 @@ public class FlinkRESTAPIWatcher {
         reqURL = String.format(format, application.getJobManagerUrl());
       }
       return yarnRestRequest(reqURL, JobsOverview.class);
-    } else if (ExecutionMode.REMOTE.equals(execMode)) {
-      if (application.getJobId() != null) {
-        return httpClusterOrElseTry(
-            application.getFlinkClusterId(),
-            cluster -> {
-              String remoteUrl = cluster.getAddress() + "/" + flinkUrl;
-              JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
-              if (jobsOverview != null) {
-                List<JobsOverview.Job> jobs =
-                    jobsOverview.getJobs().stream()
-                        .filter(x -> x.getId().equals(application.getJobId()))
-                        .collect(Collectors.toList());
-                jobsOverview.setJobs(jobs);
-              }
-              return jobsOverview;
-            });
-      }
+    }
+
+    if (application.getJobId() != null && ExecutionMode.isRemoteMode(execMode)) {
+      return httpRemoteCluster(
+          application.getFlinkClusterId(),
+          cluster -> {
+            String remoteUrl = cluster.getAddress() + "/" + flinkUrl;
+            JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
+            if (jobsOverview != null) {
+              List<JobsOverview.Job> jobs =
+                  jobsOverview.getJobs().stream()
+                      .filter(x -> x.getId().equals(application.getJobId()))
+                      .collect(Collectors.toList());
+              jobsOverview.setJobs(jobs);
+            }
+            return jobsOverview;
+          });
     }
     return null;
   }
@@ -717,16 +709,16 @@ public class FlinkRESTAPIWatcher {
         reqURL = String.format(format, application.getJobManagerUrl(), application.getJobId());
       }
       return yarnRestRequest(reqURL, CheckPoints.class);
-    } else if (ExecutionMode.REMOTE.equals(execMode)) {
-      if (application.getJobId() != null) {
-        return httpClusterOrElseTry(
-            application.getFlinkClusterId(),
-            cluster -> {
-              String remoteUrl =
-                  cluster.getAddress() + "/" + String.format(flinkUrl, application.getJobId());
-              return httpRestRequest(remoteUrl, CheckPoints.class);
-            });
-      }
+    }
+
+    if (application.getJobId() != null && ExecutionMode.isRemoteMode(execMode)) {
+      return httpRemoteCluster(
+          application.getFlinkClusterId(),
+          cluster -> {
+            String remoteUrl =
+                cluster.getAddress() + "/" + String.format(flinkUrl, application.getJobId());
+            return httpRestRequest(remoteUrl, CheckPoints.class);
+          });
     }
     return null;
   }
@@ -753,15 +745,24 @@ public class FlinkRESTAPIWatcher {
     return WATCHING_APPS.containsKey(id);
   }
 
-  private <T> T httpClusterOrElseTry(Long clusterId, Callback<FlinkCluster, T> function)
+  private <T> T httpRemoteCluster(Long clusterId, Callback<FlinkCluster, T> function)
       throws Exception {
-    FlinkCluster flinkCluster = getFlinkCluster(clusterId, false);
+    FlinkCluster flinkCluster = getFlinkRemoteCluster(clusterId, false);
     try {
       return function.call(flinkCluster);
     } catch (Exception e) {
-      flinkCluster = getFlinkCluster(clusterId, true);
+      flinkCluster = getFlinkRemoteCluster(clusterId, true);
       return function.call(flinkCluster);
     }
+  }
+
+  private FlinkCluster getFlinkRemoteCluster(Long clusterId, boolean flush) {
+    FlinkCluster flinkCluster = FLINK_CLUSTER_MAP.get(clusterId);
+    if (flinkCluster == null || flush) {
+      flinkCluster = flinkClusterService.getById(clusterId);
+      FLINK_CLUSTER_MAP.put(clusterId, flinkCluster);
+    }
+    return flinkCluster;
   }
 
   interface Callback<T, R> {
