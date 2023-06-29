@@ -62,7 +62,6 @@ public class JobScheduleTask extends QuartzJobBean {
           "Job schedule does not exist in db or process schedule offline，delete schedule job in quartz, scheduleId:{}.",
           scheduleId);
       deleteJob(context, scheduleId);
-      return;
     }
     // start flink job
     // .......

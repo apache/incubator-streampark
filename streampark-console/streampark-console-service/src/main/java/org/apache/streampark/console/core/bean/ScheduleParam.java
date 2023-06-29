@@ -15,15 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.mapper;
+package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.console.core.entity.Schedule;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import org.apache.ibatis.annotations.Param;
+import java.util.Date;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+/** schedule parameters */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ScheduleParam {
 
-public interface SchedulerMapper extends BaseMapper<Schedule> {
-
-  Schedule queryByAppId(@Param("appId") long appId);
+  private Date startTime;
+  private Date endTime;
+  private String crontab;
+  private String timezoneId;
 }

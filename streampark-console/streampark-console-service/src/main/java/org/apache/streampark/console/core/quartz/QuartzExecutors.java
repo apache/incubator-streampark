@@ -29,6 +29,7 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.Map;
@@ -42,12 +43,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 @Slf4j
 public class QuartzExecutors implements SchedulerApi {
 
-  private final Scheduler scheduler;
+  @Autowired Scheduler scheduler;
   private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
-  public QuartzExecutors(Scheduler scheduler) {
-    this.scheduler = scheduler;
-  }
 
   @SneakyThrows
   @Override

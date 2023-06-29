@@ -81,6 +81,7 @@
         <module>streampark-spark</module>
         <module>streampark-storage</module>
         <module>streampark-console</module>
+        <module>streampark-flink/streampark-flink-catalog</module>
     </modules>
 
     <properties>

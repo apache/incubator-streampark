@@ -252,4 +252,11 @@ object DateUtils {
       .map(TimeZone.getTimeZone)
   }
 
+  def differSec(d1: Date, d2: Date): Long = {
+    if (d1 == null || d2 == null) return 0
+    Math.ceil(differMs(d1, d2) / 1000.0).toLong
+  }
+
+  def differMs(d1: Date, d2: Date): Long = Math.abs(d1.getTime - d2.getTime)
+
 }

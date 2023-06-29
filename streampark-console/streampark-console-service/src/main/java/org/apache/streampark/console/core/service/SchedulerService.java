@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.Schedule;
-import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.enums.ScheduleState;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -32,13 +32,13 @@ public interface SchedulerService extends IService<Schedule> {
 
   boolean updateSchedule(Long appId, String scheduleExpression);
 
-  Map<String, Object> setScheduleState(Long appId, ReleaseState scheduleStatus);
+  void setScheduleState(Long appId, ScheduleState scheduleStatus);
 
-  boolean deleteSchedule(int scheduleId);
+  void deleteSchedule(int scheduleId);
 
   Map<String, Object> previewSchedule(String schedule);
 
-  IPage<Schedule> page(Schedule savePoint, ScheduleState request);
+  IPage<Schedule> page(Schedule schedule, RestRequest request);
 
-  Schedule querySchedule(int id);
+  Schedule querySchedule(int appId);
 }
