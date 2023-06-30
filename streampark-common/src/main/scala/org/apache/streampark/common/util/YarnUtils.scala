@@ -34,6 +34,7 @@ import java.util.{HashMap => JavaHashMap, List => JavaList}
 import java.util.concurrent.TimeUnit
 
 import scala.collection.convert.ImplicitConversions._
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 import scala.util.control.Breaks.{break, breakable}
@@ -204,7 +205,7 @@ object YarnUtils extends Logger {
 
             val address = NetUtils.getConnectAddress(inetSocketAddress)
 
-            val buffer = new StringBuilder(protocol)
+            val buffer = new mutable.StringBuilder(protocol)
             val resolved = address.getAddress
             if (resolved != null && !resolved.isAnyLocalAddress && !resolved.isLoopbackAddress) {
               buffer.append(address.getHostName)
