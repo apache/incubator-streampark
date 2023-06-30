@@ -32,7 +32,6 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
-import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
 import org.apache.streampark.flink.client.bean.DeployResponse;
@@ -196,7 +195,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flinkCluster.setClusterState(ClusterState.STARTED.getValue());
         flinkCluster.setException(null);
         updateById(flinkCluster);
-        FlinkRESTAPIWatcher.removeFlinkCluster(flinkCluster);
       } else {
         throw new ApiAlertException(
             "deploy cluster failed, unknown reason，please check you params or StreamPark error log");
