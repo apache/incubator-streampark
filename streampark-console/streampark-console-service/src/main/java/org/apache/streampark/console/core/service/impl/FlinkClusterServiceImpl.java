@@ -166,7 +166,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
           "Deploy cluster failed, unknown reason，please check you params or StreamPark error log");
       if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
         String address =
-            YarnUtils.getRMWebAppURL(true) + "/proxy/" + deployResponse.clusterId() + "/";
+            String.format(
+                "%s/proxy/%s/", YarnUtils.getRMWebAppURL(true), deployResponse.clusterId());
         flinkCluster.setAddress(address);
       } else {
         flinkCluster.setAddress(deployResponse.address());
