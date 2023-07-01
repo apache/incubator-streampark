@@ -64,9 +64,6 @@ public class FlinkCluster implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String address;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String jobManagerUrl;
-
   private String clusterId;
 
   private String clusterName;

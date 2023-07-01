@@ -47,4 +47,6 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
   Boolean existsByFlinkEnvId(Long id);
 
   List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes);
+
+  void updateClusterToStopped(Long id);
 }
