@@ -114,5 +114,5 @@ public interface UserService extends IService<User> {
 
   void transferResource(Long userId, Long targetUserId);
 
-    Map<String, Object> getLoginUserInfo(User user);
+  Map<String, Object> getLoginUserInfo(User user);
 }

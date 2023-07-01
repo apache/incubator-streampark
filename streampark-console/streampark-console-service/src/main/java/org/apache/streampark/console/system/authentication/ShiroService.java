@@ -86,7 +86,7 @@ public class ShiroService {
       shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
       filterChainDefinitionMap.forEach(
           (key, value) -> {
-              String chainDefinition = value.trim();
+            String chainDefinition = value.trim();
             filterChainManager.createChain(key, chainDefinition);
           });
     }

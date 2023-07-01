@@ -65,8 +65,7 @@ public class SsoController {
 
   @GetMapping("token")
   @ResponseBody
-  public RestResponse token()
-      throws Exception {
+  public RestResponse token() throws Exception {
     if (!ssoEnable) {
       throw new ApiAlertException(
           "Single Sign On (SSO) is not available, please contact the administrator to enable");
@@ -81,9 +80,7 @@ public class SsoController {
     }
     principal = new Pac4jPrincipal(profiles, principalNameAttribute);
     if (principal.getName() == null) {
-      log.error(
-          "Please configure correct principalNameAttribute from UserProfile: "
-              + principal);
+      log.error("Please configure correct principalNameAttribute from UserProfile: " + principal);
       throw new ApiAlertException("Please configure the correct Principal Name Attribute");
     }
 
@@ -91,5 +88,4 @@ public class SsoController {
     Map<String, Object> userInfo = userService.getLoginUserInfo(user);
     return RestResponse.success(userInfo);
   }
-
 }

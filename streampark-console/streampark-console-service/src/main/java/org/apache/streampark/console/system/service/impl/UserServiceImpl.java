@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.ResponseCode;
@@ -39,6 +38,7 @@ import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -279,33 +279,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     resourceService.changeOwnership(userId, targetUserId);
   }
 
-    @Override
-    public Map<String, Object> getLoginUserInfo(User user) {
+  @Override
+  public Map<String, Object> getLoginUserInfo(User user) {
 
-        if (user == null) {
-            return RestResponse.success().put("code", 0);
-        }
-
-        if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
-        }
-
-        // set team
-        fillInTeam(user);
-
-        // no team.
-        if (user.getLastTeamId() == null) {
-            return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
-        }
-
-        updateLoginTime(user.getUsername());
-        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), user.getUsername()));
-        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(shiroProperties.getJwtTimeOut());
-        String expireTimeStr = DateUtils.formatFullTime(expireTime);
-        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
-        String userId = RandomStringUtils.randomAlphanumeric(20);
-        user.setId(userId);
-        Map<String, Object> userInfo = generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
-        return new RestResponse().data(userInfo);
+    if (user == null) {
+      return RestResponse.success().put("code", 0);
     }
+
+    if (User.STATUS_LOCK.equals(user.getStatus())) {
+      return RestResponse.success().put("code", 1);
+    }
+
+    // set team
+    fillInTeam(user);
+
+    // no team.
+    if (user.getLastTeamId() == null) {
+      return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
+    }
+
+    updateLoginTime(user.getUsername());
+    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), user.getUsername()));
+    LocalDateTime expireTime = LocalDateTime.now().plusSeconds(shiroProperties.getJwtTimeOut());
+    String expireTimeStr = DateUtils.formatFullTime(expireTime);
+    JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+    String userId = RandomStringUtils.randomAlphanumeric(20);
+    user.setId(userId);
+    Map<String, Object> userInfo = generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
+    return new RestResponse().data(userInfo);
+  }
 }

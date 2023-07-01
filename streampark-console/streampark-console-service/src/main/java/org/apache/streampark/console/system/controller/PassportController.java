@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.system.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
@@ -28,6 +27,7 @@ import org.apache.shiro.SecurityUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -52,25 +52,25 @@ public class PassportController {
 
   @Autowired private Authenticator authenticator;
 
-    @Value("${sso.enable:#{false}}")
-    private Boolean ssoEnable;
+  @Value("${sso.enable:#{false}}")
+  private Boolean ssoEnable;
 
-    @Value("${ldap.enable:#{false}}")
-    private Boolean ldapEnable;
+  @Value("${ldap.enable:#{false}}")
+  private Boolean ldapEnable;
 
-    @Operation(summary = "SigninType")
-    @PostMapping("signtype")
-    public RestResponse type() {
-       List<String> types = new ArrayList<>();
-       types.add("password");
-       if (ssoEnable) {
-           types.add("sso");
-       }
-       if (ldapEnable) {
-           types.add("ldap");
-       }
-       return RestResponse.success(types);
+  @Operation(summary = "SigninType")
+  @PostMapping("signtype")
+  public RestResponse type() {
+    List<String> types = new ArrayList<>();
+    types.add("password");
+    if (ssoEnable) {
+      types.add("sso");
     }
+    if (ldapEnable) {
+      types.add("ldap");
+    }
+    return RestResponse.success(types);
+  }
 
   @Operation(summary = "Signin")
   @PostMapping("signin")
