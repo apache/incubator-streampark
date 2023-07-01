@@ -26,7 +26,9 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
+import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
+import org.apache.streampark.console.core.service.alert.AlertService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -43,6 +45,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +60,10 @@ import java.util.concurrent.TimeUnit;
 public class FlinkClusterWatcher {
 
   @Autowired private FlinkClusterService flinkClusterService;
+
+  @Autowired private AlertService alertService;
+
+  @Autowired private ApplicationService applicationService;
 
   private Long lastWatcheringTime = 0L;
 
@@ -107,15 +114,52 @@ public class FlinkClusterWatcher {
       EXECUTOR.execute(
           () -> {
             FlinkCluster flinkCluster = entry.getValue();
-            Integer clusterExecutionMode = flinkCluster.getExecutionMode();
-            if (!ExecutionMode.isKubernetesSessionMode(clusterExecutionMode)) {
-              ClusterState state = getClusterState(flinkCluster);
-              handleClusterState(flinkCluster, state);
-            } else {
-              // TODO: K8s Session status monitoring
-            }
+            updateClusterState(flinkCluster);
           });
     }
+  }
+
+  private ClusterState updateClusterState(FlinkCluster flinkCluster) {
+    Integer clusterExecutionMode = flinkCluster.getExecutionMode();
+    if (!ExecutionMode.isKubernetesSessionMode(clusterExecutionMode)) {
+      ClusterState state = getClusterState(flinkCluster);
+      handleClusterState(flinkCluster, state);
+      return state;
+    } else {
+      // TODO: K8s Session status monitoring
+      return ClusterState.UNKNOWN;
+    }
+  }
+
+  public synchronized boolean verifyClusterValidByClusterId(Long clusterId) {
+    FlinkCluster flinkCluster = flinkClusterService.getById(clusterId);
+    ClusterState state = ClusterState.of(flinkCluster.getClusterState());
+    if (!ClusterState.isRunningState(state)) {
+      return false;
+    }
+    state = updateClusterState(flinkCluster);
+    if (!ClusterState.isRunningState(state)) {
+      return false;
+    }
+    return true;
+  }
+
+  public boolean checkAlert(Long clusterId) {
+    FlinkCluster flinkCluster = flinkClusterService.getById(clusterId);
+    if (flinkCluster.getAlertId() == null) {
+      return false;
+    }
+    return true;
+  }
+
+  private void alert(FlinkCluster cluster, ClusterState state) {
+    if (!checkAlert(cluster.getId())) {
+      return;
+    }
+    cluster.setJobs(applicationService.getAffectedJobsByClusterId(cluster.getId()));
+    cluster.setClusterState(state.getValue());
+    cluster.setEndTime(new Date());
+    alertService.alert(cluster, state);
   }
 
   /**
@@ -171,7 +215,7 @@ public class FlinkClusterWatcher {
    */
   private ClusterState getClusterStateFromYarnAPI(FlinkCluster flinkCluster) {
     if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
-      return ClusterState.STOPPED;
+      return ClusterState.LOST;
     }
     String clusterId = flinkCluster.getClusterId();
     if (StringUtils.isEmpty(clusterId)) {
@@ -214,13 +258,15 @@ public class FlinkClusterWatcher {
         {
           updateWrapper
               .set(FlinkCluster::getAddress, null)
-              .set(FlinkCluster::getJobManagerUrl, null);
+              .set(FlinkCluster::getJobManagerUrl, null)
+              .set(FlinkCluster::getEndTime, new Date());
         }
         // fall through
       case LOST:
       case UNKNOWN:
         {
           removeFlinkCluster(flinkCluster);
+          alert(flinkCluster, state);
           break;
         }
     }

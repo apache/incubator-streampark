@@ -75,4 +75,8 @@ public enum ClusterState implements Serializable {
   public static boolean isLostState(ClusterState state) {
     return LOST.equals(state);
   }
+
+  public static boolean isUnknownState(ClusterState state) {
+    return UNKNOWN.equals(state);
+  }
 }

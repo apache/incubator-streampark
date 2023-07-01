@@ -133,6 +133,14 @@
              limit 1
     </select>
 
+    <select id="getAffectedJobsByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        select
+            count(1)
+        from t_flink_app
+        where flink_cluster_id = #{clusterId}
+            limit 1
+    </select>
+
     <select id="getByProjectId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
         select * from t_flink_app where project_id=#{projectId}
     </select>

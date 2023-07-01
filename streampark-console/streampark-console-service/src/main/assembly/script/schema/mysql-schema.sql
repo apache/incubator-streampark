@@ -458,6 +458,9 @@ create table `t_flink_cluster` (
   `exception` text comment 'exception information',
   `cluster_state` tinyint default 0 comment 'cluster status (0: created but not started, 1: started, 2: stopped)',
   `create_time` datetime not null default current_timestamp comment 'create time',
+  `start_time` datetime default null comment 'start time',
+  `end_time` datetime default null comment 'end time',
+  `alert_id` bigint default null comment 'alert id',
   primary key (`id`,`cluster_name`),
   unique key `id` (`cluster_id`,`address`,`execution_mode`)
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;

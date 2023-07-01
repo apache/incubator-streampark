@@ -290,7 +290,10 @@ create table "public"."t_flink_cluster" (
   "resolve_order" int4,
   "exception" text collate "pg_catalog"."default",
   "cluster_state" int2 default 0,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "start_time" timestamp(6),
+  "end_time" timestamp(6),
+  "alert_id" int8
 )
 ;
 comment on column "public"."t_flink_cluster"."address" is 'url address of cluster';
@@ -309,6 +312,9 @@ comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s exp
 comment on column "public"."t_flink_cluster"."k8s_conf" is 'the path where the k 8 s configuration file is located';
 comment on column "public"."t_flink_cluster"."exception" is 'exception information';
 comment on column "public"."t_flink_cluster"."cluster_state" is 'cluster status (0: create not started, 1: started, 2: stopped)';
+comment on column "public"."t_flink_cluster"."start_time" is 'cluster start time';
+comment on column "public"."t_flink_cluster"."end_time" is 'cluster end time';
+comment on column "public"."t_flink_cluster"."alert_id" is 'alert id';
 alter table "public"."t_flink_cluster" add constraint "t_flink_cluster_pkey" primary key ("id", "cluster_name");
 create index "id" on "public"."t_flink_cluster" using btree (
   "cluster_id" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last,

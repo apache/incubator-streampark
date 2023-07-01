@@ -44,7 +44,10 @@ alter table `t_flink_sql`
     add column `team_resource` varchar(64) default null;
 
 alter table `t_flink_cluster`
-    add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`;
+    add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`,
+    add column `start_time` datetime default null comment 'start time',
+    add column `end_time` datetime default null comment 'end time',
+    add column `alert_id` bigint default null comment 'alert id';
 
 -- menu level 2
 insert into `t_menu` values (120400, 120000, 'menu.resource', '/flink/resource', 'flink/resource/View', null, 'apartment', '0', 1, 3, now(), now());

@@ -142,6 +142,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     flinkCluster.setCreateTime(new Date());
     if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
       flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
+      flinkCluster.setStartTime(new Date());
+      flinkCluster.setEndTime(null);
     } else {
       flinkCluster.setClusterState(ClusterState.CREATED.getValue());
     }
@@ -172,6 +174,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkCluster.setClusterId(deployResponse.clusterId());
       flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
       flinkCluster.setException(null);
+      flinkCluster.setStartTime(new Date());
+      flinkCluster.setEndTime(null);
       FlinkClusterWatcher.addFlinkCluster(flinkCluster);
       updateById(flinkCluster);
     } catch (Exception e) {
@@ -222,6 +226,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
       flinkCluster.setAddress(null);
       flinkCluster.setClusterState(ClusterState.STOPPED.getValue());
+      flinkCluster.setEndTime(new Date());
       FlinkClusterWatcher.removeFlinkCluster(flinkCluster);
       updateById(flinkCluster);
     } catch (Exception e) {
