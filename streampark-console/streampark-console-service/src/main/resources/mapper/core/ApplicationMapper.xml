@@ -293,7 +293,8 @@
                 app_id=#{application.appId},
             </if>
             end_time=null,
-            state=14
+            state=14,
+            tracking=1
         </set>
         where id=#{application.id}
     </update>
