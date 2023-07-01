@@ -21,6 +21,6 @@ pac4j:
   # Check supported sso config parameters for different authentication clients from the below link
   # https://github.com/pac4j/pac4j/blob/master/documentation/docs/config-module.md
   properties:
-    # principalNameAttribute:
+    principalNameAttribute:
     # Optional, change by authentication client
     # Please replace and fill in your client config below when enabled SSO

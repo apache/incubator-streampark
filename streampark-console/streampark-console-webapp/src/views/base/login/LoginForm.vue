@@ -75,7 +75,6 @@
         {{ loginText.linkText }}
       </Button>
     </FormItem>
-
   </Form>
   <TeamModal v-model:visible="modelVisible" :userId="userId" @success="handleTeamSuccess" />
 </template>
@@ -230,9 +229,10 @@
     loginType.value = LoginTypeEnum.PASSWORD;
   }
 
-  onMounted(async () => {
-    const { data, code} = await fetchSignType();
-    enableSSO.value = data.find((x) => x === 'sso') != undefined;
-    enableLDAP.value = data.find((x) => x === 'ldap') != undefined;
-  }
+  onMounted(() => {
+    fetchSignType().then((resp) => {
+      enableSSO.value = resp.find((x) => x === 'sso') != undefined;
+      enableLDAP.value = resp.find((x) => x === 'ldap') != undefined;
+    });
+  });
 </script>
