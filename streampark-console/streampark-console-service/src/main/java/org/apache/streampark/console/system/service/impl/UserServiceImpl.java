@@ -280,8 +280,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   }
 
   @Override
-  public Map<String, Object> getLoginUserInfo(User user) {
-
+  public RestResponse getLoginUserInfo(User user) {
     if (user == null) {
       return RestResponse.success().put("code", 0);
     }
@@ -289,7 +288,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     if (User.STATUS_LOCK.equals(user.getStatus())) {
       return RestResponse.success().put("code", 1);
     }
-
     // set team
     fillInTeam(user);
 
@@ -306,6 +304,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     String userId = RandomStringUtils.randomAlphanumeric(20);
     user.setId(userId);
     Map<String, Object> userInfo = generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
-    return new RestResponse().data(userInfo);
+    return RestResponse.success(userInfo);
   }
 }

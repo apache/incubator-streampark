@@ -39,7 +39,6 @@ import javax.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "PASSPORT_TAG")
 @Slf4j
@@ -83,10 +82,8 @@ public class PassportController {
     if (StringUtils.isEmpty(username)) {
       return RestResponse.success().put("code", 0);
     }
-
     User user = authenticator.authenticate(username, password, loginType);
-    Map<String, Object> userInfo = userService.getLoginUserInfo(user);
-    return RestResponse.success(userInfo);
+    return userService.getLoginUserInfo(user);
   }
 
   @Operation(summary = "Signout")

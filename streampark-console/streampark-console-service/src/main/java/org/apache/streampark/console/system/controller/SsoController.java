@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Controller
@@ -85,7 +84,6 @@ public class SsoController {
     }
 
     User user = authenticator.authenticate(principal.getName(), null, LoginType.SSO.toString());
-    Map<String, Object> userInfo = userService.getLoginUserInfo(user);
-    return RestResponse.success(userInfo);
+    return userService.getLoginUserInfo(user);
   }
 }
