@@ -28,7 +28,7 @@
   import { getMonacoOptions } from '/@/views/flink/app/data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  import { Tabs, Alert, Tag, Space, Form } from 'ant-design-vue';
+  import { Tabs, Alert, Tag, Space } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchUpload } from '/@/api/flink/app/app';
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
@@ -142,7 +142,7 @@
       const formData = new FormData();
       formData.append('file', data.file);
       await fetchUpload(formData);
-      dependency.jar = {}
+      dependency.jar = {};
       dependency.jar[data.file.name] = data.file.name;
       handleUpdateDependency();
     } catch (error) {
@@ -179,12 +179,12 @@
     dependency.pom = {};
     dependency.jar = {};
     if (dataSource.pom === undefined) {
-      setContent(defaultValue)
+      setContent(defaultValue);
     }
     dataSource.pom?.map((pomRecord: DependencyType) => {
       const id = getId(pomRecord);
       dependency.pom[id] = pomRecord;
-      setContent(toPomString(pomRecord))
+      setContent(toPomString(pomRecord));
     });
     dataSource.jar?.map((fileName: string) => {
       dependency.jar[fileName] = fileName;
@@ -214,21 +214,6 @@
     uploadJars,
   });
 </script>
-
-<style lang="less">
-  @import url('/@/views/flink/app/styles/Add.less');
-  .apply-pom {
-    z-index: 99;
-    position: absolute;
-    bottom: 20px;
-    float: right;
-    right: 20px;
-    cursor: pointer;
-    height: 26px;
-    padding: 0 12px;
-    font-size: 12px;
-  }
-</style>
 
 <template>
   <template v-if="props.formModel.resourceType == 'FLINK_APP'">
@@ -269,3 +254,18 @@
     </Alert>
   </div>
 </template>
+
+<style lang="less">
+  @import url('/@/views/flink/app/styles/Add.less');
+  .apply-pom {
+    z-index: 99;
+    position: absolute;
+    bottom: 20px;
+    float: right;
+    right: 20px;
+    cursor: pointer;
+    height: 26px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+</style>

@@ -113,4 +113,6 @@ public interface UserService extends IService<User> {
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 
   void transferResource(Long userId, Long targetUserId);
+
+  RestResponse getLoginUserInfo(User user);
 }

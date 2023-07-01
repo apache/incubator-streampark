@@ -28,11 +28,7 @@
     </template>
     <BasicForm @register="registerForm" :schemas="getResourceFormSchema">
       <template #resource="{ model, field }">
-        <Resource
-          ref="resourceRef"
-          v-model:value="model[field]"
-          :form-model="model"
-        />
+        <Resource ref="resourceRef" v-model:value="model[field]" :form-model="model" />
       </template>
     </BasicForm>
   </BasicDrawer>
@@ -44,19 +40,19 @@
 </script>
 
 <script lang="ts" setup>
-  import { ref, h, computed, unref } from 'vue';
+  import { ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Resource from '/@/views/flink/resource/components/Resource.vue';
-  import { fetchAddResource, fetchUpdateResource } from "/@/api/flink/resource";
-  import { EngineTypeEnum } from "/@/views/flink/resource/resource.data";
+  import { fetchAddResource, fetchUpdateResource } from '/@/api/flink/resource';
+  import { EngineTypeEnum } from '/@/views/flink/resource/resource.data';
   import {
     renderResourceType,
-    renderStreamParkResourceGroup
-  } from "/@/views/flink/resource/useResourceRender";
-  import { useMessage } from "/@/hooks/web/useMessage";
+    renderStreamParkResourceGroup,
+  } from '/@/views/flink/resource/useResourceRender';
+  import { useMessage } from '/@/hooks/web/useMessage';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -80,9 +76,10 @@
         field: 'resourceType',
         label: t('flink.resource.resourceType'),
         component: 'Select',
-        render: ({ model }) =>
-          renderResourceType( { model, }, ),
-        rules: [{ required: true, message: t('flink.resource.form.resourceTypeIsRequiredMessage') }],
+        render: ({ model }) => renderResourceType({ model }),
+        rules: [
+          { required: true, message: t('flink.resource.form.resourceTypeIsRequiredMessage') },
+        ],
       },
       {
         field: 'engineType',
@@ -111,7 +108,7 @@
         label: t('flink.resource.resourceGroup'),
         component: 'Select',
         render: ({ model }) =>
-          renderStreamParkResourceGroup( { model, resources: unref(props.teamResource) }, ),
+          renderStreamParkResourceGroup({ model, resources: unref(props.teamResource) }),
         ifShow: ({ values }) => values?.resourceType == 'GROUP',
       },
       {
@@ -148,7 +145,7 @@
     wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
   });
 
-  const [registerDrawer, { setDrawerProps, changeLoading, closeDrawer }] = useDrawerInner(
+  const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
     async (data: Recordable) => {
       unref(resourceRef)?.setDefaultValue({});
       resetFields();
@@ -159,12 +156,11 @@
         setFieldsValue(data.record);
 
         if (data.record?.resourceType == 'GROUP') {
-          setFieldsValue({ resourceGroup: JSON.parse(data.record.resource || '[]')} );
+          setFieldsValue({ resourceGroup: JSON.parse(data.record.resource || '[]') });
         } else {
-          setFieldsValue({ dependency: data.record.resource});
+          setFieldsValue({ dependency: data.record.resource });
           unref(resourceRef)?.setDefaultValue(JSON.parse(data.record.resource || '{}'));
         }
-
       }
     },
   );
@@ -177,7 +173,7 @@
   async function handleSubmit() {
     try {
       const values = await validate();
-      let resourceJson: string = '';
+      let resourceJson = '';
 
       if (values.resourceType == 'GROUP') {
         resourceJson = JSON.stringify(values.resourceGroup);
@@ -228,7 +224,6 @@
       setDrawerProps({ confirmLoading: false });
     }
   }
-
 </script>
 
 <style lang="less">

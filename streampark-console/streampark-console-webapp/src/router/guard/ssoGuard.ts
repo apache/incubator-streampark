@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import type { Router } from 'vue-router';
-import { fetchSsoToken } from '/@/api/system/user';
+import { fetchSsoToken } from '/@/api/system/passport';
 import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
 import { PageEnum } from '/@/enums/pageEnum';
 import { useUserStoreWithOut } from '/@/store/modules/user';

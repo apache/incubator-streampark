@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Select, Tag} from 'ant-design-vue';
+import { Select, Tag } from 'ant-design-vue';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
+import { ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
 import flinkAppSvg from '/@/assets/icons/flink2.svg';
 import connectorSvg from '/@/assets/icons/connector.svg';
 import udxfSvg from '/@/assets/icons/fx.svg';
@@ -26,8 +26,7 @@ import groupSvg from '/@/assets/icons/group.svg';
 const { t } = useI18n();
 
 /* render resource type label */
-export const renderResourceType = ({ model },) => {
-
+export const renderResourceType = ({ model }) => {
   const renderOptions = () => {
     const options = [
       { label: 'Flink App', value: ResourceTypeEnum.FLINK_APP, src: flinkAppSvg },
@@ -36,27 +35,16 @@ export const renderResourceType = ({ model },) => {
       { label: 'Normal Jar', value: ResourceTypeEnum.NORMAL_JAR, src: normalJarSvg },
       { label: 'Group', value: ResourceTypeEnum.GROUP, src: groupSvg },
     ];
-    return options
-      .map(( {label,value, src} ) => {
-        return (
-          <Select.Option
-            key={ value }
-            label={ label }
-            >
-            <div>
-              <img
-                src={ src }
-                style="display: inline-block; width: 20px; height: 20px"
-              ></img>
-              <span
-                style="vertical-align: middle; margin-left: 5px;"
-              >
-                { label }
-              </span>
-            </div>
-          </Select.Option>
-        );
-      });
+    return options.map(({ label, value, src }) => {
+      return (
+        <Select.Option key={value} label={label}>
+          <div>
+            <img src={src} style="display: inline-block; width: 20px; height: 20px"></img>
+            <span style="vertical-align: middle; margin-left: 5px;">{label}</span>
+          </div>
+        </Select.Option>
+      );
+    });
   };
 
   return (
@@ -73,25 +61,26 @@ export const renderResourceType = ({ model },) => {
   );
 };
 
-export const renderStreamParkResourceGroup = ({ model, resources },) => {
-
+export const renderStreamParkResourceGroup = ({ model, resources }) => {
   const renderOptions = () => {
     console.log('resources', resources);
     return (resources || [])
-      .filter((item) => item.resourceType !== ResourceTypeEnum.FLINK_APP
-        && item.resourceType !== ResourceTypeEnum.GROUP)
+      .filter(
+        (item) =>
+          item.resourceType !== ResourceTypeEnum.FLINK_APP &&
+          item.resourceType !== ResourceTypeEnum.GROUP,
+      )
       .map((resource) => {
         return (
           <Select.Option
             key={resource.id}
-            label={ resource.resourceType + '-' + resource.resourceName}>
+            label={resource.resourceType + '-' + resource.resourceName}
+          >
             <div>
               <Tag color="green" style=";margin-left: 5px;" size="small">
                 {resource.resourceType}
               </Tag>
-              <span style="color: darkgrey">
-              {resource.resourceName}
-            </span>
+              <span style="color: darkgrey">{resource.resourceName}</span>
             </div>
           </Select.Option>
         );

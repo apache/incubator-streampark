@@ -44,7 +44,7 @@ public class ShiroService {
 
   @PostConstruct
   public void init() {
-    AbstractShiroFilter shiroFilter = null;
+    AbstractShiroFilter shiroFilter;
     try {
       shiroFilter = shiroFilterFactoryBean.getObject();
     } catch (Exception e) {
@@ -86,9 +86,8 @@ public class ShiroService {
       shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
       filterChainDefinitionMap.forEach(
           (key, value) -> {
-            String url = key;
             String chainDefinition = value.trim();
-            filterChainManager.createChain(url, chainDefinition);
+            filterChainManager.createChain(key, chainDefinition);
           });
     }
   }

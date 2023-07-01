@@ -28,7 +28,9 @@ import {
   USER_INFO_KEY,
 } from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
-import { doLogout, fetchInitUserTeam, fetchSetUserTeam } from '/@/api/system/user';
+import { signout } from '/@/api/system/passport';
+import { fetchInitUserTeam, fetchSetUserTeam } from '/@/api/system/user';
+
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { router } from '/@/router';
@@ -208,7 +210,7 @@ export const useUserStore = defineStore({
     async logout(goLogin = false) {
       if (this.getToken) {
         try {
-          await doLogout();
+          await signout();
         } catch {
           console.log('Token cancellation failed');
         }

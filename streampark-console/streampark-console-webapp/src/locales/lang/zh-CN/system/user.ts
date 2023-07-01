@@ -44,7 +44,7 @@ export default {
     edit: '编辑用户',
     view: '查看用户',
     notice: '提示',
-    transferResource: '请将需要被禁用的用户资源转移到新的用户上'
+    transferResource: '请将需要被禁用的用户资源转移到新的用户上',
   },
   roleInfo: '角色信息',
   modifyTime: '尚未修改',
@@ -54,5 +54,5 @@ export default {
   locked: '锁定',
   effective: '有效',
   resetSucceeded: '重置成功',
-  newPasswordTip: "新的密码为：",
+  newPasswordTip: '新的密码为：',
 };

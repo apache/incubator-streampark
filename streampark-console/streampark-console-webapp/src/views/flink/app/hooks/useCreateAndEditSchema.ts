@@ -54,7 +54,7 @@ import { AppTypeEnum, ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enu
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
-import { fetchTeamResource } from "/@/api/flink/resource";
+import { fetchTeamResource } from '/@/api/flink/resource';
 const { t } = useI18n();
 export interface HistoryRecord {
   k8sNamespace: Array<string>;
@@ -126,8 +126,7 @@ export const useCreateAndEditSchema = (
         field: 'teamResource',
         label: t('flink.app.teamResource'),
         component: 'Select',
-        render: ({ model }) =>
-          renderStreamParkResource( { model, resources: unref(teamResource) }, ),
+        render: ({ model }) => renderStreamParkResource({ model, resources: unref(teamResource) }),
         ifShow: ({ values }) => {
           if (edit?.appId) {
             return values.jobType == JobTypeEnum.SQL;
