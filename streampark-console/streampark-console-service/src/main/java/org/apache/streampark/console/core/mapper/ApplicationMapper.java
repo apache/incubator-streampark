@@ -66,5 +66,5 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
   boolean existsJobByClusterId(@Param("clusterId") Long clusterId);
 
-  Integer getJobByClusterId(@Param("clusterId") Long clusterId);
+  Integer getAffectedJobsByClusterId(@Param("clusterId") Long clusterId);
 }

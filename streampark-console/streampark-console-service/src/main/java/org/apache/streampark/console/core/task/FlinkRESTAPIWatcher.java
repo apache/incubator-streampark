@@ -230,7 +230,7 @@ public class FlinkRESTAPIWatcher {
                   if (StopFrom.NONE.equals(stopFrom)) {
                     savePointService.expire(application.getId());
                     application.setState(FlinkAppState.LOST.getValue());
-                    alertService.alert(application, FlinkAppState.LOST);
+                    alert(application, FlinkAppState.LOST);
                   } else {
                     application.setState(FlinkAppState.CANCELED.getValue());
                   }
@@ -770,7 +770,7 @@ public class FlinkRESTAPIWatcher {
   interface Callback<T, R> {
     R call(T e) throws Exception;
   }
-  
+
   /**
    * The situation of abnormal operation alarm is as follows: When the job running mode is yarn per
    * job or yarn application, when the job is abnormal, an alarm will be triggered directly; The job

@@ -545,8 +545,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public Integer getJobByClusterId(Long clusterId) {
-    return baseMapper.getJobByClusterId(clusterId);
+  public Integer getAffectedJobsByClusterId(Long clusterId) {
+    return baseMapper.getAffectedJobsByClusterId(clusterId);
   }
 
   @Override

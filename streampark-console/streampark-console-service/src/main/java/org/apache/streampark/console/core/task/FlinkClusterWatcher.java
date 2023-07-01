@@ -156,7 +156,7 @@ public class FlinkClusterWatcher {
     if (!checkAlert(cluster.getId())) {
       return;
     }
-    cluster.setJobs(applicationService.getJobByClusterId(cluster.getId()));
+    cluster.setJobs(applicationService.getAffectedJobsByClusterId(cluster.getId()));
     cluster.setClusterState(state.getValue());
     cluster.setEndTime(new Date());
     alertService.alert(cluster, state);
@@ -215,7 +215,7 @@ public class FlinkClusterWatcher {
    */
   private ClusterState getClusterStateFromYarnAPI(FlinkCluster flinkCluster) {
     if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
-      return ClusterState.STOPPED;
+      return ClusterState.LOST;
     }
     String clusterId = flinkCluster.getClusterId();
     if (StringUtils.isEmpty(clusterId)) {

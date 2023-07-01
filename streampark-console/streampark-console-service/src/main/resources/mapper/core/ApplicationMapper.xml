@@ -133,11 +133,11 @@
              limit 1
     </select>
 
-    <select id="getJobByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
-        SELECT
+    <select id="getAffectedJobsByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        select
             count(1)
-        FROM t_flink_app
-        WHERE flink_cluster_id = #{clusterId}
+        from t_flink_app
+        where flink_cluster_id = #{clusterId}
             limit 1
     </select>
 

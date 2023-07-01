@@ -105,7 +105,7 @@ public interface ApplicationService extends IService<Application> {
 
   boolean existsJobByClusterId(Long clusterId);
 
-  Integer getJobByClusterId(Long clusterId);
+  Integer getAffectedJobsByClusterId(Long clusterId);
 
   boolean existsJobByFlinkEnvId(Long flinkEnvId);
 
