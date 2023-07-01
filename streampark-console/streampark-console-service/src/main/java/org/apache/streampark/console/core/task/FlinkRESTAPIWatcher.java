@@ -54,10 +54,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -589,6 +585,23 @@ public class FlinkRESTAPIWatcher {
     }
   }
 
+  public static void doWatching(Application application) {
+    if (isKubernetesApp(application)) {
+      return;
+    }
+    log.info("FlinkRESTAPIWatcher add app to tracking,appId:{}", application.getId());
+    WATCHING_APPS.put(application.getId(), application);
+    STARTING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
+  }
+
+  public static void addSavepoint(Long appId) {
+    if (isKubernetesApp(appId)) {
+      return;
+    }
+    log.info("FlinkRESTAPIWatcher add app to savepoint,appId:{}", appId);
+    SAVEPOINT_CACHE.put(appId, DEFAULT_FLAG_BYTE);
+  }
+
   public static void unWatching(Long appId) {
     if (isKubernetesApp(appId)) {
       return;
@@ -603,6 +616,19 @@ public class FlinkRESTAPIWatcher {
     }
     log.info("flink job canceled app appId:{} by useId:{}", appId, CANCELLED_JOB_MAP.get(appId));
     CANCELLED_JOB_MAP.remove(appId);
+  }
+
+  public static void addCanceledApp(Long appId, Long userId) {
+    log.info("flink job addCanceledApp app appId:{}, useId:{}", appId, userId);
+    CANCELLED_JOB_MAP.put(appId, userId);
+  }
+
+  public static Long getCanceledJobUserId(Long appId) {
+    return CANCELLED_JOB_MAP.get(appId) == null ? Long.valueOf(-1) : CANCELLED_JOB_MAP.get(appId);
+  }
+
+  public static Collection<Application> getWatchingApps() {
+    return WATCHING_APPS.values();
   }
 
   private static boolean isKubernetesApp(Application application) {
@@ -715,6 +741,10 @@ public class FlinkRESTAPIWatcher {
       return null;
     }
     return JacksonUtils.read(result, clazz);
+  }
+
+  public boolean isWatchingApp(Long id) {
+    return WATCHING_APPS.containsKey(id);
   }
 
   private <T> T httpRemoteCluster(Long clusterId, Callback<FlinkCluster, T> function)
