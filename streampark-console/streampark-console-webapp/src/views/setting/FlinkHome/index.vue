@@ -25,20 +25,14 @@
   import { onMounted, ref } from 'vue';
   import { useModal } from '/@/components/Modal';
   import { SvgIcon } from '/@/components/Icon';
-  import {
-    List,
-    Switch,
-    Card,
-    Popconfirm,
-    Tooltip
-  } from 'ant-design-vue';
+  import { List, Switch, Card, Popconfirm, Tooltip } from 'ant-design-vue';
   import {
     CheckOutlined,
     CloseOutlined,
     DeleteOutlined,
     EyeOutlined,
     EditOutlined,
-    PlusOutlined
+    PlusOutlined,
   } from '@ant-design/icons-vue';
   import { FlinkEnvModal, FlinkEnvDrawer } from './components';
   import {
@@ -46,7 +40,7 @@
     fetchDefaultSet,
     fetchFlinkEnv,
     fetchFlinkEnvRemove,
-    fetchFlinkInfo
+    fetchFlinkInfo,
   } from '/@/api/flink/setting/flinkEnv';
   import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
   import { useMessage } from '/@/hooks/web/useMessage';

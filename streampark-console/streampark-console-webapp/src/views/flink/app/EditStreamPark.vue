@@ -27,11 +27,7 @@
   import configOptions from './data/option';
   import { fetchMain, fetchUpload, fetchUpdate, fetchGet } from '/@/api/flink/app/app';
   import { useRoute } from 'vue-router';
-  import {
-    getAppConfType,
-    handleSubmitParams,
-    handleTeamResource
-  } from './utils';
+  import { getAppConfType, handleSubmitParams, handleTeamResource } from './utils';
   import { fetchFlinkHistory } from '/@/api/flink/app/flinkSql';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';

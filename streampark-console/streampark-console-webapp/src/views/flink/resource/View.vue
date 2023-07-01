@@ -47,11 +47,7 @@
           >
             CONNECTOR
           </Tag>
-          <Tag
-            class="bold-tag"
-            color="#79f379"
-            v-if="record.resourceType == ResourceTypeEnum.UDXF"
-          >
+          <Tag class="bold-tag" color="#79f379" v-if="record.resourceType == ResourceTypeEnum.UDXF">
             UDXF
           </Tag>
           <Tag
@@ -63,18 +59,10 @@
           </Tag>
         </template>
         <template v-if="column.dataIndex === 'engineType'">
-          <Tag
-            class="bold-tag"
-            color="#e65270"
-            v-if="record.engineType == EngineTypeEnum.FLINK"
-          >
+          <Tag class="bold-tag" color="#e65270" v-if="record.engineType == EngineTypeEnum.FLINK">
             FLINK
           </Tag>
-          <Tag
-            class="bold-tag"
-            color="#f5be07"
-            v-if="record.engineType == EngineTypeEnum.SPARK"
-          >
+          <Tag class="bold-tag" color="#f5be07" v-if="record.engineType == EngineTypeEnum.SPARK">
             SPARK
           </Tag>
         </template>
@@ -102,7 +90,11 @@
         </template>
       </template>
     </BasicTable>
-    <ResourceDrawer :teamResource="teamResource" @register="registerDrawer" @success="handleSuccess" />
+    <ResourceDrawer
+      :teamResource="teamResource"
+      @register="registerDrawer"
+      @success="handleSuccess"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -112,7 +104,7 @@
 </script>
 
 <script lang="ts" setup>
-import {defineComponent, onMounted, ref} from 'vue';
+  import { defineComponent, onMounted, ref } from 'vue';
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
   import ResourceDrawer from './components/ResourceDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
@@ -121,12 +113,8 @@ import {defineComponent, onMounted, ref} from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
-  import {
-    fetchResourceDelete,
-    fetchResourceList,
-    fetchTeamResource
-  } from "/@/api/flink/resource";
-  import { EngineTypeEnum, ResourceTypeEnum } from "/@/views/flink/resource/resource.data";
+  import { fetchResourceDelete, fetchResourceList, fetchTeamResource } from '/@/api/flink/resource';
+  import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
   import { Tag } from 'ant-design-vue';
 
   const teamResource = ref<Array<any>>([]);
@@ -216,5 +204,4 @@ import {defineComponent, onMounted, ref} from 'vue';
   onMounted(async () => {
     updateTeamResource();
   });
-
 </script>

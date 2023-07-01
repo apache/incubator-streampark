@@ -17,21 +17,13 @@
 import { UserInfo } from '/#/store';
 import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
-import {
-  LoginParams,
-  LoginResultModel,
-  GetUserInfoModel,
-  TeamSetResponse,
-  UserListRecord,
-} from './model/userModel';
+import { GetUserInfoModel, TeamSetResponse, UserListRecord } from './model/userModel';
 
-import { ErrorMessageMode, Result } from '/#/axios';
+import { Result } from '/#/axios';
 import { BasicTableParams } from '../model/baseModel';
 
 enum Api {
   Login = '/passport/signin',
-  Logout = '/passport/signout',
-  GetUserInfo = '/getUserInfo',
   GetPermCode = '/getPermCode',
   UserList = '/user/list',
   NoTokenUsers = '/user/getNoTokenUser',
@@ -44,30 +36,8 @@ enum Api {
   INIT_TEAM = '/user/initTeam',
   APP_OWNERS = '/user/appOwners',
   TransferUserResource = '/user/transferResource',
-  SSO_TOKEN = '/sso/token',
 }
 
-/**
- * @description: user login api
- * @return {Promise<AxiosResponse<Result<LoginResultModel>>>}
- */
-export function loginApi(
-  data: LoginParams,
-  mode: ErrorMessageMode = 'modal',
-): Promise<AxiosResponse<Result<LoginResultModel>>> {
-  return defHttp.post(
-    { url: Api.Login, data },
-    { isReturnNativeResponse: true, errorMessageMode: mode },
-  );
-}
-
-/**
- * @description: getUserInfo
- * @return {Promise<GetUserInfoModel>}
- */
-export function getUserInfo(): Promise<GetUserInfoModel> {
-  return defHttp.get({ url: Api.GetUserInfo }, { errorMessageMode: 'none' });
-}
 /**
  * get user permission code list
  * @returns {Promise<string[]>}
@@ -76,9 +46,6 @@ export function getPermCode(): Promise<string[]> {
   return defHttp.get({ url: Api.GetPermCode });
 }
 
-export function doLogout() {
-  return defHttp.post({ url: Api.Logout });
-}
 /**
  * get user list
  * @param {BasicTableParams} data
@@ -152,10 +119,4 @@ export function transferUserResource(data: {
   targetUserId: string;
 }): Promise<TeamSetResponse> {
   return defHttp.put({ url: Api.TransferUserResource, data });
-}
-
-export function fetchSsoToken(): Promise<LoginResultModel> {
-  return defHttp.get({
-    url: Api.SSO_TOKEN,
-  });
 }

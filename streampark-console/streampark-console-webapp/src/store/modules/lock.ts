@@ -21,7 +21,7 @@ import { defineStore } from 'pinia';
 import { LOCK_INFO_KEY } from '/@/enums/cacheEnum';
 import { Persistent } from '/@/utils/cache/persistent';
 import { useUserStore } from './user';
-import { loginApi } from '/@/api/system/user';
+import { signin } from '/@/api/system/passport';
 
 interface LockState {
   lockInfo: Nullable<LockInfo>;
@@ -57,7 +57,7 @@ export const useLockStore = defineStore({
         try {
           const username = userStore.getUserInfo?.username;
           const loginType = userStore.getUserInfo?.loginType;
-          const { data } = await loginApi(
+          const { data } = await signin(
             {
               username,
               password: password!,

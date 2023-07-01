@@ -76,4 +76,3 @@ export function fetchResourceDelete(data: ResourceDeleteParam): Promise<AxiosRes
 export function fetchTeamResource(data: Recordable): Promise<ResourceListRecord[]> {
   return defHttp.post({ url: RESOURCE_API.LIST, data });
 }
-
