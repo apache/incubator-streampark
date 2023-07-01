@@ -27,61 +27,61 @@
   </BasicDrawer>
 </template>
 <script lang="ts">
-import { defineComponent, ref, computed, unref } from 'vue';
-import { BasicForm, useForm } from '/@/components/Form';
-import { formSchema } from '../index.data';
-import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { defineComponent, ref, computed, unref } from 'vue';
+  import { BasicForm, useForm } from '/@/components/Form';
+  import { formSchema } from '../index.data';
+  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-import {
-  fetchGatewayCreate,
-} from '/@/api/flink/setting/flinkGateway';
-import { useI18n } from '/@/hooks/web/useI18n';
+  import { fetchGatewayCreate } from '/@/api/flink/setting/flinkGateway';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
-export default defineComponent({
-  name: 'TokenDrawer',
-  components: { BasicDrawer, BasicForm },
-  emits: ['success', 'register'],
-  setup(_, { emit }) {
-    const isUpdate = ref(true);
-    const { t } = useI18n();
+  export default defineComponent({
+    name: 'TokenDrawer',
+    components: { BasicDrawer, BasicForm },
+    emits: ['success', 'register'],
+    setup(_, { emit }) {
+      const isUpdate = ref(true);
+      const { t } = useI18n();
 
-    const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
-      labelWidth: 120,
-      colon: true,
-      schemas: formSchema,
-      showActionButtonGroup: false,
-      baseColProps: { lg: 22, md: 22 },
-    });
+      const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
+        labelWidth: 120,
+        colon: true,
+        schemas: formSchema,
+        showActionButtonGroup: false,
+        baseColProps: { lg: 22, md: 22 },
+      });
 
-    const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
-      resetFields();
-      setDrawerProps({ confirmLoading: false });
-      isUpdate.value = !!data?.isUpdate;
-
-      if (unref(isUpdate)) {
-        setFieldsValue({
-          ...data.record,
-        });
-      }
-    });
-
-    const getTitle = computed(() =>
-      !unref(isUpdate) ? t('setting.flinkGateway.createGateway') : t('setting.flinkGateway.modifyGateway'),
-    );
-
-    async function handleSubmit() {
-      try {
-        const values = await validate();
-        setDrawerProps({ confirmLoading: true });
-        const res = await fetchGatewayCreate(values);
-        closeDrawer();
-        emit('success', { isUpdate: unref(isUpdate), values: res });
-      } finally {
+      const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
+        resetFields();
         setDrawerProps({ confirmLoading: false });
-      }
-    }
+        isUpdate.value = !!data?.isUpdate;
 
-    return { t, registerDrawer, registerForm, getTitle, handleSubmit };
-  },
-});
+        if (unref(isUpdate)) {
+          setFieldsValue({
+            ...data.record,
+          });
+        }
+      });
+
+      const getTitle = computed(() =>
+        !unref(isUpdate)
+          ? t('setting.flinkGateway.createGateway')
+          : t('setting.flinkGateway.modifyGateway'),
+      );
+
+      async function handleSubmit() {
+        try {
+          const values = await validate();
+          setDrawerProps({ confirmLoading: true });
+          const res = await fetchGatewayCreate(values);
+          closeDrawer();
+          emit('success', { isUpdate: unref(isUpdate), values: res });
+        } finally {
+          setDrawerProps({ confirmLoading: false });
+        }
+      }
+
+      return { t, registerDrawer, registerForm, getTitle, handleSubmit };
+    },
+  });
 </script>

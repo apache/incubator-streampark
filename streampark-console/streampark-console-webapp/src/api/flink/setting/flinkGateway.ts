@@ -34,7 +34,7 @@ enum GATEWAY_API {
  */
 export function fetchGatewayList() {
   return defHttp.get({
-    url: GATEWAY_API.LIST
+    url: GATEWAY_API.LIST,
   });
 }
 

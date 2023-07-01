@@ -23,7 +23,7 @@ export default {
   modifyGateway: '编辑 Flink 网关',
   deleteGateway: '删除 Flink 网关',
   deleteConfirm: '你确定要删除此 Flink 网关 吗？',
-  name: "Flink 网关名称",
+  name: 'Flink 网关名称',
   placeholder: {
     gatewayType: '请选择 Flink 网关类型',
   },
@@ -37,5 +37,5 @@ export default {
     deleteSuccess: '删除 Flink 网关 成功',
     createSuccess: '创建 Flink 网关 成功',
     deleteFailed: '删除 Flink 网关 失败',
-  }
+  },
 };

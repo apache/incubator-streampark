@@ -23,7 +23,7 @@ export default {
   modifyGateway: 'Edit Flink Gateway',
   deleteGateway: 'Delete Flink Gateway',
   deleteConfirm: 'Are you sure to delete this Flink Gateway ?',
-  name: "Gateway Name",
+  name: 'Gateway Name',
   placeholder: {
     gatewayType: 'Please select gateway type',
   },
@@ -37,5 +37,5 @@ export default {
     deleteSuccess: 'Delete Flink gateway successfully.',
     createSuccess: 'Create Flink gateway successfully.',
     deleteFailed: 'Delete Flink gateway failed.',
-  }
+  },
 };

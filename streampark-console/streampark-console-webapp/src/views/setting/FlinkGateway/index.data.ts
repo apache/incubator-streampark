@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {BasicColumn, FormSchema} from '/@/components/Table';
+import { BasicColumn, FormSchema } from '/@/components/Table';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 
@@ -85,4 +85,3 @@ export const columns: BasicColumn[] = [
     sorter: true,
   },
 ];
-
