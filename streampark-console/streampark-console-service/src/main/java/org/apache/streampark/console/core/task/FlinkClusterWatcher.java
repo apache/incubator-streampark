@@ -101,22 +101,21 @@ public class FlinkClusterWatcher {
 
   @Scheduled(fixedDelay = 1000)
   private void start() {
-    if (immediateWatch
-        || System.currentTimeMillis() - lastWatchTime >= WATCHER_INTERVAL.toMillis()) {
-      lastWatchTime = System.currentTimeMillis();
+    Long timeMillis = System.currentTimeMillis();
+    if (immediateWatch || timeMillis - lastWatchTime >= WATCHER_INTERVAL.toMillis()) {
+      lastWatchTime = timeMillis;
       immediateWatch = false;
-      for (Map.Entry<Long, FlinkCluster> entry : WATCHER_CLUSTERS.entrySet()) {
-        EXECUTOR.execute(
-            () -> {
-              FlinkCluster flinkCluster = entry.getValue();
-              ClusterState state = getClusterState(flinkCluster);
-              if (ClusterState.isFailed(state)) {
-                flinkClusterService.updateClusterFinalState(flinkCluster.getId(), state);
-                unWatching(flinkCluster);
-                alert(flinkCluster, state);
-              }
-            });
-      }
+      WATCHER_CLUSTERS.forEach(
+          (aLong, flinkCluster) ->
+              EXECUTOR.execute(
+                  () -> {
+                    ClusterState state = getClusterState(flinkCluster);
+                    if (ClusterState.isFailed(state)) {
+                      flinkClusterService.updateClusterFinalState(flinkCluster.getId(), state);
+                      unWatching(flinkCluster);
+                      alert(flinkCluster, state);
+                    }
+                  }));
     }
   }
 
