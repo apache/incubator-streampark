@@ -54,6 +54,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -84,9 +85,10 @@ public class FlinkRESTAPIWatcher {
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
   // track interval  every 5 seconds
-  private static final long WATCHING_INTERVAL = 1000L * 5;
+  private static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
+
   // option interval within 10 seconds
-  private static final long OPTION_INTERVAL = 1000L * 10;
+  private static final Duration OPTION_INTERVAL = Duration.ofSeconds(10);
 
   /**
    *
@@ -139,7 +141,7 @@ public class FlinkRESTAPIWatcher {
 
   private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>(0);
 
-  private Long lastWatchingTime = 0L;
+  private Long lastWatchTime = 0L;
 
   private Long lastOptionTime = 0L;
 
@@ -188,20 +190,19 @@ public class FlinkRESTAPIWatcher {
   public void start() {
     // The application has been started at the first time, or the front-end is operating start/stop,
     // need to return status info immediately.
-    if (lastWatchingTime == null || !OPTIONING.isEmpty()) {
+    if (lastWatchTime == null || !OPTIONING.isEmpty()) {
       doWatch();
-    } else if (System.currentTimeMillis() - lastOptionTime <= OPTION_INTERVAL) {
-      // The last operation time is less than option interval.(10 seconds)
-      doWatch();
-    } else if (System.currentTimeMillis() - lastWatchingTime >= WATCHING_INTERVAL) {
-      // Normal information obtain, check if there is 5 seconds interval between this time and the
-      // last time.(once every 5 seconds)
-      doWatch();
+    } else {
+      Long timeMillis = System.currentTimeMillis();
+      if (timeMillis - lastOptionTime <= OPTION_INTERVAL.toMillis()
+          || timeMillis - lastWatchTime >= WATCHING_INTERVAL.toMillis()) {
+        lastWatchTime = timeMillis;
+        doWatch();
+      }
     }
   }
 
   private void doWatch() {
-    lastWatchingTime = System.currentTimeMillis();
     for (Map.Entry<Long, Application> entry : WATCHING_APPS.entrySet()) {
       watch(entry.getKey(), entry.getValue());
     }
@@ -796,7 +797,7 @@ public class FlinkRESTAPIWatcher {
       case REMOTE:
         FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
         ClusterState clusterState = flinkClusterWatcher.getClusterState(flinkCluster);
-        if (ClusterState.isRunningState(clusterState)) {
+        if (ClusterState.isRunning(clusterState)) {
           log.info(
               "application with id {} is yarn session or remote and flink cluster with id {} is alive, application send alert",
               app.getId(),

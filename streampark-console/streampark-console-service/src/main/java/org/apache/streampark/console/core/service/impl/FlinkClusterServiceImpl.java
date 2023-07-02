@@ -279,11 +279,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void updateClusterToStopped(Long id) {
+  public void updateClusterFinalState(Long id, ClusterState state) {
     LambdaUpdateWrapper<FlinkCluster> updateWrapper =
         new LambdaUpdateWrapper<FlinkCluster>()
             .eq(FlinkCluster::getId, id)
-            .set(FlinkCluster::getClusterState, ClusterState.STOPPED.getValue())
+            .set(FlinkCluster::getClusterState, state.getValue())
             .set(FlinkCluster::getEndTime, new Date());
     update(updateWrapper);
   }
@@ -297,7 +297,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())
         || ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode())) {
       ApiAlertException.throwIfTrue(
-          ClusterState.isRunningState(flinkCluster.getClusterStateEnum()),
+          ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
           "Flink cluster is running, cannot be delete, please check.");
     }
 
@@ -388,7 +388,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   private void checkActiveIfNeeded(FlinkCluster flinkCluster) {
     if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
       ApiAlertException.throwIfFalse(
-          ClusterState.isRunningState(flinkCluster.getClusterStateEnum()),
+          ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
           "Current cluster is not active, please check!");
       if (!flinkCluster.verifyClusterConnection()) {
         flinkCluster.setClusterState(ClusterState.LOST.getValue());
