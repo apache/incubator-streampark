@@ -15,42 +15,37 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.gateway.session;
+package org.apache.streampark.console.core.entity;
 
-import java.util.Objects;
+import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 
-/** Session Handle that used to identify the Session. */
-public class SessionHandle {
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
-  private final String identifier;
+import javax.validation.constraints.NotBlank;
 
-  public SessionHandle(String identifier) {
-    this.identifier = identifier;
-  }
+import java.util.Date;
 
-  public String getIdentifier() {
-    return identifier;
-  }
+@Data
+@TableName("t_flink_gateway")
+public class FlinkGateWay {
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof SessionHandle)) {
-      return false;
-    }
-    SessionHandle that = (SessionHandle) o;
-    return Objects.equals(identifier, that.identifier);
-  }
+  @TableId(type = IdType.AUTO)
+  private Long id;
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(identifier);
-  }
+  @NotBlank(message = "{required}")
+  private String gatewayName;
 
-  @Override
-  public String toString() {
-    return identifier.toString();
-  }
+  private String description;
+
+  private GatewayTypeEnum gatewayType;
+
+  @NotBlank(message = "{required}")
+  private String address;
+
+  private Date createTime;
+
+  private Date modifyTime;
 }

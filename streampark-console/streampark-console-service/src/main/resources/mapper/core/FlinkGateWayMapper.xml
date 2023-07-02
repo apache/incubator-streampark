@@ -15,22 +15,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.apache.streampark</groupId>
-        <artifactId>streampark-flink</artifactId>
-        <version>2.2.0-SNAPSHOT</version>
-    </parent>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.apache.streampark.console.core.mapper.FlinkGateWayMapper">
 
-    <artifactId>streampark-flink-sql-gateway</artifactId>
-    <name>StreamPark : SQL Gateway Parent</name>
-    <packaging>pom</packaging>
+    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.FlinkGateWay">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="gateway_type" jdbcType="BIGINT" property="gatewayType"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
 
-    <modules>
-        <module>streampark-flink-sql-gateway-base</module>
-        <module>streampark-flink-sql-gateway-flink-v1</module>
-        <module>streampark-flink-sql-gateway-kyuubi</module>
-    </modules>
-
-</project>
+</mapper>

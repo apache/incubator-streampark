@@ -282,7 +282,6 @@
             <version>${postgresql.version}</version>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
@@ -369,6 +368,18 @@
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-flink-sqlclient_${scala.binary.version}</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-sql-gateway-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-sql-gateway-flink-v1</artifactId>
             <version>${project.version}</version>
         </dependency>
 

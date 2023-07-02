@@ -17,20 +17,22 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.apache.streampark</groupId>
-        <artifactId>streampark-flink</artifactId>
+        <artifactId>streampark-flink-sql-gateway</artifactId>
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-sql-gateway</artifactId>
-    <name>StreamPark : SQL Gateway Parent</name>
-    <packaging>pom</packaging>
+    <artifactId>streampark-flink-sql-gateway-kyuubi</artifactId>
+    <name>StreamPark : Kyuubi SQL Gateway</name>
 
-    <modules>
-        <module>streampark-flink-sql-gateway-base</module>
-        <module>streampark-flink-sql-gateway-flink-v1</module>
-        <module>streampark-flink-sql-gateway-kyuubi</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-sql-gateway-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
