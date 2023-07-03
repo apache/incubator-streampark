@@ -112,15 +112,12 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
-  import { useRouter } from 'vue-router';
   import { fetchResourceDelete, fetchResourceList, fetchTeamResource } from '/@/api/flink/resource';
   import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
   import { Tag } from 'ant-design-vue';
 
   const teamResource = ref<Array<any>>([]);
-  const router = useRouter();
   const [registerDrawer, { openDrawer }] = useDrawer();
-  const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
   const { createMessage } = useMessage();
   const { t } = useI18n();
   const [registerTable, { reload }] = useTable({
