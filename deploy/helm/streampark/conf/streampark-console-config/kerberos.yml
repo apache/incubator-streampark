@@ -24,7 +24,3 @@ security:
       principal:
       krb5:
       keytab:
-java:
-  security:
-    krb5:
-      conf:
