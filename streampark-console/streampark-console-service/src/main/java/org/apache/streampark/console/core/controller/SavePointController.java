@@ -91,13 +91,18 @@ public class SavePointController {
     @Parameter(
         name = "savepointPath",
         description = "specified savepoint path",
-        schema = @Schema(implementation = String.class))
+        schema = @Schema(implementation = String.class)),
+    @Parameter(
+        name = "nativeFormat",
+        description = "use native format",
+        schema = @Schema(implementation = Boolean.class))
   })
   @ApiAccess
   @PostMapping("trigger")
   @RequiresPermissions("savepoint:trigger")
-  public RestResponse trigger(Long appId, @Nullable String savepointPath) {
-    savePointService.trigger(appId, savepointPath);
+  public RestResponse trigger(
+      Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
+    savePointService.trigger(appId, savepointPath, nativeFormat);
     return RestResponse.success(true);
   }
 }

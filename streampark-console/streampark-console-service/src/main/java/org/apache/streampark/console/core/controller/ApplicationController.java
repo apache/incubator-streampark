@@ -276,6 +276,13 @@ public class ApplicationController {
         in = ParameterIn.QUERY,
         required = true,
         example = "false",
+        schema = @Schema(implementation = boolean.class, defaultValue = "false")),
+    @Parameter(
+        name = "nativeFormat",
+        description = "use savepoint native format",
+        in = ParameterIn.QUERY,
+        required = true,
+        example = "false",
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @PermissionAction(id = "#app.id", type = PermissionType.APP)

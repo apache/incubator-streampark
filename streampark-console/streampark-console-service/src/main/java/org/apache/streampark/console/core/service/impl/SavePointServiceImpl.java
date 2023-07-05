@@ -165,7 +165,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  public void trigger(Long appId, @Nullable String savepointPath) {
+  public void trigger(Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
     log.info("Start to trigger savepoint for app {}", appId);
     Application application = applicationService.getById(appId);
 
@@ -187,7 +187,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     // infer savepoint
     TriggerSavepointRequest request =
-        renderTriggerSavepointRequest(savepointPath, application, flinkEnv);
+        renderTriggerSavepointRequest(savepointPath, nativeFormat, application, flinkEnv);
 
     CompletableFuture<SavepointResponse> savepointFuture =
         CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
@@ -481,7 +481,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Nonnull
   private TriggerSavepointRequest renderTriggerSavepointRequest(
-      @Nullable String savepointPath, Application application, FlinkEnv flinkEnv) {
+      @Nullable String savepointPath,
+      Boolean nativeFormat,
+      Application application,
+      FlinkEnv flinkEnv) {
     String customSavepoint = this.getFinalSavepointDir(savepointPath, application);
 
     FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -496,6 +499,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         clusterId,
         application.getJobId(),
         customSavepoint,
+        nativeFormat,
         application.getK8sNamespace());
   }
 }

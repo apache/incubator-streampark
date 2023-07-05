@@ -17,7 +17,7 @@
 import Icon from '/@/components/Icon';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { Form, Input } from 'ant-design-vue';
+import { Form, Input, Switch} from 'ant-design-vue';
 import { fetchCheckSavepointPath } from '/@/api/flink/app/app';
 import { trigger } from '/@/api/flink/app/savepoint';
 import { ref, unref } from 'vue';
@@ -28,6 +28,7 @@ export const useSavepoint = (updateOption: Fn) => {
   const submitLoading = ref(false);
   const appId = ref('');
   const customSavepoint = ref('');
+  const nativeFormat = ref(false);
 
   async function handleSavepointAction(savepointTriggerReq: {
     appId: string | number;
@@ -74,6 +75,20 @@ export const useSavepoint = (updateOption: Fn) => {
                 onInput={(e) => (customSavepoint.value = e.target.value || '')}
               />
             </Form.Item>
+
+            <Form.Item
+              name="nativeFormat"
+              label="Native Format"
+              label-col={{ lg: { span: 7, offset: 0 }, sm: { span: 7, offset: 0 } }}
+              wrapper-col={{ lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } }}
+            >
+              <Switch
+                checkedValue={true}
+                unCheckedValue={false}
+                checked={nativeFormat.value}
+                onClick={(checked, e) => (nativeFormat.value = checked || false)}
+              />
+            </Form.Item>
           </Form>
         );
       },
@@ -83,6 +98,7 @@ export const useSavepoint = (updateOption: Fn) => {
             const savepointReq = {
               appId: appId.value,
               savepointPath: unref(customSavepoint),
+              nativeFormat: unref(nativeFormat),
             };
             if (unref(customSavepoint)) {
               submitLoading.value = true;
@@ -118,6 +134,7 @@ export const useSavepoint = (updateOption: Fn) => {
       },
       onCancel: () => {
         customSavepoint.value = '';
+        nativeFormat.value = false;
       },
     });
   };

@@ -79,6 +79,17 @@
         defaultValue: false,
         afterItem: () => h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
       },
+      {
+        field: 'nativeFormat',
+        label: 'NativeFormat',
+        component: 'Switch',
+        componentProps: {
+          checkedChildren: 'ON',
+          unCheckedChildren: 'OFF',
+        },
+        defaultValue: false,
+        afterItem: () => h('span', { class: 'conf-switch' }, 'Use savepoint native format'),
+      },
     ],
     colon: true,
     showActionButtonGroup: false,
@@ -90,12 +101,13 @@
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, customSavepoint, drain } = (await validate()) as Recordable;
+      const { stopSavePointed, customSavepoint, drain, nativeFormat } = (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
         savePointed: stopSavePointed,
         savePoint: customSavepoint,
         drain: drain,
+        nativeFormat: nativeFormat,
       };
 
       if (stopSavePointed) {
