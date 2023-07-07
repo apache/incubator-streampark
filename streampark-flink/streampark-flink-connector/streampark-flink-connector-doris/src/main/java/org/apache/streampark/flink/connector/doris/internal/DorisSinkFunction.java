@@ -83,7 +83,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
           || null == data.getDataRows()) {
         LOGGER.warn(
             String.format(
-                " row data not fullfilled. {database: %s, table: %s, dataRows: %s}",
+                " row data not fulfilled. {database: %s, table: %s, dataRows: %s}",
                 data.getDatabase(), data.getTable(), data.getDataRows()));
         return;
       }
@@ -91,7 +91,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
     } else {
       if (StringUtils.isEmpty(dorisConfig.database()) || StringUtils.isEmpty(dorisConfig.table())) {
         throw new RuntimeException(
-            " database|table  is empt ,please check your config or create DorisSinkRowDataWithMeta instance");
+            " database|table  is empty ,please check your config or create DorisSinkRowDataWithMeta instance");
       }
       dorisSinkWriter.writeRecords(dorisConfig.database(), dorisConfig.table(), (String) value);
     }
