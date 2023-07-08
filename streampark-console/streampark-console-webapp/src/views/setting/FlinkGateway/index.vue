@@ -46,7 +46,7 @@
   </PageWrapper>
 </template>
 <script lang="ts">
-  import { defineComponent, unref } from 'vue';
+  import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
   import FlinkGatewayDrawer from './components/FlinkGatewayDrawer.vue';

@@ -44,7 +44,10 @@ springdoc:
   packages-to-scan: org.apache.streampark.console
 
 spring:
-  profiles.active: h2 #[h2,pgsql,mysql]
+  profiles:
+    active: h2 #[h2,pgsql,mysql]
+    # Please uncomment the below config if enable sso
+    # include: sso
   application.name: StreamPark
   devtools.restart.enabled: false
   mvc.pathmatch.matching-strategy: ant_path_matcher
@@ -144,3 +147,7 @@ ldap:
   user:
     identity-attribute: uid
     email-attribute: mail
+
+sso:
+  # If turn to true, please provide the sso properties the application-sso.yml
+  enable: false

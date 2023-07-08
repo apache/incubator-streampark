@@ -16,7 +16,6 @@
 -->
 <script lang="ts">
   import { defineComponent, onMounted, reactive, ref } from 'vue';
-  import { useI18n } from '/@/hooks/web/useI18n';
   import { toPomString } from '/@/views/flink/app/utils/Pom';
 
   export default defineComponent({
@@ -29,10 +28,8 @@
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
   import { Tabs, Alert, Tag, Space } from 'ant-design-vue';
-  import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchUpload } from '/@/api/flink/app/app';
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
-  import { onMounted } from 'vue';
 
   interface DependencyType {
     artifactId: string;
@@ -64,9 +61,7 @@
       required: true,
     },
   });
-  const { t } = useI18n();
   const defaultValue = '';
-  const { Swal } = useMessage();
   const { onChange, setContent } = useMonaco(pomBox, {
     language: 'xml',
     code: props.value || defaultValue,

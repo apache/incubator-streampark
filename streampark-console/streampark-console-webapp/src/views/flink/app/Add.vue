@@ -22,7 +22,7 @@
 <script setup lang="ts" name="AppCreate">
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
-  import { Switch, Alert } from 'ant-design-vue';
+  import { Switch } from 'ant-design-vue';
   import { onMounted, reactive, ref, unref } from 'vue';
   import { PageWrapper } from '/@/components/Page';
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
@@ -32,8 +32,7 @@
   import { useDrawer } from '/@/components/Drawer';
   import Mergely from './components/Mergely.vue';
   import { handleConfTemplate } from '/@/api/flink/config';
-  import UploadJobJar from './components/UploadJobJar.vue';
-  import { fetchAppConf, fetchCreate, fetchMain, fetchUpload } from '/@/api/flink/app/app';
+  import { fetchAppConf, fetchCreate } from '/@/api/flink/app/app';
   import options from './data/option';
   import { useCreateSchema } from './hooks/useCreateSchema';
   import { getAppConfType, handleSubmitParams } from './utils';
@@ -64,8 +63,6 @@
   const go = useGo();
   const flinkSql = ref();
   const dependencyRef = ref();
-  const uploadLoading = ref(false);
-  const uploadJar = ref('');
   const submitLoading = ref(false);
 
   const { t } = useI18n();
@@ -128,24 +125,6 @@
     } else {
       openConfDrawer(false);
       setFieldsValue({ isSetConfig: false, configOverride: null });
-    }
-  }
-
-  /* Custom job upload */
-  async function handleCustomJobRequest(data) {
-    const formData = new FormData();
-    formData.append('file', data.file);
-    try {
-      const path = await fetchUpload(formData);
-      uploadJar.value = data.file.name;
-      const res = await fetchMain({
-        jar: path,
-      });
-      uploadLoading.value = false;
-      setFieldsValue({ mainClass: res });
-    } catch (error) {
-      console.error(error);
-      uploadLoading.value = false;
     }
   }
 

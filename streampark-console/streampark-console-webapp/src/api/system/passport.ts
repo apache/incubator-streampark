@@ -50,7 +50,17 @@ export function fetchSignType(): Promise<String[]> {
 }
 
 export function fetchSsoToken(): Promise<LoginResultModel> {
-  return defHttp.get({
-    url: Api.SSO_TOKEN,
-  });
+  return defHttp.get(
+    {
+      url: Api.SSO_TOKEN,
+    },
+    {
+      errorMessageMode: 'none',
+      retryRequest: {
+        isOpenRetry: false,
+        count: 1,
+        waitTime: 100,
+      },
+    },
+  );
 }
