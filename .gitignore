@@ -18,6 +18,7 @@
 .cache
 .idea/*
 !.idea/icon.png
+!.idea/vcs.xml
 .metadata
 .settings
 .project
