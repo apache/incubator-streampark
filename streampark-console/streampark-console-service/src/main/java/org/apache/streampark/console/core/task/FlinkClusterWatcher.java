@@ -30,6 +30,7 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hc.client5.http.config.RequestConfig;
 
@@ -167,7 +168,14 @@ public class FlinkClusterWatcher {
    */
   private ClusterState httpRemoteClusterState(FlinkCluster flinkCluster) {
     final String address = flinkCluster.getAddress();
-    final String flinkUrl = address.concat("/overview");
+    if (StringUtils.isEmpty(address)) {
+      return ClusterState.STOPPED;
+    }
+    final String jobManagerUrl = flinkCluster.getJobManagerUrl();
+    final String flinkUrl =
+        StringUtils.isEmpty(jobManagerUrl)
+            ? address.concat("/overview")
+            : jobManagerUrl.concat("/overview");
     try {
       String res =
           HttpClientUtils.httpGetRequest(

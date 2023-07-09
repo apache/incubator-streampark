@@ -20,6 +20,7 @@
     <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.FlinkCluster">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="job_manager_url" jdbcType="VARCHAR" property="jobManagerUrl"/>
         <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
         <result column="cluster_name" jdbcType="VARCHAR" property="clusterName"/>
         <result column="options" jdbcType="LONGVARCHAR" property="options"/>

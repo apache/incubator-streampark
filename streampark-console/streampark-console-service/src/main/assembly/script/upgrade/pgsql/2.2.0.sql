@@ -57,6 +57,7 @@ alter table "public"."t_flink_sql"
     add column "team_resource" varchar(64) default null;
 
 alter table "public"."t_flink_cluster"
+    add column "job_manager_url" varchar(150) collate "pg_catalog"."default",
     add column "start_time" timestamp(6) collate "pg_catalog"."default",
     add column "end_time" timestamp(6) collate "pg_catalog"."default",
     add column "alert_id" int8 collate "pg_catalog"."default";

@@ -44,6 +44,7 @@ alter table `t_flink_sql`
     add column `team_resource` varchar(64) default null;
 
 alter table `t_flink_cluster`
+    add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`,
     add column `start_time` datetime default null comment 'start time',
     add column `end_time` datetime default null comment 'end time',
     add column `alert_id` bigint default null comment 'alert id';
