@@ -626,7 +626,7 @@
                             <execution>
                                 <id>build</id>
                                 <goals>
-                                    <goal>pnpm</goal>
+                                    <goal>npm</goal>
                                 </goals>
                                 <configuration>
                                     <arguments>run build:no-cache</arguments>
