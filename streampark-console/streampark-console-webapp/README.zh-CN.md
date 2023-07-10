@@ -57,12 +57,7 @@ Make stream processing easier
 > ```bash
 > strict-peer-dependencies=false
 > save-workspace-protocol = rolling
-> registry = 'http://registry.npm.taobao.org'
-> sass_binary_site='http://npm.taobao.org/mirrors/node-sass/'
-> phantomjs_cdnurl='http://npm.taobao.org/mirrors/phantomjs'
-> CHROMEDRIVER_CDNURL='http://npm.taobao.org/mirrors/chromedriver'
-> electron_mirror='http://npm.taobao.org/mirrors/electron/'
-> fsevents_binary_host_mirror='http://npm.taobao.org/mirrors/fsevents/'
+> registry = 'http://registry.npmmirror.com'
 > ```
 
 ### 构建并运行
