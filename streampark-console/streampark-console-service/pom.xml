@@ -604,23 +604,23 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>install node and pnpm</id>
+                                <id>install node and npm</id>
                                 <goals>
-                                    <goal>install-node-and-pnpm</goal>
+                                    <goal>install-node-and-npm</goal>
                                 </goals>
                                 <configuration>
                                     <nodeVersion>v16.16.0</nodeVersion>
-                                    <pnpmVersion>8.5.0</pnpmVersion>
+                                    <npmVersion>8.11.0</npmVersion>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>install</id>
                                 <goals>
-                                    <goal>pnpm</goal>
+                                    <goal>npm</goal>
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
-                                    <arguments>install --ignore-scripts</arguments>
+                                    <arguments>install</arguments>
                                 </configuration>
                             </execution>
                             <execution>
