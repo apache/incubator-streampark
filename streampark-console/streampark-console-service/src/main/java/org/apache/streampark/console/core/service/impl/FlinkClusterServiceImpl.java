@@ -43,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
@@ -149,7 +150,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
     boolean ret = save(flinkCluster);
     if (ret && ExecutionMode.isRemoteMode(flinkCluster.getExecutionMode())) {
-      FlinkClusterWatcher.addFlinkCluster(flinkCluster);
+      FlinkClusterWatcher.addWatching(flinkCluster);
     }
     return ret;
   }
@@ -165,7 +166,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
           "Deploy cluster failed, unknown reason，please check you params or StreamPark error log");
       if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
         String address =
-            YarnUtils.getRMWebAppURL(true) + "/proxy/" + deployResponse.clusterId() + "/";
+            String.format(
+                "%s/proxy/%s/", YarnUtils.getRMWebAppURL(true), deployResponse.clusterId());
         flinkCluster.setAddress(address);
         flinkCluster.setJobManagerUrl(deployResponse.address());
       } else {
@@ -176,12 +178,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkCluster.setException(null);
       flinkCluster.setStartTime(new Date());
       flinkCluster.setEndTime(null);
-      FlinkClusterWatcher.addFlinkCluster(flinkCluster);
+      FlinkClusterWatcher.addWatching(flinkCluster);
       updateById(flinkCluster);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
-      flinkCluster.setAddress(null);
-      flinkCluster.setJobManagerUrl(null);
       flinkCluster.setClusterState(ClusterState.STOPPED.getValue());
       flinkCluster.setException(e.toString());
       updateById(flinkCluster);
@@ -190,18 +190,31 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void update(FlinkCluster cluster) {
-    FlinkCluster flinkCluster = getById(cluster.getId());
-    boolean success = validateQueueIfNeeded(flinkCluster, cluster);
+  public void update(FlinkCluster paramOfCluster) {
+    FlinkCluster flinkCluster = getById(paramOfCluster.getId());
+    boolean success = validateQueueIfNeeded(flinkCluster, paramOfCluster);
     ApiAlertException.throwIfFalse(
-        success, String.format(ERROR_CLUSTER_QUEUE_HINT, cluster.getYarnQueue()));
-    updateCluster(cluster, flinkCluster);
-    try {
-      updateById(flinkCluster);
-    } catch (Exception e) {
-      throw new ApiDetailException(
-          "Update cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
+        success, String.format(ERROR_CLUSTER_QUEUE_HINT, paramOfCluster.getYarnQueue()));
+
+    flinkCluster.setClusterName(paramOfCluster.getClusterName());
+    flinkCluster.setDescription(paramOfCluster.getDescription());
+    if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
+      flinkCluster.setAddress(paramOfCluster.getAddress());
+    } else {
+      flinkCluster.setClusterId(paramOfCluster.getClusterId());
+      flinkCluster.setVersionId(paramOfCluster.getVersionId());
+      flinkCluster.setDynamicProperties(paramOfCluster.getDynamicProperties());
+      flinkCluster.setOptions(paramOfCluster.getOptions());
+      flinkCluster.setResolveOrder(paramOfCluster.getResolveOrder());
+      flinkCluster.setK8sHadoopIntegration(paramOfCluster.getK8sHadoopIntegration());
+      flinkCluster.setK8sConf(paramOfCluster.getK8sConf());
+      flinkCluster.setK8sNamespace(paramOfCluster.getK8sNamespace());
+      flinkCluster.setK8sRestExposedType(paramOfCluster.getK8sRestExposedType());
+      flinkCluster.setServiceAccount(paramOfCluster.getServiceAccount());
+      flinkCluster.setFlinkImage(paramOfCluster.getFlinkImage());
+      flinkCluster.setYarnQueue(paramOfCluster.getYarnQueue());
     }
+    updateById(flinkCluster);
   }
 
   @Override
@@ -224,10 +237,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       // 4) shutdown
       ShutDownResponse shutDownResponse = shutdownInternal(flinkCluster, clusterId);
       ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
-      flinkCluster.setAddress(null);
       flinkCluster.setClusterState(ClusterState.STOPPED.getValue());
       flinkCluster.setEndTime(new Date());
-      FlinkClusterWatcher.removeFlinkCluster(flinkCluster);
+      FlinkClusterWatcher.unWatching(flinkCluster);
       updateById(flinkCluster);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -268,6 +280,16 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
+  public void updateClusterFinalState(Long id, ClusterState state) {
+    LambdaUpdateWrapper<FlinkCluster> updateWrapper =
+        new LambdaUpdateWrapper<FlinkCluster>()
+            .eq(FlinkCluster::getId, id)
+            .set(FlinkCluster::getClusterState, state.getValue())
+            .set(FlinkCluster::getEndTime, new Date());
+    update(updateWrapper);
+  }
+
+  @Override
   public void delete(FlinkCluster cluster) {
     Long id = cluster.getId();
     FlinkCluster flinkCluster = getById(id);
@@ -276,7 +298,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())
         || ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode())) {
       ApiAlertException.throwIfTrue(
-          ClusterState.isRunningState(flinkCluster.getClusterStateEnum()),
+          ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
           "Flink cluster is running, cannot be delete, please check.");
     }
 
@@ -367,39 +389,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   private void checkActiveIfNeeded(FlinkCluster flinkCluster) {
     if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
       ApiAlertException.throwIfFalse(
-          ClusterState.isRunningState(flinkCluster.getClusterStateEnum()),
+          ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
           "Current cluster is not active, please check!");
       if (!flinkCluster.verifyClusterConnection()) {
-        flinkCluster.setAddress(null);
-        flinkCluster.setJobManagerUrl(null);
         flinkCluster.setClusterState(ClusterState.LOST.getValue());
         updateById(flinkCluster);
         throw new ApiAlertException("Current cluster is not active, please check!");
       }
-    }
-  }
-
-  private void updateCluster(FlinkCluster cluster, FlinkCluster flinkCluster) {
-    flinkCluster.setClusterName(cluster.getClusterName());
-    flinkCluster.setDescription(cluster.getDescription());
-    if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
-      flinkCluster.setAddress(cluster.getAddress());
-      flinkCluster.setJobManagerUrl(cluster.getAddress());
-    } else {
-      flinkCluster.setAddress(null);
-      flinkCluster.setJobManagerUrl(null);
-      flinkCluster.setClusterId(cluster.getClusterId());
-      flinkCluster.setVersionId(cluster.getVersionId());
-      flinkCluster.setDynamicProperties(cluster.getDynamicProperties());
-      flinkCluster.setOptions(cluster.getOptions());
-      flinkCluster.setResolveOrder(cluster.getResolveOrder());
-      flinkCluster.setK8sHadoopIntegration(cluster.getK8sHadoopIntegration());
-      flinkCluster.setK8sConf(cluster.getK8sConf());
-      flinkCluster.setK8sNamespace(cluster.getK8sNamespace());
-      flinkCluster.setK8sRestExposedType(cluster.getK8sRestExposedType());
-      flinkCluster.setServiceAccount(cluster.getServiceAccount());
-      flinkCluster.setFlinkImage(cluster.getFlinkImage());
-      flinkCluster.setYarnQueue(cluster.getYarnQueue());
     }
   }
 

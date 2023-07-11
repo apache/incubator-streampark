@@ -35,14 +35,14 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hc.client5.http.config.RequestConfig;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import java.time.Duration;
 import java.util.Date;
@@ -65,13 +65,18 @@ public class FlinkClusterWatcher {
 
   @Autowired private ApplicationService applicationService;
 
-  private Long lastWatcheringTime = 0L;
+  private Long lastWatchTime = 0L;
 
   // Track interval  every 30 seconds
   private static final Duration WATCHER_INTERVAL = Duration.ofSeconds(30);
 
   /** Watcher cluster lists */
   private static final Map<Long, FlinkCluster> WATCHER_CLUSTERS = new ConcurrentHashMap<>(8);
+
+  private static final Cache<Long, ClusterState> FAILED_STATES =
+      Caffeine.newBuilder().expireAfterWrite(WATCHER_INTERVAL).build();
+
+  private boolean immediateWatch = false;
 
   /** Thread pool for processing status monitoring for each cluster */
   private static final ExecutorService EXECUTOR =
@@ -95,71 +100,33 @@ public class FlinkClusterWatcher {
     flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
   }
 
-  /** flinkcluster persistent */
-  @PreDestroy
-  private void stop() {
-    // TODO: flinkcluster persistent
-  }
-
   @Scheduled(fixedDelay = 1000)
   private void start() {
-    if (System.currentTimeMillis() - lastWatcheringTime >= WATCHER_INTERVAL.toMillis()) {
-      lastWatcheringTime = System.currentTimeMillis();
-      watcher();
+    Long timeMillis = System.currentTimeMillis();
+    if (immediateWatch || timeMillis - lastWatchTime >= WATCHER_INTERVAL.toMillis()) {
+      lastWatchTime = timeMillis;
+      immediateWatch = false;
+      WATCHER_CLUSTERS.forEach(
+          (aLong, flinkCluster) ->
+              EXECUTOR.execute(
+                  () -> {
+                    ClusterState state = getClusterState(flinkCluster);
+                    if (ClusterState.isFailed(state)) {
+                      flinkClusterService.updateClusterFinalState(flinkCluster.getId(), state);
+                      unWatching(flinkCluster);
+                      alert(flinkCluster, state);
+                    }
+                  }));
     }
-  }
-
-  private void watcher() {
-    for (Map.Entry<Long, FlinkCluster> entry : WATCHER_CLUSTERS.entrySet()) {
-      EXECUTOR.execute(
-          () -> {
-            FlinkCluster flinkCluster = entry.getValue();
-            updateClusterState(flinkCluster);
-          });
-    }
-  }
-
-  private ClusterState updateClusterState(FlinkCluster flinkCluster) {
-    Integer clusterExecutionMode = flinkCluster.getExecutionMode();
-    if (!ExecutionMode.isKubernetesSessionMode(clusterExecutionMode)) {
-      ClusterState state = getClusterState(flinkCluster);
-      handleClusterState(flinkCluster, state);
-      return state;
-    } else {
-      // TODO: K8s Session status monitoring
-      return ClusterState.UNKNOWN;
-    }
-  }
-
-  public synchronized boolean verifyClusterValidByClusterId(Long clusterId) {
-    FlinkCluster flinkCluster = flinkClusterService.getById(clusterId);
-    ClusterState state = ClusterState.of(flinkCluster.getClusterState());
-    if (!ClusterState.isRunningState(state)) {
-      return false;
-    }
-    state = updateClusterState(flinkCluster);
-    if (!ClusterState.isRunningState(state)) {
-      return false;
-    }
-    return true;
-  }
-
-  public boolean checkAlert(Long clusterId) {
-    FlinkCluster flinkCluster = flinkClusterService.getById(clusterId);
-    if (flinkCluster.getAlertId() == null) {
-      return false;
-    }
-    return true;
   }
 
   private void alert(FlinkCluster cluster, ClusterState state) {
-    if (!checkAlert(cluster.getId())) {
-      return;
+    if (cluster.getAlertId() != null) {
+      cluster.setJobs(applicationService.countJobsByClusterId(cluster.getId()));
+      cluster.setClusterState(state.getValue());
+      cluster.setEndTime(new Date());
+      alertService.alert(cluster, state);
     }
-    cluster.setJobs(applicationService.getAffectedJobsByClusterId(cluster.getId()));
-    cluster.setClusterState(state.getValue());
-    cluster.setEndTime(new Date());
-    alertService.alert(cluster, state);
   }
 
   /**
@@ -168,13 +135,29 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    * @return
    */
-  private ClusterState getClusterState(FlinkCluster flinkCluster) {
-    ClusterState state = getClusterStateFromFlinkAPI(flinkCluster);
-    if (ClusterState.isRunningState(state)) {
+  public ClusterState getClusterState(FlinkCluster flinkCluster) {
+    ClusterState state = FAILED_STATES.getIfPresent(flinkCluster.getId());
+    if (state != null) {
       return state;
-    } else {
-      return getClusterStateFromYarnAPI(flinkCluster);
     }
+    switch (flinkCluster.getExecutionModeEnum()) {
+      case REMOTE:
+        state = httpRemoteClusterState(flinkCluster);
+        break;
+      case YARN_SESSION:
+        state = httpYarnSessionClusterState(flinkCluster);
+        break;
+      default:
+        state = ClusterState.UNKNOWN;
+        break;
+    }
+    if (ClusterState.isRunning(state)) {
+      FAILED_STATES.invalidate(flinkCluster.getId());
+    } else {
+      immediateWatch = true;
+      FAILED_STATES.put(flinkCluster.getId(), state);
+    }
+    return state;
   }
 
   /**
@@ -183,12 +166,12 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    * @return
    */
-  private ClusterState getClusterStateFromFlinkAPI(FlinkCluster flinkCluster) {
+  private ClusterState httpRemoteClusterState(FlinkCluster flinkCluster) {
     final String address = flinkCluster.getAddress();
-    final String jobManagerUrl = flinkCluster.getJobManagerUrl();
     if (StringUtils.isEmpty(address)) {
       return ClusterState.STOPPED;
     }
+    final String jobManagerUrl = flinkCluster.getJobManagerUrl();
     final String flinkUrl =
         StringUtils.isEmpty(jobManagerUrl)
             ? address.concat("/overview")
@@ -198,13 +181,12 @@ public class FlinkClusterWatcher {
           HttpClientUtils.httpGetRequest(
               flinkUrl,
               RequestConfig.custom().setConnectTimeout(5000, TimeUnit.MILLISECONDS).build());
-
       JacksonUtils.read(res, Overview.class);
       return ClusterState.RUNNING;
     } catch (Exception ignored) {
       log.error("cluster id:{} get state from flink api failed", flinkCluster.getId());
     }
-    return ClusterState.UNKNOWN;
+    return ClusterState.LOST;
   }
 
   /**
@@ -213,14 +195,7 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    * @return
    */
-  private ClusterState getClusterStateFromYarnAPI(FlinkCluster flinkCluster) {
-    if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
-      return ClusterState.LOST;
-    }
-    String clusterId = flinkCluster.getClusterId();
-    if (StringUtils.isEmpty(clusterId)) {
-      return ClusterState.STOPPED;
-    }
+  private ClusterState httpYarnSessionClusterState(FlinkCluster flinkCluster) {
     String yarnUrl = "ws/v1/cluster/apps/".concat(flinkCluster.getClusterId());
     try {
       String result = YarnUtils.restRequest(yarnUrl);
@@ -243,64 +218,27 @@ public class FlinkClusterWatcher {
   }
 
   /**
-   * process cluster state
-   *
-   * @param flinkCluster
-   * @param state
-   */
-  private void handleClusterState(FlinkCluster flinkCluster, ClusterState state) {
-    LambdaUpdateWrapper<FlinkCluster> updateWrapper =
-        new LambdaUpdateWrapper<FlinkCluster>()
-            .eq(FlinkCluster::getId, flinkCluster.getId())
-            .set(FlinkCluster::getClusterState, state.getValue());
-    switch (state) {
-      case STOPPED:
-        {
-          updateWrapper
-              .set(FlinkCluster::getAddress, null)
-              .set(FlinkCluster::getJobManagerUrl, null)
-              .set(FlinkCluster::getEndTime, new Date());
-        }
-        // fall through
-      case LOST:
-      case UNKNOWN:
-        {
-          removeFlinkCluster(flinkCluster);
-          alert(flinkCluster, state);
-          break;
-        }
-    }
-    flinkClusterService.update(updateWrapper);
-  }
-
-  /**
-   * Add a cluster to cache
+   * add flinkCluster to watching
    *
    * @param flinkCluster
    */
-  public static void addFlinkCluster(FlinkCluster flinkCluster) {
-    if (WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
-      return;
-    }
-    log.info("add the cluster with id:{} to watcher cluster cache", flinkCluster.getId());
-    WATCHER_CLUSTERS.put(flinkCluster.getId(), flinkCluster);
-  }
-
-  /**
-   * Remove a cluster from cache
-   *
-   * @param flinkCluster
-   */
-  public static void removeFlinkCluster(FlinkCluster flinkCluster) {
+  public static void addWatching(FlinkCluster flinkCluster) {
     if (!WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
-      return;
+      log.info("add the cluster with id:{} to watcher cluster cache", flinkCluster.getId());
+      WATCHER_CLUSTERS.put(flinkCluster.getId(), flinkCluster);
     }
-    log.info("remove the cluster with id:{} from watcher cluster cache", flinkCluster.getId());
-    WATCHER_CLUSTERS.remove(flinkCluster.getId());
+  }
+
+  /** @param flinkCluster */
+  public static void unWatching(FlinkCluster flinkCluster) {
+    if (WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
+      log.info("remove the cluster with id:{} from watcher cluster cache", flinkCluster.getId());
+      WATCHER_CLUSTERS.remove(flinkCluster.getId());
+    }
   }
 
   /**
-   * string conver final application status
+   * string converse final application status
    *
    * @param value
    * @return
@@ -321,11 +259,9 @@ public class FlinkClusterWatcher {
    * @return
    */
   private ClusterState finalApplicationStatusConvertClusterState(FinalApplicationStatus status) {
-    switch (status) {
-      case UNDEFINED:
-        return ClusterState.RUNNING;
-      default:
-        return ClusterState.STOPPED;
+    if (status == FinalApplicationStatus.UNDEFINED) {
+      return ClusterState.RUNNING;
     }
+    return ClusterState.STOPPED;
   }
 }

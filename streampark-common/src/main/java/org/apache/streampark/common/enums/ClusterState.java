@@ -60,23 +60,13 @@ public enum ClusterState implements Serializable {
     return value;
   }
 
-  public static boolean isCreateState(ClusterState state) {
-    return CREATED.equals(state);
-  }
-
-  public static boolean isRunningState(ClusterState state) {
+  public static boolean isRunning(ClusterState state) {
     return RUNNING.equals(state);
   }
 
-  public static boolean isStoppedState(ClusterState state) {
-    return STOPPED.equals(state);
-  }
-
-  public static boolean isLostState(ClusterState state) {
-    return LOST.equals(state);
-  }
-
-  public static boolean isUnknownState(ClusterState state) {
-    return UNKNOWN.equals(state);
+  public static boolean isFailed(ClusterState state) {
+    return state == ClusterState.STOPPED
+        || state == ClusterState.LOST
+        || state == ClusterState.UNKNOWN;
   }
 }

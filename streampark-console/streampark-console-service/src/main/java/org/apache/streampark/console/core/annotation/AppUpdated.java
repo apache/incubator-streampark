@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * cause the application to be updated, Will work together with {@link
  * org.apache.streampark.console.core.aspect.StreamParkAspect#appUpdated(ProceedingJoinPoint)}, The
  * final purpose will be refresh {@link
- * org.apache.streampark.console.core.task.FlinkRESTAPIWatcher#WATCHING_APPS}, Make the state of the
+ * org.apache.streampark.console.core.task.FlinkHttpWatcher#WATCHING_APPS}, Make the state of the
  * job consistent with the database
  */
 @Target(ElementType.METHOD)
