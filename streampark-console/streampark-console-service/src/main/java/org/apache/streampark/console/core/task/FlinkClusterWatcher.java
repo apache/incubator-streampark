@@ -31,7 +31,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hc.client5.http.config.RequestConfig;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -112,7 +112,7 @@ public class FlinkClusterWatcher {
                   () -> {
                     ClusterState state = getClusterState(flinkCluster);
                     if (ClusterState.isFailed(state)) {
-                      flinkClusterService.updateClusterFinalState(flinkCluster.getId(), state);
+                      flinkClusterService.updateClusterState(flinkCluster.getId(), state);
                       unWatching(flinkCluster);
                       alert(flinkCluster, state);
                     }
@@ -161,15 +161,39 @@ public class FlinkClusterWatcher {
   }
 
   /**
-   * cluster get state from flink rest api
+   * get remote cluster state
    *
    * @param flinkCluster
    * @return
    */
   private ClusterState httpRemoteClusterState(FlinkCluster flinkCluster) {
+    return getStateFromFlinkRestApi(flinkCluster);
+  }
+
+  /**
+   * get yarn session cluster state
+   *
+   * @param flinkCluster
+   * @return
+   */
+  private ClusterState httpYarnSessionClusterState(FlinkCluster flinkCluster) {
+    final ClusterState state = getStateFromFlinkRestApi(flinkCluster);
+    if (ClusterState.isFailed(state)) {
+      return getStateFromYarnRestApi(flinkCluster);
+    }
+    return state;
+  }
+
+  /**
+   * cluster get state from flink rest api
+   *
+   * @param flinkCluster
+   * @return
+   */
+  private ClusterState getStateFromFlinkRestApi(FlinkCluster flinkCluster) {
     final String address = flinkCluster.getAddress();
     if (StringUtils.isEmpty(address)) {
-      return ClusterState.STOPPED;
+      return ClusterState.CANCELED;
     }
     final String jobManagerUrl = flinkCluster.getJobManagerUrl();
     final String flinkUrl =
@@ -195,7 +219,7 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    * @return
    */
-  private ClusterState httpYarnSessionClusterState(FlinkCluster flinkCluster) {
+  private ClusterState getStateFromYarnRestApi(FlinkCluster flinkCluster) {
     String yarnUrl = "ws/v1/cluster/apps/".concat(flinkCluster.getClusterId());
     try {
       String result = YarnUtils.restRequest(yarnUrl);
@@ -203,15 +227,14 @@ public class FlinkClusterWatcher {
         return ClusterState.UNKNOWN;
       }
       YarnAppInfo yarnAppInfo = JacksonUtils.read(result, YarnAppInfo.class);
-      FinalApplicationStatus status =
-          stringConvertFinalApplicationStatus(yarnAppInfo.getApp().getFinalStatus());
+      YarnApplicationState status = stringConvertYarnState(yarnAppInfo.getApp().getState());
       if (status == null) {
         log.error(
             "cluster id:{} final application status convert failed, invalid string ",
             flinkCluster.getId());
         return ClusterState.UNKNOWN;
       }
-      return finalApplicationStatusConvertClusterState(status);
+      return yarnStateConvertClusterState(status);
     } catch (Exception e) {
       return ClusterState.LOST;
     }
@@ -238,30 +261,30 @@ public class FlinkClusterWatcher {
   }
 
   /**
-   * string converse final application status
+   * string converse yarn application state
    *
    * @param value
    * @return
    */
-  private FinalApplicationStatus stringConvertFinalApplicationStatus(String value) {
-    for (FinalApplicationStatus status : FinalApplicationStatus.values()) {
-      if (status.name().equals(value)) {
-        return status;
+  private YarnApplicationState stringConvertYarnState(String value) {
+    for (YarnApplicationState state : YarnApplicationState.values()) {
+      if (state.name().equals(value)) {
+        return state;
       }
     }
     return null;
   }
 
   /**
-   * final application status convert cluster state
+   * yarn application state convert cluster state
    *
-   * @param status
+   * @param state
    * @return
    */
-  private ClusterState finalApplicationStatusConvertClusterState(FinalApplicationStatus status) {
-    if (status == FinalApplicationStatus.UNDEFINED) {
-      return ClusterState.RUNNING;
+  private ClusterState yarnStateConvertClusterState(YarnApplicationState state) {
+    if (state == YarnApplicationState.FINISHED) {
+      return ClusterState.CANCELED;
     }
-    return ClusterState.STOPPED;
+    return ClusterState.of(state.toString());
   }
 }

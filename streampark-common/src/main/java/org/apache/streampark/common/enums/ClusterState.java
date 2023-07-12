@@ -26,11 +26,15 @@ public enum ClusterState implements Serializable {
   /** cluster started */
   RUNNING(1),
   /** cluster stopped */
-  STOPPED(2),
+  CANCELED(2),
   /** cluster lost */
   LOST(3),
   /** cluster unknown */
-  UNKNOWN(4);
+  UNKNOWN(4),
+  STARTING(5),
+  CANCELING(6),
+  FAILED(7),
+  KILLED(8);
 
   private final Integer value;
 
@@ -65,8 +69,10 @@ public enum ClusterState implements Serializable {
   }
 
   public static boolean isFailed(ClusterState state) {
-    return state == ClusterState.STOPPED
+    return state == ClusterState.FAILED
         || state == ClusterState.LOST
-        || state == ClusterState.UNKNOWN;
+        || state == ClusterState.UNKNOWN
+        || state == ClusterState.KILLED
+        || state == ClusterState.CANCELED;
   }
 }
