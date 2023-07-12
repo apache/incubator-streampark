@@ -47,6 +47,7 @@
     language: 'yaml',
     options: {
       selectOnLineNumbers: false,
+      folding: true,
       foldingStrategy: 'indentation', // code fragmentation
       overviewRulerBorder: false, // Don't scroll bar borders
       tabSize: 2, // tab indent length
@@ -57,7 +58,7 @@
       automaticLayout: true,
       cursorStyle: 'line',
       cursorWidth: 3,
-      renderFinalNewline: true,
+      renderFinalNewline: 'on',
       renderLineHighlight: 'all',
       quickSuggestionsDelay: 100, // Code prompt delay
       minimap: { enabled: true },

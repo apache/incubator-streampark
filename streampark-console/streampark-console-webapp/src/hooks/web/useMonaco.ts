@@ -182,7 +182,8 @@ export function useMonaco(
           insertSpaces: true,
           autoClosingQuotes: 'always',
           detectIndentation: false,
-          folding: false,
+          folding: true,
+          foldingStrategy: 'indentation', // code fragmentation
           automaticLayout: true,
           theme: 'vs',
           minimap: {
