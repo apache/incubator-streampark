@@ -121,7 +121,6 @@ alter table `t_flink_cluster`
 alter table `t_access_token`
     modify column `description` varchar(255) character set utf8mb4 collate utf8mb4_general_ci default null comment 'description';
 
-
 -- menu script
 delete from `t_menu`;
 -- menu level 1

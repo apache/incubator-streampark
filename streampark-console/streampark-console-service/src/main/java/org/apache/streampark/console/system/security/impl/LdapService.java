@@ -82,10 +82,11 @@ public class LdapService {
       ldapEnv = new Properties();
       ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
       ldapEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
-      ldapEnv.put(Context.SECURITY_PRINCIPAL, ldapSecurityPrincipal);
-      ldapEnv.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
       ldapEnv.put(Context.PROVIDER_URL, ldapUrls);
     }
+
+    ldapEnv.put(Context.SECURITY_PRINCIPAL, ldapSecurityPrincipal);
+    ldapEnv.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
 
     try {
       LdapContext ctx = new InitialLdapContext(ldapEnv, null);

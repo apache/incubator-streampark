@@ -39,7 +39,7 @@ import java.util
 import java.util.{Timer, TimerTask}
 import java.util.concurrent._
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object HadoopUtils extends Logger {
@@ -58,14 +58,8 @@ object HadoopUtils extends Logger {
 
   private[this] var tgt: KerberosTicket = _
 
-  private lazy val hadoopUserName: String =
+  lazy val hadoopUserName: String =
     InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME)
-
-  private[this] lazy val debugKerberos =
-    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_DEBUG, "false")
-
-  private[this] lazy val configurationCache: util.Map[String, Configuration] =
-    new ConcurrentHashMap[String, Configuration]()
 
   private[this] lazy val kerberosConf: Map[String, String] =
     SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME, null) match {
@@ -81,16 +75,30 @@ object HadoopUtils extends Logger {
         } else null
     }
 
+  private[this] lazy val kerberosDebug =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_DEBUG, "false")
+
+  private[this] lazy val kerberosEnable =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false").toBoolean
+
+  private[this] lazy val kerberosPrincipal =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
+
+  private[this] lazy val kerberosKeytab =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
+
+  private[this] lazy val kerberosKrb5 =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KRB5_CONF, "")
+
+  private[this] lazy val configurationCache: util.Map[String, Configuration] =
+    new ConcurrentHashMap[String, Configuration]()
+
   def getUgi(): UserGroupInformation = {
     if (ugi == null) {
-      ugi = {
-        val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
-        val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
-        if (kerberosEnable) {
-          kerberosLogin()
-        } else {
-          UserGroupInformation.createRemoteUser(hadoopUserName)
-        }
+      ugi = if (kerberosEnable) {
+        getKerberosUGI()
+      } else {
+        UserGroupInformation.createRemoteUser(hadoopUserName)
       }
     }
     ugi
@@ -187,30 +195,28 @@ object HadoopUtils extends Logger {
     ugi = null
   }
 
-  private[this] def kerberosLogin(): UserGroupInformation = {
+  private[this] def getKerberosUGI(): UserGroupInformation = {
     logInfo("kerberos login starting....")
-    val principal = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
-    val keytab = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
+
     require(
-      principal.nonEmpty && keytab.nonEmpty,
+      kerberosPrincipal.nonEmpty && kerberosKeytab.nonEmpty,
       s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty")
 
-    val krb5 = kerberosConf
-      .getOrElse(
-        KEY_SECURITY_KERBEROS_KRB5_CONF,
-        kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, ""))
-      .trim
+    System.setProperty("javax.security.auth.useSubjectCredsOnly", "false")
 
-    if (krb5.nonEmpty) {
-      System.setProperty("java.security.krb5.conf", krb5)
-      System.setProperty("java.security.krb5.conf.path", krb5)
+    if (kerberosKrb5.nonEmpty) {
+      System.setProperty("java.security.krb5.conf", kerberosKrb5)
+      System.setProperty("java.security.krb5.conf.path", kerberosKrb5)
     }
-    System.setProperty("sun.security.spnego.debug", debugKerberos)
-    System.setProperty("sun.security.krb5.debug", debugKerberos)
+
+    System.setProperty("sun.security.spnego.debug", kerberosDebug)
+    System.setProperty("sun.security.krb5.debug", kerberosDebug)
     hadoopConf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
+
     Try {
       UserGroupInformation.setConfiguration(hadoopConf)
-      val ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytab)
+      val ugi =
+        UserGroupInformation.loginUserFromKeytabAndReturnUGI(kerberosPrincipal, kerberosKeytab)
       UserGroupInformation.setLoginUser(ugi)
       logInfo("kerberos authentication successful")
       ugi

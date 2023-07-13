@@ -46,6 +46,11 @@ public class MockedSqlGatewayService implements SqlGatewayService {
   }
 
   @Override
+  public boolean check(String flinkMajorVersion) {
+    return !Objects.equals(flinkMajorVersion, "1.11");
+  }
+
+  @Override
   public GatewayInfo getGatewayInfo() throws SqlGatewayException {
     throw new UnsupportedOperationException();
   }

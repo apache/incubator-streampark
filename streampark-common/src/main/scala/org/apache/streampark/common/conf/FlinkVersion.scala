@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 /** @param flinkHome actual flink home that must be a readable local path */
@@ -122,6 +122,13 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
         } else {
           false
         }
+    }
+  }
+
+  def checkVersion(sinceVersion: Int): Boolean = {
+    version.split("\\.").map(_.trim.toInt) match {
+      case Array(1, v, _) if v >= sinceVersion => true
+      case _ => false
     }
   }
 

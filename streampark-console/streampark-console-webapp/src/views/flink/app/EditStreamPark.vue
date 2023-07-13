@@ -27,11 +27,7 @@
   import configOptions from './data/option';
   import { fetchMain, fetchUpload, fetchUpdate, fetchGet } from '/@/api/flink/app/app';
   import { useRoute } from 'vue-router';
-  import {
-    getAppConfType,
-    handleSubmitParams,
-    handleTeamResource
-  } from './utils';
+  import { getAppConfType, handleSubmitParams, handleTeamResource } from './utils';
   import { fetchFlinkHistory } from '/@/api/flink/app/flinkSql';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
@@ -52,7 +48,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
-  import { ExecModeEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
+  import { ClusterStateEnum, ExecModeEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const go = useGo();
@@ -80,6 +76,7 @@
   const {
     alerts,
     flinkEnvs,
+    flinkClusters,
     flinkSql,
     getEditStreamParkFormSchema,
     registerDifferentDrawer,
@@ -254,6 +251,16 @@
 
   /* Send submission interface */
   async function handleUpdateApp(params: Recordable) {
+    if (params.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
+      const cluster =
+        unref(flinkClusters).filter((c) => {
+          return c.id == params.flinkClusterId && c.clusterState === ClusterStateEnum.STARTED;
+        })[0] || null;
+      if (cluster) {
+        Object.assign(params, { clusterId: cluster.clusterId });
+      }
+    }
+
     try {
       const updated = await fetchUpdate(params);
       if (updated) {
@@ -301,6 +308,7 @@
 
     setFieldsValue({
       jobType: res.jobType,
+      appType: res.appType,
       executionMode: res.executionMode,
       flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
       dependency: '',

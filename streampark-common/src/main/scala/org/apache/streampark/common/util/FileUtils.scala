@@ -21,7 +21,7 @@ import java.net.URL
 import java.util
 import java.util.Scanner
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 object FileUtils {
@@ -80,7 +80,7 @@ object FileUtils {
   }
 
   def getPathFromEnv(env: String): String = {
-    val path = System.getenv(env)
+    val path = Option(System.getenv(env)).getOrElse(System.getProperty(env))
     require(
       Utils.notEmpty(path),
       s"[StreamPark] FileUtils.getPathFromEnv: $env is not set on system env")

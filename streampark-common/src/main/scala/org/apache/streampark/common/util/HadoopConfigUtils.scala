@@ -24,8 +24,8 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.{Collections, Map => JavaMap, Optional}
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 

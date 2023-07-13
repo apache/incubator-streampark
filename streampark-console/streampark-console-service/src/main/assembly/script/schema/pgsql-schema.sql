@@ -271,6 +271,7 @@ create sequence "public"."streampark_t_flink_cluster_id_seq"
 create table "public"."t_flink_cluster" (
   "id" int8 not null default nextval('streampark_t_flink_cluster_id_seq'::regclass),
   "address" varchar(150) collate "pg_catalog"."default",
+  "job_manager_url" varchar(150) collate "pg_catalog"."default",
   "cluster_id" varchar(45) collate "pg_catalog"."default",
   "cluster_name" varchar(128) collate "pg_catalog"."default" not null,
   "options" text collate "pg_catalog"."default",
@@ -289,10 +290,14 @@ create table "public"."t_flink_cluster" (
   "resolve_order" int4,
   "exception" text collate "pg_catalog"."default",
   "cluster_state" int2 default 0,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "start_time" timestamp(6),
+  "end_time" timestamp(6),
+  "alert_id" int8
 )
 ;
-comment on column "public"."t_flink_cluster"."address" is 'url address of jobmanager';
+comment on column "public"."t_flink_cluster"."address" is 'url address of cluster';
+comment on column "public"."t_flink_cluster"."job_manager_url" is 'url address of jobmanager';
 comment on column "public"."t_flink_cluster"."cluster_id" is 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)';
 comment on column "public"."t_flink_cluster"."cluster_name" is 'cluster name';
 comment on column "public"."t_flink_cluster"."options" is 'parameter collection json form';
@@ -307,6 +312,9 @@ comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s exp
 comment on column "public"."t_flink_cluster"."k8s_conf" is 'the path where the k 8 s configuration file is located';
 comment on column "public"."t_flink_cluster"."exception" is 'exception information';
 comment on column "public"."t_flink_cluster"."cluster_state" is 'cluster status (0: create not started, 1: started, 2: stopped)';
+comment on column "public"."t_flink_cluster"."start_time" is 'cluster start time';
+comment on column "public"."t_flink_cluster"."end_time" is 'cluster end time';
+comment on column "public"."t_flink_cluster"."alert_id" is 'alert id';
 alter table "public"."t_flink_cluster" add constraint "t_flink_cluster_pkey" primary key ("id", "cluster_name");
 create index "id" on "public"."t_flink_cluster" using btree (
   "cluster_id" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last,
@@ -704,7 +712,7 @@ create table "public"."t_user" (
   "username" varchar(64) collate "pg_catalog"."default" not null,
   "nick_name" varchar(64) collate "pg_catalog"."default" not null,
   "salt" varchar(26) collate "pg_catalog"."default",
-  "password" varchar(64) collate "pg_catalog"."default" not null,
+  "password" varchar(64) collate "pg_catalog"."default",
   "email" varchar(64) collate "pg_catalog"."default",
   "user_type" int4,
   "login_type" int2 default 0,
@@ -725,7 +733,7 @@ comment on column "public"."t_user"."salt" is 'salt';
 comment on column "public"."t_user"."password" is 'password';
 comment on column "public"."t_user"."email" is 'email';
 comment on column "public"."t_user"."user_type" is 'user type 1:admin 2:user';
-comment on column "public"."t_user"."login_type" is 'login type 0:password 1:ldap';
+comment on column "public"."t_user"."login_type" is 'login type 0:password 1:ldap 2:sso';
 comment on column "public"."t_user"."last_team_id" is 'last team id';
 comment on column "public"."t_user"."status" is 'status 0:locked 1:active';
 comment on column "public"."t_user"."create_time" is 'creation time';

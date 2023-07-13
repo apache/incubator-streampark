@@ -38,7 +38,7 @@ import org.apache.flink.kubernetes.kubeclient.{FlinkKubeClient, FlinkKubeClientF
 
 import java.io.File
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 

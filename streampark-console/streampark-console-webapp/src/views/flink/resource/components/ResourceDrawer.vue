@@ -28,11 +28,7 @@
     </template>
     <BasicForm @register="registerForm" :schemas="getResourceFormSchema">
       <template #resource="{ model, field }">
-        <Resource
-          ref="resourceRef"
-          v-model:value="model[field]"
-          :form-model="model"
-        />
+        <Resource ref="resourceRef" v-model:value="model[field]" :form-model="model" />
       </template>
     </BasicForm>
   </BasicDrawer>
@@ -44,18 +40,28 @@
 </script>
 
 <script lang="ts" setup>
-  import { ref, h, computed, unref } from 'vue';
+  import { ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Resource from '/@/views/flink/resource/components/Resource.vue';
-  import { fetchAddResource, fetchUpdateResource } from "/@/api/flink/resource";
-  import { EngineTypeEnum } from "/@/views/flink/resource/resource.data";
-  import { renderResourceType } from "/@/views/flink/resource/useResourceRender";
-  import { useMessage } from "/@/hooks/web/useMessage";
+  import { fetchAddResource, fetchUpdateResource } from '/@/api/flink/resource';
+  import { EngineTypeEnum } from '/@/views/flink/resource/resource.data';
+  import {
+    renderResourceType,
+    renderStreamParkResourceGroup,
+  } from '/@/views/flink/resource/useResourceRender';
+  import { useMessage } from '/@/hooks/web/useMessage';
 
   const emit = defineEmits(['success', 'register']);
+
+  const props = defineProps({
+    teamResource: {
+      type: Object as Array<any>,
+      required: true,
+    },
+  });
 
   const { t } = useI18n();
   const { Swal } = useMessage();
@@ -70,9 +76,10 @@
         field: 'resourceType',
         label: t('flink.resource.resourceType'),
         component: 'Select',
-        render: ({ model }) =>
-          renderResourceType( { model, }, ),
-        rules: [{ required: true, message: t('flink.resource.form.resourceTypeIsRequiredMessage') }],
+        render: ({ model }) => renderResourceType({ model }),
+        rules: [
+          { required: true, message: t('flink.resource.form.resourceTypeIsRequiredMessage') },
+        ],
       },
       {
         field: 'engineType',
@@ -89,10 +96,27 @@
         rules: [{ required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }],
       },
       {
+        field: 'resourceName',
+        label: t('flink.resource.groupName'),
+        component: 'Input',
+        componentProps: { placeholder: t('flink.resource.groupNamePlaceholder') },
+        ifShow: ({ values }) => values?.resourceType == 'GROUP',
+        rules: [{ required: true, message: t('flink.resource.groupNameIsRequiredMessage') }],
+      },
+      {
+        field: 'resourceGroup',
+        label: t('flink.resource.resourceGroup'),
+        component: 'Select',
+        render: ({ model }) =>
+          renderStreamParkResourceGroup({ model, resources: unref(props.teamResource) }),
+        ifShow: ({ values }) => values?.resourceType == 'GROUP',
+      },
+      {
         field: 'dependency',
         label: t('flink.resource.addResource'),
         component: 'Input',
         slot: 'resource',
+        ifShow: ({ values }) => values?.resourceType !== 'GROUP',
       },
       {
         field: 'mainClass',
@@ -121,15 +145,22 @@
     wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
   });
 
-  const [registerDrawer, { setDrawerProps, changeLoading, closeDrawer }] = useDrawerInner(
+  const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
     async (data: Recordable) => {
+      unref(resourceRef)?.setDefaultValue({});
       resetFields();
       setDrawerProps({ confirmLoading: false });
       isUpdate.value = !!data?.isUpdate;
       if (unref(isUpdate)) {
         resourceId.value = data.record.id;
         setFieldsValue(data.record);
-        unref(resourceRef)?.setDefaultValue(JSON.parse(data.record.resource || '{}'));
+
+        if (data.record?.resourceType == 'GROUP') {
+          setFieldsValue({ resourceGroup: JSON.parse(data.record.resource || '[]') });
+        } else {
+          setFieldsValue({ dependency: data.record.resource });
+          unref(resourceRef)?.setDefaultValue(JSON.parse(data.record.resource || '{}'));
+        }
       }
     },
   );
@@ -140,43 +171,51 @@
 
   // form submit
   async function handleSubmit() {
-    const resource: { pom?: string; jar?: string } = {};
-    unref(resourceRef).handleApplyPom();
-    const dependencyRecords = unref(resourceRef)?.dependencyRecords;
-    const uploadJars = unref(resourceRef)?.uploadJars;
-
-    if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
-      if (unref(dependencyRecords).length > 1) {
-        Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
-        return;
-      }
-      Object.assign(resource, {
-        pom: unref(dependencyRecords),
-      });
-    }
-
-    if (uploadJars && unref(uploadJars).length > 0) {
-      Object.assign(resource, {
-        jar: unref(uploadJars),
-      });
-    }
-
-    if (resource.pom === undefined && resource.jar === undefined) {
-      Swal.fire('Failed', t('flink.resource.addResourceTip'), 'error');
-      return;
-    }
-
-    if (resource.pom?.length > 0 && resource.jar?.length > 0) {
-      Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
-      return;
-    }
-
     try {
       const values = await validate();
+      let resourceJson = '';
+
+      if (values.resourceType == 'GROUP') {
+        resourceJson = JSON.stringify(values.resourceGroup);
+      } else {
+        const resource: { pom?: string; jar?: string } = {};
+        unref(resourceRef).handleApplyPom();
+        const dependencyRecords = unref(resourceRef)?.dependencyRecords;
+        const uploadJars = unref(resourceRef)?.uploadJars;
+
+        if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
+          if (unref(dependencyRecords).length > 1) {
+            Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
+            return;
+          }
+          Object.assign(resource, {
+            pom: unref(dependencyRecords),
+          });
+        }
+
+        if (uploadJars && unref(uploadJars).length > 0) {
+          Object.assign(resource, {
+            jar: unref(uploadJars),
+          });
+        }
+
+        if (resource.pom === undefined && resource.jar === undefined) {
+          Swal.fire('Failed', t('flink.resource.addResourceTip'), 'error');
+          return;
+        }
+
+        if (resource.pom?.length > 0 && resource.jar?.length > 0) {
+          Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
+          return;
+        }
+
+        resourceJson = JSON.stringify(resource);
+      }
+
       setDrawerProps({ confirmLoading: true });
       await (isUpdate.value
-        ? fetchUpdateResource({ id: resourceId.value, resource: JSON.stringify(resource), ...values })
-        : fetchAddResource({ resource: JSON.stringify(resource), ...values }));
+        ? fetchUpdateResource({ id: resourceId.value, resource: resourceJson, ...values })
+        : fetchAddResource({ resource: resourceJson, ...values }));
       unref(resourceRef)?.setDefaultValue({});
       resetFields();
       closeDrawer();
@@ -185,7 +224,6 @@
       setDrawerProps({ confirmLoading: false });
     }
   }
-
 </script>
 
 <style lang="less">

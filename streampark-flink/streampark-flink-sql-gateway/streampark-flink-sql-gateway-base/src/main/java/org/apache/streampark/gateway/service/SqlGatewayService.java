@@ -33,6 +33,18 @@ import org.apache.streampark.gateway.session.SessionHandle;
 public interface SqlGatewayService {
 
   // -------------------------------------------------------------------------------------------
+  // Validate API
+  // -------------------------------------------------------------------------------------------
+
+  /**
+   * Check if the SQL gateway is available with the given flink major version.
+   *
+   * @param flinkMajorVersion flink major version
+   * @return true if the SQL gateway is available with the given flink major version.
+   */
+  boolean check(String flinkMajorVersion);
+
+  // -------------------------------------------------------------------------------------------
   // Info API
   // -------------------------------------------------------------------------------------------
 

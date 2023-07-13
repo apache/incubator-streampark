@@ -34,7 +34,7 @@ import org.elasticsearch.action.ActionRequest
 import java.util.{Map => JavaMap, Properties}
 
 import scala.annotation.meta.param
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 object ES5Sink {
 

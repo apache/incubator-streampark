@@ -25,7 +25,7 @@ import redis.clients.jedis.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
 import java.net.URI
 import java.util.Properties
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 /**
  * RedisEndpoint represents a redis connection endpoint info: host, port, auth password db number,

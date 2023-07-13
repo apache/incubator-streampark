@@ -27,9 +27,11 @@ import { RootRoute } from '/@/router/routes';
 
 const LOGIN_PATH = PageEnum.BASE_LOGIN;
 
+const SSO_LOGIN_PATH = PageEnum.SSO_LOGIN;
+
 const ROOT_PATH = RootRoute.path;
 
-const whitePathList: PageEnum[] = [LOGIN_PATH];
+const whitePathList: PageEnum[] = [LOGIN_PATH, SSO_LOGIN_PATH];
 
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();
@@ -44,7 +46,6 @@ export function createPermissionGuard(router: Router) {
       next(userStore.getUserInfo.homePath);
       return;
     }
-
     const token = userStore.getToken;
     // Whitelist can be directly entered
     if (whitePathList.includes(to.path as PageEnum)) {

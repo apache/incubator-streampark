@@ -31,7 +31,7 @@ import org.influxdb.dto.Point
 import java.util.{Map => JavaMap, Properties}
 import java.util.concurrent.TimeUnit
 
-import scala.collection.JavaConversions._;
+import scala.collection.convert.ImplicitConversions._;
 
 class InfluxFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T])
   extends RichSinkFunction[T]

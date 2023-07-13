@@ -161,7 +161,10 @@ export function handleIsStart(app: Recordable, optionApps: Recordable) {
 }
 
 export function handleYarnQueue(values: Recordable) {
-  if (values.executionMode == ExecModeEnum.YARN_APPLICATION || values.executionMode == ExecModeEnum.YARN_PER_JOB) {
+  if (
+    values.executionMode == ExecModeEnum.YARN_APPLICATION ||
+    values.executionMode == ExecModeEnum.YARN_PER_JOB
+  ) {
     const queue = values['yarnQueue'];
     if (queue != null && queue !== '' && queue !== undefined) {
       return queue;
@@ -313,8 +316,8 @@ export function isK8sExecMode(mode: number): boolean {
 }
 
 export function handleTeamResource(resource: string) {
-    if (resource != null && resource !== '') {
-      return JSON.parse(resource);
-    }
-    return [];
+  if (resource != null && resource !== '') {
+    return JSON.parse(resource);
+  }
+  return [];
 }

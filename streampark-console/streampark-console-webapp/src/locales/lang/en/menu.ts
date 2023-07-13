@@ -36,5 +36,6 @@ export default {
     flinkCluster: 'Flink Cluster',
     externalLink: 'External Link',
     yarnQueue: 'Yarn Queue',
+    flinkGateway: 'FLink Gateway',
   },
 };

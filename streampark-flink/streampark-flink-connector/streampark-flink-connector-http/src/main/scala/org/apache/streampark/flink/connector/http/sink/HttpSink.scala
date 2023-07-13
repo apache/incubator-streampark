@@ -29,7 +29,7 @@ import org.apache.http.client.methods._
 import java.util.Properties
 
 import scala.annotation.meta.param
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 object HttpSink {
 

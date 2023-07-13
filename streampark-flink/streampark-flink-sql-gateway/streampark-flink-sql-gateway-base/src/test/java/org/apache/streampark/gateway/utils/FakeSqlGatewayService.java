@@ -37,6 +37,11 @@ public class FakeSqlGatewayService implements SqlGatewayService {
   private FakeSqlGatewayService() {}
 
   @Override
+  public boolean check(String flinkMajorVersion) {
+    return true;
+  }
+
+  @Override
   public GatewayInfo getGatewayInfo() throws SqlGatewayException {
     throw new UnsupportedOperationException();
   }

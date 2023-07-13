@@ -19,18 +19,17 @@ package org.apache.streampark.gateway;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
 /** {@link OperationHandle} to index the {@code Operation}. */
 public class OperationHandle implements Serializable {
 
-  private final UUID identifier;
+  private final String identifier;
 
-  public OperationHandle(UUID identifier) {
+  public OperationHandle(String identifier) {
     this.identifier = identifier;
   }
 
-  public UUID getIdentifier() {
+  public String getIdentifier() {
     return identifier;
   }
 

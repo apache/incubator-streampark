@@ -33,7 +33,7 @@ import javax.annotation.Nullable
 import java.io.File
 import java.util.{Map => JavaMap}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.Try
 
 /**
@@ -61,6 +61,7 @@ case class SubmitRequest(
     appConf: String,
     applicationType: ApplicationType,
     savePoint: String,
+    restoreMode: RestoreMode,
     args: String,
     @Nullable buildResult: BuildResult,
     @Nullable k8sSubmitParam: KubernetesSubmitParam,

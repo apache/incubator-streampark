@@ -22,7 +22,7 @@ import io.netty.resolver.HostsFileParser
 import java.net.InetAddress
 import java.util.{Map => JavaMap}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.immutable.ListMap
 
 object HostsUtils {

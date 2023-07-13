@@ -25,7 +25,7 @@ import org.apache.hadoop.security.UserGroupInformation
 
 import java.util.Properties
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 class HBaseClient(func: () => Connection) extends Serializable {
   lazy val connection: Connection = func()

@@ -28,7 +28,7 @@ import org.apache.spark.SparkConf
 
 import java.util
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 /**

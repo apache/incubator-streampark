@@ -33,7 +33,8 @@ import java.util
 import java.util.{HashMap => JavaHashMap, List => JavaList}
 import java.util.concurrent.TimeUnit
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 import scala.util.control.Breaks.{break, breakable}
@@ -52,6 +53,11 @@ object YarnUtils extends Logger {
   lazy val hasYarnHttpKerberosAuth: Boolean = {
     val yarnHttpAuth: String = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_YARN_AUTH)
     "kerberos".equalsIgnoreCase(yarnHttpAuth)
+  }
+
+  lazy val hasYarnHttpSampleAuth: Boolean = {
+    val yarnHttpAuth: String = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_YARN_AUTH)
+    "sample".equalsIgnoreCase(yarnHttpAuth)
   }
 
   /**
@@ -115,15 +121,8 @@ object YarnUtils extends Logger {
     if (StringUtils.isNotBlank(PROXY_YARN_URL)) PROXY_YARN_URL else getRMWebAppURL()
   }
 
-  /**
-   * <pre>
-   *
-   * @return
-   *   </pre>
-   */
-  def getRMWebAppURL(): String = {
-
-    if (rmHttpURL == null) {
+  def getRMWebAppURL(getLatest: Boolean = false): String = {
+    if (rmHttpURL == null || getLatest) {
       synchronized {
         val conf = HadoopUtils.hadoopConf
         val useHttps = YarnConfiguration.useHttps(conf)
@@ -206,7 +205,7 @@ object YarnUtils extends Logger {
 
             val address = NetUtils.getConnectAddress(inetSocketAddress)
 
-            val buffer = new StringBuilder(protocol)
+            val buffer = new mutable.StringBuilder(protocol)
             val resolved = address.getAddress
             if (resolved != null && !resolved.isAnyLocalAddress && !resolved.isLoopbackAddress) {
               buffer.append(address.getHostName)
@@ -244,17 +243,16 @@ object YarnUtils extends Logger {
    * @return
    */
   def restRequest(url: String): String = {
-    if (url == null) return null
 
-    def request(url: String): String = {
-      logDebug("request url is " + url);
+    def request(reqUrl: String): String = {
+      logDebug("request url is " + reqUrl)
       val config = RequestConfig.custom.setConnectTimeout(5000, TimeUnit.MILLISECONDS).build
       if (hasYarnHttpKerberosAuth) {
         HadoopUtils
           .getUgi()
           .doAs(new PrivilegedExceptionAction[String] {
             override def run(): String = {
-              Try(HttpClientUtils.httpAuthGetRequest(url, config)) match {
+              Try(HttpClientUtils.httpAuthGetRequest(reqUrl, config)) match {
                 case Success(v) => v
                 case Failure(e) =>
                   logError("yarnUtils authRestRequest error, detail: ", e)
@@ -263,6 +261,9 @@ object YarnUtils extends Logger {
             }
           })
       } else {
+        val url = if (hasYarnHttpSampleAuth) {
+          s"$reqUrl?user.name=${HadoopUtils.hadoopUserName}"
+        } else reqUrl
         Try(HttpClientUtils.httpGetRequest(url, config)) match {
           case Success(v) => v
           case Failure(e) =>
@@ -272,10 +273,16 @@ object YarnUtils extends Logger {
       }
     }
 
-    if (url.startsWith("http://") || url.startsWith("https://")) request(url)
-    else {
-      request(s"${getRMWebAppURL()}/$url")
+    url match {
+      case u if u.matches("^http(|s)://.*") => request(url)
+      case _ =>
+        val resp = request(s"${getRMWebAppURL()}/$url")
+        if (resp != null) resp;
+        else {
+          request(s"${getRMWebAppURL(true)}/$url")
+        }
     }
+
   }
 
 }

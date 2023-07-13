@@ -69,7 +69,7 @@ public class CheckpointProcessor {
 
   @Autowired private SavePointService savePointService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
 
   public void process(Application application, @Nonnull CheckPoints checkPoints) {
     checkPoints.getLatestCheckpoint().forEach(checkPoint -> process(application, checkPoint));
@@ -85,7 +85,7 @@ public class CheckpointProcessor {
       if (shouldStoreAsSavepoint(checkPointKey, checkPoint)) {
         savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
         saveSavepoint(checkPoint, application.getId());
-        flinkRESTAPIWatcher.cleanSavepoint(application);
+        flinkHttpWatcher.cleanSavepoint(application);
         return;
       }
 
