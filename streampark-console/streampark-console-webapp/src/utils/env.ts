@@ -18,8 +18,11 @@ import type { GlobEnvConfig } from '/#/config';
 
 import { warn } from '/@/utils/log';
 import pkg from '../../package.json';
-import { getConfigFileName } from '../../build/getConfigFileName';
-
+const getVariableName = (title: string) => {
+  return `__PRODUCTION__${title.replace(/\s/g, '_').replace(/-/g, '_') || '__APP'}__CONF__`
+    .toUpperCase()
+    .replace(/\s/g, '');
+};
 export function getCommonStoragePrefix() {
   const { VITE_GLOB_APP_SHORT_NAME } = getAppEnvConfig();
   return `${VITE_GLOB_APP_SHORT_NAME}__${getEnv()}`.toUpperCase();
@@ -31,7 +34,7 @@ export function getStorageShortName() {
 }
 
 export function getAppEnvConfig() {
-  const ENV_NAME = getConfigFileName(import.meta.env);
+  const ENV_NAME = getVariableName(import.meta.env.VITE_GLOB_APP_TITLE);
 
   const ENV = (import.meta.env.DEV
     ? // Get the global configuration (the configuration will be extracted independently when packaging)
