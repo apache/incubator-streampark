@@ -255,7 +255,6 @@ DEFAULT_OPTS="""
   -XX:NewSize=100m
   -XX:+UseConcMarkSweepGC
   -XX:CMSInitiatingOccupancyFraction=70
-  -XX:ThreadStackSize=512
   -Xloggc:${APP_HOME}/logs/gc.log
   """
 
