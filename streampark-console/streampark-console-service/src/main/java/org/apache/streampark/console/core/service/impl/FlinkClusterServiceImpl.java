@@ -156,17 +156,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void starting(FlinkCluster flinkCluster) {
-    flinkCluster.setClusterState(ClusterState.STARTING.getValue());
-    flinkCluster.setStartTime(new Date());
-    updateById(flinkCluster);
-  }
-
-  @Override
   @Transactional(rollbackFor = {Exception.class})
   public void start(FlinkCluster cluster) {
     FlinkCluster flinkCluster = getById(cluster.getId());
-    starting(flinkCluster);
+    updateClusterState(cluster.getId(), ClusterState.STARTING);
     try {
       DeployResponse deployResponse = deployInternal(flinkCluster);
       ApiAlertException.throwIfNull(
@@ -185,8 +178,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
       flinkCluster.setException(null);
       flinkCluster.setEndTime(null);
-      FlinkClusterWatcher.addWatching(flinkCluster);
       updateById(flinkCluster);
+      FlinkClusterWatcher.addWatching(flinkCluster);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       flinkCluster.setClusterState(ClusterState.FAILED.getValue());
@@ -229,12 +222,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void canceling(FlinkCluster flinkCluster) {
-    flinkCluster.setClusterState(ClusterState.CANCELING.getValue());
-    updateById(flinkCluster);
-  }
-
-  @Override
   public void shutdown(FlinkCluster cluster) {
     FlinkCluster flinkCluster = this.getById(cluster.getId());
     // 1) check mode
@@ -250,15 +237,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     ApiAlertException.throwIfTrue(
         existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
 
-    canceling(flinkCluster);
+    updateClusterState(flinkCluster.getId(), ClusterState.CANCELING);
     try {
       // 4) shutdown
       ShutDownResponse shutDownResponse = shutdownInternal(flinkCluster, clusterId);
       ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
       flinkCluster.setClusterState(ClusterState.CANCELED.getValue());
       flinkCluster.setEndTime(new Date());
-      FlinkClusterWatcher.unWatching(flinkCluster);
       updateById(flinkCluster);
+      FlinkClusterWatcher.unWatching(flinkCluster);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       flinkCluster.setException(e.toString());
@@ -302,8 +289,23 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     LambdaUpdateWrapper<FlinkCluster> updateWrapper =
         new LambdaUpdateWrapper<FlinkCluster>()
             .eq(FlinkCluster::getId, id)
-            .set(FlinkCluster::getClusterState, state.getValue())
-            .set(FlinkCluster::getEndTime, new Date());
+            .set(FlinkCluster::getClusterState, state.getValue());
+
+    switch (state) {
+      case KILLED:
+      case UNKNOWN:
+      case LOST:
+      case FAILED:
+      case CANCELED:
+        updateWrapper.set(FlinkCluster::getEndTime, new Date());
+        break;
+      case STARTING:
+        updateWrapper.set(FlinkCluster::getStartTime, new Date());
+        break;
+      default:
+        break;
+    }
+
     update(updateWrapper);
   }
 

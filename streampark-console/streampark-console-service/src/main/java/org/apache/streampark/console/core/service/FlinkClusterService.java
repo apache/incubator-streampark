@@ -37,11 +37,7 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   void update(FlinkCluster flinkCluster);
 
-  void starting(FlinkCluster flinkCluster);
-
   void start(FlinkCluster flinkCluster);
-
-  void canceling(FlinkCluster flinkCluster);
 
   void shutdown(FlinkCluster flinkCluster);
 
