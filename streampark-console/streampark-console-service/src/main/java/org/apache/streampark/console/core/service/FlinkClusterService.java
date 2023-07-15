@@ -37,7 +37,11 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   void update(FlinkCluster flinkCluster);
 
+  void starting(FlinkCluster flinkCluster);
+
   void start(FlinkCluster flinkCluster);
+
+  void canceling(FlinkCluster flinkCluster);
 
   void shutdown(FlinkCluster flinkCluster);
 
@@ -49,5 +53,5 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes);
 
-  void updateClusterFinalState(Long id, ClusterState state);
+  void updateClusterState(Long id, ClusterState state);
 }
