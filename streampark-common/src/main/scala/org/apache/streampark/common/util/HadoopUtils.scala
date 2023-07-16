@@ -27,7 +27,7 @@ import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.service.Service.STATE
-import org.apache.hadoop.yarn.api.records.ApplicationId
+import org.apache.hadoop.yarn.api.records.{ApplicationId, YarnApplicationState}
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.conf.YarnConfiguration
 
@@ -288,6 +288,10 @@ object HadoopUtils extends Logger {
     val destPath = new Path(tmpDir.getAbsolutePath + "/" + sourcePath.getName)
     fs.copyToLocalFile(sourcePath, destPath)
     new File(destPath.toString).getAbsolutePath
+  }
+
+  def toYarnState(state: String): YarnApplicationState = {
+    YarnApplicationState.values.find(_.name() == state).orNull
   }
 
   private class HadoopConfiguration extends Configuration {

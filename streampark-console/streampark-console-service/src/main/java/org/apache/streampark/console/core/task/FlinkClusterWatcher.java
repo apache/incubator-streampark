@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -111,10 +112,17 @@ public class FlinkClusterWatcher {
               EXECUTOR.execute(
                   () -> {
                     ClusterState state = getClusterState(flinkCluster);
-                    if (ClusterState.isFailed(state)) {
-                      flinkClusterService.updateClusterState(flinkCluster.getId(), state);
-                      unWatching(flinkCluster);
-                      alert(flinkCluster, state);
+                    switch (state) {
+                      case FAILED:
+                      case LOST:
+                      case UNKNOWN:
+                      case KILLED:
+                        flinkClusterService.updateClusterState(flinkCluster.getId(), state);
+                        unWatching(flinkCluster);
+                        alert(flinkCluster, state);
+                        break;
+                      default:
+                        break;
                     }
                   }));
     }
@@ -177,8 +185,8 @@ public class FlinkClusterWatcher {
    * @return
    */
   private ClusterState httpYarnSessionClusterState(FlinkCluster flinkCluster) {
-    final ClusterState state = getStateFromFlinkRestApi(flinkCluster);
-    if (ClusterState.isFailed(state)) {
+    ClusterState state = getStateFromFlinkRestApi(flinkCluster);
+    if (ClusterState.LOST == state) {
       return getStateFromYarnRestApi(flinkCluster);
     }
     return state;
@@ -191,12 +199,9 @@ public class FlinkClusterWatcher {
    * @return
    */
   private ClusterState getStateFromFlinkRestApi(FlinkCluster flinkCluster) {
-    final String address = flinkCluster.getAddress();
-    if (StringUtils.isEmpty(address)) {
-      return ClusterState.CANCELED;
-    }
-    final String jobManagerUrl = flinkCluster.getJobManagerUrl();
-    final String flinkUrl =
+    String address = flinkCluster.getAddress();
+    String jobManagerUrl = flinkCluster.getJobManagerUrl();
+    String flinkUrl =
         StringUtils.isEmpty(jobManagerUrl)
             ? address.concat("/overview")
             : jobManagerUrl.concat("/overview");
@@ -227,7 +232,7 @@ public class FlinkClusterWatcher {
         return ClusterState.UNKNOWN;
       }
       YarnAppInfo yarnAppInfo = JacksonUtils.read(result, YarnAppInfo.class);
-      YarnApplicationState status = stringConvertYarnState(yarnAppInfo.getApp().getState());
+      YarnApplicationState status = HadoopUtils.toYarnState(yarnAppInfo.getApp().getState());
       if (status == null) {
         log.error(
             "cluster id:{} final application status convert failed, invalid string ",
@@ -258,21 +263,6 @@ public class FlinkClusterWatcher {
       log.info("remove the cluster with id:{} from watcher cluster cache", flinkCluster.getId());
       WATCHER_CLUSTERS.remove(flinkCluster.getId());
     }
-  }
-
-  /**
-   * string converse yarn application state
-   *
-   * @param value
-   * @return
-   */
-  private YarnApplicationState stringConvertYarnState(String value) {
-    for (YarnApplicationState state : YarnApplicationState.values()) {
-      if (state.name().equals(value)) {
-        return state;
-      }
-    }
-    return null;
   }
 
   /**

@@ -67,12 +67,4 @@ public enum ClusterState implements Serializable {
   public static boolean isRunning(ClusterState state) {
     return RUNNING.equals(state);
   }
-
-  public static boolean isFailed(ClusterState state) {
-    return state == ClusterState.FAILED
-        || state == ClusterState.LOST
-        || state == ClusterState.UNKNOWN
-        || state == ClusterState.KILLED
-        || state == ClusterState.CANCELED;
-  }
 }
