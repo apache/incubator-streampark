@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Variable;
 
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /** org.apache.streampark.console.core.service.VariableServiceTest */
-class VariableServiceTest extends SpringTestBase {
+class VariableServiceTest extends SpringUnitTestBase {
 
   @Autowired private VariableService variableService;
 
