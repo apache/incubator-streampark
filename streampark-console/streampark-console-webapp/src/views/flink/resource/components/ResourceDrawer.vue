@@ -49,6 +49,7 @@
   import { fetchAddResource, fetchUpdateResource } from '/@/api/flink/resource';
   import { EngineTypeEnum } from '/@/views/flink/resource/resource.data';
   import {
+    renderEngineType,
     renderResourceType,
     renderStreamParkResourceGroup,
   } from '/@/views/flink/resource/useResourceRender';
@@ -73,6 +74,13 @@
   const getResourceFormSchema = computed((): FormSchema[] => {
     return [
       {
+        field: 'resourceName',
+        label: t('flink.resource.resourceName'),
+        component: 'Input',
+        componentProps: { placeholder: t('flink.resource.resourceNamePlaceholder') },
+        rules: [{ required: true, message: t('flink.resource.form.resourceNameIsRequiredMessage') }],
+      },
+      {
         field: 'resourceType',
         label: t('flink.resource.resourceType'),
         component: 'Select',
@@ -85,15 +93,11 @@
         field: 'engineType',
         label: t('flink.resource.engineType'),
         component: 'Select',
+        render: ({ model }) => renderEngineType({ model }),
         defaultValue: EngineTypeEnum.FLINK,
-        componentProps: {
-          placeholder: t('flink.resource.engineTypePlaceholder'),
-          options: [
-            { label: 'apache flink', value: EngineTypeEnum.FLINK, disabled: false },
-            { label: 'apache spark', value: EngineTypeEnum.SPARK, disabled: true },
-          ],
-        },
-        rules: [{ required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }],
+        rules: [
+          { required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }
+        ],
       },
       {
         field: 'resourceName',
