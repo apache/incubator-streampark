@@ -81,6 +81,7 @@
         <module>streampark-spark</module>
         <module>streampark-storage</module>
         <module>streampark-console</module>
+        <module>streampark-test-utils</module>
     </modules>
 
     <properties>
