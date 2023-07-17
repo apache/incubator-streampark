@@ -95,7 +95,6 @@ import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CoreOptions;
@@ -119,7 +118,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -137,7 +135,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -302,24 +299,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     map.put("runningJob", runningJob);
 
     return map;
-  }
-
-  @Override
-  public String upload(MultipartFile file) throws Exception {
-    File temp = WebUtils.getAppTempDir();
-    String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
-    File saveFile = new File(temp, fileName);
-    // delete when exists
-    if (saveFile.exists()) {
-      saveFile.delete();
-    }
-    // save file to temp dir
-    try {
-      file.transferTo(saveFile);
-    } catch (Exception e) {
-      throw new ApiDetailException(e);
-    }
-    return saveFile.getAbsolutePath();
   }
 
   @Override

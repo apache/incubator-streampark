@@ -28,8 +28,10 @@
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
   import { Tabs, Alert, Tag, Space } from 'ant-design-vue';
-  import { fetchUpload } from '/@/api/flink/app/app';
+  import { fetchUpload } from '/@/api/flink/resource';
+
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
+  import { ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
 
   interface DependencyType {
     artifactId: string;
@@ -211,7 +213,7 @@
 </script>
 
 <template>
-  <template v-if="props.formModel.resourceType == 'FLINK_APP'">
+  <template v-if="props.formModel.resourceType === ResourceTypeEnum.FLINK_APP">
     <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
   </template>
   <template v-else>

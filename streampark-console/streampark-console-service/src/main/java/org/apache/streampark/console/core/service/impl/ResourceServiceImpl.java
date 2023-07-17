@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
@@ -37,6 +38,7 @@ import org.apache.streampark.console.core.service.ResourceService;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.shaded.org.apache.commons.codec.digest.DigestUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -48,8 +50,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -197,6 +201,34 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             .eq(Resource::getCreatorId, userId)
             .set(Resource::getCreatorId, targetUserId);
     this.baseMapper.update(null, updateWrapper);
+  }
+
+  /**
+   * @param file
+   * @return
+   */
+  @Override
+  public String upload(MultipartFile file) throws IOException {
+    File temp = WebUtils.getAppTempDir();
+
+    String name = file.getOriginalFilename();
+    String suffix = name.substring(name.lastIndexOf("."));
+
+    String sha256Hex = DigestUtils.sha256Hex(file.getInputStream());
+    String fileName = sha256Hex.concat(suffix);
+
+    File saveFile = new File(temp, fileName);
+
+    if (!saveFile.exists()) {
+      // save file to temp dir
+      try {
+        file.transferTo(saveFile);
+      } catch (Exception e) {
+        throw new ApiDetailException(e);
+      }
+    }
+
+    return saveFile.getAbsolutePath();
   }
 
   private void transferTeamResource(Long teamId, String resourceName) {

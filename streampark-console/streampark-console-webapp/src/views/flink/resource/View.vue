@@ -28,45 +28,45 @@
         <template v-if="column.dataIndex === 'resourceType'">
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.FLINK_APP">
             <template #icon>
-              <img :src=flinkAppSvg class="svg-icon" alt="Flink App"/>
+              <img :src="flinkAppSvg" class="svg-icon" alt="Flink App" />
             </template>
             Flink App
           </Tag>
 
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.CONNECTOR">
             <template #icon>
-              <img :src=connectorSvg class="svg-icon" alt="Connector"/>
+              <img :src="connectorSvg" class="svg-icon" alt="Connector" />
             </template>
             Connector
           </Tag>
 
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.UDXF">
             <template #icon>
-              <img :src=udxfSvg class="svg-icon" alt="UDXF"/>
+              <img :src="udxfSvg" class="svg-icon" alt="UDXF" />
             </template>
             UDXF
           </Tag>
 
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.NORMAL_JAR">
             <template #icon>
-              <img :src=normalJarSvg class="svg-icon" alt="Normal jar"/>
+              <img :src="normalJarSvg" class="svg-icon" alt="Normal jar" />
             </template>
             Normal Jar
           </Tag>
 
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.GROUP">
             <template #icon>
-              <img :src=groupSvg class="svg-icon" alt="GROUP"/>
+              <img :src="groupSvg" class="svg-icon" alt="GROUP" />
             </template>
             GROUP
           </Tag>
         </template>
         <template v-if="column.dataIndex === 'engineType'">
           <span v-if="record.engineType === EngineTypeEnum.FLINK">
-            <SvgIcon name="flink"/> Apache Flink
+            <SvgIcon name="flink" /> Apache Flink
           </span>
           <span v-if="record.engineType === EngineTypeEnum.SPARK">
-            <SvgIcon name="spark"/> Apache Spark
+            <SvgIcon name="spark" /> Apache Spark
           </span>
         </template>
         <template v-if="column.dataIndex === 'action'">
@@ -118,11 +118,9 @@
   import { fetchResourceDelete, fetchResourceList, fetchTeamResource } from '/@/api/flink/resource';
   import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
   import { Tag } from 'ant-design-vue';
-  import SvgIcon from "/@/components/Icon/src/SvgIcon.vue";
-
+  import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
 
   import flinkAppSvg from '/@/assets/icons/flink2.svg';
-  import sparkSvg from '/@/assets/icons/spark.svg';
   import connectorSvg from '/@/assets/icons/connector.svg';
   import udxfSvg from '/@/assets/icons/fx.svg';
   import normalJarSvg from '/@/assets/icons/jar.svg';
@@ -188,7 +186,7 @@
     });
     if (data.status === 'success') {
       createMessage.success(t('flink.resource.deleteResource') + t('flink.resource.success'));
-      reload();
+      await reload();
       updateTeamResource();
     } else {
       createMessage.error(t('flink.resource.deleteResource') + t('flink.resource.fail'));
@@ -216,16 +214,15 @@
 </script>
 
 <style lang="less" scoped>
-.svg-icon {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
+  .svg-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
 
-  .svg-connector {
-    svg path {
-      fill: #fff0f6 !important;
+    .svg-connector {
+      svg path {
+        fill: #fff0f6 !important;
+      }
     }
   }
-}
-
 </style>

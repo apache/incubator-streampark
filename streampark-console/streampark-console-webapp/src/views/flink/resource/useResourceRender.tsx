@@ -16,7 +16,7 @@
  */
 import { Select, Tag } from 'ant-design-vue';
 import { useI18n } from '/@/hooks/web/useI18n';
-import {EngineTypeEnum, ResourceTypeEnum} from '/@/views/flink/resource/resource.data';
+import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
 
 import flinkAppSvg from '/@/assets/icons/flink2.svg';
 import sparkSvg from '/@/assets/icons/spark.svg';
@@ -70,9 +70,9 @@ export const renderEngineType = ({ model }) => {
       { label: 'Apache Flink', value: EngineTypeEnum.FLINK, disabled: false, src: flinkAppSvg },
       { label: 'Apache Spark', value: EngineTypeEnum.SPARK, disabled: true, src: sparkSvg },
     ];
-    return options.map(({ label, value,disabled, src }) => {
+    return options.map(({ label, value, disabled, src }) => {
       return (
-        <Select.Option key={value} label={label} disabled={disabled} >
+        <Select.Option key={value} label={label} disabled={disabled}>
           <div>
             <img src={src} style="display: inline-block; width: 20px; height: 20px"></img>
             <span style="vertical-align: middle; margin-left: 5px;">{label}</span>
@@ -95,7 +95,6 @@ export const renderEngineType = ({ model }) => {
     </div>
   );
 };
-
 
 export const renderStreamParkResourceGroup = ({ model, resources }) => {
   const renderOptions = () => {
