@@ -32,6 +32,11 @@ import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.enums.AppExistsState;
 import org.apache.streampark.console.core.enums.PermissionType;
+import org.apache.streampark.console.core.service.AppBuildPipeService;
+import org.apache.streampark.console.core.service.ApplicationBackUpService;
+import org.apache.streampark.console.core.service.ApplicationLogService;
+import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
