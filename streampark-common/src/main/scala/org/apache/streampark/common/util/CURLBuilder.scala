@@ -37,7 +37,7 @@ class CURLBuilder(val url: String) {
   }
 
   def build: String = {
-    require(url != null, "[StreamPark] cURL build failed, url must not be null")
+    require(url != null, "[StreamPark] CURL build failed, url must not be null")
     val cURL = new StringBuilder("curl -X POST ")
     cURL.append(String.format("'%s' \\\n", url))
     for (headerKey <- headers.keySet) {
