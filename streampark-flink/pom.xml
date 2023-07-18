@@ -39,6 +39,7 @@
         <module>streampark-flink-packer</module>
         <module>streampark-flink-kubernetes</module>
         <module>streampark-flink-sql-gateway</module>
+        <module>streampark-flink-catalog-mysql</module>
     </modules>
 
     <dependencies>
