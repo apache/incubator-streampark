@@ -44,7 +44,7 @@ import javax.annotation.{Nonnull, Nullable}
 import java.io.File
 import java.util
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 

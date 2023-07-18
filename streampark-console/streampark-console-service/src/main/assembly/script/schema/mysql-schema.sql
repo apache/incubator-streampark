@@ -379,10 +379,10 @@ create table `t_user` (
   `username` varchar(64) collate utf8mb4_general_ci not null comment 'user name',
   `nick_name` varchar(64) collate utf8mb4_general_ci not null comment 'nick name',
   `salt` varchar(26) collate utf8mb4_general_ci default null comment 'salt',
-  `password` varchar(64) collate utf8mb4_general_ci not null comment 'password',
+  `password` varchar(64) collate utf8mb4_general_ci default null comment 'password',
   `email` varchar(64) collate utf8mb4_general_ci default null comment 'email',
   `user_type` int  not null comment 'user type 1:admin 2:user',
-  `login_type` tinyint default 0 comment 'login type 0:password 1:ldap',
+  `login_type` tinyint default 0 comment 'login type 0:password 1:ldap 2:sso',
   `last_team_id` bigint default null comment 'last team id',
   `status` char(1) collate utf8mb4_general_ci not null comment 'status 0:locked 1:active',
   `create_time` datetime not null default current_timestamp comment 'create time',
@@ -437,7 +437,8 @@ create table `t_app_build_pipe`(
 drop table if exists `t_flink_cluster`;
 create table `t_flink_cluster` (
   `id` bigint not null auto_increment,
-  `address` varchar(150) default null comment 'url address of jobmanager',
+  `address` varchar(150) default null comment 'url address of cluster',
+  `job_manager_url` varchar(150) default null comment 'url address of jobmanager',
   `cluster_id` varchar(45) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
   `cluster_name` varchar(128) not null comment 'cluster name',
   `options` text comment 'json form of parameter collection ',
@@ -457,6 +458,9 @@ create table `t_flink_cluster` (
   `exception` text comment 'exception information',
   `cluster_state` tinyint default 0 comment 'cluster status (0: created but not started, 1: started, 2: stopped)',
   `create_time` datetime not null default current_timestamp comment 'create time',
+  `start_time` datetime default null comment 'start time',
+  `end_time` datetime default null comment 'end time',
+  `alert_id` bigint default null comment 'alert id',
   primary key (`id`,`cluster_name`),
   unique key `id` (`cluster_id`,`address`,`execution_mode`)
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;

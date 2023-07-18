@@ -37,7 +37,6 @@
     getSavePointColumns,
   } from '../../data/detail.data';
   import { getMonacoOptions } from '../../data';
-  import { handleView } from '../../utils';
   import { useRoute } from 'vue-router';
   import { fetchGetVer, fetchListVer, fetchRemoveConf } from '/@/api/flink/config';
   import { fetchRemoveSavePoint, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
@@ -47,6 +46,7 @@
     fetchOptionLog,
     fetchRemoveBackup,
     fetchDeleteOperationLog,
+    fetchYarn,
   } from '/@/api/flink/app/app';
   import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';
@@ -269,6 +269,11 @@
       version: record.version,
       createTime: record.createTime,
     });
+  }
+
+  async function handleYarnUrl(yarnAppId: string) {
+    const res = await fetchYarn();
+    window.open(res + '/proxy/' + yarnAppId + '/');
   }
 
   function getSavePointAction(record: Recordable): ActionItem[] {
@@ -528,7 +533,7 @@
               <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
             </template>
             <template v-if="column.dataIndex === 'yarnAppId'">
-              <a type="link" :href="record.yarnAppId" target="_blank">
+              <a type="link" @click="handleYarnUrl(record.yarnAppId)" target="_blank">
                 {{ record.yarnAppId }}
               </a>
             </template>

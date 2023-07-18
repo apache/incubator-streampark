@@ -23,7 +23,6 @@
 </script>
 
 <script setup lang="ts" name="StopApplicationModal">
-  import { InputNumber } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
@@ -91,8 +90,7 @@
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, customSavepoint, drain } =
-        (await validate()) as Recordable;
+      const { stopSavePointed, customSavepoint, drain } = (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
         savePointed: stopSavePointed,

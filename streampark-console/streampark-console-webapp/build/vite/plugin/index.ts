@@ -27,8 +27,9 @@ import { configVisualizerConfig } from './visualizer';
 import { configThemePlugin } from './theme';
 import { configImageminPlugin } from './imagemin';
 import { configSvgIconsPlugin } from './svgSprite';
+import { createAppConfigPlugin } from './appConfig';
 
-export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
+export async function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
   const {
     VITE_USE_IMAGEMIN,
     VITE_LEGACY,
@@ -42,7 +43,8 @@ export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
     // have to
     vueJsx(),
   ];
-
+  const appConfigPlugin = await createAppConfigPlugin(isBuild);
+  vitePlugins.push(appConfigPlugin);
   // vite-plugin-windicss
   vitePlugins.push(windiCSS());
 
@@ -50,7 +52,7 @@ export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
   VITE_LEGACY && isBuild && vitePlugins.push(legacy());
 
   // vite-plugin-html
-  vitePlugins.push(configHtmlPlugin(viteEnv, isBuild));
+  vitePlugins.push(configHtmlPlugin(isBuild));
 
   // vite-plugin-svg-icons
   vitePlugins.push(configSvgIconsPlugin(isBuild));
@@ -76,9 +78,6 @@ export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
     vitePlugins.push(
       configCompressPlugin(VITE_BUILD_COMPRESS, VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE),
     );
-
-    // vite-plugin-pwa
-    // vitePlugins.push(configPwaConfig(viteEnv));
   }
 
   return vitePlugins;

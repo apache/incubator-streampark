@@ -97,6 +97,7 @@ export default {
     rememberMe: '记住我',
     forgetPassword: '忘记密码?',
     otherSignIn: '其他登录方式',
+    ssoSignIn: '通过SSO登录',
 
     ldapTip: '通过LDAP登录',
     passwordTip: '通过密码登录',

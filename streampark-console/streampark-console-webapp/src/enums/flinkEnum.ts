@@ -228,3 +228,9 @@ export enum FailoverStrategyEnum {
   ALERT = 1,
   RESTART = 2,
 }
+
+export enum RestoreModeEnum {
+  CLAIM = 1,
+  NO_CLAIM = 2,
+  LEGACY = 3,
+}

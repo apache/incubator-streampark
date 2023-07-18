@@ -63,14 +63,4 @@
         </dependencies>
     </dependencyManagement>
 
-    <profiles>
-        <profile>
-            <id>scala-2.11</id>
-            <modules>
-                <!-- redis only support scala 2.11 -->
-                <module>streampark-flink-connector-redis</module>
-            </modules>
-        </profile>
-    </profiles>
-
 </project>

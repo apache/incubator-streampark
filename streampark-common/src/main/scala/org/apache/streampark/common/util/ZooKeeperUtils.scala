@@ -23,7 +23,7 @@ import org.apache.zookeeper.CreateMode
 
 import java.nio.charset.StandardCharsets
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 object ZooKeeperUtils {

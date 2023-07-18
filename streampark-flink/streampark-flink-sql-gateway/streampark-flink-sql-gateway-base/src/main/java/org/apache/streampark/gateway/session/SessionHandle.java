@@ -18,22 +18,17 @@
 package org.apache.streampark.gateway.session;
 
 import java.util.Objects;
-import java.util.UUID;
 
 /** Session Handle that used to identify the Session. */
 public class SessionHandle {
 
-  private final UUID identifier;
+  private final String identifier;
 
-  public static SessionHandle create() {
-    return new SessionHandle(UUID.randomUUID());
-  }
-
-  public SessionHandle(UUID identifier) {
+  public SessionHandle(String identifier) {
     this.identifier = identifier;
   }
 
-  public UUID getIdentifier() {
+  public String getIdentifier() {
     return identifier;
   }
 

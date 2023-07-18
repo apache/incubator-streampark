@@ -24,10 +24,7 @@ import { fetchMain, fetchName } from '/@/api/flink/app/app';
 import { modules, fetchListConf, fetchListJars } from '/@/api/flink/project';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
-import {
-  renderResourceFrom,
-  renderStreamParkJarApp
-} from './useFlinkRender';
+import { renderResourceFrom, renderStreamParkJarApp } from './useFlinkRender';
 import { filterOption, getAppConfType } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
@@ -126,8 +123,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         field: 'uploadJobJar',
         label: t('flink.app.selectJobJar'),
         component: 'Select',
-        render: ({ model }) =>
-          renderStreamParkJarApp( { model, resources: unref(teamResource) }, ),
+        render: ({ model }) => renderStreamParkJarApp({ model, resources: unref(teamResource) }),
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
       },
       {
@@ -199,11 +195,12 @@ export const useCreateSchema = (dependencyRef: Ref) => {
               { label: 'StreamPark Flink', value: String(AppTypeEnum.STREAMPARK_FLINK) },
               { label: 'Apache Flink', value: String(AppTypeEnum.APACHE_FLINK) },
             ],
-            onChange: () => {
+            onChange: (value) => {
               Object.assign(formModel, {
                 config: undefined,
                 jobName: undefined,
                 configOverride: null,
+                appType: value,
               });
               fetchListJars({
                 id: formModel.project,

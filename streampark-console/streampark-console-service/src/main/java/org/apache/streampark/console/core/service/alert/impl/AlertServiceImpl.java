@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.alert.impl;
 
+import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.SpringContextUtils;
@@ -24,6 +25,7 @@ import org.apache.streampark.console.core.bean.AlertConfigWithParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.enums.AlertType;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.FlinkAppState;
@@ -48,17 +50,22 @@ public class AlertServiceImpl implements AlertService {
   @Override
   public void alert(Application application, CheckPointStatus checkPointStatus) {
     AlertTemplate alertTemplate = AlertTemplate.of(application, checkPointStatus);
-    alert(application, alertTemplate);
+    alert(application.getAlertId(), alertTemplate);
   }
 
   @Override
   public void alert(Application application, FlinkAppState appState) {
     AlertTemplate alertTemplate = AlertTemplate.of(application, appState);
-    alert(application, alertTemplate);
+    alert(application.getAlertId(), alertTemplate);
   }
 
-  private void alert(Application application, AlertTemplate alertTemplate) {
-    Integer alertId = application.getAlertId();
+  @Override
+  public void alert(FlinkCluster flinkCluster, ClusterState clusterState) {
+    AlertTemplate alertTemplate = AlertTemplate.of(flinkCluster, clusterState);
+    alert(flinkCluster.getAlertId(), alertTemplate);
+  }
+
+  private void alert(Integer alertId, AlertTemplate alertTemplate) {
     if (alertId == null) {
       return;
     }

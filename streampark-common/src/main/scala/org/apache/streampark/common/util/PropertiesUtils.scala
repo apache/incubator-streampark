@@ -27,8 +27,8 @@ import java.util.{HashMap => JavaMap, LinkedHashMap => JavaLinkedMap, Properties
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.collection.mutable.{Map => MutableMap}
 

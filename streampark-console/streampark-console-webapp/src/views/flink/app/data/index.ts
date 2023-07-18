@@ -69,7 +69,6 @@ export const getAppColumns = (): BasicColumn[] => [
 export const getMonacoOptions = (readOnly: boolean) => {
   return {
     selectOnLineNumbers: false,
-    foldingStrategy: 'indentation', // code fragmentation
     overviewRulerBorder: false, // Don't scroll bar borders
     autoClosingBrackets: 'always',
     autoClosingDelete: 'always',

@@ -65,20 +65,6 @@ echo_g () {
     printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $GREEN $RESET
 }
 
-echo_y () {
-    # Color yellow: Warning
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $YELLOW $RESET
-}
-
-echo_w () {
-    # Color yellow: White
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $WHITE $RESET
-}
-
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false
 os400=false
@@ -122,122 +108,24 @@ print_logo() {
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
 }
 
-checkPerm() {
+build() {
   if [ -x "$PRG_DIR/mvnw" ]; then
-    return 0
+    echo_g "Apache StreamPark, building..."
+    "$PRG_DIR/mvnw" -Pshaded,webapp,dist -DskipTests clean install
+    if [ $? -eq 0 ]; then
+       printf '\n'
+       echo_g """StreamPark project build successful!
+       dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
+    fi
   else
-    return 1
-  fi
-}
-
-selectScala() {
-  echo_w 'StreamPark supports Scala 2.11 and 2.12. Which version do you need ?'
-  select scala in "2.11" "2.12"
-  do
-    case $scala in
-      "2.11")
-        return 1
-        ;;
-      "2.12")
-        return 2
-        ;;
-      *)
-        echo_r "invalid selected, exit.."
-        exit 1
-        ;;
-    esac
-  done
-}
-
-selectMode() {
-  echo_w 'StreamPark supports front-end and server-side mixed / detached packaging mode, Which mode do you need ?'
-  select scala in "mixed mode" "detached mode"
-  do
-    case $scala in
-      "mixed mode")
-        echo_g "mixed mode selected (mixed build project of front-end and back-ends)"
-        return 1
-        ;;
-      "detached mode")
-        echo_g "detached mode selected (Only build the back-end project, the front-end build need by yourself)"
-        return 2
-        ;;
-      *)
-        echo_r "invalid selected, exit.."
-        exit 1
-        ;;
-    esac
-  done
-}
-
-
-mixedPackage() {
-  scala="scala-2.11"
-  if [ "$1" == 2 ]; then
-    scala="scala-2.12"
-  fi
-
-  echo_g "build info: package mode @ mixed, $scala, now build starting..."
-
-  "$PRG_DIR/mvnw" -P$scala,shaded,webapp,dist -DskipTests clean install
-
-  if [ $? -eq 0 ]; then
-     printf '\n'
-     echo_g """StreamPark project build successful!
-     info: package mode @ mixed, $scala
-     dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
-  fi
-}
-
-detachedPackage () {
-  scala="scala-2.11"
-  if [ "$1" == 2 ]; then
-    scala="scala-2.12"
-  fi
-
-  echo_g "build info: package mode @ detached, $scala, now build starting..."
-
-  "$PRG_DIR"/mvnw -P$scala,shaded,dist -DskipTests clean install
-
-  if [ $? -eq 0 ]; then
-    printf '\n'
-    echo_g """StreamPark project build successful!
-    info: package mode @ detached, $scala
-    dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist
-
-    Next, you need to build front-end by yourself.
-
-     1) cd $(cd "$PRG_DIR" &>/dev/null && pwd)/streampark-console/streampark-console-webapp
-     2) pnpm install && pnpm build
-
-    please visit: https://streampark.apache.org/docs/user-guide/deployment for more detail. \n"""
+    echo_r "permission denied: $PRG_DIR/mvnw, please check."
+    exit 1
   fi
 }
 
 main() {
   print_logo
-  checkPerm
-  if [ $? -eq 1 ]; then
-    # shellcheck disable=SC2006
-    echo_r "permission denied: $PRG_DIR/mvnw, please check."
-    exit 1
-  fi
-  selectMode
-  if [ $? -eq 1 ]; then
-    selectScala
-    if [ $? -eq 1 ]; then
-      mixedPackage 1
-    else
-      mixedPackage 2
-    fi
-  else
-    selectScala
-    if [ $? -eq 1 ]; then
-      detachedPackage 1
-    else
-      detachedPackage 2
-    fi
-  fi
+  build
 }
 
 main "$@"

@@ -209,7 +209,7 @@
           :placeholder="t('setting.alarm.faultAlertType')"
           allowClear
           mode="multiple"
-          @change="(value: string[]) => alertType = value"
+          @change="(value: string[]) => (alertType = value)"
         >
           <SelectOption
             v-for="(v, k) in alertTypes"

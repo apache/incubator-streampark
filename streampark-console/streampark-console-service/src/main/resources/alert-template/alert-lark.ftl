@@ -27,6 +27,7 @@
     },
     {
       "fields": [
+<#if type == 1 || type == 2>
         {
           "is_short": false,
           "text": {
@@ -34,6 +35,16 @@
             "tag": "lark_md"
           }
         },
+</#if>
+<#if type == 3>
+        {
+          "is_short": false,
+          "text": {
+            "content": "**Cluster Name：${jobName}**",
+            "tag": "lark_md"
+          }
+        },
+</#if>
 <#if  type == 1 >
         {
           "is_short": false,
@@ -109,6 +120,43 @@
             "tag": "lark_md"
           }
         }
+</#if>
+<#if  type == 3 >
+       {
+          "is_short": false,
+          "text": {
+            "content": "**Cluster Status：${status}**",
+            "tag": "lark_md"
+          }
+       },
+       {
+          "is_short": true,
+          "text": {
+            "content": "**Start Time：${startTime}**",
+            "tag": "lark_md"
+          }
+       },
+       {
+          "is_short": false,
+          "text": {
+            "content": "**End Time：${endTime}**",
+            "tag": "lark_md"
+          }
+       },
+       {
+          "is_short": true,
+          "text": {
+            "content": "**Duration：${duration}**",
+            "tag": "lark_md"
+          }
+       },
+       {
+          "is_short": false,
+          "text": {
+            "content": "**Affected Jobs：${affectedJobs}**",
+            "tag": "lark_md"
+          }
+       }
 </#if>
       ],
       "tag": "div"

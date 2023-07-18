@@ -49,7 +49,8 @@ export default {
     edit: 'Edit User',
     view: 'View User',
     notice: 'Notice',
-    transferResource: 'Please transfer the resources to another user',
+    transferResource:
+      'Please transfer the resources of the user who needs to be disabled to a new user',
   },
   roleInfo: 'Role Info',
   modifyTime: 'Not yet modified',
@@ -59,5 +60,5 @@ export default {
   locked: 'locked',
   effective: 'effective',
   resetSucceeded: 'Reset Succeeded',
-  newPasswordTip: 'The new password is: ',
+  newPasswordTip: "The new password is: ",
 };

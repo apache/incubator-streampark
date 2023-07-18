@@ -44,6 +44,7 @@ export const useEdit = () => {
     Object.assign(defaultOptions, JSON.parse(app.options || '{}'));
     Object.assign(returnData, {
       jobType: res.jobType,
+      appType: res.appType,
       versionId: res.versionId,
       executionMode: res.executionMode,
       resourceFrom: res.resourceFrom,

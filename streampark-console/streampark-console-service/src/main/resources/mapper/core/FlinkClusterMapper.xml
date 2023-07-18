@@ -20,6 +20,7 @@
     <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.FlinkCluster">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="job_manager_url" jdbcType="VARCHAR" property="jobManagerUrl"/>
         <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
         <result column="cluster_name" jdbcType="VARCHAR" property="clusterName"/>
         <result column="options" jdbcType="LONGVARCHAR" property="options"/>
@@ -39,6 +40,9 @@
         <result column="exception" jdbcType="LONGVARCHAR" property="exception"/>
         <result column="cluster_state" jdbcType="TINYINT" property="clusterState"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
+        <result column="start_time" jdbcType="DATE" property="startTime"/>
+        <result column="end_time" jdbcType="DATE" property="endTime"/>
+        <result column="alert_id" jdbcType="BIGINT" property="alertId"/>
     </resultMap>
 
     <select id="existsByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.String">

@@ -26,13 +26,11 @@ import {
   UserLockResponse,
 } from './model/userModel';
 
-import { ErrorMessageMode, Result } from '/#/axios';
+import { Result } from '/#/axios';
 import { BasicTableParams } from '../model/baseModel';
 
 enum Api {
   Login = '/passport/signin',
-  Logout = '/passport/signout',
-  GetUserInfo = '/getUserInfo',
   GetPermCode = '/getPermCode',
   UserList = '/user/list',
   NoTokenUsers = '/user/getNoTokenUser',
@@ -45,30 +43,10 @@ enum Api {
   CheckName = '/user/check/name',
   SET_TEAM = '/user/setTeam',
   INIT_TEAM = '/user/initTeam',
-  APP_OWNERS = '/user/appOwners'
+  APP_OWNERS = '/user/appOwners',
+  TransferUserResource = '/user/transferResource',
 }
 
-/**
- * @description: user login api
- * @return {Promise<AxiosResponse<Result<LoginResultModel>>>}
- */
-export function loginApi(
-  data: LoginParams,
-  mode: ErrorMessageMode = 'modal',
-): Promise<AxiosResponse<Result<LoginResultModel>>> {
-  return defHttp.post(
-    { url: Api.Login, data },
-    { isReturnNativeResponse: true, errorMessageMode: mode },
-  );
-}
-
-/**
- * @description: getUserInfo
- * @return {Promise<GetUserInfoModel>}
- */
-export function getUserInfo(): Promise<GetUserInfoModel> {
-  return defHttp.get({ url: Api.GetUserInfo }, { errorMessageMode: 'none' });
-}
 /**
  * get user permission code list
  * @returns {Promise<string[]>}
@@ -77,9 +55,6 @@ export function getPermCode(): Promise<string[]> {
   return defHttp.get({ url: Api.GetPermCode });
 }
 
-export function doLogout() {
-  return defHttp.post({ url: Api.Logout });
-}
 /**
  * get user list
  * @param {BasicTableParams} data
@@ -102,8 +77,7 @@ export function addUser(data: Recordable) {
 }
 
 export function resetPassword(data): Promise<AxiosResponse<Result<string>>> {
-  return defHttp.put({ url: Api.ResetPassword, data },
-    { isReturnNativeResponse: true },);
+  return defHttp.put({ url: Api.ResetPassword, data }, { isReturnNativeResponse: true });
 }
 
 export function checkUserName(data) {

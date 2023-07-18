@@ -151,10 +151,10 @@ export const formSchema = (formType: string): FormSchema[] => {
       component: 'Select',
       componentProps: {
         disabled: isView,
-        options:  [
+        options: [
           { label: t('ADMIN'), value: UserTypeEnum.ADMIN },
           { label: t('USER'), value: UserTypeEnum.USER },
-        ]
+        ],
       },
       rules: [{ required: true }],
     },

@@ -37,7 +37,7 @@
         class="fix-auto-fill"
       >
         <template #prefix>
-          <user-outlined type="user" />
+          <user-outlined />
         </template>
       </Input>
     </FormItem>
@@ -49,10 +49,11 @@
         :placeholder="t('sys.login.password')"
       >
         <template #prefix>
-          <lock-outlined type="user" />
+          <lock-outlined />
         </template>
       </InputPassword>
     </FormItem>
+
     <FormItem class="enter-x">
       <Button
         type="primary"
@@ -65,21 +66,26 @@
         {{ loginText.buttonText }}
       </Button>
     </FormItem>
+
     <FormItem class="enter-x text-left">
-      <Button type="link" @click="changeLoginType"> {{ loginText.linkText }} </Button>
+      <Button :href="SSO_LOGIN_PATH" type="link" v-if="enableSSO">
+        {{ t('sys.login.ssoSignIn') }}
+      </Button>
+      <Button type="link" class="float-right" @click="changeLoginType" v-if="enableLDAP">
+        {{ loginText.linkText }}
+      </Button>
     </FormItem>
   </Form>
   <TeamModal v-model:visible="modelVisible" :userId="userId" @success="handleTeamSuccess" />
 </template>
 <script lang="ts" setup>
-  import { reactive, ref, unref, computed } from 'vue';
+  import { reactive, ref, unref, computed, onMounted } from 'vue';
   import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 
   import { Form, Input, Button } from 'ant-design-vue';
 
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
-
   import { useUserStore } from '/@/store/modules/user';
   import {
     LoginStateEnum,
@@ -89,14 +95,17 @@
     LoginTypeEnum,
   } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { loginApi } from '/@/api/system/user';
+  import { signin, fetchSignType } from '/@/api/system/passport';
   import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
   import TeamModal from './teamModal.vue';
   import { fetchUserTeam } from '/@/api/system/member';
   import { LoginResultModel } from '/@/api/system/model/userModel';
   import { Result } from '/#/axios';
+  import { PageEnum } from '/@/enums/pageEnum';
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
+
+  const SSO_LOGIN_PATH = PageEnum.SSO_LOGIN;
 
   const { t } = useI18n();
   const { createErrorModal, createMessage } = useMessage();
@@ -113,6 +122,9 @@
   const userId = ref('');
   const modelVisible = ref(false);
   const loginType = ref(LoginTypeEnum.PASSWORD);
+  const enableSSO = ref(false);
+  const enableLDAP = ref(false);
+
   const formData = reactive<LoginForm>({
     account: '',
     password: '',
@@ -142,7 +154,7 @@
   }
 
   async function handleLoginRequest(loginFormValue: LoginForm): Promise<Result<LoginResultModel>> {
-    const { data } = await loginApi(
+    const { data } = await signin(
       {
         password: loginFormValue.password,
         username: loginFormValue.account,
@@ -208,6 +220,7 @@
     modelVisible.value = false;
     handleLogin();
   }
+
   function changeLoginType() {
     if (loginType.value === LoginTypeEnum.PASSWORD) {
       loginType.value = LoginTypeEnum.LDAP;
@@ -215,4 +228,11 @@
     }
     loginType.value = LoginTypeEnum.PASSWORD;
   }
+
+  onMounted(() => {
+    fetchSignType().then((resp) => {
+      enableSSO.value = resp.find((x) => x === 'sso') != undefined;
+      enableLDAP.value = resp.find((x) => x === 'ldap') != undefined;
+    });
+  });
 </script>

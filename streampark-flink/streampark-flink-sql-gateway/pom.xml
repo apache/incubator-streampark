@@ -29,6 +29,8 @@
 
     <modules>
         <module>streampark-flink-sql-gateway-base</module>
+        <module>streampark-flink-sql-gateway-flink-v1</module>
+        <module>streampark-flink-sql-gateway-kyuubi</module>
     </modules>
 
 </project>

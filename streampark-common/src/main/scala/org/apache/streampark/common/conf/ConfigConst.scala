@@ -69,8 +69,6 @@ object ConfigConst {
 
   val KEY_SECURITY_KERBEROS_KRB5_CONF = "security.kerberos.login.krb5"
 
-  val KEY_JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf"
-
   // spark
 
   val KEY_SPARK_MAIN_CLASS = "spark.main.class"
@@ -172,17 +170,10 @@ object ConfigConst {
 
   val KEY_HBASE_AUTH_USER = "hbase.auth.user"
 
-  val DEFAULT_HBASE_WRITE_SIZE = 1024 * 1024 * 10
+  val DEFAULT_HBASE_WRITE_SIZE: Int = 1024 * 1024 * 10
 
   /** about influx */
   val INFLUX_PREFIX = "influx."
-
-  val KEY_INFLUX_ACTIONS = "actions"
-
-  val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
-
-  /** flink config key */
-  val KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
 
   val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
 

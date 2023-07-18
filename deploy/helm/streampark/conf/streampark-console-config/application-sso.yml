@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -12,10 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-ports:
-  - port: 3344
-    onOpen: open-preview
-tasks:
-  - init: pnpm install
-    command: pnpm run dev
+pac4j:
+  callbackUrl: http://localhost:10000/callback
+  # Put all parameters under `properties`
+  # Check supported sso config parameters for different authentication clients from the below link
+  # https://github.com/pac4j/pac4j/blob/master/documentation/docs/config-module.md
+  properties:
+    principalNameAttribute:
+    # Optional, change by authentication client
+    # Please replace and fill in your client config below when enabled SSO

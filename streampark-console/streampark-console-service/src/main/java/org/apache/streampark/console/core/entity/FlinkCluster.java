@@ -64,6 +64,9 @@ public class FlinkCluster implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String address;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
+  private String jobManagerUrl;
+
   private String clusterId;
 
   private String clusterName;
@@ -103,6 +106,14 @@ public class FlinkCluster implements Serializable {
   private Integer clusterState;
 
   private Date createTime = new Date();
+
+  private Date startTime;
+
+  private Date endTime;
+
+  private Integer alertId;
+
+  private transient Integer jobs = 0;
 
   @JsonIgnore
   public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
@@ -145,6 +156,11 @@ public class FlinkCluster implements Serializable {
     return null;
   }
 
+  /**
+   * Verify the cluster connection whether is valid.
+   *
+   * @return <code>false</code> if the connection of the cluster is invalid, <code>true</code> else.
+   */
   public boolean verifyClusterConnection() {
     if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
       if (address == null) {
@@ -167,9 +183,10 @@ public class FlinkCluster implements Serializable {
         //
       }
       return false;
-    } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
+    }
+    if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
       try {
-        String restUrl = YarnUtils.getRMWebAppURL() + "/proxy/" + this.clusterId + "/overview";
+        String restUrl = YarnUtils.getRMWebAppURL(true) + "/proxy/" + this.clusterId + "/overview";
         String result =
             HttpClientUtils.httpGetRequest(
                 restUrl,

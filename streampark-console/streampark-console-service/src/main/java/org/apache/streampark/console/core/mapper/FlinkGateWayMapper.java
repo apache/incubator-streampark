@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,26 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// #!/usr/bin/env node
 
-import { runBuildConfig } from './buildConf';
-import colors from 'picocolors';
+package org.apache.streampark.console.core.mapper;
 
-import pkg from '../../package.json';
+import org.apache.streampark.console.core.entity.FlinkGateWay;
 
-export const runBuild = async () => {
-  try {
-    const argvList = process.argv.splice(2);
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-    // Generate configuration file
-    if (!argvList.includes('disabled-config')) {
-      runBuildConfig();
-    }
-
-    console.log(`✨ ${colors.cyan(`[${pkg.name}]`)}` + ' - build successfully!');
-  } catch (error) {
-    console.log(colors.red('vite build error:\n' + error));
-    process.exit(1);
-  }
-};
-runBuild();
+public interface FlinkGateWayMapper extends BaseMapper<FlinkGateWay> {}

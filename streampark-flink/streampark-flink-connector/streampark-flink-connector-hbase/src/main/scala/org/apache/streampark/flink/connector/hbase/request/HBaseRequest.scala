@@ -31,7 +31,7 @@ import java.util.concurrent.{CompletableFuture, Executors, ExecutorService, Time
 import java.util.function.{Consumer, Supplier}
 
 import scala.annotation.meta.param
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 
 object HBaseRequest {
 

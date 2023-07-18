@@ -46,7 +46,7 @@
   import { Skeleton } from 'ant-design-vue';
   import { CollapseTransition } from '/@/components/Transition';
   import CollapseHeader from './CollapseHeader.vue';
-  import { triggerWindowResize } from '/@/utils/event';
+  import { triggerWindowResize as triggerWindowResizeFn } from '/@/utils/event';
   // hook
   import { useTimeoutFn } from '/@/hooks/core/useTimeout';
   import { useDesign } from '/@/hooks/web/useDesign';
@@ -87,7 +87,7 @@
     show.value = isNil(val) ? !show.value : val;
     if (props.triggerWindowResize) {
       // 200 milliseconds here is because the expansion has animation,
-      useTimeoutFn(triggerWindowResize, 200);
+      useTimeoutFn(triggerWindowResizeFn, 200);
     }
   }
 

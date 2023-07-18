@@ -43,7 +43,7 @@ import { CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/flink/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
-import {ResourceTypeEnum} from "/@/views/flink/resource/resource.data";
+import { ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
 
 const { t } = useI18n();
 /* render input dropdown component */
@@ -462,7 +462,7 @@ export const renderSqlHistory = (
             )}
 
             <span style="color: darkgrey">
-                <Icon icon="ant-design:clock-circle-outlined" />
+              <Icon icon="ant-design:clock-circle-outlined" />
               {ver.createTime}
             </span>
           </div>
@@ -529,28 +529,26 @@ export const renderResourceFrom = (model: Recordable) => {
   );
 };
 
-export const renderStreamParkResource = ({ model, resources },) => {
-
+export const renderStreamParkResource = ({ model, resources }) => {
   const renderOptions = () => {
     console.log('resources', resources);
     return (resources || [])
-      .filter((item) => item.resourceType !== ResourceTypeEnum.FLINK_APP )
+      .filter((item) => item.resourceType !== ResourceTypeEnum.FLINK_APP)
       .map((resource) => {
-      return (
-        <Select.Option
-          key={resource.id}
-          label={ resource.resourceType + '-' + resource.resourceName}>
-          <div>
-            <Tag color="green" style=";margin-left: 5px;" size="small">
-              {resource.resourceType}
-            </Tag>
-            <span style="color: darkgrey">
-              {resource.resourceName}
-            </span>
-          </div>
-        </Select.Option>
-      );
-    });
+        return (
+          <Select.Option
+            key={resource.id}
+            label={resource.resourceType + '-' + resource.resourceName}
+          >
+            <div>
+              <Tag color="green" style=";margin-left: 5px;" size="small">
+                {resource.resourceType}
+              </Tag>
+              <span style="color: darkgrey">{resource.resourceName}</span>
+            </div>
+          </Select.Option>
+        );
+      });
   };
 
   return (
@@ -572,34 +570,29 @@ export const renderStreamParkResource = ({ model, resources },) => {
   );
 };
 
-export const renderStreamParkJarApp = ({ model, resources },) => {
-
+export const renderStreamParkJarApp = ({ model, resources }) => {
   function handleAppChange(value: SelectValue) {
     const res = resources.filter((item) => item.id == value)[0];
-    model.mainClass = res.mainClass
+    model.mainClass = res.mainClass;
     model.uploadJobJar = res.resourceName;
   }
 
   const renderOptions = () => {
     console.log('resources', resources);
     return (resources || [])
-      .filter((item) => item.resourceType == ResourceTypeEnum.FLINK_APP )
+      .filter((item) => item.resourceType == ResourceTypeEnum.FLINK_APP)
       .map((resource) => {
-      return (
-        <Select.Option
-          key={resource.id}
-          label={resource.resourceName}>
-          <div>
-            <Tag color="green" style=";margin-left: 5px;" size="small">
-              {resource.resourceType}
-            </Tag>
-            <span style="color: darkgrey">
-              {resource.resourceName}
-            </span>
-          </div>
-        </Select.Option>
-      );
-    });
+        return (
+          <Select.Option key={resource.id} label={resource.resourceName}>
+            <div>
+              <Tag color="green" style=";margin-left: 5px;" size="small">
+                {resource.resourceType}
+              </Tag>
+              <span style="color: darkgrey">{resource.resourceName}</span>
+            </div>
+          </Select.Option>
+        );
+      });
   };
 
   return (

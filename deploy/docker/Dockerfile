@@ -18,8 +18,8 @@
 FROM alpine:3.16 as deps-stage
 COPY . /
 WORKDIR /
-RUN tar zxvf dist/apache-streampark_*-*-bin.tar.gz \
-&& mv apache-streampark_*-*-bin streampark
+RUN tar zxvf dist/apache-streampark*-*-bin.tar.gz \
+&& mv apache-streampark*-*-bin streampark
 
 FROM docker:dind
 WORKDIR /streampark

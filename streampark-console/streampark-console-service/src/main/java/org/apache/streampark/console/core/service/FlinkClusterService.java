@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -49,6 +50,8 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
   Boolean existsByUserId(Long userId);
 
   List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes);
+
+  void updateClusterState(Long id, ClusterState state);
 
   void changeOwnership(Long userId, Long targetUserId);
 }
