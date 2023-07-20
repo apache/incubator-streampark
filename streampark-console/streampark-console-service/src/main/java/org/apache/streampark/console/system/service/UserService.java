@@ -68,9 +68,8 @@ public interface UserService extends IService<User> {
    * update user
    *
    * @param user user
-   * @return
    */
-  RestResponse updateUser(User user) throws Exception;
+  void updateUser(User user) throws Exception;
 
   /**
    * update password
