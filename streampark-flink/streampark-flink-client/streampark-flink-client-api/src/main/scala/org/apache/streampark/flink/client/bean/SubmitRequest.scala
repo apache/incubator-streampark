@@ -175,7 +175,7 @@ case class SubmitRequest(
   @throws[Exception]
   def checkBuildResult(): Unit = {
     executionMode match {
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION | ExecutionMode.KUBERNETES_NATIVE_APPLICATION =>
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION =>
         if (buildResult == null) {
           throw new Exception(
             s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +
