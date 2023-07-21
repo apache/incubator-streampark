@@ -38,7 +38,7 @@ public final class JacksonUtils {
   static {
     MAPPER = new ObjectMapper();
     MAPPER.registerModule(new DefaultScalaModule());
-    MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
