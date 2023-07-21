@@ -17,15 +17,15 @@
 
 package org.apache.streampark.flink.catalog.factory;
 
-import org.apache.streampark.flink.catalog.StreamParkMysqlCatalog;
+import org.apache.streampark.flink.catalog.MysqlCatalog;
 
 import org.apache.flink.annotation.Internal;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 
-/** {@link ConfigOption}s for {@link StreamParkMysqlCatalog}. */
+/** {@link ConfigOption}s for {@link MysqlCatalog}. */
 @Internal
-public class StreamParkMysqlCatalogFactoryOptions {
+public class MysqlCatalogFactoryOptions {
 
   public static final ConfigOption<String> JDBC_URL =
       ConfigOptions.key("jdbcUrl")
@@ -46,5 +46,5 @@ public class StreamParkMysqlCatalogFactoryOptions {
           .noDefaultValue()
           .withDescription("Password to use when connecting to the MySQL database server.");
 
-  private StreamParkMysqlCatalogFactoryOptions() {}
+  private MysqlCatalogFactoryOptions() {}
 }

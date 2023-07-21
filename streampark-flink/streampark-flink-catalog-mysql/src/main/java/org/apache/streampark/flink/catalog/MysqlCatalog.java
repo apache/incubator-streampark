@@ -74,7 +74,7 @@ import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.apache.flink.util.Preconditions.checkNotNull;
 
 @Getter
-public class StreamParkMysqlCatalog extends AbstractCatalog {
+public class MysqlCatalog extends AbstractCatalog {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -82,7 +82,7 @@ public class StreamParkMysqlCatalog extends AbstractCatalog {
 
   private HikariDataSource dataSource;
 
-  public StreamParkMysqlCatalog(String name, String jdbcUrl, String username, String password) {
+  public MysqlCatalog(String name, String jdbcUrl, String username, String password) {
 
     super(name, Constants.DEFAULT_DATABASE);
 
