@@ -16,6 +16,7 @@
  */
 package org.apache.streampark.flink.core
 
+import org.apache.streampark.common.conf.ConfigConst.PARAM_PREFIX
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.Logger
 
@@ -417,7 +418,7 @@ case class SqlSegment(start: Int, end: Int, sql: String)
 
 object SqlSplitter {
 
-  private lazy val singleLineCommentPrefixList = Set[String]("--")
+  private lazy val singleLineCommentPrefixList = Set[String](PARAM_PREFIX)
 
   /**
    * Split whole text into multiple sql statements. Two Steps: Step 1, split the whole text into
@@ -453,7 +454,7 @@ object SqlSplitter {
       while (scanner.hasNextLine) {
         lineNumber += 1
         val line = scanner.nextLine().trim
-        val nonEmpty = line.nonEmpty && !line.startsWith("--")
+        val nonEmpty = line.nonEmpty && !line.startsWith(PARAM_PREFIX)
         if (line.startsWith("/*")) {
           startComment = true
           hasComment = true
@@ -618,7 +619,7 @@ object SqlSplitter {
     builder.toString
   }
 
-  private[this] def isSingleLineComment(text: String) = text.trim.startsWith("--")
+  private[this] def isSingleLineComment(text: String) = text.trim.startsWith(PARAM_PREFIX)
 
   private[this] def isMultipleLineComment(text: String) =
     text.trim.startsWith("/*") && text.trim.endsWith("*/")

@@ -101,7 +101,7 @@ trait Spark extends Logger {
           createOnError = value.toBoolean
           argv = tail
         case Nil =>
-        case other :: value :: tail if other.startsWith("--") =>
+        case other :: value :: tail if other.startsWith(PARAM_PREFIX) =>
           userArgs += other.drop(2) -> value
           argv = tail
         case tail =>
