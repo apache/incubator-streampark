@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.catalog.factory;
 
-import org.apache.streampark.flink.catalog.StreamParkMysqlCatalog;
+import org.apache.streampark.flink.catalog.MysqlCatalog;
 import org.apache.streampark.flink.catalog.utils.Constants;
 
 import org.apache.flink.configuration.ConfigOption;
@@ -28,8 +28,8 @@ import org.apache.flink.table.factories.FactoryUtil;
 import java.util.HashSet;
 import java.util.Set;
 
-/** Factory for {@link StreamParkMysqlCatalog}. */
-public class StreamParkMysqlCatalogFactory implements CatalogFactory {
+/** Factory for {@link MysqlCatalog}. */
+public class MysqlCatalogFactory implements CatalogFactory {
 
   @Override
   public String factoryIdentifier() {
@@ -39,9 +39,9 @@ public class StreamParkMysqlCatalogFactory implements CatalogFactory {
   @Override
   public Set<ConfigOption<?>> requiredOptions() {
     final Set<ConfigOption<?>> options = new HashSet<>();
-    options.add(StreamParkMysqlCatalogFactoryOptions.JDBC_URL);
-    options.add(StreamParkMysqlCatalogFactoryOptions.USERNAME);
-    options.add(StreamParkMysqlCatalogFactoryOptions.PASSWORD);
+    options.add(MysqlCatalogFactoryOptions.JDBC_URL);
+    options.add(MysqlCatalogFactoryOptions.USERNAME);
+    options.add(MysqlCatalogFactoryOptions.PASSWORD);
     return options;
   }
 
@@ -55,10 +55,10 @@ public class StreamParkMysqlCatalogFactory implements CatalogFactory {
     final FactoryUtil.CatalogFactoryHelper helper =
         FactoryUtil.createCatalogFactoryHelper(this, context);
     helper.validate();
-    return new StreamParkMysqlCatalog(
+    return new MysqlCatalog(
         context.getName(),
-        helper.getOptions().get(StreamParkMysqlCatalogFactoryOptions.JDBC_URL),
-        helper.getOptions().get(StreamParkMysqlCatalogFactoryOptions.USERNAME),
-        helper.getOptions().get(StreamParkMysqlCatalogFactoryOptions.PASSWORD));
+        helper.getOptions().get(MysqlCatalogFactoryOptions.JDBC_URL),
+        helper.getOptions().get(MysqlCatalogFactoryOptions.USERNAME),
+        helper.getOptions().get(MysqlCatalogFactoryOptions.PASSWORD));
   }
 }
