@@ -108,6 +108,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.core.enums.Operation.RELEASE;
+
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
@@ -170,8 +172,7 @@ public class AppBuildPipeServiceImpl
 
     Application app = applicationService.getById(appId);
     ApplicationLog applicationLog = new ApplicationLog();
-    applicationLog.setOptionName(
-        org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
+    applicationLog.setOptionName(RELEASE.getValue());
     applicationLog.setAppId(app.getId());
     applicationLog.setOptionTime(new Date());
 

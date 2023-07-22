@@ -199,7 +199,7 @@ public final class CommonUtils implements Serializable {
     if (iterator != null) {
       while (iterator.hasNext()) {
         Object candidate = iterator.next();
-        if (ObjectUtils.safeEquals(candidate, element)) {
+        if (ObjectUtils.equals(candidate, element)) {
           return true;
         }
       }
@@ -218,7 +218,7 @@ public final class CommonUtils implements Serializable {
     if (enumeration != null) {
       while (enumeration.hasMoreElements()) {
         Object candidate = enumeration.nextElement();
-        if (ObjectUtils.safeEquals(candidate, element)) {
+        if (ObjectUtils.equals(candidate, element)) {
           return true;
         }
       }
