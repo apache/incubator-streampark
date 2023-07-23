@@ -14,20 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.streampark.flink.catalog.dao;
 
-package org.apache.streampark.flink.catalog.utils;
+import javax.sql.DataSource;
 
-public class Constants {
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Map;
 
-  public static final String IDENTIFIER = "mysql_catalog";
+public class PropertiesDao extends BaseDao {
 
-  public static final String COMMENT = "comment";
+  public PropertiesDao(DataSource dataSource) {
+    super(dataSource);
+  }
 
-  public static final String DEFAULT_DATABASE = "default_database";
-
-
-  public static final String TABLE = "TABLE";
-
-  public static final String VIEW = "VIEW";
-
+  public void batchStatement(
+      PreparedStatement ps, Integer id, Map<String, String> properties, Boolean upsert) {
+    properties.forEach(
+        (k, v) -> {
+          try {
+            ps.setInt(1, id);
+            ps.setString(2, k);
+            ps.setString(3, v);
+            if (upsert) {
+              ps.setString(4, v);
+            }
+          } catch (SQLException e) {
+            throw new RuntimeException(e);
+          }
+        });
+  }
 }
