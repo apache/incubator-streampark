@@ -25,9 +25,7 @@ public class Constants {
 
   public static final String DEFAULT_DATABASE = "default_database";
 
-
   public static final String TABLE = "TABLE";
 
   public static final String VIEW = "VIEW";
-
 }
