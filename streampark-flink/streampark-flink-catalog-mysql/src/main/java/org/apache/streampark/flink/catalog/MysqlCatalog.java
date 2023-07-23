@@ -17,8 +17,6 @@
 
 package org.apache.streampark.flink.catalog;
 
-import org.apache.streampark.common.tuple.Tuple2;
-import org.apache.streampark.common.tuple.Tuple3;
 import org.apache.streampark.flink.catalog.dao.ColumnDao;
 import org.apache.streampark.flink.catalog.dao.DatabaseDao;
 import org.apache.streampark.flink.catalog.dao.DatabasePropertiesDao;
@@ -27,6 +25,8 @@ import org.apache.streampark.flink.catalog.dao.TableDao;
 import org.apache.streampark.flink.catalog.dao.TablePropertiesDao;
 import org.apache.streampark.flink.catalog.utils.Constants;
 
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.catalog.AbstractCatalog;
 import org.apache.flink.table.catalog.CatalogBaseTable;

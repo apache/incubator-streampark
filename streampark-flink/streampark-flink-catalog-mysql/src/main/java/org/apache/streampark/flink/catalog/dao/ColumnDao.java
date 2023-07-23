@@ -17,8 +17,7 @@
 
 package org.apache.streampark.flink.catalog.dao;
 
-import org.apache.streampark.common.tuple.Tuple3;
-
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.types.DataType;
 

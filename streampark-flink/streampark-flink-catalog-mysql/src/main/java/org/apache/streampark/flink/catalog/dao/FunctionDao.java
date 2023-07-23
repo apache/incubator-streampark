@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.catalog.dao;
 
-import org.apache.streampark.common.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple2;
 
 import javax.sql.DataSource;
 
