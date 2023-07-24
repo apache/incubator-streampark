@@ -46,10 +46,6 @@ public class BaseDao {
     return new QueryRunner(dataSource).insert(sql, rsh, params);
   }
 
-  public void jdbcBatch(String sql, Object[][] params) throws SQLException {
-    new QueryRunner(dataSource).batch(sql, params);
-  }
-
   public void close(AutoCloseable... closes) throws SQLException {
     for (AutoCloseable closeable : closes) {
       if (closeable != null) {

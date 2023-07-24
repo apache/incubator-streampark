@@ -690,6 +690,6 @@ public class MysqlCatalog extends AbstractCatalog {
   }
 
   private boolean mapNotEmpty(Map<?, ?> map) {
-    return map == null || map.isEmpty();
+    return map != null && !map.isEmpty();
   }
 }
