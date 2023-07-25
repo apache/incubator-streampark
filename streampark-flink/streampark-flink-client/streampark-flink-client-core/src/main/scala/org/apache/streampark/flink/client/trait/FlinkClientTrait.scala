@@ -359,8 +359,6 @@ trait FlinkClientTrait extends Logger {
 
     logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
 
-    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
-
     val commandLine = FlinkRunOption.parse(commandLineOptions, cliArgs, true)
 
     val activeCommandLine = validateAndGetActiveCommandLine(
@@ -489,8 +487,6 @@ trait FlinkClientTrait extends Logger {
       commandLine: CommandLine): Configuration = {
 
     require(activeCustomCommandLine != null, "activeCustomCommandLine must not be null.")
-    val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
-    val customConfiguration = new Configuration(executorConfig)
     val configuration = new Configuration()
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome)
     flinkDefaultConfiguration.keySet.foreach(
@@ -500,7 +496,7 @@ trait FlinkClientTrait extends Logger {
           case _ =>
         }
       })
-    configuration.addAll(customConfiguration)
+    configuration.addAll(activeCustomCommandLine.toConfiguration(commandLine))
     configuration
   }
 
