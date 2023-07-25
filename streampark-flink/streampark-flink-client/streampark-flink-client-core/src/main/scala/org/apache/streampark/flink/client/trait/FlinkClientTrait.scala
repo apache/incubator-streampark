@@ -359,8 +359,6 @@ trait FlinkClientTrait extends Logger {
 
     logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
 
-    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
-
     val commandLine = FlinkRunOption.parse(commandLineOptions, cliArgs, true)
 
     val activeCommandLine = validateAndGetActiveCommandLine(
