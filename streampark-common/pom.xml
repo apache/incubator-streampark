@@ -128,13 +128,6 @@
             <artifactId>streampark-shaded-jackson</artifactId>
             <version>${streampark.shaded.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.ivy</groupId>
-            <artifactId>ivy</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>
