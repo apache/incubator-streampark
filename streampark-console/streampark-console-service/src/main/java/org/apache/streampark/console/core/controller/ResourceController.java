@@ -59,6 +59,12 @@ public class ResourceController {
     return RestResponse.success();
   }
 
+  @Operation(summary = "check resource")
+  @PostMapping("check")
+  public RestResponse checkResource(@Valid Resource resource) {
+    return this.resourceService.checkResource(resource);
+  }
+
   @Operation(summary = "List resources")
   @PostMapping("page")
   public RestResponse page(RestRequest restRequest, Resource resource) {

@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -68,6 +69,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   @Autowired private ApplicationService applicationService;
   @Autowired private CommonService commonService;
   @Autowired private FlinkSqlService flinkSqlService;
+
+  public ResourceServiceImpl() {}
 
   @Override
   public IPage<Resource> page(Resource resource, RestRequest restRequest) {
@@ -229,6 +232,31 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     return saveFile.getAbsolutePath();
+  }
+
+  @Override
+  public RestResponse checkResource(Resource resource) {
+    ResourceType type = resource.getResourceType();
+    switch (type) {
+      case FLINK_APP:
+        // check main.
+        break;
+      case CONNECTOR:
+        Dependency dependency = Dependency.toDependency(resource.getResource());
+        if (!dependency.isEmpty()) {
+          String connectorPath = null;
+          if (!dependency.getJar().isEmpty()) {
+            String jar = dependency.getJar().get(0);
+            File localJar = new File(WebUtils.getAppTempDir(), jar);
+            connectorPath = localJar.getAbsolutePath();
+          } else {
+            Pom pom = dependency.getPom().get(0);
+          }
+        }
+        break;
+    }
+
+    return null;
   }
 
   private void transferTeamResource(Long teamId, String resourceName) {

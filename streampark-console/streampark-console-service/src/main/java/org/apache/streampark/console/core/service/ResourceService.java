@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Resource;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -91,4 +92,6 @@ public interface ResourceService extends IService<Resource> {
   void changeOwnership(Long userId, Long targetUserId);
 
   String upload(MultipartFile file) throws IOException;
+
+  RestResponse checkResource(Resource resource);
 }
