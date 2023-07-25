@@ -94,4 +94,6 @@ public interface ResourceService extends IService<Resource> {
   String upload(MultipartFile file) throws IOException;
 
   RestResponse checkResource(Resource resource);
+
+  List<String> getConnectorId(Resource resource);
 }

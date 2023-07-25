@@ -17,76 +17,34 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.util.DependencyUtils;
-import org.apache.streampark.console.core.bean.Pom;
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.flink.packer.maven.Artifact;
+import org.apache.streampark.flink.packer.maven.MavenTool;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.io.File;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import scala.collection.JavaConversions;
+import java.util.Optional;
 
 @Slf4j
 class DependencyUtilsTest {
 
   @Test
-  void resolveMavenDependencies() {
-    /**
-     * <dependency> <groupId>org.apache.flink</groupId> <artifactId>flink-table-common</artifactId>
-     * <version>${flink.version}</version> </dependency>
-     *
-     * <p><dependency> <groupId>org.apache.flink</groupId> <artifactId>flink-java</artifactId>
-     * <version>${flink.version}</version> </dependency>
-     */
-    List<Pom> dependency = new ArrayList<>();
+  void resolveMavenDependencies() throws Exception {
+    Artifact artifact = new Artifact("org.apache.flink", "flink-table-common", "1.17.1", null);
 
-    Pom dept = new Pom();
-    dept.setGroupId("org.apache.flink");
-    dept.setArtifactId("flink-table-common");
-    dept.setVersion("1.17.1");
-    dependency.add(dept);
-
-    StringBuilder builder = new StringBuilder();
-    dependency.forEach(
-        x -> {
-          String info =
-              String.format("%s:%s:%s,", x.getGroupId(), x.getArtifactId(), x.getVersion());
-          builder.append(info);
-        });
-    String packages = builder.deleteCharAt(builder.length() - 1).toString();
-
-    Timer timer = new Timer();
-    timer.schedule(
-        new TimerTask() {
-          @Override
-          public void run() {
-            log.info(">>>>> running....");
-          }
-        },
-        0,
-        3000);
-
-    try {
-      Collection<String> jars =
-          JavaConversions.asJavaCollection(
-              DependencyUtils.resolveMavenDependencies(
-                  packages,
-                  null,
-                  null,
-                  null,
-                  out -> {
-                    System.err.println("---------->" + out);
-                  }));
-      System.out.println();
-      System.out.println("----------------------------------------------------------------");
-      jars.forEach(System.out::println);
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
+    InternalConfigHolder.set(CommonConfig.STREAMPARK_WORKSPACE_LOCAL(), "~/workspace");
+    List<File> files = MavenTool.resolveArtifacts(artifact);
+    if (!files.isEmpty()) {
+      String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
+      Optional<File> jarFile = files.stream().filter(x -> x.getName().equals(fileName)).findFirst();
+      if (jarFile.isPresent()) {
+        String jar = jarFile.get().getAbsolutePath();
+        System.out.println(jar);
+      }
     }
   }
 }

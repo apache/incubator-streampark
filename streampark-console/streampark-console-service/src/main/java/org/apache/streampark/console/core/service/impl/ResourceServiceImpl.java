@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -36,6 +37,8 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.flink.packer.maven.Artifact;
+import org.apache.streampark.flink.packer.maven.MavenTool;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +61,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -240,23 +245,76 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     switch (type) {
       case FLINK_APP:
         // check main.
-        break;
-      case CONNECTOR:
-        Dependency dependency = Dependency.toDependency(resource.getResource());
-        if (!dependency.isEmpty()) {
-          String connectorPath = null;
-          if (!dependency.getJar().isEmpty()) {
-            String jar = dependency.getJar().get(0);
-            File localJar = new File(WebUtils.getAppTempDir(), jar);
-            connectorPath = localJar.getAbsolutePath();
-          } else {
-            Pom pom = dependency.getPom().get(0);
-          }
+        File jarFile = getResourceJar(resource);
+        Manifest manifest = Utils.getJarManifest(jarFile);
+        String mainClass = manifest.getMainAttributes().getValue("Main-Class");
+        if (mainClass == null) {
+          // main class is null
+          return RestResponse.success().data(1);
         }
-        break;
+        // successful.
+        return RestResponse.success().data(0);
+      case CONNECTOR:
+        // 1) get connector id
+        List<String> connectorIds = getConnectorId(resource);
+        if (Utils.isEmpty(connectorIds)) {
+          // connector id is null
+          return RestResponse.success().data(1);
+        }
+        // 2) check connector exists
+        boolean exists = existsResourceByConnectorIds(connectorIds);
+        if (exists) {
+          return RestResponse.success(2);
+        }
+        return RestResponse.success().data(0);
+    }
+    return RestResponse.success().data(0);
+  }
+
+  private boolean existsResourceByConnectorIds(List<String> connectorIds) {
+    return false;
+  }
+
+  @Override
+  public List<String> getConnectorId(Resource resource) {
+    ApiAlertException.throwIfFalse(
+        !ResourceType.CONNECTOR.equals(resource.getResourceType()),
+        "getConnectorId method error, resource not flink connector.");
+    File connector = getResourceJar(resource);
+    if (connector != null) {
+      // TODO parse connector get connectorId
     }
 
     return null;
+  }
+
+  private File getResourceJar(Resource resource) {
+    Dependency dependency = Dependency.toDependency(resource.getResource());
+    if (dependency.isEmpty()) {
+      return null;
+    }
+    if (!dependency.getJar().isEmpty()) {
+      String jar = dependency.getJar().get(0);
+      return new File(WebUtils.getAppTempDir(), jar);
+    } else {
+      Pom pom = dependency.getPom().get(0);
+      Artifact artifact =
+          new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion(), null);
+      try {
+        List<File> files = MavenTool.resolveArtifacts(artifact);
+        if (!files.isEmpty()) {
+          String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
+          Optional<File> jarFile =
+              files.stream().filter(x -> x.getName().equals(fileName)).findFirst();
+          if (jarFile.isPresent()) {
+            return jarFile.get();
+          }
+        }
+      } catch (Exception e) {
+        log.error("download flink connector error: " + e);
+      }
+      return null;
+    }
   }
 
   private void transferTeamResource(Long teamId, String resourceName) {
