@@ -60,6 +60,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -68,7 +70,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.ServiceLoader;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
@@ -126,7 +131,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
           "Please upload jar for Flink_App resource");
 
       Long teamId = resource.getTeamId();
-      String resourceName = null;
+      String resourceName;
 
       if (poms.isEmpty()) {
         resourceName = jars.get(0);
@@ -308,15 +313,25 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     Dependency dependency = Dependency.toDependency(resource.getResource());
     List<File> jars;
+    File connector;
+
     if (!dependency.getPom().isEmpty()) {
       // 1) pom
       Artifact artifact = dependency.toArtifact().get(0);
       jars = MavenTool.resolveArtifacts(artifact);
+      String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
+      Optional<File> jarFile = jars.stream().filter(x -> x.getName().equals(fileName)).findFirst();
+      connector = jarFile.get();
     } else {
       // 2) jar
       String jar = dependency.getJar().get(0);
-      jars = Collections.singletonList(new File(WebUtils.getAppTempDir(), jar));
+      File jarFile = new File(WebUtils.getAppTempDir(), jar);
+      connector = jarFile;
+      jars = Collections.singletonList(jarFile);
     }
+
+    // connector factories...
+    List<String> factories = getConnectorFactory(connector);
 
     Class<Factory> className = Factory.class;
     URL[] array =
@@ -335,14 +350,18 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       ServiceLoader<Factory> serviceLoader = ServiceLoader.load(className, urlClassLoader);
       List<FlinkConnectorResource> connectorResources = new ArrayList<>();
       for (Factory factory : serviceLoader) {
-        String factoryClassName = factory.getClass().getName();
-        if (!factoryClassName.equals("org.apache.flink.table.module.CoreModuleFactory")) {
-          FlinkConnectorResource connectorResource = new FlinkConnectorResource();
-          connectorResource.setClassName(factoryClassName);
-          connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
-          connectorResource.setRequiredOptions(factory.requiredOptions());
-          connectorResource.setOptionalOptions(factory.optionalOptions());
-          connectorResources.add(connectorResource);
+        try {
+          String factoryClassName = factory.getClass().getName();
+          if (factories.contains(factoryClassName)) {
+            FlinkConnectorResource connectorResource = new FlinkConnectorResource();
+            connectorResource.setClassName(factoryClassName);
+            connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
+            connectorResource.setRequiredOptions(factory.requiredOptions());
+            connectorResource.setOptionalOptions(factory.optionalOptions());
+            connectorResources.add(connectorResource);
+          }
+        } catch (Throwable t) {
+          //
         }
       }
       return connectorResources;
@@ -418,5 +437,23 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     return dependApplications;
+  }
+
+  private List<String> getConnectorFactory(File connector) throws Exception {
+    String configFile = "META-INF/services/org.apache.flink.table.factories.Factory";
+    JarFile jarFile = new JarFile(connector);
+    JarEntry entry = jarFile.getJarEntry(configFile);
+    List<String> factories = new ArrayList<>(0);
+    try (InputStream inputStream = jarFile.getInputStream(entry)) {
+      Scanner scanner = new Scanner(new InputStreamReader(inputStream));
+      while (scanner.hasNextLine()) {
+        String line = scanner.nextLine().trim();
+        if (line.length() > 0 && !line.startsWith("#")) {
+          factories.add(line);
+        }
+      }
+      scanner.close();
+    }
+    return factories;
   }
 }
