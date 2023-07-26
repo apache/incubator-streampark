@@ -27,6 +27,7 @@ import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
+import org.apache.streampark.console.core.bean.FlinkConnectorResource;
 import org.apache.streampark.console.core.bean.Pom;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
@@ -42,6 +43,7 @@ import org.apache.streampark.flink.packer.maven.MavenTool;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.table.factories.Factory;
 import org.apache.hadoop.shaded.org.apache.commons.codec.digest.DigestUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -58,10 +60,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
@@ -262,18 +269,23 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         return RestResponse.success().data(0);
       case CONNECTOR:
         // 1) get connector id
-        List<String> connectorIds;
+        List<FlinkConnectorResource> connectorResources;
         try {
-          connectorIds = getConnectorId(resource);
+          connectorResources = getConnectorResource(resource);
         } catch (Exception e) {
           return RestResponse.success().data(1);
         }
 
-        if (Utils.isEmpty(connectorIds)) {
+        if (Utils.isEmpty(connectorResources)) {
           // connector id is null
           return RestResponse.success().data(2);
         }
         // 2) check connector exists
+        List<String> connectorIds =
+            connectorResources.stream()
+                .map(FlinkConnectorResource::getFactoryIdentifier)
+                .collect(Collectors.toList());
+
         boolean exists = existsResourceByConnectorIds(connectorIds);
         if (exists) {
           return RestResponse.success(3);
@@ -288,17 +300,53 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   }
 
   @Override
-  public List<String> getConnectorId(Resource resource) throws Exception {
+  public List<FlinkConnectorResource> getConnectorResource(Resource resource) throws Exception {
+
     ApiAlertException.throwIfFalse(
         !ResourceType.CONNECTOR.equals(resource.getResourceType()),
         "getConnectorId method error, resource not flink connector.");
-    File connector = getResourceJar(resource);
-    if (connector != null) {
-      String spi = "META-INF/services/org.apache.flink.table.factories.Factory";
 
-      // TODO parse connector get connectorId
+    Dependency dependency = Dependency.toDependency(resource.getResource());
+    List<File> jars;
+    if (!dependency.getPom().isEmpty()) {
+      // 1) pom
+      Artifact artifact = dependency.toArtifact().get(0);
+      jars = MavenTool.resolveArtifacts(artifact);
+    } else {
+      // 2) jar
+      String jar = dependency.getJar().get(0);
+      jars = Collections.singletonList(new File(WebUtils.getAppTempDir(), jar));
     }
-    return null;
+
+    Class<Factory> className = Factory.class;
+    URL[] array =
+        jars.stream()
+            .map(
+                x -> {
+                  try {
+                    return x.toURI().toURL();
+                  } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                  }
+                })
+            .toArray(URL[]::new);
+
+    try (URLClassLoader urlClassLoader = URLClassLoader.newInstance(array)) {
+      ServiceLoader<Factory> serviceLoader = ServiceLoader.load(className, urlClassLoader);
+      List<FlinkConnectorResource> connectorResources = new ArrayList<>();
+      for (Factory factory : serviceLoader) {
+        String factoryClassName = factory.getClass().getName();
+        if (!factoryClassName.equals("org.apache.flink.table.module.CoreModuleFactory")) {
+          FlinkConnectorResource connectorResource = new FlinkConnectorResource();
+          connectorResource.setClassName(factoryClassName);
+          connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
+          connectorResource.setRequiredOptions(factory.requiredOptions());
+          connectorResource.setOptionalOptions(factory.optionalOptions());
+          connectorResources.add(connectorResource);
+        }
+      }
+      return connectorResources;
+    }
   }
 
   private File getResourceJar(Resource resource) throws Exception {
@@ -310,9 +358,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       String jar = dependency.getJar().get(0);
       return new File(WebUtils.getAppTempDir(), jar);
     } else {
-      Pom pom = dependency.getPom().get(0);
-      Artifact artifact =
-          new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion(), null);
+      Artifact artifact = dependency.toArtifact().get(0);
       List<File> files = MavenTool.resolveArtifacts(artifact);
       if (!files.isEmpty()) {
         String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());

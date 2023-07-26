@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.bean.FlinkConnectorResource;
 import org.apache.streampark.console.core.entity.Resource;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -95,5 +96,5 @@ public interface ResourceService extends IService<Resource> {
 
   RestResponse checkResource(Resource resource);
 
-  List<String> getConnectorId(Resource resource) throws Exception;
+  List<FlinkConnectorResource> getConnectorResource(Resource resource) throws Exception;
 }
