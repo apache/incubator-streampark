@@ -245,26 +245,38 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     switch (type) {
       case FLINK_APP:
         // check main.
-        File jarFile = getResourceJar(resource);
+        File jarFile = null;
+        try {
+          jarFile = getResourceJar(resource);
+        } catch (Exception e) {
+          // get jarFile error
+          return RestResponse.success().data(1);
+        }
         Manifest manifest = Utils.getJarManifest(jarFile);
         String mainClass = manifest.getMainAttributes().getValue("Main-Class");
         if (mainClass == null) {
           // main class is null
-          return RestResponse.success().data(1);
+          return RestResponse.success().data(2);
         }
         // successful.
         return RestResponse.success().data(0);
       case CONNECTOR:
         // 1) get connector id
-        List<String> connectorIds = getConnectorId(resource);
+        List<String> connectorIds;
+        try {
+          connectorIds = getConnectorId(resource);
+        } catch (Exception e) {
+          return RestResponse.success().data(1);
+        }
+
         if (Utils.isEmpty(connectorIds)) {
           // connector id is null
-          return RestResponse.success().data(1);
+          return RestResponse.success().data(2);
         }
         // 2) check connector exists
         boolean exists = existsResourceByConnectorIds(connectorIds);
         if (exists) {
-          return RestResponse.success(2);
+          return RestResponse.success(3);
         }
         return RestResponse.success().data(0);
     }
@@ -276,19 +288,20 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   }
 
   @Override
-  public List<String> getConnectorId(Resource resource) {
+  public List<String> getConnectorId(Resource resource) throws Exception {
     ApiAlertException.throwIfFalse(
         !ResourceType.CONNECTOR.equals(resource.getResourceType()),
         "getConnectorId method error, resource not flink connector.");
     File connector = getResourceJar(resource);
     if (connector != null) {
+      String spi = "META-INF/services/org.apache.flink.table.factories.Factory";
+
       // TODO parse connector get connectorId
     }
-
     return null;
   }
 
-  private File getResourceJar(Resource resource) {
+  private File getResourceJar(Resource resource) throws Exception {
     Dependency dependency = Dependency.toDependency(resource.getResource());
     if (dependency.isEmpty()) {
       return null;
@@ -300,18 +313,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       Pom pom = dependency.getPom().get(0);
       Artifact artifact =
           new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion(), null);
-      try {
-        List<File> files = MavenTool.resolveArtifacts(artifact);
-        if (!files.isEmpty()) {
-          String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
-          Optional<File> jarFile =
-              files.stream().filter(x -> x.getName().equals(fileName)).findFirst();
-          if (jarFile.isPresent()) {
-            return jarFile.get();
-          }
+      List<File> files = MavenTool.resolveArtifacts(artifact);
+      if (!files.isEmpty()) {
+        String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
+        Optional<File> jarFile =
+            files.stream().filter(x -> x.getName().equals(fileName)).findFirst();
+        if (jarFile.isPresent()) {
+          return jarFile.get();
         }
-      } catch (Exception e) {
-        log.error("download flink connector error: " + e);
       }
       return null;
     }

@@ -95,5 +95,5 @@ public interface ResourceService extends IService<Resource> {
 
   RestResponse checkResource(Resource resource);
 
-  List<String> getConnectorId(Resource resource);
+  List<String> getConnectorId(Resource resource) throws Exception;
 }
