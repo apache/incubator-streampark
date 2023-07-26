@@ -303,7 +303,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   public List<FlinkConnectorResource> getConnectorResource(Resource resource) throws Exception {
 
     ApiAlertException.throwIfFalse(
-        !ResourceType.CONNECTOR.equals(resource.getResourceType()),
+        ResourceType.CONNECTOR.equals(resource.getResourceType()),
         "getConnectorId method error, resource not flink connector.");
 
     Dependency dependency = Dependency.toDependency(resource.getResource());
