@@ -87,7 +87,7 @@ create table `t_flink_gateway` (
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- menu level 2
-insert into `t_menu` values (120500, 130000, 'setting.flinkGateway', '/setting/FlinkGateway', 'setting/FlinkGateway/index', null, 'apartment', '0', 1, 3, now(), now());
+insert into `t_menu` values (120500, 130000, 'setting.flinkGateway', '/setting/FlinkGateway', 'setting/FlinkGateway/index', null, 'api', '0', 1, 3, now(), now());
 -- menu level 3
 insert into `t_menu` values (120501, 120500, 'add', NULL, NULL, 'gateway:add', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (120502, 120500, 'update', NULL, NULL, 'gateway:update', NULL, '1', 1, NULL, now(), now());
@@ -103,5 +103,38 @@ insert into `t_role_menu` (role_id, menu_id) values (100002, 120500);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120501);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120502);
 insert into `t_role_menu` (role_id, menu_id) values (100002, 120503);
+
+-- ----------------------------
+-- Table of t_flink_catalog
+-- ----------------------------
+drop table if exists `t_flink_catalog`;
+create table `t_flink_catalog` (
+                                `id` bigint not null auto_increment,
+                                `catalog_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the catalog',
+                                `properties` text not null comment 'properties of catalog',
+                                `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
+                                `create_time` datetime not null default current_timestamp comment 'create time',
+                                `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+                                primary key (`id`) using btree,
+                                unique key `un_catalog_name_inx` (`catalog_name`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+-- menu level 2
+insert into `t_menu` values (120600, 130000, 'setting.flinkCatalog', '/setting/FlinkCatalog', 'setting/FlinkCatalog/index', null, 'folder', '0', 1, 3, now(), now());
+-- menu level 3
+insert into `t_menu` values (120601, 120600, 'add', NULL, NULL, 'catalog:add', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (120602, 120600, 'update', NULL, NULL, 'catalog:update', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` values (120603, 120600, 'delete', NULL, NULL, 'catalog:delete', NULL, '1', 1, NULL, now(), now());
+
+-- role menu script
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120600);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120601);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120602);
+insert into `t_role_menu` (role_id, menu_id) values (100001, 120603);
+
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120600);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120601);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120602);
+insert into `t_role_menu` (role_id, menu_id) values (100002, 120603);
 
 set foreign_key_checks = 1;

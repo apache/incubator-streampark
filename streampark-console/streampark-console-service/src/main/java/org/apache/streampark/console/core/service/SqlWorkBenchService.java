@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.console.core.bean.SqlGatewayExecuteResult;
+import org.apache.streampark.console.core.enums.CatalogMetaType;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.results.Column;
 import org.apache.streampark.gateway.results.GatewayInfo;
@@ -24,6 +26,8 @@ import org.apache.streampark.gateway.results.OperationInfo;
 import org.apache.streampark.gateway.results.ResultQueryCondition;
 import org.apache.streampark.gateway.results.ResultSet;
 import org.apache.streampark.gateway.session.SessionHandle;
+
+import java.util.List;
 
 public interface SqlWorkBenchService {
 
@@ -119,6 +123,17 @@ public interface SqlWorkBenchService {
       ResultQueryCondition resultQueryCondition);
 
   /**
+   * Execute statement and fetch result (Combination of executeStatement and fetchResults)
+   *
+   * @param flinkGatewayId flink gateway id
+   * @param sessionHandleId session handle
+   * @param statement statement
+   * @return result set
+   */
+  SqlGatewayExecuteResult executeAndFetchResults(
+      Long flinkGatewayId, String sessionHandleId, String statement);
+
+  /**
    * Send heartbeat
    *
    * @param flinkGatewayId flink gateway id
@@ -134,4 +149,41 @@ public interface SqlWorkBenchService {
    * @return true if supported
    */
   boolean check(Long flinkGatewayId, Long flinkClusterId);
+
+  /**
+   * Get catalogs metadata. If database name is not null, get tables metadata in the database else
+   * get the specified database metadata.
+   *
+   * @param flinkGatewayId flink gateway id
+   * @param sessionHandle session handle
+   * @param catalogId catalog id
+   * @param databaseName database name
+   * @param catalogMetaType catalog meta type
+   * @return catalogs metadata
+   */
+  List<String> listMetaData(
+      Long flinkGatewayId,
+      String sessionHandle,
+      Long catalogId,
+      String databaseName,
+      CatalogMetaType catalogMetaType);
+
+  /**
+   * Get create sql
+   *
+   * @param flinkGatewayId flink gateway id
+   * @param sessionHandle session handle
+   * @param catalogId catalog id
+   * @param databaseName database name
+   * @param objectName object name
+   * @param catalogMetaType catalog meta type
+   * @return create sql
+   */
+  String showCreateSql(
+      Long flinkGatewayId,
+      String sessionHandle,
+      Long catalogId,
+      String databaseName,
+      String objectName,
+      CatalogMetaType catalogMetaType);
 }

@@ -19,12 +19,14 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.ApiAccess;
+import org.apache.streampark.console.core.enums.CatalogMetaType;
 import org.apache.streampark.console.core.service.SqlWorkBenchService;
 import org.apache.streampark.gateway.results.ResultQueryCondition;
 import org.apache.streampark.gateway.session.SessionHandle;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(tags = {"FLINK_GATEWAY_TAG"})
+@Tag(name = "SQL_WORK_BENCH_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -52,7 +54,7 @@ public class SqlWorkBenchController {
   // Validation API
   // -------------------------------------------------------------------------------------------
   @ApiAccess
-  @ApiOperation(value = "Check Support", notes = "Check Support", tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Check Support", description = "Check Support")
   @GetMapping("{flinkClusterId}/check")
   public RestResponse check(@PathVariable Long flinkGatewayId, @PathVariable Long flinkClusterId) {
     return RestResponse.success(sqlWorkBenchService.check(flinkGatewayId, flinkClusterId));
@@ -63,7 +65,7 @@ public class SqlWorkBenchController {
   // -------------------------------------------------------------------------------------------
 
   @ApiAccess
-  @ApiOperation(value = "Get gateway info", notes = "Get gateway info", tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Get gateway info", description = "Get gateway info")
   @GetMapping("getGatewayInfo")
   public RestResponse getGatewayInfo(@PathVariable Long flinkGatewayId) {
     return RestResponse.success(sqlWorkBenchService.getGatewayInfo(flinkGatewayId));
@@ -74,7 +76,7 @@ public class SqlWorkBenchController {
   // -------------------------------------------------------------------------------------------
 
   @ApiAccess
-  @ApiOperation(value = "Open sessions", notes = "Open sessions", tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Open sessions", description = "Open sessions")
   @PostMapping("/{flinkClusterId}/sessions")
   public RestResponse openSession(
       @PathVariable Long flinkGatewayId, @PathVariable Long flinkClusterId) {
@@ -83,7 +85,7 @@ public class SqlWorkBenchController {
   }
 
   @ApiAccess
-  @ApiOperation(value = "Heartbeat", notes = "Heartbeat", tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Heartbeat", description = "Heartbeat")
   @PostMapping("sessions/{sessionHandle}/heartbeat")
   public RestResponse heartbeat(
       @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
@@ -92,7 +94,7 @@ public class SqlWorkBenchController {
   }
 
   @ApiAccess
-  @ApiOperation(value = "Close session", notes = "Close session", tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Close session", description = "Close session")
   @DeleteMapping("sessions/{sessionHandle}")
   public RestResponse closeSession(
       @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
@@ -105,7 +107,7 @@ public class SqlWorkBenchController {
   // -------------------------------------------------------------------------------------------
 
   @ApiAccess
-  @ApiOperation(value = "Cancel operation", notes = "Cancel operation", tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Cancel operation", description = "Cancel operation")
   @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/cancel")
   public RestResponse cancelOperation(
       @PathVariable Long flinkGatewayId,
@@ -116,7 +118,7 @@ public class SqlWorkBenchController {
   }
 
   @ApiAccess
-  @ApiOperation(value = "Close operation", notes = "Close operation", tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Close operation", description = "Close operation")
   @DeleteMapping("sessions/{sessionHandle}/operations/{operationHandle}/close")
   public RestResponse closeOperation(
       @PathVariable Long flinkGatewayId,
@@ -127,10 +129,7 @@ public class SqlWorkBenchController {
   }
 
   @ApiAccess
-  @ApiOperation(
-      value = "Get operation info",
-      notes = "Get operation info",
-      tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Get operation info", description = "Get operation info")
   @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/info")
   public RestResponse getOperationInfo(
       @PathVariable Long flinkGatewayId,
@@ -141,10 +140,7 @@ public class SqlWorkBenchController {
   }
 
   @ApiAccess
-  @ApiOperation(
-      value = "Get operation result schema",
-      notes = "Get operation result schema",
-      tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Get operation result schema", description = "Get operation result schema")
   @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/resultSchema")
   public RestResponse getOperationResultSchema(
       @PathVariable Long flinkGatewayId,
@@ -160,10 +156,7 @@ public class SqlWorkBenchController {
   // -------------------------------------------------------------------------------------------
 
   @ApiAccess
-  @ApiOperation(
-      value = "Execute statement",
-      notes = "Execute statement",
-      tags = "FLINK_GATEWAY_TAG")
+  @Operation(summary = "Execute statement", description = "Execute statement")
   @PostMapping("sessions/{sessionHandle}/statements")
   public RestResponse executeStatement(
       @PathVariable Long flinkGatewayId,
@@ -174,8 +167,8 @@ public class SqlWorkBenchController {
   }
 
   @ApiAccess
-  @ApiOperation(value = "Fetch results", notes = "Fetch results", tags = "FLINK_GATEWAY_TAG")
-  @PostMapping("sessions/{sessionHandle}/statements/{operationHandle}/info")
+  @Operation(summary = "Fetch results", description = "Fetch results")
+  @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/result")
   public RestResponse fetchResults(
       @PathVariable Long flinkGatewayId,
       @PathVariable String sessionHandle,
@@ -186,10 +179,82 @@ public class SqlWorkBenchController {
             flinkGatewayId, sessionHandle, operationHandle, resultQueryCondition));
   }
 
+  @ApiAccess
+  @Operation(
+      summary = "Execute statement and fetch results",
+      description =
+          "Execute statement and fetch results , the statement will be executed in a new operation handle.")
+  @PostMapping("sessions/{sessionHandle}/statement/result")
+  public RestResponse executeStatementAndFetchResult(
+      @PathVariable Long flinkGatewayId,
+      @PathVariable String sessionHandle,
+      @RequestParam String statement) {
+    return RestResponse.success(
+        sqlWorkBenchService.executeAndFetchResults(flinkGatewayId, sessionHandle, statement));
+  }
+
   // -------------------------------------------------------------------------------------------
   // Catalog API
   // -------------------------------------------------------------------------------------------
-  // TODO: 2023/5/5 because of catalog with fixed statement, so frontend can use above methods to
-  // get catalog info
 
+  @ApiAccess
+  @Operation(
+      summary = "List the name of object in catalog",
+      description =
+          "List the name of object in catalog , when catalogMetaType is TABLE or VIEW or FUNCTION, the databaseName is required")
+  @PostMapping("sessions/{sessionHandle}/catalogs/{catalogId}/databases/{catalogMetaType}")
+  public RestResponse listMetaData(
+      @PathVariable Long flinkGatewayId,
+      @PathVariable String sessionHandle,
+      @PathVariable Long catalogId,
+      @RequestParam(required = false) String databaseName,
+      @PathVariable
+          @ApiParam(
+              value = "Specify the type of catalog meta data",
+              allowableValues = "DATABASE,TABLE,VIEW,FUNCTION")
+          CatalogMetaType catalogMetaType) {
+    return RestResponse.success(
+        sqlWorkBenchService.listMetaData(
+            flinkGatewayId, sessionHandle, catalogId, databaseName, catalogMetaType));
+  }
+
+  @ApiAccess
+  @Operation(summary = "Show create sql of object", description = "only for table/view")
+  @PostMapping("sessions/{sessionHandle}/catalogs/{catalogId}/{databaseName}/{objectName}")
+  public RestResponse showCreateSql(
+      @PathVariable Long flinkGatewayId,
+      @PathVariable String sessionHandle,
+      @PathVariable Long catalogId,
+      @PathVariable String databaseName,
+      @PathVariable String objectName,
+      @RequestParam @ApiParam(allowableValues = "TABLE,VIEW") CatalogMetaType catalogMetaType) {
+    return RestResponse.success(
+        sqlWorkBenchService.showCreateSql(
+            flinkGatewayId, sessionHandle, catalogId, databaseName, objectName, catalogMetaType));
+  }
+
+  // -------------------------------------------------------------------------------------------
+  // JOB API (Only for flink 1.17+)
+  // -------------------------------------------------------------------------------------------
+
+  @ApiAccess
+  @Operation(summary = "List jobs", description = "List jobs")
+  @PostMapping("sessions/{sessionHandle}/jobs")
+  public RestResponse listJobs(
+      @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
+    return RestResponse.success(
+        sqlWorkBenchService.executeAndFetchResults(flinkGatewayId, sessionHandle, "SHOW JOBS;"));
+  }
+
+  @ApiAccess
+  @Operation(summary = "Stop job", description = "stop job")
+  @PostMapping("sessions/{sessionHandle}/jobs/{jobId}/stop")
+  public RestResponse stopJob(
+      @PathVariable Long flinkGatewayId,
+      @PathVariable String sessionHandle,
+      @PathVariable String jobId) {
+    return RestResponse.success(
+        sqlWorkBenchService.executeAndFetchResults(
+            flinkGatewayId, sessionHandle, "STOP JOB '" + jobId + "';"));
+  }
 }

@@ -15,8 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.gateway.results;
+package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.EnumValue;
 
-public class FunctionInfo implements Serializable {}
+public enum CatalogMetaType {
+  DATABASE(1),
+
+  TABLE(2),
+  VIEW(3),
+  FUNCTION(4),
+  SHOW_CREATE_TABLE(5),
+  SHOW_CREATE_VIEW(6);
+
+  @EnumValue private final int code;
+
+  public int getCode() {
+    return code;
+  }
+
+  CatalogMetaType(int i) {
+    this.code = i;
+  }
+}
