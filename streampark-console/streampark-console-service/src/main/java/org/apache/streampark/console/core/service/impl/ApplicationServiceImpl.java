@@ -78,6 +78,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.task.FlinkClusterWatcher;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
@@ -215,6 +216,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private LogClientService logClient;
 
   @Autowired private YarnQueueService yarnQueueService;
+
+  @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
   @PostConstruct
   public void resetOptionState() {
@@ -430,7 +433,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())
           || ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
         FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
-        boolean conned = flinkCluster.verifyClusterConnection();
+        boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
         if (!conned) {
           throw new ApiAlertException("the target cluster is unavailable, please check!");
         }
