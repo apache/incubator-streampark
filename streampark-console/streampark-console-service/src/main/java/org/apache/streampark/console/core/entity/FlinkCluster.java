@@ -111,6 +111,7 @@ public class FlinkCluster implements Serializable {
 
   private Date endTime;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer alertId;
 
   private transient Integer jobs = 0;

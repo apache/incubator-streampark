@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { defineComponent, unref, ref } from 'vue';
   import { useGo } from '/@/hooks/web/usePage';
   export default defineComponent({
     name: 'EditCluster',
@@ -36,6 +36,8 @@
   import { useRoute } from 'vue-router';
   import { useEdit } from '../../flink/app/hooks/useEdit';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { fetchAlertSetting } from '/@/api/flink/setting/alert';
+  import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 
   const go = useGo();
   const route = useRoute();
@@ -43,6 +45,7 @@
   const { Swal } = useMessage();
   const { handleResetApplication, defaultOptions } = useEdit();
   const cluster = reactive<Recordable>({});
+  const alerts = ref<AlertSetting[]>([]);
   const { getLoading, changeLoading, getClusterSchema, handleSubmitParams } = useClusterSetting();
 
   const [registerForm, { submit, setFieldsValue }] = useForm({
@@ -97,6 +100,10 @@
   function handleReset() {
     const resetParams = handleResetApplication();
     nextTick(() => {
+      let selectAlertId: string | undefined;
+      if (cluster.alertId) {
+        selectAlertId = unref(alerts)?.filter((t) => t.id == cluster.alertId)[0]?.id;
+      }
       setFieldsValue({
         clusterName: cluster.clusterName,
         clusterId: cluster.clusterId,
@@ -106,6 +113,7 @@
         dynamicProperties: cluster.dynamicProperties,
         resolveOrder: cluster.resolveOrder,
         yarnQueue: cluster.yarnQueue,
+        alertId: selectAlertId,
         versionId: cluster.versionId || null,
         k8sRestExposedType: cluster.k8sRestExposedType,
         flinkImage: cluster.flinkImage,
@@ -117,6 +125,9 @@
     });
   }
   onMounted(() => {
+    fetchAlertSetting().then((res) => {
+      alerts.value = res;
+    });
     getClusterInfo();
   });
 </script>
