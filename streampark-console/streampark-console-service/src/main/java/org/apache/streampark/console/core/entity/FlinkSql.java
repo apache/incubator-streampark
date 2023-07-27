@@ -89,7 +89,7 @@ public class FlinkSql {
     // 2) determine if dependency has changed
     Dependency thisDependency = Dependency.toDependency(this.getDependency());
     Dependency targetDependency = Dependency.toDependency(target.getDependency());
-    boolean depDifference = !thisDependency.eq(targetDependency);
+    boolean depDifference = !thisDependency.equals(targetDependency);
     // 3) determine if team resource has changed
     boolean teamResDifference = !Objects.equals(this.teamResource, target.getTeamResource());
 

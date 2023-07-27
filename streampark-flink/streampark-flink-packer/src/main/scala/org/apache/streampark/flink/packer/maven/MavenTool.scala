@@ -244,7 +244,7 @@ object MavenTool extends Logger {
     (repoSystem, session)
   }
 
-  class ShadeFilter extends Filter {
+  private[this] class ShadeFilter extends Filter {
     override def canFilter(jar: File): Boolean = true
 
     override def isFiltered(name: String): Boolean = {

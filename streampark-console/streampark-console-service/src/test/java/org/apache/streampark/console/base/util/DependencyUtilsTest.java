@@ -104,8 +104,7 @@ class DependencyUtilsTest {
     System.out.println(connectorResources);
   }
 
-  @Test
-  public List<String> getConnectorFactory(File connector) throws Exception {
+  private List<String> getConnectorFactory(File connector) throws Exception {
     String configFile = "META-INF/services/org.apache.flink.table.factories.Factory";
     JarFile jarFile = new JarFile(connector);
     JarEntry entry = jarFile.getJarEntry(configFile);
