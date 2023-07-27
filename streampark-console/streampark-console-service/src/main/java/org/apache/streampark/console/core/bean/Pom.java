@@ -52,7 +52,7 @@ public class Pom {
           groupId,
           artifactId,
           version,
-          StringUtils.isEmpty(classifier) ? "" : classifier
+          StringUtils.isEmpty(classifier) ? "" : ":".concat(classifier)
       );
   }
 
