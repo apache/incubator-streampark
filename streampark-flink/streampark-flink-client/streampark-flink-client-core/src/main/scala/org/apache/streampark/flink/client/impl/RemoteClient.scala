@@ -44,7 +44,7 @@ object RemoteClient extends FlinkClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    // 2) submit job
+    //  submit job
     super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(
       jobGraphSubmit)
 
