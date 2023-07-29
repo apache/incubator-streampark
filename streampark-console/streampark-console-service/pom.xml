@@ -367,6 +367,12 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-kubernetes-v2_${scala.binary.version}</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-flink-sqlclient_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -676,7 +682,9 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <target>
-                                        <copy file="${project.build.directory}/apache-streampark-${project.version}-incubating-bin.tar.gz" overwrite="true" tofile="${project.basedir}/../../dist/apache-streampark-${project.version}-incubating-bin.tar.gz" />
+                                        <copy file="${project.build.directory}/apache-streampark-${project.version}-incubating-bin.tar.gz"
+                                              overwrite="true"
+                                              tofile="${project.basedir}/../../dist/apache-streampark-${project.version}-incubating-bin.tar.gz"/>
                                     </target>
                                 </configuration>
                             </execution>
