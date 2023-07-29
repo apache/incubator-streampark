@@ -42,8 +42,8 @@ trait YarnClientTrait extends FlinkClientTrait {
       request: R,
       flinkConf: Configuration,
       actionFunc: (JobID, ClusterClient[_]) => O): O = {
-    val jobID = getJobID(request.jobId)
-    val clusterClient = {
+
+    Utils.using {
       flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
       val clusterClientFactory = new YarnClusterClientFactory
       val applicationId = clusterClientFactory.getClusterId(flinkConf)
@@ -53,15 +53,15 @@ trait YarnClientTrait extends FlinkClientTrait {
       }
       val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
       clusterDescriptor.retrieve(applicationId).getClusterClient
+    } {
+      client =>
+        Try(actionFunc(getJobID(request.jobId), client)).recover {
+          case e =>
+            throw new FlinkException(
+              s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
+                s"detail: ${Utils.stringifyException(e)}");
+        }.get
     }
-    Try {
-      actionFunc(jobID, clusterClient)
-    }.recover {
-      case e =>
-        throw new FlinkException(
-          s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
-            s"detail: ${Utils.stringifyException(e)}");
-    }.get
   }
 
   override def doTriggerSavepoint(
