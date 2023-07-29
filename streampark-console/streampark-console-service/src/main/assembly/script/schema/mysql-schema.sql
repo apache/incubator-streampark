@@ -531,4 +531,27 @@ create table `t_yarn_queue` (
    unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
+
+
+-- ----------------------------
+-- Table of t_resource
+-- ----------------------------
+drop table if exists `t_resource`;
+create table if not exists `t_resource` (
+`id` bigint not null auto_increment primary key,
+`resource_name` varchar(128) not null comment 'The name of the resource',
+`resource_type` int not null comment '0:app 1:common 2:connector 3:format 4:udf',
+`resource_path` varchar(255) default null,
+`resource` text,
+`engine_type` int not null comment 'compute engine type, 0:apache flink 1:apache spark',
+`main_class` varchar(255) default null,
+`description` text default null comment 'More detailed description of resource',
+`creator_id` bigint not null comment 'user id of creator',
+`connector_required_options` text default null,
+`connector_optional_options` text default null,
+`team_id` bigint not null comment 'team id',
+`create_time` datetime not null default current_timestamp comment 'create time',
+`modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time'
+);
+
 set foreign_key_checks = 1;
