@@ -46,7 +46,7 @@
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Resource from '/@/views/flink/resource/components/Resource.vue';
-  import { fetchAddResource, fetchUpdateResource } from '/@/api/flink/resource';
+  import { fetchAddResource, fetchUpdateResource, checkResource } from '/@/api/flink/resource';
   import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
   import {
     renderEngineType,
@@ -54,6 +54,7 @@
     renderStreamParkResourceGroup,
   } from '/@/views/flink/resource/useResourceRender';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { exceptionPropWidth } from '/@/utils';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -179,7 +180,6 @@
     try {
       const values = await validate();
       let resourceJson = '';
-
       if (values.resourceType == ResourceTypeEnum.GROUP) {
         resourceJson = JSON.stringify(values.resourceGroup);
       } else {
@@ -215,16 +215,66 @@
         }
 
         resourceJson = JSON.stringify(resource);
+        // check resource
+        const resp = await checkResource({
+          id: resourceId.value,
+          resource: resourceJson,
+          ...values,
+        });
+        const state = resp['state'];
+        switch (state) {
+          case 1:
+            // download error
+            if (resource.pom?.length > 0) {
+              Swal.fire({
+                icon: 'error',
+                title: t('sys.api.errorTip'),
+                width: exceptionPropWidth(),
+                html: '<pre class="api-exception">' + resp['exception'] + '</pre>',
+                focusConfirm: false,
+              });
+            } else {
+              Swal.fire('Failed', t('flink.resource.jarFileErrorTip'), 'error');
+            }
+            break;
+          case 2:
+            if (values.resourceType == ResourceTypeEnum.FLINK_APP) {
+              Swal.fire('Failed', t('flink.resource.mainNullTip'), 'error');
+            }
+            if (values.resourceType == ResourceTypeEnum.CONNECTOR) {
+              Swal.fire('Failed', t('flink.resource.connectorInvalidTip'), 'error');
+            }
+            break;
+          case 3:
+            Swal.fire(
+              'Failed',
+              t('flink.resource.connectorExistsTip').concat(': ').concat(resp['name']),
+              'error',
+            );
+            break;
+          case 4:
+            Swal.fire('Failed', t('flink.resource.connectorModifyTip'), 'error');
+            break;
+          case 0:
+            const connector = resp['connector'] || null;
+            setDrawerProps({ confirmLoading: true });
+            await (isUpdate.value
+              ? fetchUpdateResource({
+                  id: resourceId.value,
+                  resource: resourceJson,
+                  connector: connector,
+                  ...values,
+                })
+              : fetchAddResource({ resource: resourceJson, connector: connector, ...values }));
+            unref(resourceRef)?.setDefaultValue({});
+            await resetFields();
+            closeDrawer();
+            emit('success', isUpdate.value);
+            break;
+          default:
+            break;
+        }
       }
-
-      setDrawerProps({ confirmLoading: true });
-      await (isUpdate.value
-        ? fetchUpdateResource({ id: resourceId.value, resource: resourceJson, ...values })
-        : fetchAddResource({ resource: resourceJson, ...values }));
-      unref(resourceRef)?.setDefaultValue({});
-      await resetFields();
-      closeDrawer();
-      emit('success', isUpdate.value);
     } finally {
       setDrawerProps({ confirmLoading: false });
     }

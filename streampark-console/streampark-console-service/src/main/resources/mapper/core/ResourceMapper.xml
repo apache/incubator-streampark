@@ -20,11 +20,14 @@
     <resultMap id="ResourceMap" type="org.apache.streampark.console.core.entity.Resource">
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="resource_name" jdbcType="VARCHAR" property="resourceName"/>
+        <result column="connector_path" jdbcType="VARCHAR" property="connectorPath"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="resource_type" jdbcType="BIGINT" property="resourceType"/>
         <result column="resource" jdbcType="VARCHAR" property="resource"/>
         <result column="engine_type" jdbcType="BIGINT" property="engineType"/>
         <result column="creator_id" jdbcType="BIGINT" property="creatorId"/>
+        <result column="connector_required_options" jdbcType="LONGVARCHAR" property="connectorRequiredOptions"/>
+        <result column="connector_optional_options" jdbcType="LONGVARCHAR" property="connectorOptionalOptions"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>

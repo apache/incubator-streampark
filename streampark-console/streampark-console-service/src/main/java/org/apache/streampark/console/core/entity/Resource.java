@@ -40,7 +40,11 @@ public class Resource implements Serializable {
   @TableId(type = IdType.AUTO)
   private Long id;
 
+  // resourceName unique
   private String resourceName;
+
+  // resource path
+  private String resourcePath;
 
   private String resource;
 
@@ -54,7 +58,14 @@ public class Resource implements Serializable {
 
   private EngineType engineType;
 
+  // for flink app
   private String mainClass;
+
+  // for flink connector
+  private String connectorRequiredOptions;
+
+  // for flink connector
+  private String connectorOptionalOptions;
 
   /** user name of creator */
   private transient String creatorName;
@@ -69,4 +80,6 @@ public class Resource implements Serializable {
   private transient String sortField;
 
   private transient String sortOrder;
+
+  private transient String connector;
 }

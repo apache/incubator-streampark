@@ -48,12 +48,11 @@ public class Pom {
 
   @Override
   public String toString() {
-      return String.format("%s:%s:%s%s",
-          groupId,
-          artifactId,
-          version,
-          StringUtils.isEmpty(classifier) ? "" : ":".concat(classifier)
-      );
+    return String.format(
+        "%s:%s:%s%s",
+        groupId,
+        artifactId,
+        version,
+        StringUtils.isEmpty(classifier) ? "" : ":".concat(classifier));
   }
-
 }

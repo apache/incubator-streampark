@@ -23,6 +23,7 @@ import org.apache.streampark.console.core.bean.FlinkConnectorResource;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 
+import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.factories.Factory;
 
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +35,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
-import java.util.ServiceLoader;
+import java.time.Duration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -48,8 +45,7 @@ class DependencyUtilsTest {
   @Test
   public void resolveFlinkConnector() throws Exception {
 
-    Artifact artifact =
-        new Artifact("org.apache.flink", "flink-connector-hive_2.12", "1.17.1", null);
+    Artifact artifact = new Artifact("com.ververica", "flink-connector-mysql-cdc", "2.4.1", null);
 
     InternalConfigHolder.set(CommonConfig.STREAMPARK_WORKSPACE_LOCAL(), "~/tmp");
 
@@ -88,12 +84,18 @@ class DependencyUtilsTest {
           FlinkConnectorResource connectorResource = new FlinkConnectorResource();
           connectorResource.setClassName(factoryClassName);
           connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
-          try {
-            connectorResource.setRequiredOptions(factory.requiredOptions());
-            connectorResource.setOptionalOptions(factory.optionalOptions());
-          } catch (Throwable e) {
-            //
-          }
+          Map<String, String> requiredOptions = new HashMap<>(0);
+          factory
+              .requiredOptions()
+              .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
+          connectorResource.setRequiredOptions(requiredOptions);
+
+          Map<String, String> optionalOptions = new HashMap<>(0);
+          factory
+              .optionalOptions()
+              .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
+          connectorResource.setOptionalOptions(optionalOptions);
+
           connectorResources.add(connectorResource);
         }
       }
@@ -102,6 +104,24 @@ class DependencyUtilsTest {
     }
     urlClassLoader.close();
     System.out.println(connectorResources);
+  }
+
+  private String getOptionDefaultValue(ConfigOption<?> option) {
+    if (!option.hasDefaultValue()) {
+      return null;
+    }
+    Object value = option.defaultValue();
+    if (value instanceof Duration) {
+      return value.toString().replace("PT", "").toLowerCase();
+    }
+    return value.toString();
+  }
+
+  @Test
+  public void testDuration() {
+    String s = "PT30H";
+    Duration duration = Duration.parse(s);
+    System.out.println(duration.getSeconds());
   }
 
   private List<String> getConnectorFactory(File connector) throws Exception {

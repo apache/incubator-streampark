@@ -54,14 +54,14 @@ public class ResourceController {
   @Operation(summary = "add resource")
   @PostMapping("add")
   @RequiresPermissions("resource:add")
-  public RestResponse addResource(@Valid Resource resource) {
+  public RestResponse addResource(@Valid Resource resource) throws Exception {
     this.resourceService.addResource(resource);
     return RestResponse.success();
   }
 
   @Operation(summary = "check resource")
   @PostMapping("check")
-  public RestResponse checkResource(@Valid Resource resource) {
+  public RestResponse checkResource(@Valid Resource resource) throws Exception {
     return this.resourceService.checkResource(resource);
   }
 

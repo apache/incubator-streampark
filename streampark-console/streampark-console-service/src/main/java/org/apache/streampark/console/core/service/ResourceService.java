@@ -53,7 +53,7 @@ public interface ResourceService extends IService<Resource> {
    *
    * @param resource resource
    */
-  void addResource(Resource resource);
+  void addResource(Resource resource) throws Exception;
 
   /**
    * @param teamId team id
@@ -94,7 +94,7 @@ public interface ResourceService extends IService<Resource> {
 
   String upload(MultipartFile file) throws IOException;
 
-  RestResponse checkResource(Resource resource);
+  RestResponse checkResource(Resource resource) throws Exception;
 
-  List<FlinkConnectorResource> getConnectorResource(Resource resource) throws Exception;
+  FlinkConnectorResource getConnectorResource(Resource resource) throws Exception;
 }

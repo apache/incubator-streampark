@@ -25,6 +25,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.bean.FlinkConnectorResource;
@@ -42,7 +43,7 @@ import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.factories.Factory;
 import org.apache.hadoop.shaded.org.apache.commons.codec.digest.DigestUtils;
 
@@ -51,6 +52,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,11 +64,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -110,50 +115,52 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   }
 
   @Override
-  public void addResource(Resource resource) {
+  public void addResource(Resource resource) throws Exception {
     String resourceStr = resource.getResource();
     ApiAlertException.throwIfNull(resourceStr, "Please add pom or jar resource.");
 
-    if (resource.getResourceType() == ResourceType.GROUP) {
-      ApiAlertException.throwIfNull(
-          resource.getResourceName(), "The name of resource group is required.");
+    // check
+    Dependency dependency = Dependency.toDependency(resourceStr);
+    List<String> jars = dependency.getJar();
+    List<Pom> poms = dependency.getPom();
+
+    ApiAlertException.throwIfTrue(
+        jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
+
+    ApiAlertException.throwIfTrue(
+        resource.getResourceType() == ResourceType.FLINK_APP && jars.isEmpty(),
+        "Please upload jar for Flink_App resource");
+
+    ApiAlertException.throwIfTrue(
+        jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
+
+    if (resource.getResourceType() != ResourceType.CONNECTOR) {
+      ApiAlertException.throwIfNull(resource.getResourceName(), "The resourceName is required.");
     } else {
-      Dependency dependency = Dependency.toDependency(resourceStr);
-      List<String> jars = dependency.getJar();
-      List<Pom> poms = dependency.getPom();
-
-      ApiAlertException.throwIfTrue(
-          jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
-      ApiAlertException.throwIfTrue(
-          jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
-      ApiAlertException.throwIfTrue(
-          resource.getResourceType() == ResourceType.FLINK_APP && jars.isEmpty(),
-          "Please upload jar for Flink_App resource");
-
-      Long teamId = resource.getTeamId();
-      String resourceName;
-
-      if (poms.isEmpty()) {
-        resourceName = jars.get(0);
-        ApiAlertException.throwIfTrue(
-            this.findByResourceName(teamId, resourceName) != null,
-            String.format("Sorry, the resource %s already exists.", resourceName));
-
-        // copy jar to team upload directory
-        transferTeamResource(teamId, resourceName);
-      } else {
-        Pom pom = poms.get(0);
-        resourceName =
-            String.format("%s:%s:%s", pom.getGroupId(), pom.getArtifactId(), pom.getVersion());
-        if (StringUtils.isNotBlank(pom.getClassifier())) {
-          resourceName = resourceName + ":" + pom.getClassifier();
-        }
-        ApiAlertException.throwIfTrue(
-            this.findByResourceName(teamId, resourceName) != null,
-            String.format("Sorry, the resource %s already exists.", resourceName));
+      String connector = resource.getConnector();
+      ApiAlertException.throwIfTrue(connector == null, "the flink connector is null.");
+      FlinkConnectorResource connectorResource =
+          JacksonUtils.read(connector, FlinkConnectorResource.class);
+      resource.setResourceName(connectorResource.getFactoryIdentifier());
+      if (connectorResource.getRequiredOptions() != null) {
+        resource.setConnectorRequiredOptions(
+            JacksonUtils.write(connectorResource.getRequiredOptions()));
       }
+      if (connectorResource.getOptionalOptions() != null) {
+        resource.setConnectorOptionalOptions(
+            JacksonUtils.write(connectorResource.getOptionalOptions()));
+      }
+    }
 
-      resource.setResourceName(resourceName);
+    ApiAlertException.throwIfTrue(
+        this.findByResourceName(resource.getTeamId(), resource.getResourceName()) != null,
+        String.format("Sorry, the resource %s already exists.", resource.getResourceName()));
+
+    if (!jars.isEmpty()) {
+      String resourcePath = jars.get(0);
+      resource.setResourcePath(resourcePath);
+      // copy jar to team upload directory
+      transferTeamResource(resource.getTeamId(), resourcePath);
     }
 
     resource.setCreatorId(commonService.getUserId());
@@ -252,60 +259,82 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   }
 
   @Override
-  public RestResponse checkResource(Resource resource) {
-    ResourceType type = resource.getResourceType();
+  public RestResponse checkResource(Resource resourceParam) throws JsonProcessingException {
+    ResourceType type = resourceParam.getResourceType();
+    Map<String, Serializable> resp = new HashMap<>(0);
+    resp.put("state", 0);
     switch (type) {
       case FLINK_APP:
         // check main.
-        File jarFile = null;
+        File jarFile;
         try {
-          jarFile = getResourceJar(resource);
+          jarFile = getResourceJar(resourceParam);
         } catch (Exception e) {
           // get jarFile error
-          return RestResponse.success().data(1);
+          resp.put("state", 1);
+          resp.put("exception", Utils.stringifyException(e));
+          return RestResponse.success().data(resp);
         }
         Manifest manifest = Utils.getJarManifest(jarFile);
         String mainClass = manifest.getMainAttributes().getValue("Main-Class");
+
         if (mainClass == null) {
           // main class is null
-          return RestResponse.success().data(2);
+          resp.put("state", 2);
+          return RestResponse.success().data(resp);
         }
-        // successful.
-        return RestResponse.success().data(0);
+        return RestResponse.success().data(resp);
       case CONNECTOR:
         // 1) get connector id
-        List<FlinkConnectorResource> connectorResources;
+        FlinkConnectorResource connectorResource;
         try {
-          connectorResources = getConnectorResource(resource);
+          connectorResource = getConnectorResource(resourceParam);
         } catch (Exception e) {
-          return RestResponse.success().data(1);
+          // connector id is null
+          resp.put("state", 1);
+          resp.put("exception", Utils.stringifyException(e));
+          return RestResponse.success().data(resp);
         }
 
-        if (Utils.isEmpty(connectorResources)) {
-          // connector id is null
-          return RestResponse.success().data(2);
+        if (connectorResource == null) {
+          // connector invalid
+          resp.put("state", 2);
+          return RestResponse.success().data(resp);
         }
         // 2) check connector exists
-        List<String> connectorIds =
-            connectorResources.stream()
-                .map(FlinkConnectorResource::getFactoryIdentifier)
-                .collect(Collectors.toList());
-
-        boolean exists = existsResourceByConnectorIds(connectorIds);
+        boolean exists =
+            existsFlinkConnector(resourceParam.getId(), connectorResource.getFactoryIdentifier());
         if (exists) {
-          return RestResponse.success(3);
+          resp.put("state", 3);
+          resp.put("name", connectorResource.getFactoryIdentifier());
+          return RestResponse.success(resp);
         }
-        return RestResponse.success().data(0);
+
+        if (resourceParam.getId() != null) {
+          Resource resource = getById(resourceParam.getId());
+          if (!resource.getResourceName().equals(connectorResource.getFactoryIdentifier())) {
+            resp.put("state", 4);
+            return RestResponse.success().data(resp);
+          }
+        }
+        resp.put("state", 0);
+        resp.put("connector", JacksonUtils.write(connectorResource));
+        return RestResponse.success().data(resp);
     }
-    return RestResponse.success().data(0);
+    return RestResponse.success().data(resp);
   }
 
-  private boolean existsResourceByConnectorIds(List<String> connectorIds) {
-    return false;
+  private boolean existsFlinkConnector(Long id, String connectorId) {
+    LambdaQueryWrapper<Resource> lambdaQueryWrapper =
+        new LambdaQueryWrapper<Resource>().eq(Resource::getResourceName, connectorId);
+    if (id != null) {
+      lambdaQueryWrapper.ne(Resource::getId, id);
+    }
+    return getBaseMapper().exists(lambdaQueryWrapper);
   }
 
   @Override
-  public List<FlinkConnectorResource> getConnectorResource(Resource resource) throws Exception {
+  public FlinkConnectorResource getConnectorResource(Resource resource) throws Exception {
 
     ApiAlertException.throwIfFalse(
         ResourceType.CONNECTOR.equals(resource.getResourceType()),
@@ -313,7 +342,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     Dependency dependency = Dependency.toDependency(resource.getResource());
     List<File> jars;
-    File connector;
+    File connector = null;
 
     if (!dependency.getPom().isEmpty()) {
       // 1) pom
@@ -321,7 +350,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       jars = MavenTool.resolveArtifacts(artifact);
       String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
       Optional<File> jarFile = jars.stream().filter(x -> x.getName().equals(fileName)).findFirst();
-      connector = jarFile.get();
+      if (jarFile.isPresent()) {
+        connector = jarFile.get();
+      }
     } else {
       // 2) jar
       String jar = dependency.getJar().get(0);
@@ -348,23 +379,38 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     try (URLClassLoader urlClassLoader = URLClassLoader.newInstance(array)) {
       ServiceLoader<Factory> serviceLoader = ServiceLoader.load(className, urlClassLoader);
-      List<FlinkConnectorResource> connectorResources = new ArrayList<>();
       for (Factory factory : serviceLoader) {
-        try {
-          String factoryClassName = factory.getClass().getName();
-          if (factories.contains(factoryClassName)) {
-            FlinkConnectorResource connectorResource = new FlinkConnectorResource();
+        String factoryClassName = factory.getClass().getName();
+        if (factories.contains(factoryClassName)) {
+          FlinkConnectorResource connectorResource = new FlinkConnectorResource();
+          try {
             connectorResource.setClassName(factoryClassName);
             connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
-            connectorResource.setRequiredOptions(factory.requiredOptions());
-            connectorResource.setOptionalOptions(factory.optionalOptions());
-            connectorResources.add(connectorResource);
+          } catch (Exception ignored) {
           }
-        } catch (Throwable t) {
-          //
+
+          try {
+            Map<String, String> requiredOptions = new HashMap<>(0);
+            factory
+                .requiredOptions()
+                .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
+            connectorResource.setRequiredOptions(requiredOptions);
+          } catch (Exception ignored) {
+
+          }
+
+          try {
+            Map<String, String> optionalOptions = new HashMap<>(0);
+            factory
+                .optionalOptions()
+                .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
+            connectorResource.setOptionalOptions(optionalOptions);
+          } catch (Exception ignored) {
+          }
+          return connectorResource;
         }
       }
-      return connectorResources;
+      return null;
     }
   }
 
@@ -391,15 +437,15 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
   }
 
-  private void transferTeamResource(Long teamId, String resourceName) {
+  private void transferTeamResource(Long teamId, String resourcePath) {
     String teamUploads = String.format("%s/%d", Workspace.local().APP_UPLOADS(), teamId);
     if (!FsOperator.lfs().exists(teamUploads)) {
       FsOperator.lfs().mkdirs(teamUploads);
     }
-    File localJar = new File(WebUtils.getAppTempDir(), resourceName);
-    File teamUploadJar = new File(teamUploads, resourceName);
+    File localJar = new File(WebUtils.getAppTempDir(), resourcePath);
+    File teamUploadJar = new File(teamUploads, resourcePath);
     ApiAlertException.throwIfFalse(
-        localJar.exists(), "Missing file: " + resourceName + ", please upload again");
+        localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
     FsOperator.lfs()
         .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
   }
@@ -455,5 +501,16 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       scanner.close();
     }
     return factories;
+  }
+
+  private String getOptionDefaultValue(ConfigOption<?> option) {
+    if (!option.hasDefaultValue()) {
+      return null;
+    }
+    Object value = option.defaultValue();
+    if (value instanceof Duration) {
+      return value.toString().replace("PT", "").toLowerCase();
+    }
+    return value.toString();
   }
 }

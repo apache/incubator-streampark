@@ -17,17 +17,14 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.flink.configuration.ConfigOption;
-
 import lombok.Data;
 
-import java.util.Set;
+import java.util.Map;
 
 @Data
 public class FlinkConnectorResource {
-
   private String className;
   private String factoryIdentifier;
-  Set<ConfigOption<?>> requiredOptions;
-  Set<ConfigOption<?>> optionalOptions;
+  Map<String, String> requiredOptions;
+  Map<String, String> optionalOptions;
 }
