@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.service.SqlWorkBenchService;
+import org.apache.streampark.gateway.CompleteStatementRequestBody;
 import org.apache.streampark.gateway.results.ResultQueryCondition;
 import org.apache.streampark.gateway.session.SessionHandle;
 
@@ -184,6 +185,21 @@ public class SqlWorkBenchController {
     return RestResponse.success(
         sqlWorkBenchService.fetchResults(
             flinkGatewayId, sessionHandle, operationHandle, resultQueryCondition));
+  }
+
+  @ApiAccess
+  @ApiOperation(
+      value = "Complete statement",
+      notes = "Complete statement",
+      tags = "FLINK_GATEWAY_TAG")
+  @PostMapping("sessions/{sessionHandle}/statements/complete")
+  public RestResponse completeStatement(
+      @PathVariable Long flinkGatewayId,
+      @PathVariable String sessionHandle,
+      @RequestBody CompleteStatementRequestBody completeStatementRequestBody) {
+    return RestResponse.success(
+        sqlWorkBenchService.completeStatement(
+            flinkGatewayId, sessionHandle, completeStatementRequestBody));
   }
 
   // -------------------------------------------------------------------------------------------

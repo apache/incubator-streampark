@@ -17,11 +17,11 @@
 
 package org.apache.streampark.gateway.flink;
 
-import org.apache.streampark.gateway.flink.v1.client.dto.OpenSessionRequestBody;
-import org.apache.streampark.gateway.flink.v1.client.dto.OpenSessionResponseBody;
-import org.apache.streampark.gateway.flink.v1.client.rest.ApiClient;
-import org.apache.streampark.gateway.flink.v1.client.rest.ApiException;
-import org.apache.streampark.gateway.flink.v1.client.rest.DefaultApi;
+import org.apache.streampark.gateway.flink.v2.client.dto.OpenSessionRequestBody;
+import org.apache.streampark.gateway.flink.v2.client.dto.OpenSessionResponseBody;
+import org.apache.streampark.gateway.flink.v2.client.rest.ApiClient;
+import org.apache.streampark.gateway.flink.v2.client.rest.ApiException;
+import org.apache.streampark.gateway.flink.v2.client.rest.DefaultApi;
 
 import java.util.Collections;
 

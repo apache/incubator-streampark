@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.gateway.CompleteStatementRequestBody;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.results.Column;
 import org.apache.streampark.gateway.results.GatewayInfo;
@@ -24,6 +25,8 @@ import org.apache.streampark.gateway.results.OperationInfo;
 import org.apache.streampark.gateway.results.ResultQueryCondition;
 import org.apache.streampark.gateway.results.ResultSet;
 import org.apache.streampark.gateway.session.SessionHandle;
+
+import java.util.List;
 
 public interface SqlWorkBenchService {
 
@@ -102,6 +105,19 @@ public interface SqlWorkBenchService {
    */
   OperationHandle executeStatement(
       Long flinkGatewayId, String sessionHandleUUIDStr, String statement);
+
+  /**
+   * Get the completion hints for the given statement at the given position.
+   *
+   * @param flinkGatewayId flink gateway id
+   * @param sessionHandleUUIDStr session handle uuid string
+   * @param completeStatementRequestBody complete statement request body
+   * @return completion hints
+   */
+  List<String> completeStatement(
+      Long flinkGatewayId,
+      String sessionHandleUUIDStr,
+      CompleteStatementRequestBody completeStatementRequestBody);
 
   /**
    * Fetch results

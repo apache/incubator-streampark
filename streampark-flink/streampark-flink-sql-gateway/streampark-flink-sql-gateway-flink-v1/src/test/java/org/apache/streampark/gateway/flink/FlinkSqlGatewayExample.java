@@ -17,13 +17,13 @@
 
 package org.apache.streampark.gateway.flink;
 
-import org.apache.streampark.gateway.flink.client.dto.ExecuteStatementRequestBody;
-import org.apache.streampark.gateway.flink.client.dto.ExecuteStatementResponseBody;
-import org.apache.streampark.gateway.flink.client.dto.FetchResultsResponseBody;
-import org.apache.streampark.gateway.flink.client.dto.OpenSessionRequestBody;
-import org.apache.streampark.gateway.flink.client.dto.OpenSessionResponseBody;
-import org.apache.streampark.gateway.flink.client.rest.ApiException;
-import org.apache.streampark.gateway.flink.client.rest.v1.DefaultApi;
+import org.apache.streampark.gateway.flink.v1.client.dto.ExecuteStatementRequestBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.ExecuteStatementResponseBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.FetchResultsResponseBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.OpenSessionRequestBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.OpenSessionResponseBody;
+import org.apache.streampark.gateway.flink.v1.client.rest.ApiException;
+import org.apache.streampark.gateway.flink.v1.client.rest.DefaultApi;
 
 import java.util.UUID;
 

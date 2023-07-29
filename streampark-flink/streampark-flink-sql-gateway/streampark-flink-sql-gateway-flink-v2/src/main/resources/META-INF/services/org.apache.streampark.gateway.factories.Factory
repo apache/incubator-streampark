@@ -16,4 +16,4 @@
 #  limitations under the License.
 #
 
-org.apache.streampark.gateway.flink.v1.FlinkSqlGatewayServiceFactory
+org.apache.streampark.gateway.flink.v2.FlinkSqlGatewayServiceFactory

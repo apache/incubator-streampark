@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.gateway.flink;
+package org.apache.streampark.gateway.flink.v2;
 
 import org.apache.streampark.gateway.ConfigOption;
 import org.apache.streampark.gateway.factories.SqlGatewayServiceFactory;
@@ -37,7 +37,7 @@ public class FlinkSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
 
   @Override
   public String factoryIdentifier() {
-    return "flink-v1";
+    return "flink-v2";
   }
 
   @Override

@@ -371,6 +371,7 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!--region Gateway dependency-->
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-flink-sql-gateway-base</artifactId>
@@ -382,6 +383,13 @@
             <artifactId>streampark-flink-sql-gateway-flink-v1</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-sql-gateway-flink-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--endregion-->
 
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>

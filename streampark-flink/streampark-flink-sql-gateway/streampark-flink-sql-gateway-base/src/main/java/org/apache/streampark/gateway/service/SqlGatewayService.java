@@ -17,6 +17,7 @@
 
 package org.apache.streampark.gateway.service;
 
+import org.apache.streampark.gateway.CompleteStatementRequestBody;
 import org.apache.streampark.gateway.ExecutionConfiguration;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.OperationStatus;
@@ -28,6 +29,8 @@ import org.apache.streampark.gateway.results.ResultQueryCondition;
 import org.apache.streampark.gateway.results.ResultSet;
 import org.apache.streampark.gateway.session.SessionEnvironment;
 import org.apache.streampark.gateway.session.SessionHandle;
+
+import java.util.List;
 
 /** A service of SQL gateway is responsible for handling requests from streampark console. */
 public interface SqlGatewayService {
@@ -155,5 +158,16 @@ public interface SqlGatewayService {
       SessionHandle sessionHandle,
       OperationHandle operationHandle,
       ResultQueryCondition resultQueryCondition)
+      throws SqlGatewayException;
+
+  /**
+   * Get the completion hints for the given statement at the given position.
+   *
+   * @param sessionHandle handle to identify the session.
+   * @param completeStatementRequestBody completion hints request body.
+   * @return Returns the completion hints.
+   */
+  List<String> completeStatement(
+      SessionHandle sessionHandle, CompleteStatementRequestBody completeStatementRequestBody)
       throws SqlGatewayException;
 }

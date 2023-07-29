@@ -22,7 +22,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: v1/1.16
+  version: v2/1.17-SNAPSHOT
 paths:
   /api_versions:
     get:
@@ -75,8 +75,7 @@ paths:
           description: The SessionHandle that identifies a session.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/SessionHandle'
       responses:
         "200":
           description: The request was successful.
@@ -93,8 +92,7 @@ paths:
           description: The SessionHandle that identifies a session.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/SessionHandle'
       responses:
         "200":
           description: The request was successful.
@@ -102,6 +100,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CloseSessionResponseBody'
+  /sessions/{session_handle}/complete-statement:
+    get:
+      description: Get the completion hints for the given statement at the given position.
+      operationId: completeStatement
+      parameters:
+        - name: session_handle
+          in: path
+          description: The SessionHandle that identifies a session.
+          required: true
+          schema:
+            $ref: '#/components/schemas/SessionHandle'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteStatementRequestBody'
+      responses:
+        "200":
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompleteStatementResponseBody'
+  /sessions/{session_handle}/configure-session:
+    post:
+      description: |-
+        Configures the session with the statement which could be:
+        CREATE TABLE, DROP TABLE, ALTER TABLE, CREATE DATABASE, DROP DATABASE, ALTER DATABASE, CREATE FUNCTION, DROP FUNCTION, ALTER FUNCTION, CREATE CATALOG, DROP CATALOG, USE CATALOG, USE [CATALOG.]DATABASE, CREATE VIEW, DROP VIEW, LOAD MODULE, UNLOAD MODULE, USE MODULE, ADD JAR.
+      operationId: configureSession
+      parameters:
+        - name: session_handle
+          in: path
+          description: The SessionHandle that identifies a session.
+          required: true
+          schema:
+            $ref: '#/components/schemas/SessionHandle'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigureSessionRequestBody'
+      responses:
+        "200":
+          description: The request was successful.
   /sessions/{session_handle}/heartbeat:
     post:
       description: "Trigger heartbeat to tell the server that the client is active,\
@@ -151,15 +193,13 @@ paths:
           description: The SessionHandle that identifies a session.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/SessionHandle'
         - name: operation_handle
           in: path
           description: The OperationHandle that identifies a operation.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/OperationHandle'
       responses:
         "200":
           description: The request was successful.
@@ -177,15 +217,13 @@ paths:
           description: The SessionHandle that identifies a session.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/SessionHandle'
         - name: operation_handle
           in: path
           description: The OperationHandle that identifies a operation.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/OperationHandle'
         - name: token
           in: path
           description: The OperationHandle that identifies a operation.
@@ -193,6 +231,13 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: rowFormat
+          in: query
+          description: The row format to serialize the RowData.
+          required: true
+          style: form
+          schema:
+            $ref: '#/components/schemas/RowFormat'
       responses:
         "200":
           description: The request was successful.
@@ -210,15 +255,13 @@ paths:
           description: The SessionHandle that identifies a session.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/SessionHandle'
         - name: operation_handle
           in: path
           description: The OperationHandle that identifies a operation.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/OperationHandle'
       responses:
         "200":
           description: The request was successful.
@@ -236,8 +279,7 @@ paths:
           description: The SessionHandle that identifies a session.
           required: true
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/SessionHandle'
       requestBody:
         content:
           application/json:
@@ -257,13 +299,109 @@ components:
       properties:
         status:
           type: string
-    WatermarkSpec:
+    Column:
       type: object
       properties:
-        rowtimeAttribute:
+        comment:
           type: string
-        watermarkExpression:
-          $ref: '#/components/schemas/ResolvedExpression'
+        dataType:
+          $ref: '#/components/schemas/DataType'
+        name:
+          type: string
+        persisted:
+          type: boolean
+        physical:
+          type: boolean
+    ColumnInfo:
+      type: object
+      properties:
+        comment:
+          type: string
+        logicalType:
+#          $ref: '#/components/schemas/LogicalType'
+          type: object
+        name:
+          type: string
+    CompleteStatementRequestBody:
+      type: object
+      properties:
+        position:
+          type: integer
+          format: int32
+        statement:
+          type: string
+    CompleteStatementResponseBody:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            type: string
+    ConfigureSessionRequestBody:
+      type: object
+      properties:
+        executionTimeout:
+          type: integer
+          format: int64
+        statement:
+          type: string
+    ConstraintType:
+      type: string
+      enum:
+        - PRIMARY_KEY
+        - UNIQUE_KEY
+    DataType:
+      type: object
+      properties:
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataType'
+        logicalType:
+          $ref: '#/components/schemas/LogicalType'
+    ExecuteStatementRequestBody:
+      type: object
+      properties:
+        executionConfig:
+          type: object
+          additionalProperties:
+            type: string
+        executionTimeout:
+          type: integer
+          format: int64
+        statement:
+          type: string
+    ExecuteStatementResponseBody:
+      type: object
+      properties:
+        operationHandle:
+          type: string
+    Expression:
+      type: object
+    FetchResultsResponseBody:
+      type: object
+      properties:
+        jobID:
+          $ref: '#/components/schemas/JobID'
+        nextResultUri:
+          type: string
+        isQueryResult:
+          type: boolean
+        resultKind:
+          $ref: '#/components/schemas/ResultKind'
+        resultType:
+          $ref: '#/components/schemas/ResultType'
+        results:
+          $ref: '#/components/schemas/ResultInfo'
+    FieldGetter:
+      type: object
+    GetApiVersionResponseBody:
+      type: object
+      properties:
+        versions:
+          type: array
+          items:
+            type: string
     GetInfoResponseBody:
       type: object
       properties:
@@ -271,58 +409,29 @@ components:
           type: string
         version:
           type: string
-    JobVertexID:
-      pattern: "[0-9a-f]{32}"
-      type: string
-    ResolvedExpression:
+    GetSessionConfigResponseBody:
       type: object
       properties:
-        outputDataType:
-          $ref: '#/components/schemas/DataType'
-        resolvedChildren:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResolvedExpression'
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/Expression'
-    LogicalType:
-      type: object
-      properties:
-        typeRoot:
-          $ref: '#/components/schemas/LogicalTypeRoot'
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/LogicalType'
-        nullable:
-          type: boolean
-    UniqueConstraint:
-      type: object
-      properties:
-        name:
-          type: string
-        enforced:
-          type: boolean
-        columns:
-          type: array
-          items:
-            type: string
-        type:
-          $ref: '#/components/schemas/ConstraintType'
-    ExecuteStatementRequestBody:
-      type: object
-      properties:
-        statement:
-          type: string
-        executionTimeout:
-          type: integer
-          format: int64
-        executionConfig:
+        properties:
           type: object
           additionalProperties:
             type: string
+    IntermediateDataSetID:
+      pattern: "[0-9a-f]{32}"
+      type: string
+    JobID:
+      pattern: "[0-9a-f]{32}"
+      type: string
+    JobVertexID:
+      pattern: "[0-9a-f]{32}"
+      type: string
+    LogicalType:
+      type: object
+      properties:
+        nullable:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/LogicalTypeRoot'
     LogicalTypeRoot:
       type: string
       enum:
@@ -355,149 +464,47 @@ components:
         - RAW
         - SYMBOL
         - UNRESOLVED
+    OpenSessionRequestBody:
+      type: object
+      properties:
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        sessionName:
+          type: string
+    OpenSessionResponseBody:
+      type: object
+      properties:
+        sessionHandle:
+          type: string
     OperationHandle:
       type: string
       properties:
         identifier:
           type: string
           format: uuid
-    ExecuteStatementResponseBody:
+    OperationStatusResponseBody:
       type: object
       properties:
-        operationHandle:
+        status:
           type: string
-    FetchResultsResponseBody:
+    ResolvedExpression:
       type: object
       properties:
-        results:
-          $ref: '#/components/schemas/ResultSet'
-        resultType:
-          type: string
-        nextResultUri:
-          type: string
-    RowData:
-      type: object
-      properties:
-        arity:
-          type: integer
-          format: int32
-        rowKind:
-          $ref: '#/components/schemas/RowKind'
-    Column:
-      type: object
-      properties:
-        name:
-          type: string
-        dataType:
-          $ref: '#/components/schemas/DataType'
-        comment:
-          type: string
-        physical:
-          type: boolean
-        persisted:
-          type: boolean
-    TriggerId:
-      pattern: "[0-9a-f]{32}"
-      type: string
-    ResourceID:
-      pattern: "[0-9a-f]{32}"
-      type: string
-    OpenSessionRequestBody:
-      type: object
-      properties:
-        sessionName:
-          type: string
-        properties:
-          type: object
-          additionalProperties:
-            type: string
-    ResultSet:
-      type: object
-      properties:
-        columns:
-          type: array
-          items:
-            properties:
-              name:
-                type: string
-              logicalType:
-                type: object
-                properties:
-                  type:
-                    $ref: '#/components/schemas/LogicalTypeRoot'
-                  fields:
-                    type: array
-                    items:
-                      properties:
-                        name:
-                          type: string
-                        fieldType:
-                          type: object
-                          properties:
-                            type:
-                              $ref: '#/components/schemas/LogicalTypeRoot'
-                            nullable:
-                              type: boolean
-                            length:
-                              type: integer
-                              format: int32
-                            precision:
-                              type: integer
-                              format: int32
-                            scale:
-                              type: integer
-                              format: int32
-                  nullable:
-                    type: boolean
-                  length:
-                    type: integer
-                    format: int32
-                  precision:
-                    type: integer
-                    format: int32
-                  scale:
-                    type: integer
-                    format: int32
-              comment:
-                type: string
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              kind:
-                $ref: '#/components/schemas/RowKind'
-              fields:
-                type: array
-                items:
-                  type: object
-    DataType:
-      type: object
-      properties:
-        logicalType:
-          $ref: '#/components/schemas/LogicalType'
         children:
           type: array
           items:
-            $ref: '#/components/schemas/DataType'
+            $ref: '#/components/schemas/Expression'
+        outputDataType:
+          $ref: '#/components/schemas/DataType'
+        resolvedChildren:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResolvedExpression'
     ResolvedSchema:
       type: object
       properties:
-        columns:
-          type: array
-          items:
-            $ref: '#/components/schemas/Column'
-        watermarkSpecs:
-          type: array
-          items:
-            $ref: '#/components/schemas/WatermarkSpec'
-        primaryKey:
-          $ref: '#/components/schemas/UniqueConstraint'
-        primaryKeyIndexes:
-          type: array
-          items:
-            type: integer
-            format: int32
         columnCount:
           type: integer
           format: int32
@@ -509,45 +516,64 @@ components:
           type: array
           items:
             type: string
-    GetSessionConfigResponseBody:
-      type: object
-      properties:
-        properties:
-          type: object
-          additionalProperties:
-            type: string
-    SerializedThrowable:
-      type: object
-      properties:
-        serialized-throwable:
-          type: string
-          format: binary
-    GetApiVersionResponseBody:
-      type: object
-      properties:
-        versions:
+        columns:
           type: array
           items:
-            type: string
-    OperationStatusResponseBody:
+            $ref: '#/components/schemas/Column'
+        primaryKey:
+          $ref: '#/components/schemas/UniqueConstraint'
+        primaryKeyIndexes:
+          type: array
+          items:
+            type: integer
+            format: int32
+        watermarkSpecs:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatermarkSpec'
+    ResourceID:
+      pattern: "[0-9a-f]{32}"
+      type: string
+    ResultInfo:
       type: object
       properties:
-        status:
-          type: string
-    SessionHandle:
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ColumnInfo'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RowData'
+        resultSchema:
+          $ref: '#/components/schemas/ResolvedSchema'
+        rowFormat:
+          $ref: '#/components/schemas/RowFormat'
+    ResultKind:
       type: string
-      properties:
-        identifier:
-          type: string
-          format: uuid
+      enum:
+        - SUCCESS
+        - SUCCESS_WITH_CONTENT
     ResultType:
       type: string
       enum:
         - NOT_READY
         - PAYLOAD
         - EOS
-    Expression:
+    RowData:
       type: object
+      properties:
+        fields:
+          type: array
+          items:
+            type: object
+        kind:
+          $ref: '#/components/schemas/RowKind'
+    RowFormat:
+      type: string
+      enum:
+        - JSON
+        - PLAIN_TEXT
     RowKind:
       type: string
       enum:
@@ -555,19 +581,38 @@ components:
         - UPDATE_BEFORE
         - UPDATE_AFTER
         - DELETE
-    OpenSessionResponseBody:
+    SerializedThrowable:
       type: object
       properties:
-        sessionHandle:
+        serialized-throwable:
           type: string
-    ConstraintType:
+          format: binary
+    SessionHandle:
       type: string
-      enum:
-        - PRIMARY_KEY
-        - UNIQUE_KEY
-    IntermediateDataSetID:
+      properties:
+        identifier:
+          type: string
+          format: uuid
+    TriggerId:
       pattern: "[0-9a-f]{32}"
       type: string
-    JobID:
-      pattern: "[0-9a-f]{32}"
-      type: string
+    UniqueConstraint:
+      type: object
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        enforced:
+          type: boolean
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/ConstraintType'
+    WatermarkSpec:
+      type: object
+      properties:
+        rowtimeAttribute:
+          type: string
+        watermarkExpression:
+          $ref: '#/components/schemas/ResolvedExpression'
