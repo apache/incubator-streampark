@@ -138,9 +138,8 @@
       loading.value = true;
       const formData = new FormData();
       formData.append('file', data.file);
-      await fetchUpload(formData);
       dependency.jar = {};
-      dependency.jar[data.file.name] = data.file.name;
+      dependency.jar[data.file.name] = await fetchUpload(formData);
       handleUpdateDependency();
     } catch (error) {
       console.error(error);
@@ -159,7 +158,6 @@
     Object.keys(dependency.jar).forEach((v: string) => {
       jars.push(v);
     });
-
     dependencyRecords.value = deps;
     uploadJars.value = jars;
   }

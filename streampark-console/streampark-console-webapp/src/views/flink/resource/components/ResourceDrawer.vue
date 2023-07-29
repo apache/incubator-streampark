@@ -160,7 +160,6 @@
       if (unref(isUpdate)) {
         resourceId.value = data.record.id;
         await setFieldsValue(data.record);
-
         if (data.record?.resourceType === ResourceTypeEnum.GROUP) {
           await setFieldsValue({ resourceGroup: JSON.parse(data.record.resource || '[]') });
         } else {
@@ -175,6 +174,11 @@
     !unref(isUpdate) ? t('flink.resource.addResource') : t('flink.resource.modifyResource'),
   );
 
+  async function handleResetFields() {
+    resourceId.value = null;
+    await resetFields();
+  }
+
   // form submit
   async function handleSubmit() {
     try {
@@ -187,10 +191,10 @@
         unref(resourceRef).handleApplyPom();
         const dependencyRecords = unref(resourceRef)?.dependencyRecords;
         const uploadJars = unref(resourceRef)?.uploadJars;
-
         if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
           if (unref(dependencyRecords).length > 1) {
             Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
+            await handleResetFields();
             return;
           }
           Object.assign(resource, {
@@ -206,11 +210,13 @@
 
         if (resource.pom === undefined && resource.jar === undefined) {
           Swal.fire('Failed', t('flink.resource.addResourceTip'), 'error');
+          await handleResetFields();
           return;
         }
 
         if (resource.pom?.length > 0 && resource.jar?.length > 0) {
           Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
+          await handleResetFields();
           return;
         }
 
@@ -267,13 +273,13 @@
                 })
               : fetchAddResource({ resource: resourceJson, connector: connector, ...values }));
             unref(resourceRef)?.setDefaultValue({});
-            await resetFields();
             closeDrawer();
             emit('success', isUpdate.value);
             break;
           default:
             break;
         }
+        await handleResetFields();
       }
     } finally {
       setDrawerProps({ confirmLoading: false });
