@@ -24,10 +24,7 @@ import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 
 import org.apache.commons.lang3.StringUtils;
@@ -154,51 +151,6 @@ public class FlinkCluster implements Serializable {
       //
     }
     return null;
-  }
-
-  /**
-   * Verify the cluster connection whether is valid.
-   *
-   * @return <code>false</code> if the connection of the cluster is invalid, <code>true</code> else.
-   */
-  public boolean verifyClusterConnection() {
-    if (ExecutionMode.REMOTE.equals(this.getExecutionModeEnum())) {
-      if (address == null) {
-        return false;
-      }
-      // 1) check url is Legal
-      if (!CommonUtils.isLegalUrl(address)) {
-        return false;
-      }
-      // 2) check connection
-      try {
-        String restUrl = address + "/overview";
-        String result =
-            HttpClientUtils.httpGetRequest(
-                restUrl,
-                RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
-        JacksonUtils.read(result, Overview.class);
-        return true;
-      } catch (Exception ignored) {
-        //
-      }
-      return false;
-    }
-    if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
-      try {
-        String restUrl = YarnUtils.getRMWebAppURL(true) + "/proxy/" + this.clusterId + "/overview";
-        String result =
-            HttpClientUtils.httpGetRequest(
-                restUrl,
-                RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
-        JacksonUtils.read(result, Overview.class);
-        return true;
-      } catch (Exception ignored) {
-        //
-      }
-      return false;
-    }
-    return false;
   }
 
   @JsonIgnore
