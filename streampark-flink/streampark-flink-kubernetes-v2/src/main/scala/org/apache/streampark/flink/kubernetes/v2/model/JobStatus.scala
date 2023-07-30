@@ -54,6 +54,7 @@ object JobState extends Enumeration {
       RECONCILING, UNKNOWN = Value
 
   def valueOf(raw: String): JobState = values.find(_.toString == raw).getOrElse(UNKNOWN)
+  val maybeDeploying = Set(INITIALIZING, CREATED, RESTARTING, RECONCILING)
 }
 
 object JobStatus {

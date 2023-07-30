@@ -20,6 +20,8 @@ package org.apache.streampark.flink.kubernetes.v2.model
 /**
  * Flink job status snapshot identified by StreamPark app-id.
  *
+ * For the logical code to convert a JobSnapshot to a [[org.apache.streampark.console.core.enums.FlinkAppState]],
+ * see the [[org.apache.streampark.console.core.utils.FlinkAppStateConverter#dryK8sJobSnapshotToFlinkAppState]]
  *
  * @param appId Ref to [[org.apache.streampark.console.core.entity.Application.id]]
  * @param clusterNs Flink cluster namespace on kubernetes.
