@@ -17,11 +17,13 @@
 
 package org.apache.streampark.flink.kubernetes.v2.httpfs
 
-import org.apache.streampark.common.zio.ZIOExt.{UIOOps, unsafeRun}
-import org.apache.streampark.flink.kubernetes.v2.util.K8sTools.{newK8sClient, usingK8sClient}
-import zio.{Ref, UIO, ZIO, durationInt}
+import org.apache.streampark.common.zio.ZIOExt.{unsafeRun, UIOOps}
+import org.apache.streampark.flink.kubernetes.v2.K8sTools.{newK8sClient, usingK8sClient}
+
+import zio.{durationInt, Ref, UIO, ZIO}
 
 import java.net.{InetAddress, InetSocketAddress, Socket}
+
 import scala.util.Using
 
 object FileServerPeerAddress {

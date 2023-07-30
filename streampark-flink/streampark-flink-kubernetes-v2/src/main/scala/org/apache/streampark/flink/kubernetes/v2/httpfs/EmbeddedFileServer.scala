@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.kubernetes.v2.httpfs
 
-
 import org.apache.streampark.common.zio.ZIOExt.UIOOps
+
 import zio.{Ref, UIO, ZIO}
 import zio.http._
 
