@@ -17,15 +17,6 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.ResponseCode;
@@ -49,14 +40,33 @@ import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.UserService;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
+
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -113,42 +123,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void createUser(User user) {
-      user.setCreateTime(new Date());
-      if (StringUtils.isNoneBlank(user.getPassword())) {
-          String salt = ShaHashUtils.getRandomSalt();
-          String password = ShaHashUtils.encrypt(salt, user.getPassword());
-          user.setSalt(salt);
-          user.setPassword(password);
-      }
-      save(user);
+    user.setCreateTime(new Date());
+    if (StringUtils.isNoneBlank(user.getPassword())) {
+      String salt = ShaHashUtils.getRandomSalt();
+      String password = ShaHashUtils.encrypt(salt, user.getPassword());
+      user.setSalt(salt);
+      user.setPassword(password);
+    }
+    save(user);
   }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateUser(User user) {
-        user.setPassword(null);
-        user.setStatus(null);
-        user.setModifyTime(new Date());
-        updateById(user);
-    }
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void updateUser(User user) {
+    user.setPassword(null);
+    user.setStatus(null);
+    user.setModifyTime(new Date());
+    updateById(user);
+  }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updatePassword(User userParam) {
-        User user = getById(userParam.getUserId());
-        ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void updatePassword(User userParam) {
+    User user = getById(userParam.getUserId());
+    ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
 
-        String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
-        ApiAlertException.throwIfFalse(
-            StringUtils.equals(user.getPassword(), saltPassword),
-            "Old password error. Update password failed.");
+    String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
+    ApiAlertException.throwIfFalse(
+        StringUtils.equals(user.getPassword(), saltPassword),
+        "Old password error. Update password failed.");
 
-        String salt = ShaHashUtils.getRandomSalt();
-        String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
-        user.setSalt(salt);
-        user.setPassword(password);
-        this.baseMapper.updateById(user);
-    }
+    String salt = ShaHashUtils.getRandomSalt();
+    String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
+    user.setSalt(salt);
+    user.setPassword(password);
+    this.baseMapper.updateById(user);
+  }
 
   @Override
   @Transactional(rollbackFor = Exception.class)
@@ -264,47 +274,47 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public boolean lockUser(Long userId, Long transferToUserId) {
+    AlertException.throwIfTrue(
+        Objects.equals(userId, transferToUserId), "UserId and transferToUserId cannot be same.");
+    boolean hasApplication = applicationService.existsByUserId(userId);
+    boolean hasResource = resourceService.existsByUserId(userId);
+    boolean hasVariable = variableService.existsByUserId(userId);
+    boolean hasAlertConfig = alertConfigService.existsByUserId(userId);
+    boolean hasFlinkCluster = flinkClusterService.existsByUserId(userId);
+    boolean needTransferResource =
+        hasApplication || hasResource || hasVariable || hasAlertConfig || hasFlinkCluster;
+    if (needTransferResource && transferToUserId == null) {
+      return true;
+    }
+    if (transferToUserId != null) {
+      User transferToUser = this.baseMapper.selectById(transferToUserId);
+      AlertException.throwIfNull(
+          transferToUser, "The user to whom the transfer needs to be made does not exist.");
       AlertException.throwIfTrue(
-          Objects.equals(userId, transferToUserId), "UserId and transferToUserId cannot be same.");
-      boolean hasApplication = applicationService.existsByUserId(userId);
-      boolean hasResource = resourceService.existsByUserId(userId);
-      boolean hasVariable = variableService.existsByUserId(userId);
-      boolean hasAlertConfig = alertConfigService.existsByUserId(userId);
-      boolean hasFlinkCluster = flinkClusterService.existsByUserId(userId);
-      boolean needTransferResource =
-          hasApplication || hasResource || hasVariable || hasAlertConfig || hasFlinkCluster;
-      if (needTransferResource && transferToUserId == null) {
-          return true;
+          Objects.equals(transferToUser.getStatus(), User.STATUS_LOCK),
+          "The user to whom the transfer cannot be a locked user.");
+      if (hasApplication) {
+        applicationService.changeOwnership(userId, transferToUserId);
       }
-      if (transferToUserId != null) {
-          User transferToUser = this.baseMapper.selectById(transferToUserId);
-          AlertException.throwIfNull(
-              transferToUser, "The user to whom the transfer needs to be made does not exist.");
-          AlertException.throwIfTrue(
-              Objects.equals(transferToUser.getStatus(), User.STATUS_LOCK),
-              "The user to whom the transfer cannot be a locked user.");
-          if (hasApplication) {
-              applicationService.changeOwnership(userId, transferToUserId);
-          }
-          if (hasResource) {
-              resourceService.changeOwnership(userId, transferToUserId);
-          }
-          if (hasVariable) {
-              variableService.changeOwnership(userId, transferToUserId);
-          }
-          if (hasAlertConfig) {
-              alertConfigService.changeOwnership(userId, transferToUserId);
-          }
-          if (hasFlinkCluster) {
-              flinkClusterService.changeOwnership(userId, transferToUserId);
-          }
+      if (hasResource) {
+        resourceService.changeOwnership(userId, transferToUserId);
       }
-      this.baseMapper.update(
-          null,
-          Wrappers.lambdaUpdate(User.class)
-              .set(User::getStatus, User.STATUS_LOCK)
-              .eq(User::getUserId, userId));
-      return false;
+      if (hasVariable) {
+        variableService.changeOwnership(userId, transferToUserId);
+      }
+      if (hasAlertConfig) {
+        alertConfigService.changeOwnership(userId, transferToUserId);
+      }
+      if (hasFlinkCluster) {
+        flinkClusterService.changeOwnership(userId, transferToUserId);
+      }
+    }
+    this.baseMapper.update(
+        null,
+        Wrappers.lambdaUpdate(User.class)
+            .set(User::getStatus, User.STATUS_LOCK)
+            .eq(User::getUserId, userId));
+    return false;
   }
 
   @Override
