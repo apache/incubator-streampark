@@ -54,7 +54,6 @@
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-shaded-flink-kubernetes-operator-api</artifactId>
             <version>${streampark.shaded.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- K8s Client -->
