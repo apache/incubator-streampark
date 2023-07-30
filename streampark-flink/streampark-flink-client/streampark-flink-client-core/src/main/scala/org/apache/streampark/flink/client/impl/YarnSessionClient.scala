@@ -209,7 +209,7 @@ object YarnSessionClient extends YarnClientTrait {
         try {
           val applicationStatus =
             clusterDescriptor.getYarnClient
-              .getApplicationReport(ConverterUtils.toApplicationId(deployRequest.clusterId))
+              .getApplicationReport(ApplicationId.fromString(deployRequest.clusterId))
               .getFinalApplicationStatus
           if (FinalApplicationStatus.UNDEFINED.equals(applicationStatus)) {
             // application is running
