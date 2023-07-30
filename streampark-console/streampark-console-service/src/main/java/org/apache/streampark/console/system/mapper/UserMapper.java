@@ -29,7 +29,7 @@ import java.util.List;
 
 public interface UserMapper extends BaseMapper<User> {
 
-  IPage<User> findUserDetail(Page page, @Param("user") User user);
+  IPage<User> findUserDetail(Page<User> page, @Param("user") User user);
 
   List<User> getNoTokenUser();
 

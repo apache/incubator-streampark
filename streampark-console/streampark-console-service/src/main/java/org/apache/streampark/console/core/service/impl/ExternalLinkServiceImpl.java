@@ -84,7 +84,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   }
 
   private void renderLinkUrl(ExternalLink link, Application app) {
-    HashMap<String, String> map = new HashMap();
+    HashMap<String, String> map = new HashMap<>();
     map.put(PlaceholderType.JOB_ID.get(), app.getJobId());
     map.put(PlaceholderType.JOB_NAME.get(), app.getJobName());
     map.put(PlaceholderType.YARN_ID.get(), app.getAppId());
@@ -94,7 +94,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   }
 
   private boolean check(ExternalLink params) {
-    LambdaQueryWrapper<ExternalLink> queryWrapper = new LambdaQueryWrapper<ExternalLink>();
+    LambdaQueryWrapper<ExternalLink> queryWrapper = new LambdaQueryWrapper<>();
     // badgeName and LinkUrl cannot be duplicated
     queryWrapper.nested(
         qw ->

@@ -111,7 +111,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
       menus.forEach(
           m -> {
             ids.add(m.getMenuId().toString());
-            trees.add(new RouterTree(m));
+            trees.add(new RouterTree<>(m));
           });
       result.put("ids", ids);
       result.put("total", menus.size());

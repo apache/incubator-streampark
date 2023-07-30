@@ -28,67 +28,71 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
   /**
    * check exists
    *
-   * @param version
-   * @return
+   * @param version version
+   * @return two places will be checked: <br>
+   *     1) name repeated <br>
+   *     2) flink-dist <br>
+   *     -1) invalid path <br>
+   *     0) ok <br>
    */
   Integer check(FlinkEnv version);
 
   /**
    * create new
    *
-   * @param version
-   * @throws IOException
+   * @param version version
+   * @throws IOException IOException
    */
   boolean create(FlinkEnv version) throws Exception;
 
   /**
    * delete flink env
    *
-   * @param id
+   * @param id id
    */
   void delete(Long id);
 
   /**
    * update
    *
-   * @param version
-   * @throws IOException
+   * @param version version
+   * @throws IOException IOException
    */
   void update(FlinkEnv version) throws IOException;
 
   /**
    * get flink version by appid
    *
-   * @param appId
-   * @return
+   * @param appId appId
+   * @return FlinkEnv
    */
   FlinkEnv getByAppId(Long appId);
 
   /**
    * set a flink version as the default
    *
-   * @param id
+   * @param id id
    */
   void setDefault(Long id);
 
   /**
    * get default version
    *
-   * @return
+   * @return FlinkEnv
    */
   FlinkEnv getDefault();
 
   /**
    * get flink version, if null, get default version
    *
-   * @return
+   * @return FlinkEnv
    */
   FlinkEnv getByIdOrDefault(Long id);
 
   /**
    * sycn conf file
    *
-   * @param id
+   * @param id id
    */
   void syncConf(Long id) throws IOException;
 

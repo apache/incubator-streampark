@@ -158,8 +158,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   /**
    * get variables through team
    *
-   * @param teamId
-   * @return
+   * @param teamId teamId
+   * @return variable list
    */
   @Override
   public List<Variable> findByTeamId(Long teamId) {
@@ -169,9 +169,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   /**
    * Get variables through team and search keywords.
    *
-   * @param teamId
+   * @param teamId teamId
    * @param keyword Fuzzy search keywords through variable code or description, Nullable.
-   * @return
+   * @return variable list
    */
   @Override
   public List<Variable> findByTeamId(Long teamId, String keyword) {
@@ -181,9 +181,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   /**
    * Replace variable with defined variable codes.
    *
-   * @param teamId
+   * @param teamId teamId
    * @param mixed Text with placeholders, e.g. "--cluster ${kafka.cluster}"
-   * @return
+   * @return replaced variable
    */
   @Override
   public String replaceVariable(Long teamId, String mixed) {

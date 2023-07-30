@@ -33,9 +33,9 @@ import javax.servlet.Filter;
 
 import java.util.Map;
 
+/** Service used to change shiro filter and filterChains dynamically */
 @Component
 @Slf4j
-/** Service used to change shiro filter and filterChains dynamically */
 public class ShiroService {
   @Autowired private ShiroFilterFactoryBean shiroFilterFactoryBean;
 

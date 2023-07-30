@@ -62,7 +62,7 @@ public class FlinkClusterController {
   @Operation(summary = "Check the cluster status")
   @PostMapping("check")
   public RestResponse check(FlinkCluster cluster) {
-    ResponseResult checkResult = flinkClusterService.check(cluster);
+    ResponseResult<Object> checkResult = flinkClusterService.check(cluster);
     return RestResponse.success(checkResult);
   }
 

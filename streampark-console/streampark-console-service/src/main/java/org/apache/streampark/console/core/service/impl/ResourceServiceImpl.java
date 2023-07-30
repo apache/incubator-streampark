@@ -107,7 +107,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
           "Please upload jar for Flink_App resource");
 
       Long teamId = resource.getTeamId();
-      String resourceName = null;
+      String resourceName;
 
       if (poms.isEmpty()) {
         resourceName = jars.get(0);

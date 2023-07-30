@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.base.domain;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 
 public class RestResponse extends HashMap<String, Object> {
@@ -60,6 +62,7 @@ public class RestResponse extends HashMap<String, Object> {
     return this;
   }
 
+  @NotNull
   @Override
   public RestResponse put(String key, Object value) {
     super.put(key, value);

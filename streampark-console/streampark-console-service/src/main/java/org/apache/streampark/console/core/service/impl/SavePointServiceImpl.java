@@ -384,7 +384,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     return config.isEmpty() ? null : config.get(SAVEPOINT_DIRECTORY.key());
   }
 
-  /** Try get the 'state.checkpoints.num-retained' from the dynamic properties. */
+  /** Try to get the 'state.checkpoints.num-retained' from the dynamic properties. */
   private Optional<Integer> tryGetChkNumRetainedFromDynamicProps(String dynamicProps) {
     String rawCfgValue =
         extractDynamicPropertiesAsJava(dynamicProps).get(MAX_RETAINED_CHECKPOINTS.key());
@@ -405,7 +405,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     return Optional.empty();
   }
 
-  /** Try get the 'state.checkpoints.num-retained' from the flink env. */
+  /** Try to get the 'state.checkpoints.num-retained' from the flink env. */
   private int getChkNumRetainedFromFlinkEnv(
       @Nonnull FlinkEnv flinkEnv, @Nonnull Application application) {
     String flinkConfNumRetained =

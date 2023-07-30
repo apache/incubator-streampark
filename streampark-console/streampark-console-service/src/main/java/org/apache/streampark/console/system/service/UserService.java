@@ -75,8 +75,8 @@ public interface UserService extends IService<User> {
   /**
    * update password
    *
-   * @param user
-   * @throws Exception
+   * @param user user
+   * @throws Exception exception
    */
   void updatePassword(User user) throws Exception;
 
@@ -92,7 +92,7 @@ public interface UserService extends IService<User> {
   /**
    * Get the permissions of current userId.
    *
-   * @param userId the user Id
+   * @param userId the user id
    * @param teamId team id. If it's null, will find permissions from all teams.
    * @return permissions
    */

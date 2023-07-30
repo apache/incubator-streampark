@@ -20,6 +20,7 @@ package org.apache.streampark.console.base.interceptor;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -35,7 +36,10 @@ import java.util.Map;
 public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+  public boolean preHandle(
+      @NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull Object handler)
       throws Exception {
     if (request instanceof MultipartHttpServletRequest) {
       MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -54,9 +58,9 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
   @Override
   public void postHandle(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      Object handler,
+      @NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull Object handler,
       ModelAndView modelAndView)
       throws Exception {
     HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
@@ -64,7 +68,10 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
   @Override
   public void afterCompletion(
-      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+      @NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull Object handler,
+      Exception ex)
       throws Exception {
     HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
   }

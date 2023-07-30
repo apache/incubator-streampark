@@ -101,7 +101,7 @@ public class AlertTemplate implements Serializable {
   }
 
   private static class AlertTemplateBuilder {
-    private AlertTemplate alertTemplate = new AlertTemplate();
+    private final AlertTemplate alertTemplate = new AlertTemplate();
 
     public AlertTemplateBuilder setTitle(String title) {
       alertTemplate.setTitle(title);

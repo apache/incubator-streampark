@@ -31,9 +31,9 @@ public final class ShaHashUtils {
   /**
    * encrypt user password
    *
-   * @param salt
-   * @param password
-   * @return
+   * @param salt salt
+   * @param password password
+   * @return encrypted value
    */
   public static String encrypt(String salt, String password) {
     return new Sha256Hash(password, ByteSource.Util.bytes(salt), 1024).toHex();
@@ -46,8 +46,8 @@ public final class ShaHashUtils {
   /**
    * get random salt
    *
-   * @param length
-   * @return
+   * @param length length
+   * @return randomSalt
    */
   public static String getRandomSalt(int length) {
     String base = "abcdefghijklmnopqrstuvwxyz0123456789";

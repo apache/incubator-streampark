@@ -122,17 +122,18 @@ public class StreamParkAspect {
               "Permission denied, only user himself can access this permission");
           break;
         case TEAM:
-          Member member = memberService.findByUserName(paramId, currentUser.getUsername());
+          Member memberByTeam = memberService.findByUserName(paramId, currentUser.getUsername());
           ApiAlertException.throwIfTrue(
-              member == null,
+              memberByTeam == null,
               "Permission denied, only user belongs to this team can access this permission");
           break;
         case APP:
           Application app = applicationService.getById(paramId);
           ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
-          member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
+          Member memberByApp =
+              memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
           ApiAlertException.throwIfTrue(
-              member == null,
+              memberByApp == null,
               "Permission denied, only user belongs to this team can access this permission");
           break;
         default:

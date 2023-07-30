@@ -35,11 +35,9 @@ public class RestRequest implements Serializable {
   @Schema(example = "1", required = true)
   private int pageNum = 1;
 
-  @Schema(example = "", description = "e.g. create_time")
+  @Schema(description = "e.g. create_time")
   private String sortField;
 
-  @Schema(
-      example = "",
-      allowableValues = {"asc", "desc"})
+  @Schema(allowableValues = {"asc", "desc"})
   private String sortOrder;
 }

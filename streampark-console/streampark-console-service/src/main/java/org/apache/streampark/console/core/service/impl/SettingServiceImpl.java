@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
   private final Setting emptySetting = new Setting();
 
   @Override
-  public void onApplicationEvent(ContextRefreshedEvent event) {
+  public void onApplicationEvent(@NotNull ContextRefreshedEvent event) {
     List<Setting> settingList = super.list();
     settingList.forEach(x -> SETTINGS.put(x.getSettingKey(), x));
   }

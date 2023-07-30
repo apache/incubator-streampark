@@ -229,7 +229,6 @@ public class ApplicationController {
         name = "allowNonRestored",
         description = "ignore savepoint if cannot be restored",
         in = ParameterIn.QUERY,
-        required = false,
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @ApiAccess

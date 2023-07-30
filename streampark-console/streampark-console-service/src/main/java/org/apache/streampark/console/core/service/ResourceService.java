@@ -68,14 +68,14 @@ public interface ResourceService extends IService<Resource> {
   /**
    * delete resource
    *
-   * @param resource
+   * @param resource resource
    */
   void deleteResource(Resource resource);
 
   /**
    * Get resource through team id.
    *
-   * @param teamId
+   * @param teamId teamId
    * @return team resources
    */
   List<Resource> findByTeamId(Long teamId);

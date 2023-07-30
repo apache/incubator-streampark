@@ -867,7 +867,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       } else {
         File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
         if (jarFile.exists()) {
-          long checkSum = 0;
+          long checkSum;
           try {
             checkSum = FileUtils.checksumCRC32(jarFile);
           } catch (IOException e) {
@@ -977,8 +977,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
    * 2. dependency has changed<br>
    * 3. parameter has changed<br>
    *
-   * @param application
-   * @param appParam
+   * @param application application
+   * @param appParam appParam
    */
   private void updateFlinkSqlJob(Application application, Application appParam) {
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
@@ -1403,7 +1403,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   /**
    * Setup task is starting (for webUI "state" display)
    *
-   * @param application
+   * @param application application
    */
   @Override
   public void starting(Application application) {

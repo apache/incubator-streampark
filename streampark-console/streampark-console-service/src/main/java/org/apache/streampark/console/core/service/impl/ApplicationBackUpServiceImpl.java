@@ -196,8 +196,7 @@ public class ApplicationBackUpServiceImpl
     try {
       Application application = applicationService.getById(backUp.getAppId());
       application.getFsOperator().delete(backUp.getPath());
-      removeById(id);
-      return true;
+      return removeById(id);
     } catch (Exception e) {
       throw new InternalException(e.getMessage());
     }

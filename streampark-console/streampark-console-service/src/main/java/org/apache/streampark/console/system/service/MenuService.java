@@ -31,7 +31,7 @@ public interface MenuService extends IService<Menu> {
   /**
    * Get the permissions of current userId.
    *
-   * @param userId the user Id
+   * @param userId the user id
    * @param teamId team id. If it's null, will find permissions from all teams.
    * @return permissions
    */

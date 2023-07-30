@@ -32,6 +32,7 @@ import lombok.Data;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Map;
 
@@ -66,7 +67,7 @@ public class FlinkEnv implements Serializable {
   public void doSetFlinkConf() throws ApiDetailException {
     try {
       File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
-      String flinkConf = FileUtils.readFileToString(yaml);
+      String flinkConf = FileUtils.readFileToString(yaml, Charset.defaultCharset());
       this.flinkConf = DeflaterUtils.zipString(flinkConf);
     } catch (Exception e) {
       throw new ApiDetailException(e);

@@ -85,9 +85,9 @@ public class JWTUtil {
   /**
    * generate token
    *
-   * @param userId
-   * @param userName
-   * @return
+   * @param userId userId
+   * @param userName userName
+   * @return token
    */
   public static String sign(Long userId, String userName) {
     return sign(userId, userName, getExpireTime());
@@ -96,10 +96,10 @@ public class JWTUtil {
   /**
    * generate token
    *
-   * @param userId
-   * @param userName
-   * @param expireTime
-   * @return
+   * @param userId userId
+   * @param userName userName
+   * @param expireTime expireTime
+   * @return token
    */
   public static String sign(Long userId, String userName, Long expireTime) {
     try {
@@ -110,7 +110,7 @@ public class JWTUtil {
           .withExpiresAt(date)
           .sign(algorithm);
     } catch (Exception e) {
-      log.error("error：{}", e);
+      log.error("error", e);
       return null;
     }
   }

@@ -55,9 +55,9 @@ public class VariableController {
   /**
    * Get variable list by page.
    *
-   * @param restRequest
-   * @param variable
-   * @return
+   * @param restRequest restRequest
+   * @param variable variable
+   * @return res
    */
   @Operation(summary = "List variables")
   @PostMapping("page")
@@ -73,9 +73,9 @@ public class VariableController {
   /**
    * Get variables through team and search keywords.
    *
-   * @param teamId
+   * @param teamId teamId
    * @param keyword Fuzzy search keywords through variable code or description, Nullable.
-   * @return
+   * @return res
    */
   @Operation(summary = "List variables")
   @PostMapping("list")

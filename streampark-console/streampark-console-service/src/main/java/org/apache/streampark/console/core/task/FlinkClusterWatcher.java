@@ -140,8 +140,8 @@ public class FlinkClusterWatcher {
   /**
    * cluster get state from flink or yarn api
    *
-   * @param flinkCluster
-   * @return
+   * @param flinkCluster flinkCluster
+   * @return ClusterState
    */
   public ClusterState getClusterState(FlinkCluster flinkCluster) {
     ClusterState state = FAILED_STATES.getIfPresent(flinkCluster.getId());
@@ -161,8 +161,8 @@ public class FlinkClusterWatcher {
   /**
    * get remote cluster state
    *
-   * @param flinkCluster
-   * @return
+   * @param flinkCluster flinkCluster
+   * @return ClusterState
    */
   private ClusterState httpRemoteClusterState(FlinkCluster flinkCluster) {
     return getStateFromFlinkRestApi(flinkCluster);
@@ -171,8 +171,8 @@ public class FlinkClusterWatcher {
   /**
    * get yarn session cluster state
    *
-   * @param flinkCluster
-   * @return
+   * @param flinkCluster flinkCluster
+   * @return ClusterState
    */
   private ClusterState httpYarnSessionClusterState(FlinkCluster flinkCluster) {
     ClusterState state = getStateFromFlinkRestApi(flinkCluster);
@@ -185,8 +185,8 @@ public class FlinkClusterWatcher {
   /**
    * get flink cluster state
    *
-   * @param flinkCluster
-   * @return
+   * @param flinkCluster flinkCluster
+   * @return ClusterState
    */
   private ClusterState httpClusterState(FlinkCluster flinkCluster) {
     switch (flinkCluster.getExecutionModeEnum()) {
@@ -202,8 +202,8 @@ public class FlinkClusterWatcher {
   /**
    * cluster get state from flink rest api
    *
-   * @param flinkCluster
-   * @return
+   * @param flinkCluster flinkCluster
+   * @return ClusterState
    */
   private ClusterState getStateFromFlinkRestApi(FlinkCluster flinkCluster) {
     String address = flinkCluster.getAddress();
@@ -228,8 +228,8 @@ public class FlinkClusterWatcher {
   /**
    * cluster get state from yarn rest api
    *
-   * @param flinkCluster
-   * @return
+   * @param flinkCluster flinkCluster
+   * @return ClusterState
    */
   private ClusterState getStateFromYarnRestApi(FlinkCluster flinkCluster) {
     String yarnUrl = "ws/v1/cluster/apps/".concat(flinkCluster.getClusterId());
@@ -255,7 +255,7 @@ public class FlinkClusterWatcher {
   /**
    * add flinkCluster to watching
    *
-   * @param flinkCluster
+   * @param flinkCluster flinkCluster
    */
   public static void addWatching(FlinkCluster flinkCluster) {
     if (!WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
@@ -264,7 +264,11 @@ public class FlinkClusterWatcher {
     }
   }
 
-  /** @param flinkCluster */
+  /**
+   * unWatching
+   *
+   * @param flinkCluster flinkCluster
+   */
   public static void unWatching(FlinkCluster flinkCluster) {
     if (WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
       log.info("remove the cluster with id:{} from watcher cluster cache", flinkCluster.getId());
@@ -275,8 +279,8 @@ public class FlinkClusterWatcher {
   /**
    * yarn application state convert cluster state
    *
-   * @param state
-   * @return
+   * @param state YarnApplicationState
+   * @return ClusterState
    */
   private ClusterState yarnStateConvertClusterState(YarnApplicationState state) {
     return state == YarnApplicationState.FINISHED
@@ -291,6 +295,6 @@ public class FlinkClusterWatcher {
    */
   public Boolean verifyClusterConnection(FlinkCluster flinkCluster) {
     ClusterState clusterState = httpClusterState(flinkCluster);
-    return ClusterState.isRunning(clusterState) ? true : false;
+    return ClusterState.isRunning(clusterState);
   }
 }

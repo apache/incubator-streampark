@@ -29,7 +29,7 @@ import java.util.List;
 
 public interface FlinkClusterService extends IService<FlinkCluster> {
 
-  ResponseResult check(FlinkCluster flinkCluster);
+  ResponseResult<Object> check(FlinkCluster flinkCluster);
 
   Boolean create(FlinkCluster flinkCluster);
 

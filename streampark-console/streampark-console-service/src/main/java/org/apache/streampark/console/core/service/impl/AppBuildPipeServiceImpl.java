@@ -87,6 +87,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -164,7 +165,7 @@ public class AppBuildPipeServiceImpl
    * @return Whether the pipeline was successfully started
    */
   @Override
-  public boolean buildApplication(Long appId, boolean forceBuild) {
+  public boolean buildApplication(@NotNull Long appId, boolean forceBuild) {
     // check the build environment
     checkBuildEnv(appId, forceBuild);
 
@@ -385,7 +386,6 @@ public class AppBuildPipeServiceImpl
    *
    * @param appId application id
    * @param forceBuild forced start pipeline or not
-   * @return
    */
   private void checkBuildEnv(Long appId, boolean forceBuild) {
     Application app = applicationService.getById(appId);
@@ -590,8 +590,8 @@ public class AppBuildPipeServiceImpl
     try {
       String[] resourceIds = JacksonUtils.read(application.getTeamResource(), String[].class);
 
-      List<Artifact> mvnArtifacts = new ArrayList<Artifact>();
-      List<String> jarLibs = new ArrayList<String>();
+      List<Artifact> mvnArtifacts = new ArrayList<>();
+      List<String> jarLibs = new ArrayList<>();
 
       Arrays.stream(resourceIds)
           .forEach(
@@ -606,13 +606,12 @@ public class AppBuildPipeServiceImpl
                         JacksonUtils.read(resource.getResource(), String[].class);
                     Arrays.stream(groupElements)
                         .forEach(
-                            resourceIdInGroup -> {
-                              mergeDependency(
-                                  application,
-                                  mvnArtifacts,
-                                  jarLibs,
-                                  resourceService.getById(resourceIdInGroup));
-                            });
+                            resourceIdInGroup ->
+                                mergeDependency(
+                                    application,
+                                    mvnArtifacts,
+                                    jarLibs,
+                                    resourceService.getById(resourceIdInGroup)));
                   } catch (JsonProcessingException e) {
                     throw new ApiAlertException("Parse resource group failed.", e);
                   }
@@ -634,21 +633,20 @@ public class AppBuildPipeServiceImpl
     dependency
         .getPom()
         .forEach(
-            pom -> {
-              mvnArtifacts.add(
-                  new Artifact(
-                      pom.getGroupId(),
-                      pom.getArtifactId(),
-                      pom.getVersion(),
-                      pom.getClassifier()));
-            });
+            pom ->
+                mvnArtifacts.add(
+                    new Artifact(
+                        pom.getGroupId(),
+                        pom.getArtifactId(),
+                        pom.getVersion(),
+                        pom.getClassifier())));
     dependency
         .getJar()
         .forEach(
-            jar -> {
-              jarLibs.add(
-                  String.format(
-                      "%s/%d/%s", Workspace.local().APP_UPLOADS(), application.getTeamId(), jar));
-            });
+            jar ->
+                jarLibs.add(
+                    String.format(
+                        "%s/%d/%s",
+                        Workspace.local().APP_UPLOADS(), application.getTeamId(), jar)));
   }
 }

@@ -60,7 +60,7 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
   /**
    * delete appBuildPipeline By application
    *
-   * @param appId
+   * @param appId app id
    */
   void removeApp(Long appId);
 }

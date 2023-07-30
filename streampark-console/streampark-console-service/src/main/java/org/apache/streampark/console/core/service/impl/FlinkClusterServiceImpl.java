@@ -97,8 +97,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
   @Override
-  public ResponseResult check(FlinkCluster cluster) {
-    ResponseResult result = new ResponseResult();
+  public ResponseResult<Object> check(FlinkCluster cluster) {
+    ResponseResult<Object> result = new ResponseResult<>();
     result.setStatus(0);
 
     // 1) Check name is already exists

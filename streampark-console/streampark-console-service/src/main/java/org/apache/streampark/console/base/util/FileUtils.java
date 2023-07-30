@@ -30,7 +30,7 @@ public class FileUtils {
    * @param file The file
    * @param maxSize Maximum size of read file
    * @return The file content
-   * @throws IOException
+   * @throws IOException IOException
    */
   public static byte[] readEndOfFile(File file, long maxSize) throws IOException {
     long readSize = maxSize;
@@ -53,7 +53,7 @@ public class FileUtils {
    * @param file The file
    * @param maxSize Maximum size of read file
    * @return The file content
-   * @throws IOException
+   * @throws IOException IOException
    */
   public static byte[] readFileFromOffset(File file, long startOffset, long maxSize)
       throws IOException {

@@ -63,7 +63,7 @@ public final class GZipUtils {
           String fullFileName = createDir(targetDir, entryName, 2);
           try (FileOutputStream outputStream = new FileOutputStream(fullFileName);
               BufferedOutputStream bufOutput = new BufferedOutputStream(outputStream)) {
-            int b = -1;
+            int b;
             while ((b = archiveInput.read()) != -1) {
               bufOutput.write(b);
             }
@@ -80,7 +80,7 @@ public final class GZipUtils {
    * @param baseDir baseDir
    * @param entry archive entry
    * @param type type: 1, dir; 2, file
-   * @return
+   * @return fullFilePath
    */
   private static String createDir(String baseDir, String entry, int type) {
     String[] items = entry.split("/");
