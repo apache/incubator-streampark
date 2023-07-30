@@ -18,7 +18,7 @@
 package org.apache.streampark.common.conf
 
 /** Flink kubernetes Configuration for v1 version */
-@Deprecated("see: org.apache.streampark.flink.kubernetes.v2.Config")
+@deprecated("see: org.apache.streampark.flink.kubernetes.v2.Config")
 object K8sFlinkConfig {
 
   val jobStatusTrackTaskTimeoutSec: InternalOption = InternalOption(
