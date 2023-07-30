@@ -15,21 +15,24 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.v2.util
+package org.apache.streampark.common
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature
+import scala.language.implicitConversions
 
-import scala.util.chaining.scalaUtilChainingOps
+package object zio {
 
-object Parser {
+  /** Similar to python's pprint, format print any type of instance. */
+  @inline def toPrettyString(value: Any): String = value match {
+    case v: String => v
+    case v => pprint.apply(v, height = 2000).render
+  }
 
-  val jacksonMapper: ObjectMapper = new ObjectMapper()
+  implicit class PrettyStringOps(value: Any) {
+    @inline def prettyStr: String = toPrettyString(value)
+  }
 
-  val yamlMapper: ObjectMapper =
-    new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER))
-      .tap(_.setSerializationInclusion(JsonInclude.Include.NON_NULL))
+  /** Automatically converts value to Some value. */
+  implicit def liftValueAsSome[A](value: A): Option[A] = Some(value)
+
 
 }

@@ -29,13 +29,10 @@
     <name>StreamPark : Flink Kubernetes Integration V2</name>
 
     <properties>
-        <zio.version>2.0.15</zio.version>
-        <zio-logging.version>2.1.12</zio-logging.version>
         <zio-http.version>3.0.0-RC2</zio-http.version>
         <fabric8.version>6.8.0</fabric8.version>
         <sttp-client.version>3.8.13</sttp-client.version>
         <os-lib.version>0.9.1</os-lib.version>
-        <pprint.version>0.8.1</pprint.version>
         <upickle.version>3.0.0</upickle.version>
         <jackson-dataformat-yaml.version>2.14.2</jackson-dataformat-yaml.version>
         <scalatest.skiptests>true</scalatest.skiptests>
@@ -66,24 +63,6 @@
         <!-- ZIO -->
         <dependency>
             <groupId>dev.zio</groupId>
-            <artifactId>zio-streams_${scala.binary.version}</artifactId>
-            <version>${zio.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.zio</groupId>
-            <artifactId>zio-concurrent_${scala.binary.version}</artifactId>
-            <version>${zio.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.zio</groupId>
-            <artifactId>zio-logging-slf4j2_${scala.binary.version}</artifactId>
-            <version>${zio-logging.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.zio</groupId>
             <artifactId>zio-http_${scala.binary.version}</artifactId>
             <version>${zio-http.version}</version>
         </dependency>
@@ -106,12 +85,6 @@
             <groupId>com.lihaoyi</groupId>
             <artifactId>os-lib_${scala.binary.version}</artifactId>
             <version>${os-lib.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.lihaoyi</groupId>
-            <artifactId>pprint_${scala.binary.version}</artifactId>
-            <version>${pprint.version}</version>
         </dependency>
 
         <dependency>

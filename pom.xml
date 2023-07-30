@@ -123,6 +123,9 @@
         <commons-lang3.version>3.8.1</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
         <assertj.version>3.23.1</assertj.version>
+        <zio.version>2.0.15</zio.version>
+        <zio-logging.version>2.1.12</zio-logging.version>
+        <pprint.version>0.8.1</pprint.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
