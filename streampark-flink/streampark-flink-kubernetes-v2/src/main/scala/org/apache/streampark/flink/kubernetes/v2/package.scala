@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.v2
+package org.apache.streampark.flink.kubernetes
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -25,7 +25,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature
 import scala.language.implicitConversions
 import scala.util.chaining.scalaUtilChainingOps
 
-package object util {
+package object v2 {
 
   val jacksonMapper: ObjectMapper = new ObjectMapper()
 

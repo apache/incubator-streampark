@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.v2.util
+package org.apache.streampark.flink.kubernetes.v2
 
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.common.zio.ZIOExt.{unsafeRun, IOOps, OptionZIOOps, UIOOps}
@@ -90,7 +90,6 @@ object K8sTools extends Logger {
         _     <- mainFiberRef.set(Some(fiber))
       } yield ()
 
-    // noinspection DuplicatedCode
     def stop: UIO[Unit] =
       for {
         _ <- innerStop
