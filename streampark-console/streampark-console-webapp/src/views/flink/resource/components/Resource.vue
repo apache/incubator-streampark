@@ -156,14 +156,15 @@
       deps.push(dependency.pom[v]);
     });
     Object.keys(dependency.jar).forEach((v: string) => {
-      jars.push(v);
+      jars.push(v + ':' + dependency.jar[v]);
     });
     dependencyRecords.value = deps;
     uploadJars.value = jars;
   }
 
   function handleRemoveJar(jar: string) {
-    delete dependency.jar[jar];
+    console.log(jar);
+    delete dependency.jar[jar.split(':')[0]];
     handleUpdateDependency();
   }
 
@@ -237,7 +238,7 @@
       <template #message>
         <Space>
           <Tag class="tag-dependency" color="#108ee9">JAR</Tag>
-          {{ jar }}
+          {{ jar.split(':')[0] }}
           <Icon
             icon="ant-design:close-outlined"
             class="icon-close cursor-pointer"
@@ -251,7 +252,9 @@
 </template>
 
 <style lang="less">
-  @import url('/@/views/flink/app/styles/Add.less');
+  .dependency-box {
+    margin-top: 10px;
+  }
   .apply-pom {
     z-index: 99;
     position: absolute;

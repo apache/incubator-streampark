@@ -47,7 +47,7 @@ public final class CommonUtils implements Serializable {
 
   private CommonUtils() {}
 
-  private static final long serialVersionUID = 6458428317155311192L;
+  private static final long serialVersionUID = 1L;
 
   private static final String OS = System.getProperty("os.name").toLowerCase();
 

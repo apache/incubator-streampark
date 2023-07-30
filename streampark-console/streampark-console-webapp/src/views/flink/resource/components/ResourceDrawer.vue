@@ -174,14 +174,11 @@
     !unref(isUpdate) ? t('flink.resource.addResource') : t('flink.resource.modifyResource'),
   );
 
-  async function handleResetFields() {
-    resourceId.value = null;
-    await resetFields();
-  }
-
   // form submit
   async function handleSubmit() {
     try {
+      const id = resourceId.value;
+      resourceId.value = null;
       const values = await validate();
       let resourceJson = '';
       if (values.resourceType == ResourceTypeEnum.GROUP) {
@@ -194,7 +191,6 @@
         if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
           if (unref(dependencyRecords).length > 1) {
             Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
-            await handleResetFields();
             return;
           }
           Object.assign(resource, {
@@ -210,20 +206,18 @@
 
         if (resource.pom === undefined && resource.jar === undefined) {
           Swal.fire('Failed', t('flink.resource.addResourceTip'), 'error');
-          await handleResetFields();
           return;
         }
 
         if (resource.pom?.length > 0 && resource.jar?.length > 0) {
           Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
-          await handleResetFields();
           return;
         }
 
         resourceJson = JSON.stringify(resource);
         // check resource
         const resp = await checkResource({
-          id: resourceId.value,
+          id: id,
           resource: resourceJson,
           ...values,
         });
@@ -254,11 +248,14 @@
           case 3:
             Swal.fire(
               'Failed',
-              t('flink.resource.connectorExistsTip').concat(': ').concat(resp['name']),
+              t('flink.resource.connectorInfoErrorTip').concat(': ').concat(resp['name']),
               'error',
             );
             break;
           case 4:
+            Swal.fire('Failed', t('flink.resource.connectorExistsTip'), 'error');
+            break;
+          case 5:
             Swal.fire('Failed', t('flink.resource.connectorModifyTip'), 'error');
             break;
           case 0:
@@ -266,7 +263,7 @@
             setDrawerProps({ confirmLoading: true });
             await (isUpdate.value
               ? fetchUpdateResource({
-                  id: resourceId.value,
+                  id: id,
                   resource: resourceJson,
                   connector: connector,
                   ...values,
@@ -279,7 +276,7 @@
           default:
             break;
         }
-        await handleResetFields();
+        await resetFields();
       }
     } finally {
       setDrawerProps({ confirmLoading: false });

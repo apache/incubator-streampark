@@ -36,6 +36,8 @@ export default {
   jarFileErrorTip: 'Jar file is null, please try again',
   mainNullTip: 'Flink app invalid, main class is null',
   connectorExistsTip: 'this connector already exists',
+  connectorInvalidTip: 'flink connector invalid, please check',
+  connectorInfoErrorTip: 'get flink connector information error.',
   connectorModifyTip: 'this connector cannot be modified, because factoryIdentifier has changed',
   add: 'Add',
   success: ' successful',

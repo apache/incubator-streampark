@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.bean.FlinkConnectorResource;
 import org.apache.streampark.console.core.entity.Resource;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -95,6 +94,4 @@ public interface ResourceService extends IService<Resource> {
   String upload(MultipartFile file) throws IOException;
 
   RestResponse checkResource(Resource resource) throws Exception;
-
-  FlinkConnectorResource getConnectorResource(Resource resource) throws Exception;
 }

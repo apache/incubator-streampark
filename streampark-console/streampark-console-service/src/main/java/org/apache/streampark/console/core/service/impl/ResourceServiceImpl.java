@@ -160,7 +160,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       String resourcePath = jars.get(0);
       resource.setResourcePath(resourcePath);
       // copy jar to team upload directory
-      transferTeamResource(resource.getTeamId(), resourcePath);
+      String upFile = resourcePath.split(":")[1];
+      transferTeamResource(resource.getTeamId(), upFile);
     }
 
     resource.setCreatorId(commonService.getUserId());
@@ -186,7 +187,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       ApiAlertException.throwIfFalse(
           resourceName.equals(findResource.getResourceName()),
           "Please make sure the resource name is not changed.");
-      transferTeamResource(findResource.getTeamId(), resourceName);
+
+      Dependency dependency = Dependency.toDependency(resource.getResource());
+      if (!dependency.getJar().isEmpty()) {
+        String jarFile = dependency.getJar().get(0).split(":")[1];
+        transferTeamResource(findResource.getTeamId(), jarFile);
+      }
     }
 
     findResource.setDescription(resource.getDescription());
@@ -287,25 +293,64 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       case CONNECTOR:
         // 1) get connector id
         FlinkConnectorResource connectorResource;
+
+        ApiAlertException.throwIfFalse(
+            ResourceType.CONNECTOR.equals(resourceParam.getResourceType()),
+            "getConnectorId method error, resource not flink connector.");
+
+        List<File> jars;
+        File connector = null;
+        List<String> factories;
+
+        Dependency dependency = Dependency.toDependency(resourceParam.getResource());
+
+        // 1) get connector jar
+        if (!dependency.getPom().isEmpty()) {
+          Artifact artifact = dependency.toArtifact().get(0);
+          try {
+            jars = MavenTool.resolveArtifacts(artifact);
+          } catch (Exception e) {
+            // connector download is null
+            resp.put("state", 1);
+            resp.put("exception", Utils.stringifyException(e));
+            return RestResponse.success().data(resp);
+          }
+          String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
+          Optional<File> file = jars.stream().filter(x -> x.getName().equals(fileName)).findFirst();
+          if (file.isPresent()) {
+            connector = file.get();
+          }
+        } else {
+          // 2) jar
+          String jar = dependency.getJar().get(0).split(":")[1];
+          File file = new File(jar);
+          connector = file;
+          jars = Collections.singletonList(file);
+        }
+
+        // 2) parse connector Factory
         try {
-          connectorResource = getConnectorResource(resourceParam);
+          factories = getConnectorFactory(connector);
         } catch (Exception e) {
-          // connector id is null
-          resp.put("state", 1);
+          // flink connector invalid
+          resp.put("state", 2);
           resp.put("exception", Utils.stringifyException(e));
           return RestResponse.success().data(resp);
         }
 
+        // 3) get connector resource
+        connectorResource = getConnectorResource(jars, factories);
         if (connectorResource == null) {
-          // connector invalid
-          resp.put("state", 2);
+          // connector is null
+          resp.put("state", 3);
           return RestResponse.success().data(resp);
         }
+
         // 2) check connector exists
         boolean exists =
             existsFlinkConnector(resourceParam.getId(), connectorResource.getFactoryIdentifier());
         if (exists) {
-          resp.put("state", 3);
+          resp.put("state", 4);
           resp.put("name", connectorResource.getFactoryIdentifier());
           return RestResponse.success(resp);
         }
@@ -313,7 +358,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         if (resourceParam.getId() != null) {
           Resource resource = getById(resourceParam.getId());
           if (!resource.getResourceName().equals(connectorResource.getFactoryIdentifier())) {
-            resp.put("state", 4);
+            resp.put("state", 5);
             return RestResponse.success().data(resp);
           }
         }
@@ -333,37 +378,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     return getBaseMapper().exists(lambdaQueryWrapper);
   }
 
-  @Override
-  public FlinkConnectorResource getConnectorResource(Resource resource) throws Exception {
-
-    ApiAlertException.throwIfFalse(
-        ResourceType.CONNECTOR.equals(resource.getResourceType()),
-        "getConnectorId method error, resource not flink connector.");
-
-    Dependency dependency = Dependency.toDependency(resource.getResource());
-    List<File> jars;
-    File connector = null;
-
-    if (!dependency.getPom().isEmpty()) {
-      // 1) pom
-      Artifact artifact = dependency.toArtifact().get(0);
-      jars = MavenTool.resolveArtifacts(artifact);
-      String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
-      Optional<File> jarFile = jars.stream().filter(x -> x.getName().equals(fileName)).findFirst();
-      if (jarFile.isPresent()) {
-        connector = jarFile.get();
-      }
-    } else {
-      // 2) jar
-      String jar = dependency.getJar().get(0);
-      File jarFile = new File(WebUtils.getAppTempDir(), jar);
-      connector = jarFile;
-      jars = Collections.singletonList(jarFile);
-    }
-
-    // connector factories...
-    List<String> factories = getConnectorFactory(connector);
-
+  private FlinkConnectorResource getConnectorResource(List<File> jars, List<String> factories) {
     Class<Factory> className = Factory.class;
     URL[] array =
         jars.stream()
@@ -411,7 +426,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         }
       }
       return null;
+    } catch (Exception e) {
+      log.error("getConnectorResource failed. " + e);
     }
+    return null;
   }
 
   private File getResourceJar(Resource resource) throws Exception {
@@ -420,8 +438,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       return null;
     }
     if (!dependency.getJar().isEmpty()) {
-      String jar = dependency.getJar().get(0);
-      return new File(WebUtils.getAppTempDir(), jar);
+      String jar = dependency.getJar().get(0).split(":")[1];
+      return new File(jar);
     } else {
       Artifact artifact = dependency.toArtifact().get(0);
       List<File> files = MavenTool.resolveArtifacts(artifact);
@@ -442,8 +460,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     if (!FsOperator.lfs().exists(teamUploads)) {
       FsOperator.lfs().mkdirs(teamUploads);
     }
-    File localJar = new File(WebUtils.getAppTempDir(), resourcePath);
-    File teamUploadJar = new File(teamUploads, resourcePath);
+    File localJar = new File(resourcePath);
+    File teamUploadJar = new File(teamUploads, localJar.getName());
     ApiAlertException.throwIfFalse(
         localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
     FsOperator.lfs()
@@ -489,6 +507,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     String configFile = "META-INF/services/org.apache.flink.table.factories.Factory";
     JarFile jarFile = new JarFile(connector);
     JarEntry entry = jarFile.getJarEntry(configFile);
+    if (entry == null) {
+      throw new IllegalArgumentException("invalid flink connector");
+    }
     List<String> factories = new ArrayList<>(0);
     try (InputStream inputStream = jarFile.getInputStream(entry)) {
       Scanner scanner = new Scanner(new InputStreamReader(inputStream));
