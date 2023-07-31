@@ -19,8 +19,8 @@ package org.apache.streampark.flink.kubernetes.ingress
 
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.common.util.Utils.using
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
 
 import scala.language.postfixOps
@@ -30,7 +30,7 @@ object IngressController extends Logger {
   private[this] val VERSION_REGEXP = "(\\d+\\.\\d+)".r
 
   private lazy val ingressStrategy: IngressStrategy = {
-    using(new DefaultKubernetesClient()) {
+    using(KubernetesRetriever.newK8sClient()) {
       client =>
         val version = VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
         if (version >= 1.19) {
