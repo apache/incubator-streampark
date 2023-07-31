@@ -25,7 +25,7 @@ object Config {
 
   val EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR: InternalOption = InternalOption(
     key = "streampark.flink-k8s.httpfs.mirror-dir",
-    defaultValue = s"${Workspace.local}/mirror",
+    defaultValue = s"${Workspace.local.WORKSPACE}/mirror",
     classType = classOf[String],
     description = "Local mirror directory for embedded file server"
   )
@@ -82,6 +82,5 @@ object Config {
     classType = classOf[Boolean],
     description = "Whether to log the yaml of the generated flink custom resource when submit flink job & cluster"
   )
-
 
 }
