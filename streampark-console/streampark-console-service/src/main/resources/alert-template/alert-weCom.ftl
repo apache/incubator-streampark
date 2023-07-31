@@ -32,7 +32,8 @@
 -   **Start Time：${startTime}**
 -   **End Time：${endTime}**
 -   **Duration：${duration}**
--   **Affected Jobs：${affectedJobs}**
+-   **All Jobs：${allJobs}**
+-   **About Affected Jobs：${affectedJobs}**
 </#if>
 
 > Best Wishes!

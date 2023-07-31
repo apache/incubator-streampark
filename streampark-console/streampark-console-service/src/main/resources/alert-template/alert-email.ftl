@@ -1012,7 +1012,16 @@
 
                                                                     <tr>
                                                                         <td style="border-bottom-style:solid; border-bottom-width: 1px; border-bottom-color: rgba(169,169,169,.5); border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
-                                                                            Affected Jobs
+                                                                            All Jobs
+                                                                        </td>
+                                                                        <td style="border: 1px solid rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.allJobs}
+                                                                        </td>
+                                                                    </tr>
+
+                                                                    <tr>
+                                                                        <td style="border-bottom-style:solid; border-bottom-width: 1px; border-bottom-color: rgba(169,169,169,.5); border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            About Affected Jobs
                                                                         </td>
                                                                         <td style="border: 1px solid rgba(169,169,169,.5); padding: 1em">
                                                                             ${mail.affectedJobs}

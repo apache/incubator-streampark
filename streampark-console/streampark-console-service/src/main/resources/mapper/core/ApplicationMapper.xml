@@ -141,6 +141,16 @@
             limit 1
     </select>
 
+    <select id="countAffectedJobsByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        select
+            count(1)
+        from t_flink_app
+        where flink_cluster_id = #{clusterId}
+            and state in (5, 7, 9)
+            and (end_time IS NULL or TIMESTAMPDIFF(SECOND, end_time, NOW()) &lt;= 1)
+            limit 1
+    </select>
+
     <select id="getByProjectId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
         select * from t_flink_app where project_id=#{projectId}
     </select>

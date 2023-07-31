@@ -130,7 +130,8 @@ public class FlinkClusterWatcher {
 
   private void alert(FlinkCluster cluster, ClusterState state) {
     if (cluster.getAlertId() != null) {
-      cluster.setJobs(applicationService.countJobsByClusterId(cluster.getId()));
+      cluster.setAllJobs(applicationService.countJobsByClusterId(cluster.getId()));
+      cluster.setAffectedJobs(applicationService.countAffectedJobsByClusterId(cluster.getId()));
       cluster.setClusterState(state.getValue());
       cluster.setEndTime(new Date());
       alertService.alert(cluster, state);

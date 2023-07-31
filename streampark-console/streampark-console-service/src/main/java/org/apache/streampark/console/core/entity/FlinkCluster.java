@@ -61,6 +61,79 @@ public class FlinkCluster implements Serializable {
   @TableId(type = IdType.AUTO)
   private Long id;
 
+  @Override
+  public String toString() {
+    return "FlinkCluster{"
+        + "id="
+        + id
+        + ", address='"
+        + address
+        + '\''
+        + ", jobManagerUrl='"
+        + jobManagerUrl
+        + '\''
+        + ", clusterId='"
+        + clusterId
+        + '\''
+        + ", clusterName='"
+        + clusterName
+        + '\''
+        + ", executionMode="
+        + executionMode
+        + ", versionId="
+        + versionId
+        + ", k8sNamespace='"
+        + k8sNamespace
+        + '\''
+        + ", serviceAccount='"
+        + serviceAccount
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + ", userId="
+        + userId
+        + ", flinkImage='"
+        + flinkImage
+        + '\''
+        + ", options='"
+        + options
+        + '\''
+        + ", yarnQueue='"
+        + yarnQueue
+        + '\''
+        + ", k8sHadoopIntegration="
+        + k8sHadoopIntegration
+        + ", dynamicProperties='"
+        + dynamicProperties
+        + '\''
+        + ", k8sRestExposedType="
+        + k8sRestExposedType
+        + ", k8sConf='"
+        + k8sConf
+        + '\''
+        + ", resolveOrder="
+        + resolveOrder
+        + ", exception='"
+        + exception
+        + '\''
+        + ", clusterState="
+        + clusterState
+        + ", createTime="
+        + createTime
+        + ", startTime="
+        + startTime
+        + ", endTime="
+        + endTime
+        + ", alertId="
+        + alertId
+        + ", allJobs="
+        + allJobs
+        + ", affectedJobs="
+        + affectedJobs
+        + '}';
+  }
+
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String address;
 
@@ -109,11 +182,14 @@ public class FlinkCluster implements Serializable {
 
   private Date startTime;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Date endTime;
 
   private Integer alertId;
 
-  private transient Integer jobs = 0;
+  private transient Integer allJobs = 0;
+
+  private transient Integer affectedJobs = 0;
 
   @JsonIgnore
   public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
