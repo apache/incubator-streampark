@@ -17,9 +17,9 @@
 
 package org.apache.streampark.common.zio
 
+import zio.{IO, Runtime, Unsafe, ZIO}
 import zio.logging.backend.SLF4J
 import zio.stream.ZStream
-import zio.{IO, Runtime, Unsafe, ZIO}
 
 /** ZIO extension */
 object ZIOExt {
@@ -62,7 +62,13 @@ object ZIOExt {
     @inline def someOrUnitZIO(effect: A => ZIO[R, E, _]): ZIO[R, E, Unit] =
       zio.flatMap {
         case Some(value) => effect(value).unit
-        case None => ZIO.unit
+        case None        => ZIO.unit
+      }
+
+    @inline def noneOrUnitZIO(effect: ZIO[R, E, _]): ZIO[R, E, Unit] =
+      zio.flatMap {
+        case Some(_) => ZIO.unit
+        case None    => effect.unit
       }
   }
 
@@ -82,7 +88,7 @@ object ZIOExt {
     /* Output a stream that does not repeat with the previous element. */
     @inline def diffPrev: ZStream[R, E, A] = zstream.zipWithPrevious
       .filter {
-        case (None, cur) => true
+        case (None, cur)       => true
         case (Some(prev), cur) => prev != cur
       }
       .map { case (_, cur) => cur }

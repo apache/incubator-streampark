@@ -25,8 +25,8 @@ import zio.http._
 object EmbeddedFileServer {
 
   private val routes = Http.collectHttp[Request] {
-    case Method.GET -> !! / "health"               => Handler.ok.toHttp
-    case Method.GET -> !! / "fs" / subspace / name =>
+    case Method.GET -> Root / "health"               => Handler.ok.toHttp
+    case Method.GET -> Root / "fs" / subspace / name =>
       Http.fromFileZIO(FileMirror.getLocalFile(subspace, name))
   }
 

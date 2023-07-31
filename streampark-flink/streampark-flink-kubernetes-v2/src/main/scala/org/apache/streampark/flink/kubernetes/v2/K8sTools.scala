@@ -36,44 +36,65 @@ object K8sTools extends Logger {
       .flatMap(client => ZIO.attemptBlocking(f(client)))
   }
 
-  /** Converts fabric8 callback-style Watch to ZStream style. */
-  def watchK8sResource[R](genWatch: KubernetesClient => WatchAndWaitable[R]) = {
+  /**
+   * Converts fabric8 callback-style Watch to ZStream style.
+   * Usage:
+   * {{{
+   *   watchK8sResource(client => client.services().withName("my-service"))
+   *      .flatMap(watch => watch.stream.debug.runCollect)
+   * }}}
+   */
+  def watchK8sResource[R](genWatch: KubernetesClient => WatchAndWaitable[R]): IO[Throwable, K8sWatcher[R]] = {
     for {
       queue  <- Queue.unbounded[(Watcher.Action, R)]
       client <- ZIO.attempt(newK8sClient)
 
       watcherF = new Watcher[R]() {
-
-                   override def reconnecting(): Boolean = true
-
+                   override def reconnecting(): Boolean                                  = true
                    override def eventReceived(action: Watcher.Action, resource: R): Unit = {
                      queue.offer((action, resource)).runIO
                    }
-
-                   override def onClose(cause: WatcherException): Unit = {
+                   override def onClose(cause: WatcherException): Unit                   = {
                      logError("[StreamPark] K8s Watcher was accidentally closed.", cause)
                    }
-
-                   override def onClose(): Unit = {
+                   override def onClose(): Unit                                          = {
                      super.onClose()
                      queue.shutdown.runIO
                      client.close()
                    }
                  }
-      watch <- ZIO.attemptBlocking(genWatch(client).watch(watcherF))
-      stream = ZStream.fromQueue(queue)
+      watch   <- ZIO.attemptBlocking(genWatch(client).watch(watcherF))
+      stream   = ZStream.fromQueue(queue)
     } yield K8sWatcher(watch, stream)
   }
 
+  /** Rich Kubernetes watcher wrapper. */
   case class K8sWatcher[R](watch: Watch, stream: UStream[(Watcher.Action, R)])
 
-  /** Safely and automatically retry subscriptions to k8s resources。 */
-  def watchK8sResourceForever[R](
-      genWatch: KubernetesClient => WatchAndWaitable[R]
-  )(pipe: UStream[(Watcher.Action, R)] => UStream[_]): K8sResourceWatcher[R] = {
+  /**
+   * Safely and automatically retry subscriptions to k8s resources。
+   *
+   * @param genWatch The shape of building Watch resources monad from KubeClient.
+   * @param pipe The shape of consume watching stream.
+   *
+   * Usage:
+   * {{{
+   *   watchK8sResourceForever(client =>
+   *      client
+   *        .services()
+   *        .inNamespace("test")
+   *         .withName("my-svc")) { stream =>
+   *      stream
+   *        .debug
+   *     .map(_._2)}
+   * }}}
+   */
+  def watchK8sResourceForever[R](genWatch: KubernetesClient => WatchAndWaitable[R])(
+      pipe: UStream[(Watcher.Action, R)] => UStream[_]): K8sResourceWatcher[R] = {
     K8sResourceWatcher(genWatch, pipe)
   }
 
+  /** Rich Kubernetes watcher wrapper. */
   case class K8sResourceWatcher[R](
       genWatch: KubernetesClient => WatchAndWaitable[R],
       pipe: UStream[(Watcher.Action, R)] => UStream[_]) {

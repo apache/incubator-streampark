@@ -19,20 +19,20 @@ package org.apache.streampark.flink.kubernetes.v2
 
 import org.apache.streampark.flink.kubernetes.v2.FlinkRestRequest._
 import org.apache.streampark.flink.kubernetes.v2.model.{FlinkPipeOprState, JobSavepointDef, JobSavepointStatus}
+
 import sttp.client3._
 import sttp.client3.httpclient.zio.HttpClientZioBackend
 import sttp.client3.ziojson._
-import zio.json.{DeriveJsonCodec, JsonCodec, jsonField}
 import zio.{IO, Task, ZIO}
+import zio.json.{jsonField, DeriveJsonCodec, JsonCodec}
 
 import scala.util.chaining.scalaUtilChainingOps
 
-type TriggerId = String
-
-/**
- * Flink rest-api request.
- */
+/** Flink rest-api request. */
 case class FlinkRestRequest(restUrl: String) {
+
+  type TriggerId = String
+
   /**
    * Get all job overview info
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#jobs-overview
@@ -124,10 +124,11 @@ case class FlinkRestRequest(restUrl: String) {
           val rspJson                  = ujson.read(body)
           val status                   = rspJson("status")("id").str.pipe(FlinkPipeOprState.ofRaw)
           val (location, failureCause) = rspJson("operation").objOpt match {
-            case None => None -> None
+            case None            => None -> None
             case Some(operation) =>
-              val loc = operation.get("location").flatMap(_.strOpt)
-              val failure = operation.get("failure-cause")
+              val loc     = operation.get("location").flatMap(_.strOpt)
+              val failure = operation
+                .get("failure-cause")
                 .flatMap(_.objOpt.flatMap(map => map.get("stack-trace")))
                 .flatMap(_.strOpt)
               loc -> failure
@@ -147,16 +148,17 @@ object FlinkRestRequest {
       HttpClientZioBackend.scoped().flatMap(backend => request(backend))
     }
 
-  implicit class RequestIOExceptionExt [A](requestIO: Task[Response[Either[ResponseException[String, String], A]]]) {
+  implicit class RequestIOExceptionExt[A](requestIO: Task[Response[Either[ResponseException[String, String], A]]]) {
     @inline def flattenBodyT: IO[Throwable, A] = requestIO.flatMap(rsp => ZIO.fromEither(rsp.body))
   }
 
   implicit class RequestIOPlainExt(requestIO: Task[Response[Either[String, String]]]) {
-    @inline def flattenBody: IO[Throwable, String] = requestIO.flatMap(rsp => ZIO.fromEither(rsp.body).mapError(new Exception(_)))
+    @inline def flattenBody: IO[Throwable, String] =
+      requestIO.flatMap(rsp => ZIO.fromEither(rsp.body).mapError(new Exception(_)))
   }
 
   implicit class RequestIOTaskExt[A](requestIO: Task[String]) {
-    @inline def attemptBody(f: String => A): IO[Throwable, A] = requestIO.flatMap { body => ZIO.attempt(f(body)) }
+    @inline def attemptBody(f: String => A): IO[Throwable, A] = requestIO.flatMap(body => ZIO.attempt(f(body)))
   }
 
   // --- Flink rest api models ---

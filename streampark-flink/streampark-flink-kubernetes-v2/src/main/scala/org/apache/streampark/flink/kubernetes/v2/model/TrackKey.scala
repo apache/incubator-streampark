@@ -71,7 +71,7 @@ object TrackKey {
   /**
    * Key of Flink cluster manged by Flink K8s operator.
    *
-   * @param id ref to [[org.apache.streampark.console.core.entity.Application.id]]
+   * @param id ref to [[org.apache.streampark.console.core.entity.FlinkCluster.id]]
    * @param namespace k8s CR namespace
    * @param name  k8s CR namespace
    */
@@ -83,7 +83,7 @@ object TrackKey {
   /**
    * Compatible with previous versions of tasks submitted directly to flink-k8s-session.
    *
-   * @param id ref to [[org.apache.streampark.console.core.entity.FlinkCluster.id]]
+   * @param id ref to [[org.apache.streampark.console.core.entity.Application.id]]]
    * @param namespace flink cluster k8s namespace
    * @param clusterId flink cluster k8s name
    * @param jid jobid
