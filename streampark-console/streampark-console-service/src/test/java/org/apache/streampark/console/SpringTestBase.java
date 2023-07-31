@@ -109,4 +109,14 @@ public abstract class SpringTestBase {
     yarnQueue.setQueueLabel(queueLabel);
     return yarnQueue;
   }
+
+  protected FlinkCluster mockRemoteFlinkCluster(
+          String name, String address, Long versionId) {
+    FlinkCluster cluster = new FlinkCluster();
+    cluster.setClusterName(name);
+    cluster.setAddress(address);
+    cluster.setVersionId(versionId);
+    cluster.setExecutionMode(ExecutionMode.REMOTE.getMode());
+    return cluster;
+  }
 }

@@ -99,4 +99,19 @@ class FlinkClusterServiceTest extends SpringTestBase {
     cluster2.setYarnQueue(nonExistedQueue);
     assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster1, cluster2)).isFalse();
   }
+
+  @Test
+  void testCheck() {
+    FlinkClusterServiceImpl clusterServiceImpl = (FlinkClusterServiceImpl) flinkClusterService;
+
+    // Test the correct URL
+    FlinkCluster cluster1 = mockRemoteFlinkCluster("correct URL", "http://clickhouse3:8082", 1L);
+    assertThat(clusterServiceImpl.check(cluster1).getStatus()).isEqualTo(0); // 0 means the correct URL
+
+    // Testing for incorrect URLs
+    FlinkCluster cluster2 = mockRemoteFlinkCluster("incorrect URL 1", "http://clickhouse3/8082", 2L);
+    assertThat(clusterServiceImpl.check(cluster2).getStatus()).isEqualTo(3);
+    FlinkCluster cluster3 = mockRemoteFlinkCluster("incorrect URL 2", "http://clickhouse3/any-suffix", 3L);
+    assertThat(clusterServiceImpl.check(cluster3).getStatus()).isEqualTo(3);
+  }
 }

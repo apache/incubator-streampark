@@ -16,7 +16,7 @@
 #
 
 server:
-  port: 10000
+  port: 10001
   undertow:
     buffer-size: 1024
     direct-buffers: true
