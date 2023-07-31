@@ -80,7 +80,7 @@ object CROperator extends CROperator {
       _                   <- ZIO
                                .attempt(yamlMapper.writeValueAsString(flinkDeployCR))
                                .catchAll(e => ZIO.succeed(e.getMessage))
-                               .flatMap(yaml => ZIO.logInfo(s"[StreamPark] Applying FlinkDeployment K8s CR: \n$yaml"))
+                               .flatMap(yaml => ZIO.logInfo(s"Applying FlinkDeployment K8s CR: \n$yaml"))
                                .when(logFlinkCrYaml)
 
       // Apply FlinkDeployment CR to kubernetes
@@ -91,7 +91,7 @@ object CROperator extends CROperator {
                              }
     } yield ()
   } *> ZIO.logInfo(
-    s"[StreamPark] Successfully apply FlinkDeployment K8s CR: namespace=${spec.namespace}, name=${spec.name}")
+    s"Successfully apply FlinkDeployment K8s CR: namespace=${spec.namespace}, name=${spec.name}")
 
   /** Apply FlinkSessionJob CR. */
   // noinspection DuplicatedCode
@@ -106,7 +106,7 @@ object CROperator extends CROperator {
       _            <- ZIO
                         .attempt(yamlMapper.writeValueAsString(sessionJobCR))
                         .catchAll(e => ZIO.succeed(e.getMessage))
-                        .flatMap(yaml => ZIO.logInfo(s"[StreamPark] Applying FlinkSessionJob K8s CR: \n$yaml"))
+                        .flatMap(yaml => ZIO.logInfo(s"Applying FlinkSessionJob K8s CR: \n$yaml"))
                         .when(logFlinkCrYaml)
 
       // Apply FlinkSessionJob CR to kubernetes
@@ -117,7 +117,7 @@ object CROperator extends CROperator {
                       }
     } yield ()
   } *> ZIO.logInfo(
-    s"[StreamPark] Successfully apply FlinkSessionJob K8s CR: namespace=${spec.namespace}, name=${spec.name}")
+    s"Successfully apply FlinkSessionJob K8s CR: namespace=${spec.namespace}, name=${spec.name}")
 
   // Convert job.uri to file-server http access uri
   private def mirrorJobJarToHttpFileServer(job: Option[JobDef], mirrorSpace: String) = {
@@ -234,7 +234,7 @@ object CROperator extends CROperator {
         .inNamespace(namespace)
         .withName(name)
         .delete()
-    } *> ZIO.logInfo(s"[StreamPark] Delete FlinkDeployment CR: namespace=$namespace, name=$name")
+    } *> ZIO.logInfo(s"Delete FlinkDeployment CR: namespace=$namespace, name=$name")
 
   /** Delete FlinkSessionJob CR. */
   def deleteSessionJob(namespace: String, name: String): IO[Throwable, Unit] =
@@ -244,6 +244,6 @@ object CROperator extends CROperator {
         .inNamespace(namespace)
         .withName(name)
         .delete()
-    } *> ZIO.logInfo(s"[StreamPark] Delete FlinkDeployment CR: namespace=$namespace, name=$name")
+    } *> ZIO.logInfo(s"Delete FlinkDeployment CR: namespace=$namespace, name=$name")
 
 }

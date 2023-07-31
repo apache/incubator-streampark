@@ -141,12 +141,6 @@
             <version>${zio.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>dev.zio</groupId>
-            <artifactId>zio-logging-slf4j2_${scala.binary.version}</artifactId>
-            <version>${zio-logging.version}</version>
-        </dependency>
-
         <!-- pprint -->
         <dependency>
             <groupId>com.lihaoyi</groupId>

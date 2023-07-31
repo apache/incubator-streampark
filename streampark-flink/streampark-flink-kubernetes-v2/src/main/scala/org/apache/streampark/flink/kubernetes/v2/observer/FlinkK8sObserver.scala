@@ -135,7 +135,7 @@ object FlinkK8sObserver extends FlinkK8sObserver {
              case ClusterKey(id, ns, name)                              => trackCluster(ns, name)
            }
       _ <- trackedKeys.add(key).unit
-      _ <- logInfo(s"[StreamPark] Start watching Flink resource: $key")
+      _ <- logInfo(s"Start watching Flink resource: $key")
     } yield ()
   }
 
@@ -188,7 +188,7 @@ object FlinkK8sObserver extends FlinkK8sObserver {
                unTrackUnmanagedSessionJob(clusterNs, clusterName)
            }
       _ <- trackedKeys.remove(key)
-      _ <- logInfo(s"[StreamPark] Stop watching Flink resource: $key")
+      _ <- logInfo(s"Stop watching Flink resource: $key")
     } yield ()
   }
 

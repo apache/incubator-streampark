@@ -55,7 +55,7 @@ object K8sTools extends Logger {
                      queue.offer((action, resource)).runIO
                    }
                    override def onClose(cause: WatcherException): Unit                   = {
-                     logError("[StreamPark] K8s Watcher was accidentally closed.", cause)
+                     logError("K8s Watcher was accidentally closed.", cause)
                    }
                    override def onClose(): Unit                                          = {
                      super.onClose()
@@ -129,7 +129,7 @@ object K8sTools extends Logger {
                            queue.offer((action, resource)).runIO
                          }
                          override def onClose(cause: WatcherException): Unit                   = {
-                           logError("[StreamPark] K8s Watcher was accidentally closed.", cause)
+                           logError("K8s Watcher was accidentally closed.", cause)
                            launch.runIO
                          }
                        }

@@ -18,17 +18,16 @@
 package org.apache.streampark.common.zio
 
 import zio.{IO, Runtime, Unsafe, ZIO}
-import zio.logging.backend.SLF4J
 import zio.stream.ZStream
 
 /** ZIO extension */
 object ZIOExt {
 
   /* Unsafe run zio effect. */
-  @throws[Throwable]
+  @throws[Exception]
   @inline def unsafeRun[E, A](zio: IO[E, A]): A = Unsafe.unsafe { implicit u =>
     Runtime.default.unsafe
-      .run(zio.provideLayer(Runtime.removeDefaultLoggers >>> SLF4J.slf4j))
+      .run(zio.provideLayer(Runtime.removeDefaultLoggers >>> LoggerBackend.default))
       .getOrThrowFiberFailure()
   }
 

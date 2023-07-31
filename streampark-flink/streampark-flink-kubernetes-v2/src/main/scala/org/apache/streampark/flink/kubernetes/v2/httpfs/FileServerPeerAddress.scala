@@ -36,7 +36,7 @@ object FileServerPeerAddress {
   infer
     .map(Some(_))
     .tap(address.set)
-    .tap(addr => ZIO.logInfo(s"[StreamPark] Embedded HTTP file server K8s peer address: $addr"))
+    .tap(addr => ZIO.logInfo(s"Embedded HTTP file server K8s peer address: $addr"))
     .forkDaemon
     .runUIO
 

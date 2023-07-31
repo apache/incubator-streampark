@@ -35,7 +35,7 @@ object EmbeddedFileServer {
   /** Launch the netty-based internal http file server at port specified by fileServerPort param. */
   def launch: UIO[Unit] = {
     val serve = for {
-      _ <- ZIO.log(s"[StreamPark] Launch internal http file server at port: $fileServerPort")
+      _ <- ZIO.log(s"Launch internal http file server at port: $fileServerPort")
       _ <- Server
              .serve(routes.withDefaultErrorResponse)
              .provide(Server.defaultWithPort(fileServerPort))

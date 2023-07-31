@@ -18,13 +18,11 @@
 package org.apache.streampark.flink.kubernetes.v2.observer
 
 import org.apache.streampark.common.zio.ZIOExt.{OptionZIOOps, UIOOps}
-import org.apache.streampark.flink.kubernetes.v2.K8sTools
-import org.apache.streampark.flink.kubernetes.v2.K8sTools.{watchK8sResource, watchK8sResourceForever, K8sResourceWatcher}
+import org.apache.streampark.flink.kubernetes.v2.K8sTools.{watchK8sResourceForever, K8sResourceWatcher}
 import org.apache.streampark.flink.kubernetes.v2.model.{JobStatus, SessionJobCRStatus}
 import org.apache.streampark.shaded.org.apache.flink.kubernetes.operator.api.FlinkSessionJob
 
-import io.fabric8.kubernetes.api.model.Service
-import zio.{IO, UIO}
+import zio.UIO
 import zio.concurrent.ConcurrentMap
 
 /**
@@ -70,8 +68,5 @@ case class SessionJobCRObserver(
         // update SessionJobCR status cache
         .tap(status => sessionJobCRSnaps.put((namespace, name), status))
     }
-
-
-
 
 }
