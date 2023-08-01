@@ -131,6 +131,12 @@
         <!-- ZIO -->
         <dependency>
             <groupId>dev.zio</groupId>
+            <artifactId>zio-logging_${scala.binary.version}</artifactId>
+            <version>${zio-logging.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.zio</groupId>
             <artifactId>zio-streams_${scala.binary.version}</artifactId>
             <version>${zio.version}</version>
         </dependency>

@@ -15,24 +15,23 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common
+package org.apache.streampark.flink.kubernetes.v2.model
 
-import scala.language.implicitConversions
+/**
+ * Flink Job savepoint definition.
+ *
+ * @param drain         If true, drain the job before taking savepoint.
+ * @param savepointPath The path to save the savepoint.
+ * @param formatType    The format type of the savepoint.
+ * @param triggerId     The trigger id of the savepoint.
+ */
+case class JobSavepointDef(
+    drain: Boolean = false,
+    savepointPath: Option[String] = None,
+    formatType: Option[String] = None,
+    triggerId: Option[String] = None)
 
-package object zio {
-
-  /** Similar to python's pprint, format print any type of instance. */
-  @inline def toPrettyString(value: Any): String = value match {
-    case v: String => v
-    case v => pprint.apply(v, height = 2000, showFieldNames = true).render
-  }
-
-  implicit class PrettyStringOps(value: Any) {
-    @inline def prettyStr: String = toPrettyString(value)
-  }
-
-  /** Automatically converts value to Some value. */
-  implicit def liftValueAsSome[A](value: A): Option[A] = Some(value)
-
-
+object JobSavepointDef {
+  val CANONICAL_FORMAT = "CANONICAL"
+  val NATIVE_FORMAT    = "NATIVE"
 }

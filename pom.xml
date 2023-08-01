@@ -124,6 +124,7 @@
         <enumeratum.version>1.6.1</enumeratum.version>
         <assertj.version>3.23.1</assertj.version>
         <zio.version>2.0.15</zio.version>
+        <zio-logging.version>2.1.13</zio-logging.version>
         <pprint.version>0.8.1</pprint.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
@@ -525,7 +526,9 @@
                         </resourceIncludes>
                         <resourceExcludes>
                             **/.asf.yaml,
-                            **/.github/**
+                            **/.github/**,
+                            **/crd/**.yml,
+                            **/crd/**.yaml
                         </resourceExcludes>
                         <excludes>
                         </excludes>

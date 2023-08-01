@@ -26,6 +26,7 @@ import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.zio.ZIOExt;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.SettingService;
@@ -33,6 +34,7 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.streampark.flink.kubernetes.v2.httpfs.EmbeddedFileServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -98,6 +100,8 @@ public class EnvInitializer implements ApplicationRunner {
     overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
     // initialize local file system resources
     storageInitialize(LFS);
+    // Launch the embedded http file server.
+    ZIOExt.unsafeRun(EmbeddedFileServer.launch());
   }
 
   private void initInternalConfig(Environment springEnv) {
