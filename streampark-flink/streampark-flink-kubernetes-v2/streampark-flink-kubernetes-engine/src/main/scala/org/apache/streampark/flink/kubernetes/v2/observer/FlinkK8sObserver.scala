@@ -90,17 +90,16 @@ sealed trait FlinkK8sObserver {
 
 object FlinkK8sObserver extends FlinkK8sObserver {
 
-  val trackedKeys = ConcurrentSet.empty[TrackKey].runUIO
-
-  // fixme duplicate subscribe
+  // The following is a visible external snapshot.
+  val trackedKeys          = ConcurrentSet.empty[TrackKey].runUIO
   val evaluatedJobSnaps    = Ref.make(Map.empty[AppId, JobSnapshot]).runUIO
   val restSvcEndpointSnaps = ConcurrentMap.empty[(Namespace, Name), RestSvcEndpoint].runUIO
-  // fixme duplicate subscribe
   val clusterMetricsSnaps  = ConcurrentMap.empty[(Namespace, Name), ClusterMetrics].runUIO
 
-  val deployCRSnaps                           = ConcurrentMap.empty[(Namespace, Name), (DeployCRStatus, Option[JobStatus])].runUIO
-  val sessionJobCRSnaps                       = ConcurrentMap.empty[(Namespace, Name), (SessionJobCRStatus, Option[JobStatus])].runUIO
-  private[observer] val clusterJobStatusSnaps = ConcurrentMap.empty[(Namespace, Name), Vector[JobStatus]].runUIO
+  // In general, there is no need to view these snapshots externally.
+  val deployCRSnaps         = ConcurrentMap.empty[(Namespace, Name), (DeployCRStatus, Option[JobStatus])].runUIO
+  val sessionJobCRSnaps     = ConcurrentMap.empty[(Namespace, Name), (SessionJobCRStatus, Option[JobStatus])].runUIO
+  val clusterJobStatusSnaps = ConcurrentMap.empty[(Namespace, Name), Vector[JobStatus]].runUIO
 
   private val restSvcEndpointObserver = RestSvcEndpointObserver(restSvcEndpointSnaps)
   private val deployCrObserver        = DeployCRObserver(deployCRSnaps)
@@ -198,16 +197,17 @@ object FlinkK8sObserver extends FlinkK8sObserver {
   /** Re-evaluate all job status snapshots from caches. */
   private def evalJobSnapshot: UIO[Unit] = {
 
-    def mergeJobStatus(crStatus: Option[JobStatus], restStatus: Option[JobStatus]) = (crStatus, restStatus) match {
-      case (Some(e), None)        => Some(e)
-      case (None, Some(e))        => Some(e)
-      case (None, None)           => None
-      case (Some(cr), Some(rest)) =>
-        Some(
-          if (rest.updatedTs > cr.updatedTs) rest
-          else cr.copy(endTs = rest.endTs, tasks = rest.tasks)
-        )
-    }
+    def mergeJobStatus(crStatus: Option[JobStatus], restStatus: Option[JobStatus]) =
+      (crStatus, restStatus) match {
+        case (Some(e), None)        => Some(e)
+        case (None, Some(e))        => Some(e)
+        case (None, None)           => None
+        case (Some(cr), Some(rest)) =>
+          Some(
+            if (rest.updatedTs > cr.updatedTs) rest
+            else cr.copy(endTs = rest.endTs, tasks = rest.tasks)
+          )
+      }
 
     ZStream
       .fromIterableZIO(trackedKeys.toSet)
@@ -227,7 +227,7 @@ object FlinkK8sObserver extends FlinkK8sObserver {
             jobStatusFromRest = restJobStatusVec.flatMap(_.headOption)
             finalJobStatus    = mergeJobStatus(jobStatusFromCr, jobStatusFromRest)
 
-          } yield JobSnapshot(id, ns, name, crStatus, finalJobStatus)
+          } yield JobSnapshot.eval(id, ns, name, crStatus, finalJobStatus)
 
         case SessionJobKey(id, ns, name, clusterName) =>
           for {
@@ -240,13 +240,13 @@ object FlinkK8sObserver extends FlinkK8sObserver {
             jobStatusFromRest = restJobStatusVec.flatMap(_.find(_.jobId == jobId))
             finalJobStatus    = mergeJobStatus(jobStatusFromCr, jobStatusFromRest)
 
-          } yield JobSnapshot(id, ns, clusterName, crStatus, finalJobStatus)
+          } yield JobSnapshot.eval(id, ns, clusterName, crStatus, finalJobStatus)
 
         case UnmanagedSessionJobKey(id, clusterNs, clusterName, jid) =>
           for {
             restJobStatusVec <- clusterJobStatusSnaps.get((clusterNs, clusterName))
             jobStatus         = restJobStatusVec.flatMap(_.find(_.jobId == jid))
-          } yield JobSnapshot(id, clusterNs, clusterName, None, jobStatus)
+          } yield JobSnapshot.eval(id, clusterNs, clusterName, None, jobStatus)
       }
       // Collect result and Refresh evaluatedJobSnaps cache
       .runCollect

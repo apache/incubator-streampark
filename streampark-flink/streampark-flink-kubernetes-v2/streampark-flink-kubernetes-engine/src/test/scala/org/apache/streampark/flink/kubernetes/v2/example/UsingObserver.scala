@@ -61,8 +61,20 @@ class UsingObserver extends AnyWordSpecLike with BeforeAndAfterAll {
       _          <- FlinkK8sObserver.track(TrackKey.sessionJob(233, "fdev", "simple-sessionjob", "simple-session"))
       _          <- FlinkK8sObserver.track(TrackKey.appJob(234, "fdev", "simple-appjob"))
       // subscribe job status changes
-      watchStream = FlinkK8sObserver.clusterMetricsSnaps.subscribe()
+      watchStream = FlinkK8sObserver.evaluatedJobSnaps.flatSubscribe()
       _          <- watchStream.debugPretty.runDrain
+    } yield ()
+  }
+
+  "Only subscribe Flink job state changes." in unsafeRun {
+    for {
+      _ <- FlinkK8sObserver.track(TrackKey.appJob(234, "fdev", "simple-appjob"))
+      _ <- FlinkK8sObserver.evaluatedJobSnaps
+             .flatSubscribe()
+             .map { case (appId, status) => (appId, status.evalState) }
+             .diffPrev
+             .debug
+             .runDrain
     } yield ()
   }
 
@@ -72,7 +84,7 @@ class UsingObserver extends AnyWordSpecLike with BeforeAndAfterAll {
       _          <- FlinkK8sObserver.track(TrackKey.sessionJob(233, "fdev", "simple-sessionjob", "simple-session"))
       _          <- FlinkK8sObserver.track(TrackKey.appJob(234, "fdev", "simple-appjob"))
       // subscribe job status changes
-      watchStream = FlinkK8sObserver.clusterMetricsSnaps.flatSubscribeValues()
+      watchStream = FlinkK8sObserver.clusterMetricsSnaps.flatSubscribe()
       _          <- watchStream.debugPretty.runDrain
     } yield ()
   }

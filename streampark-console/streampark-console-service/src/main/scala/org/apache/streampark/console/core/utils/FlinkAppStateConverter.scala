@@ -18,41 +18,15 @@
 package org.apache.streampark.console.core.utils
 
 import org.apache.streampark.console.core.enums.FlinkAppState
-import org.apache.streampark.flink.kubernetes.v2.model.{EvalState, JobSnapshot, JobState}
-import org.apache.streampark.flink.kubernetes.v2.model.JobState.JobState
+import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 
 import scala.util.Try
 
 object FlinkAppStateConverter {
 
-  /** Merge CR status and job status inside [[JobSnapshot]] to [[FlinkAppState]]. */
-  def dryK8sJobSnapshotToFlinkAppState(snapshot: JobSnapshot): FlinkAppState =
-    (snapshot.crStatus, snapshot.jobStatus) match {
-      case (None, None)                      => FlinkAppState.LOST
-      case (None, Some(jobStatus))           => jobStateToAppState(jobStatus.state)
-      case (Some(crStatus), None)            =>
-        crStatus.evalState match {
-          case EvalState.DEPLOYING | EvalState.READY => FlinkAppState.INITIALIZING
-          case EvalState.FAILED                      => FlinkAppState.FAILED
-          case EvalState.SUSPENDED                   => FlinkAppState.SUSPENDED
-          case EvalState.DELETED                     => FlinkAppState.TERMINATED
-        }
-      case (Some(crStatus), Some(jobStatus)) =>
-        if (jobStatus.updatedTs >= crStatus.updatedTs) jobStateToAppState(jobStatus.state)
-        else {
-          crStatus.evalState match {
-            case EvalState.FAILED    => FlinkAppState.FAILED
-            case EvalState.SUSPENDED => FlinkAppState.SUSPENDED
-            case EvalState.DELETED   => FlinkAppState.TERMINATED
-            case EvalState.READY     => jobStateToAppState(jobStatus.state)
-            case EvalState.DEPLOYING =>
-              if (JobState.maybeDeploying.contains(jobStatus.state)) jobStateToAppState(jobStatus.state)
-              else FlinkAppState.INITIALIZING
-          }
-        }
-    }
-
-  private def jobStateToAppState(state: JobState) =
-    Try(FlinkAppState.of(state.toString)).getOrElse(FlinkAppState.OTHER)
+  /** Convert [[EvalJobState]] to [[FlinkAppState]]. */
+  def k8sEvalJobStateToFlinkAppState(jobState: EvalJobState): FlinkAppState = {
+    Try(FlinkAppState.valueOf(jobState.toString)).getOrElse(FlinkAppState.OTHER)
+  }
 
 }

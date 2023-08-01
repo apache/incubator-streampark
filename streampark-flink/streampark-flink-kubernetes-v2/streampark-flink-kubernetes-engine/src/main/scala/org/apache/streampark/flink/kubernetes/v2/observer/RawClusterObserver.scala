@@ -60,9 +60,9 @@ case class RawClusterObserver(
             case Some(endpoint) => FlinkRestRequest(endpoint.chooseRest).listJobOverviewInfo
           })
       .retry(Schedule.spaced(restRetryInterval))
-      .repeat(Schedule.spaced(restPollingInterval))
       .map(jobOverviews => jobOverviews.map(info => JobStatus.fromRest(info)))
       .tap(jobStatuses => clusterJobStatusSnaps.put((namespace, name), jobStatuses))
+      .repeat(Schedule.spaced(restPollingInterval))
       .runDrain
       .forkDaemon
 
@@ -95,7 +95,6 @@ case class RawClusterObserver(
               FlinkRestRequest(endpoint.chooseRest).getJobmanagerConfig
           })
       .retry(Schedule.spaced(restRetryInterval))
-      .repeat(Schedule.spaced(restPollingInterval))
       .map { case (clusterOv, jmConfigs) =>
         val totalJmMemory = FlinkMemorySizeParser
           .parse(jmConfigs.getOrElse("jobmanager.memory.process.size", "0b"))
@@ -121,6 +120,7 @@ case class RawClusterObserver(
         )
       }
       .tap(metrics => clusterMetricsSnaps.put((namespace, name), metrics))
+      .repeat(Schedule.spaced(restPollingInterval))
       .runDrain
       .forkDaemon
 

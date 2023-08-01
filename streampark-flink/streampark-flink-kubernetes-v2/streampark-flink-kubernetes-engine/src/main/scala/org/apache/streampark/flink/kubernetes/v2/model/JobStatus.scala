@@ -45,23 +45,6 @@ case class JobStatus(
     tasks: Option[TaskStats] = None,
     updatedTs: Long)
 
-/**
- * Flink Job State.
- * This enum is essentially equivalent to the meaning in the Flink REST API.
- * see: [[org.apache.flink.kubernetes.operator.api.status.JobStatus]]
- */
-object JobState extends Enumeration {
-
-  type JobState = Value
-
-  val INITIALIZING, CREATED, RUNNING, FAILING, FAILED, CANCELLING, CANCELED, FINISHED, RESTARTING, SUSPENDED,
-      RECONCILING = Value
-  val UNKNOWN = Value
-
-  def valueOf(raw: String): JobState = values.find(_.toString == raw).getOrElse(UNKNOWN)
-  val maybeDeploying                 = Set(INITIALIZING, CREATED, RESTARTING, RECONCILING)
-}
-
 object JobStatus {
 
   // Convert from REST API object.

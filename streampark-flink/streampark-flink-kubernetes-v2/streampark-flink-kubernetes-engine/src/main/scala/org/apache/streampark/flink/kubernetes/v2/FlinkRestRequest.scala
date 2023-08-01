@@ -20,9 +20,10 @@ package org.apache.streampark.flink.kubernetes.v2
 import org.apache.streampark.flink.kubernetes.v2.FlinkRestRequest._
 import org.apache.streampark.flink.kubernetes.v2.model.{FlinkPipeOprState, JobSavepointDef, JobSavepointStatus}
 
-import zio.{IO, Task, ZIO}
+import zio.{IO, ZIO}
 import zio.ZIO.attempt
-import zio.http.{Body, Client, Method, Response}
+import zio.http.{Body, Client}
+import zio.http.Method.{PATCH, POST}
 import zio.json._
 
 import java.nio.charset.Charset
@@ -41,7 +42,7 @@ case class FlinkRestRequest(restUrl: String) {
    */
   def listJobOverviewInfo: IO[Throwable, Vector[JobOverviewInfo]] =
     for {
-      res <- get(s"$restUrl/jobs/overview")
+      res <- Client.request(s"$restUrl/jobs/overview")
       rs  <- res.body.asJson[JobOverviewRsp]
     } yield rs.jobs
 
@@ -51,7 +52,7 @@ case class FlinkRestRequest(restUrl: String) {
    */
   def getClusterOverview: IO[Throwable, ClusterOverviewInfo] =
     for {
-      res <- get(s"$restUrl/overview")
+      res <- Client.request(s"$restUrl/overview")
       rs  <- res.body.asJson[ClusterOverviewInfo]
     } yield rs
 
@@ -61,7 +62,7 @@ case class FlinkRestRequest(restUrl: String) {
    */
   def getJobmanagerConfig: IO[Throwable, Map[String, String]] =
     for {
-      res  <- get(s"$restUrl/jobmanager/config")
+      res  <- Client.request(s"$restUrl/jobmanager/config")
       body <- res.body.asString
       rs   <- attempt {
                 ujson
@@ -77,7 +78,7 @@ case class FlinkRestRequest(restUrl: String) {
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#jobs-jobid-1
    */
   def cancelJob(jobId: String): IO[Throwable, Unit] = {
-    patch(s"$restUrl/jobs/$jobId?mode=cancel").unit
+    Client.request(s"$restUrl/jobs/$jobId?mode=cancel", method = PATCH).unit
   }
 
   /**
@@ -86,7 +87,7 @@ case class FlinkRestRequest(restUrl: String) {
    */
   def stopJobWithSavepoint(jobId: String, sptReq: StopJobSptReq): IO[Throwable, TriggerId] =
     for {
-      res  <- post(s"$restUrl/jobs/$jobId/stop", sptReq.toJson)
+      res  <- Client.request(s"$restUrl/jobs/$jobId/stop", method = POST, content = sptReq.toJson)
       body <- res.body.asString
       rs   <- attempt(ujson.read(body)("request-id").str)
     } yield rs
@@ -97,7 +98,7 @@ case class FlinkRestRequest(restUrl: String) {
    */
   def triggerSavepoint(jobId: String, sptReq: TriggerSptReq): IO[Throwable, TriggerId] =
     for {
-      res  <- post(s"$restUrl/jobs/$jobId/savepoints", sptReq.toJson)
+      res  <- Client.request(s"$restUrl/jobs/$jobId/savepoints", method = POST, content = sptReq.toJson)
       body <- res.body.asString
       rs   <- attempt(ujson.read(body)("request-id").str)
     } yield rs
@@ -108,7 +109,7 @@ case class FlinkRestRequest(restUrl: String) {
    */
   def getSavepointOperationStatus(jobId: String, triggerId: String): IO[Throwable, JobSavepointStatus] =
     for {
-      res  <- get(s"$restUrl/jobs/$jobId/savepoints/$triggerId")
+      res  <- Client.request(s"$restUrl/jobs/$jobId/savepoints/$triggerId")
       body <- res.body.asString
       rs   <- attempt {
                 val rspJson                  = ujson.read(body)
@@ -130,16 +131,10 @@ case class FlinkRestRequest(restUrl: String) {
 
 object FlinkRestRequest {
 
-  private def get(url: String): Task[Response] =
-    Client.request(url, method = Method.GET).provideLayer(Client.default)
+  implicit def autoProvideClientLayer[A](zio: ZIO[Client, Throwable, A]): IO[Throwable, A] =
+    zio.provideLayer(Client.default)
 
-  private def patch(url: String): Task[Response] =
-    Client.request(url, method = Method.PATCH).provideLayer(Client.default)
-
-  private def post(url: String, body: String): Task[Response] =
-    Client
-      .request(url, method = Method.POST, content = Body.fromString(body, charset = Charset.forName("UTF-8")))
-      .provideLayer(Client.default)
+  implicit def liftStringBody(content: String): Body = Body.fromString(content, charset = Charset.forName("UTF-8"))
 
   implicit class BodyExtension(body: Body) {
     def asJson[A](implicit decoder: JsonDecoder[A]): IO[Throwable, A] = for {
