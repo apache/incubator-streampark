@@ -48,16 +48,16 @@ class FlinkMemorySizeParserSpec extends AnyWordSpecLike with Matchers {
   "case-2: parse strange flink memory size text to bytes" in {
 
     val cases = Seq(
-      "1 m" -> Some(1024 * 1024L),
-      " 1  m" -> Some(1024 * 1024L),
+      "1 m"    -> Some(1024 * 1024L),
+      " 1  m"  -> Some(1024 * 1024L),
       " 1 m  " -> Some(1024 * 1024L),
-      "1 m  " -> Some(1024 * 1024L),
+      "1 m  "  -> Some(1024 * 1024L),
       "  1m  " -> Some(1024 * 1024L),
-      "  m  " -> None,
-      "m  " -> None,
-      "1024" -> None,
-      "1024 " -> None,
-      " 1024 " -> None,
+      "  m  "  -> None,
+      "m  "    -> None,
+      "1024"   -> None,
+      "1024 "  -> None,
+      " 1024 " -> None
     )
     cases.foreach { case (in, expect) =>
       FlinkMemorySizeParser.parse(in).map(_.bytes) shouldBe expect
@@ -68,6 +68,5 @@ class FlinkMemorySizeParserSpec extends AnyWordSpecLike with Matchers {
     FlinkMemorySizeParser.parse("1g").map(_.mebiBytes) shouldBe Some(1024L)
     FlinkMemorySizeParser.parse("1g").map(_.kibiBytes) shouldBe Some(1024L * 1024L)
   }
-
 
 }

@@ -22,12 +22,14 @@ import org.apache.streampark.flink.kubernetes.v2.K8sTools.usingK8sClient
 import org.apache.streampark.flink.kubernetes.v2.httpfs.FileMirror
 import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, FlinkSessionJobDef, JobDef}
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
+
 import io.fabric8.kubernetes.api.model._
 import org.apache.flink.v1beta1.{FlinkDeployment, FlinkSessionJob}
 import zio.{IO, UIO, ZIO}
 import zio.stream.ZStream
 
 import java.util
+
 import scala.jdk.CollectionConverters._
 
 /**
@@ -88,8 +90,7 @@ object CROperator extends CROperator {
                                else client.resource(flinkDeployCR).create()
                              }
     } yield ()
-  } *> ZIO.logInfo(
-    s"Successfully apply FlinkDeployment K8s CR: namespace=${spec.namespace}, name=${spec.name}")
+  } *> ZIO.logInfo(s"Successfully apply FlinkDeployment K8s CR: namespace=${spec.namespace}, name=${spec.name}")
 
   /** Apply FlinkSessionJob CR. */
   // noinspection DuplicatedCode
@@ -114,8 +115,7 @@ object CROperator extends CROperator {
                         else client.resource(sessionJobCR).create()
                       }
     } yield ()
-  } *> ZIO.logInfo(
-    s"Successfully apply FlinkSessionJob K8s CR: namespace=${spec.namespace}, name=${spec.name}")
+  } *> ZIO.logInfo(s"Successfully apply FlinkSessionJob K8s CR: namespace=${spec.namespace}, name=${spec.name}")
 
   // Convert job.uri to file-server http access uri
   private def mirrorJobJarToHttpFileServer(job: Option[JobDef], mirrorSpace: String) = {

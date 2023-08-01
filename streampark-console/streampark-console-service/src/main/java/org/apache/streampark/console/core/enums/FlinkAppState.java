@@ -140,9 +140,9 @@ public enum FlinkAppState implements Serializable {
   }
 
   /**
-   * Type conversion bridging
-   * Deprecated, see {@link org.apache.streampark.console.core.utils.FlinkAppStateConverter}
-   * */
+   * Type conversion bridging Deprecated, see {@link
+   * org.apache.streampark.console.core.utils.FlinkAppStateConverter}
+   */
   @Deprecated
   public static class Bridge {
     /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */

@@ -34,5 +34,4 @@ package object zio {
   /** Automatically converts value to Some value. */
   implicit def liftValueAsSome[A](value: A): Option[A] = Some(value)
 
-
 }

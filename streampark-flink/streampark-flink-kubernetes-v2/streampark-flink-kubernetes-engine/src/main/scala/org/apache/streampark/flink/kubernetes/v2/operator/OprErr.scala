@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 package org.apache.streampark.flink.kubernetes.v2.operator
 
 object OprErr {

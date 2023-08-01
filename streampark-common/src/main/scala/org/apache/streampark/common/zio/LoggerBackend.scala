@@ -30,7 +30,7 @@ object LoggerBackend {
   lazy val default: ZLayer[Any, Nothing, Unit] = Runtime.addLogger(provideLogger())
 
   private val defaultLoggerName = getClass.getName
-  private val loggers           = TrieMap[String, BridgeLogger]()
+  private val loggers = TrieMap[String, BridgeLogger]()
 
   private def getLogger(loggerName: String): BridgeLogger = {
     loggers.getOrElseUpdate(loggerName, BridgeLogger(loggerName))
@@ -40,8 +40,8 @@ object LoggerBackend {
     override protected def logName: String = loggerName
 
     def trace(msg: String): Unit = super.logTrace(msg)
-    def info(msg: String): Unit  = super.logInfo(msg)
-    def warn(msg: String): Unit  = super.logWarn(msg)
+    def info(msg: String): Unit = super.logInfo(msg)
+    def warn(msg: String): Unit = super.logWarn(msg)
     def error(msg: String): Unit = super.logError(msg)
     def debug(msg: String): Unit = super.logDebug(msg)
   }
@@ -56,21 +56,23 @@ object LoggerBackend {
       spans: List[LogSpan],
       annotations: Map[String, String]) => {
 
-    val loggerName = LoggerNameExtractor.trace(trace, FiberRefs.empty, Map.empty).getOrElse(defaultLoggerName)
-    val logger     = getLogger(loggerName)
-    val msg        =
-      if (annotations.nonEmpty) s"${annotations.map { case (k, v) => s"[$k=$v]" }.mkString(" ")} ${message()}"
+    val loggerName =
+      LoggerNameExtractor.trace(trace, FiberRefs.empty, Map.empty).getOrElse(defaultLoggerName)
+    val logger = getLogger(loggerName)
+    val msg =
+      if (annotations.nonEmpty)
+        s"${annotations.map { case (k, v) => s"[$k=$v]" }.mkString(" ")} ${message()}"
       else message()
 
     logLevel match {
-      case LogLevel.None    => logger.trace(msg)
-      case LogLevel.All     => logger.trace(msg)
-      case LogLevel.Trace   => logger.trace(msg)
-      case LogLevel.Debug   => logger.debug(msg)
-      case LogLevel.Info    => logger.info(msg)
+      case LogLevel.None => logger.trace(msg)
+      case LogLevel.All => logger.trace(msg)
+      case LogLevel.Trace => logger.trace(msg)
+      case LogLevel.Debug => logger.debug(msg)
+      case LogLevel.Info => logger.info(msg)
       case LogLevel.Warning => logger.warn(msg)
-      case LogLevel.Error   => logger.error(msg)
-      case LogLevel.Fatal   => logger.error(msg)
+      case LogLevel.Error => logger.error(msg)
+      case LogLevel.Fatal => logger.error(msg)
     }
   }
 

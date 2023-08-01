@@ -18,9 +18,10 @@
 package org.apache.streampark.common.zio
 
 import org.apache.streampark.common.zio.ZIOExt.ZStreamOps
+
+import zio.{durationInt, Chunk, Duration, Ref, Schedule, UIO}
 import zio.concurrent.{ConcurrentMap, ConcurrentSet}
 import zio.stream.{UStream, ZStream}
-import zio.{Chunk, Duration, Ref, Schedule, UIO, durationInt}
 
 /** Subscription-ready data structure extension for ZIO Concurrent Collection. */
 object ZIOContainerSubscription {
@@ -48,12 +49,13 @@ object ZIOContainerSubscription {
     def flatSubscribe(interval: Duration = defaultSubInterval): UStream[E] =
       ZStream
         .fromZIO(Ref.make(Set.empty[E]))
-        .flatMap { prevSet =>
-          subscribe(interval)
-            .mapZIO(cur => prevSet.get.map(prev => (prev, cur)))
-            .map { case (prev, cur) => cur -> cur.diff(prev) }
-            .tap { case (cur, _) => prevSet.set(cur) }
-            .flatMap { case (_, curDiff) => ZStream.fromIterable(curDiff) }
+        .flatMap {
+          prevSet =>
+            subscribe(interval)
+              .mapZIO(cur => prevSet.get.map(prev => (prev, cur)))
+              .map { case (prev, cur) => cur -> cur.diff(prev) }
+              .tap { case (cur, _) => prevSet.set(cur) }
+              .flatMap { case (_, curDiff) => ZStream.fromIterable(curDiff) }
         }
   }
 
@@ -78,12 +80,13 @@ object ZIOContainerSubscription {
     def flatSubscribe(interval: Duration = 500.millis): UStream[(K, V)] =
       ZStream
         .fromZIO(Ref.make(Chunk.empty[(K, V)]))
-        .flatMap { prevMap =>
-          subscribe(interval)
-            .mapZIO(cur => prevMap.get.map(prev => (prev, cur)))
-            .map { case (prev, cur) => cur -> cur.diff(prev) }
-            .tap { case (cur, _) => prevMap.set(cur) }
-            .flatMap { case (_, curDiff) => ZStream.fromIterable(curDiff) }
+        .flatMap {
+          prevMap =>
+            subscribe(interval)
+              .mapZIO(cur => prevMap.get.map(prev => (prev, cur)))
+              .map { case (prev, cur) => cur -> cur.diff(prev) }
+              .tap { case (cur, _) => prevMap.set(cur) }
+              .flatMap { case (_, curDiff) => ZStream.fromIterable(curDiff) }
         }
 
     /*
@@ -125,12 +128,13 @@ object ZIOContainerSubscription {
     def flatSubscribe(interval: Duration = defaultSubInterval) =
       ZStream
         .fromZIO(Ref.make(Chunk.empty[(K, V)]))
-        .flatMap { prevMap =>
-          subscribe(interval)
-            .mapZIO(cur => prevMap.get.map(prev => (prev, cur)))
-            .map { case (prev, cur) => cur -> cur.diff(prev) }
-            .tap { case (cur, _) => prevMap.set(cur) }
-            .flatMap { case (_, curDiff) => ZStream.fromIterable(curDiff) }
+        .flatMap {
+          prevMap =>
+            subscribe(interval)
+              .mapZIO(cur => prevMap.get.map(prev => (prev, cur)))
+              .map { case (prev, cur) => cur -> cur.diff(prev) }
+              .tap { case (cur, _) => prevMap.set(cur) }
+              .flatMap { case (_, curDiff) => ZStream.fromIterable(curDiff) }
         }
 
     /*

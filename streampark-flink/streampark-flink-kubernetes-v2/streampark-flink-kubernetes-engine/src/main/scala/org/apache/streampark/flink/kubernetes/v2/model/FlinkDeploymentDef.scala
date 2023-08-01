@@ -17,12 +17,13 @@
 
 package org.apache.streampark.flink.kubernetes.v2.model
 
-import io.fabric8.kubernetes.api.model.{ObjectMeta, Pod}
-import org.apache.flink.v1beta1.FlinkDeploymentSpec.FlinkVersion
-import org.apache.flink.v1beta1.flinkdeploymentspec.{Ingress, TaskManager}
-import org.apache.flink.v1beta1.{FlinkDeployment, FlinkDeploymentSpec, flinkdeploymentspec}
 import org.apache.streampark.flink.kubernetes.v2.jacksonMapper
 import org.apache.streampark.flink.kubernetes.v2.model.FlinkDeploymentDef.mapPodToPodTemplate
+
+import io.fabric8.kubernetes.api.model.{ObjectMeta, Pod}
+import org.apache.flink.v1beta1.{flinkdeploymentspec, FlinkDeployment, FlinkDeploymentSpec}
+import org.apache.flink.v1beta1.FlinkDeploymentSpec.FlinkVersion
+import org.apache.flink.v1beta1.flinkdeploymentspec.{Ingress, TaskManager}
 
 import scala.jdk.CollectionConverters.mapAsJavaMapConverter
 import scala.reflect.ClassTag
