@@ -28,7 +28,7 @@ import zio.ZIO
  * Example of using an embedded file server.
  * Tips: Please uncomment the @Ignore tag to execute the example code.
  */
-@Ignore
+ @Ignore
 class UsingEmbeddedFileServer extends AnyWordSpecLike with BeforeAndAfterAll {
 
   "Launch embedded http file server and mirror files" in unsafeRun {
