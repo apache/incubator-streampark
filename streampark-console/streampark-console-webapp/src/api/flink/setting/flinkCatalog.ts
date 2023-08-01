@@ -19,60 +19,53 @@ import { defHttp } from '/@/utils/http/axios';
 import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
 
-enum GATEWAY_API {
-  CREATE = '/flink/gateway/create',
-  UPDATE = '/flink/gateway/update',
-  LIST = '/flink/gateway/list',
-  DELETE = '/flink/gateway/delete/{id}',
-  GET = '/flink/gateway/get',
-  CHECK_NAME = '/flink/gateway/check/name',
-  CHECK_ADDRESS = '/flink/gateway/check/address',
+enum Catalog_API {
+  CREATE = '/flink/catalog/create',
+  UPDATE = '/flink/catalog/update',
+  LIST = '/flink/catalog/list',
+  DELETE = '/flink/catalog/delete/{id}',
+  GET = '/flink/catalog/get',
+  CHECK_NAME = '/flink/catalog/check/name',
 }
 
 /**
- * fetch gateway list.
+ * fetch Catalog list.
  */
-export function fetchGatewayList() {
+export function fetchCatalogList() {
   return defHttp.get({
-    url: GATEWAY_API.LIST,
+    url: Catalog_API.LIST,
   });
 }
 
 /**
- * fetch gateway remove result.
+ * fetch Catalog remove result.
  * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchGatewayDelete(id: string): Promise<AxiosResponse<Result>> {
+export function fetchCatalogDelete(id: string): Promise<AxiosResponse<Result>> {
   return defHttp.delete(
-    { url: GATEWAY_API.DELETE.replace('{id}', id) },
+    { url: Catalog_API.DELETE.replace('{id}', id) },
     { isReturnNativeResponse: true },
   );
 }
 
-export function fetchGatewayCreate(data: Recordable) {
+export function fetchCatalogCreate(data: Recordable) {
   return defHttp.postJson({
-    url: GATEWAY_API.CREATE,
+    url: Catalog_API.CREATE,
     data,
   });
 }
 
-export function fetchGatewayUpdate(data: Recordable) {
+export function fetchCatalogUpdate(data: Recordable) {
   return defHttp.postJson({
-    url: GATEWAY_API.UPDATE,
+    url: Catalog_API.UPDATE,
     data,
   });
 }
 
-export function fetchGatewayCheckName(name: string) {
+export function fetchCatalogCheckName(name: string) {
   return defHttp.get({
-    url: GATEWAY_API.CHECK_NAME,
+    url: Catalog_API.CHECK_NAME,
     params: { name },
   });
 }
 
-export function fetchGatewayCheckAddress(address: string) {
-  return defHttp.get({
-    url: GATEWAY_API.CHECK_ADDRESS,
-    params: { address },
-  });
-}

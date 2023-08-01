@@ -18,7 +18,7 @@
   <PageWrapper>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'gateway:add'">
+        <a-button type="primary" @click="handleCreate" v-auth="'catalog:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -30,10 +30,10 @@
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
-                auth: 'gateway:delete',
-                tooltip: t('setting.flinkGateway.deleteGateway'),
+                auth: 'catalog:delete',
+                tooltip: t('setting.flinkCatalog.deleteCatalog'),
                 popConfirm: {
-                  title: t('setting.flinkGateway.deleteConfirm'),
+                  title: t('setting.flinkCatalog.deleteConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },
               },
@@ -42,26 +42,26 @@
         </template>
       </template>
     </BasicTable>
-    <FlinkGatewayDrawer @register="registerDrawer" @success="handleSuccess" />
+    <FlinkCatalogDrawer @register="registerDrawer" @success="handleSuccess" />
   </PageWrapper>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import FlinkGatewayDrawer from './components/FlinkGatewayDrawer.vue';
+  import FlinkCatalogDrawer from './components/FlinkCatalogDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { fetchGatewayDelete, fetchGatewayList } from '/@/api/flink/setting/flinkGateway';
+  import { fetchCatalogDelete, fetchCatalogList } from '/@/api/flink/setting/flinkCatalog';
   import { columns, searchFormSchema } from './index.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { PageWrapper } from '/@/components/Page';
   export default defineComponent({
-    name: 'FlinkGateway',
+    name: 'FlinkCatalog',
     components: {
       BasicTable,
-      FlinkGatewayDrawer: FlinkGatewayDrawer,
+      FlinkCatalogDrawer: FlinkCatalogDrawer,
       TableAction,
       Icon,
       PageWrapper,
@@ -71,15 +71,8 @@
       const { createMessage } = useMessage();
       const [registerDrawer, { openDrawer }] = useDrawer();
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
-        title: t('setting.flinkGateway.tableTitle'),
-        api: fetchGatewayList,
-        // beforeFetch: (params) => {
-        //   if (params.user) {
-        //     params.username = params.user;
-        //     delete params.user;
-        //   }
-        //   return params;
-        // },
+        title: t('setting.flinkCatalog.tableTitle'),
+        api: fetchCatalogList,
         columns,
         formConfig: {
           baseColProps: { style: { paddingRight: '30px' } },
@@ -104,21 +97,21 @@
       }
 
       async function handleDelete(record: Recordable) {
-        const res = await fetchGatewayDelete(record.id);
+        const res = await fetchCatalogDelete(record.id);
         if (res) {
-          createMessage.success(t('setting.flinkGateway.operation.deleteSuccess'));
+          createMessage.success(t('setting.flinkCatalog.operation.deleteSuccess'));
           reload();
         } else {
-          createMessage.success(t('setting.flinkGateway.operation.deleteFailed'));
+          createMessage.success(t('setting.flinkCatalog.operation.deleteFailed'));
         }
       }
 
       function handleSuccess({ isUpdate, values }) {
         if (isUpdate) {
-          createMessage.success(t('setting.flinkGateway.operation.updateSuccess'));
+          createMessage.success(t('setting.flinkCatalog.operation.updateSuccess'));
           updateTableDataRecord(values.id, values);
         } else {
-          createMessage.success(t('setting.flinkGateway.operation.createSuccess'));
+          createMessage.success(t('setting.flinkCatalog.operation.createSuccess'));
           reload();
         }
       }

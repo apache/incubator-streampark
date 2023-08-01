@@ -22,10 +22,12 @@ import org.apache.streampark.gateway.flink.client.dto.ExecuteStatementResponseBo
 import org.apache.streampark.gateway.flink.client.dto.FetchResultsResponseBody;
 import org.apache.streampark.gateway.flink.client.dto.OpenSessionRequestBody;
 import org.apache.streampark.gateway.flink.client.dto.OpenSessionResponseBody;
+import org.apache.streampark.gateway.flink.client.dto.ResultSetDataInner;
 import org.apache.streampark.gateway.flink.client.rest.ApiException;
 import org.apache.streampark.gateway.flink.client.rest.v1.DefaultApi;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class FlinkSqlGatewayExample {
 
@@ -38,51 +40,118 @@ public class FlinkSqlGatewayExample {
     //    runOnKubernetes(api);
   }
 
-  public static void runOnRemote(DefaultApi api) throws ApiException, InterruptedException {
+  public static void runOnRemote(DefaultApi api) throws Exception {
     OpenSessionResponseBody response =
         api.openSession(
             new OpenSessionRequestBody()
                 .putPropertiesItem("rest.address", "192.168.20.239")
+                //                    .putPropertiesItem("rest.address", "192.168.20.144")
                 .putPropertiesItem("rest.port", "8081")
                 .putPropertiesItem("execution.target", "remote"));
     String sessionHandle = response.getSessionHandle();
-    System.out.println("SessionHandle: " + sessionHandle);
+    printResult(api, sessionHandle, extracted(api, sessionHandle, "show catalogs;"));
 
-    ExecuteStatementResponseBody statement1 =
-        api.executeStatement(
-            UUID.fromString(sessionHandle),
-            new ExecuteStatementRequestBody()
-                .statement(
-                    "CREATE TABLE Orders (\n"
-                        + "    order_number BIGINT,\n"
-                        + "    price        DECIMAL(32,2),\n"
-                        + "    buyer        ROW<first_name STRING, last_name STRING>,\n"
-                        + "    order_time   TIMESTAMP(3)\n"
-                        + ") WITH (\n"
-                        + "  'connector' = 'datagen',\n"
-                        + "  'number-of-rows' = '2'\n"
-                        + ")")
-                .putExecutionConfigItem(
-                    "pipeline.name", "Flink SQL Gateway SDK on flink cluster Example"));
+    printResult(
+        api,
+        sessionHandle,
+        extracted(
+            api,
+            sessionHandle,
+            "CREATE CATALOG my_catalog WITH(\n"
+                + "    'type' = 'jdbc',\n"
+                + "    'default-database' = 'streampark',\n"
+                + "    'username' = 'root',\n"
+                + "    'password' = 'streampark',\n"
+                + "    'base-url' = 'jdbc:mysql://192.168.20.144:3306'\n"
+                + ");\n"));
 
-    System.out.println("create table: " + statement1.getOperationHandle());
+    //    printResult(
+    //        api,
+    //        sessionHandle,
+    //        extracted(
+    //            api,
+    //            sessionHandle,
+    //            "CREATE CATALOG mysql_sp WITH (\n"
+    //                + "  'type' = 'streampark_mysql_catalog',\n"
+    //                + "  'jdbcUrl' =
+    // 'jdbc:mysql://localhost:3306/streampark?useSSL=false&useUnicode=true&characterEncoding=UTF-8',\n"
+    //                + "  'username' = 'root',\n"
+    //                + "  'password' = 'streampark'\n"
+    //                + ");"));
+    //    printResult(api, sessionHandle, extracted(api, sessionHandle, "USE CATALOG mysql_sp;"));
+    //        printResult(api, sessionHandle, extracted(api, sessionHandle, "CREATE TABLE source3 ("
+    //            + "id STRING"
+    //            + ") WITH (" +
+    //            " 'connector' = 'datagen'" +
+    //            ")"));
+    printResult(api, sessionHandle, extracted(api, sessionHandle, "USE CATALOG my_catalog"));
+    printResult(api, sessionHandle, extracted(api, sessionHandle, "show tables;"));
 
-    ExecuteStatementResponseBody statement2 =
-        api.executeStatement(
-            UUID.fromString(sessionHandle),
-            new ExecuteStatementRequestBody()
-                .statement("select * from Orders;")
-                .putExecutionConfigItem(
-                    "pipeline.name", "Flink SQL Gateway SDK on flink cluster Example"));
+    //    printResult(
+    //        api,
+    //        sessionHandle,
+    //        extracted(
+    //            api,
+    //            sessionHandle,
+    //            "ADD JAR '/opt/flink-1.16.1/udf/streampark-flink-udf_2.12-2.2.0-SNAPSHOT.jar';"));
+    //        printResult(api, sessionHandle, extracted(api, sessionHandle, "create function  if not
+    // exists length_function as 'org.apache.streampark.flink.udf.Length' language scala"));
+    //        printResult(api, sessionHandle, extracted(api, sessionHandle, " DESCRIBE mykafka;"));
+    //        printResult(api, sessionHandle, extracted(api, sessionHandle, " show tables;"));
+    //        printResult(api, sessionHandle, extracted(api, sessionHandle, " show databases;"));
+    //    printResult(
+    //        api,
+    //        sessionHandle,
+    //        extracted(api, sessionHandle, " select length_function(id) from source3;"));
 
-    System.out.println("select * from Orders: " + statement2.getOperationHandle());
+    printResult(
+        api, sessionHandle, extracted(api, sessionHandle, " show create table t_flink_app;"));
+  }
 
-    Thread.sleep(1000 * 10);
+  private static void printResult(DefaultApi api, String sessionHandle, String statementHandle)
+      throws Exception {
 
-    FetchResultsResponseBody fetchResultsResponseBody =
-        api.fetchResults(
-            UUID.fromString(sessionHandle), UUID.fromString(statement2.getOperationHandle()), 0L);
-    fetchResultsResponseBody.getResults().getColumns().forEach(System.out::println);
+    if (statementHandle != null) {
+      try {
+        System.out.println("---start---");
+        System.out.println(
+            "operationStatus: "
+                + api.getOperationStatus(
+                        UUID.fromString(sessionHandle), UUID.fromString(statementHandle))
+                    .getStatus());
+        Thread.sleep(5 * 1000);
+        FetchResultsResponseBody fetchResultsResponseBody =
+            api.fetchResults(UUID.fromString(sessionHandle), UUID.fromString(statementHandle), 0L);
+        System.out.println(
+            fetchResultsResponseBody.getResults().getColumns().stream()
+                .map(o -> o.getName() + " " + o.getLogicalType().getType())
+                .collect(Collectors.toList()));
+        for (ResultSetDataInner datum : fetchResultsResponseBody.getResults().getData()) {
+          datum.getFields().forEach(o -> System.out.println(o + " "));
+        }
+        System.out.println("---end---");
+      } catch (ApiException e) {
+        System.out.println(e.getResponseBody());
+      }
+    }
+  }
+
+  private static String extracted(DefaultApi api, String sessionHandle, String sql)
+      throws ApiException {
+    ExecuteStatementResponseBody statement1 = null;
+    try {
+      statement1 =
+          api.executeStatement(
+              UUID.fromString(sessionHandle),
+              new ExecuteStatementRequestBody()
+                  .statement(sql)
+                  .putExecutionConfigItem(
+                      "pipeline.name", "Flink SQL Gateway SDK on flink cluster Example"));
+      return statement1.getOperationHandle();
+    } catch (ApiException e) {
+      System.out.println(e.getResponseBody());
+    }
+    return null;
   }
 
   private static void runOnKubernetes(DefaultApi api) throws ApiException {

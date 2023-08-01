@@ -17,10 +17,11 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.entity.FlinkGateWay;
-import org.apache.streampark.console.core.enums.GatewayTypeEnum;
-import org.apache.streampark.console.core.service.FlinkGateWayService;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.core.entity.FlinkCatalog;
+import org.apache.streampark.console.core.service.FlinkCatalogService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,64 +40,55 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
 
-@Tag(name = "FLINK_GATEWAY_TAG")
+@Tag(name = "FLINK_CATALOG_TAG")
 @Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("flink/gateway")
-public class FlinkGateWayController {
+@RequestMapping("flink/catalog")
+public class FlinkCatalogController {
 
-  private final FlinkGateWayService flinkGatewayService;
+  private final FlinkCatalogService flinkCatalogService;
 
-  @Operation(summary = "List flink gateways")
+  @Operation(summary = "List catalog")
   @GetMapping("list")
-  public RestResponse list() {
-    return RestResponse.success(flinkGatewayService.list());
+  public RestResponse list(RestRequest request) {
+    return RestResponse.success(
+        flinkCatalogService.page(new MybatisPager<FlinkCatalog>().getDefaultPage(request)));
   }
 
-  @Operation(summary = "Create flink gateway")
+  @Operation(summary = "Create flink catalog")
   @PostMapping("create")
-  public RestResponse create(@RequestBody FlinkGateWay flinkGateWay) {
-    flinkGatewayService.create(flinkGateWay);
+  public RestResponse create(@RequestBody FlinkCatalog flinkCatalog) {
+    flinkCatalogService.create(flinkCatalog);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Check flink gateway name")
+  @Operation(summary = "Check flink catalog name")
   @GetMapping("check/name")
   public RestResponse checkName(
-      @NotNull(message = "The Gateway name cannot be null") @RequestParam("name") String name) {
-    return RestResponse.success(flinkGatewayService.existsByGatewayName(name));
+      @NotNull(message = "The flink catalog name cannot be null") @RequestParam("name")
+          String name) {
+    return RestResponse.success(flinkCatalogService.existsByCatalogName(name));
   }
 
-  @Operation(summary = "Check flink gateway address")
-  @GetMapping("check/address")
-  public RestResponse checkAddress(
-      @NotNull(message = "The Gateway address cannot be null") @RequestParam("address")
-          String address)
-      throws Exception {
-    GatewayTypeEnum gatewayVersion = flinkGatewayService.getGatewayVersion(address);
-    return RestResponse.success(gatewayVersion);
-  }
-
-  @Operation(summary = "Update flink gateway")
+  @Operation(summary = "Update flink catalog")
   @PutMapping("update")
-  public RestResponse update(@RequestBody FlinkGateWay flinkGateWay) {
-    flinkGatewayService.update(flinkGateWay);
+  public RestResponse update(@RequestBody FlinkCatalog flinkCatalog) {
+    flinkCatalogService.update(flinkCatalog);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Get flink gateway by id")
+  @Operation(summary = "Get flink catalog by id")
   @GetMapping("get/{id}")
   public RestResponse get(@PathVariable Long id) {
-    return RestResponse.success(flinkGatewayService.getById(id));
+    return RestResponse.success(flinkCatalogService.getById(id));
   }
 
-  @Operation(summary = "Delete flink gateway by id")
+  @Operation(summary = "Delete flink catalog by id")
   @DeleteMapping("delete/{id}")
-  public RestResponse delete(
-      @NotNull(message = "The Gateway id cannot be null") @PathVariable Long id) {
-    flinkGatewayService.removeById(id);
+  public RestResponse delete(@PathVariable Long id) {
+    flinkCatalogService.removeById(id);
     return RestResponse.success();
   }
 }

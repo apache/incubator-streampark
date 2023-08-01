@@ -15,28 +15,22 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: '系统管理',
-    userManagement: '用户管理',
-    roleManagement: '角色管理',
-    menuManagement: '菜单管理',
-    tokenManagement: 'Token 管理',
-    teamManagement: '团队管理',
-    memberManagement: '成员管理',
-    project: '项目管理',
-    application: '作业管理',
-    variable: '变量管理',
-    resource: '资源管理',
-    setting: '设置中心',
+  tableTitle: 'Flink Catalog List',
+  createCatalog: 'Create Flink Catalog',
+  success: 'Success',
+  properties: 'Catalog Properties',
+  modifyCatalog: 'Edit Flink Catalog',
+  deleteCatalog: 'Delete Flink Catalog',
+  deleteConfirm: 'Are you sure to delete this Flink Catalog ?',
+  name: 'Catalog Name',
+  checkResult: {
+    emptyHint: 'Flink catalog name can not be empty.',
+    emptyProperties: 'Flink catalog properties can not be empty.',
   },
-  setting: {
-    system: '系统设置',
-    alarm: '告警设置',
-    flinkHome: 'Flink 版本',
-    flinkCluster: 'Flink 集群',
-    externalLink: '扩展链接',
-    yarnQueue: 'Yarn 队列',
-    flinkGateway: 'FLink 网关',
-    flinkCatalog: 'FLink Catalog',
+  operation: {
+    updateSuccess: 'Update Flink catalog successfully.',
+    deleteSuccess: 'Delete Flink catalog successfully.',
+    createSuccess: 'Create Flink catalog successfully.',
+    deleteFailed: 'Delete Flink catalog failed.',
   },
 };

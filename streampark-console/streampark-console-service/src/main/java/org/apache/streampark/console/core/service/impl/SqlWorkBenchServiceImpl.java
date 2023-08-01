@@ -19,9 +19,13 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.HadoopConfigUtils;
+import org.apache.streampark.console.core.bean.SqlGatewayExecuteResult;
+import org.apache.streampark.console.core.entity.FlinkCatalog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkGateWay;
+import org.apache.streampark.console.core.enums.CatalogMetaType;
+import org.apache.streampark.console.core.service.FlinkCatalogService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
@@ -30,21 +34,27 @@ import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.gateway.OperationHandle;
+import org.apache.streampark.gateway.OperationStatus;
+import org.apache.streampark.gateway.exception.SqlGatewayException;
 import org.apache.streampark.gateway.factories.FactoryUtil;
 import org.apache.streampark.gateway.factories.SqlGatewayServiceFactoryUtils;
 import org.apache.streampark.gateway.flink.FlinkSqlGatewayServiceFactory;
 import org.apache.streampark.gateway.results.Column;
+import org.apache.streampark.gateway.results.FetchOrientation;
 import org.apache.streampark.gateway.results.GatewayInfo;
 import org.apache.streampark.gateway.results.OperationInfo;
 import org.apache.streampark.gateway.results.ResultQueryCondition;
 import org.apache.streampark.gateway.results.ResultSet;
+import org.apache.streampark.gateway.results.RowData;
 import org.apache.streampark.gateway.service.SqlGatewayService;
 import org.apache.streampark.gateway.session.SessionEnvironment;
 import org.apache.streampark.gateway.session.SessionHandle;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.client.program.ClusterClient;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -54,10 +64,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import static org.apache.streampark.common.enums.ExecutionMode.KUBERNETES_NATIVE_SESSION;
-import static org.apache.streampark.common.enums.ExecutionMode.REMOTE;
-import static org.apache.streampark.common.enums.ExecutionMode.YARN_SESSION;
+import static java.lang.Thread.sleep;
 
 @Slf4j
 @Service
@@ -67,6 +76,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
   private final FlinkClusterService flinkClusterService;
   private final FlinkGateWayService flinkGateWayService;
   private final FlinkEnvService flinkEnvService;
+  private final FlinkCatalogService flinkCatalogService;
 
   /** Get SqlGatewayService instance by flinkGatewayId */
   private SqlGatewayService getSqlGateWayService(Long flinkGatewayId) {
@@ -200,6 +210,49 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
             resultQueryCondition);
   }
 
+  @SneakyThrows
+  @Override
+  public SqlGatewayExecuteResult executeAndFetchResults(
+      Long flinkGatewayId, String sessionHandleId, String statement) {
+
+    SqlGatewayService sqlGateWayService = getSqlGateWayService(flinkGatewayId);
+    SessionHandle sessionHandle = new SessionHandle(sessionHandleId);
+    OperationHandle operationHandle =
+        sqlGateWayService.executeStatement(sessionHandle, statement, 10000L, null);
+
+    // Wait for the operation to complete then fetch the result
+    OperationInfo operationInfo = new OperationInfo(OperationStatus.INITIALIZED, null);
+    while (!operationInfo.getStatus().isTerminalStatus()) {
+      // Sleep 100ms to avoid too many requests
+      sleep(100L);
+      operationInfo = sqlGateWayService.getOperationInfo(sessionHandle, operationHandle);
+    }
+
+    if (operationInfo.getStatus() == OperationStatus.FINISHED) {
+      // fetch result and return when result data size > 0 or nextToken is null
+      ResultSet resultSet =
+          sqlGateWayService.fetchResults(
+              sessionHandle, operationHandle, new ResultQueryCondition());
+
+      List<RowData> data = resultSet.getData();
+      Long nextToken = resultSet.getNextToken();
+
+      while (nextToken != null && CollectionUtils.isEmpty(data)) {
+        Thread.sleep(500);
+        resultSet =
+            sqlGateWayService.fetchResults(
+                sessionHandle,
+                operationHandle,
+                new ResultQueryCondition(FetchOrientation.FETCH_NEXT, nextToken, 1000));
+        data = resultSet.getData();
+        nextToken = resultSet.getNextToken();
+      }
+      return new SqlGatewayExecuteResult(sessionHandle, operationHandle, operationInfo, resultSet);
+    }
+    throw new SqlGatewayException(
+        "Execute statement :" + statement + "failed !", operationInfo.getException());
+  }
+
   @Override
   public void heartbeat(Long flinkGatewayId, String sessionHandle) {
     getSqlGateWayService(flinkGatewayId).heartbeat(new SessionHandle(sessionHandle));
@@ -216,5 +269,95 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
       throw new IllegalArgumentException("FlinkEnv not found");
     }
     return getSqlGateWayService(flinkGatewayId).check(flinkEnv.getFlinkVersion().majorVersion());
+  }
+
+  @Override
+  public List<String> listMetaData(
+      Long flinkGatewayId,
+      String sessionHandle,
+      Long catalogId,
+      String databaseName,
+      CatalogMetaType catalogMetaType) {
+
+    FlinkCatalog flinkCatalog = flinkCatalogService.getById(catalogId);
+    if (flinkCatalog == null) {
+      throw new IllegalArgumentException("FlinkCatalog not found");
+    }
+
+    // if catalog is not exist, create it and use it
+    List<String> catalogs =
+        executeAndFetchListResults(
+            flinkGatewayId, sessionHandle, flinkCatalog.getShowCatalogsSql());
+    if (CollectionUtils.isEmpty(catalogs) || !catalogs.contains(flinkCatalog.getCatalogName())) {
+      executeAndFetchResults(flinkGatewayId, sessionHandle, flinkCatalog.getCreateCatalogSql());
+    }
+    executeAndFetchResults(flinkGatewayId, sessionHandle, flinkCatalog.getUseCatalogSql());
+
+    String sql;
+    switch (catalogMetaType) {
+      case DATABASE:
+        sql = flinkCatalog.getShowDatabasesSql();
+        break;
+      case TABLE:
+        sql = flinkCatalog.getShowTablesSql(databaseName);
+        break;
+      case VIEW:
+        sql = flinkCatalog.getShowViewsSql();
+        break;
+      case FUNCTION:
+        sql = flinkCatalog.getShowFunctionsSql(databaseName);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported catalogMetaType: " + catalogMetaType);
+    }
+    return executeAndFetchListResults(flinkGatewayId, sessionHandle, sql);
+  }
+
+  @Override
+  public String showCreateSql(
+      Long flinkGatewayId,
+      String sessionHandle,
+      Long catalogId,
+      String databaseName,
+      String objectName,
+      CatalogMetaType catalogMetaType) {
+
+    FlinkCatalog flinkCatalog = flinkCatalogService.getById(catalogId);
+    if (flinkCatalog == null) {
+      throw new IllegalArgumentException("FlinkCatalog not found");
+    }
+    String sql;
+    switch (catalogMetaType) {
+      case TABLE:
+        sql = flinkCatalog.getShowCreateTableSql(databaseName, objectName);
+        break;
+      case VIEW:
+        sql = flinkCatalog.getShowCreateViewSql(databaseName, objectName);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported catalogMetaType: " + catalogMetaType);
+    }
+    return executeAndFetchListResults(flinkGatewayId, sessionHandle, sql).get(0);
+  }
+
+  // -------------------------------------------------------------------------------------------
+  // Utils Methods
+  // -------------------------------------------------------------------------------------------
+
+  /**
+   * Execute statement and return the first field of the result
+   *
+   * @param flinkGatewayId flink gateway id
+   * @param sessionHandle session handle
+   * @param statement statement
+   * @return result
+   */
+  private List<String> executeAndFetchListResults(
+      Long flinkGatewayId, String sessionHandle, String statement) {
+    SqlGatewayExecuteResult sqlGatewayExecuteResult =
+        executeAndFetchResults(flinkGatewayId, sessionHandle, statement);
+    return sqlGatewayExecuteResult.getResultSet().getData().stream()
+        .map(rowData -> (String) rowData.getFields().get(0))
+        .collect(Collectors.toList());
   }
 }
