@@ -17,6 +17,7 @@
 
 package org.apache.streampark.gateway.utils;
 
+import org.apache.streampark.gateway.CompleteStatementRequestBody;
 import org.apache.streampark.gateway.ExecutionConfiguration;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.exception.SqlGatewayException;
@@ -28,6 +29,8 @@ import org.apache.streampark.gateway.results.ResultSet;
 import org.apache.streampark.gateway.service.SqlGatewayService;
 import org.apache.streampark.gateway.session.SessionEnvironment;
 import org.apache.streampark.gateway.session.SessionHandle;
+
+import java.util.List;
 
 /** Mocked implementation of {@link SqlGatewayService}. */
 public class FakeSqlGatewayService implements SqlGatewayService {
@@ -100,6 +103,13 @@ public class FakeSqlGatewayService implements SqlGatewayService {
       SessionHandle sessionHandle,
       OperationHandle operationHandle,
       ResultQueryCondition resultQueryCondition)
+      throws SqlGatewayException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public List<String> completeStatement(
+      SessionHandle sessionHandle, CompleteStatementRequestBody completeStatementRequestBody)
       throws SqlGatewayException {
     throw new UnsupportedOperationException();
   }

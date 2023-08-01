@@ -29,10 +29,10 @@ import org.apache.streampark.console.core.service.SqlWorkBenchService;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.ingress.IngressController;
+import org.apache.streampark.gateway.CompleteStatementRequestBody;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.factories.FactoryUtil;
 import org.apache.streampark.gateway.factories.SqlGatewayServiceFactoryUtils;
-import org.apache.streampark.gateway.flink.FlinkSqlGatewayServiceFactory;
 import org.apache.streampark.gateway.results.Column;
 import org.apache.streampark.gateway.results.GatewayInfo;
 import org.apache.streampark.gateway.results.OperationInfo;
@@ -55,10 +55,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.apache.streampark.common.enums.ExecutionMode.KUBERNETES_NATIVE_SESSION;
-import static org.apache.streampark.common.enums.ExecutionMode.REMOTE;
-import static org.apache.streampark.common.enums.ExecutionMode.YARN_SESSION;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -79,7 +75,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
     config.put(
         FactoryUtil.SQL_GATEWAY_SERVICE_TYPE.getKey(),
         flinkGateWay.getGatewayType().getIdentifier());
-    config.put(FlinkSqlGatewayServiceFactory.BASE_URI.getKey(), flinkGateWay.getAddress());
+    config.put("base-uri", flinkGateWay.getAddress());
     List<SqlGatewayService> actual = SqlGatewayServiceFactoryUtils.createSqlGatewayService(config);
     if (actual.size() > 1) {
       log.warn("There are more than one SqlGatewayService instance, please check your config");
@@ -185,6 +181,15 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
       Long flinkGatewayId, String sessionHandleUUIDStr, String statement) {
     return getSqlGateWayService(flinkGatewayId)
         .executeStatement(new SessionHandle(sessionHandleUUIDStr), statement, 10000L, null);
+  }
+
+  @Override
+  public List<String> completeStatement(
+      Long flinkGatewayId,
+      String sessionHandleUUIDStr,
+      CompleteStatementRequestBody completeStatementRequestBody) {
+    return getSqlGateWayService(flinkGatewayId)
+        .completeStatement(new SessionHandle(sessionHandleUUIDStr), completeStatementRequestBody);
   }
 
   @Override

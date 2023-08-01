@@ -15,22 +15,23 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.gateway.flink;
+package org.apache.streampark.gateway.flink.v1;
 
+import org.apache.streampark.gateway.CompleteStatementRequestBody;
 import org.apache.streampark.gateway.ExecutionConfiguration;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.OperationStatus;
 import org.apache.streampark.gateway.exception.SqlGatewayException;
-import org.apache.streampark.gateway.flink.client.dto.ExecuteStatementRequestBody;
-import org.apache.streampark.gateway.flink.client.dto.FetchResultsResponseBody;
-import org.apache.streampark.gateway.flink.client.dto.GetInfoResponseBody;
-import org.apache.streampark.gateway.flink.client.dto.OpenSessionRequestBody;
-import org.apache.streampark.gateway.flink.client.dto.OperationStatusResponseBody;
-import org.apache.streampark.gateway.flink.client.dto.ResultSetColumnsInner;
-import org.apache.streampark.gateway.flink.client.dto.ResultSetDataInner;
-import org.apache.streampark.gateway.flink.client.rest.ApiClient;
-import org.apache.streampark.gateway.flink.client.rest.ApiException;
-import org.apache.streampark.gateway.flink.client.rest.v1.DefaultApi;
+import org.apache.streampark.gateway.flink.v1.client.dto.ExecuteStatementRequestBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.FetchResultsResponseBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.GetInfoResponseBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.OpenSessionRequestBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.OperationStatusResponseBody;
+import org.apache.streampark.gateway.flink.v1.client.dto.ResultSetColumnsInner;
+import org.apache.streampark.gateway.flink.v1.client.dto.ResultSetDataInner;
+import org.apache.streampark.gateway.flink.v1.client.rest.ApiClient;
+import org.apache.streampark.gateway.flink.v1.client.rest.ApiException;
+import org.apache.streampark.gateway.flink.v1.client.rest.DefaultApi;
 import org.apache.streampark.gateway.results.Column;
 import org.apache.streampark.gateway.results.GatewayInfo;
 import org.apache.streampark.gateway.results.OperationInfo;
@@ -94,9 +95,7 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
   @Override
   public void heartbeat(SessionHandle sessionHandle) throws SqlGatewayException {
     try {
-      defaultApi.triggerSession(
-          new org.apache.streampark.gateway.flink.client.dto.SessionHandle()
-              .identifier(UUID.fromString(sessionHandle.getIdentifier())));
+      defaultApi.triggerSession(sessionHandle.getIdentifier());
     } catch (ApiException e) {
       throw new SqlGatewayException("Flink native SqlGateWay heartbeat failed!", e);
     }
@@ -115,11 +114,7 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
   public void cancelOperation(SessionHandle sessionHandle, OperationHandle operationHandle)
       throws SqlGatewayException {
     try {
-      defaultApi.cancelOperation(
-          new org.apache.streampark.gateway.flink.client.dto.SessionHandle()
-              .identifier(UUID.fromString(sessionHandle.getIdentifier())),
-          new org.apache.streampark.gateway.flink.client.dto.OperationHandle()
-              .identifier(UUID.fromString(operationHandle.getIdentifier())));
+      defaultApi.cancelOperation(sessionHandle.getIdentifier(), operationHandle.getIdentifier());
     } catch (ApiException e) {
       throw new SqlGatewayException("Flink native SqlGateWay cancelOperation failed!", e);
     }
@@ -205,7 +200,7 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
         nextToken = Long.valueOf(nextResultUri.substring(nextResultUri.lastIndexOf("/") + 1));
       }
 
-      org.apache.streampark.gateway.flink.client.dto.ResultSet results =
+      org.apache.streampark.gateway.flink.v1.client.dto.ResultSet results =
           fetchResultsResponseBody.getResults();
 
       List<ResultSetColumnsInner> resultsColumns = results.getColumns();
@@ -235,5 +230,13 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
     } catch (ApiException e) {
       throw new SqlGatewayException("Flink native SqlGateWay fetchResults failed!", e);
     }
+  }
+
+  @Override
+  public List<String> completeStatement(
+      SessionHandle sessionHandle, CompleteStatementRequestBody completeStatementRequestBody)
+      throws SqlGatewayException {
+    throw new SqlGatewayException(
+        "Flink native SqlGateWay don`t support operation:completeStatement!");
   }
 }

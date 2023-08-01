@@ -24,17 +24,21 @@ import org.apache.streampark.console.core.entity.FlinkGateWay;
 import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 import org.apache.streampark.console.core.mapper.FlinkGateWayMapper;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
-import org.apache.streampark.gateway.flink.client.dto.GetApiVersionResponseBody;
 
 import org.apache.hc.client5.http.config.RequestConfig;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -72,6 +76,7 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
 
   @Override
   public GatewayTypeEnum getGatewayVersion(String address) {
+    // change to use SqlGatewayService to get version in future
     String restUrl = address + "/api_versions";
     try {
       String result =
@@ -79,9 +84,19 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
               restUrl,
               RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
       if (result != null) {
-        String versionStr =
-            JacksonUtils.read(result, GetApiVersionResponseBody.class).getVersions().get(0);
-        return "V1".equals(versionStr) ? GatewayTypeEnum.FLINK_V1 : GatewayTypeEnum.FLINK_V2;
+        List<String> versions = new ArrayList<>();
+        JsonNode jsonNode = JacksonUtils.readTree(result);
+        Optional.ofNullable(jsonNode.get("versions"))
+            .filter(JsonNode::isArray)
+            .map(ArrayNode.class::cast)
+            .ifPresent(
+                arrayNode -> arrayNode.elements().forEachRemaining(e -> versions.add(e.asText())));
+        // Currently, we only support V1 and V2. Flink 1.17 will return both V1 and V2, so we need
+        // to get the last one.
+        if (versions.size() > 0) {
+          String versionStr = versions.get(versions.size() - 1);
+          return "V1".equals(versionStr) ? GatewayTypeEnum.FLINK_V1 : GatewayTypeEnum.FLINK_V2;
+        }
       }
     } catch (Exception e) {
       log.error("get gateway version failed", e);

@@ -90,35 +90,6 @@ public class SqlGatewayServiceFactoryUtilsTest {
             SqlGatewayServiceFactory.class.getCanonicalName()));
   }
 
-  /*  @Test
-  public void testCreateServiceWithMissingOptions() {
-    Map<String, String> config = getDefaultConfig();
-    config.remove("sql-gateway.Service.mocked.host");
-
-    validateException(
-        config,
-        "One or more required options are missing.\n\n"
-            + "Missing required options are:\n\n"
-            + "host");
-  }*/
-
-  /*  @Test
-  public void testCreateServiceWithUnconsumedOptions() {
-    Map<String, String> config = getDefaultConfig();
-    config.put("sql-gateway.Service.mocked.unconsumed-option", "error");
-
-    validateException(
-        config,
-        "Unsupported options found for 'mocked'.\n\n"
-            + "Unsupported options:\n\n"
-            + "unconsumed-option\n\n"
-            + "Supported options:\n\n"
-            + "description\n"
-            + "host\n"
-            + "id\n"
-            + "port");
-  }*/
-
   // --------------------------------------------------------------------------------------------
 
   private void validateException(Map<String, String> config, String errorMessage) {
