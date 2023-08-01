@@ -93,9 +93,9 @@ public class FlinkGateWayController {
   }
 
   @Operation(summary = "Delete flink gateway by id")
-  @DeleteMapping("delete")
+  @DeleteMapping("delete/{id}")
   public RestResponse delete(
-      @NotNull(message = "The Gateway id cannot be null") @RequestParam("id") Long id) {
+      @NotNull(message = "The Gateway id cannot be null") @PathVariable Long id) {
     flinkGatewayService.removeById(id);
     return RestResponse.success();
   }
