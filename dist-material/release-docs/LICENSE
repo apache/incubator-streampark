@@ -370,11 +370,13 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://mvnrepository.com/artifact/org.apache.flink/flink-statebackend-rocksdb_2.12/1.14.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-streaming-java_2.12/1.14.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java/1.14.4 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java/1.16.2 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java-bridge_2.12/1.14.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala-bridge_2.12/1.14.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala_2.12/1.14.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-code-splitter/1.14.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-common/1.14.4 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.flink/flink-table-common/1.16.2 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-planner_2.12/1.14.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/flink-table-runtime_2.12/1.14.4 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.flink/force-shading/1.8.1 Apache-2.0
@@ -570,6 +572,8 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://mvnrepository.com/artifact/org.pac4j/pac4j-oauth/4.5.7 Apache-2.0
     https://mvnrepository.com/artifact/org.pac4j/pac4j-oidc/4.5.7 Apache-2.0
     https://maven.apache.org/wrapper Apache-2.0
+    https://mvnrepository.com/artifact/commons-dbutils/commons-dbutils/1.7 Apache-2.0
+    https://mvnrepository.com/artifact/com.zaxxer/HikariCP/4.0.3 Apache-2.0
     mvnw files from https://github.com/apache/maven-wrapper Apache 2.0
     streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath.sh from https://github.com/apache/tomcat
 
