@@ -92,8 +92,10 @@ object FlinkK8sObserver extends FlinkK8sObserver {
 
   val trackedKeys = ConcurrentSet.empty[TrackKey].runUIO
 
+  // fixme duplicate subscribe
   val evaluatedJobSnaps    = Ref.make(Map.empty[AppId, JobSnapshot]).runUIO
   val restSvcEndpointSnaps = ConcurrentMap.empty[(Namespace, Name), RestSvcEndpoint].runUIO
+  // fixme duplicate subscribe
   val clusterMetricsSnaps  = ConcurrentMap.empty[(Namespace, Name), ClusterMetrics].runUIO
 
   val deployCRSnaps                           = ConcurrentMap.empty[(Namespace, Name), (DeployCRStatus, Option[JobStatus])].runUIO
@@ -116,9 +118,11 @@ object FlinkK8sObserver extends FlinkK8sObserver {
   override def track(key: TrackKey): UIO[Unit] = {
 
     def trackCluster(ns: String, name: String): UIO[Unit] = {
-      deployCrObserver.watch(ns, name) <*>
-      restSvcEndpointObserver.watch(ns, name) *>
-      clusterObserver.watch(ns, name)
+      for {
+        _ <- deployCrObserver.watch(ns, name)
+        _ <- restSvcEndpointObserver.watch(ns, name)
+        _ <- clusterObserver.watch(ns, name)
+      } yield ()
     }
 
     def trackSessionJob(ns: String, name: String, refDeployName: String): UIO[Unit] = {

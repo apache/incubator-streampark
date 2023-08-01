@@ -20,12 +20,14 @@ package org.apache.streampark.flink.kubernetes.v2
 import org.apache.streampark.flink.kubernetes.v2.FlinkRestRequest._
 import org.apache.streampark.flink.kubernetes.v2.model.{FlinkPipeOprState, JobSavepointDef, JobSavepointStatus}
 
-import sttp.client3._
-import sttp.client3.httpclient.zio.HttpClientZioBackend
-import sttp.client3.ziojson._
 import zio.{IO, Task, ZIO}
-import zio.json.{jsonField, DeriveJsonCodec, JsonCodec}
+import zio.ZIO.attempt
+import zio.http.{Body, Client, Method, Response}
+import zio.json._
 
+import java.nio.charset.Charset
+
+import scala.language.implicitConversions
 import scala.util.chaining.scalaUtilChainingOps
 
 /** Flink rest-api request. */
@@ -37,129 +39,116 @@ case class FlinkRestRequest(restUrl: String) {
    * Get all job overview info
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#jobs-overview
    */
-  def listJobOverviewInfo: IO[Throwable, Vector[JobOverviewInfo]] = usingSttp { backend =>
-    request
-      .get(uri"$restUrl/jobs/overview")
-      .response(asJson[JobOverviewRsp])
-      .send(backend)
-      .flattenBodyT
-      .map(_.jobs)
-  }
+  def listJobOverviewInfo: IO[Throwable, Vector[JobOverviewInfo]] =
+    for {
+      res <- get(s"$restUrl/jobs/overview")
+      rs  <- res.body.asJson[JobOverviewRsp]
+    } yield rs.jobs
 
   /**
    * Get cluster overview
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#overview-1
    */
-  def getClusterOverview: IO[Throwable, ClusterOverviewInfo] = usingSttp { backend =>
-    request
-      .get(uri"$restUrl/overview")
-      .response(asJson[ClusterOverviewInfo])
-      .send(backend)
-      .flattenBodyT
-  }
+  def getClusterOverview: IO[Throwable, ClusterOverviewInfo] =
+    for {
+      res <- get(s"$restUrl/overview")
+      rs  <- res.body.asJson[ClusterOverviewInfo]
+    } yield rs
 
   /**
    * Get job manager configuration.
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#jobmanager-config
    */
-  def getJobmanagerConfig: IO[Throwable, Map[String, String]] = usingSttp { backend =>
-    request
-      .get(uri"$restUrl/jobmanager/config")
-      .send(backend)
-      .flattenBody
-      .attemptBody(ujson.read(_).arr.map(item => item("key").str -> item("value").str).toMap)
-  }
+  def getJobmanagerConfig: IO[Throwable, Map[String, String]] =
+    for {
+      res  <- get(s"$restUrl/jobmanager/config")
+      body <- res.body.asString
+      rs   <- attempt {
+                ujson
+                  .read(body)
+                  .arr
+                  .map(item => item("key").str -> item("value").str)
+                  .toMap
+              }
+    } yield rs
 
   /**
    * Cancels job.
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#jobs-jobid-1
    */
-  def cancelJob(jobId: String): IO[Throwable, Unit] =
-    usingSttp { backend =>
-      request
-        .patch(uri"$restUrl/jobs/$jobId?mode=cancel")
-        .send(backend)
-        .unit
-    }
+  def cancelJob(jobId: String): IO[Throwable, Unit] = {
+    patch(s"$restUrl/jobs/$jobId?mode=cancel").unit
+  }
 
   /**
    * Stops job with savepoint.
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#jobs-jobid-stop
    */
   def stopJobWithSavepoint(jobId: String, sptReq: StopJobSptReq): IO[Throwable, TriggerId] =
-    usingSttp { backend =>
-      request
-        .post(uri"$restUrl/jobs/$jobId/stop")
-        .body(sptReq)
-        .send(backend)
-        .flattenBody
-        .attemptBody(ujson.read(_)("request-id").str)
-    }
+    for {
+      res  <- post(s"$restUrl/jobs/$jobId/stop", sptReq.toJson)
+      body <- res.body.asString
+      rs   <- attempt(ujson.read(body)("request-id").str)
+    } yield rs
 
   /**
    * Triggers a savepoint of job.
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#jobs-jobid-savepoints
    */
   def triggerSavepoint(jobId: String, sptReq: TriggerSptReq): IO[Throwable, TriggerId] =
-    usingSttp { backend =>
-      request
-        .post(uri"$restUrl/jobs/$jobId/savepoints")
-        .body(sptReq)
-        .send(backend)
-        .flattenBody
-        .attemptBody(ujson.read(_)("request-id").str)
-    }
+    for {
+      res  <- post(s"$restUrl/jobs/$jobId/savepoints", sptReq.toJson)
+      body <- res.body.asString
+      rs   <- attempt(ujson.read(body)("request-id").str)
+    } yield rs
 
   /**
    * Get status of savepoint operation.
    * see: https://nightlies.apache.org/flink/flink-docs-master/docs/ops/rest_api/#jobs-jobid-savepoints-triggerid
    */
   def getSavepointOperationStatus(jobId: String, triggerId: String): IO[Throwable, JobSavepointStatus] =
-    usingSttp { backend =>
-      request
-        .get(uri"$restUrl/jobs/$jobId/savepoints/$triggerId")
-        .send(backend)
-        .flattenBody
-        .attemptBody { body =>
-          val rspJson                  = ujson.read(body)
-          val status                   = rspJson("status")("id").str.pipe(FlinkPipeOprState.ofRaw)
-          val (location, failureCause) = rspJson("operation").objOpt match {
-            case None            => None -> None
-            case Some(operation) =>
-              val loc     = operation.get("location").flatMap(_.strOpt)
-              val failure = operation
-                .get("failure-cause")
-                .flatMap(_.objOpt.flatMap(map => map.get("stack-trace")))
-                .flatMap(_.strOpt)
-              loc -> failure
-          }
-          JobSavepointStatus(status, failureCause, location)
-        }
-    }
+    for {
+      res  <- get(s"$restUrl/jobs/$jobId/savepoints/$triggerId")
+      body <- res.body.asString
+      rs   <- attempt {
+                val rspJson                  = ujson.read(body)
+                val status                   = rspJson("status")("id").str.pipe(FlinkPipeOprState.ofRaw)
+                val (location, failureCause) = rspJson("operation").objOpt match {
+                  case None            => None -> None
+                  case Some(operation) =>
+                    val loc     = operation.get("location").flatMap(_.strOpt)
+                    val failure = operation
+                      .get("failure-cause")
+                      .flatMap(_.objOpt.flatMap(map => map.get("stack-trace")))
+                      .flatMap(_.strOpt)
+                    loc -> failure
+                }
+                JobSavepointStatus(status, failureCause, location)
+              }
+    } yield rs
 }
 
 object FlinkRestRequest {
 
-  val request = basicRequest
+  private def get(url: String): Task[Response] =
+    Client.request(url, method = Method.GET).provideLayer(Client.default)
 
-  // sttp client wrapper
-  def usingSttp[A](request: SttpBackend[Task, Any] => IO[Throwable, A]): IO[Throwable, A] =
-    ZIO.scoped {
-      HttpClientZioBackend.scoped().flatMap(backend => request(backend))
-    }
+  private def patch(url: String): Task[Response] =
+    Client.request(url, method = Method.PATCH).provideLayer(Client.default)
 
-  implicit class RequestIOExceptionExt[A](requestIO: Task[Response[Either[ResponseException[String, String], A]]]) {
-    @inline def flattenBodyT: IO[Throwable, A] = requestIO.flatMap(rsp => ZIO.fromEither(rsp.body))
+  private def post(url: String, body: String): Task[Response] =
+    Client
+      .request(url, method = Method.POST, content = Body.fromString(body, charset = Charset.forName("UTF-8")))
+      .provideLayer(Client.default)
+
+  implicit class BodyExtension(body: Body) {
+    def asJson[A](implicit decoder: JsonDecoder[A]): IO[Throwable, A] = for {
+      data <- body.asString
+      rsp  <- ZIO.fromEither(data.fromJson[A]).mapError(ParseJsonError)
+    } yield rsp
   }
 
-  implicit class RequestIOPlainExt(requestIO: Task[Response[Either[String, String]]]) {
-    @inline def flattenBody: IO[Throwable, String] =
-      requestIO.flatMap(rsp => ZIO.fromEither(rsp.body).mapError(new Exception(_)))
-  }
-
-  implicit class RequestIOTaskExt[A](requestIO: Task[String]) {
-    @inline def attemptBody(f: String => A): IO[Throwable, A] = requestIO.flatMap(body => ZIO.attempt(f(body)))
-  }
+  case class ParseJsonError(msg: String) extends Exception(msg)
 
   // --- Flink rest api models ---
 

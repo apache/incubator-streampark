@@ -59,9 +59,9 @@ class UsingObserver extends AnyWordSpecLike with BeforeAndAfterAll {
     for {
       // track resource
       _          <- FlinkK8sObserver.track(TrackKey.sessionJob(233, "fdev", "simple-sessionjob", "simple-session"))
-      _          <- FlinkK8sObserver.track(TrackKey.appJob(233, "fdev", "simple-appjob"))
+      _          <- FlinkK8sObserver.track(TrackKey.appJob(234, "fdev", "simple-appjob"))
       // subscribe job status changes
-      watchStream = FlinkK8sObserver.evaluatedJobSnaps.flatSubscribeValues()
+      watchStream = FlinkK8sObserver.clusterMetricsSnaps.subscribe()
       _          <- watchStream.debugPretty.runDrain
     } yield ()
   }
@@ -70,7 +70,7 @@ class UsingObserver extends AnyWordSpecLike with BeforeAndAfterAll {
     for {
       // track resource
       _          <- FlinkK8sObserver.track(TrackKey.sessionJob(233, "fdev", "simple-sessionjob", "simple-session"))
-      _          <- FlinkK8sObserver.track(TrackKey.appJob(233, "fdev", "simple-appjob"))
+      _          <- FlinkK8sObserver.track(TrackKey.appJob(234, "fdev", "simple-appjob"))
       // subscribe job status changes
       watchStream = FlinkK8sObserver.clusterMetricsSnaps.flatSubscribeValues()
       _          <- watchStream.debugPretty.runDrain

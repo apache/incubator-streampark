@@ -574,8 +574,6 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://mvnrepository.com/artifact/dev.zio/zio-streams_2.12/2.0.15 Apache-2.0
     https://mvnrepository.com/artifact/dev.zio/zio-concurrent_2.12/2.0.15 Apache-2.0
     https://mvnrepository.com/artifact/dev.zio/zio-http_2.12/3.0.0-RC2 Apache-2.0
-    https://mvnrepository.com/artifact/com.softwaremill.sttp.client3/zio_2.12/3.8.16 Apache-2.0
-    https://mvnrepository.com/artifact/com.softwaremill.sttp.client3/zio-json_2.12/3.8.16 Apache-2.0
     https://maven.apache.org/wrapper Apache-2.0
     mvnw files from https://github.com/apache/maven-wrapper Apache 2.0
     streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath.sh from https://github.com/apache/tomcat

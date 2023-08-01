@@ -31,7 +31,6 @@
     <properties>
         <zio-http.version>3.0.0-RC2</zio-http.version>
         <fabric8.version>6.8.0</fabric8.version>
-        <sttp-client.version>3.8.13</sttp-client.version>
         <os-lib.version>0.9.1</os-lib.version>
         <upickle.version>3.0.0</upickle.version>
         <jackson-dataformat-yaml.version>2.14.2</jackson-dataformat-yaml.version>
@@ -66,24 +65,11 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- ZIO -->
+        <!-- ZIO HTTP -->
         <dependency>
             <groupId>dev.zio</groupId>
             <artifactId>zio-http_${scala.binary.version}</artifactId>
             <version>${zio-http.version}</version>
-        </dependency>
-
-        <!-- Http client -->
-        <dependency>
-            <groupId>com.softwaremill.sttp.client3</groupId>
-            <artifactId>zio_${scala.binary.version}</artifactId>
-            <version>${sttp-client.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.softwaremill.sttp.client3</groupId>
-            <artifactId>zio-json_${scala.binary.version}</artifactId>
-            <version>${sttp-client.version}</version>
         </dependency>
 
         <!-- Tools -->

@@ -150,7 +150,7 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
       name = "appjob-with-ingress",
       namespace = "fdev",
       image = "flink:1.16",
-      flinkVersion = FlinkVersion.v1_16,
+      flinkVersion = FlinkVersion.V1_16,
       jobManager = JobManagerDef(cpu = 1, memory = "1024m"),
       taskManager = TaskManagerDef(cpu = 1, memory = "1024m"),
       job = JobDef(
