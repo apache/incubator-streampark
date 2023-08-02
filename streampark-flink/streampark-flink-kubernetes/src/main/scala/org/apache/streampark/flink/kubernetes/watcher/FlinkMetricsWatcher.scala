@@ -77,8 +77,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
     // get all legal tracking cluster key
     val trackIds: Set[TrackId] = Try(watchController.getActiveWatchingIds())
       .filter(_.nonEmpty)
-      .getOrElse(return
-      )
+      .getOrElse(return None)
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[FlinkMetricCV]]] =
       trackIds.map(
