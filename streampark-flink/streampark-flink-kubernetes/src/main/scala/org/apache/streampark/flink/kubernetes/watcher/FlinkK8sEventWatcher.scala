@@ -42,7 +42,7 @@ class FlinkK8sEventWatcher(implicit watchController: FlinkK8sWatchController)
 
   /** start watcher process */
   override def doStart(): Unit = {
-    k8sClient = Try(KubernetesRetriever.newK8sClient()).getOrElse {
+    k8sClient = Try(KubernetesRetriever.getK8sClient()).getOrElse {
       logError("[flink-k8s] FlinkK8sEventWatcher fails to start.")
       return
     }

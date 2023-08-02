@@ -18,9 +18,9 @@
 package org.apache.streampark.flink.kubernetes.ingress
 
 import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 
 import io.fabric8.kubernetes.api.model.networking.v1.IngressBuilder
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
 
 import scala.collection.JavaConverters._
@@ -34,7 +34,7 @@ class IngressStrategyV1 extends IngressStrategy {
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
 
-    Utils.using(new DefaultKubernetesClient) {
+    Utils.using(KubernetesRetriever.getK8sClient()) {
       client =>
         Try {
           Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
@@ -51,7 +51,7 @@ class IngressStrategyV1 extends IngressStrategy {
   }
 
   override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    Utils.using(new DefaultKubernetesClient) {
+    Utils.using(KubernetesRetriever.getK8sClient()) {
       client =>
         val ownerReference = getOwnerReference(nameSpace, clusterId, client)
         val ingress = new IngressBuilder()

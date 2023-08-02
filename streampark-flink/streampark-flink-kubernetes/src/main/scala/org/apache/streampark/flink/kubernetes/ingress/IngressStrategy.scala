@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.ingress
 
 import io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClient
 import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
 
@@ -64,7 +64,7 @@ trait IngressStrategy {
   def getOwnerReference(
       nameSpace: String,
       clusterId: String,
-      client: DefaultKubernetesClient): OwnerReference = {
+      client: KubernetesClient): OwnerReference = {
 
     val deployment = client
       .apps()

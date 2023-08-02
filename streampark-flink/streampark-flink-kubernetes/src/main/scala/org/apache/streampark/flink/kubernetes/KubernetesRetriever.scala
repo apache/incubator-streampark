@@ -47,15 +47,24 @@ object KubernetesRetriever extends Logger {
   // see org.apache.flink.configuration.RestOptions.RETRY_MAX_ATTEMPTS
   val FLINK_REST_RETRY_MAX_ATTEMPTS = 2
 
+  private var kubernetesClient: KubernetesClient = _
+
   /** get new KubernetesClient */
   @throws(classOf[KubernetesClientException])
-  def newK8sClient(): KubernetesClient = {
-    new DefaultKubernetesClient()
+  def getK8sClient(): KubernetesClient = {
+    if (kubernetesClient == null) {
+      synchronized {
+        if (kubernetesClient == null) {
+          kubernetesClient = new DefaultKubernetesClient()
+        }
+      }
+    }
+    kubernetesClient
   }
 
   /** check connection of kubernetes cluster */
   def checkK8sConnection(): Boolean = {
-    Try(newK8sClient().getVersion != null).getOrElse(false)
+    Try(getK8sClient().getVersion != null).getOrElse(false)
   }
 
   private val clusterClientServiceLoader = new DefaultClusterClientServiceLoader()
@@ -107,7 +116,7 @@ object KubernetesRetriever extends Logger {
    *   deployment namespace
    */
   def isDeploymentExists(name: String, namespace: String): Boolean = {
-    using(KubernetesRetriever.newK8sClient()) {
+    using(KubernetesRetriever.getK8sClient()) {
       client =>
         client
           .apps()
