@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.domain;
 
-import org.jetbrains.annotations.NotNull;
+import javax.validation.constraints.NotNull;
 
 import java.util.HashMap;
 
