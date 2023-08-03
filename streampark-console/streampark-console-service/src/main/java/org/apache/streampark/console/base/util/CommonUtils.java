@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanMap;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,8 +55,9 @@ public final class CommonUtils implements Serializable {
    * is empty
    *
    * @param objs handle obj
-   * @return Boolean <b>Returns true if the object is Null, returns true if the size of the
-   *     collection is 0, and returns true if the iterator has no next</b>
+   * @return Boolean
+   * @see <b>Returns true if the object is Null, returns true if the size of the collection is 0,
+   *     and returns true if the iterator has no next</b>
    * @since 1.0
    */
   public static Boolean isEmpty(Object... objs) {
@@ -90,8 +93,7 @@ public final class CommonUtils implements Serializable {
       }
 
       if (obj instanceof Iterable) {
-        ((Iterable<?>) obj).iterator();
-        if (!((Iterable<?>) obj).iterator().hasNext()) {
+        if (((Iterable<?>) obj).iterator() == null || !((Iterable<?>) obj).iterator().hasNext()) {
           return true;
         }
       }
@@ -189,11 +191,11 @@ public final class CommonUtils implements Serializable {
     return toFloat(val, 0f);
   }
 
-  public static List<?> arrayToList(Object source) {
+  public static List arrayToList(Object source) {
     return Arrays.asList(ObjectUtils.toObjectArray(source));
   }
 
-  public static boolean contains(Iterator<Object> iterator, Object element) {
+  public static boolean contains(Iterator iterator, Object element) {
     if (iterator != null) {
       while (iterator.hasNext()) {
         Object candidate = iterator.next();
@@ -212,7 +214,7 @@ public final class CommonUtils implements Serializable {
    * @param element the element to look for
    * @return <code>true</code> if found, <code>false</code> else
    */
-  public static boolean contains(Enumeration<Object> enumeration, Object element) {
+  public static boolean contains(Enumeration enumeration, Object element) {
     if (enumeration != null) {
       while (enumeration.hasMoreElements()) {
         Object candidate = enumeration.nextElement();
@@ -248,7 +250,7 @@ public final class CommonUtils implements Serializable {
    * @param element the element to look for
    * @return <code>true</code> if found, <code>false</code> else
    */
-  public static boolean containsInstance(Collection<Object> collection, Object element) {
+  public static boolean containsInstance(Collection collection, Object element) {
     if (collection != null) {
       for (Object candidate : collection) {
         if (candidate == element) {
@@ -260,7 +262,7 @@ public final class CommonUtils implements Serializable {
   }
 
   public static <A, E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
-    ArrayList<A> elements = new ArrayList<>();
+    ArrayList<A> elements = new ArrayList<A>();
     while (enumeration.hasMoreElements()) {
       elements.add(enumeration.nextElement());
     }
@@ -275,10 +277,10 @@ public final class CommonUtils implements Serializable {
    */
   public static <E> Iterator<E> toIterator(Enumeration<E> enumeration) {
     @SuppressWarnings("hiding")
-    class EnumerationIterator<U> implements Iterator<U> {
-      private final Enumeration<U> enumeration;
+    class EnumerationIterator<E> implements Iterator<E> {
+      private final Enumeration<E> enumeration;
 
-      public EnumerationIterator(Enumeration<U> enumeration) {
+      public EnumerationIterator(Enumeration<E> enumeration) {
         this.enumeration = enumeration;
       }
 
@@ -288,7 +290,7 @@ public final class CommonUtils implements Serializable {
       }
 
       @Override
-      public U next() {
+      public E next() {
         return this.enumeration.nextElement();
       }
 
@@ -298,7 +300,7 @@ public final class CommonUtils implements Serializable {
       }
     }
 
-    return new EnumerationIterator<>(enumeration);
+    return new EnumerationIterator<E>(enumeration);
   }
 
   public static String getOsName() {
@@ -310,11 +312,11 @@ public final class CommonUtils implements Serializable {
   }
 
   public static boolean isMacOS() {
-    return OS.contains("mac") && OS.indexOf("os") > 0 && !OS.contains("x");
+    return OS.contains("mac") && OS.contains("os") && !OS.contains("x");
   }
 
   public static boolean isMacOSX() {
-    return OS.contains("mac") && OS.indexOf("os") > 0 && OS.indexOf("x") > 0;
+    return OS.contains("mac") && OS.contains("os") && OS.contains("x");
   }
 
   public static boolean isWindows() {
@@ -439,8 +441,8 @@ public final class CommonUtils implements Serializable {
   }
 
   public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map) {
-    List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
-    list.sort(Map.Entry.comparingByValue());
+    List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>(map.entrySet());
+    Collections.sort(list, Comparator.comparing(Map.Entry::getValue));
     Map<K, V> result = new LinkedHashMap<>();
     for (Map.Entry<K, V> entry : list) {
       result.put(entry.getKey(), entry.getValue());
@@ -480,7 +482,7 @@ public final class CommonUtils implements Serializable {
 
   public static <T> T[] arrayInsertIndex(T[] array, int index, T t) {
     Utils.notNull(array);
-    List<T> arrayList = new ArrayList<>(array.length + 1);
+    List<T> arrayList = new ArrayList<T>(array.length + 1);
     if (index == 0) {
       arrayList.add(t);
       Collections.addAll(arrayList, array);
@@ -506,7 +508,7 @@ public final class CommonUtils implements Serializable {
    * @return uuid
    */
   public static String uuid(int len) {
-    StringBuilder sb = new StringBuilder();
+    StringBuffer sb = new StringBuffer();
     while (sb.length() < len) {
       sb.append(uuid());
     }
@@ -521,9 +523,9 @@ public final class CommonUtils implements Serializable {
     if (number.doubleValue() == 0.00) {
       return 0D;
     }
-    StringBuilder prefix = new StringBuilder();
+    String prefix = "";
     while (offset > 0) {
-      prefix.append("0");
+      prefix += "0";
       offset -= 1;
     }
 
@@ -579,14 +581,15 @@ public final class CommonUtils implements Serializable {
   /**
    * convert List<T> to List<Map<String, Object>>
    *
-   * @param objList objList
-   * @return List<Map<String, Object>>
+   * @param objList
+   * @return
+   * @throws IOException
    */
   public static <T> List<Map<String, Object>> objectsToMaps(List<T> objList) {
     List<Map<String, Object>> list = new ArrayList<>();
     if (objList != null && objList.size() > 0) {
-      Map<String, Object> map;
-      T bean;
+      Map<String, Object> map = null;
+      T bean = null;
       for (T t : objList) {
         bean = t;
         map = beanToMap(bean);
@@ -601,9 +604,9 @@ public final class CommonUtils implements Serializable {
    *
    * @param maps maps
    * @param clazz element class
-   * @return List<T>
-   * @throws InstantiationException InstantiationException
-   * @throws IllegalAccessException IllegalAccessException
+   * @return
+   * @throws InstantiationException
+   * @throws IllegalAccessException
    */
   public static <T> List<T> mapsToObjects(List<Map<String, Object>> maps, Class<T> clazz)
       throws InstantiationException, IllegalAccessException {
