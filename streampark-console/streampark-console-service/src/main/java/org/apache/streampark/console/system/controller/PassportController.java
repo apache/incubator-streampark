@@ -80,7 +80,7 @@ public class PassportController {
       throws Exception {
 
     if (StringUtils.isEmpty(username)) {
-      return RestResponse.success().put("code", 0);
+      return RestResponse.success().put(RestResponse.CODE_KEY, 0);
     }
     User user = authenticator.authenticate(username, password, loginType);
     return userService.getLoginUserInfo(user);

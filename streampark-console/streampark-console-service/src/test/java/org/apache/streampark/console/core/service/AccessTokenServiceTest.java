@@ -45,10 +45,10 @@ public class AccessTokenServiceTest extends SpringTestBase {
     String expireTime = "9999-01-01 00:00:00";
     RestResponse restResponse = accessTokenService.generateToken(mockUserId, expireTime, "");
     Assertions.assertNotNull(restResponse);
-    Assertions.assertInstanceOf(AccessToken.class, restResponse.get("data"));
+    Assertions.assertInstanceOf(AccessToken.class, restResponse.get(RestResponse.DATA_KEY));
 
     // verify
-    AccessToken accessToken = (AccessToken) restResponse.get("data");
+    AccessToken accessToken = (AccessToken) restResponse.get(RestResponse.DATA_KEY);
     LOG.info(accessToken.getToken());
     JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(accessToken.getToken()));
     LOG.info(jwtToken.getToken());
@@ -73,7 +73,7 @@ public class AccessTokenServiceTest extends SpringTestBase {
     Long tokenId = accessToken.getId();
     RestResponse toggleTokenResp = accessTokenService.toggleToken(tokenId);
     Assertions.assertNotNull(toggleTokenResp);
-    Assertions.assertTrue((Boolean) toggleTokenResp.get("data"));
+    Assertions.assertTrue((Boolean) toggleTokenResp.get(RestResponse.DATA_KEY));
 
     // get
     AccessToken afterToggle = accessTokenService.getByUserId(mockUserId);
