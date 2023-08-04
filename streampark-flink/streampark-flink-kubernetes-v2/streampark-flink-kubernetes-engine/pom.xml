@@ -42,7 +42,24 @@
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-common_${scala.binary.version}</artifactId>
-            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-logging_${scala.binary.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-streams_${scala.binary.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-concurrent_${scala.binary.version}</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -58,6 +75,7 @@
             <artifactId>kubernetes-client</artifactId>
             <version>${fabric8.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>generator-annotations</artifactId>
