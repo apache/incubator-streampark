@@ -32,7 +32,6 @@
     <modules>
         <module>streampark-shaded-slf4j</module>
         <module>streampark-shaded-jackson</module>
-        <module>streampark-shaded-flink-kubernetes-operator</module>
     </modules>
 
     <properties>

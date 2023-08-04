@@ -66,7 +66,7 @@ case class Workspace(storageType: StorageType) {
     }
   }
 
-  private[conf] lazy val WORKSPACE: String = {
+  lazy val WORKSPACE: String = {
     storageType match {
       case StorageType.LFS =>
         val path: String = getConfigValue[String](CommonConfig.STREAMPARK_WORKSPACE_LOCAL)
