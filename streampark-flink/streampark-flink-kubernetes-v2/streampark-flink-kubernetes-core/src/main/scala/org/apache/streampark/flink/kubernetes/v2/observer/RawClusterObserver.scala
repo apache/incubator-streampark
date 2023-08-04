@@ -98,15 +98,15 @@ case class RawClusterObserver(
       .map { case (clusterOv, jmConfigs) =>
         val totalJmMemory = FlinkMemorySizeParser
           .parse(jmConfigs.getOrElse("jobmanager.memory.process.size", "0b"))
-          .map(x => Try(x.mebiBytes).getOrElse(0))
+          .map(_.mebiBytes)
+          .map(e => Try(e.toInt).getOrElse(0))
           .getOrElse(0)
-          .toInt
 
         val totalTmMemory = FlinkMemorySizeParser
           .parse(jmConfigs.getOrElse("taskmanager.memory.process.size", "0b"))
-          .map(x => Try(x.mebiBytes * clusterOv.taskManagers).getOrElse(0))
+          .map(_.mebiBytes * clusterOv.taskManagers)
+          .map(e => Try(e.toInt).getOrElse(0))
           .getOrElse(0)
-          .toInt
 
         ClusterMetrics(
           totalJmMemory = totalJmMemory,
