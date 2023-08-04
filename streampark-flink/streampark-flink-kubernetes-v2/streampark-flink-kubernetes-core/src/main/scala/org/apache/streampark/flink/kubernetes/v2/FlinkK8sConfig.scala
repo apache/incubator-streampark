@@ -24,14 +24,14 @@ object FlinkK8sConfig {
   // ----- embedded http file server config -----
 
   val EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR: InternalOption = InternalOption(
-    key = "streampark.flink-k8s.httpfs.mirror-dir",
+    key = "streampark.flink-k8s.fs.mirror-dir",
     defaultValue = s"${Workspace.local.WORKSPACE}/mirror",
     classType = classOf[String],
     description = "Local mirror directory for embedded file server"
   )
 
   val EMBEDDED_HTTP_FILE_SERVER_PORT: InternalOption = InternalOption(
-    key = "streampark.flink-k8s.httpfs.port",
+    key = "streampark.flink-k8s.fs-server.port",
     defaultValue = 10030,
     classType = classOf[Integer],
     description = "Port of the embedded http file server"
