@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.v2.operator
 
-object OprErr {
+object OprError {
 
   case class UnsupportedAction(msg: String) extends Exception("Unsupported action: " + msg)
 

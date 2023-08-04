@@ -24,7 +24,7 @@ import zio.logging.LoggerNameExtractor
 
 import scala.collection.concurrent.TrieMap
 
-/** ZIO logging Backend that bridging to [[org.apache.streampark.common.util.Logger]] */
+/** ZIOLogger that bridging to [[org.apache.streampark.common.util.Logger]] */
 object ZIOLogger {
 
   lazy val default: ZLayer[Any, Nothing, Unit] = Runtime.addLogger(provideLogger())
@@ -48,12 +48,12 @@ object ZIOLogger {
 
   private[this] def provideLogger(): ZLogger[String, Unit] = (
       trace: Trace,
-      fiberId: FiberId,
+      _: FiberId,
       logLevel: LogLevel,
       message: () => String,
-      cause: Cause[Any],
-      context: FiberRefs,
-      spans: List[LogSpan],
+      _: Cause[Any],
+      _: FiberRefs,
+      _: List[LogSpan],
       annotations: Map[String, String]) => {
 
     val loggerName =
@@ -73,7 +73,7 @@ object ZIOLogger {
       case LogLevel.Warning => logger.warn(msg)
       case LogLevel.Error => logger.error(msg)
       case LogLevel.Fatal => logger.error(msg)
-      case _ => logger.error(msg)
+      case _ =>
     }
   }
 

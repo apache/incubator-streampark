@@ -18,9 +18,9 @@
 package org.apache.streampark.flink.kubernetes.v2
 
 import org.apache.streampark.common.conf.InternalConfigHolder
-import org.apache.streampark.flink.kubernetes.v2.Config.{EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR, EMBEDDED_HTTP_FILE_SERVER_PORT}
+import org.apache.streampark.flink.kubernetes.v2.FlinkK8sConfig.{EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR, EMBEDDED_HTTP_FILE_SERVER_PORT}
 
-package object httpfs {
+package object fs {
 
   lazy val localMirrorDir: String = InternalConfigHolder.get(EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR)
   lazy val fileServerPort: Int    = InternalConfigHolder.get(EMBEDDED_HTTP_FILE_SERVER_PORT)

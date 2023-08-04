@@ -17,7 +17,7 @@
 package org.apache.streampark.flink.kubernetes.v2
 
 import org.apache.streampark.common.conf.InternalConfigHolder
-import org.apache.streampark.flink.kubernetes.v2.Config.EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR
+import org.apache.streampark.flink.kubernetes.v2.FlinkK8sConfig.EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR
 import org.apache.streampark.flink.kubernetes.v2.example.clearTestAssets
 
 package object example {

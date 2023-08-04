@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.v2.example
 
 import org.apache.streampark.common.zio.ZIOExt.unsafeRun
-import org.apache.streampark.flink.kubernetes.v2.httpfs.{EmbeddedFileServer, FileMirror}
+import org.apache.streampark.flink.kubernetes.v2.fs.{EmbeddedFileServer, FileMirror}
 
 import org.scalatest.{BeforeAndAfterAll, Ignore}
 import org.scalatest.wordspec.AnyWordSpecLike

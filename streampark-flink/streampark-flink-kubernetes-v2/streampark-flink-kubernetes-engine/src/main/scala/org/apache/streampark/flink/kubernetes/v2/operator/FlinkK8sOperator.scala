@@ -23,7 +23,7 @@ import org.apache.streampark.flink.kubernetes.v2.FlinkRestRequest.{StopJobSptReq
 import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey._
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
-import org.apache.streampark.flink.kubernetes.v2.operator.OprErr._
+import org.apache.streampark.flink.kubernetes.v2.operator.OprError._
 
 import zio.{durationInt, IO, Schedule, ZIO}
 import zio.stream.ZStream

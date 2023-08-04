@@ -24,15 +24,12 @@ object FlinkMemorySizeParser {
   private val pattern = raw"(\d+)\s*([a-zA-Z]+)".r
 
   def parse(text: String): Option[MemorySize] = Try {
-    val trimmed = text.trim
-    if (trimmed.isEmpty) return None
-
-    pattern.findFirstMatchIn(text) match {
+    pattern.findFirstMatchIn(text.trim) match {
       case None          => None
       case Some(matched) =>
         val size = matched.group(1).toLong
         val unit = matched.group(2)
-        Unit.all.find(u => u.units.contains(unit)) match {
+        Unit.all.find(_.units.contains(unit.toLowerCase)) match {
           case None          => None
           case Some(hitUnit) => Some(MemorySize(size * hitUnit.multiplier))
         }
@@ -47,14 +44,15 @@ object FlinkMemorySizeParser {
     def tebiBytes: Long = bytes >> 40
   }
 
-  sealed abstract class UnitADT(val units: Array[String], val multiplier: Long)
-  object Unit {
-    val all = Array(Bytes, KiloBytes, MegaBytes, GigaBytes, TeraBytes)
-    case object Bytes     extends UnitADT(Array("b", "bytes"), 1L)
-    case object KiloBytes extends UnitADT(Array("k", "kb", "kibibytes"), 1024L)
-    case object MegaBytes extends UnitADT(Array("m", "mb", "mebibytes"), 1024L * 1024L)
-    case object GigaBytes extends UnitADT(Array("g", "gb", "gibibytes"), 1024L * 1024L * 1024L)
-    case object TeraBytes extends UnitADT(Array("t", "tb", "tebibytes"), 1024L * 1024L * 1024L * 1024L)
+  private[this] object Unit {
+    sealed abstract class Unit(val units: Array[String], val multiplier: Long)
+
+    lazy val all: Array[Unit] = Array(Bytes, KiloBytes, MegaBytes, GigaBytes, TeraBytes)
+    case object Bytes     extends Unit(Array("b", "bytes"), 1L)
+    case object KiloBytes extends Unit(Array("k", "kb", "kibibytes"), 1024L)
+    case object MegaBytes extends Unit(Array("m", "mb", "mebibytes"), 1024L * 1024L)
+    case object GigaBytes extends Unit(Array("g", "gb", "gibibytes"), 1024L * 1024L * 1024L)
+    case object TeraBytes extends Unit(Array("t", "tb", "tebibytes"), 1024L * 1024L * 1024L * 1024L)
   }
 
 }

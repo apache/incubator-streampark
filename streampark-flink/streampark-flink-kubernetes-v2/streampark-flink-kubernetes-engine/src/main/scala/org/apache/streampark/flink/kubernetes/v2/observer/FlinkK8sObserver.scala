@@ -131,10 +131,10 @@ object FlinkK8sObserver extends FlinkK8sObserver {
 
     for {
       _ <- key match {
-             case ApplicationJobKey(id, ns, name)                       => trackCluster(ns, name)
-             case SessionJobKey(id, ns, name, clusterName)              => trackSessionJob(ns, name, clusterName)
-             case UnmanagedSessionJobKey(id, clusterNs, clusterId, jid) => trackCluster(clusterNs, clusterId)
-             case ClusterKey(id, ns, name)                              => trackCluster(ns, name)
+             case ApplicationJobKey(_, ns, name)                     => trackCluster(ns, name)
+             case SessionJobKey(_, ns, name, clusterName)            => trackSessionJob(ns, name, clusterName)
+             case UnmanagedSessionJobKey(_, clusterNs, clusterId, _) => trackCluster(clusterNs, clusterId)
+             case ClusterKey(_, ns, name)                            => trackCluster(ns, name)
            }
       _ <- trackedKeys.add(key).unit
       _ <- logInfo(s"Start watching Flink resource: $key")
@@ -183,10 +183,10 @@ object FlinkK8sObserver extends FlinkK8sObserver {
 
     for {
       _ <- key match {
-             case ApplicationJobKey(id, ns, name)                         => unTrackCluster(ns, name)
-             case SessionJobKey(id, ns, name, clusterName)                => unTrackSessionJob(ns, name)
-             case ClusterKey(id, ns, name)                                => unTrackPureCluster(ns, name)
-             case UnmanagedSessionJobKey(id, clusterNs, clusterName, jid) =>
+             case ApplicationJobKey(_, ns, name)                       => unTrackCluster(ns, name)
+             case SessionJobKey(_, ns, name, _)                        => unTrackSessionJob(ns, name)
+             case ClusterKey(_, ns, name)                              => unTrackPureCluster(ns, name)
+             case UnmanagedSessionJobKey(_, clusterNs, clusterName, _) =>
                unTrackUnmanagedSessionJob(clusterNs, clusterName)
            }
       _ <- trackedKeys.remove(key)

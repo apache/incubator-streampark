@@ -73,6 +73,7 @@ case class RestSvcEndpointObserver(restSvcEndpointSnaps: ConcurrentMap[(Namespac
               .find(_.getPort == 8081)
               .map(_.getTargetPort.getIntVal.toInt)
               .getOrElse(8081)
+
             Some(RestSvcEndpoint(namespace, name, port, clusterIP))
         }
         .mapZIO {

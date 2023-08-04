@@ -43,7 +43,7 @@ case class FlinkRestRequest(restUrl: String) {
   def listJobOverviewInfo: IO[Throwable, Vector[JobOverviewInfo]] =
     for {
       res <- Client.request(s"$restUrl/jobs/overview")
-      rs  <- res.body.asJson[JobOverviewRsp]
+      rs  <- res.body.asJson[JobOverviewResp]
     } yield rs.jobs
 
   /**
@@ -147,10 +147,10 @@ object FlinkRestRequest {
 
   // --- Flink rest api models ---
 
-  case class JobOverviewRsp(jobs: Vector[JobOverviewInfo])
+  case class JobOverviewResp(jobs: Vector[JobOverviewInfo])
 
-  object JobOverviewRsp {
-    implicit val codec: JsonCodec[JobOverviewRsp] = DeriveJsonCodec.gen[JobOverviewRsp]
+  object JobOverviewResp {
+    implicit val codec: JsonCodec[JobOverviewResp] = DeriveJsonCodec.gen[JobOverviewResp]
   }
 
   case class JobOverviewInfo(

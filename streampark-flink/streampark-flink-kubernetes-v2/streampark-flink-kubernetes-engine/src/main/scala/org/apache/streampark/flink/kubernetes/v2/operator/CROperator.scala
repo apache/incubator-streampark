@@ -19,7 +19,7 @@ package org.apache.streampark.flink.kubernetes.v2.operator
 
 import org.apache.streampark.flink.kubernetes.v2.{pathLastSegment, yamlMapper}
 import org.apache.streampark.flink.kubernetes.v2.K8sTools.usingK8sClient
-import org.apache.streampark.flink.kubernetes.v2.httpfs.FileMirror
+import org.apache.streampark.flink.kubernetes.v2.fs.FileMirror
 import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, FlinkSessionJobDef, JobDef}
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 
@@ -30,6 +30,7 @@ import zio.stream.ZStream
 
 import java.util
 
+import scala.collection.convert.ImplicitConversions._
 import scala.jdk.CollectionConverters._
 
 /**
@@ -157,7 +158,8 @@ object CROperator extends CROperator {
 
       // handle initContainers
       val initContainers: util.List[Container] = Option(spec.getInitContainers).getOrElse(new util.ArrayList())
-      val libLoaderInitContainer               = new ContainerBuilder()
+
+      val libLoaderInitContainer = new ContainerBuilder()
         .withName("userlib-loader")
         .withImage("busybox:1.35.0")
         .withCommand(
@@ -171,7 +173,9 @@ object CROperator extends CROperator {
             .build
         )
         .build
+
       initContainers.add(libLoaderInitContainer)
+
       spec.setInitContainers(initContainers)
 
       // handle containers
@@ -185,10 +189,10 @@ object CROperator extends CROperator {
               .withSubPath(jarName)
               .build)
           .toList
-          .asJava
 
       val containers: util.List[Container] = Option(spec.getContainers).getOrElse(new util.ArrayList())
-      containers.asScala.zipWithIndex
+
+      containers.zipWithIndex
         .find { case (e, _) => e.getName == "flink-main-container" }
         .map { case (e, idx) =>
           val volMounts = Option(e.getVolumeMounts)
@@ -207,6 +211,7 @@ object CROperator extends CROperator {
               .withVolumeMounts(flinkMainContainerVolMounts)
               .build)
         )
+
       spec.setContainers(containers)
 
       // handle volumes

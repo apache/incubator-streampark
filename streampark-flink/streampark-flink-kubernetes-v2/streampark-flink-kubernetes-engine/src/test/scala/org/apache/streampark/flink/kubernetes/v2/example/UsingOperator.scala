@@ -20,7 +20,7 @@ package org.apache.streampark.flink.kubernetes.v2.example
 import org.apache.streampark.common.zio.{liftValueAsSome, PrettyStringOps}
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
 import org.apache.streampark.common.zio.ZIOExt.{unsafeRun, IOOps, ZStreamOps}
-import org.apache.streampark.flink.kubernetes.v2.httpfs.EmbeddedFileServer
+import org.apache.streampark.flink.kubernetes.v2.fs.EmbeddedFileServer
 import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 import org.apache.streampark.flink.kubernetes.v2.operator.FlinkK8sOperator

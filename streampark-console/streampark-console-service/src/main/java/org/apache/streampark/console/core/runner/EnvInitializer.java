@@ -30,7 +30,7 @@ import org.apache.streampark.common.zio.ZIOExt;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.SettingService;
-import org.apache.streampark.flink.kubernetes.v2.httpfs.EmbeddedFileServer;
+import org.apache.streampark.flink.kubernetes.v2.fs.EmbeddedFileServer;
 
 import org.apache.commons.lang3.StringUtils;
 

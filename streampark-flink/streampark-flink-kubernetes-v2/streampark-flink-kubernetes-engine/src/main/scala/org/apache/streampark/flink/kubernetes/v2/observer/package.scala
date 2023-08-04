@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.v2
 
 import org.apache.streampark.common.conf.InternalConfigHolder
-import org.apache.streampark.flink.kubernetes.v2.Config._
+import org.apache.streampark.flink.kubernetes.v2.FlinkK8sConfig._
 import org.apache.streampark.flink.kubernetes.v2.observer.AccessFlinkRestType.AccessFlinkRestType
 
 import zio.{durationLong, Duration}

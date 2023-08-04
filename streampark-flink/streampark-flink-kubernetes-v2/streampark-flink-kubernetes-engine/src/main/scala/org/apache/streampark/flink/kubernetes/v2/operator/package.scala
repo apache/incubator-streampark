@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.v2
 
 import org.apache.streampark.common.conf.InternalConfigHolder
-import org.apache.streampark.flink.kubernetes.v2.Config.LOG_FLINK_CR_YAML
+import org.apache.streampark.flink.kubernetes.v2.FlinkK8sConfig.LOG_FLINK_CR_YAML
 
 /**
  * Notes:

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.v2.httpfs
+package org.apache.streampark.flink.kubernetes.v2.fs
 
 import org.apache.streampark.common.zio.ZIOExt.UIOOps
 

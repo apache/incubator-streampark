@@ -19,7 +19,7 @@ package org.apache.streampark.flink.kubernetes.v2
 
 import org.apache.streampark.common.conf.{InternalOption, Workspace}
 
-object Config {
+object FlinkK8sConfig {
 
   // ----- embedded http file server config -----
 
