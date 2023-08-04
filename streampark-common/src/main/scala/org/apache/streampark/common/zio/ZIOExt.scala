@@ -28,7 +28,7 @@ object ZIOExt {
   @inline def unsafeRun[E, A](zio: IO[E, A]): A = Unsafe.unsafe {
     implicit u =>
       Runtime.default.unsafe
-        .run(zio.provideLayer(Runtime.removeDefaultLoggers >>> LoggerBackend.default))
+        .run(zio.provideLayer(Runtime.removeDefaultLoggers >>> ZIOLogger.default))
         .getOrThrowFiberFailure()
   }
 

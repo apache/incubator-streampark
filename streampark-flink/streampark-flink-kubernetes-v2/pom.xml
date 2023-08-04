@@ -34,7 +34,7 @@
 
     <modules>
         <module>streampark-flink-kubernetes-crd</module>
-        <module>streampark-flink-kubernetes-engine</module>
+        <module>streampark-flink-kubernetes-core</module>
     </modules>
 
     <build>
