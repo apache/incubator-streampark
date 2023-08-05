@@ -19,26 +19,33 @@ package org.apache.streampark.common.util
 import org.apache.commons.lang3.StringUtils
 import org.junit.jupiter.api.{Assertions, Test}
 
+import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
+import scala.language.postfixOps
 
 class PropertiesUtilsTestCase {
 
   @Test def testExtractProgramArgs(): Unit = {
-    val argsStr = "--host localhost:8123\n\n\n" +
-      "--sql \"\"\"insert into table_a select * from table_b\"\"\"\n" +
+    val argsStr = "--host localhost:8123\n" +
+      "--sql \"insert into table_a select * from table_b\"\n" +
       "--c d\r\n" +
-      "--x yyy"
+      "--including-tables \"BASE_CARD_ETPS|BASE_CHECKED_STAT\"\n"
     val programArgs = new ArrayBuffer[String]()
     if (StringUtils.isNotEmpty(argsStr)) {
-      val multiLineChar = "\"\"\""
+      val multiChar = "\""
       val array = argsStr.split("\\s+")
-      if (array.filter(_.startsWith(multiLineChar)).isEmpty) {
-        array.foreach(programArgs +=)
+      if (!array.exists(_.startsWith(multiChar))) {
+        array.foreach(x => {
+          if (x.trim.nonEmpty) {
+            programArgs += x
+          }
+        })
       } else {
         val argsArray = new ArrayBuffer[String]()
         val tempBuffer = new ArrayBuffer[String]()
 
-        def processElement(index: Int, multiLine: Boolean): Unit = {
+        @tailrec
+        def processElement(index: Int, multi: Boolean): Unit = {
 
           if (index == array.length) {
             if (tempBuffer.nonEmpty) {
@@ -48,43 +55,50 @@ class PropertiesUtilsTestCase {
           }
 
           val next = index + 1
-          val elem = array(index)
+          val elem = array(index).trim
 
-          if (elem.trim.nonEmpty) {
-            if (!multiLine) {
-              if (elem.startsWith(multiLineChar)) {
-                tempBuffer += elem.drop(3)
-                processElement(next, true)
-              } else {
-                argsArray += elem
-                processElement(next, false)
-              }
-            } else {
-              if (elem.endsWith(multiLineChar)) {
-                tempBuffer += elem.dropRight(3)
+          if (elem.isEmpty) {
+            processElement(next, multi = false)
+          } else {
+            if (multi) {
+              if (elem.endsWith(multiChar)) {
+                tempBuffer += elem.dropRight(1)
                 argsArray += tempBuffer.mkString(" ")
                 tempBuffer.clear()
-                processElement(next, false)
+                processElement(next, multi = false)
               } else {
                 tempBuffer += elem
-                processElement(next, multiLine)
+                processElement(next, multi)
+              }
+            } else {
+              if (elem.startsWith(multiChar)) {
+                if (elem.endsWith(multiChar)) {
+                  tempBuffer += elem.drop(1).dropRight(1)
+                } else {
+                  tempBuffer += elem.drop(1)
+                }
+                processElement(next, multi = true)
+              } else {
+                if (elem.endsWith(multiChar)) {
+                  argsArray += elem.dropRight(1)
+                } else {
+                  argsArray += elem
+                }
+                processElement(next, multi = false)
               }
             }
-          } else {
-            tempBuffer += elem
-            processElement(next, false)
           }
         }
 
-        processElement(0, false)
-        argsArray.foreach(x => programArgs += x.trim)
+        processElement(0, multi = false)
+        argsArray.foreach(x => programArgs += x)
       }
     }
 
     Assertions.assertEquals("localhost:8123", programArgs(1))
     Assertions.assertEquals("insert into table_a select * from table_b", programArgs(3))
     Assertions.assertEquals("d", programArgs(5))
-    Assertions.assertEquals("yyy", programArgs(7))
+    Assertions.assertEquals("BASE_CARD_ETPS|BASE_CHECKED_STAT", programArgs(7))
   }
 
   @Test def testDynamicProperties(): Unit = {
