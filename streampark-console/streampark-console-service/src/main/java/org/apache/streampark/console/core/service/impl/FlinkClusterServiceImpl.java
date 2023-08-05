@@ -159,7 +159,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Transactional(rollbackFor = {Exception.class})
   public void start(FlinkCluster cluster) {
     FlinkCluster flinkCluster = getById(cluster.getId());
-    updateClusterState(cluster.getId(), ClusterState.STARTING);
     try {
       DeployResponse deployResponse = deployInternal(flinkCluster);
       ApiAlertException.throwIfNull(
@@ -224,6 +223,26 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Override
   public void shutdown(FlinkCluster cluster) {
     FlinkCluster flinkCluster = this.getById(cluster.getId());
+
+    try {
+      ShutDownResponse shutDownResponse =
+          shutdownInternal(flinkCluster, flinkCluster.getClusterId());
+      ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
+      flinkCluster.setClusterState(ClusterState.CANCELED.getValue());
+      flinkCluster.setEndTime(new Date());
+      updateById(flinkCluster);
+      FlinkClusterWatcher.unWatching(flinkCluster);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      flinkCluster.setException(e.toString());
+      updateById(flinkCluster);
+      throw new ApiDetailException(
+          "Shutdown cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
+    }
+  }
+
+  public Boolean allowShutdownCluster(FlinkCluster cluster) {
+    FlinkCluster flinkCluster = this.getById(cluster.getId());
     // 1) check mode
     String clusterId = flinkCluster.getClusterId();
     ApiAlertException.throwIfTrue(
@@ -237,22 +256,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     ApiAlertException.throwIfTrue(
         existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
 
-    updateClusterState(flinkCluster.getId(), ClusterState.CANCELING);
-    try {
-      // 4) shutdown
-      ShutDownResponse shutDownResponse = shutdownInternal(flinkCluster, clusterId);
-      ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
-      flinkCluster.setClusterState(ClusterState.CANCELED.getValue());
-      flinkCluster.setEndTime(new Date());
-      updateById(flinkCluster);
-      FlinkClusterWatcher.unWatching(flinkCluster);
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      flinkCluster.setException(e.toString());
-      updateById(flinkCluster);
-      throw new ApiDetailException(
-          "Shutdown cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
-    }
+    return true;
   }
 
   @Override

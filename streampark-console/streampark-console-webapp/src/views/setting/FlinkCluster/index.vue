@@ -48,6 +48,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTitle } from '/@/components/Basic';
+  import State from './State.tsx'
 
   const ListItem = List.Item;
   const ListItemMeta = ListItem.Meta;
@@ -58,7 +59,7 @@
   const clusters = ref<FlinkCluster[]>([]);
   const loading = ref(false);
   function handleIsStart(item) {
-    return item.clusterState === ClusterStateEnum.STARTED;
+    return item.clusterState === ClusterStateEnum.RUNNING;
   }
 
   /* Go to edit cluster */
@@ -155,7 +156,7 @@
               <SvgIcon class="avatar p-15px" name="flink" size="60" />
             </template>
           </ListItemMeta>
-          <div class="list-content" style="width: 20%">
+          <div class="list-content" style="width: 10%">
             <div class="list-content-item">
               <span>{{ t('setting.flinkCluster.form.executionMode') }}</span>
               <p style="margin-top: 10px">
@@ -165,7 +166,7 @@
           </div>
           <div
             class="list-content"
-            style="width: 30%"
+            style="width: 40%"
             v-if="
               item.executionMode === ExecModeEnum.REMOTE ||
               item.executionMode === ExecModeEnum.YARN_SESSION
@@ -177,6 +178,21 @@
                 <a :href="item.address" target="_blank">
                   {{ item.address }}
                 </a>
+              </p>
+            </div>
+          </div>
+          <div
+            class="list-content"
+            style="width: 10%"
+            v-if="
+              item.executionMode === ExecModeEnum.REMOTE ||
+              item.executionMode === ExecModeEnum.YARN_SESSION
+            "
+          >
+            <div class="list-content-item">
+              <span>{{ t('setting.flinkCluster.form.runState') }}</span>
+              <p style="margin-top: 10px">
+                <State :data="{ clusterState: item.clusterState }" />
               </p>
             </div>
           </div>

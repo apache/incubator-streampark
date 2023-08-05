@@ -254,7 +254,7 @@
     if (params.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
       const cluster =
         unref(flinkClusters).filter((c) => {
-          return c.id == params.flinkClusterId && c.clusterState === ClusterStateEnum.STARTED;
+          return c.id == params.flinkClusterId && c.clusterState === ClusterStateEnum.RUNNING;
         })[0] || null;
       if (cluster) {
         Object.assign(params, { clusterId: cluster.clusterId });
