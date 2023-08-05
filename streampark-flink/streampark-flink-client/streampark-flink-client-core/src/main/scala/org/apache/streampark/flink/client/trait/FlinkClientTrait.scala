@@ -429,6 +429,7 @@ trait FlinkClientTrait extends Logger {
 
           val next = index + 1
           val elem = array(index).trim
+          val until = if (elem.endsWith(multiChar)) 1 else 0
 
           if (elem.isEmpty) {
             processElement(next, multi = false)
@@ -445,18 +446,10 @@ trait FlinkClientTrait extends Logger {
               }
             } else {
               if (elem.startsWith(multiChar)) {
-                if (elem.endsWith(multiChar)) {
-                  tempBuffer += elem.drop(1).dropRight(1)
-                } else {
-                  tempBuffer += elem.drop(1)
-                }
+                tempBuffer += elem.drop(1).dropRight(until)
                 processElement(next, multi = true)
               } else {
-                if (elem.endsWith(multiChar)) {
-                  argsArray += elem.dropRight(1)
-                } else {
-                  argsArray += elem
-                }
+                argsArray += elem.dropRight(until)
                 processElement(next, multi = false)
               }
             }
