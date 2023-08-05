@@ -35,11 +35,12 @@ class PropertiesUtilsTestCase {
       val multiChar = "\""
       val array = argsStr.split("\\s+")
       if (!array.exists(_.startsWith(multiChar))) {
-        array.foreach(x => {
-          if (x.trim.nonEmpty) {
-            programArgs += x
-          }
-        })
+        array.foreach(
+          x => {
+            if (x.trim.nonEmpty) {
+              programArgs += x
+            }
+          })
       } else {
         val argsArray = new ArrayBuffer[String]()
         val tempBuffer = new ArrayBuffer[String]()
