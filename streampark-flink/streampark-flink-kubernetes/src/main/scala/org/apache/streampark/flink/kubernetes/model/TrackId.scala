@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
+import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
@@ -25,7 +26,7 @@ import scala.util.Try
 /** tracking identifier for flink on kubernetes */
 case class TrackId(
     executeMode: FlinkK8sExecuteMode.Value,
-    namespace: String = "default",
+    namespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
     clusterId: String,
     appId: Long,
     jobId: String,
