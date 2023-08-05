@@ -429,7 +429,6 @@ trait FlinkClientTrait extends Logger {
 
           val next = index + 1
           val elem = array(index).trim
-          val until = if (elem.endsWith(multiChar)) 1 else 0
 
           if (elem.isEmpty) {
             processElement(next, multi = false)
@@ -445,6 +444,7 @@ trait FlinkClientTrait extends Logger {
                 processElement(next, multi)
               }
             } else {
+              val until = if (elem.endsWith(multiChar)) 1 else 0
               if (elem.startsWith(multiChar)) {
                 tempBuffer += elem.drop(1).dropRight(until)
                 processElement(next, multi = true)
