@@ -51,7 +51,7 @@
           allowClear: true,
         },
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, t('setting.flinkHome.operateMessage.flinkNameTips')),
+          h('span', { class: 'tip-info' }, t('setting.flinkHome.operateMessage.flinkNameTips')),
         rules: [
           { required: true, message: t('setting.flinkHome.operateMessage.flinkNameIsRequired') },
         ],
@@ -65,7 +65,7 @@
           allowClear: true,
         },
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, t('setting.flinkHome.operateMessage.flinkHomeTips')),
+          h('span', { class: 'tip-info' }, t('setting.flinkHome.operateMessage.flinkHomeTips')),
         rules: [
           { required: true, message: t('setting.flinkHome.operateMessage.flinkHomeIsRequired') },
         ],
@@ -172,10 +172,3 @@
     <BasicForm @register="registerForm" />
   </BasicModal>
 </template>
-<style lang="less">
-  .conf-switch {
-    display: inline-block;
-    margin-top: 10px;
-    color: darkgrey;
-  }
-</style>

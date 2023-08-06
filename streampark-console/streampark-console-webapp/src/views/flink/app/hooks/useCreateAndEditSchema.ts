@@ -46,7 +46,7 @@ import {
 import { fetchSelect } from '/@/api/flink/project';
 import { fetchAlertSetting } from '/@/api/flink/setting/alert';
 import { fetchFlinkCluster } from '/@/api/flink/setting/flinkCluster';
-import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
+import { fetchFlinkEnv, fetchListFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
@@ -167,9 +167,9 @@ export const useCreateAndEditSchema = (
     ];
   });
 
-  function handleFlinkVersion(id: number | string) {
+  async function handleFlinkVersion(id: number | string) {
     if (!dependencyRef) return;
-    scalaVersion = unref(flinkEnvs)?.find((v) => v.id === id)?.scalaVersion || '';
+    scalaVersion = await fetchFlinkEnv(id)?.scalaVersion;
     checkPomScalaVersion();
   }
 
@@ -617,7 +617,7 @@ export const useCreateAndEditSchema = (
     });
 
     //get flinkEnv
-    fetchFlinkEnv().then((res) => {
+    fetchListFlinkEnv().then((res) => {
       flinkEnvs.value = res;
     });
     //get flinkCluster

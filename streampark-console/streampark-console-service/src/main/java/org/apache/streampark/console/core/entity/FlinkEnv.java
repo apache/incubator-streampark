@@ -23,6 +23,7 @@ import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -60,6 +61,12 @@ public class FlinkEnv implements Serializable {
   private Date createTime;
 
   private transient FlinkVersion flinkVersion;
+
+  private transient String versionOfLarge;
+
+  private transient String versionOfMiddle;
+
+  private transient String versionOfLast;
 
   private transient String streamParkScalaVersion = scala.util.Properties.versionNumberString();
 
@@ -101,23 +108,31 @@ public class FlinkEnv implements Serializable {
     this.flinkConf = DeflaterUtils.unzipString(this.flinkConf);
   }
 
-  @JsonIgnore
   public String getLargeVersion() {
-    return this.version.substring(0, this.version.lastIndexOf("."));
+    if (StringUtils.isNotEmpty(this.version)) {
+      return this.version.substring(0, this.version.lastIndexOf("."));
+    }
+    return null;
   }
 
-  @JsonIgnore
   public String getVersionOfFirst() {
-    return this.version.split("\\.")[0];
+    if (StringUtils.isNotEmpty(this.version)) {
+      return this.version.split("\\.")[0];
+    }
+    return null;
   }
 
-  @JsonIgnore
   public String getVersionOfMiddle() {
-    return this.version.split("\\.")[1];
+    if (StringUtils.isNotEmpty(this.version)) {
+      return this.version.split("\\.")[1];
+    }
+    return null;
   }
 
-  @JsonIgnore
   public String getVersionOfLast() {
-    return this.version.split("\\.")[2];
+    if (StringUtils.isNotEmpty(this.version)) {
+      return this.version.split("\\.")[2];
+    }
+    return null;
   }
 }

@@ -132,7 +132,7 @@
         },
         defaultValue: false,
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, t('flink.variable.form.desensitizationDesc')),
+          h('span', { class: 'tip-info' }, t('flink.variable.form.desensitizationDesc')),
       },
     ];
   });
@@ -194,11 +194,3 @@
     }
   }
 </script>
-
-<style lang="less">
-  .conf-switch {
-    display: inline-block;
-    margin-top: 10px;
-    color: darkgrey;
-  }
-</style>

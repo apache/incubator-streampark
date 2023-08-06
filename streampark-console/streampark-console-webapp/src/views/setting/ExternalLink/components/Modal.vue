@@ -100,7 +100,7 @@
         afterItem: () =>
           h(
             'span',
-            { class: 'conf-switch' },
+            { class: 'tip-info' },
             'Supported variables: {job_id}, {yarn_id}, {job_name},Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
           ),
         rules: [

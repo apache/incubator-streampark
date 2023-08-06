@@ -24,7 +24,7 @@
   });
 </script>
 <script setup lang="ts" name="StartApplicationModal">
-  import { h, onMounted, ref, unref } from 'vue';
+  import { h } from 'vue';
   import { Select, Input, Tag } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon, Icon } from '/@/components/Icon';
@@ -34,7 +34,7 @@
   import { fetchStart } from '/@/api/flink/app/app';
   import { RestoreModeEnum } from '/@/enums/flinkEnum';
   import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
-  import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
+  import { renderFlinkAppRestoreMode } from '/@/views/flink/app/hooks/useFlinkRender';
 
   const SelectOption = Select.Option;
 
@@ -44,8 +44,6 @@
 
   const emits = defineEmits(['register', 'updateOption']);
   const receiveData = reactive<Recordable>({});
-
-  const flinkEnvs = ref<FlinkEnv[]>([]);
 
   const [registerModal, { closeModal }] = useModalInner((data) => {
     if (data) {
@@ -73,7 +71,7 @@
         afterItem: () =>
           h(
             'span',
-            { class: 'conf-switch' },
+            { class: 'tip-info' },
             'restore the application from savepoint or latest checkpoint',
           ),
       },
@@ -87,7 +85,7 @@
         afterItem: () =>
           h(
             'span',
-            { class: 'conf-switch' },
+            { class: 'tip-info' },
             'restore the application from savepoint or latest checkpoint',
           ),
         slot: 'savepoint',
@@ -99,21 +97,8 @@
         label: 'restore mode',
         component: 'Select',
         defaultValue: RestoreModeEnum.NO_CLAIM,
-        componentProps: {
-          options: [
-            { label: 'CLAIM', value: RestoreModeEnum.CLAIM },
-            { label: 'NO_CLAIM', value: RestoreModeEnum.NO_CLAIM },
-            { label: 'LEGACY', value: RestoreModeEnum.LEGACY },
-          ],
-        },
-        afterItem: () =>
-          h(
-            'span',
-            { class: 'conf-switch' },
-            'restore mode is supported since flink 1.15, usually, you do not have to set this parameter',
-          ),
-        ifShow: ({ values }) =>
-          values.startSavePointed && checkFlinkVersion(receiveData.application.versionId),
+        render: (renderCallbackParams) => renderFlinkAppRestoreMode(renderCallbackParams),
+        ifShow: ({ values }) => values.startSavePointed && checkFlinkVersion(),
       },
       {
         field: 'allowNonRestoredState',
@@ -124,7 +109,7 @@
           unCheckedChildren: 'OFF',
         },
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, 'ignore savepoint then cannot be restored'),
+          h('span', { class: 'tip-info' }, 'ignore savepoint then cannot be restored'),
         defaultValue: false,
         ifShow: ({ values }) => values.startSavePointed,
       },
@@ -191,16 +176,11 @@
     }
   }
 
-  function checkFlinkVersion(versionId: string) {
-    let env = unref(flinkEnvs).filter((env) => env.id == versionId)[0];
-    return parseInt(env.version.split('.')[1]) >= 15;
+  async function checkFlinkVersion() {
+    const versionId = receiveData.application.versionId;
+    const flinkVersion = await fetchFlinkEnv(versionId);
+    return parseInt(flinkVersion.versionOfMiddle) >= 15;
   }
-
-  onMounted(() => {
-    fetchFlinkEnv().then((res) => {
-      flinkEnvs.value = res;
-    });
-  });
 </script>
 <template>
   <BasicModal

@@ -54,8 +54,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        afterItem: () =>
-          h('span', { class: 'conf-switch' }, 'trigger savePoint before taking cancel'),
+        afterItem: () => h('span', { class: 'tip-info' }, 'trigger savePoint before taking cancel'),
       },
       {
         field: 'customSavepoint',
@@ -65,7 +64,7 @@
           placeholder: 'Entry the custom savepoint path',
           allowClear: true,
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, 'cancel job with savepoint path'),
+        afterItem: () => h('span', { class: 'tip-info' }, 'cancel job with savepoint path'),
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
@@ -77,7 +76,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: () => h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
+        afterItem: () => h('span', { class: 'tip-info' }, 'Send max watermark before stopped'),
       },
     ],
     colon: true,

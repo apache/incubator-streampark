@@ -27,7 +27,7 @@ import {
   renderYarnQueue,
 } from '../../flink/app/hooks/useFlinkRender';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
-import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
+import { fetchListFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 import { FormSchema } from '/@/components/Table';
 import optionData from '../../flink/app/data/option';
 import {
@@ -169,8 +169,8 @@ export const useClusterSetting = () => {
           fieldNames: { label: 'alertName', value: 'id', options: 'options' },
         },
         ifShow: ({ values }) =>
-            values.executionMode == ExecModeEnum.YARN_SESSION ||
-            values.executionMode == ExecModeEnum.REMOTE,
+          values.executionMode == ExecModeEnum.YARN_SESSION ||
+          values.executionMode == ExecModeEnum.REMOTE,
       },
       {
         field: 'clusterId',
@@ -384,7 +384,7 @@ export const useClusterSetting = () => {
     }
   }
   onMounted(() => {
-    fetchFlinkEnv().then((res) => {
+    fetchListFlinkEnv().then((res) => {
       flinkEnvs.value = res;
     });
     fetchAlertSetting().then((res) => {

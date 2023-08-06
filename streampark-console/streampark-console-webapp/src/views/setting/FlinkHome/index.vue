@@ -38,7 +38,7 @@
   import {
     fetchValidity,
     fetchDefaultSet,
-    fetchFlinkEnv,
+    fetchListFlinkEnv,
     fetchFlinkEnvRemove,
     fetchFlinkInfo,
   } from '/@/api/flink/setting/flinkEnv';
@@ -102,7 +102,7 @@
 
   /* Get flink environment data */
   async function getFlinkSetting() {
-    flinks.value = await fetchFlinkEnv();
+    flinks.value = await fetchListFlinkEnv();
   }
 
   onMounted(() => {
