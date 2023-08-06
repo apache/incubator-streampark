@@ -96,7 +96,6 @@ import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CoreOptions;
@@ -120,7 +119,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -305,24 +303,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     map.put("runningJob", runningJob);
 
     return map;
-  }
-
-  @Override
-  public String upload(MultipartFile file) throws Exception {
-    File temp = WebUtils.getAppTempDir();
-    String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
-    File saveFile = new File(temp, fileName);
-    // delete when exists
-    if (saveFile.exists()) {
-      saveFile.delete();
-    }
-    // save file to temp dir
-    try {
-      file.transferTo(saveFile);
-    } catch (Exception e) {
-      throw new ApiDetailException(e);
-    }
-    return saveFile.getAbsolutePath();
   }
 
   @Override
@@ -861,26 +841,51 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
 
     application.setRelease(ReleaseState.NEED_RELEASE.get());
+
+    // 1) jar job jar file changed
     if (application.isUploadJob()) {
-      if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
+      if (!Objects.equals(application.getJar(), appParam.getJar())) {
         application.setBuild(true);
       } else {
         File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
         if (jarFile.exists()) {
-          long checkSum = 0;
           try {
-            checkSum = FileUtils.checksumCRC32(jarFile);
+            long checkSum = FileUtils.checksumCRC32(jarFile);
+            if (!Objects.equals(checkSum, application.getJarCheckSum())) {
+              application.setBuild(true);
+            }
           } catch (IOException e) {
             log.error("Error in checksumCRC32 for {}.", jarFile);
             throw new RuntimeException(e);
-          }
-          if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
-            application.setBuild(true);
           }
         }
       }
     }
 
+    // 2) k8s podTemplate changed..
+    if (application.getBuild() && ExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
+      if (ObjectUtils.trimNoEquals(
+              application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
+          || ObjectUtils.trimNoEquals(
+              application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate())
+          || ObjectUtils.trimNoEquals(
+              application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate())
+          || ObjectUtils.trimNoEquals(
+              application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
+          || ObjectUtils.trimNoEquals(
+              application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())
+          || ObjectUtils.trimNoEquals(application.getFlinkImage(), appParam.getFlinkImage())) {
+        application.setBuild(true);
+      }
+    }
+
+    // 3) flink version changed
+    if (!application.getBuild()
+        && !Objects.equals(application.getVersionId(), appParam.getVersionId())) {
+      application.setBuild(true);
+    }
+
+    // 4) yarn application mode change
     if (!application.getBuild()) {
       if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
         if (appParam.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)
@@ -888,28 +893,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           application.setBuild(true);
         }
       }
-    }
-
-    if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
-      if (!ObjectUtils.safeTrimEquals(
-              application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
-          || !ObjectUtils.safeTrimEquals(
-              application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate())
-          || !ObjectUtils.safeTrimEquals(
-              application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate())
-          || !ObjectUtils.safeTrimEquals(
-              application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
-          || !ObjectUtils.safeTrimEquals(
-              application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())
-          || !ObjectUtils.safeTrimEquals(application.getFlinkImage(), appParam.getFlinkImage())) {
-        application.setBuild(true);
-      }
-    }
-
-    // when flink version has changed, we should rebuild the application. Otherwise, the shims jar
-    // may be not suitable for the new flink version.
-    if (!ObjectUtils.safeEquals(application.getVersionId(), appParam.getVersionId())) {
-      application.setBuild(true);
     }
 
     appParam.setJobType(application.getJobType());
@@ -959,15 +942,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // Flink Sql job...
     if (application.isFlinkSqlJob()) {
       updateFlinkSqlJob(application, appParam);
-    } else {
-      if (application.isStreamParkJob()) {
-        configService.update(appParam, application.isRunning());
-      } else {
-        application.setJar(appParam.getJar());
-        application.setMainClass(appParam.getMainClass());
-      }
+      return true;
     }
-    baseMapper.updateById(application);
+
+    if (application.isStreamParkJob()) {
+      configService.update(appParam, application.isRunning());
+    } else {
+      application.setJar(appParam.getJar());
+      application.setMainClass(appParam.getMainClass());
+    }
+    this.updateById(application);
     return true;
   }
 
@@ -1039,6 +1023,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
       }
     }
+    this.updateById(application);
     this.configService.update(appParam, application.isRunning());
   }
 

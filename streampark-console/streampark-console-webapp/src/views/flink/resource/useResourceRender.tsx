@@ -16,8 +16,10 @@
  */
 import { Select, Tag } from 'ant-design-vue';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
+import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
+
 import flinkAppSvg from '/@/assets/icons/flink2.svg';
+import sparkSvg from '/@/assets/icons/spark.svg';
 import connectorSvg from '/@/assets/icons/connector.svg';
 import udxfSvg from '/@/assets/icons/fx.svg';
 import normalJarSvg from '/@/assets/icons/jar.svg';
@@ -54,6 +56,39 @@ export const renderResourceType = ({ model }) => {
         placeholder={t('flink.resource.form.resourceTypePlaceholder')}
         value={model.resourceType}
         onChange={(value) => (model.resourceType = value)}
+      >
+        {renderOptions()}
+      </Select>
+    </div>
+  );
+};
+
+/* render resource type label */
+export const renderEngineType = ({ model }) => {
+  const renderOptions = () => {
+    const options = [
+      { label: 'Apache Flink', value: EngineTypeEnum.FLINK, disabled: false, src: flinkAppSvg },
+      { label: 'Apache Spark', value: EngineTypeEnum.SPARK, disabled: true, src: sparkSvg },
+    ];
+    return options.map(({ label, value, disabled, src }) => {
+      return (
+        <Select.Option key={value} label={label} disabled={disabled}>
+          <div>
+            <img src={src} style="display: inline-block; width: 20px; height: 20px"></img>
+            <span style="vertical-align: middle; margin-left: 5px;">{label}</span>
+          </div>
+        </Select.Option>
+      );
+    });
+  };
+
+  return (
+    <div>
+      <Select
+        allow-clear
+        placeholder={t('flink.resource.engineTypePlaceholder')}
+        value={model.engineType}
+        onChange={(value) => (model.engineType = value)}
       >
         {renderOptions()}
       </Select>

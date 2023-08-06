@@ -48,10 +48,11 @@ public class Pom {
 
   @Override
   public String toString() {
-    return groupId + ":" + artifactId + ":" + version + getClassifier(":");
-  }
-
-  private String getClassifier(String joiner) {
-    return StringUtils.isEmpty(classifier) ? "" : joiner + classifier;
+    return String.format(
+        "%s:%s:%s%s",
+        groupId,
+        artifactId,
+        version,
+        StringUtils.isEmpty(classifier) ? "" : ":".concat(classifier));
   }
 }

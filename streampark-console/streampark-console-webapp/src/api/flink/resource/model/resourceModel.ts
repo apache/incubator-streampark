@@ -34,6 +34,7 @@ export interface ResourceListRecord {
 export interface ResourceParam {
   id?: string;
   resourceName: string;
+  connector?: string;
   engineType: string;
   description: string;
 }

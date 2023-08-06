@@ -25,7 +25,6 @@ import org.apache.streampark.console.core.enums.AppExistsState;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -74,8 +73,6 @@ public interface ApplicationService extends IService<Application> {
   boolean mapping(Application app);
 
   Map<String, Serializable> dashboard(Long teamId);
-
-  String upload(MultipartFile file) throws Exception;
 
   /** set the latest to Effective, it will really become the current effective */
   void toEffective(Application application);

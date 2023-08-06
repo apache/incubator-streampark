@@ -52,7 +52,7 @@ public class Dependency {
     return pom.isEmpty() && jar.isEmpty();
   }
 
-  public boolean eq(Dependency other) {
+  public boolean equals(Dependency other) {
     if (other == null) {
       return false;
     }
@@ -76,20 +76,20 @@ public class Dependency {
   }
 
   public DependencyInfo toJarPackDeps() {
-    List<Artifact> mvnArts =
-        this.pom.stream()
-            .map(
-                pom ->
-                    new Artifact(
-                        pom.getGroupId(),
-                        pom.getArtifactId(),
-                        pom.getVersion(),
-                        pom.getClassifier()))
-            .collect(Collectors.toList());
+    List<Artifact> mvnArts = toArtifact();
     List<String> extJars =
         this.jar.stream()
             .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
             .collect(Collectors.toList());
     return new DependencyInfo(mvnArts, extJars);
+  }
+
+  public List<Artifact> toArtifact() {
+    return this.pom.stream()
+        .map(
+            pom ->
+                new Artifact(
+                    pom.getGroupId(), pom.getArtifactId(), pom.getVersion(), pom.getClassifier()))
+        .collect(Collectors.toList());
   }
 }

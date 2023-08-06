@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -53,9 +54,15 @@ public class ResourceController {
   @Operation(summary = "add resource")
   @PostMapping("add")
   @RequiresPermissions("resource:add")
-  public RestResponse addResource(@Valid Resource resource) {
+  public RestResponse addResource(@Valid Resource resource) throws Exception {
     this.resourceService.addResource(resource);
     return RestResponse.success();
+  }
+
+  @Operation(summary = "check resource")
+  @PostMapping("check")
+  public RestResponse checkResource(@Valid Resource resource) throws Exception {
+    return this.resourceService.checkResource(resource);
   }
 
   @Operation(summary = "List resources")
@@ -86,5 +93,13 @@ public class ResourceController {
   public RestResponse listResource(@RequestParam Long teamId) {
     List<Resource> resourceList = resourceService.findByTeamId(teamId);
     return RestResponse.success(resourceList);
+  }
+
+  @Operation(summary = "Upload the resource jar")
+  @PostMapping("upload")
+  @RequiresPermissions("resource:add")
+  public RestResponse upload(MultipartFile file) throws Exception {
+    String uploadPath = resourceService.upload(file);
+    return RestResponse.success(uploadPath);
   }
 }

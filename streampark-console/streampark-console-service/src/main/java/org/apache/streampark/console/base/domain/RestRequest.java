@@ -27,7 +27,7 @@ import java.io.Serializable;
 @Data
 public class RestRequest implements Serializable {
 
-  private static final long serialVersionUID = -4869594085374385813L;
+  private static final long serialVersionUID = 1L;
 
   @Schema(example = "10", required = true)
   private int pageSize = 10;

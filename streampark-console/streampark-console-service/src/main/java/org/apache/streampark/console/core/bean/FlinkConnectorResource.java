@@ -15,27 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain.router;
+package org.apache.streampark.console.core.bean;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.io.Serializable;
+import java.util.Map;
 
-/** Vue Router Meta */
 @Data
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class RouterMeta implements Serializable {
-
-  private static final long serialVersionUID = 1L;
-
-  private Boolean closeable;
-
-  private Boolean hidden;
-
-  private Boolean keepAlive;
-
-  private String icon;
+public class FlinkConnectorResource {
+  private String className;
+  private String factoryIdentifier;
+  Map<String, String> requiredOptions;
+  Map<String, String> optionalOptions;
 }

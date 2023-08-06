@@ -115,6 +115,7 @@
             <optional>true</optional>
         </dependency>
 
+
         <!--logback -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
@@ -127,6 +128,7 @@
             <artifactId>streampark-shaded-jackson</artifactId>
             <version>${streampark.shaded.version}</version>
         </dependency>
+
 
         <!-- ZIO -->
         <dependency>

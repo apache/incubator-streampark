@@ -28,6 +28,8 @@ import org.apache.commons.codec.digest.DigestUtils
 
 import java.io.{File, FileInputStream, IOException}
 
+import scala.collection.convert.ImplicitConversions._
+
 /** Building pipeline for flink yarn application mode */
 class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildRequest)
   extends BuildPipeline {
@@ -59,7 +61,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
           case DevelopmentMode.FLINK_SQL =>
             val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
             mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
-          case _ => Set[String]()
+          case _ => List[String]()
         }
       }.getOrElse(throw getError.exception)
 

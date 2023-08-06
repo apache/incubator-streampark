@@ -104,7 +104,7 @@ public final class ObjectUtils {
       return false;
     }
     for (Object arrayEle : array) {
-      if (safeEquals(arrayEle, element)) {
+      if (equals(arrayEle, element)) {
         return true;
       }
     }
@@ -238,7 +238,7 @@ public final class ObjectUtils {
    * @return whether the given objects are equal
    * @see Arrays#equals
    */
-  public static boolean safeEquals(Object o1, Object o2) {
+  public static boolean equals(Object o1, Object o2) {
     if (o1 == null || o2 == null) {
       return false;
     }
@@ -282,8 +282,8 @@ public final class ObjectUtils {
     return false;
   }
 
-  public static boolean safeTrimEquals(Object o1, Object o2) {
-    boolean equals = safeEquals(o1, o2);
+  public static boolean trimEquals(Object o1, Object o2) {
+    boolean equals = equals(o1, o2);
     if (!equals) {
       if (o1 != null && o2 != null) {
         if (o1 instanceof String && o2 instanceof String) {
@@ -292,6 +292,10 @@ public final class ObjectUtils {
       }
     }
     return equals;
+  }
+
+  public static boolean trimNoEquals(Object o1, Object o2) {
+    return !trimEquals(o1, o2);
   }
 
   /**
