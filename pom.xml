@@ -123,6 +123,9 @@
         <commons-lang3.version>3.8.1</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
         <assertj.version>3.23.1</assertj.version>
+        <zio.version>2.0.15</zio.version>
+        <zio-logging.version>2.1.13</zio-logging.version>
+        <pprint.version>0.8.1</pprint.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
@@ -212,6 +215,12 @@
                         <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.streampark</groupId>
+                <artifactId>streampark-common_${scala.binary.version}</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
@@ -433,6 +442,32 @@
                 <scope>test</scope>
             </dependency>
 
+            <!-- ZIO -->
+            <dependency>
+                <groupId>dev.zio</groupId>
+                <artifactId>zio-logging_${scala.binary.version}</artifactId>
+                <version>${zio-logging.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>dev.zio</groupId>
+                <artifactId>zio-streams_${scala.binary.version}</artifactId>
+                <version>${zio.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>dev.zio</groupId>
+                <artifactId>zio-concurrent_${scala.binary.version}</artifactId>
+                <version>${zio.version}</version>
+            </dependency>
+
+            <!-- pprint -->
+            <dependency>
+                <groupId>com.lihaoyi</groupId>
+                <artifactId>pprint_${scala.binary.version}</artifactId>
+                <version>${pprint.version}</version>
+            </dependency>
+
         </dependencies>
 
     </dependencyManagement>
@@ -523,7 +558,9 @@
                         </resourceIncludes>
                         <resourceExcludes>
                             **/.asf.yaml,
-                            **/.github/**
+                            **/.github/**,
+                            **/crd/**.yml,
+                            **/crd/**.yaml
                         </resourceExcludes>
                         <excludes>
                         </excludes>

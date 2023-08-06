@@ -24,7 +24,7 @@ import org.apache.hadoop.net.NetUtils
 import org.apache.hadoop.yarn.api.records._
 import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.conf.{HAUtil, YarnConfiguration}
-import org.apache.hadoop.yarn.util.{ConverterUtils, RMHAUtils}
+import org.apache.hadoop.yarn.util.RMHAUtils
 import org.apache.hc.client5.http.config.RequestConfig
 
 import java.net.InetAddress
@@ -87,7 +87,7 @@ object YarnUtils extends Logger {
    * @return
    */
   def getState(appId: String): YarnApplicationState = {
-    val applicationId = ConverterUtils.toApplicationId(appId)
+    val applicationId = ApplicationId.fromString(appId)
     val state =
       try {
         val applicationReport = HadoopUtils.yarnClient.getApplicationReport(applicationId)

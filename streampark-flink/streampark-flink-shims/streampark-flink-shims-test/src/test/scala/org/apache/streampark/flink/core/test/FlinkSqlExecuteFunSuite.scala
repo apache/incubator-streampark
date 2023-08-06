@@ -16,7 +16,7 @@
  */
 package org.apache.streampark.flink.core.test
 
-import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
+import org.apache.streampark.common.conf.ConfigConst.{KEY_FLINK_SQL, PARAM_PREFIX}
 import org.apache.streampark.common.util.DeflaterUtils
 import org.apache.streampark.flink.core.{FlinkSqlExecutor, FlinkTableInitializer, StreamTableContext}
 
@@ -28,7 +28,7 @@ import scala.collection.mutable.ArrayBuffer
 class FlinkSqlExecuteFunSuite extends AnyFunSuite {
 
   def execute(sql: String)(implicit func: String => Unit): Unit = {
-    val args = ArrayBuffer(KEY_FLINK_SQL("--"), DeflaterUtils.zipString(sql.stripMargin))
+    val args = ArrayBuffer(KEY_FLINK_SQL(PARAM_PREFIX), DeflaterUtils.zipString(sql.stripMargin))
     val context = new StreamTableContext(FlinkTableInitializer.initialize(args.toArray, null, null))
     FlinkSqlExecutor.executeSql(KEY_FLINK_SQL(), context.parameter, context)
   }

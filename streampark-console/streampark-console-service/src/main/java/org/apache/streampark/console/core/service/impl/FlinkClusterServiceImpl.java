@@ -94,6 +94,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Autowired private YarnQueueService yarnQueueService;
 
+  @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
   @Override
   public ResponseResult check(FlinkCluster cluster) {
     ResponseResult result = new ResponseResult();
@@ -118,14 +120,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     // 3) Check connection
     if (ExecutionMode.isRemoteMode(cluster.getExecutionModeEnum())
-        && !cluster.verifyClusterConnection()) {
+        && !flinkClusterWatcher.verifyClusterConnection(cluster)) {
       result.setMsg("The remote cluster connection failed, please check!");
       result.setStatus(3);
       return result;
     }
     if (ExecutionMode.isYarnMode(cluster.getExecutionModeEnum())
         && cluster.getClusterId() != null
-        && !cluster.verifyClusterConnection()) {
+        && !flinkClusterWatcher.verifyClusterConnection(cluster)) {
       result.setMsg("The flink cluster connection failed, please check!");
       result.setStatus(4);
       return result;
@@ -197,6 +199,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         success, String.format(ERROR_CLUSTER_QUEUE_HINT, paramOfCluster.getYarnQueue()));
 
     flinkCluster.setClusterName(paramOfCluster.getClusterName());
+    flinkCluster.setAlertId(paramOfCluster.getAlertId());
     flinkCluster.setDescription(paramOfCluster.getDescription());
     if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
       flinkCluster.setAddress(paramOfCluster.getAddress());
@@ -411,7 +414,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       ApiAlertException.throwIfFalse(
           ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
           "Current cluster is not active, please check!");
-      if (!flinkCluster.verifyClusterConnection()) {
+      if (!flinkClusterWatcher.verifyClusterConnection(flinkCluster)) {
         flinkCluster.setClusterState(ClusterState.LOST.getValue());
         updateById(flinkCluster);
         throw new ApiAlertException("Current cluster is not active, please check!");

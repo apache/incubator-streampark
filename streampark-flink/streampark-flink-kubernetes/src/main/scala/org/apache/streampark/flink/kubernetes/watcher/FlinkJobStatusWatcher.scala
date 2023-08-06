@@ -99,8 +99,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       // get all legal tracking ids
       val trackIds = Try(watchController.getAllWatchingIds())
         .filter(_.nonEmpty)
-        .getOrElse(return
-        )
+        .getOrElse(return None)
 
       // retrieve flink job status in thread pool
       val tracksFuture: Set[Future[Option[JobStatusCV]]] = trackIds.map {

@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.task;
 
-import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -784,8 +783,7 @@ public class FlinkHttpWatcher {
       case YARN_SESSION:
       case REMOTE:
         FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
-        ClusterState clusterState = flinkClusterWatcher.getClusterState(flinkCluster);
-        if (ClusterState.isRunning(clusterState)) {
+        if (flinkClusterWatcher.verifyClusterConnection(flinkCluster)) {
           log.info(
               "application with id {} is yarn session or remote and flink cluster with id {} is alive, application send alert",
               app.getId(),

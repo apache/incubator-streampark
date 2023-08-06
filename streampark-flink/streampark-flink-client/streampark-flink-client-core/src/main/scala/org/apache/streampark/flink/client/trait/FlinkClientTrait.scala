@@ -52,11 +52,11 @@ import scala.util.{Failure, Success, Try}
 
 trait FlinkClientTrait extends Logger {
 
-  private[client] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
-  private[client] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")
-  private[client] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF("--")
-  private[client] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME("--")
-  private[client] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM("--")
+  private[client] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF(PARAM_PREFIX)
+  private[client] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL(PARAM_PREFIX)
+  private[client] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF(PARAM_PREFIX)
+  private[client] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME(PARAM_PREFIX)
+  private[client] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM(PARAM_PREFIX)
 
   @throws[Exception]
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
@@ -359,8 +359,6 @@ trait FlinkClientTrait extends Logger {
 
     logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
 
-    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
-
     val commandLine = FlinkRunOption.parse(commandLineOptions, cliArgs, true)
 
     val activeCommandLine = validateAndGetActiveCommandLine(
@@ -489,8 +487,6 @@ trait FlinkClientTrait extends Logger {
       commandLine: CommandLine): Configuration = {
 
     require(activeCustomCommandLine != null, "activeCustomCommandLine must not be null.")
-    val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
-    val customConfiguration = new Configuration(executorConfig)
     val configuration = new Configuration()
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome)
     flinkDefaultConfiguration.keySet.foreach(
@@ -500,7 +496,7 @@ trait FlinkClientTrait extends Logger {
           case _ =>
         }
       })
-    configuration.addAll(customConfiguration)
+    configuration.addAll(activeCustomCommandLine.toConfiguration(commandLine))
     configuration
   }
 

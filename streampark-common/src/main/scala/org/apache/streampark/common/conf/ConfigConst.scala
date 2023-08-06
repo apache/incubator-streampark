@@ -24,6 +24,8 @@ object ConfigConst {
 
   val DEFAULT_DATAMASK_STRING = "********"
 
+  val PARAM_PREFIX = "--"
+
   /** about parameter... */
 
   val KEY_APP_HOME = "app.home"

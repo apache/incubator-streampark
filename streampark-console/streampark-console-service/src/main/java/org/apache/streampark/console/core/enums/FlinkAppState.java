@@ -88,12 +88,14 @@ public enum FlinkAppState implements Serializable {
    * Lost track of flink job temporarily. A complete loss of flink job tracking translates into LOST
    * state.
    */
+  @Deprecated
   SILENT(17),
 
   /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
   TERMINATED(18),
 
   /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
+  @Deprecated
   POS_TERMINATED(19),
 
   /** Job SUCCEEDED on yarn. */
@@ -137,7 +139,11 @@ public enum FlinkAppState implements Serializable {
         || FlinkAppState.TERMINATED == flinkAppState;
   }
 
-  /** type conversion bridging */
+  /**
+   * Type conversion bridging Deprecated, see {@link
+   * org.apache.streampark.console.core.utils.FlinkAppStateConverter}
+   */
+  @Deprecated
   public static class Bridge {
     /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */
     public static FlinkAppState fromK8sFlinkJobState(Enumeration.Value flinkJobState) {

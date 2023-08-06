@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.kubernetes.enums
 
 /** flink job status on kubernetes */
+@Deprecated
 object FlinkJobState extends Enumeration {
 
   // flink job has been submit by the streampark.
