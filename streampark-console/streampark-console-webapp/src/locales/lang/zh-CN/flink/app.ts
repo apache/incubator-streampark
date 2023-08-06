@@ -68,6 +68,7 @@ export default {
   status: '运行状态',
   startTime: '启动时间',
   endTime: '结束时间',
+  restoreModeTip: 'flink 1.15开始支持restore模式，一般情况下不用设置该参数',
   release: {
     releaseTitle: '该应用程序的当前启动正在进行中.',
     releaseDesc: '您确定要强制进行另一次构建吗',

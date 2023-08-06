@@ -39,7 +39,7 @@ import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
-import { CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
+import { CandidateTypeEnum, FailoverStrategyEnum, RestoreModeEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/flink/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
@@ -227,7 +227,7 @@ export const renderOptionsItems = (
             rules={[{ validator: conf.validator }]}
           />
         )}
-        {conf.type === 'switch' && <span class="conf-switch">({conf.placeholder})</span>}
+        {conf.type === 'switch' && <span class="tip-info">({conf.placeholder})</span>}
         <p class="conf-desc"> {descriptionFilter(conf)} </p>
       </Form.Item>
     );
@@ -607,6 +607,42 @@ export const renderStreamParkJarApp = ({ model, resources }) => {
       >
         {renderOptions()}
       </Select>
+    </div>
+  );
+};
+
+export const renderFlinkAppRestoreMode = ({ model, field }: RenderCallbackParams) => {
+  return (
+    <div>
+      <Select
+        value={model[field]}
+        onChange={(value) => (model[field] = value)}
+        placeholder="Please select restore mode"
+      >
+        <Select.Option key="claim" value={RestoreModeEnum.CLAIM}>
+          <Tag color="#13c2c2" style=";margin-left: 5px;" size="small">
+            CLAIM
+          </Tag>
+        </Select.Option>
+        <Select.Option key="no_claim" value={RestoreModeEnum.NO_CLAIM}>
+          <Tag color="#2db7f5" style=";margin-left: 5px;" size="small">
+            NO_CLAIM
+          </Tag>
+        </Select.Option>
+        <Select.Option key="legacy" value={RestoreModeEnum.LEGACY}>
+          <Tag color="#8E50FF" style=";margin-left: 5px;" size="small">
+            LEGACY
+          </Tag>
+        </Select.Option>
+      </Select>
+      <p class="mt-10px">
+        <span class="note-info">
+          <Tag color="#2db7f5" class="tag-note" size="small">
+            {t('flink.app.noteInfo.note')}
+          </Tag>
+          <span class="tip-info">{t('flink.app.restoreModeTip')}</span>
+        </span>
+      </p>
     </div>
   );
 };

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.common.conf.FlinkVersion;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
@@ -61,6 +62,12 @@ public class FlinkEnv implements Serializable {
 
   private transient FlinkVersion flinkVersion;
 
+  private transient String versionOfLarge;
+
+  private transient String versionOfMiddle;
+
+  private transient String versionOfLast;
+
   private transient String streamParkScalaVersion = scala.util.Properties.versionNumberString();
 
   public void doSetFlinkConf() throws ApiDetailException {
@@ -101,23 +108,31 @@ public class FlinkEnv implements Serializable {
     this.flinkConf = DeflaterUtils.unzipString(this.flinkConf);
   }
 
-  @JsonIgnore
   public String getLargeVersion() {
-    return this.version.substring(0, this.version.lastIndexOf("."));
+      if (StringUtils.isNotEmpty(this.version)) {
+          return this.version.substring(0, this.version.lastIndexOf("."));
+      }
+      return null;
   }
 
-  @JsonIgnore
   public String getVersionOfFirst() {
-    return this.version.split("\\.")[0];
+      if (StringUtils.isNotEmpty(this.version)) {
+          return this.version.split("\\.")[0];
+      }
+      return null;
   }
 
-  @JsonIgnore
   public String getVersionOfMiddle() {
-    return this.version.split("\\.")[1];
+      if (StringUtils.isNotEmpty(this.version)) {
+          return this.version.split("\\.")[1];
+      }
+      return null;
   }
 
-  @JsonIgnore
   public String getVersionOfLast() {
-    return this.version.split("\\.")[2];
+      if (StringUtils.isNotEmpty(this.version)) {
+          return this.version.split("\\.")[2];
+      }
+      return null;
   }
 }

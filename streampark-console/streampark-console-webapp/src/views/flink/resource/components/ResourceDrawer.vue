@@ -283,11 +283,3 @@
     }
   }
 </script>
-
-<style lang="less">
-  .conf-switch {
-    display: inline-block;
-    margin-top: 10px;
-    color: darkgrey;
-  }
-</style>
