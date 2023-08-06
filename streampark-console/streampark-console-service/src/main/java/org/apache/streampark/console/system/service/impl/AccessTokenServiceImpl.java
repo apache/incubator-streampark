@@ -59,7 +59,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   public RestResponse generateToken(Long userId, String expireTime, String description) {
     User user = userService.getById(userId);
     if (Objects.isNull(user)) {
-      return RestResponse.success().put("code", 0).message("user not available");
+      return RestResponse.success().put(RestResponse.CODE_KEY, 0).message("user not available");
     }
 
     if (StringUtils.isEmpty(expireTime)) {

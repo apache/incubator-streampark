@@ -282,18 +282,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public RestResponse getLoginUserInfo(User user) {
     if (user == null) {
-      return RestResponse.success().put("code", 0);
+      return RestResponse.success().put(RestResponse.CODE_KEY, 0);
     }
 
     if (User.STATUS_LOCK.equals(user.getStatus())) {
-      return RestResponse.success().put("code", 1);
+      return RestResponse.success().put(RestResponse.CODE_KEY, 1);
     }
     // set team
     fillInTeam(user);
 
     // no team.
     if (user.getLastTeamId() == null) {
-      return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
+      return RestResponse.success()
+          .data(user.getUserId())
+          .put(RestResponse.CODE_KEY, ResponseCode.CODE_FORBIDDEN);
     }
 
     updateLoginTime(user.getUsername());

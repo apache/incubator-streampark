@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineType;
@@ -54,13 +55,17 @@ class UserServiceTest extends SpringTestBase {
     user.setStatus(User.STATUS_LOCK);
     Map<String, Object> data =
         (Map<String, Object>)
-            userService.updateUser(user).getOrDefault("data", Collections.emptyMap());
+            userService
+                .updateUser(user)
+                .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
     Assertions.assertNotEquals(true, data.get("needTransferResource"));
     // unlock user
     user.setStatus(User.STATUS_VALID);
     Map<String, Object> data1 =
         (Map<String, Object>)
-            userService.updateUser(user).getOrDefault("data", Collections.emptyMap());
+            userService
+                .updateUser(user)
+                .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
     Assertions.assertNotEquals(true, data1.get("needTransferResource"));
 
     Resource resource = new Resource();
@@ -74,7 +79,9 @@ class UserServiceTest extends SpringTestBase {
     user.setStatus(User.STATUS_LOCK);
     Map<String, Object> data2 =
         (Map<String, Object>)
-            userService.updateUser(user).getOrDefault("data", Collections.emptyMap());
+            userService
+                .updateUser(user)
+                .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
     Assertions.assertEquals(true, data2.get("needTransferResource"));
   }
 

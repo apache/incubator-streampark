@@ -17,49 +17,56 @@
 
 package org.apache.streampark.console.base.domain;
 
+import javax.validation.constraints.NotNull;
+
 import java.util.HashMap;
 
 public class RestResponse extends HashMap<String, Object> {
 
   public static final String STATUS_SUCCESS = "success";
   public static final String STATUS_FAIL = "error";
+  public static final String STATUS_KEY = "status";
+  public static final String CODE_KEY = "code";
+  public static final String MESSAGE_KEY = "message";
+  public static final String DATA_KEY = "data";
 
   private static final long serialVersionUID = 1L;
 
   public static RestResponse success(Object data) {
     RestResponse resp = new RestResponse();
-    resp.put("status", STATUS_SUCCESS);
-    resp.put("code", ResponseCode.CODE_SUCCESS);
-    resp.put("data", data);
+    resp.put(STATUS_KEY, STATUS_SUCCESS);
+    resp.put(CODE_KEY, ResponseCode.CODE_SUCCESS);
+    resp.put(DATA_KEY, data);
     return resp;
   }
 
   public static RestResponse success() {
     RestResponse resp = new RestResponse();
-    resp.put("status", STATUS_SUCCESS);
-    resp.put("code", ResponseCode.CODE_SUCCESS);
+    resp.put(STATUS_KEY, STATUS_SUCCESS);
+    resp.put(CODE_KEY, ResponseCode.CODE_SUCCESS);
     return resp;
   }
 
   public static RestResponse fail(String message, Long code) {
     RestResponse resp = new RestResponse();
-    resp.put("status", STATUS_FAIL);
-    resp.put("message", message);
-    resp.put("code", code);
-    resp.put("data", null);
+    resp.put(STATUS_KEY, STATUS_FAIL);
+    resp.put(MESSAGE_KEY, message);
+    resp.put(CODE_KEY, code);
+    resp.put(DATA_KEY, null);
     return resp;
   }
 
   public RestResponse message(String message) {
-    this.put("message", message);
+    this.put(MESSAGE_KEY, message);
     return this;
   }
 
   public RestResponse data(Object data) {
-    this.put("data", data);
+    this.put(DATA_KEY, data);
     return this;
   }
 
+  @NotNull
   @Override
   public RestResponse put(String key, Object value) {
     super.put(key, value);
