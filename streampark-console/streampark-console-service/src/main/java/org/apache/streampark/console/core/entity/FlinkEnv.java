@@ -17,13 +17,13 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.common.conf.FlinkVersion;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -109,30 +109,30 @@ public class FlinkEnv implements Serializable {
   }
 
   public String getLargeVersion() {
-      if (StringUtils.isNotEmpty(this.version)) {
-          return this.version.substring(0, this.version.lastIndexOf("."));
-      }
-      return null;
+    if (StringUtils.isNotEmpty(this.version)) {
+      return this.version.substring(0, this.version.lastIndexOf("."));
+    }
+    return null;
   }
 
   public String getVersionOfFirst() {
-      if (StringUtils.isNotEmpty(this.version)) {
-          return this.version.split("\\.")[0];
-      }
-      return null;
+    if (StringUtils.isNotEmpty(this.version)) {
+      return this.version.split("\\.")[0];
+    }
+    return null;
   }
 
   public String getVersionOfMiddle() {
-      if (StringUtils.isNotEmpty(this.version)) {
-          return this.version.split("\\.")[1];
-      }
-      return null;
+    if (StringUtils.isNotEmpty(this.version)) {
+      return this.version.split("\\.")[1];
+    }
+    return null;
   }
 
   public String getVersionOfLast() {
-      if (StringUtils.isNotEmpty(this.version)) {
-          return this.version.split("\\.")[2];
-      }
-      return null;
+    if (StringUtils.isNotEmpty(this.version)) {
+      return this.version.split("\\.")[2];
+    }
+    return null;
   }
 }
