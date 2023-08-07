@@ -17,12 +17,14 @@
 
 package org.apache.streampark.flink.connector.failover
 
+import org.apache.streampark.common.util.Logger
+
 import java.util
 import java.util.regex.Pattern
 
 import scala.collection.convert.ImplicitConversions._
 
-case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) {
+case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) extends Logger {
   def incrementCounter(): Unit = attemptCounter += 1
 
   def size: Int = records.size()
@@ -45,7 +47,7 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
             case None => prefixMap.put(prefix, List(valueMatcher.group(3)))
           }
         } else {
-          println(s"[WARN] ignore record: $x")
+          logWarn(s"ignore record: $x")
         }
       })
 
