@@ -132,17 +132,6 @@ trait FlinkClientTrait extends Logger {
     }
 
     // set JVMOptions..
-    setJvmOptions(submitRequest, flinkConfig)
-
-    setConfig(submitRequest, flinkConfig)
-
-    doSubmit(submitRequest, flinkConfig)
-
-  }
-
-  private[this] def setJvmOptions(
-      submitRequest: SubmitRequest,
-      flinkConfig: Configuration): Unit = {
     if (MapUtils.isNotEmpty(submitRequest.properties)) {
       submitRequest.properties.foreach(
         x =>
@@ -151,6 +140,11 @@ trait FlinkClientTrait extends Logger {
             case _ =>
           })
     }
+
+    setConfig(submitRequest, flinkConfig)
+
+    doSubmit(submitRequest, flinkConfig)
+
   }
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
@@ -459,21 +453,21 @@ trait FlinkClientTrait extends Logger {
     }
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
-      programArgs += PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml += PARAM_KEY_APP_NAME += DeflaterUtils
-        .zipString(submitRequest.effectiveAppName) += PARAM_KEY_FLINK_PARALLELISM += getParallelism(
-        submitRequest).toString
+
+      programArgs += PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml
+      programArgs += PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
+      programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
+
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINK_SQL =>
-          programArgs += PARAM_KEY_FLINK_SQL
-          programArgs += submitRequest.flinkSQL
+          programArgs += PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
-            programArgs += PARAM_KEY_APP_CONF
-            programArgs += submitRequest.appConf
+            programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
           }
         case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
-          programArgs += PARAM_KEY_APP_CONF
-          programArgs += submitRequest.appConf
+          programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
       }
+
     }
     programArgs.toList.asJava
   }
