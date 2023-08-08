@@ -17,12 +17,14 @@
 
 package org.apache.streampark.flink.connector.failover
 
+import org.apache.streampark.common.util.Logger
+
 import java.util
 import java.util.regex.Pattern
 
 import scala.collection.convert.ImplicitConversions._
 
-case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) {
+case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) extends Logger {
   def incrementCounter(): Unit = attemptCounter += 1
 
   def size: Int = records.size()
@@ -34,22 +36,24 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
     Pattern.compile("^(.*)\\s+(values|value)(.*)", Pattern.CASE_INSENSITIVE)
 
   lazy val sqlStatement: String = {
-    val matcher = INSERT_REGEXP.matcher(records.head)
-    if (!matcher.find()) null;
-    else {
-      val prefix = matcher.group(1)
-      val values = records
-        .map(
-          x => {
-            val valueMatcher = INSERT_REGEXP.matcher(x)
-            if (valueMatcher.find()) {
-              valueMatcher.group(3)
-            } else {
-              null
-            }
-          })
-        .mkString(",")
-      s"$prefix VALUES $values"
+    val prefixMap: Map[String, List[String]] = Map[String, List[String]]()
+    records.foreach(
+      x => {
+        val valueMatcher = INSERT_REGEXP.matcher(x)
+        if (valueMatcher.find()) {
+          val prefix = valueMatcher.group(1)
+          prefixMap.get(prefix) match {
+            case Some(value) => value.add(valueMatcher.group(3))
+            case None => prefixMap.put(prefix, List(valueMatcher.group(3)))
+          }
+        } else {
+          logWarn(s"ignore record: $x")
+        }
+      })
+
+    prefixMap.size match {
+      case _ => prefixMap.map((m) => s"""${m._1} VALUES ${m._2.mkString(",")}""").mkString(";")
+      case 0 => null
     }
   }
 
