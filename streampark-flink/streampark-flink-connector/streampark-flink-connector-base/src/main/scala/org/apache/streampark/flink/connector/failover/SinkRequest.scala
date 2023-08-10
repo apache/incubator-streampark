@@ -30,10 +30,10 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
   def size: Int = records.size()
 
   private[this] lazy val TABLE_REGEXP =
-    Pattern.compile("(insert\\s+into|update|delete)\\s+(.*?)(\\(|\\s+)", Pattern.CASE_INSENSITIVE)
+    Pattern.compile("^\\s*(insert\\s+into|update|delete)\\s+(.*?)(\\(|\\s+)", Pattern.CASE_INSENSITIVE)
 
   private[this] lazy val INSERT_REGEXP =
-    Pattern.compile("^(.*)\\s+(values|value)(.*)", Pattern.CASE_INSENSITIVE)
+    Pattern.compile("^\\s*(insert\\s+into)\\s+(`?([a-zA-Z]\\w*)`?.)?`?([a-zA-Z]\\w*)`?((\\s*\\((\\s*`?[a-zA-Z]\\w*`?\\s*)*\\))|(\\s+))\\s*(value|values)\\s*(\\(.*\\))\\s*;?", Pattern.CASE_INSENSITIVE)
 
   lazy val sqlStatement: String = {
     val prefixMap: Map[String, List[String]] = Map[String, List[String]]()
@@ -41,10 +41,10 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
       x => {
         val valueMatcher = INSERT_REGEXP.matcher(x)
         if (valueMatcher.find()) {
-          val prefix = valueMatcher.group(1)
+          val prefix = x.substring(0, valueMatcher.start(valueMatcher.groupCount()))
           prefixMap.get(prefix) match {
-            case Some(value) => value.add(valueMatcher.group(3))
-            case None => prefixMap.put(prefix, List(valueMatcher.group(3)))
+            case Some(value) => value.add(valueMatcher.group(valueMatcher.groupCount()))
+            case None => prefixMap.put(prefix, List(valueMatcher.group(valueMatcher.groupCount())))
           }
         } else {
           logWarn(s"ignore record: $x")
