@@ -58,6 +58,14 @@ trait FlinkClientTrait extends Logger {
   private[client] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME(PARAM_PREFIX)
   private[client] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM(PARAM_PREFIX)
 
+  private[this] lazy val javaEnvOpts = List(
+    CoreOptions.FLINK_JVM_OPTIONS,
+    CoreOptions.FLINK_JM_JVM_OPTIONS,
+    CoreOptions.FLINK_HS_JVM_OPTIONS,
+    CoreOptions.FLINK_TM_JVM_OPTIONS,
+    CoreOptions.FLINK_CLI_JVM_OPTIONS
+  )
+
   @throws[Exception]
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
@@ -124,35 +132,19 @@ trait FlinkClientTrait extends Logger {
     }
 
     // set JVMOptions..
-    setJvmOptions(submitRequest, flinkConfig)
+    if (MapUtils.isNotEmpty(submitRequest.properties)) {
+      submitRequest.properties.foreach(
+        x =>
+          javaEnvOpts.find(_.key == x._1.trim) match {
+            case Some(p) => flinkConfig.set(p, x._2.toString)
+            case _ =>
+          })
+    }
 
     setConfig(submitRequest, flinkConfig)
 
     doSubmit(submitRequest, flinkConfig)
 
-  }
-
-  private[this] def setJvmOptions(
-      submitRequest: SubmitRequest,
-      flinkConfig: Configuration): Unit = {
-    if (MapUtils.isNotEmpty(submitRequest.properties)) {
-      submitRequest.properties.foreach(
-        x => {
-          val k = x._1.trim
-          val v = x._2.toString
-          if (k == CoreOptions.FLINK_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_JM_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_JM_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_HS_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_HS_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_TM_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_TM_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_CLI_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_CLI_JVM_OPTIONS, v)
-          }
-        })
-    }
   }
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
@@ -310,7 +302,6 @@ trait FlinkClientTrait extends Logger {
       submitRequest.appOption
         .filter(
           x => {
-            // 验证参数是否合法...
             val verify = commandLineOptions.hasOption(x._1)
             if (!verify) logWarn(s"param:${x._1} is error,skip it.")
             verify
@@ -405,78 +396,78 @@ trait FlinkClientTrait extends Logger {
   }
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
-
     val programArgs = new ArrayBuffer[String]()
+    val args = submitRequest.args
 
-    if (StringUtils.isNotEmpty(submitRequest.args)) {
-      val multiLineChar = "\"\"\""
-      val array = submitRequest.args.split("\\s+")
-      if (!array.exists(_.startsWith(multiLineChar))) {
+    if (StringUtils.isNotEmpty(args)) {
+      val multiChar = "\""
+      val array = args.split("\\s+")
+      if (!array.exists(_.startsWith(multiChar))) {
         array.foreach(programArgs +=)
       } else {
         val argsArray = new ArrayBuffer[String]()
         val tempBuffer = new ArrayBuffer[String]()
 
-        @tailrec def processElement(index: Int, multiLine: Boolean): Unit = {
+        @tailrec
+        def processElement(index: Int, multi: Boolean): Unit = {
+
           if (index == array.length) {
             if (tempBuffer.nonEmpty) {
               argsArray += tempBuffer.mkString(" ")
             }
             return
           }
-          val next = index + 1
-          val elem = array(index)
 
-          if (elem.trim.nonEmpty) {
-            if (!multiLine) {
-              if (elem.startsWith(multiLineChar)) {
-                tempBuffer += elem.drop(3)
-                processElement(next, multiLine = true)
-              } else {
-                argsArray += elem
-                processElement(next, multiLine = false)
-              }
-            } else {
-              if (elem.endsWith(multiLineChar)) {
-                tempBuffer += elem.dropRight(3)
+          val next = index + 1
+          val elem = array(index).trim
+
+          if (elem.isEmpty) {
+            processElement(next, multi = false)
+          } else {
+            if (multi) {
+              if (elem.endsWith(multiChar)) {
+                tempBuffer += elem.dropRight(1)
                 argsArray += tempBuffer.mkString(" ")
                 tempBuffer.clear()
-                processElement(next, multiLine = false)
+                processElement(next, multi = false)
               } else {
                 tempBuffer += elem
-                processElement(next, multiLine)
+                processElement(next, multi)
+              }
+            } else {
+              val until = if (elem.endsWith(multiChar)) 1 else 0
+              if (elem.startsWith(multiChar)) {
+                tempBuffer += elem.drop(1).dropRight(until)
+                processElement(next, multi = true)
+              } else {
+                argsArray += elem.dropRight(until)
+                processElement(next, multi = false)
               }
             }
-          } else {
-            tempBuffer += elem
-            processElement(next, multiLine = false)
           }
         }
 
-        processElement(0, multiLine = false)
-        argsArray.foreach(x => programArgs += x.trim)
+        processElement(0, multi = false)
+        argsArray.foreach(x => programArgs += x)
       }
     }
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
-      programArgs += PARAM_KEY_FLINK_CONF
-      programArgs += submitRequest.flinkYaml
-      programArgs += PARAM_KEY_APP_NAME
-      programArgs += DeflaterUtils.zipString(submitRequest.effectiveAppName)
-      programArgs += PARAM_KEY_FLINK_PARALLELISM
-      programArgs += getParallelism(submitRequest).toString
+
+      programArgs += PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml
+      programArgs += PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
+      programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
+
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINK_SQL =>
-          programArgs += PARAM_KEY_FLINK_SQL
-          programArgs += submitRequest.flinkSQL
+          programArgs += PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
-            programArgs += PARAM_KEY_APP_CONF
-            programArgs += submitRequest.appConf
+            programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
           }
         case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
-          programArgs += PARAM_KEY_APP_CONF
-          programArgs += submitRequest.appConf
+          programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
       }
+
     }
     programArgs.toList.asJava
   }
