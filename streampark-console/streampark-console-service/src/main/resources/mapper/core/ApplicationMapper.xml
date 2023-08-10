@@ -145,9 +145,17 @@
         select
             count(1)
         from t_flink_app
-        where flink_cluster_id = #{clusterId}
+        where
+            flink_cluster_id = #{clusterId}
             and state in (5, 7, 9)
-            and (end_time IS NULL or TIMESTAMPDIFF(SECOND, end_time, NOW()) &lt;= 1)
+            <choose>
+                <when test="dbType == 'pgsql'">
+                    and (end_time IS NULL or EXTRACT(EPOCH FROM (NOW() - end_time)) &lt;= 1)
+                </when>
+                <otherwise>
+                    and (end_time IS NULL or TIMESTAMPDIFF(SECOND, end_time, NOW()) &lt;= 1)
+                </otherwise>
+            </choose>
             limit 1
     </select>
 
