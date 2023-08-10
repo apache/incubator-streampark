@@ -33,7 +33,7 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
     Pattern.compile("(insert\\s+into|update|delete)\\s+(.*?)(\\(|\\s+)", Pattern.CASE_INSENSITIVE)
 
   private[this] lazy val INSERT_REGEXP =
-    Pattern.compile("((\\)\\s*)|(\\w`?\\s+))(values|value)\\s*\\(", Pattern.CASE_INSENSITIVE)
+    Pattern.compile("^(.*?)\\s+(values|value)(.*)", Pattern.CASE_INSENSITIVE)
 
   lazy val sqlStatement: String = {
     val prefixMap: Map[String, List[String]] = Map[String, List[String]]()
@@ -41,11 +41,10 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
       x => {
         val valueMatcher = INSERT_REGEXP.matcher(x)
         if (valueMatcher.find()) {
-          val prefix = x.substring(0, valueMatcher.start())
-          val value = x.substring(valueMatcher.end() - 1, x.lastIndexOf(')') + 1)
+          val prefix = valueMatcher.group(1)
           prefixMap.get(prefix) match {
-            case Some(values) => values.add(value)
-            case None => prefixMap.put(prefix, List(value))
+            case Some(value) => value.add(valueMatcher.group(3))
+            case None => prefixMap.put(prefix, List(valueMatcher.group(3)))
           }
         } else {
           logWarn(s"ignore record: $x")
