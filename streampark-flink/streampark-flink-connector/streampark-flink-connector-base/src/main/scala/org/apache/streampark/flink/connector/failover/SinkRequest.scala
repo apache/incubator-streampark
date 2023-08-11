@@ -33,7 +33,7 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
     Pattern.compile("(insert\\s+into|update|delete)\\s+(.*?)(\\(|\\s+)", Pattern.CASE_INSENSITIVE)
 
   private[this] lazy val INSERT_REGEXP =
-    Pattern.compile("^(.*)\\s+(values|value)(.*)", Pattern.CASE_INSENSITIVE)
+    Pattern.compile("^(.*?)\\s+(values|value)(.*)", Pattern.CASE_INSENSITIVE)
 
   lazy val sqlStatement: String = {
     val prefixMap: Map[String, List[String]] = Map[String, List[String]]()
