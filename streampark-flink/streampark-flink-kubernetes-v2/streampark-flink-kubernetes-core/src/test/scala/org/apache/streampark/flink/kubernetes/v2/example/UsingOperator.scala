@@ -104,11 +104,11 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
       jobManager = JobManagerDef(cpu = 1, memory = "1024m"),
       taskManager = TaskManagerDef(cpu = 1, memory = "1024m"),
       job = JobDef(
-        jarURI = "assets/quick-sql-1.0.jar",
+        jarURI = s"$assetPath/quick-sql-1.0.jar",
         parallelism = 1,
         entryClass = "demo.flink.SqlFakerDataJob"
       ),
-      extJarPaths = Array("assets/flink-faker-0.5.3.jar")
+      extJarPaths = Array(s"$assetPath/flink-faker-0.5.3.jar")
     )
     for {
       _ <- FlinkK8sOperator.deployApplicationJob(114514, spec)
@@ -124,14 +124,14 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
       flinkVersion = FlinkVersion.V1_16,
       jobManager = JobManagerDef(cpu = 1, memory = "1024m"),
       taskManager = TaskManagerDef(cpu = 1, memory = "1024m"),
-      extJarPaths = Array("assets/flink-faker-0.5.3.jar")
+      extJarPaths = Array(s"$assetPath/flink-faker-0.5.3.jar")
     )
     val jobSpec     = FlinkSessionJobDef(
       namespace = "fdev",
       name = "sessionjob-with-extra-jar",
       deploymentName = "session-with-extra-jar",
       job = JobDef(
-        jarURI = "assets/quick-sql-1.0.jar",
+        jarURI = s"$assetPath/quick-sql-1.0.jar",
         parallelism = 1,
         entryClass = "demo.flink.SqlFakerDataJob"
       )
