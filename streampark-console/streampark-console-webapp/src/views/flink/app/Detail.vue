@@ -218,7 +218,7 @@
 
   /* Documentation page */
   function handleDocPage() {
-    const res = window.origin.split(':')[1] + ':10000/doc.html';
+    const res = window.origin + '/doc.html';
     window.open(res);
   }
 
