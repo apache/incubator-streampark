@@ -43,6 +43,7 @@ import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.factories.Factory;
 import org.apache.hadoop.shaded.org.apache.commons.codec.digest.DigestUtils;
@@ -284,7 +285,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         Manifest manifest = Utils.getJarManifest(jarFile);
         String mainClass = manifest.getMainAttributes().getValue("Main-Class");
 
-        if (mainClass == null) {
+        if (mainClass == null && StringUtils.isBlank(resourceParam.getMainClass())) {
           // main class is null
           resp.put("state", 2);
           return RestResponse.success().data(resp);
