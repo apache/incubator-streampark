@@ -144,7 +144,7 @@ object PodTemplateParser {
    */
   def extractHostAliasMap(podTemplateContent: String): JMap[String, String] = {
     val hosts = new util.LinkedHashMap[String, String](0)
-    if (podTemplateContent == null || podTemplateContent.isEmpty) {
+    if (StringUtils.isBlank(podTemplateContent)) {
       return hosts
     }
     try {
