@@ -1320,19 +1320,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 savePoint.setCreateTime(new Date());
                 savePoint.setTriggerTime(triggerTime);
                 savePointService.save(savePoint);
-                log.info("savePoint path: {} is saved", savePointDir);
               }
               if (isKubernetesApp(application)) {
                 k8SFlinkTrackMonitor.unWatching(toTrackId(application));
-                log.info("k8SFlinkTrackMonitor.unWatching");
               }
             },
             e -> {
               if (e.getCause() instanceof CancellationException) {
                 updateToStopped(application);
-                log.info("updateToStopped");
               } else {
-                log.info("stop flink job fail.", e);
+                log.error("stop flink job fail.", e);
                 application.setOptionState(OptionState.NONE.getValue());
                 application.setState(FlinkAppState.FAILED.getValue());
                 updateById(application);
@@ -1359,7 +1356,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             (t, e) -> {
               cancelFutureMap.remove(application.getId());
               applicationLogService.save(applicationLog);
-              log.info("cancel {} finished", application.getAppHome());
             });
   }
 
