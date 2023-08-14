@@ -69,6 +69,18 @@
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
+        field: 'nativeFormat',
+        label: 'NativeFormat',
+        component: 'Switch',
+        componentProps: {
+          checkedChildren: 'ON',
+          unCheckedChildren: 'OFF',
+        },
+        defaultValue: false,
+        afterItem: () => h('span', { class: 'conf-switch' }, 'Note: native format savepoint is supported since flink 1.15'),
+        ifShow: ({ values }) => !!values.stopSavePointed,
+      },
+      {
         field: 'drain',
         label: 'Drain',
         component: 'Switch',
@@ -78,17 +90,6 @@
         },
         defaultValue: false,
         afterItem: () => h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
-      },
-      {
-        field: 'nativeFormat',
-        label: 'NativeFormat',
-        component: 'Switch',
-        componentProps: {
-          checkedChildren: 'ON',
-          unCheckedChildren: 'OFF',
-        },
-        defaultValue: false,
-        afterItem: () => h('span', { class: 'conf-switch' }, 'Use savepoint native format'),
       },
     ],
     colon: true,
