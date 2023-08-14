@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.commons.collections.CollectionUtils
+import org.apache.commons.collections.{CollectionUtils, MapUtils}
 import org.apache.commons.lang3.StringUtils
 import org.yaml.snakeyaml.Yaml
 
@@ -91,7 +91,7 @@ object PodTemplateParser {
    *   pod template content
    */
   def completeHostAliasSpec(hosts: JMap[String, String], podTemplateContent: String): String = {
-    if (hosts.isEmpty) return podTemplateContent
+    if (MapUtils.isEmpty(hosts)) return podTemplateContent
     try {
       val content = completeInitPodTemplate(podTemplateContent)
       // convert hosts map to host alias
