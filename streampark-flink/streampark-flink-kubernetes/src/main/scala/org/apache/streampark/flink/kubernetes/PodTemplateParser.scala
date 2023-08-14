@@ -51,7 +51,7 @@ object PodTemplateParser {
    *   complemented pod template
    */
   def completeInitPodTemplate(podTemplateContent: String): String = {
-    if (podTemplateContent == null || podTemplateContent.trim.isEmpty) {
+    if (StringUtils.isBlank(podTemplateContent)) {
       return POD_TEMPLATE_INIT_CONTENT
     }
     val yaml = new Yaml
