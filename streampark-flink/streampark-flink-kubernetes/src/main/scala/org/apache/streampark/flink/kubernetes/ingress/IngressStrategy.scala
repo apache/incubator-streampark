@@ -17,6 +17,8 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
+import org.apache.streampark.common.conf.ConfigConst
+
 import io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.commons.io.FileUtils
@@ -56,7 +58,7 @@ trait IngressStrategy {
   def buildIngressLabels(clusterId: String): Map[String, String] = {
     Map(
       "app" -> clusterId,
-      "type" -> "flink-native-kubernetes",
+      "type" -> ConfigConst.FLINK_NATIVE_KUBERNETES_LABEL,
       "component" -> "ingress"
     )
   }

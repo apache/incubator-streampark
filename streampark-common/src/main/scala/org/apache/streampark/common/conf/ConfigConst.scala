@@ -113,6 +113,8 @@ object ConfigConst {
 
   val KEY_K8S_IMAGE_PULL_POLICY = "kubernetes.container.image.pull-policy"
 
+  val FLINK_NATIVE_KUBERNETES_LABEL = "flink-native-kubernetes"
+
   // ---table---
   val KEY_FLINK_TABLE_PLANNER = "flink.table.planner"
 
