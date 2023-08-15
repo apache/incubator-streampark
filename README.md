@@ -94,14 +94,6 @@ Thank you to all the people who already contributed to StreamPark!
 
 [![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/incubator-streampark/graphs/contributors)
 
-## ⏰ Contributor Over Time
-
-[![Stargazers Over Time](https://contributor-overtime-api.git-contributor.com/contributors-svg?chart=contributorOverTime&repo=apache/incubator-streampark)](https://git-contributor.com?chart=contributorOverTime&repo=apache/incubator-streampark)
-
-## 👍Stargazers Over Time
-
-![Stargazers over time](https://api.star-history.com/svg?repos=apache/incubator-streampark&type=Date)
-
 ## 💬 Social Media
 
 - [Twitter](https://twitter.com/ASFStreamPark)
