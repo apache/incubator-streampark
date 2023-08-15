@@ -78,8 +78,6 @@ class FlinkK8sEventWatcher(implicit watchController: FlinkK8sWatchController)
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
     val clusterId = event.getMetadata.getName
     val namespace = event.getMetadata.getNamespace
-    // if (!cachePool.isInTracking(TrackId.onApplication(namespace, clusterId)))
-    //  return
     // just tracking every flink-k8s-native event :)
     watchController.k8sDeploymentEvents.put(
       K8sEventKey(namespace, clusterId),
