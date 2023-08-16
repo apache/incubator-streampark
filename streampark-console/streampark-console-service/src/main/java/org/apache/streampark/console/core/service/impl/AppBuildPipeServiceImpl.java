@@ -244,8 +244,8 @@ public class AppBuildPipeServiceImpl
                 if (!localJar.exists()) {
                   Resource resource =
                       resourceService.findByResourceName(app.getTeamId(), app.getJar());
-                  if (resource != null && StringUtils.isNotBlank(resource.getResourcePath())) {
-                    localJar = new File(resource.getResourcePath().split(":")[1]);
+                  if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                    localJar = new File(resource.getFilePath());
                     uploadJar = appUploads.concat("/").concat(localJar.getName());
                   }
                 }

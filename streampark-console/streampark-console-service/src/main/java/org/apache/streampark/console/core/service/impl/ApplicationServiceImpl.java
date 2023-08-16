@@ -731,8 +731,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       if (!new File(jarPath).exists()) {
         Resource resource =
             resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
-        if (resource != null && StringUtils.isNotBlank(resource.getResourcePath())) {
-          jarPath = resource.getResourcePath().split(":")[1];
+        if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+          jarPath = resource.getFilePath();
         }
       }
       appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
@@ -1494,9 +1494,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (!FsOperator.hdfs().exists(flinkUserJar)) {
               Resource resource =
                   resourceService.findByResourceName(application.getTeamId(), application.getJar());
-              if (resource != null && StringUtils.isNotBlank(resource.getResourcePath())) {
-                String fileName = new File(resource.getResourcePath().split(":")[1]).getName();
-                flinkUserJar = String.format("%s/%s", application.getAppHome(), fileName);
+              if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                flinkUserJar =
+                    String.format(
+                        "%s/%s",
+                        application.getAppHome(), new File(resource.getFilePath()).getName());
               }
             }
             break;
