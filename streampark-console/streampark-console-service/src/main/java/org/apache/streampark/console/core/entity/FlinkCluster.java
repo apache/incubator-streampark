@@ -106,12 +106,15 @@ public class FlinkCluster implements Serializable {
 
   private Date startTime;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Date endTime;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer alertId;
 
-  private transient Integer jobs = 0;
+  private transient Integer allJobs = 0;
+
+  private transient Integer affectedJobs = 0;
 
   @JsonIgnore
   public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {

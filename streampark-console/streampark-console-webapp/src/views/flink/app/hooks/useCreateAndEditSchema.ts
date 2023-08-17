@@ -82,7 +82,7 @@ export const useCreateAndEditSchema = (
 
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
 
-  /* 
+  /*
   !The original item is also unassigned
   */
   function getConfigSchemas() {
@@ -98,7 +98,7 @@ export const useCreateAndEditSchema = (
       .filter((o) => {
         // Edit mode has one more filter condition
         if (edit?.mode) {
-          return o.executionMode == executionMode && o.clusterState === ClusterStateEnum.STARTED;
+          return o.executionMode == executionMode && o.clusterState === ClusterStateEnum.RUNNING;
         } else {
           return o.executionMode == executionMode;
         }

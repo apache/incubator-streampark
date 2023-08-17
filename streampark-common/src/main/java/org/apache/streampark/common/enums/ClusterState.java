@@ -32,7 +32,7 @@ public enum ClusterState implements Serializable {
   /** cluster unknown */
   UNKNOWN(4),
   STARTING(5),
-  CANCELING(6),
+  CANCELLING(6),
   FAILED(7),
   KILLED(8);
 

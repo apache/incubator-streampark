@@ -104,6 +104,8 @@ public interface ApplicationService extends IService<Application> {
 
   Integer countJobsByClusterId(Long clusterId);
 
+  Integer countAffectedJobsByClusterId(Long clusterId, String dbType);
+
   boolean existsJobByFlinkEnvId(Long flinkEnvId);
 
   List<String> getRecentK8sNamespace();

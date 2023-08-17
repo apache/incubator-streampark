@@ -67,4 +67,7 @@ public interface ApplicationMapper extends BaseMapper<Application> {
   boolean existsJobByClusterId(@Param("clusterId") Long clusterId);
 
   Integer countJobsByClusterId(@Param("clusterId") Long clusterId);
+
+  Integer countAffectedJobsByClusterId(
+      @Param("clusterId") Long clusterId, @Param("dbType") String dbType);
 }

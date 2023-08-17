@@ -41,6 +41,8 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   void shutdown(FlinkCluster flinkCluster);
 
+  Boolean allowShutdownCluster(FlinkCluster flinkCluster);
+
   Boolean existsByClusterId(String clusterId, Long id);
 
   Boolean existsByClusterName(String clusterName, Long id);

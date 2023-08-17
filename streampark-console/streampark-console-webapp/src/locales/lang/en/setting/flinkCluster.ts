@@ -24,6 +24,7 @@ export default {
   form: {
     clusterName: 'Cluster Name',
     address: 'Cluster URL',
+    runState: 'Run State',
     internal: 'internal cluster',
     executionMode: 'Execution Mode',
     versionId: 'Flink Version',

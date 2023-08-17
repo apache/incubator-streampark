@@ -143,7 +143,7 @@
     const cluster =
       unref(flinkClusters).filter((c) => {
         if (flinkClusterId) {
-          return c.id == flinkClusterId && c.clusterState === ClusterStateEnum.STARTED;
+          return c.id == flinkClusterId && c.clusterState === ClusterStateEnum.RUNNING;
         }
       })[0] || null;
     if (cluster) {

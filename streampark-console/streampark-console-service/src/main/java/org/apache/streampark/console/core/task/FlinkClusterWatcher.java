@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.task;
 
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.HadoopUtils;
@@ -130,7 +132,10 @@ public class FlinkClusterWatcher {
 
   private void alert(FlinkCluster cluster, ClusterState state) {
     if (cluster.getAlertId() != null) {
-      cluster.setJobs(applicationService.countJobsByClusterId(cluster.getId()));
+      cluster.setAllJobs(applicationService.countJobsByClusterId(cluster.getId()));
+      cluster.setAffectedJobs(
+          applicationService.countAffectedJobsByClusterId(
+              cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
       cluster.setClusterState(state.getValue());
       cluster.setEndTime(new Date());
       alertService.alert(cluster, state);

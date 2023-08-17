@@ -153,7 +153,14 @@
        {
           "is_short": false,
           "text": {
-            "content": "**Affected Jobs：${affectedJobs}**",
+            "content": "**All Jobs：${allJobs}**",
+            "tag": "lark_md"
+          }
+       },
+       {
+          "is_short": false,
+          "text": {
+            "content": "**About Affected Jobs：${affectedJobs}**",
             "tag": "lark_md"
           }
        }
