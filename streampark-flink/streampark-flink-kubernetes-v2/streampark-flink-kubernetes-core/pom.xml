@@ -32,7 +32,6 @@
         <zio-http.version>3.0.0-RC2</zio-http.version>
         <fabric8.version>6.8.0</fabric8.version>
         <os-lib.version>0.9.1</os-lib.version>
-        <pprint.version>0.8.1</pprint.version>
         <upickle.version>3.0.0</upickle.version>
         <jackson-dataformat-yaml.version>2.14.2</jackson-dataformat-yaml.version>
         <scalatest.skiptests>true</scalatest.skiptests>
@@ -107,7 +106,7 @@
         <dependency>
             <groupId>com.lihaoyi</groupId>
             <artifactId>pprint_${scala.binary.version}</artifactId>
-            <version>${pprint.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <!-- yaml parser -->
