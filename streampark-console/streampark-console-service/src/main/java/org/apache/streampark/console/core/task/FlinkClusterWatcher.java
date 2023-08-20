@@ -296,6 +296,6 @@ public class FlinkClusterWatcher {
    */
   public Boolean verifyClusterConnection(FlinkCluster flinkCluster) {
     ClusterState clusterState = httpClusterState(flinkCluster);
-    return ClusterState.isRunning(clusterState) ? true : false;
+    return ClusterState.isRunning(clusterState);
   }
 }
