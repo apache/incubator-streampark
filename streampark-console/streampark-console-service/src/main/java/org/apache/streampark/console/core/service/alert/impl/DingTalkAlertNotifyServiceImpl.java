@@ -107,7 +107,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     } catch (AlertException alertException) {
       throw alertException;
     } catch (Exception e) {
-      throw new AlertException("Failed send dingTalk alert", e);
+      throw new AlertException("Failed send DingTalk alert", e);
     }
   }
 
