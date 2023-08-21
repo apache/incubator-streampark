@@ -53,7 +53,7 @@
   /* Callback before file upload */
   function handleBeforeUpload(file) {
     if (file.type !== 'application/java-archive') {
-      if (!/\.(jar|JAR)$/.test(file.name)) {
+      if (!/\.(jar|JAR|py)$/.test(file.name)) {
         emit('update:loading', false);
         createMessage.error('Only jar files can be uploaded! please check your file.');
         return false;

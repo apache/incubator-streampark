@@ -20,7 +20,7 @@ package org.apache.streampark.flink.client.`trait`
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, RestoreMode}
-import org.apache.streampark.common.util.{DeflaterUtils, Logger}
+import org.apache.streampark.common.util.{DeflaterUtils, EnvUtils, Logger}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -139,6 +139,17 @@ trait FlinkClientTrait extends Logger {
             case Some(p) => flinkConfig.set(p, x._2.toString)
             case _ =>
           })
+    }
+
+    if (StringUtils.isNotBlank(submitRequest.pyflinkFilePath)) {
+      val flinkOptPath: String = System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR)
+      if (StringUtils.isBlank(flinkOptPath)) {
+        logWarn(s"Get environment variable ${ConfigConstants.ENV_FLINK_OPT_DIR} fail")
+        val flinkHome = submitRequest.flinkVersion.flinkHome
+        EnvUtils.setEnv(ConfigConstants.ENV_FLINK_OPT_DIR, s"$flinkHome/opt");
+        logInfo(
+          s"Set temporary environment variables ${ConfigConstants.ENV_FLINK_OPT_DIR} = $flinkHome/opt")
+      }
     }
 
     setConfig(submitRequest, flinkConfig)
