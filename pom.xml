@@ -78,8 +78,6 @@
     <modules>
         <module>streampark-common</module>
         <module>streampark-flink</module>
-        <module>streampark-spark</module>
-        <module>streampark-storage</module>
         <module>streampark-console</module>
     </modules>
 
@@ -857,6 +855,13 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>spark</id>
+            <modules>
+                <module>streampark-spark</module>
+            </modules>
         </profile>
     </profiles>
 
