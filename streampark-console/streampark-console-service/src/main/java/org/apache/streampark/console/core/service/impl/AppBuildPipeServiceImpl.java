@@ -80,6 +80,7 @@ import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -234,13 +235,21 @@ public class AppBuildPipeServiceImpl
               FsOperator fsOperator = app.getFsOperator();
               fsOperator.delete(appHome);
               if (app.isUploadJob()) {
+                String uploadJar = appUploads.concat("/").concat(app.getJar());
                 File localJar =
                     new File(
                         String.format(
                             "%s/%d/%s",
                             Workspace.local().APP_UPLOADS(), app.getTeamId(), app.getJar()));
+                if (!localJar.exists()) {
+                  Resource resource =
+                      resourceService.findByResourceName(app.getTeamId(), app.getJar());
+                  if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                    localJar = new File(resource.getFilePath());
+                    uploadJar = appUploads.concat("/").concat(localJar.getName());
+                  }
+                }
                 // upload jar copy to appHome
-                String uploadJar = appUploads.concat("/").concat(app.getJar());
                 checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
 
                 switch (app.getApplicationType()) {

@@ -43,6 +43,7 @@ import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.factories.Factory;
 import org.apache.hadoop.shaded.org.apache.commons.codec.digest.DigestUtils;
@@ -204,13 +205,18 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     Resource findResource = getById(resource.getId());
     checkOrElseAlert(findResource);
 
-    FsOperator.lfs()
-        .delete(
-            String.format(
-                "%s/%d/%s",
-                Workspace.local().APP_UPLOADS(),
-                findResource.getTeamId(),
-                findResource.getResourceName()));
+    String filePath =
+        String.format(
+            "%s/%d/%s",
+            Workspace.local().APP_UPLOADS(),
+            findResource.getTeamId(),
+            findResource.getResourceName());
+
+    if (!new File(filePath).exists() && StringUtils.isNotBlank(findResource.getFilePath())) {
+      filePath = findResource.getFilePath();
+    }
+
+    FsOperator.lfs().delete(filePath);
 
     this.removeById(resource);
   }

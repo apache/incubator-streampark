@@ -24,6 +24,7 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.RestoreMode;
 import org.apache.streampark.common.enums.StorageType;
+import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.CompletableFutureUtils;
@@ -49,6 +50,7 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Project;
+import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.AppExistsState;
 import org.apache.streampark.console.core.enums.CandidateType;
@@ -74,6 +76,7 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.LogClientService;
 import org.apache.streampark.console.core.service.ProjectService;
+import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
@@ -216,6 +219,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private YarnQueueService yarnQueueService;
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
+  @Autowired private ResourceService resourceService;
 
   @PostConstruct
   public void resetOptionState() {
@@ -728,6 +733,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       String jarPath =
           String.format(
               "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
+      if (!new File(jarPath).exists()) {
+        Resource resource =
+            resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
+        if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+          jarPath = resource.getFilePath();
+        }
+      }
       appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
     }
 
@@ -1484,6 +1496,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             break;
           case APACHE_FLINK:
             flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+            if (!FsOperator.hdfs().exists(flinkUserJar)) {
+              Resource resource =
+                  resourceService.findByResourceName(application.getTeamId(), application.getJar());
+              if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                flinkUserJar =
+                    String.format(
+                        "%s/%s",
+                        application.getAppHome(), new File(resource.getFilePath()).getName());
+              }
+            }
             break;
           default:
             throw new IllegalArgumentException(
