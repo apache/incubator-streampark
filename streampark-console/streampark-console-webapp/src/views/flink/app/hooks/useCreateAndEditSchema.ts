@@ -124,7 +124,7 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'teamResource',
-        label: t('flink.app.teamResource'),
+        label: t('flink.app.resource'),
         component: 'Select',
         render: ({ model }) => renderStreamParkResource({ model, resources: unref(teamResource) }),
         ifShow: ({ values }) => {

@@ -531,7 +531,6 @@ export const renderResourceFrom = (model: Recordable) => {
 
 export const renderStreamParkResource = ({ model, resources }) => {
   const renderOptions = () => {
-    console.log('resources', resources);
     return (resources || [])
       .filter((item) => item.resourceType !== ResourceTypeEnum.FLINK_APP)
       .map((resource) => {
@@ -561,8 +560,7 @@ export const renderStreamParkResource = ({ model, resources }) => {
         max-tag-count={3}
         onChange={(value) => (model.teamResource = value)}
         value={model.teamResource}
-        placeholder={t('flink.app.teamResourcePlaceHolder')}
-        style="width: calc(100% - 60px)"
+        placeholder={t('flink.app.resourcePlaceHolder')}
       >
         {renderOptions()}
       </Select>
