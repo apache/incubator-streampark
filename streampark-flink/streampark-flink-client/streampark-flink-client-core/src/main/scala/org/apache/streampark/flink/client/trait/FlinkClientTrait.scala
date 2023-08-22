@@ -17,9 +17,10 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, RestoreMode}
+import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util.{DeflaterUtils, EnvUtils, Logger}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
@@ -35,6 +36,7 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
+import org.apache.flink.python.PythonOptions
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
@@ -232,16 +234,37 @@ trait FlinkClientTrait extends Logger {
       flinkConfig: Configuration,
       submitRequest: SubmitRequest,
       jarFile: File): (PackagedProgram, JobGraph) = {
-    val packageProgram = PackagedProgram.newBuilder
-      .setJarFile(jarFile)
-      .setEntryPointClassName(
-        flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
-      .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-      .setArguments(
-        flinkConfig
-          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList()): _*)
-      .build()
+    var packageProgram: PackagedProgram = null
+    if (StringUtils.isNotBlank(submitRequest.pyflinkFilePath)) {
+      val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
+      if (!FsOperator.lfs.exists(pythonVenv)) {
+        throw new RuntimeException(s"$pythonVenv File does not exist")
+      }
+      flinkConfig
+        // python.archives
+        .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
+        // python.client.executable
+        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+        // python.executable
+        .safeSet(PythonOptions.PYTHON_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+
+      packageProgram = PackagedProgram.newBuilder
+        .setEntryPointClassName(ConfigConst.PYTHON_DRIVER_CLASS_NAME)
+        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
+        .setArguments("-py", submitRequest.pyflinkFilePath)
+        .build()
+    } else {
+      packageProgram = PackagedProgram.newBuilder
+        .setJarFile(jarFile)
+        .setEntryPointClassName(
+          flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
+        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
+        .setArguments(
+          flinkConfig
+            .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+            .orElse(Lists.newArrayList()): _*)
+        .build()
+    }
 
     val jobGraph = PackagedProgramUtils.createJobGraph(
       packageProgram,

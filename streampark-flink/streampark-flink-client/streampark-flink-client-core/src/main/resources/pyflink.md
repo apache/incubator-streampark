@@ -59,7 +59,13 @@ venv.zip is about 539M in size and needs to be uploaded to hdfs by itself
 hadoop fs -put ./venv.zip /streampark/python
 ```
 
-### 3. Copy Python dependencies to $FLINK_HOME/lib
+### 3. Copy venv.zip to $WORKSPACE/python
+
+```shell
+copy ./venv.zip $WORKSPACE/python
+```
+
+### 4. Copy Python dependencies to $FLINK_HOME/lib
 
 ```shell
 cp -r $FLINK_HOME/opt/python  $FLINK_HOME/lib
@@ -67,7 +73,7 @@ cp -r $FLINK_HOME/opt/python  $FLINK_HOME/lib
 cp  $FLINK_HOME/opt/flink-python-* $FLINK_HOME/lib
 ```
 
-### 4. Reference document
+### 5. Reference document
 ```text
 https://help.aliyun.com/document_detail/413966.html#:~:text=.%2Fsetup-pyflink-%20virtual%20-env.sh,%E8%AF%A5%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%AE%8C%E6%88%90%E5%90%8E%EF%BC%8C%E4%BC%9A%E7%94%9F%E6%88%90%E4%B8%80%E4%B8%AA%E5%90%8D%E4%B8%BA%20venv%20%E7%9A%84%E7%9B%AE%E5%BD%95%EF%BC%8C%E5%8D%B3%E4%B8%BAPython%203.6%E7%9A%84%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83%E3%80%82
 
