@@ -256,7 +256,9 @@ public class ApplicationConfigServiceImpl
   private void fillEffectiveField(Long id, List<ApplicationConfig> configList) {
     ApplicationConfig effective = getEffective(id);
 
-    if (effective == null) return;
+    if (effective == null) {
+      return;
+    }
 
     configList.stream()
         .filter(config -> config.getId().equals(effective.getId()))
