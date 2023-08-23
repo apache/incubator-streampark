@@ -31,8 +31,6 @@ object DateUtils {
 
   val format_yyyyMMdd = "yyyyMMdd"
 
-  val fullCompact = "yyyyMMddHHmmss"
-
   def parse(
       date: String,
       format: String = fullFormat,
