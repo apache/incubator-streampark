@@ -18,10 +18,12 @@
 package org.apache.streampark.console.core.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import lombok.Getter;
 
 import java.util.Arrays;
 
 /** Compute engine type. */
+@Getter
 public enum EngineType {
 
   /** Apache Flink: activated by default */
@@ -34,10 +36,6 @@ public enum EngineType {
 
   EngineType(int code) {
     this.code = code;
-  }
-
-  public int getCode() {
-    return code;
   }
 
   public static EngineType of(Integer code) {
