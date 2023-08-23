@@ -18,10 +18,12 @@
 package org.apache.streampark.console.core.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import lombok.Getter;
 
 import java.util.Arrays;
 
 /** The resource type. */
+@Getter
 public enum ResourceType {
 
   /** Flink application */
@@ -43,10 +45,6 @@ public enum ResourceType {
 
   ResourceType(int code) {
     this.code = code;
-  }
-
-  public int getCode() {
-    return code;
   }
 
   public static ResourceType of(Integer code) {
