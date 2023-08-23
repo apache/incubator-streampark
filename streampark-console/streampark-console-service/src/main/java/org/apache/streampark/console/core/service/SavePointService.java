@@ -33,7 +33,7 @@ public interface SavePointService extends IService<SavePoint> {
 
   SavePoint getLatest(Long id);
 
-  void trigger(Long appId, @Nullable String savepointPath);
+  void trigger(Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat);
 
   Boolean delete(Long id, Application application) throws InternalException;
 

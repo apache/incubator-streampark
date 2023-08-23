@@ -119,6 +119,7 @@ export interface AppListRecord {
   savePoint?: any;
   savePointed: boolean;
   drain: boolean;
+  nativeFormat: boolean;
   allowNonRestored: boolean;
   socketId?: any;
   projectName?: any;
@@ -149,6 +150,7 @@ export interface CancelParam {
   id: string;
   savePointed: boolean;
   drain: boolean;
+  nativeFormat: boolean;
   savePoint: string;
 }
 // create Params

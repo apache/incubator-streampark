@@ -38,6 +38,8 @@ trait SavepointRequestTrait {
 
   val savepointPath: String
 
+  val nativeFormat: Boolean
+
   val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE
 
   @Nullable val properties: JavaMap[String, Any]

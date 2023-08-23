@@ -68,6 +68,18 @@
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
+        field: 'nativeFormat',
+        label: 'NativeFormat',
+        component: 'Switch',
+        componentProps: {
+          checkedChildren: 'ON',
+          unCheckedChildren: 'OFF',
+        },
+        defaultValue: false,
+        afterItem: () => h('span', { class: 'conf-switch' }, 'Note: native format savepoint is supported since flink 1.15'),
+        ifShow: ({ values }) => !!values.stopSavePointed,
+      },
+      {
         field: 'drain',
         label: 'Drain',
         component: 'Switch',
@@ -89,12 +101,13 @@
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, customSavepoint, drain } = (await validate()) as Recordable;
+      const { stopSavePointed, customSavepoint, drain, nativeFormat } = (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
         savePointed: stopSavePointed,
         savePoint: customSavepoint,
         drain: drain,
+        nativeFormat: nativeFormat,
       };
 
       if (stopSavePointed) {
