@@ -25,7 +25,7 @@ import org.apache.streampark.console.core.bean.AlertDingTalkParams;
 import org.apache.streampark.console.core.bean.AlertLarkParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.bean.AlertWeComParams;
-import org.apache.streampark.console.core.bean.SenderEmail;
+import org.apache.streampark.console.core.bean.EmailConfig;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
@@ -58,7 +58,7 @@ class AlertServiceTest {
   RestTemplate restTemplate = new RestTemplate();
   private Template template;
 
-  private SenderEmail senderEmail;
+  private EmailConfig emailConfig;
 
   @BeforeEach
   void before1() {
@@ -87,13 +87,13 @@ class AlertServiceTest {
 
   void initConfigForSendEmail() {
     this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
-    senderEmail = new SenderEmail();
-    senderEmail.setFrom("****@domain.com");
-    senderEmail.setUserName("******");
-    senderEmail.setPassword("******");
-    senderEmail.setSmtpPort(465);
-    senderEmail.setSsl(true);
-    senderEmail.setSmtpHost("smtp.exmail.qq.com");
+    emailConfig = new EmailConfig();
+    emailConfig.setFrom("****@domain.com");
+    emailConfig.setUserName("******");
+    emailConfig.setPassword("******");
+    emailConfig.setSmtpPort(465);
+    emailConfig.setSsl(true);
+    emailConfig.setSmtpHost("smtp.exmail.qq.com");
   }
 
   void before2() {
@@ -232,15 +232,15 @@ class AlertServiceTest {
   private void sendEmail(String subject, String html, String... mails) throws EmailException {
     HtmlEmail htmlEmail = new HtmlEmail();
     htmlEmail.setCharset("UTF-8");
-    htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-    htmlEmail.setAuthentication(this.senderEmail.getUserName(), this.senderEmail.getPassword());
-    htmlEmail.setFrom(this.senderEmail.getFrom());
+    htmlEmail.setHostName(this.emailConfig.getSmtpHost());
+    htmlEmail.setAuthentication(this.emailConfig.getUserName(), this.emailConfig.getPassword());
+    htmlEmail.setFrom(this.emailConfig.getFrom());
 
-    if (this.senderEmail.isSsl()) {
+    if (this.emailConfig.isSsl()) {
       htmlEmail.setSSLOnConnect(true);
-      htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+      htmlEmail.setSslSmtpPort(this.emailConfig.getSmtpPort().toString());
     } else {
-      htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
+      htmlEmail.setSmtpPort(this.emailConfig.getSmtpPort());
     }
     htmlEmail.setSubject(subject);
     htmlEmail.setHtmlMsg(html);
