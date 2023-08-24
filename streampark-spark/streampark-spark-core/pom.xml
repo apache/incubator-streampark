@@ -23,7 +23,7 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-spark-core_2.12</artifactId>
+    <artifactId>streampark-spark-core</artifactId>
     <name>StreamPark : Spark Core</name>
 
     <!--项目基本依赖-->

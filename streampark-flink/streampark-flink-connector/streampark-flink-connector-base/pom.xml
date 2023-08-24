@@ -24,7 +24,7 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-connector-base_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-connector-base</artifactId>
     <name>StreamPark : Flink Connector Base</name>
 
     <dependencies>
@@ -38,19 +38,19 @@
         <!-- streampark -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-core_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims-base_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims-base</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -58,7 +58,7 @@
         <!-- provided -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

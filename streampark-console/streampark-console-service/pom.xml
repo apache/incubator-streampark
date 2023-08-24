@@ -335,36 +335,36 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims-base_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims-base</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-client-api_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-client-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-kubernetes</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes-core_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-kubernetes-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-sqlclient_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-sqlclient</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -447,7 +447,7 @@
             <groupId>dev.zio</groupId>
             <artifactId>zio-logging_${scala.binary.version}</artifactId>
         </dependency>
-      
+
         <dependency>
             <groupId>dev.zio</groupId>
             <artifactId>zio-streams_${scala.binary.version}</artifactId>
@@ -508,49 +508,49 @@
                         <!-- flink 1.12 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.12_${scala.binary.version}</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.12</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.13 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.13_${scala.binary.version}</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.13</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.14 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.14_${scala.binary.version}</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.14</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.15 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.15_${scala.binary.version}</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.15</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.16 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.16_${scala.binary.version}</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.16</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.17 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.17_${scala.binary.version}</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.17</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink-submit-core -->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
+                            <artifactId>streampark-flink-client-core</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </dependency>
