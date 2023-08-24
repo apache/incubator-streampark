@@ -17,12 +17,10 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.console.core.entity.Setting;
+import org.apache.streampark.console.core.service.SettingService;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Map;
 
 /**
  * The EmailConfig class represents the configuration for an email system. It holds the SMTP host,
@@ -35,13 +33,6 @@ import java.util.Map;
 @Slf4j
 public class EmailConfig {
 
-  public static final String KEY_ALERT_EMAIL_HOST = "alert.email.host";
-  public static final String KEY_ALERT_EMAIL_PORT = "alert.email.port";
-  public static final String KEY_ALERT_EMAIL_FROM = "alert.email.from";
-  public static final String KEY_ALERT_EMAIL_USERNAME = "alert.email.userName";
-  public static final String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
-  public static final String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
-
   private String smtpHost;
   private Integer smtpPort;
   private String from;
@@ -52,20 +43,32 @@ public class EmailConfig {
   /**
    * Constructs the EmailConfig object from the given settings map.
    *
-   * @param settingMap a map of settings
    * @return a new EmailConfig object that has its fields set according to the provided settings
    */
-  public static EmailConfig fromSetting(Map<String, Setting> settingMap) {
+  public static EmailConfig fromSetting() {
     try {
       EmailConfig emailConfig = new EmailConfig();
-      emailConfig.setSmtpHost(settingMap.get(KEY_ALERT_EMAIL_HOST).getSettingValue());
+
+      emailConfig.setSmtpHost(
+          SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
+
       emailConfig.setSmtpPort(
-          Integer.valueOf(settingMap.get(KEY_ALERT_EMAIL_PORT).getSettingValue()));
-      emailConfig.setFrom(settingMap.get(KEY_ALERT_EMAIL_FROM).getSettingValue());
-      emailConfig.setUserName(settingMap.get(KEY_ALERT_EMAIL_USERNAME).getSettingValue());
-      emailConfig.setPassword(settingMap.get(KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
+          Integer.valueOf(
+              SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue()));
+
+      emailConfig.setFrom(
+          SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
+
+      emailConfig.setUserName(
+          SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
+
+      emailConfig.setPassword(
+          SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
+
       emailConfig.setSsl(
-          Boolean.parseBoolean(settingMap.get(KEY_ALERT_EMAIL_SSL).getSettingValue()));
+          Boolean.parseBoolean(
+              SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue()));
+
       return emailConfig;
     } catch (Exception e) {
       log.warn("Failed to create EmailConfig from settings", e);

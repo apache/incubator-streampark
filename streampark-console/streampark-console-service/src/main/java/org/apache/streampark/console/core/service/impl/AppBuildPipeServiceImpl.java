@@ -30,6 +30,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
+import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -475,6 +476,7 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
         return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
       case KUBERNETES_NATIVE_APPLICATION:
+        DockerConfig dockerConfig = settingService.getDockerConfig();
         FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest =
             new FlinkK8sApplicationBuildRequest(
                 app.getJobName(),
@@ -491,10 +493,10 @@ public class AppBuildPipeServiceImpl
                 app.getK8sPodTemplates(),
                 app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
                 DockerConf.of(
-                    settingService.getDockerRegisterAddress(),
-                    settingService.getDockerRegisterNamespace(),
-                    settingService.getDockerRegisterUser(),
-                    settingService.getDockerRegisterPassword()),
+                    dockerConfig.getAddress(),
+                    dockerConfig.getNamespace(),
+                    dockerConfig.getUser(),
+                    dockerConfig.getPassword()),
                 app.getIngressTemplate());
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
         return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);

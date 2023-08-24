@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.console.core.bean.EmailConfig;
+import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.mapper.SettingMapper;
@@ -81,36 +81,13 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
   }
 
   @Override
-  public EmailConfig getSenderEmail() {
-    return EmailConfig.fromSetting(SETTINGS);
+  public MavenConfig getMavenConfig() {
+    return MavenConfig.fromSetting();
   }
 
   @Override
-  public String getDockerRegisterAddress() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_DOCKER_REGISTER_ADDRESS, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getDockerRegisterUser() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_DOCKER_REGISTER_USER, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getDockerRegisterPassword() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_DOCKER_REGISTER_PASSWORD, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getDockerRegisterNamespace() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_DOCKER_REGISTER_NAMESPACE, emptySetting)
-        .getSettingValue();
+  public DockerConfig getDockerConfig() {
+    return DockerConfig.fromSetting();
   }
 
   @Override
@@ -118,11 +95,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     return SETTINGS
         .getOrDefault(SettingService.KEY_STREAMPARK_ADDRESS, emptySetting)
         .getSettingValue();
-  }
-
-  @Override
-  public MavenConfig getMavenConfig() {
-    return MavenConfig.fromSetting(SETTINGS);
   }
 
   @Override
