@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class Dependency {
-  private List<Pom> pom = Collections.emptyList();
+  private List<MavenPom> pom = Collections.emptyList();
   private List<String> jar = Collections.emptyList();
 
   @SneakyThrows
