@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.bean;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.console.core.entity.Setting;
+import org.apache.streampark.console.core.service.SettingService;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,9 +48,9 @@ public class MavenConfig {
   private String mvnAuthPassword;
 
   /** */
-  public static MavenConfig fromSetting(Map<String, Setting> settings) {
+  public static MavenConfig fromSetting() {
     MavenConfig mavenConfig = new MavenConfig();
-
+    Map<String, Setting> settings = SettingService.SETTINGS;
     if (settings.containsKey(CommonConfig.MAVEN_SETTINGS_PATH().key())) {
       mavenConfig.setMvnSettings(
           settings.get(CommonConfig.MAVEN_SETTINGS_PATH().key()).getSettingValue());

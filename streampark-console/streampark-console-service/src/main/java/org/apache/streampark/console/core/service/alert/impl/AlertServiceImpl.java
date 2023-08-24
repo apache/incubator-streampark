@@ -21,7 +21,7 @@ import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.SpringContextUtils;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.streampark.console.core.entity.Application;
@@ -71,14 +71,14 @@ public class AlertServiceImpl implements AlertService {
     }
     AlertConfig alertConfig = alertConfigService.getById(alertId);
     try {
-      alert(AlertConfigWithParams.of(alertConfig), alertTemplate);
+      alert(AlertConfigParams.of(alertConfig), alertTemplate);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
     }
   }
 
   @Override
-  public boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate)
+  public boolean alert(AlertConfigParams params, AlertTemplate alertTemplate)
       throws AlertException {
     List<AlertType> alertTypes = AlertType.decode(params.getAlertType());
     if (CollectionUtils.isEmpty(alertTypes)) {

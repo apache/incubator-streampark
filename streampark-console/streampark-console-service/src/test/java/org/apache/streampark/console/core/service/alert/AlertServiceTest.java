@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service.alert;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertDingTalkParams;
 import org.apache.streampark.console.core.bean.AlertLarkParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -53,7 +53,7 @@ import java.util.TimeZone;
 @Disabled("These test cases can't be runnable due to external service is not available.")
 class AlertServiceTest {
   AlertTemplate alertTemplate;
-  AlertConfigWithParams params = new AlertConfigWithParams();
+  AlertConfigParams params = new AlertConfigParams();
   ObjectMapper mapper = new ObjectMapper();
   RestTemplate restTemplate = new RestTemplate();
   private Template template;

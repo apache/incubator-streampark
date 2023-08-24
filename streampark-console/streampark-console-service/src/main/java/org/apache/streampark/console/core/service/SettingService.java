@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.core.bean.EmailConfig;
+import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.entity.Setting;
 
@@ -30,13 +30,21 @@ public interface SettingService extends IService<Setting> {
 
   Map<String, Setting> SETTINGS = new ConcurrentHashMap<>();
 
-  String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
-
+  // docker
   String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
   String KEY_DOCKER_REGISTER_USER = "docker.register.user";
   String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
-
   String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
+
+  // alert.
+  String KEY_ALERT_EMAIL_HOST = "alert.email.host";
+  String KEY_ALERT_EMAIL_PORT = "alert.email.port";
+  String KEY_ALERT_EMAIL_FROM = "alert.email.from";
+  String KEY_ALERT_EMAIL_USERNAME = "alert.email.userName";
+  String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
+  String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
+
+  String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
 
   String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
 
@@ -44,19 +52,11 @@ public interface SettingService extends IService<Setting> {
 
   boolean update(Setting setting);
 
-  String getStreamParkAddress();
-
   MavenConfig getMavenConfig();
 
-  EmailConfig getSenderEmail();
+  DockerConfig getDockerConfig();
 
-  String getDockerRegisterAddress();
-
-  String getDockerRegisterUser();
-
-  String getDockerRegisterPassword();
-
-  String getDockerRegisterNamespace();
+  String getStreamParkAddress();
 
   String getIngressModeDefault();
 }

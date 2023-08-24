@@ -19,7 +19,7 @@ package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.console.core.bean.FlinkConnectorResource;
+import org.apache.streampark.console.core.bean.FlinkConnector;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 
@@ -83,12 +83,12 @@ class DependencyUtilsTest {
     URLClassLoader urlClassLoader = URLClassLoader.newInstance(array);
     ServiceLoader<Factory> serviceLoader = ServiceLoader.load(className, urlClassLoader);
 
-    List<FlinkConnectorResource> connectorResources = new ArrayList<>();
+    List<FlinkConnector> connectorResources = new ArrayList<>();
     try {
       for (Factory factory : serviceLoader) {
         String factoryClassName = factory.getClass().getName();
         if (factories.contains(factoryClassName)) {
-          FlinkConnectorResource connectorResource = new FlinkConnectorResource();
+          FlinkConnector connectorResource = new FlinkConnector();
           connectorResource.setClassName(factoryClassName);
           connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
           Map<String, String> requiredOptions = new HashMap<>(0);
