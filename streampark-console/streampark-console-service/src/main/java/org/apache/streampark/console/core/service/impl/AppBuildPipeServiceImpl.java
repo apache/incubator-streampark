@@ -422,6 +422,14 @@ public class AppBuildPipeServiceImpl
   private BuildPipeline createPipelineInstance(@Nonnull Application app) {
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
     String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
+
+    if (!new File(flinkUserJar).exists()) {
+      Resource resource = resourceService.findByResourceName(app.getTeamId(), app.getJar());
+      if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+        flinkUserJar = resource.getFilePath();
+      }
+    }
+
     ExecutionMode executionMode = app.getExecutionModeEnum();
     String mainClass = ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
     switch (executionMode) {
