@@ -24,14 +24,13 @@ import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, Flin
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 
 import io.fabric8.kubernetes.api.model._
-import io.fabric8.kubernetes.api.model.apiextensions.v1.{CustomResourceDefinition, CustomResourceDefinitionList}
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionList
 import io.fabric8.kubernetes.client.CustomResource
 import org.apache.flink.v1beta1.{FlinkDeployment, FlinkSessionJob}
 import zio.{IO, UIO, ZIO}
 import zio.stream.ZStream
 
 import java.util
-import java.util.stream.Collectors
 
 import scala.collection.convert.ImplicitConversions._
 import scala.jdk.CollectionConverters._
@@ -259,13 +258,10 @@ object CROperator extends CROperator {
       val crds: CustomResourceDefinitionList = client.apiextensions.v1.customResourceDefinitions.list
       val flinkDeploymentCRDName: String     = CustomResource.getCRDName(classOf[FlinkDeployment])
 
-      val flinkDeploymentCRDList: util.List[CustomResourceDefinition] = crds.getItems.stream
-        .filter((crd: CustomResourceDefinition) => crd.getMetadata.getName.equals(flinkDeploymentCRDName))
-        .collect(Collectors.toList)
-      if (flinkDeploymentCRDList == null || flinkDeploymentCRDList.isEmpty())
+      val exists: Boolean = crds.getItems.asScala.exists(crd => crd.getMetadata.getName == flinkDeploymentCRDName)
+
+      if (!exists)
         throw new RuntimeException("The FlinkDeployment CRD is not currently deployed in the k8s cluster")
-
     }
-
   }
 }
