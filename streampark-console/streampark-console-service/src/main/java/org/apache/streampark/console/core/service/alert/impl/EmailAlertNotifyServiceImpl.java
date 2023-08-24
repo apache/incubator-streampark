@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
 import org.apache.streampark.console.core.bean.AlertConfigWithParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
-import org.apache.streampark.console.core.bean.SenderEmail;
+import org.apache.streampark.console.core.bean.EmailConfig;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
@@ -58,7 +58,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
   @Override
   public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template)
       throws AlertException {
-    SenderEmail senderEmail =
+    EmailConfig emailConfig =
         Optional.ofNullable(settingService.getSenderEmail())
             .orElseThrow(() -> new AlertException("Please configure first mail sender"));
     String contacts =
@@ -67,12 +67,11 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
       throw new AlertException("Please configure a valid contacts");
     }
     String[] emails = contacts.split(",");
-    return sendEmail(senderEmail, template, emails);
+    return sendEmail(emailConfig, template, emails);
   }
 
-  private boolean sendEmail(SenderEmail senderEmail, AlertTemplate mail, String... mails)
+  private boolean sendEmail(EmailConfig emailConfig, AlertTemplate mail, String... mails)
       throws AlertException {
-    log.info(mail.getSubject());
     try {
       Map<String, AlertTemplate> out = new HashMap<>(16);
       out.put("mail", mail);
@@ -80,15 +79,15 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
       HtmlEmail htmlEmail = new HtmlEmail();
       htmlEmail.setCharset("UTF-8");
-      htmlEmail.setHostName(senderEmail.getSmtpHost());
-      htmlEmail.setAuthentication(senderEmail.getUserName(), senderEmail.getPassword());
-      htmlEmail.setFrom(senderEmail.getFrom());
-      if (senderEmail.isSsl()) {
+      htmlEmail.setHostName(emailConfig.getSmtpHost());
+      htmlEmail.setAuthentication(emailConfig.getUserName(), emailConfig.getPassword());
+      htmlEmail.setFrom(emailConfig.getFrom());
+      if (emailConfig.isSsl()) {
         htmlEmail.setSSLCheckServerIdentity(true);
         htmlEmail.setSSLOnConnect(true);
-        htmlEmail.setSslSmtpPort(senderEmail.getSmtpPort().toString());
+        htmlEmail.setSslSmtpPort(emailConfig.getSmtpPort().toString());
       } else {
-        htmlEmail.setSmtpPort(senderEmail.getSmtpPort());
+        htmlEmail.setSmtpPort(emailConfig.getSmtpPort());
       }
       htmlEmail.setSubject(mail.getSubject());
       htmlEmail.setHtmlMsg(html);

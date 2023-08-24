@@ -24,6 +24,8 @@ import java.io.RandomAccessFile;
 /** The file utils. */
 public class FileUtils {
 
+  private FileUtils() {}
+
   /**
    * Read the end of the file.
    *
