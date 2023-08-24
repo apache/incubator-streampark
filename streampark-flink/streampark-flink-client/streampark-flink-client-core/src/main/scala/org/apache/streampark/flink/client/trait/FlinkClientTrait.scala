@@ -25,6 +25,7 @@ import org.apache.streampark.common.util.{DeflaterUtils, EnvUtils, Logger}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
+import org.apache.streampark.flink.util.FlinkUtils
 
 import com.google.common.collect.Lists
 import org.apache.commons.cli.{CommandLine, Options}
@@ -247,6 +248,12 @@ trait FlinkClientTrait extends Logger {
         .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
         // python.executable
         .safeSet(PythonOptions.PYTHON_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+
+      val pythonFlinkconnectorJars: String =
+        FlinkUtils.getPythonFlinkconnectorJars(submitRequest.flinkVersion.flinkHome)
+      if (StringUtils.isNotBlank(pythonFlinkconnectorJars)) {
+        flinkConfig.setString(PipelineOptions.JARS.key(), pythonFlinkconnectorJars)
+      }
 
       packageProgram = PackagedProgram.newBuilder
         .setEntryPointClassName(ConfigConst.PYTHON_DRIVER_CLASS_NAME)

@@ -24,6 +24,7 @@ import org.apache.streampark.common.util.{HdfsUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
+import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -108,6 +109,12 @@ object YarnApplicationClient extends YarnClientTrait {
       val argList = new util.ArrayList[String]()
       argList.add("-pym")
       argList.add(pyflinkFile.getName.replace(ConfigConst.PYTHON_SUFFIX, ""))
+
+      val pythonFlinkconnectorJars: String =
+        FlinkUtils.getPythonFlinkconnectorJars(submitRequest.flinkVersion.flinkHome)
+      if (StringUtils.isNotBlank(pythonFlinkconnectorJars)) {
+        flinkConfig.setString(PipelineOptions.JARS.key(), pythonFlinkconnectorJars)
+      }
 
       // yarn.ship-files
       flinkConfig.setString(
