@@ -83,4 +83,12 @@ object FlinkK8sConfig {
     description = "Whether to log the yaml of the generated flink custom resource when submit flink job & cluster"
   )
 
+  // ----- k8s config -----
+
+  val K8S_CONFIG_FILE_PATH: InternalOption = InternalOption(
+    key = "streampark.flink-k8s.config-file-path",
+    defaultValue = "~/.kube/config",
+    classType = classOf[String],
+    description = "K8s Configuration file path"
+  )
 }

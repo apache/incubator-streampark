@@ -17,7 +17,8 @@
 
 package org.apache.streampark.flink.kubernetes.v2
 
-import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.conf.InternalConfigHolder
+import org.apache.streampark.common.util.{FileUtils, Logger}
 import org.apache.streampark.common.zio.ZIOExt.{unsafeRun, IOOps, OptionZIOOps, UIOOps}
 
 import io.fabric8.kubernetes.client._
@@ -25,10 +26,28 @@ import io.fabric8.kubernetes.client.dsl.WatchAndWaitable
 import zio.{durationInt, Fiber, IO, Queue, Ref, Schedule, UIO, ZIO}
 import zio.stream.{UStream, ZStream}
 
+import java.io.File
+
 object K8sTools extends Logger {
 
   /** Create new fabric8 k8s client */
-  def newK8sClient: KubernetesClient = new KubernetesClientBuilder().build
+  def newK8sClient: KubernetesClient = {
+    var config: Config = null
+
+    var k8sConfigFilePath: String = InternalConfigHolder
+      .get[String](FlinkK8sConfig.K8S_CONFIG_FILE_PATH)
+
+    if (k8sConfigFilePath != null) {
+      if (k8sConfigFilePath.startsWith("~")) {
+        val homePath: String = System.getProperty("user.home")
+        k8sConfigFilePath = k8sConfigFilePath.replace("~", homePath)
+      }
+      config = Config.fromKubeconfig(null, FileUtils.readString(new File(k8sConfigFilePath)), null)
+    } else {
+      config = Config.autoConfigure(null)
+    }
+    new KubernetesClientBuilder().withConfig(config).build()
+  }
 
   @inline def usingK8sClient[A](f: KubernetesClient => A): IO[Throwable, A] = ZIO.scoped {
     ZIO
