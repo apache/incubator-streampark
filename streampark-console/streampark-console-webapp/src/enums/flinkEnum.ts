@@ -236,7 +236,7 @@ export enum FailoverStrategyEnum {
 }
 
 export enum RestoreModeEnum {
-  CLAIM = 1,
-  NO_CLAIM = 2,
+  NO_CLAIM = 1,
+  CLAIM = 2,
   LEGACY = 3,
 }
