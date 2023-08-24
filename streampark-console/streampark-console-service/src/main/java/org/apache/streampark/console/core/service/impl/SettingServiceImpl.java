@@ -70,7 +70,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
           new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, setting.getSettingKey());
       this.update(entity, queryWrapper);
 
-      getMavenConfig().updateMavenInternalConfig();
+      getMavenConfig().updateConfig();
 
       Optional<Setting> optional = Optional.ofNullable(SETTINGS.get(setting.getSettingKey()));
       optional.ifPresent(x -> x.setSettingValue(value));

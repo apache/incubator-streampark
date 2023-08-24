@@ -78,7 +78,7 @@ public class MavenConfig {
    * instance variables mvnSettings, mvnRepository, mvnAuthUser, or mvnAuthPassword have non-empty
    * values, they will be updated in the internal configuration.
    */
-  public void updateMavenInternalConfig() {
+  public void updateConfig() {
 
     if (StringUtils.isNotEmpty(mvnSettings)) {
       InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), mvnSettings);

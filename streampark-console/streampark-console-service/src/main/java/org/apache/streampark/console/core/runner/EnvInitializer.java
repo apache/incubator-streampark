@@ -113,7 +113,7 @@ public class EnvInitializer implements ApplicationRunner {
               InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 
-    settingService.getMavenConfig().updateMavenInternalConfig();
+    settingService.getMavenConfig().updateConfig();
 
     InternalConfigHolder.log();
   }
@@ -134,18 +134,16 @@ public class EnvInitializer implements ApplicationRunner {
     Workspace workspace = Workspace.of(storageType);
 
     // 1. prepare workspace dir
-    String[] dirs =
-        new String[] {
-          workspace.APP_UPLOADS(),
-          workspace.APP_WORKSPACE(),
-          workspace.APP_BACKUPS(),
-          workspace.APP_SAVEPOINTS(),
-          workspace.APP_JARS()
-        };
     if (storageType.equals(LFS)) {
       fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
     }
-    Arrays.stream(dirs).forEach(fsOperator::mkdirsIfNotExists);
+    Arrays.asList(
+            workspace.APP_UPLOADS(),
+            workspace.APP_WORKSPACE(),
+            workspace.APP_BACKUPS(),
+            workspace.APP_SAVEPOINTS(),
+            workspace.APP_JARS())
+        .forEach(fsOperator::mkdirsIfNotExists);
 
     // 2. upload jar.
     // 2.1) upload client jar
