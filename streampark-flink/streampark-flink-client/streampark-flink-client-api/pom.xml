@@ -23,39 +23,39 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-client-api_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-client-api</artifactId>
     <name>StreamPark : Flink Client Api</name>
 
     <dependencies>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-proxy_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-proxy</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-packer_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-packer</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-kubernetes</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims-base_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims-base</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

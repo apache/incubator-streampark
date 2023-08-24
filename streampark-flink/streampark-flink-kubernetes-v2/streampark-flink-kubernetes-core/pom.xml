@@ -25,7 +25,7 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-kubernetes-core_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-kubernetes-core</artifactId>
     <name>StreamPark : Flink Kubernetes Integration Core</name>
 
     <properties>
@@ -41,7 +41,7 @@
         <!-- Streampark modules -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
             <scope>provided</scope>
         </dependency>
 
