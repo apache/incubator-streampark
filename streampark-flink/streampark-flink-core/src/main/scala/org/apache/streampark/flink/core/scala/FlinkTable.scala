@@ -29,23 +29,21 @@ import scala.language.implicitConversions
 
 trait FlinkTable extends Logger {
 
-  var jobExecutionResult: JobExecutionResult = _
-
   implicit final lazy val parameter: ParameterTool = context.parameter
 
   implicit var context: TableContext = _
+
+  private[this] def init(args: Array[String]): Unit = {
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
+    context = new TableContext(FlinkTableInitializer.initialize(args, config))
+  }
 
   def main(args: Array[String]): Unit = {
     init(args)
     ready()
     handle()
-    jobExecutionResult = context.start()
+    context.start()
     destroy()
-  }
-
-  private[this] def init(args: Array[String]): Unit = {
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-    context = new TableContext(FlinkTableInitializer.initialize(args, config))
   }
 
   def ready(): Unit = {}

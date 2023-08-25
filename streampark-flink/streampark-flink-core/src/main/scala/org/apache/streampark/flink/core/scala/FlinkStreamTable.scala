@@ -22,7 +22,6 @@ import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 import org.apache.streampark.flink.core.{FlinkTableInitializer, StreamTableContext}
 import org.apache.streampark.flink.core.TableExt
 
-import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{Table, TableConfig}
@@ -40,20 +39,18 @@ trait FlinkStreamTable extends Logger {
 
   implicit var context: StreamTableContext = _
 
-  var jobExecutionResult: JobExecutionResult = _
+  private[this] def init(args: Array[String]): Unit = {
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
+    context = new StreamTableContext(
+      FlinkTableInitializer.initialize(args, configStream, configTable))
+  }
 
   def main(args: Array[String]): Unit = {
     init(args)
     ready()
     handle()
-    jobExecutionResult = context.start()
+    context.start()
     destroy()
-  }
-
-  private[this] def init(args: Array[String]): Unit = {
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
-    context = new StreamTableContext(
-      FlinkTableInitializer.initialize(args, configStream, configTable))
   }
 
   def configStream(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
