@@ -236,8 +236,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         }
     }
 
-    val mode = Try(TableMode.withName(parameter.get(KEY_FLINK_TABLE_MODE))).getOrElse(tableMode)
-    mode match {
+    tableMode match {
       case TableMode.batch =>
         logInfo(s"components should work in $tableMode mode")
         builder.inBatchMode()
