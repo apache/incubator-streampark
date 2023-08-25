@@ -24,7 +24,7 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-common</artifactId>
+    <artifactId>streampark-common_${scala.binary.version}</artifactId>
     <name>StreamPark : Common</name>
 
     <dependencies>

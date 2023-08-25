@@ -23,7 +23,7 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-packer</artifactId>
+    <artifactId>streampark-flink-packer_${scala.binary.version}</artifactId>
     <name>StreamPark : Flink Packer</name>
 
     <properties>
@@ -38,13 +38,13 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common</artifactId>
+            <artifactId>streampark-common_${scala.binary.version}</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes</artifactId>
+            <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 

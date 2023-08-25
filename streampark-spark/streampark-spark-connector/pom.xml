@@ -24,7 +24,7 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-spark-connector</artifactId>
+    <artifactId>streampark-spark-connector_2.12</artifactId>
     <name>StreamPark : Spark Connector</name>
     <packaging>pom</packaging>
 
