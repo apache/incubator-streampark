@@ -22,7 +22,6 @@ import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
-
 import com.google.common.collect.Lists
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -30,6 +29,10 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.flink.v1beta1.FlinkDeploymentSpec.FlinkVersion
+import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, JobDef, JobManagerDef, TaskManagerDef}
+import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
+import org.apache.streampark.flink.kubernetes.v2.operator.FlinkK8sOperator
 
 /** kubernetes native application mode submit */
 object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
@@ -66,9 +69,15 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
       clusterDescriptor = descriptor
       val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
-      clusterClient = clusterDescriptor
-        .deployApplicationCluster(clusterSpecification, applicationConfig)
-        .getClusterClient
+//      clusterClient = clusterDescriptor
+//        .deployApplicationCluster(clusterSpecification, applicationConfig)
+//        .getClusterClient
+
+      val spec = convertFlinkDeploymentDef(submitRequest)
+
+      for {
+        _ <- FlinkK8sOperator.deployApplicationJob(114514, spec)
+      } yield ()
 
       val clusterId = clusterClient.getClusterId
       val result = SubmitResponse(
@@ -102,5 +111,35 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       flinkConf: Configuration): SavepointResponse = {
     flinkConf.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
     super.doTriggerSavepoint(request, flinkConf)
+  }
+
+  def convertFlinkDeploymentDef(submitRequest: SubmitRequest): FlinkDeploymentDef ={
+    val spec = FlinkDeploymentDef (
+      name = submitRequest.appName,
+      namespace = submitRequest.k8sSubmitParam.kubernetesNamespace,
+      image = "flink:" + submitRequest.flinkVersion.version,
+      flinkVersion =  convertflinkVersion(submitRequest.flinkVersion.version),
+      jobManager = JobManagerDef(cpu = 1, submitRequest.properties.get("jobmanager.memory.process.size").toString),
+      taskManager = TaskManagerDef(cpu = 1, submitRequest.properties.get("taskmanager.memory.process.size").toString),
+      job = Some(
+        JobDef(
+          jarURI = submitRequest.userJarFile.getAbsolutePath,
+          parallelism = submitRequest.properties.get("parallelism.default").asInstanceOf[Int]
+        ))
+    )
+    spec
+  }
+
+  def convertflinkVersion(version: String) : FlinkVersion ={
+    val parts = version.split("\\.")
+    val extracted = parts(0) + parts(1)
+    extracted match {
+      case "1.17" => FlinkVersion.V1_17
+      case "1.16" => FlinkVersion.V1_16
+      case "1.15" => FlinkVersion.V1_15
+      case "1.14" => FlinkVersion.V1_14
+      case "1.13" => FlinkVersion.V1_13
+      case _      => null
+    }
   }
 }
