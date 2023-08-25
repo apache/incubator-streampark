@@ -47,7 +47,7 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
 
   override def execute(jobName: String): JobExecutionResult = {
     printLogo(s"FlinkTable $jobName Starting...")
-    tableEnv.execute(jobName)
+    null
   }
 
   @deprecated override def fromTableSource(source: TableSource[_]): Table =
