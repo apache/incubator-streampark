@@ -21,6 +21,9 @@ import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_NAME, KEY_FLINK_AP
 import org.apache.streampark.common.util.DeflaterUtils
 
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.configuration.PipelineOptions
+import org.apache.flink.table.api.TableEnvironment
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
 import scala.util.Try
 
@@ -28,7 +31,7 @@ object EnhancerImplicit {
 
   implicit class EnhanceParameterTool(parameterTool: ParameterTool) {
 
-    def getAppName(name: String = null, required: Boolean = false): String = {
+    private[flink] def getAppName(name: String = null, required: Boolean = false): String = {
       val appName = name match {
         case null =>
           Try(DeflaterUtils.unzipString(parameterTool.get(KEY_APP_NAME(), null)))
@@ -41,6 +44,29 @@ object EnhancerImplicit {
       appName
     }
 
+  }
+
+  implicit class EnhanceTableEnvironment(env: TableEnvironment) {
+
+    private[flink] def setAppName(implicit parameter: ParameterTool): TableEnvironment = {
+      val appName = parameter.getAppName()
+      if (appName != null) {
+        env.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
+      }
+      env
+    }
+
+  }
+
+  implicit class EnhanceStreamExecutionEnvironment(env: StreamTableEnvironment) {
+
+    private[flink] def setAppName(implicit parameter: ParameterTool): StreamTableEnvironment = {
+      val appName = parameter.getAppName()
+      if (appName != null) {
+        env.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
+      }
+      env
+    }
   }
 
 }
