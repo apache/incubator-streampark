@@ -33,7 +33,7 @@ import java.io.Serializable;
 @Schema(name = "AlertConfig")
 @Data
 @Slf4j
-public class AlertConfigWithParams implements Serializable {
+public class AlertConfigParams implements Serializable {
 
   @Schema(example = "1")
   private Long id;
@@ -65,11 +65,11 @@ public class AlertConfigWithParams implements Serializable {
   @Schema(description = "lark alert parameters")
   private AlertLarkParams larkParams;
 
-  public static AlertConfigWithParams of(AlertConfig config) {
+  public static AlertConfigParams of(AlertConfig config) {
     if (config == null) {
       return null;
     }
-    AlertConfigWithParams params = new AlertConfigWithParams();
+    AlertConfigParams params = new AlertConfigParams();
     BeanUtils.copyProperties(
         config,
         params,

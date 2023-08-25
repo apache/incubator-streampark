@@ -23,14 +23,14 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-client-core</artifactId>
     <name>StreamPark : Flink Client Core</name>
 
     <dependencies>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-client-api_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-client-api</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -39,14 +39,14 @@
           so a full build dependencies is required. -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-kubernetes</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

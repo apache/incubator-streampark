@@ -28,7 +28,6 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.FileUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
@@ -72,6 +71,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -233,24 +234,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   public List<String> modules(Long id) {
     Project project = getById(id);
     Utils.notNull(project);
-    BuildState buildState = BuildState.of(project.getBuildState());
-    if (BuildState.SUCCESSFUL.equals(buildState)) {
-      File appHome = project.getDistHome();
-      if (appHome.exists()) {
-        List<String> list = new ArrayList<>();
-        File[] files = appHome.listFiles();
-        if (CommonUtils.notEmpty(files)) {
-          for (File file : files) {
-            list.add(file.getName());
-          }
-        }
-        return list;
-      } else {
-        return Collections.emptyList();
-      }
-    } else {
+
+    if (!BuildState.SUCCESSFUL.equals(BuildState.of(project.getBuildState()))
+        || !project.getDistHome().exists()) {
       return Collections.emptyList();
     }
+
+    File[] files = project.getDistHome().listFiles();
+    return files == null
+        ? Collections.emptyList()
+        : Stream.of(files).map(File::getName).collect(Collectors.toList());
   }
 
   @Override

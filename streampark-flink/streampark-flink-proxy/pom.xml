@@ -23,14 +23,14 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-proxy_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-proxy</artifactId>
     <name>StreamPark : Flink Proxy</name>
 
     <dependencies>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
             <scope>provided</scope>
         </dependency>
 

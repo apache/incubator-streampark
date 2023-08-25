@@ -28,8 +28,8 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
-import org.apache.streampark.console.core.bean.FlinkConnectorResource;
-import org.apache.streampark.console.core.bean.Pom;
+import org.apache.streampark.console.core.bean.FlinkConnector;
+import org.apache.streampark.console.core.bean.MavenPom;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
@@ -123,7 +123,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     // check
     Dependency dependency = Dependency.toDependency(resourceStr);
     List<String> jars = dependency.getJar();
-    List<Pom> poms = dependency.getPom();
+    List<MavenPom> poms = dependency.getPom();
 
     ApiAlertException.throwIfTrue(
         jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
@@ -140,8 +140,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     } else {
       String connector = resource.getConnector();
       ApiAlertException.throwIfTrue(connector == null, "the flink connector is null.");
-      FlinkConnectorResource connectorResource =
-          JacksonUtils.read(connector, FlinkConnectorResource.class);
+      FlinkConnector connectorResource = JacksonUtils.read(connector, FlinkConnector.class);
       resource.setResourceName(connectorResource.getFactoryIdentifier());
       if (connectorResource.getRequiredOptions() != null) {
         resource.setConnectorRequiredOptions(
@@ -298,7 +297,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         return RestResponse.success().data(resp);
       case CONNECTOR:
         // 1) get connector id
-        FlinkConnectorResource connectorResource;
+        FlinkConnector connectorResource;
 
         ApiAlertException.throwIfFalse(
             ResourceType.CONNECTOR.equals(resourceParam.getResourceType()),
@@ -384,7 +383,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     return getBaseMapper().exists(lambdaQueryWrapper);
   }
 
-  private FlinkConnectorResource getConnectorResource(List<File> jars, List<String> factories) {
+  private FlinkConnector getConnectorResource(List<File> jars, List<String> factories) {
     Class<Factory> className = Factory.class;
     URL[] array =
         jars.stream()
@@ -403,7 +402,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       for (Factory factory : serviceLoader) {
         String factoryClassName = factory.getClass().getName();
         if (factories.contains(factoryClassName)) {
-          FlinkConnectorResource connectorResource = new FlinkConnectorResource();
+          FlinkConnector connectorResource = new FlinkConnector();
           try {
             connectorResource.setClassName(factoryClassName);
             connectorResource.setFactoryIdentifier(factory.factoryIdentifier());

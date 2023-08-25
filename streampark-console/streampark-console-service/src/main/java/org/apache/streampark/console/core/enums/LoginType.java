@@ -18,11 +18,13 @@
 package org.apache.streampark.console.core.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 /** The user login type. */
+@Getter
 public enum LoginType {
 
   /** sign in with password */
@@ -38,10 +40,6 @@ public enum LoginType {
 
   LoginType(int code) {
     this.code = code;
-  }
-
-  public int getCode() {
-    return code;
   }
 
   public static LoginType of(Integer code) {

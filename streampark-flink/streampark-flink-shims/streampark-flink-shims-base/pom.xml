@@ -25,14 +25,14 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-shims-base_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-shims-base</artifactId>
     <name>StreamPark : Flink Shims Base</name>
 
     <dependencies>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
         </dependency>
 
         <!--flink base-->

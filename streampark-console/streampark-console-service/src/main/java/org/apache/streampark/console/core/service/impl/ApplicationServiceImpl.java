@@ -54,7 +54,7 @@ import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.AppExistsState;
 import org.apache.streampark.console.core.enums.CandidateType;
-import org.apache.streampark.console.core.enums.ChangedType;
+import org.apache.streampark.console.core.enums.ChangeTypeEnum;
 import org.apache.streampark.console.core.enums.CheckPointType;
 import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.FlinkAppState;
@@ -1000,12 +1000,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       FlinkSql targetFlinkSql = new FlinkSql(appParam);
 
       // judge sql and dependency has changed
-      ChangedType changedType = copySourceFlinkSql.checkChange(targetFlinkSql);
+      ChangeTypeEnum changeTypeEnum = copySourceFlinkSql.checkChange(targetFlinkSql);
 
-      log.info("updateFlinkSqlJob changedType: {}", changedType);
+      log.info("updateFlinkSqlJob changeTypeEnum: {}", changeTypeEnum);
 
       // if has been changed
-      if (changedType.hasChanged()) {
+      if (changeTypeEnum.hasChanged()) {
         // check if there is a candidate version for the newly added record
         FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
         // If the candidate version of the new record exists, it will be deleted directly,
@@ -1025,7 +1025,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         FlinkSql sql = new FlinkSql(appParam);
         flinkSqlService.create(sql);
-        if (changedType.isDependencyChanged()) {
+        if (changeTypeEnum.isDependencyChanged()) {
           application.setBuild(true);
         }
       } else {
@@ -1299,6 +1299,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getSavePointed(),
             appParam.getDrain(),
             customSavepoint,
+            appParam.getNativeFormat(),
             application.getK8sNamespace());
 
     final Date triggerTime = new Date();

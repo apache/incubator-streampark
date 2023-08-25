@@ -279,6 +279,13 @@ public class ApplicationController {
         in = ParameterIn.QUERY,
         required = true,
         example = "false",
+        schema = @Schema(implementation = boolean.class, defaultValue = "false")),
+    @Parameter(
+        name = "nativeFormat",
+        description = "use savepoint native format",
+        in = ParameterIn.QUERY,
+        required = true,
+        example = "false",
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @PermissionAction(id = "#app.id", type = PermissionType.APP)
@@ -418,7 +425,7 @@ public class ApplicationController {
     } else if (pathPart == null) {
       error =
           "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-    } else if (pathPart.length() == 0 || "/".equals(pathPart)) {
+    } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
       error = "Cannot use the root directory for checkpoints.";
     }
     if (error != null) {

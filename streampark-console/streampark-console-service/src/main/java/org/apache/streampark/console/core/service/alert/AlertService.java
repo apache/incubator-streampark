@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.alert;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.console.base.exception.AlertException;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -34,5 +34,5 @@ public interface AlertService {
 
   void alert(FlinkCluster flinkCluster, ClusterState clusterState);
 
-  boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate) throws AlertException;
+  boolean alert(AlertConfigParams params, AlertTemplate alertTemplate) throws AlertException;
 }

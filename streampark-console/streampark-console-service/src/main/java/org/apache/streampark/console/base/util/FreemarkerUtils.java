@@ -40,6 +40,8 @@ public class FreemarkerUtils {
     CONFIGURATION.setDefaultEncoding("UTF-8");
   }
 
+  private FreemarkerUtils() {}
+
   public static Template loadTemplateFile(String fileName) throws ExceptionInInitializerError {
     try {
       return CONFIGURATION.getTemplate(fileName);

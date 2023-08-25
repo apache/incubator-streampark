@@ -17,42 +17,14 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.commons.lang3.StringUtils;
-
 import lombok.Data;
 
-import java.util.Objects;
+import java.util.Map;
 
 @Data
-public class Pom {
-  private String groupId;
-  private String artifactId;
-  private String version;
-  private String classifier;
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    return this.toString().equals(o.toString());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(groupId, artifactId, version, classifier);
-  }
-
-  @Override
-  public String toString() {
-    return String.format(
-        "%s:%s:%s%s",
-        groupId,
-        artifactId,
-        version,
-        StringUtils.isEmpty(classifier) ? "" : ":".concat(classifier));
-  }
+public class FlinkConnector {
+  private String className;
+  private String factoryIdentifier;
+  Map<String, String> requiredOptions;
+  Map<String, String> optionalOptions;
 }

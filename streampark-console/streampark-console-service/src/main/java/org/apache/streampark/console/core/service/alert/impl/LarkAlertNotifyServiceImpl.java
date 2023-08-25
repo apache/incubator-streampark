@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertLarkParams;
 import org.apache.streampark.console.core.bean.AlertLarkRobotResponse;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -69,7 +69,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
   }
 
   @Override
-  public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate)
+  public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate alertTemplate)
       throws AlertException {
     AlertLarkParams alertLarkParams = alertConfig.getLarkParams();
     if (alertLarkParams.getIsAtAll()) {
