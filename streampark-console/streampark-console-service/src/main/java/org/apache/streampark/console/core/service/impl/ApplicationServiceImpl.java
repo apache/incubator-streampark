@@ -74,7 +74,6 @@ import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.service.LogClientService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavePointService;
@@ -213,8 +212,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private VariableService variableService;
-
-  @Autowired private LogClientService logClient;
 
   @Autowired private YarnQueueService yarnQueueService;
 
@@ -504,37 +501,38 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Override
   public boolean existsByTeamId(Long teamId) {
-    return baseMapper.existsByTeamId(teamId);
+    return baseMapper.exists(
+        new LambdaQueryWrapper<Application>().eq(Application::getTeamId, teamId));
   }
 
   @Override
   public boolean existsByUserId(Long userId) {
-    return baseMapper.existsByUserId(userId);
+    return baseMapper.exists(
+        new LambdaQueryWrapper<Application>().eq(Application::getUserId, userId));
   }
 
   @Override
   public boolean existsRunningJobByClusterId(Long clusterId) {
-    boolean exists = baseMapper.existsRunningJobByClusterId(clusterId);
-    if (exists) {
-      return true;
-    }
-    for (Application application : FlinkHttpWatcher.getWatchingApps()) {
-      if (clusterId.equals(application.getFlinkClusterId())
-          && FlinkAppState.RUNNING.equals(application.getFlinkAppStateEnum())) {
-        return true;
-      }
-    }
-    return false;
+    return baseMapper.existsRunningJobByClusterId(clusterId)
+        || FlinkHttpWatcher.getWatchingApps().stream()
+            .anyMatch(
+                application ->
+                    clusterId.equals(application.getFlinkClusterId())
+                        && FlinkAppState.RUNNING.equals(application.getFlinkAppStateEnum()));
   }
 
   @Override
   public boolean existsJobByClusterId(Long clusterId) {
-    return baseMapper.existsJobByClusterId(clusterId);
+    return baseMapper.exists(
+        new LambdaQueryWrapper<Application>().eq(Application::getFlinkClusterId, clusterId));
   }
 
   @Override
   public Integer countJobsByClusterId(Long clusterId) {
-    return baseMapper.countJobsByClusterId(clusterId);
+    return baseMapper
+        .selectCount(
+            new LambdaQueryWrapper<Application>().eq(Application::getFlinkClusterId, clusterId))
+        .intValue();
   }
 
   @Override
@@ -544,9 +542,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Override
   public boolean existsJobByFlinkEnvId(Long flinkEnvId) {
-    LambdaQueryWrapper<Application> lambdaQueryWrapper =
-        new LambdaQueryWrapper<Application>().eq(Application::getVersionId, flinkEnvId);
-    return getBaseMapper().exists(lambdaQueryWrapper);
+    return baseMapper.exists(
+        new LambdaQueryWrapper<Application>().eq(Application::getVersionId, flinkEnvId));
   }
 
   @Override
@@ -623,7 +620,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                   future.cancel(true);
                 }
                 if (path != null) {
-                  return logClient.rollViewLog(path, offset, limit);
+                  return org.apache.streampark.console.base.util.FileUtils.rollViewLog(
+                      path, offset, limit);
                 }
                 return null;
               })
@@ -652,7 +650,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     return ParameterCli.read(args);
   }
 
-  /** Check if the current jobName and other key identifiers already exist in db and yarn/k8s */
+  /**
+   * Check if the current jobName and other key identifiers already exist in the database and
+   * yarn/k8s.
+   *
+   * @param appParam The application to check for existence.
+   * @return The state of the application's existence.
+   */
   @Override
   public AppExistsState checkExists(Application appParam) {
 
@@ -672,14 +676,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return AppExistsState.IN_DB;
       }
 
-      FlinkAppState state = FlinkAppState.of(app.getState());
       // has stopped status
-      if (state.equals(FlinkAppState.ADDED)
-          || state.equals(FlinkAppState.CREATED)
-          || state.equals(FlinkAppState.FAILED)
-          || state.equals(FlinkAppState.CANCELED)
-          || state.equals(FlinkAppState.LOST)
-          || state.equals(FlinkAppState.KILLED)) {
+      if (FlinkAppState.isEndState(app.getState())) {
         // check whether jobName exists on yarn
         if (ExecutionMode.isYarnMode(appParam.getExecutionMode())
             && YarnUtils.isContains(appParam.getJobName())) {
@@ -758,7 +756,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   private boolean existsByJobName(String jobName) {
-    return this.baseMapper.existsByJobName(jobName);
+    return baseMapper.exists(
+        new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
   }
 
   @SuppressWarnings("checkstyle:WhitespaceAround")
@@ -879,7 +878,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
 
-    // 2) k8s podTemplate changed..
+    // 2) k8s podTemplate changed.
     if (application.getBuild() && ExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
       if (ObjectUtils.trimNoEquals(
               application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
@@ -1386,7 +1385,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             "This state.savepoints.dir value "
                 + savepointPath
                 + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-      } else if (pathPart.length() == 0 || "/".equals(pathPart)) {
+      } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
         error =
             "This state.savepoints.dir value "
                 + savepointPath
