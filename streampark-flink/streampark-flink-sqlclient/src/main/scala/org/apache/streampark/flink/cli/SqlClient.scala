@@ -26,30 +26,42 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.ExecutionOptions
 
 import scala.language.implicitConversions
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object SqlClient extends App {
 
-  val parameterTool = ParameterTool.fromArgs(args)
+  private[this] val parameterTool = ParameterTool.fromArgs(args)
 
-  val flinkSql = {
+  private[this] val flinkSql = {
     val sql = parameterTool.get(KEY_FLINK_SQL())
     require(sql != null && sql.trim.nonEmpty, "Usage: flink sql cannot be null")
-    Try(DeflaterUtils.unzipString(sql)).getOrElse(
-      throw new IllegalArgumentException("Usage: flink sql is invalid or null, please check"))
+    Try(DeflaterUtils.unzipString(sql)) match {
+      case Success(value) => value
+      case Failure(_) =>
+        throw new IllegalArgumentException("Usage: flink sql is invalid or null, please check")
+    }
   }
 
-  val sets = SqlCommandParser.parseSQL(flinkSql).filter(_.command == SqlCommand.SET)
+  private[this] val sets = SqlCommandParser.parseSQL(flinkSql).filter(_.command == SqlCommand.SET)
 
-  val mode = sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
-    case Some(e) => e.operands(1)
+  private[this] val defaultMode = "streaming"
+
+  private[this] val mode = sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
+    case Some(e) =>
+      // 1) flink sql execution.runtime-mode has highest priority
+      e.operands(1)
     case None =>
-      val appConf = parameterTool.get(KEY_APP_CONF(), null)
-      val defaultMode = "streaming"
-      if (appConf == null) defaultMode
-      else {
-        val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(appConf.drop(7)))
-        parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode)
+      // 2) dynamic properties execution.runtime-mode
+      parameterTool.get(ExecutionOptions.RUNTIME_MODE.key(), null) match {
+        case null =>
+          parameterTool.get(KEY_APP_CONF(), null) match {
+            case null => defaultMode
+            case f =>
+              val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(f.drop(7)))
+              // 3) application conf execution.runtime-mode
+              parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode)
+          }
+        case m => m
       }
   }
 
