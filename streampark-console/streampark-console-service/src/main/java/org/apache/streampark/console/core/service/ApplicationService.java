@@ -98,15 +98,15 @@ public interface ApplicationService extends IService<Application> {
 
   void forcedStop(Application app);
 
-  boolean existsRunningJobByClusterId(Long clusterId);
+  boolean existsRunningByClusterId(Long clusterId);
 
-  boolean existsJobByClusterId(Long clusterId);
+  boolean existsByClusterId(Long clusterId);
 
-  Integer countJobsByClusterId(Long clusterId);
+  Integer countByClusterId(Long clusterId);
 
-  Integer countAffectedJobsByClusterId(Long clusterId, String dbType);
+  Integer countAffectedByClusterId(Long clusterId, String dbType);
 
-  boolean existsJobByFlinkEnvId(Long flinkEnvId);
+  boolean existsByFlinkEnvId(Long flinkEnvId);
 
   List<String> getRecentK8sNamespace();
 
