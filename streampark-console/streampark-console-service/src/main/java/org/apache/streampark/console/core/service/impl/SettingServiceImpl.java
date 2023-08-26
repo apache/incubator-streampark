@@ -28,34 +28,32 @@ import org.apache.commons.lang3.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import javax.annotation.PostConstruct;
+
 import java.util.Optional;
 
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-    implements SettingService, ApplicationListener<ContextRefreshedEvent> {
+    implements SettingService {
+
+  private final Setting emptySetting = new Setting();
+
+  @PostConstruct
+  public void loadSettings() {
+    list().forEach(x -> SETTINGS.put(x.getSettingKey(), x));
+  }
 
   @Override
   public Setting get(String key) {
     LambdaQueryWrapper<Setting> queryWrapper =
         new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, key);
     return this.getOne(queryWrapper);
-  }
-
-  private final Setting emptySetting = new Setting();
-
-  @Override
-  public void onApplicationEvent(ContextRefreshedEvent event) {
-    List<Setting> settingList = super.list();
-    settingList.forEach(x -> SETTINGS.put(x.getSettingKey(), x));
   }
 
   @Override
