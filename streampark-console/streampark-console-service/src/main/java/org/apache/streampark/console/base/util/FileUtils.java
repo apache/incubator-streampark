@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,10 +96,7 @@ public class FileUtils {
       File file = new File(path);
       if (file.exists() && file.isFile()) {
         try (Stream<String> stream = Files.lines(Paths.get(path))) {
-          List<String> lines = stream.skip(offset).limit(limit).collect(Collectors.toList());
-          StringBuilder builder = new StringBuilder();
-          lines.forEach(line -> builder.append(line).append("\r\n"));
-          return builder.toString();
+          return stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n"));
         }
       }
       return null;
