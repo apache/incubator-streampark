@@ -512,7 +512,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public boolean existsRunningJobByClusterId(Long clusterId) {
+  public boolean existsRunningByClusterId(Long clusterId) {
     return baseMapper.existsRunningJobByClusterId(clusterId)
         || FlinkHttpWatcher.getWatchingApps().stream()
             .anyMatch(
@@ -522,13 +522,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public boolean existsJobByClusterId(Long clusterId) {
+  public boolean existsByClusterId(Long clusterId) {
     return baseMapper.exists(
         new LambdaQueryWrapper<Application>().eq(Application::getFlinkClusterId, clusterId));
   }
 
   @Override
-  public Integer countJobsByClusterId(Long clusterId) {
+  public Integer countByClusterId(Long clusterId) {
     return baseMapper
         .selectCount(
             new LambdaQueryWrapper<Application>().eq(Application::getFlinkClusterId, clusterId))
@@ -536,12 +536,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public Integer countAffectedJobsByClusterId(Long clusterId, String dbType) {
-    return baseMapper.countAffectedJobsByClusterId(clusterId, dbType);
+  public Integer countAffectedByClusterId(Long clusterId, String dbType) {
+    return baseMapper.countAffectedByClusterId(clusterId, dbType);
   }
 
   @Override
-  public boolean existsJobByFlinkEnvId(Long flinkEnvId) {
+  public boolean existsByFlinkEnvId(Long flinkEnvId) {
     return baseMapper.exists(
         new LambdaQueryWrapper<Application>().eq(Application::getVersionId, flinkEnvId));
   }

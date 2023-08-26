@@ -164,7 +164,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
     // 3.check if it is being used by any application
     ApiAlertException.throwIfTrue(
-        applicationService.existsJobByFlinkEnvId(flinkEnv.getId()),
+        applicationService.existsByFlinkEnvId(flinkEnv.getId()),
         "The flink home is still in use by some application, please check.");
   }
 }

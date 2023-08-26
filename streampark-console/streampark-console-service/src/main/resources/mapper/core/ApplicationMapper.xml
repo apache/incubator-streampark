@@ -93,7 +93,7 @@
              limit 1
     </select>
 
-    <select id="countAffectedJobsByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+    <select id="countAffectedByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
         select
             count(1)
         from t_flink_app
