@@ -476,7 +476,7 @@ trait FlinkClientTrait extends Logger {
     if (submitRequest.properties.nonEmpty) {
       if (submitRequest.properties.containsKey(ExecutionOptions.RUNTIME_MODE.key())) {
         programArgs += s"--${ExecutionOptions.RUNTIME_MODE.key()}"
-        programArgs += submitRequest.properties.get(ExecutionOptions.RUNTIME_MODE.key())
+        programArgs += submitRequest.properties.get(ExecutionOptions.RUNTIME_MODE.key()).toString
       }
     }
 
