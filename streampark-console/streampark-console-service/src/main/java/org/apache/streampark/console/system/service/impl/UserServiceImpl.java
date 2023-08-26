@@ -27,7 +27,7 @@ import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.LoginType;
-import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;

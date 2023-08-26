@@ -36,7 +36,7 @@ import org.apache.streampark.console.core.enums.BuildState;
 import org.apache.streampark.console.core.enums.GitCredential;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;

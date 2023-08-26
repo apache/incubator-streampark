@@ -24,7 +24,7 @@ import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.mapper.AlertConfigMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 
 import org.apache.commons.collections.CollectionUtils;

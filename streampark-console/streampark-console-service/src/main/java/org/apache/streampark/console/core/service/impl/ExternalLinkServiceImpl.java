@@ -22,7 +22,7 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ExternalLink;
 import org.apache.streampark.console.core.enums.PlaceholderType;
 import org.apache.streampark.console.core.mapper.ExternalLinkMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.ExternalLinkService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

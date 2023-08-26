@@ -28,6 +28,7 @@ import org.apache.streampark.console.core.entity.Effective;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.EffectiveType;
+import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.impl.SavePointServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -56,7 +57,8 @@ class SavePointServiceTest extends SpringUnitTestBase {
 
   @Autowired private FlinkEnvService flinkEnvService;
   @Autowired private FlinkClusterService flinkClusterService;
-  @Autowired ApplicationService applicationService;
+  @Autowired
+  ApplicationService applicationService;
 
   @AfterEach
   void cleanTestRecordsInDatabase() {

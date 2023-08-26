@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineType;
 import org.apache.streampark.console.core.enums.ResourceType;
 import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
