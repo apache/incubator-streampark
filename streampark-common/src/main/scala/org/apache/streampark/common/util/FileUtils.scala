@@ -197,8 +197,11 @@ object FileUtils {
     var readSize = maxSize
     new RandomAccessFile(file, "r").autoClose(
       raFile => {
-        if (raFile.length > maxSize) raFile.seek(raFile.length - maxSize)
-        else if (raFile.length < maxSize) readSize = raFile.length.toInt
+        if (raFile.length > maxSize) {
+          raFile.seek(raFile.length - maxSize)
+        } else if (raFile.length < maxSize) {
+          readSize = raFile.length.toInt
+        }
         val fileContent = new Array[Byte](readSize.toInt)
         raFile.read(fileContent)
         fileContent
