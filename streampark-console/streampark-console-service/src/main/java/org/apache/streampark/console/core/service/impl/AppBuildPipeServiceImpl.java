@@ -424,7 +424,7 @@ public class AppBuildPipeServiceImpl
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
     String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
 
-    if (!new File(flinkUserJar).exists()) {
+    if (!FileUtils.exists(flinkUserJar)) {
       Resource resource = resourceService.findByResourceName(app.getTeamId(), app.getJar());
       if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
         flinkUserJar = resource.getFilePath();

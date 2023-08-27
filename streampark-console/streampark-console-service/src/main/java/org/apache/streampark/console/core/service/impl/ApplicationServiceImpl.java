@@ -29,6 +29,7 @@ import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -97,7 +98,6 @@ import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CoreOptions;
@@ -129,7 +129,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
@@ -619,9 +618,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (!future.isDone()) {
                   future.cancel(true);
                 }
-                if (path != null) {
-                  return org.apache.streampark.console.base.util.FileUtils.rollViewLog(
-                      path, offset, limit);
+                if (FileUtils.exists(path)) {
+                  return FileUtils.tailOf(path, offset, limit);
                 }
                 return null;
               })
@@ -738,7 +736,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           jarPath = resource.getFilePath();
         }
       }
-      appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
+      appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
     }
 
     if (save(appParam)) {
@@ -866,7 +864,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
         if (jarFile.exists()) {
           try {
-            long checkSum = FileUtils.checksumCRC32(jarFile);
+            long checkSum = org.apache.commons.io.FileUtils.checksumCRC32(jarFile);
             if (!Objects.equals(checkSum, application.getJarCheckSum())) {
               application.setBuild(true);
             }
@@ -1144,7 +1142,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public String readConf(Application appParam) throws IOException {
     File file = new File(appParam.getConfig());
-    String conf = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+    String conf = FileUtils.readFile(file);
     return Base64.getEncoder().encodeToString(conf.getBytes());
   }
 
