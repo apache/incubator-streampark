@@ -24,7 +24,6 @@ import java.net.URL
 import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
 import java.util.jar.{JarFile, JarInputStream}
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object Utils {
@@ -94,8 +93,7 @@ object Utils {
     new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
   }
 
-  def copyProperties(original: Properties, target: Properties): Unit =
-    original.foreach(x => target.put(x._1, x._2))
+  def copyProperties(original: Properties, target: Properties): Unit = target.putAll(original)
 
   /** get os name */
   def getOsName: String = OS
@@ -117,9 +115,7 @@ object Utils {
     } catch {
       case e: Throwable if excFunc != null => excFunc(e)
     } finally {
-      if (handle != null) {
-        handle.close()
-      }
+      close(handle)
     }
   }
 
@@ -162,9 +158,9 @@ object Utils {
     else {
       try {
         val stm = new StringWriter
-        val wrt = new PrintWriter(stm)
-        e.printStackTrace(wrt)
-        wrt.close()
+        val writer = new PrintWriter(stm)
+        e.printStackTrace(writer)
+        close(writer)
         stm.toString
       } catch {
         case _: Throwable => e.getClass.getName + " (error while printing stack trace)"
