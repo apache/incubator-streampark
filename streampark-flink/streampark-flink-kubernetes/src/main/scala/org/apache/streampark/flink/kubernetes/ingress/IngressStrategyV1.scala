@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.ImplicitsUtils._
 
 import io.fabric8.kubernetes.api.model.networking.v1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
@@ -34,7 +34,7 @@ class IngressStrategyV1 extends IngressStrategy {
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
 
-    Utils.using(new DefaultKubernetesClient) {
+    new DefaultKubernetesClient().autoClose(
       client =>
         Try {
           Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
@@ -45,14 +45,12 @@ class IngressStrategyV1 extends IngressStrategy {
         }.recover {
           case e =>
             throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
-        }.get
-    }
-
+        }.get)
   }
 
   override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    Utils.using(new DefaultKubernetesClient) {
-      client =>
+    new DefaultKubernetesClient().autoClose(
+      client => {
         val ownerReference = getOwnerReference(nameSpace, clusterId, client)
         val ingress = new IngressBuilder()
           .withNewMetadata()
@@ -94,6 +92,7 @@ class IngressStrategyV1 extends IngressStrategy {
           .endSpec()
           .build()
         client.network.v1.ingresses().inNamespace(nameSpace).create(ingress)
-    }
+      })
   }
+
 }

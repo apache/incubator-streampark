@@ -16,6 +16,8 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.ImplicitsUtils._
+
 import java.io._
 import java.net.URL
 import java.nio.ByteBuffer
@@ -28,7 +30,7 @@ import java.util.stream.Collectors
 import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
-object FileUtils extends org.apache.commons.io.FileUtils {
+object FileUtils {
 
   private[this] def bytesToHexString(src: Array[Byte]): String = {
     val stringBuilder = new mutable.StringBuilder
@@ -48,12 +50,12 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     if (input == null) {
       throw new RuntimeException("The inputStream can not be null")
     }
-    Utils.using(input) {
-      in =>
+    input.autoClose(
+      in => {
         val b = new Array[Byte](4)
         in.read(b, 0, b.length)
         bytesToHexString(b)
-    } == "504B0304"
+      }) == "504B0304"
   }
 
   def isJarFileType(file: File): Boolean = {
@@ -150,16 +152,18 @@ object FileUtils extends org.apache.commons.io.FileUtils {
 
   @throws[IOException]
   def readInputStream(in: InputStream, array: Array[Byte]): Unit = {
-    var toRead = array.length
-    var ret = 0
-    var off = 0
-    while (toRead > 0) {
-      ret = in.read(array, off, toRead)
-      if (ret < 0) throw new IOException("Bad inputStream, premature EOF")
-      toRead -= ret
-      off += ret
-    }
-    Utils.close(in)
+    in.autoClose(
+      is => {
+        var toRead = array.length
+        var ret = 0
+        var off = 0
+        while (toRead > 0) {
+          ret = is.read(array, off, toRead)
+          if (ret < 0) throw new IOException("Bad inputStream, premature EOF")
+          toRead -= ret
+          off += ret
+        }
+      })
   }
 
   @throws[IOException]
@@ -169,10 +173,13 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     } else {
       val len = file.length
       val array = new Array[Byte](len.toInt)
-      val is = Files.newInputStream(file.toPath)
-      readInputStream(is, array)
-      Utils.close(is)
-      new String(array, StandardCharsets.UTF_8)
+      Files
+        .newInputStream(file.toPath)
+        .autoClose(
+          is => {
+            readInputStream(is, array)
+            new String(array, StandardCharsets.UTF_8)
+          })
     }
   }
 
@@ -188,14 +195,14 @@ object FileUtils extends org.apache.commons.io.FileUtils {
   @throws[IOException]
   def readEndOfFile(file: File, maxSize: Long): Array[Byte] = {
     var readSize = maxSize
-    Utils.using(new RandomAccessFile(file, "r")) {
-      raFile =>
+    new RandomAccessFile(file, "r").autoClose(
+      raFile => {
         if (raFile.length > maxSize) raFile.seek(raFile.length - maxSize)
         else if (raFile.length < maxSize) readSize = raFile.length.toInt
         val fileContent = new Array[Byte](readSize.toInt)
         raFile.read(fileContent)
         fileContent
-    }
+      })
   }
 
   /**
@@ -220,14 +227,14 @@ object FileUtils extends org.apache.commons.io.FileUtils {
       throw new IllegalArgumentException(
         s"The startOffset $startOffset is great than the file length ${file.length}")
     }
-    Utils.using(new RandomAccessFile(file, "r")) {
-      raFile =>
+    new RandomAccessFile(file, "r").autoClose(
+      raFile => {
         val readSize = Math.min(maxSize, file.length - startOffset)
         raFile.seek(startOffset)
         val fileContent = new Array[Byte](readSize.toInt)
         raFile.read(fileContent)
         fileContent
-    }
+      })
   }
 
   /**
@@ -245,9 +252,9 @@ object FileUtils extends org.apache.commons.io.FileUtils {
   def tailOf(path: String, offset: Int, limit: Int): String = try {
     val file = new File(path)
     if (file.exists && file.isFile) {
-      Utils.using(Files.lines(Paths.get(path))) {
-        stream => stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n"))
-      }
+      Files
+        .lines(Paths.get(path))
+        .autoClose(stream => stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n")))
     }
     null
   }

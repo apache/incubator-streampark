@@ -20,7 +20,7 @@ package org.apache.streampark.flink.packer.pipeline.impl
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.fs.{FsOperator, HdfsOperator, LfsOperator}
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.ImplicitsUtils._
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 
@@ -90,7 +90,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
         case FsOperator.hdfs =>
           val uploadFile = s"${Workspace.remote.APP_UPLOADS}/${originFile.getName}"
           if (fsOperator.exists(uploadFile)) {
-            Utils.using(new FileInputStream(originFile))(
+            new FileInputStream(originFile).autoClose(
               inputStream => {
                 if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadFile)) {
                   fsOperator.upload(originFile.getAbsolutePath, uploadFile)

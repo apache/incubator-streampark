@@ -18,8 +18,8 @@
 package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.common.conf.ConfigConst
-import org.apache.streampark.common.util.{Logger, Utils}
-import org.apache.streampark.common.util.Utils.using
+import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
@@ -108,32 +108,33 @@ object KubernetesRetriever extends Logger {
    *   deployment namespace
    */
   def isDeploymentExists(name: String, namespace: String): Boolean = {
-    using(KubernetesRetriever.newK8sClient()) {
-      client =>
-        client
-          .apps()
-          .deployments()
-          .inNamespace(namespace)
-          .withLabel("type", ConfigConst.FLINK_NATIVE_KUBERNETES_LABEL)
-          .list()
-          .getItems
-          .asScala
-          .exists(e => e.getMetadata.getName == name)
-    }(_ => false)
+    KubernetesRetriever
+      .newK8sClient()
+      .autoClose(
+        client =>
+          client
+            .apps()
+            .deployments()
+            .inNamespace(namespace)
+            .withLabel("type", ConfigConst.FLINK_NATIVE_KUBERNETES_LABEL)
+            .list()
+            .getItems
+            .asScala
+            .exists(e => e.getMetadata.getName == name))(_ => false)
   }
 
   /** retrieve flink jobManager rest url */
   def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
-    Utils.using(
-      KubernetesRetriever
-        .newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
-        .getOrElse(return None)) {
-      client =>
-        val url =
-          IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
-        logger.info(s"retrieve flink jobManager rest url: $url")
-        client.close()
-        Some(url)
-    }
+    KubernetesRetriever
+      .newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
+      .getOrElse(return None)
+      .autoClose(
+        client => {
+          val url =
+            IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+          logger.info(s"retrieve flink jobManager rest url: $url")
+          Some(url)
+        })
   }
+
 }
