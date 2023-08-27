@@ -116,8 +116,8 @@ object FileUtils extends org.apache.commons.io.FileUtils {
   def exists(file: Serializable): Boolean = {
     file match {
       case null => false
-      case f: java.io.File => f.exists()
-      case p => new java.io.File(p.toString).exists()
+      case f: File => f.exists()
+      case p => new File(p.toString).exists()
     }
   }
 
@@ -159,7 +159,7 @@ object FileUtils extends org.apache.commons.io.FileUtils {
       toRead -= ret
       off += ret
     }
-    in.close()
+    Utils.close(in)
   }
 
   @throws[IOException]
@@ -171,7 +171,7 @@ object FileUtils extends org.apache.commons.io.FileUtils {
       val array = new Array[Byte](len.toInt)
       val is = Files.newInputStream(file.toPath)
       readInputStream(is, array)
-      is.close()
+      Utils.close(is)
       new String(array, StandardCharsets.UTF_8)
     }
   }
@@ -182,25 +182,20 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     val channel = Channels.newChannel(outputStream)
     val buffer = ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8))
     channel.write(buffer)
-    channel.close()
-    outputStream.flush()
-    outputStream.close()
+    Utils.close(channel, outputStream)
   }
 
   @throws[IOException]
   def readEndOfFile(file: File, maxSize: Long): Array[Byte] = {
     var readSize = maxSize
-    var fileContent: Array[Byte] = null
-    try {
-      val raFile = new RandomAccessFile(file, "r")
-      try {
+    Utils.using(new RandomAccessFile(file, "r")) {
+      raFile =>
         if (raFile.length > maxSize) raFile.seek(raFile.length - maxSize)
         else if (raFile.length < maxSize) readSize = raFile.length.toInt
-        fileContent = new Array[Byte](readSize.toInt)
+        val fileContent = new Array[Byte](readSize.toInt)
         raFile.read(fileContent)
-      } finally if (raFile != null) raFile.close()
+        fileContent
     }
-    fileContent
   }
 
   /**

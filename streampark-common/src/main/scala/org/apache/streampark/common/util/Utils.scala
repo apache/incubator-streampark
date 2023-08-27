@@ -18,7 +18,7 @@ package org.apache.streampark.common.util
 
 import org.apache.commons.lang3.StringUtils
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException, PrintWriter, StringWriter}
+import java.io.{BufferedInputStream, File, FileInputStream, Flushable, IOException, PrintWriter, StringWriter}
 import java.lang.{Boolean => JavaBool, Byte => JavaByte, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 import java.net.URL
 import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
@@ -128,6 +128,9 @@ object Utils {
       c => {
         try {
           if (c != null) {
+            if (c.isInstanceOf[Flushable]) {
+              c.asInstanceOf[Flushable].flush()
+            }
             c.close()
           }
         } catch {
