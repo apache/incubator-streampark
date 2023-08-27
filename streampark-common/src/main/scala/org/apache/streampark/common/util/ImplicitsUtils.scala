@@ -18,15 +18,7 @@ package org.apache.streampark.common.util
 
 import org.apache.streampark.common.util.Utils.close
 
-import java.lang.{
-  Boolean => JavaBool,
-  Byte => JavaByte,
-  Double => JavaDouble,
-  Float => JavaFloat,
-  Integer => JavaInt,
-  Long => JavaLong,
-  Short => JavaShort
-}
+import java.lang.{Boolean => JavaBool, Byte => JavaByte, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 
 object ImplicitsUtils {
 
