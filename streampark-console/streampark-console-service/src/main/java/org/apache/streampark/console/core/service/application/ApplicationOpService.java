@@ -27,16 +27,51 @@ import org.apache.streampark.console.core.entity.Application;
  */
 public interface ApplicationOpService extends IService<Application> {
 
+    /**
+     * This method is used to start the given application.
+     *
+     * @param app The application object to be started.
+     */
     void starting(Application app);
 
+    /**
+     * Starts the specified application.
+     *
+     * @param app The application to start.
+     * @param auto True if the application should start automatically, False otherwise.
+     * @throws Exception If an error occurs while starting the application.
+     */
     void start(Application app, boolean auto) throws Exception;
 
+    /**
+     * Restarts the given application.
+     *
+     * @param application The application to restart.
+     * @throws Exception If an error occurs while restarting the application.
+     */
     void restart(Application application) throws Exception;
 
+    /**
+     * Revokes access for the given application.
+     *
+     * @param app The application for which access needs to be revoked.
+     * @throws ApplicationException if an error occurs while revoking access.
+     */
     void revoke(Application app) throws ApplicationException;
 
+    /**
+     * Cancels the given application. Throws an exception if cancellation fails.
+     *
+     * @param app the application to be canceled
+     * @throws Exception if cancellation fails
+     */
     void cancel(Application app) throws Exception;
 
+    /**
+     * Forces the given application to stop.
+     *
+     * @param app the application to be stopped
+     */
     void forcedStop(Application app);
 
 }

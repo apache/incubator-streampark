@@ -38,26 +38,92 @@ import java.util.Map;
  */
 public interface ApplicationService extends IService<Application> {
 
+    /**
+     * Retrieves a page of applications based on the provided parameters.
+     *
+     * @param app The application object to be used for filtering the results.
+     * @param request The REST request object containing additional parameters or headers.
+     * @return A page of Application objects based on the provided parameters.
+     */
     IPage<Application> page(Application app, RestRequest request);
 
+    /**
+     * Creates a new application.
+     *
+     * @param app The application to create.
+     * @return True if the application was successfully created, false otherwise.
+     * @throws IOException If an I/O error occurs.
+     */
     boolean create(Application app) throws IOException;
 
+    /**
+     * Copies the given Application.
+     *
+     * @param app the Application to be copied
+     * @return the size of the copied Application in bytes as a Long value
+     * @throws IOException if there was an error during the copy process
+     */
     Long copy(Application app) throws IOException;
 
+    /**
+     * Updates the given application.
+     *
+     * @param app the application to be updated
+     * @return true if the update was successful, false otherwise
+     */
     boolean update(Application app);
 
+    /**
+     * Deletes the given Application from the system.
+     *
+     * @param app The Application to be deleted.
+     * @return True if the deletion was successful, false otherwise.
+     */
     Boolean delete(Application app);
 
+    /**
+     *
+     */
     Application getApp(Application app);
 
+    /**
+     * Updates the release of the given application.
+     *
+     * @param application The application to update the release for.
+     */
     void updateRelease(Application application);
 
+    /**
+     * Retrieves a list of applications by project ID.
+     *
+     * @param id The project ID to search for applications.
+     * @return A list of applications associated with the project ID.
+     */
     List<Application> getByProjectId(Long id);
 
+    /**
+     * Changes the ownership of all applications associated with a user.
+     *
+     * @param userId The ID of the user whose applications will be changed.
+     * @param targetUserId The ID of the user who will become the new owner of the applications.
+     */
     void changeOwnership(Long userId, Long targetUserId);
 
+    /**
+     * Retrieves a list of applications based on the specified team ID.
+     *
+     * @param teamId The ID of the team to retrieve the applications for.
+     * @return A list of Application objects associated with the given team ID.
+     */
     List<Application> getByTeamId(Long teamId);
 
+    /**
+     * Retrieves a list of applications by team ID and execution modes.
+     *
+     * @param teamId The ID of the team to filter by
+     * @param executionModes The collection of execution modes to filter by
+     * @return A list of applications that belong to the specified team and have the specified execution modes
+     */
     List<Application> getByTeamIdAndExecutionModes(
         Long teamId, Collection<ExecutionMode> executionModes);
 }
