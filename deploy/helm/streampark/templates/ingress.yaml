@@ -15,23 +15,27 @@
 # limitations under the License.
 #
 {{- if .Values.ingress.enabled }}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "streampark.name" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
   {{- include "streampark.labels" . | nindent 4 }}
   annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: {{ .Values.nginx.ingress.kubernetes.configurationSnippet }}
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.nginx.ingress.kubernetes.proxyBbodySize }}
-    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.nginx.ingress.kubernetes.rewriteTarget }}
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   rules:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
-        - backend:
-            serviceName: {{ .Values.service.name }}
-            servicePort: {{ .Values.spec.name }}
-          path: {{ .Values.ingress.path }}
+          - backend:
+              service:
+                name: {{ .Values.service.name }}
+                port:
+                  name: {{ .Values.spec.name }}
+            path: {{ .Values.ingress.path }}
+            pathType: {{ .Values.ingress.pathType }}
 {{- end }}
