@@ -137,8 +137,9 @@
           listData.value[1].list = [...data];
         }
       }
+      
       const wbSocketUrl = `${window.location.origin}${
-        import.meta.env.VITE_GLOB_API_URL
+        import.meta.env.VITE_GLOB_API_URL + (import.meta.env.VITE_GLOB_API_URL_PREFIX || '')
       }/websocket/${userStore.getUserInfo.userId}`;
 
       const { data } = useWebSocket(wbSocketUrl.replace(/http/, 'ws'), {
