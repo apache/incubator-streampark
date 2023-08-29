@@ -14,6 +14,6 @@ kubectl apply -f result/streampark/templates
 
 ### 3. open WebUI
 
-http://streampark.apache.org/streampark
+http://${host}:10000
 
 #### [more detail](streampark/templates/NOTES.txt)
