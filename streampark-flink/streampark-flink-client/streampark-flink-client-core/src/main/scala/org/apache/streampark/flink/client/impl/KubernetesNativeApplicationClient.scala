@@ -119,7 +119,7 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       name = submitRequest.appName,
       namespace = submitRequest.k8sSubmitParam.kubernetesNamespace,
       image = "flink:" + submitRequest.flinkVersion.majorVersion,
-      flinkVersion = converFlinkVersion(submitRequest.flinkVersion.majorVersion),
+      flinkVersion = converFlinkVersion(submitRequest.flinkVersion.majorVersion).getOrElse(null),
       jobManager = JobManagerDef(
         cpu = 1,
         memory = flinkConfig.get(JobManagerOptions.TOTAL_PROCESS_MEMORY).toString),
@@ -137,14 +137,14 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     spec
   }
 
-  private[this] def converFlinkVersion(version: String): FlinkVersion = {
+  private[this] def converFlinkVersion(version: String): Option[FlinkVersion] = {
     version match {
-      case "1.17" => FlinkVersion.V1_17
-      case "1.16" => FlinkVersion.V1_16
-      case "1.15" => FlinkVersion.V1_15
-      case "1.14" => FlinkVersion.V1_14
-      case "1.13" => FlinkVersion.V1_13
-      case _ => null
+      case "1.17" => Some(FlinkVersion.V1_17)
+      case "1.16" => Some(FlinkVersion.V1_16)
+      case "1.15" => Some(FlinkVersion.V1_15)
+      case "1.14" => Some(FlinkVersion.V1_14)
+      case "1.13" => Some(FlinkVersion.V1_13)
+      case _ => None
     }
   }
 }
