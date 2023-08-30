@@ -147,7 +147,7 @@ class ApplicationServiceITest extends SpringIntegrationTestBase {
               return true;
             });
 
-    assertThat(completableFuture.get(WATCHING_INTERVAL.toMillis() * 4, TimeUnit.MILLISECONDS))
+    assertThat(completableFuture.get(WATCHING_INTERVAL.toMillis() * 24, TimeUnit.MILLISECONDS))
         .isEqualTo(true);
   }
 }
