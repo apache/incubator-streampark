@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.impl.ApplicationServiceImpl;
@@ -34,8 +34,8 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** org.apache.streampark.console.core.service.ApplicationServiceTest. */
-class ApplicationServiceTest extends SpringTestBase {
+/** org.apache.streampark.console.core.service.ApplicationServiceUnitTest. */
+class ApplicationServiceTest extends SpringUnitTestBase {
 
   @Autowired private ApplicationService applicationService;
 

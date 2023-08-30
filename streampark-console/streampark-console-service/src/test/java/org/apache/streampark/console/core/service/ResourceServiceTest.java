@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 
 import org.apache.hc.core5.http.ContentType;
 
@@ -35,7 +35,7 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** org.apache.streampark.console.core.service.ResourceServiceTest. */
-class ResourceServiceTest extends SpringTestBase {
+class ResourceServiceTest extends SpringUnitTestBase {
 
   @Autowired private ResourceService resourceService;
 
