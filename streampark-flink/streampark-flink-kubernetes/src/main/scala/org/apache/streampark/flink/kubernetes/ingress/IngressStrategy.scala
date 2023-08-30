@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
-import org.apache.streampark.common.conf.ConfigConst
+import org.apache.streampark.common.conf.{ConfigConst, InternalConfigHolder, K8sFlinkConfig}
 
 import io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
@@ -48,11 +48,16 @@ trait IngressStrategy {
   }
 
   def buildIngressAnnotations(clusterId: String): Map[String, String] = {
-    Map(
+    val annotations = Map(
       "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
       "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
       "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;")
     )
+    val ingressClass = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
+    if (ingressClass.nonEmpty) {
+      annotations + ("kubernetes.io/ingress.class" -> ingressClass)
+    }
+    annotations
   }
 
   def buildIngressLabels(clusterId: String): Map[String, String] = {
