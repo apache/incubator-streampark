@@ -185,7 +185,11 @@ public interface ApplicationInfoService extends IService<Application> {
    */
   String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception;
 
-  /** */
+  /**
+   * Retrieves the list of recent Kubernetes namespaces.
+   *
+   * @return The list of recent Kubernetes namespaces as a List of Strings.
+   */
   List<String> getRecentK8sNamespace();
 
   /**
