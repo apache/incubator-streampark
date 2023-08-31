@@ -303,7 +303,6 @@ public class Application implements Serializable {
       case CANCELED:
       case TERMINATED:
       case POS_TERMINATED:
-      case LOST:
         return 0;
       default:
         return 1;

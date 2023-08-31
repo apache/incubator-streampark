@@ -83,6 +83,8 @@ public class FlinkHttpWatcher {
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
+  @Autowired private AutoHealthProbingTask autoHealthProbingTask;
+
   // track interval  every 5 seconds
   private static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
 
@@ -162,6 +164,7 @@ public class FlinkHttpWatcher {
         applicationService.list(
             new LambdaQueryWrapper<Application>()
                 .eq(Application::getTracking, 1)
+                .ne(Application::getState, FlinkAppState.LOST)
                 .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode()));
     applications.forEach(
         (app) -> {
@@ -563,7 +566,9 @@ public class FlinkHttpWatcher {
 
   public void cleanSavepoint(Application application) {
     SAVEPOINT_CACHE.invalidate(application.getId());
-    application.setOptionState(OptionState.NONE.getValue());
+    if (!autoHealthProbingTask.isProbeOptionState(application.getOptionState().intValue())) {
+      application.setOptionState(OptionState.NONE.getValue());
+    }
   }
 
   /** set current option state */
