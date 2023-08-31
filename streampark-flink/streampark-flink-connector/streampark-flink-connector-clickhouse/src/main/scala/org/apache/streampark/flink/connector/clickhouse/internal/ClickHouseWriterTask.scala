@@ -21,12 +21,12 @@ import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.connector.clickhouse.conf.ClickHouseHttpConfig
 import org.apache.streampark.flink.connector.failover.{FailoverWriter, SinkRequest}
 
-import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaders}
+import io.netty.handler.codec.http.HttpHeaderNames
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}
 
 import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.util.Try
 
 case class ClickHouseWriterTask(
