@@ -26,7 +26,7 @@ import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response
 
 import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
 
-import scala.collection.convert.ImplicitConversions._
+import scala.collection.JavaConversions._
 import scala.util.Try
 
 case class ClickHouseWriterTask(
@@ -63,24 +63,36 @@ case class ClickHouseWriterTask(
     }
 
   def send(sinkRequest: SinkRequest): Unit = {
-    val request = buildRequest(sinkRequest)
-    logDebug(s"Ready to load data to ${sinkRequest.table}, size: ${sinkRequest.size}")
-    val whenResponse = asyncHttpClient.executeRequest(request)
-    val callback = respCallback(whenResponse, sinkRequest)
-    whenResponse.addListener(callback, callbackService)
+    if (sinkRequest.sqlStatement == null || sinkRequest.sqlStatement.isEmpty) {
+      logWarn(s"Skip empty sql statement")
+      return
+    }
+
+    val requests = buildRequest(sinkRequest)
+    requests.foreach(
+      request => {
+        logDebug(s"Ready to fire request: $request")
+        val whenResponse = asyncHttpClient.executeRequest(request)
+        val callback = respCallback(whenResponse, sinkRequest)
+        whenResponse.addListener(callback, callbackService)
+      })
   }
 
-  def buildRequest(sinkRequest: SinkRequest): Request = {
-    val host = clickHouseConf.getRandomHostUrl
-    val builder = asyncHttpClient
-      .preparePost(host)
-      .setRequestTimeout(clickHouseConf.timeout)
-      .setHeader(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=utf-8")
-      .setBody(sinkRequest.sqlStatement)
-    if (clickHouseConf.credentials != null) {
-      builder.setHeader(HttpHeaderNames.AUTHORIZATION, "Basic " + clickHouseConf.credentials)
-    }
-    builder.build
+  private def buildRequest(sinkRequest: SinkRequest): List[Request] = {
+    logDebug(s"There is [${sinkRequest.sqlStatement.size}] statement(s) in SinkRequest ")
+    sinkRequest.sqlStatement.map(
+      statement => {
+        val host = clickHouseConf.getRandomHostUrl
+        val builder = asyncHttpClient
+          .preparePost(host)
+          .setRequestTimeout(clickHouseConf.timeout)
+          .setHeader(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=utf-8")
+          .setBody(statement)
+        if (clickHouseConf.credentials != null) {
+          builder.setHeader(HttpHeaderNames.AUTHORIZATION, "Basic " + clickHouseConf.credentials)
+        }
+        builder.build
+      })
   }
 
   def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable =
