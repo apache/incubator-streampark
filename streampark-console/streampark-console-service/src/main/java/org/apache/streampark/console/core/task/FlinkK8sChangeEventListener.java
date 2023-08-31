@@ -23,8 +23,10 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.alert.AlertService;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
@@ -56,7 +58,9 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8
 @Component
 public class FlinkK8sChangeEventListener {
 
-  @Lazy @Autowired private ApplicationService applicationService;
+  @Lazy @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationActionService applicationActionService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Lazy @Autowired private AlertService alertService;
 
@@ -83,13 +87,13 @@ public class FlinkK8sChangeEventListener {
     JobStatusCV jobStatus = event.jobStatus();
     TrackId trackId = event.trackId();
     // get pre application record
-    Application app = applicationService.getById(trackId.appId());
+    Application app = applicationManageService.getById(trackId.appId());
     if (app == null) {
       return;
     }
     // update application record
     setByJobStatusCV(app, jobStatus);
-    applicationService.persistMetrics(app);
+    applicationInfoService.persistMetrics(app);
 
     // email alerts when necessary
     FlinkAppState state = FlinkAppState.of(app.getState());
@@ -116,7 +120,7 @@ public class FlinkK8sChangeEventListener {
       return;
     }
 
-    Application app = applicationService.getById(trackId.appId());
+    Application app = applicationManageService.getById(trackId.appId());
     if (app == null) {
       return;
     }
@@ -128,7 +132,7 @@ public class FlinkK8sChangeEventListener {
     app.setTotalSlot(metrics.totalSlot());
     app.setAvailableSlot(metrics.availableSlot());
 
-    applicationService.persistMetrics(app);
+    applicationInfoService.persistMetrics(app);
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -148,7 +152,8 @@ public class FlinkK8sChangeEventListener {
     CheckPoints checkPoint = new CheckPoints();
     checkPoint.setLatest(latest);
 
-    checkpointProcessor.process(applicationService.getById(event.trackId().appId()), checkPoint);
+    checkpointProcessor.process(
+        applicationManageService.getById(event.trackId().appId()), checkPoint);
   }
 
   private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {

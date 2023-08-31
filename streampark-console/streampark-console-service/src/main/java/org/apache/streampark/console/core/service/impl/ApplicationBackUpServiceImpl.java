@@ -31,17 +31,17 @@ import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ApplicationBackUpMapper;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,17 +49,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+@RequiredArgsConstructor
 public class ApplicationBackUpServiceImpl
     extends ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp>
     implements ApplicationBackUpService {
 
-  @Autowired private ApplicationService applicationService;
-
-  @Autowired private ApplicationConfigService configService;
-
-  @Autowired private EffectiveService effectiveService;
-
-  @Autowired private FlinkSqlService flinkSqlService;
+  private final ApplicationManageService applicationManageService;
+  private final ApplicationConfigService configService;
+  private final EffectiveService effectiveService;
+  private final FlinkSqlService flinkSqlService;
 
   @Override
   public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
@@ -74,7 +72,7 @@ public class ApplicationBackUpServiceImpl
   @Transactional(rollbackFor = {Exception.class})
   public void rollback(ApplicationBackUp backParam) {
 
-    Application application = applicationService.getById(backParam.getAppId());
+    Application application = applicationManageService.getById(backParam.getAppId());
 
     FsOperator fsOperator = application.getFsOperator();
     // backup files not exist
@@ -119,7 +117,7 @@ public class ApplicationBackUpServiceImpl
     fsOperator.copyDir(backParam.getPath(), application.getAppHome());
 
     // update restart status
-    applicationService.update(
+    applicationManageService.update(
         new UpdateWrapper<Application>()
             .lambda()
             .eq(Application::getId, application.getId())
@@ -194,7 +192,7 @@ public class ApplicationBackUpServiceImpl
   public Boolean delete(Long id) throws InternalException {
     ApplicationBackUp backUp = getById(id);
     try {
-      Application application = applicationService.getById(backUp.getAppId());
+      Application application = applicationManageService.getById(backUp.getAppId());
       application.getFsOperator().delete(backUp.getPath());
       removeById(id);
       return true;

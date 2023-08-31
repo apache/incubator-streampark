@@ -28,7 +28,7 @@ import org.apache.streampark.console.core.entity.Effective;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.EffectiveType;
-import org.apache.streampark.console.core.service.application.ApplicationService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.SavePointServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -57,8 +57,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
 
   @Autowired private FlinkEnvService flinkEnvService;
   @Autowired private FlinkClusterService flinkClusterService;
-  @Autowired
-  ApplicationService applicationService;
+  @Autowired ApplicationManageService applicationManageService;
 
   @AfterEach
   void cleanTestRecordsInDatabase() {
@@ -67,7 +66,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     effectiveService.remove(new QueryWrapper<>());
     flinkEnvService.remove(new QueryWrapper<>());
     flinkClusterService.remove(new QueryWrapper<>());
-    applicationService.remove(new QueryWrapper<>());
+    applicationManageService.remove(new QueryWrapper<>());
   }
 
   /**
@@ -151,7 +150,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     application.setTeamId(teamId);
     application.setVersionId(idOfFlinkEnv);
     application.setExecutionMode(ExecutionMode.YARN_APPLICATION.getMode());
-    applicationService.save(application);
+    applicationManageService.save(application);
 
     FlinkEnv flinkEnv = new FlinkEnv();
     flinkEnv.setFlinkName("mockFlinkName");

@@ -32,10 +32,12 @@ import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.annotation.VisibleForTesting;
@@ -74,7 +76,9 @@ import java.util.stream.Collectors;
 @Component
 public class FlinkHttpWatcher {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationActionService applicationActionService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private AlertService alertService;
 
@@ -162,7 +166,7 @@ public class FlinkHttpWatcher {
   public void init() {
     WATCHING_APPS.clear();
     List<Application> applications =
-        applicationService.list(
+        applicationManageService.list(
             new LambdaQueryWrapper<Application>()
                 .eq(Application::getTracking, 1)
                 .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode()));
@@ -177,7 +181,7 @@ public class FlinkHttpWatcher {
   public void doStop() {
     log.info(
         "FlinkHttpWatcher StreamPark Console will be shutdown,persistent application to database.");
-    WATCHING_APPS.forEach((k, v) -> applicationService.persistMetrics(v));
+    WATCHING_APPS.forEach((k, v) -> applicationInfoService.persistMetrics(v));
   }
 
   /**
@@ -251,7 +255,7 @@ public class FlinkHttpWatcher {
                   doAlert(application, FlinkAppState.of(application.getState()));
                   if (appState.equals(FlinkAppState.FAILED)) {
                     try {
-                      applicationService.start(application, true);
+                      applicationActionService.start(application, true);
                     } catch (Exception e) {
                       log.error(e.getMessage(), e);
                     }
@@ -389,7 +393,7 @@ public class FlinkHttpWatcher {
               new LambdaUpdateWrapper<Application>()
                   .eq(Application::getId, application.getId())
                   .set(Application::getRelease, ReleaseState.DONE.get());
-          applicationService.update(updateWrapper);
+          applicationManageService.update(updateWrapper);
           break;
         default:
           break;
@@ -423,7 +427,7 @@ public class FlinkHttpWatcher {
     } else {
       WATCHING_APPS.put(application.getId(), application);
     }
-    applicationService.persistMetrics(application);
+    applicationInfoService.persistMetrics(application);
   }
 
   /**
@@ -453,7 +457,7 @@ public class FlinkHttpWatcher {
             currentState.name());
         cleanSavepoint(application);
         application.setState(currentState.getValue());
-        if (StopFrom.NONE.equals(stopFrom) || applicationService.checkAlter(application)) {
+        if (StopFrom.NONE.equals(stopFrom) || applicationManageService.checkAlter(application)) {
           if (StopFrom.NONE.equals(stopFrom)) {
             log.info(
                 "FlinkHttpWatcher getFromFlinkRestApi, job cancel is not form StreamPark,savePoint expired!");
@@ -472,7 +476,7 @@ public class FlinkHttpWatcher {
         application.setState(FlinkAppState.FAILED.getValue());
         doPersistMetrics(application, true);
         doAlert(application, FlinkAppState.FAILED);
-        applicationService.start(application, true);
+        applicationActionService.start(application, true);
         break;
       case RESTARTING:
         log.info(
@@ -547,11 +551,11 @@ public class FlinkHttpWatcher {
           if (flinkAppState.equals(FlinkAppState.FAILED)
               || flinkAppState.equals(FlinkAppState.LOST)
               || (flinkAppState.equals(FlinkAppState.CANCELED) && StopFrom.NONE.equals(stopFrom))
-              || applicationService.checkAlter(application)) {
+              || applicationManageService.checkAlter(application)) {
             doAlert(application, flinkAppState);
             stopCanceledJob(application.getId());
             if (flinkAppState.equals(FlinkAppState.FAILED)) {
-              applicationService.start(application, true);
+              applicationActionService.start(application, true);
             }
           }
         } catch (Exception e) {

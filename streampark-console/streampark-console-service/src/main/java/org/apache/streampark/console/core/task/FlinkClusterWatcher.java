@@ -29,9 +29,11 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.alert.AlertService;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -66,7 +68,9 @@ public class FlinkClusterWatcher {
 
   @Autowired private AlertService alertService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationActionService applicationActionService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   private Long lastWatchTime = 0L;
 
@@ -132,9 +136,9 @@ public class FlinkClusterWatcher {
 
   private void alert(FlinkCluster cluster, ClusterState state) {
     if (cluster.getAlertId() != null) {
-      cluster.setAllJobs(applicationService.countByClusterId(cluster.getId()));
+      cluster.setAllJobs(applicationManageService.countByClusterId(cluster.getId()));
       cluster.setAffectedJobs(
-          applicationService.countAffectedByClusterId(
+          applicationManageService.countAffectedByClusterId(
               cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
       cluster.setClusterState(state.getValue());
       cluster.setEndTime(new Date());

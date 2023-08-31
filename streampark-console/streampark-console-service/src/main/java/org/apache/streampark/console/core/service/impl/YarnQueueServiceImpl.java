@@ -26,9 +26,9 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.mapper.YarnQueueMapper;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +67,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public static final String QUEUE_EMPTY_HINT = "Yarn queue label mustn't be empty.";
   public static final String QUEUE_AVAILABLE_HINT = "The queue label is available.";
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Override
@@ -230,7 +230,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public void checkNotReferencedByApplications(
       @Nonnull Long teamId, @Nonnull String queueLabel, @Nonnull String operation) {
     List<Application> appsReferenceQueueLabel =
-        applicationService
+        applicationManageService
             .getByTeamIdAndExecutionModes(
                 teamId, Sets.newHashSet(ExecutionMode.YARN_APPLICATION, ExecutionMode.YARN_PER_JOB))
             .stream()

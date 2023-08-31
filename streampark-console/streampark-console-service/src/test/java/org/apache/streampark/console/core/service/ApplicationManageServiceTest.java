@@ -21,8 +21,10 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.YarnQueue;
-import org.apache.streampark.console.core.service.application.ApplicationService;
-import org.apache.streampark.console.core.service.application.impl.ApplicationServiceImpl;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.impl.ApplicationManageServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.junit.jupiter.api.AfterEach;
@@ -36,15 +38,17 @@ import java.util.Date;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** org.apache.streampark.console.core.service.ApplicationServiceUnitTest. */
-class ApplicationServiceTest extends SpringUnitTestBase {
+class ApplicationManageServiceTest extends SpringUnitTestBase {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationActionService applicationActionService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private YarnQueueService yarnQueueService;
 
   @AfterEach
   void cleanTestRecordsInDatabase() {
-    applicationService.remove(new QueryWrapper<>());
+    applicationManageService.remove(new QueryWrapper<>());
     yarnQueueService.remove(new QueryWrapper<>());
   }
 
@@ -82,7 +86,7 @@ class ApplicationServiceTest extends SpringUnitTestBase {
     app.setDrain(false);
     app.setAllowNonRestored(false);
 
-    Assertions.assertDoesNotThrow(() -> applicationService.updateRelease(app));
+    Assertions.assertDoesNotThrow(() -> applicationManageService.updateRelease(app));
   }
 
   @Test
@@ -94,12 +98,13 @@ class ApplicationServiceTest extends SpringUnitTestBase {
     application.setSavePointed(false);
     application.setAllowNonRestored(false);
 
-    applicationService.start(application, false);
+    applicationManageService.start(application, false);
   }
 
   @Test
   void testCheckQueueValidationIfNeeded() {
-    ApplicationServiceImpl applicationServiceImpl = (ApplicationServiceImpl) applicationService;
+    ApplicationManageServiceImpl applicationServiceImpl =
+        (ApplicationManageServiceImpl) applicationManageService;
 
     // ------- Test it for the create operation. -------
     final String queueLabel = "queue1@label1";

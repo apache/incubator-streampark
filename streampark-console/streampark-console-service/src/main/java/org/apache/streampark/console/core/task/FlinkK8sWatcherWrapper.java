@@ -19,7 +19,9 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.service.application.ApplicationService;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
@@ -60,7 +62,9 @@ public class FlinkK8sWatcherWrapper {
 
   @Lazy @Autowired private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
 
-  @Lazy @Autowired private ApplicationService applicationService;
+  @Lazy @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationActionService applicationActionService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
   @Bean(destroyMethod = "close")
@@ -97,7 +101,7 @@ public class FlinkK8sWatcherWrapper {
         .eq(Application::getTracking, 1)
         .in(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
 
-    List<Application> k8sApplication = applicationService.list(queryWrapper);
+    List<Application> k8sApplication = applicationManageService.list(queryWrapper);
     if (CollectionUtils.isEmpty(k8sApplication)) {
       return Lists.newArrayList();
     }
@@ -107,7 +111,7 @@ public class FlinkK8sWatcherWrapper {
             .filter(app -> !Bridge.toTrackId(app).isLegal())
             .collect(Collectors.toList());
     if (CollectionUtils.isNotEmpty(correctApps)) {
-      applicationService.saveOrUpdateBatch(correctApps);
+      applicationManageService.saveOrUpdateBatch(correctApps);
     }
     // filter out the application that should be tracking
     return k8sApplication.stream()

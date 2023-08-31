@@ -49,14 +49,16 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
-import org.apache.streampark.console.core.service.application.impl.ApplicationServiceImpl;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.impl.ApplicationManageServiceImpl;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
@@ -132,7 +134,9 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private MessageService messageService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationActionService applicationActionService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private ApplicationLogService applicationLogService;
 
@@ -173,7 +177,7 @@ public class AppBuildPipeServiceImpl
     // check the build environment
     checkBuildEnv(appId, forceBuild);
 
-    Application app = applicationService.getById(appId);
+    Application app = applicationManageService.getById(appId);
     ApplicationLog applicationLog = new ApplicationLog();
     applicationLog.setOptionName(RELEASE.getValue());
     applicationLog.setAppId(app.getId());
@@ -182,7 +186,7 @@ public class AppBuildPipeServiceImpl
     // check if you need to go through the build process (if the jar and pom have changed,
     // you need to go through the build process, if other common parameters are modified,
     // you don't need to go through the build process)
-    boolean needBuild = applicationService.checkBuildAndUpdate(app);
+    boolean needBuild = applicationManageService.checkBuildAndUpdate(app);
     if (!needBuild) {
       applicationLog.setSuccess(true);
       applicationLogService.save(applicationLog);
@@ -219,14 +223,14 @@ public class AppBuildPipeServiceImpl
             saveEntity(buildPipeline);
 
             app.setRelease(ReleaseState.RELEASING.get());
-            applicationService.updateRelease(app);
+            applicationManageService.updateRelease(app);
 
             if (flinkHttpWatcher.isWatchingApp(app.getId())) {
               flinkHttpWatcher.init();
             }
 
             // 1) checkEnv
-            applicationService.checkEnv(app);
+            applicationManageService.checkEnv(app);
 
             // 2) some preparatory work
             String appUploads = app.getWorkspace().APP_UPLOADS();
@@ -314,7 +318,7 @@ public class AppBuildPipeServiceImpl
                 // If the current task is not running, or the task has just been added, directly set
                 // the candidate version to the official version
                 if (app.isFlinkSqlJob()) {
-                  applicationService.toEffective(app);
+                  applicationManageService.toEffective(app);
                 } else {
                   if (app.isStreamParkJob()) {
                     ApplicationConfig config = applicationConfigService.getLatest(app.getId());
@@ -351,7 +355,7 @@ public class AppBuildPipeServiceImpl
               applicationLog.setException(Utils.stringifyException(snapshot.error().exception()));
               applicationLog.setSuccess(false);
             }
-            applicationService.updateRelease(app);
+            applicationManageService.updateRelease(app);
             applicationLogService.save(applicationLog);
             if (flinkHttpWatcher.isWatchingApp(app.getId())) {
               flinkHttpWatcher.init();
@@ -400,7 +404,7 @@ public class AppBuildPipeServiceImpl
    * @return
    */
   private void checkBuildEnv(Long appId, boolean forceBuild) {
-    Application app = applicationService.getById(appId);
+    Application app = applicationManageService.getById(appId);
 
     // 1) check flink version
     FlinkEnv env = flinkEnvService.getById(app.getVersionId());
@@ -409,7 +413,7 @@ public class AppBuildPipeServiceImpl
         checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
 
     // 2) check env
-    boolean envOk = applicationService.checkEnv(app);
+    boolean envOk = applicationManageService.checkEnv(app);
     ApiAlertException.throwIfFalse(
         envOk, "Check flink env failed, please check the flink version of this job");
 
@@ -515,7 +519,7 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
+  /** copy from {@link ApplicationActionService#start(Application, boolean)} */
   private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
     switch (app.getDevelopmentMode()) {
       case CUSTOM_CODE:
@@ -627,13 +631,11 @@ public class AppBuildPipeServiceImpl
                         JacksonUtils.read(resource.getResource(), String[].class);
                     Arrays.stream(groupElements)
                         .forEach(
-                            resourceIdInGroup -> {
-                              mergeDependency(
-                                  application,
-                                  mvnArtifacts,
-                                  jarLibs,
-                                  resourceService.getById(resourceIdInGroup));
-                            });
+                            resourceIdInGroup -> mergeDependency(
+                                application,
+                                mvnArtifacts,
+                                jarLibs,
+                                resourceService.getById(resourceIdInGroup)));
                   } catch (JsonProcessingException e) {
                     throw new ApiAlertException("Parse resource group failed.", e);
                   }
@@ -655,21 +657,17 @@ public class AppBuildPipeServiceImpl
     dependency
         .getPom()
         .forEach(
-            pom -> {
-              mvnArtifacts.add(
-                  new Artifact(
-                      pom.getGroupId(),
-                      pom.getArtifactId(),
-                      pom.getVersion(),
-                      pom.getClassifier()));
-            });
+            pom -> mvnArtifacts.add(
+                new Artifact(
+                    pom.getGroupId(),
+                    pom.getArtifactId(),
+                    pom.getVersion(),
+                    pom.getClassifier())));
     dependency
         .getJar()
         .forEach(
-            jar -> {
-              jarLibs.add(
-                  String.format(
-                      "%s/%d/%s", Workspace.local().APP_UPLOADS(), application.getTeamId(), jar));
-            });
+            jar -> jarLibs.add(
+                String.format(
+                    "%s/%d/%s", Workspace.local().APP_UPLOADS(), application.getTeamId(), jar)));
   }
 }

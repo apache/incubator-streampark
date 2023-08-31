@@ -1,0 +1,93 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.streampark.console.core.service.application.impl;
+
+import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.mapper.ApplicationMapper;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+
+@Slf4j
+@Service
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper, Application>
+    implements ApplicationManageService {
+  @Override
+  public IPage<Application> page(Application app, RestRequest request) {
+    return null;
+  }
+
+  @Override
+  public boolean create(Application app) throws IOException {
+    return false;
+  }
+
+  @Override
+  public Long copy(Application app) throws IOException {
+    return null;
+  }
+
+  @Override
+  public boolean update(Application app) {
+    return false;
+  }
+
+  @Override
+  public Boolean delete(Application app) {
+    return null;
+  }
+
+  @Override
+  public Application getApp(Application app) {
+    return null;
+  }
+
+  @Override
+  public void updateRelease(Application application) {}
+
+  @Override
+  public List<Application> getByProjectId(Long id) {
+    return null;
+  }
+
+  @Override
+  public void changeOwnership(Long userId, Long targetUserId) {}
+
+  @Override
+  public List<Application> getByTeamId(Long teamId) {
+    return null;
+  }
+
+  @Override
+  public List<Application> getByTeamIdAndExecutionModes(
+      Long teamId, Collection<ExecutionMode> executionModes) {
+    return null;
+  }
+}

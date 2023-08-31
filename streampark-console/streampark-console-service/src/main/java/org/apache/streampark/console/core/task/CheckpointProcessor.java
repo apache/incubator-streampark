@@ -22,9 +22,11 @@ import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.FailoverStrategy;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -63,7 +65,9 @@ public class CheckpointProcessor {
 
   private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationActionService applicationActionService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private AlertService alertService;
 
@@ -114,7 +118,7 @@ public class CheckpointProcessor {
               break;
             case RESTART:
               try {
-                applicationService.restart(application);
+                applicationActionService.restart(application);
               } catch (Exception e) {
                 throw new RuntimeException(e);
               }
