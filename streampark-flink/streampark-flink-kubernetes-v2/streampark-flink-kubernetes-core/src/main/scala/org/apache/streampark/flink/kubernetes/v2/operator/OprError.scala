@@ -28,4 +28,7 @@ object OprError {
   case class FlinkRestEndpointNotFound(namespace: String, name: String)
     extends Exception(s"Flink cluster rest endpoint not found: namespace=$namespace, name=$name")
 
+  case class TrackKeyNotFound(namespace: String, name: String)
+    extends Exception(s"TrackKey not found: namespace=$namespace, name=$name")
+
 }

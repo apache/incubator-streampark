@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.streampark.console.core.task
 
 import org.apache.streampark.common.enums.ExecutionMode
@@ -12,6 +29,7 @@ import org.apache.streampark.console.core.utils.FlinkAppStateConverter
 import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 import org.apache.streampark.flink.kubernetes.v2.observer.{FlinkK8sObserver, Name, Namespace}
+import org.apache.streampark.flink.kubernetes.v2.operator.OprError.TrackKeyNotFound
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -81,9 +99,14 @@ class FlinkK8sChangeListener {
         metricsSnap =>
           ZIO
             .attempt {
-              val key: (Namespace, Name) = metricsSnap._1
-              // 未完成，通过Namespace和Name查询
-              val app: Application = applicationService.getById(key)
+              val namespaceAndName: (Namespace, Name) = metricsSnap._1
+              val trackKey: ZIO[Any, TrackKeyNotFound, TrackKey] = FlinkK8sObserver.trackedKeys
+                .find(
+                  trackedKey =>
+                    trackedKey.clusterNamespace == namespaceAndName._1 && trackedKey.clusterName == namespaceAndName._2)
+                .someOrFail(TrackKeyNotFound(namespaceAndName._1, namespaceAndName._2))
+
+              val app: Application = applicationService.getById(trackKey.map(_.id))
 
               // discard session mode change
               if (app == null || ExecutionMode.isKubernetesSessionMode(app.getExecutionMode))
@@ -110,14 +133,17 @@ class FlinkK8sChangeListener {
           ZIO
             .attempt {
 
-              val key: (Namespace, Name) = restSvcEndpointSnap._1
+              val namespaceAndName: (Namespace, Name) = restSvcEndpointSnap._1
+              val trackKey: ZIO[Any, TrackKeyNotFound, TrackKey] = FlinkK8sObserver.trackedKeys
+                .find(
+                  trackedKey =>
+                    trackedKey.clusterNamespace == namespaceAndName._1 && trackedKey.clusterName == namespaceAndName._2)
+                .someOrFail(TrackKeyNotFound(namespaceAndName._1, namespaceAndName._2))
               val restSvcEndpoint: RestSvcEndpoint = restSvcEndpointSnap._2
 
-              // 未完成，通过Namespace和Name查询
-              val app: Application = applicationService.getById(key)
+              val app: Application = applicationService.getById(trackKey.map(_.id))
 
-              // 未完成，通过Namespace和Name查询
-              val flinkCluster: FlinkCluster = flinkClusterService.getById(key)
+              val flinkCluster: FlinkCluster = flinkClusterService.getById(app.getFlinkClusterId)
 
               if (restSvcEndpoint == null || restSvcEndpoint.chooseRest == null) return ZIO.unit
               val url = restSvcEndpoint.chooseRest
