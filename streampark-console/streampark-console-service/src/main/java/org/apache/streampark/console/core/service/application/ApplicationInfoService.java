@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.application;
 
+import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.AppExistsState;
 
@@ -32,6 +33,42 @@ import java.util.Map;
  * application.
  */
 public interface ApplicationInfoService extends IService<Application> {
+
+  /**
+   * Maps the given application.
+   *
+   * @param app The application to be mapped.
+   * @return True if the mapping was successful, false otherwise.
+   */
+  boolean mapping(Application app);
+
+  /**
+   * Checks the environment for the given application.
+   *
+   * @param app the application to check the environment for
+   * @return true if the environment is valid for the application, false otherwise
+   * @throws ApplicationException if an error occurs while checking the environment
+   */
+  boolean checkEnv(Application app) throws ApplicationException;
+
+  /**
+   * Checks the savepoint path for the given application.
+   *
+   * @param app the application to check the savepoint path for
+   * @return the check message
+   * @throws Exception if an error occurs while checking the savepoint path
+   */
+  String checkSavepointPath(Application app) throws Exception;
+
+  /**
+   * Checks if the given application meets the required alterations.
+   *
+   * @param application The application to be checked.
+   * @return True if the application meets the required alterations, false otherwise.
+   * @throws ApplicationException If an error occurs while checking the alterations.
+   */
+  boolean checkAlter(Application application);
+
   /**
    * Checks if a record exists in the database with the given team ID.
    *
@@ -49,45 +86,45 @@ public interface ApplicationInfoService extends IService<Application> {
   boolean existsByUserId(Long userId);
 
   /**
-   * Checks if there exists a running job for the given cluster ID.
-   *
-   * @param clusterId The ID of the cluster.
-   * @return true if there is a running job for the given cluster ID, false otherwise.
-   */
-  boolean existsRunningJobByClusterId(Long clusterId);
-
-  /**
-   * Checks if a job exists for a given cluster ID.
-   *
-   * @param clusterId The ID of the cluster.
-   * @return true if a job exists for the given cluster ID; otherwise, false.
-   */
-  boolean existsJobByClusterId(Long clusterId);
-
-  /**
-   * Checks if there is a job that is associated with the given Flink environment ID.
+   * Checks if a job exists for a given Flink environment ID.
    *
    * @param flinkEnvId The ID of the Flink environment.
-   * @return True if a job exists for the given Flink environment ID, false otherwise.
+   * @return true if a job exists for the given Flink environment ID; otherwise, false.
    */
-  boolean existsJobByFlinkEnvId(Long flinkEnvId);
+  boolean existsByFlinkEnvId(Long flinkEnvId);
 
   /**
-   * Counts the number of jobs belonging to a given cluster ID.
+   * Checks if a job is running for a given cluster ID.
    *
    * @param clusterId The ID of the cluster.
-   * @return The number of jobs belonging to the cluster.
+   * @return true if a job is running for the given cluster ID; otherwise, false.
    */
-  Integer countJobsByClusterId(Long clusterId);
+  boolean existsRunningByClusterId(Long clusterId);
 
   /**
-   * Counts the number of affected jobs by the given cluster ID and database type.
+   * Checks if there is a job that is associated with the given cluster ID.
+   *
+   * @param clusterId The ID of the cluster.
+   * @return True if a job exists for the given cluster ID, false otherwise.
+   */
+  boolean existsByClusterId(Long clusterId);
+
+  /**
+   * Counts the number of items associated with the given cluster ID.
+   *
+   * @param clusterId The ID of the cluster.
+   * @return The number of items associated with the given cluster ID.
+   */
+  Integer countByClusterId(Long clusterId);
+
+  /**
+   * Counts the number of items associated with the given cluster ID and database type.
    *
    * @param clusterId The ID of the cluster.
    * @param dbType The type of the database.
-   * @return The number of affected jobs.
+   * @return The number of items associated with the given cluster ID and database type.
    */
-  Integer countAffectedJobsByClusterId(Long clusterId, String dbType);
+  Integer countAffectedByClusterId(Long clusterId, String dbType);
 
   /**
    * Gets the YARN name for the given application.

@@ -22,7 +22,6 @@ import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.application.impl.ApplicationManageServiceImpl;
 
@@ -42,8 +41,6 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
 
   @Autowired private ApplicationManageService applicationManageService;
   @Autowired private ApplicationActionService applicationActionService;
-  @Autowired private ApplicationInfoService applicationInfoService;
-
   @Autowired private YarnQueueService yarnQueueService;
 
   @AfterEach
@@ -98,7 +95,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
     application.setSavePointed(false);
     application.setAllowNonRestored(false);
 
-    applicationManageService.start(application, false);
+    applicationActionService.start(application, false);
   }
 
   @Test

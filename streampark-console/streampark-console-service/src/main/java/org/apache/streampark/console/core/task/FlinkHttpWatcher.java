@@ -457,7 +457,7 @@ public class FlinkHttpWatcher {
             currentState.name());
         cleanSavepoint(application);
         application.setState(currentState.getValue());
-        if (StopFrom.NONE.equals(stopFrom) || applicationManageService.checkAlter(application)) {
+        if (StopFrom.NONE.equals(stopFrom) || applicationInfoService.checkAlter(application)) {
           if (StopFrom.NONE.equals(stopFrom)) {
             log.info(
                 "FlinkHttpWatcher getFromFlinkRestApi, job cancel is not form StreamPark,savePoint expired!");
@@ -551,7 +551,7 @@ public class FlinkHttpWatcher {
           if (flinkAppState.equals(FlinkAppState.FAILED)
               || flinkAppState.equals(FlinkAppState.LOST)
               || (flinkAppState.equals(FlinkAppState.CANCELED) && StopFrom.NONE.equals(stopFrom))
-              || applicationManageService.checkAlter(application)) {
+              || applicationInfoService.checkAlter(application)) {
             doAlert(application, flinkAppState);
             stopCanceledJob(application.getId());
             if (flinkAppState.equals(FlinkAppState.FAILED)) {

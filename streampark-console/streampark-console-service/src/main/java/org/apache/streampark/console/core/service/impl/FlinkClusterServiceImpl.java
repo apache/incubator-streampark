@@ -30,9 +30,7 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkClusterWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
@@ -92,8 +90,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Autowired private CommonService commonService;
 
-  @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
   @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private YarnQueueService yarnQueueService;
@@ -265,7 +261,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     // 3) check job if running on cluster
     boolean existsRunningJob =
-        applicationManageService.existsRunningByClusterId(flinkCluster.getId());
+        applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
     ApiAlertException.throwIfTrue(
         existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
 
@@ -340,7 +336,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     ApiAlertException.throwIfTrue(
-        applicationManageService.existsByClusterId(id),
+        applicationInfoService.existsByClusterId(id),
         "Some app on this cluster, the cluster cannot be delete, please check.");
     removeById(id);
   }

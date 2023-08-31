@@ -195,7 +195,7 @@ public class ApplicationController {
   @PostMapping("mapping")
   @RequiresPermissions("app:mapping")
   public RestResponse mapping(Application app) {
-    boolean flag = applicationManageService.mapping(app);
+    boolean flag = applicationInfoService.mapping(app);
     return RestResponse.success(flag);
   }
 
@@ -245,7 +245,7 @@ public class ApplicationController {
   @RequiresPermissions("app:start")
   public RestResponse start(@Parameter(hidden = true) Application app) {
     try {
-      applicationManageService.checkEnv(app);
+      applicationInfoService.checkEnv(app);
       applicationActionService.start(app, false);
       return RestResponse.success(true);
     } catch (Exception e) {
@@ -307,7 +307,7 @@ public class ApplicationController {
   @PostMapping("clean")
   @RequiresPermissions("app:clean")
   public RestResponse clean(Application app) {
-    applicationActionService.clean(app);
+    applicationManageService.clean(app);
     return RestResponse.success(true);
   }
 
@@ -441,7 +441,7 @@ public class ApplicationController {
   @Operation(summary = "Check the application savepoint path")
   @PostMapping("checkSavepointPath")
   public RestResponse checkSavepointPath(Application app) throws Exception {
-    String error = applicationManageService.checkSavepointPath(app);
+    String error = applicationInfoService.checkSavepointPath(app);
     if (error == null) {
       return RestResponse.success(true);
     } else {

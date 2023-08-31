@@ -70,6 +70,21 @@ public interface ApplicationManageService extends IService<Application> {
   boolean update(Application app);
 
   /**
+   * Sets the given application to be effective.
+   *
+   * @param application the application to be set effective
+   */
+  void toEffective(Application application);
+
+  /**
+   * Checks if the given application is ready to build and update.
+   *
+   * @param app the application to check for readiness
+   * @return true if the application is ready to build and update, false otherwise
+   */
+  boolean checkBuildAndUpdate(Application app);
+
+  /**
    * Deletes the given Application from the system.
    *
    * @param app The Application to be deleted.
@@ -92,6 +107,13 @@ public interface ApplicationManageService extends IService<Application> {
    * @param application The application to update the release for.
    */
   void updateRelease(Application application);
+
+  /**
+   * Cleans the application by performing necessary cleanup tasks.
+   *
+   * @param app The application to clean.
+   */
+  void clean(Application app);
 
   /**
    * Retrieves a list of applications by project ID.

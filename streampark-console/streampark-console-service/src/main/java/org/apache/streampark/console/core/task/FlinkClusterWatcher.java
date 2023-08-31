@@ -136,9 +136,9 @@ public class FlinkClusterWatcher {
 
   private void alert(FlinkCluster cluster, ClusterState state) {
     if (cluster.getAlertId() != null) {
-      cluster.setAllJobs(applicationManageService.countByClusterId(cluster.getId()));
+      cluster.setAllJobs(applicationInfoService.countByClusterId(cluster.getId()));
       cluster.setAffectedJobs(
-          applicationManageService.countAffectedByClusterId(
+          applicationInfoService.countAffectedByClusterId(
               cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
       cluster.setClusterState(state.getValue());
       cluster.setEndTime(new Date());

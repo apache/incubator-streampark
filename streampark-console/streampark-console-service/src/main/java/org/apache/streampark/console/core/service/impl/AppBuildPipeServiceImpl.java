@@ -58,7 +58,6 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.service.application.impl.ApplicationManageServiceImpl;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
@@ -135,7 +134,7 @@ public class AppBuildPipeServiceImpl
   @Autowired private MessageService messageService;
 
   @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
+
   @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private ApplicationLogService applicationLogService;
@@ -230,7 +229,7 @@ public class AppBuildPipeServiceImpl
             }
 
             // 1) checkEnv
-            applicationManageService.checkEnv(app);
+            applicationInfoService.checkEnv(app);
 
             // 2) some preparatory work
             String appUploads = app.getWorkspace().APP_UPLOADS();
@@ -413,7 +412,7 @@ public class AppBuildPipeServiceImpl
         checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
 
     // 2) check env
-    boolean envOk = applicationManageService.checkEnv(app);
+    boolean envOk = applicationInfoService.checkEnv(app);
     ApiAlertException.throwIfFalse(
         envOk, "Check flink env failed, please check the flink version of this job");
 
@@ -631,11 +630,12 @@ public class AppBuildPipeServiceImpl
                         JacksonUtils.read(resource.getResource(), String[].class);
                     Arrays.stream(groupElements)
                         .forEach(
-                            resourceIdInGroup -> mergeDependency(
-                                application,
-                                mvnArtifacts,
-                                jarLibs,
-                                resourceService.getById(resourceIdInGroup)));
+                            resourceIdInGroup ->
+                                mergeDependency(
+                                    application,
+                                    mvnArtifacts,
+                                    jarLibs,
+                                    resourceService.getById(resourceIdInGroup)));
                   } catch (JsonProcessingException e) {
                     throw new ApiAlertException("Parse resource group failed.", e);
                   }
@@ -657,17 +657,20 @@ public class AppBuildPipeServiceImpl
     dependency
         .getPom()
         .forEach(
-            pom -> mvnArtifacts.add(
-                new Artifact(
-                    pom.getGroupId(),
-                    pom.getArtifactId(),
-                    pom.getVersion(),
-                    pom.getClassifier())));
+            pom ->
+                mvnArtifacts.add(
+                    new Artifact(
+                        pom.getGroupId(),
+                        pom.getArtifactId(),
+                        pom.getVersion(),
+                        pom.getClassifier())));
     dependency
         .getJar()
         .forEach(
-            jar -> jarLibs.add(
-                String.format(
-                    "%s/%d/%s", Workspace.local().APP_UPLOADS(), application.getTeamId(), jar)));
+            jar ->
+                jarLibs.add(
+                    String.format(
+                        "%s/%d/%s",
+                        Workspace.local().APP_UPLOADS(), application.getTeamId(), jar)));
   }
 }
