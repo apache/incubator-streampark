@@ -17,9 +17,12 @@
 
 package org.apache.streampark.console.core.enums;
 
+import lombok.Getter;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
+@Getter
 public enum ResourceFrom implements Serializable {
 
   /** cicd(build from cvs) */
@@ -36,9 +39,5 @@ public enum ResourceFrom implements Serializable {
 
   public static ResourceFrom of(Integer value) {
     return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
-  }
-
-  public Integer getValue() {
-    return value;
   }
 }

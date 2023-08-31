@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.authentication;
 
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.system.entity.AccessToken;
 
 import com.auth0.jwt.JWT;
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 import java.util.TimeZone;
 
-class JWTTest extends SpringTestBase {
+class JWTTest extends SpringUnitTestBase {
 
   @Test
   void testExpireTime() {

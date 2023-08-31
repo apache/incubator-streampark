@@ -103,6 +103,12 @@
             <version>${upickle.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.lihaoyi</groupId>
+            <artifactId>pprint_${scala.binary.version}</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- yaml parser -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>

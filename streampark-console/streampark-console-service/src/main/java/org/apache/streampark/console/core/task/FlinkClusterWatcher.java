@@ -132,9 +132,9 @@ public class FlinkClusterWatcher {
 
   private void alert(FlinkCluster cluster, ClusterState state) {
     if (cluster.getAlertId() != null) {
-      cluster.setAllJobs(applicationService.countJobsByClusterId(cluster.getId()));
+      cluster.setAllJobs(applicationService.countByClusterId(cluster.getId()));
       cluster.setAffectedJobs(
-          applicationService.countAffectedJobsByClusterId(
+          applicationService.countAffectedByClusterId(
               cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
       cluster.setClusterState(state.getValue());
       cluster.setEndTime(new Date());
@@ -296,6 +296,6 @@ public class FlinkClusterWatcher {
    */
   public Boolean verifyClusterConnection(FlinkCluster flinkCluster) {
     ClusterState clusterState = httpClusterState(flinkCluster);
-    return ClusterState.isRunning(clusterState) ? true : false;
+    return ClusterState.isRunning(clusterState);
   }
 }

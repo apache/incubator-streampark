@@ -104,8 +104,8 @@ object YarnApplicationClient extends YarnClientTrait {
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
     SecurityUtils.install(new SecurityConfiguration(flinkConfig))
-    SecurityUtils.getInstalledContext.runSecured(new Callable[SubmitResponse] {
-      override def call(): SubmitResponse = {
+    SecurityUtils.getInstalledContext.runSecured(
+      () => {
         val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
         val clientFactory =
           clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
@@ -137,8 +137,7 @@ object YarnApplicationClient extends YarnClientTrait {
         } finally {
           Utils.close(clusterDescriptor, clusterClient)
         }
-      }
-    })
+      })
   }
 
 }

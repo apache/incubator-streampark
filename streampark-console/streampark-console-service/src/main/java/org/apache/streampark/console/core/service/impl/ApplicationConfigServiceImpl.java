@@ -256,13 +256,13 @@ public class ApplicationConfigServiceImpl
   private void fillEffectiveField(Long id, List<ApplicationConfig> configList) {
     ApplicationConfig effective = getEffective(id);
 
-    if (effective != null) {
-      for (ApplicationConfig config : configList) {
-        if (config.getId().equals(effective.getId())) {
-          config.setEffective(true);
-          break;
-        }
-      }
+    if (effective == null) {
+      return;
     }
+
+    configList.stream()
+        .filter(config -> config.getId().equals(effective.getId()))
+        .findFirst()
+        .ifPresent(config -> config.setEffective(true));
   }
 }

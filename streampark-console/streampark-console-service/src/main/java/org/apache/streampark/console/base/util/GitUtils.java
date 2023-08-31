@@ -46,6 +46,8 @@ import java.util.List;
 /** */
 public class GitUtils {
 
+  private GitUtils() {}
+
   public static Git clone(Project project) throws GitAPIException {
     CloneCommand cloneCommand =
         Git.cloneRepository().setURI(project.getUrl()).setDirectory(project.getAppSource());

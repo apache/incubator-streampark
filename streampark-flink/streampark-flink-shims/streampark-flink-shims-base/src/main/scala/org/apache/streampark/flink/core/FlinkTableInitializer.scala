@@ -17,15 +17,14 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.enums.{ApiType, PlannerType, TableMode}
+import org.apache.streampark.common.enums.{ApiType, PlannerType}
 import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.enums.TableMode.TableMode
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.streampark.flink.core.EnhancerImplicit._
 import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.{Configuration, PipelineOptions}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableConfig, TableEnvironment}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
@@ -38,34 +37,18 @@ import scala.util.{Failure, Success, Try}
 
 private[flink] object FlinkTableInitializer {
 
-  private[this] var flinkInitializer: FlinkTableInitializer = _
-
   def initialize(
       args: Array[String],
       config: (TableConfig, ParameterTool) => Unit): (ParameterTool, TableEnvironment) = {
-    if (flinkInitializer == null) {
-      this.synchronized {
-        if (flinkInitializer == null) {
-          flinkInitializer = new FlinkTableInitializer(args, ApiType.scala)
-          flinkInitializer.tableConfFunc = config
-          flinkInitializer.initEnvironment(TableMode.batch)
-        }
-      }
-    }
-    (flinkInitializer.configuration.parameter, flinkInitializer.tableEnvironment)
+    val flinkInitializer = new FlinkTableInitializer(args, ApiType.scala)
+    flinkInitializer.tableConfFunc = config
+    (flinkInitializer.configuration.parameter, flinkInitializer.tableEnv)
   }
 
   def initialize(args: TableEnvConfig): (ParameterTool, TableEnvironment) = {
-    if (flinkInitializer == null) {
-      this.synchronized {
-        if (flinkInitializer == null) {
-          flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
-          flinkInitializer.javaTableEnvConfFunc = args.conf
-          flinkInitializer.initEnvironment(TableMode.batch)
-        }
-      }
-    }
-    (flinkInitializer.configuration.parameter, flinkInitializer.tableEnvironment)
+    val flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
+    flinkInitializer.javaTableEnvConfFunc = args.conf
+    (flinkInitializer.configuration.parameter, flinkInitializer.tableEnv)
   }
 
   def initialize(
@@ -73,38 +56,25 @@ private[flink] object FlinkTableInitializer {
       configStream: (StreamExecutionEnvironment, ParameterTool) => Unit,
       configTable: (TableConfig, ParameterTool) => Unit)
       : (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
-    if (flinkInitializer == null) {
-      this.synchronized {
-        if (flinkInitializer == null) {
-          flinkInitializer = new FlinkTableInitializer(args, ApiType.scala)
-          flinkInitializer.streamEnvConfFunc = configStream
-          flinkInitializer.tableConfFunc = configTable
-          flinkInitializer.initEnvironment(TableMode.streaming)
-        }
-      }
-    }
+
+    val flinkInitializer = new FlinkTableInitializer(args, ApiType.scala)
+    flinkInitializer.streamEnvConfFunc = configStream
+    flinkInitializer.tableConfFunc = configTable
     (
       flinkInitializer.configuration.parameter,
-      flinkInitializer.streamEnvironment,
-      flinkInitializer.streamTableEnvironment)
+      flinkInitializer.streamEnv,
+      flinkInitializer.streamTableEnv)
   }
 
   def initialize(args: StreamTableEnvConfig)
       : (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
-    if (flinkInitializer == null) {
-      this.synchronized {
-        if (flinkInitializer == null) {
-          flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
-          flinkInitializer.javaStreamEnvConfFunc = args.streamConfig
-          flinkInitializer.javaTableEnvConfFunc = args.tableConfig
-          flinkInitializer.initEnvironment(TableMode.streaming)
-        }
-      }
-    }
+    val flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
+    flinkInitializer.javaStreamEnvConfFunc = args.streamConfig
+    flinkInitializer.javaTableEnvConfFunc = args.tableConfig
     (
       flinkInitializer.configuration.parameter,
-      flinkInitializer.streamEnvironment,
-      flinkInitializer.streamTableEnvironment)
+      flinkInitializer.streamEnv,
+      flinkInitializer.streamTableEnv)
   }
 
 }
@@ -112,30 +82,95 @@ private[flink] object FlinkTableInitializer {
 private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
   extends FlinkStreamingInitializer(args, apiType) {
 
-  private[this] var localStreamTableEnv: StreamTableEnvironment = _
+  private[this] lazy val envSettings = {
 
-  private[this] var localTableEnv: TableEnvironment = _
+    val builder = EnvironmentSettings.newInstance()
 
-  def streamTableEnvironment: StreamTableEnvironment = {
-    if (localStreamTableEnv == null) {
-      this.synchronized {
-        if (localStreamTableEnv == null) {
-          initEnvironment(TableMode.streaming)
+    Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER)))
+      .getOrElse(PlannerType.blink) match {
+      case PlannerType.blink =>
+        val useBlinkPlanner =
+          Try(builder.getClass.getDeclaredMethod("useBlinkPlanner")).getOrElse(null)
+        if (useBlinkPlanner == null) {
+          logWarn("useBlinkPlanner deprecated")
+        } else {
+          useBlinkPlanner.setAccessible(true)
+          useBlinkPlanner.invoke(builder)
+          logInfo("blinkPlanner will be use.")
         }
-      }
+      case PlannerType.old =>
+        val useOldPlanner = Try(builder.getClass.getDeclaredMethod("useOldPlanner")).getOrElse(null)
+        if (useOldPlanner == null) {
+          logWarn("useOldPlanner deprecated")
+        } else {
+          useOldPlanner.setAccessible(true)
+          useOldPlanner.invoke(builder)
+          logInfo("useOldPlanner will be use.")
+        }
+      case PlannerType.any =>
+        val useAnyPlanner = Try(builder.getClass.getDeclaredMethod("useAnyPlanner")).getOrElse(null)
+        if (useAnyPlanner == null) {
+          logWarn("useAnyPlanner deprecated")
+        } else {
+          logInfo("useAnyPlanner will be use.")
+          useAnyPlanner.setAccessible(true)
+          useAnyPlanner.invoke(builder)
+        }
     }
-    localStreamTableEnv
+
+    val buildWith =
+      (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
+    buildWith match {
+      case (x: String, y: String) if x != null && y != null =>
+        logInfo(s"with built in catalog: $x")
+        logInfo(s"with built in database: $y")
+        builder.withBuiltInCatalogName(x)
+        builder.withBuiltInDatabaseName(y)
+      case (x: String, _) if x != null =>
+        logInfo(s"with built in catalog: $x")
+        builder.withBuiltInCatalogName(x)
+      case (_, y: String) if y != null =>
+        logInfo(s"with built in database: $y")
+        builder.withBuiltInDatabaseName(y)
+      case _ =>
+    }
+    builder
   }
 
-  def tableEnvironment: TableEnvironment = {
-    if (localTableEnv == null) {
-      this.synchronized {
-        if (localTableEnv == null) {
-          initEnvironment(TableMode.batch)
-        }
-      }
+  lazy val tableEnv: TableEnvironment = {
+    logInfo(s"job working in batch mode")
+    envSettings.inBatchMode()
+    val tableEnv = TableEnvironment.create(envSettings.build()).setAppName
+    apiType match {
+      case ApiType.java if javaTableEnvConfFunc != null =>
+        javaTableEnvConfFunc.configuration(tableEnv.getConfig, parameter)
+      case ApiType.scala if tableConfFunc != null =>
+        tableConfFunc(tableEnv.getConfig, parameter)
+      case _ =>
     }
-    localTableEnv
+    tableEnv
+  }
+
+  lazy val streamTableEnv: StreamTableEnvironment = {
+    logInfo(s"components should work in streaming mode")
+    envSettings.inStreamingMode()
+    val setting = envSettings.build()
+
+    if (streamEnvConfFunc != null) {
+      streamEnvConfFunc(streamEnv, parameter)
+    }
+    if (javaStreamEnvConfFunc != null) {
+      javaStreamEnvConfFunc.configuration(streamEnv.getJavaEnv, parameter)
+    }
+    val streamTableEnv = StreamTableEnvironment.create(streamEnv, setting).setAppName
+    apiType match {
+      case ApiType.java if javaTableEnvConfFunc != null =>
+        javaTableEnvConfFunc.configuration(streamTableEnv.getConfig, parameter)
+      case ApiType.scala if tableConfFunc != null =>
+        tableConfFunc(streamTableEnv.getConfig, parameter)
+      case _ =>
+    }
+    streamTableEnv
   }
 
   /** In case of table SQL, the parameter conf is not required, it depends on the developer. */
@@ -197,110 +232,6 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
                 new IllegalArgumentException(s"[StreamPark] init sql error.$e")
                 configuration
             }
-        }
-    }
-  }
-
-  def initEnvironment(tableMode: TableMode): Unit = {
-    val builder = EnvironmentSettings.newInstance()
-    val parameter = configuration.parameter
-    Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER)))
-      .getOrElse(PlannerType.blink) match {
-      case PlannerType.blink =>
-        val useBlinkPlanner =
-          Try(builder.getClass.getDeclaredMethod("useBlinkPlanner")).getOrElse(null)
-        if (useBlinkPlanner == null) {
-          logWarn("useBlinkPlanner deprecated")
-        } else {
-          useBlinkPlanner.setAccessible(true)
-          useBlinkPlanner.invoke(builder)
-          logInfo("blinkPlanner will be use.")
-        }
-      case PlannerType.old =>
-        val useOldPlanner = Try(builder.getClass.getDeclaredMethod("useOldPlanner")).getOrElse(null)
-        if (useOldPlanner == null) {
-          logWarn("useOldPlanner deprecated")
-        } else {
-          useOldPlanner.setAccessible(true)
-          useOldPlanner.invoke(builder)
-          logInfo("useOldPlanner will be use.")
-        }
-      case PlannerType.any =>
-        val useAnyPlanner = Try(builder.getClass.getDeclaredMethod("useAnyPlanner")).getOrElse(null)
-        if (useAnyPlanner == null) {
-          logWarn("useAnyPlanner deprecated")
-        } else {
-          logInfo("useAnyPlanner will be use.")
-          useAnyPlanner.setAccessible(true)
-          useAnyPlanner.invoke(builder)
-        }
-    }
-
-    val mode = Try(TableMode.withName(parameter.get(KEY_FLINK_TABLE_MODE))).getOrElse(tableMode)
-    mode match {
-      case TableMode.batch =>
-        logInfo(s"components should work in $tableMode mode")
-        builder.inBatchMode()
-      case TableMode.streaming =>
-        logInfo(s"components should work in $tableMode mode")
-        builder.inStreamingMode()
-    }
-
-    val buildWith =
-      (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
-    buildWith match {
-      case (x: String, y: String) if x != null && y != null =>
-        logInfo(s"with built in catalog: $x")
-        logInfo(s"with built in database: $y")
-        builder.withBuiltInCatalogName(x)
-        builder.withBuiltInDatabaseName(y)
-      case (x: String, _) if x != null =>
-        logInfo(s"with built in catalog: $x")
-        builder.withBuiltInCatalogName(x)
-      case (_, y: String) if y != null =>
-        logInfo(s"with built in database: $y")
-        builder.withBuiltInDatabaseName(y)
-      case _ =>
-    }
-    val setting = builder.build()
-    tableMode match {
-      case TableMode.batch => localTableEnv = TableEnvironment.create(setting)
-      case TableMode.streaming =>
-        initEnvironment()
-        if (streamEnvConfFunc != null) {
-          streamEnvConfFunc(streamEnvironment, parameter)
-        }
-        if (javaStreamEnvConfFunc != null) {
-          javaStreamEnvConfFunc.configuration(streamEnvironment.getJavaEnv, parameter)
-        }
-        localStreamTableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
-    }
-    val appName = parameter.getAppName()
-    if (appName != null) {
-      tableMode match {
-        case TableMode.batch =>
-          localTableEnv.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
-        case TableMode.streaming =>
-          localStreamTableEnv.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
-      }
-    }
-
-    apiType match {
-      case ApiType.java =>
-        if (javaTableEnvConfFunc != null) {
-          tableMode match {
-            case TableMode.batch =>
-              javaTableEnvConfFunc.configuration(localTableEnv.getConfig, parameter)
-            case TableMode.streaming =>
-              javaTableEnvConfFunc.configuration(localStreamTableEnv.getConfig, parameter)
-          }
-        }
-      case ApiType.scala =>
-        if (tableConfFunc != null) {
-          tableMode match {
-            case TableMode.batch => tableConfFunc(localTableEnv.getConfig, parameter)
-            case TableMode.streaming => tableConfFunc(localStreamTableEnv.getConfig, parameter)
-          }
         }
     }
   }

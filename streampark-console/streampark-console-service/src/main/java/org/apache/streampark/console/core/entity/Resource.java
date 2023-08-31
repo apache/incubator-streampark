@@ -82,4 +82,29 @@ public class Resource implements Serializable {
   private transient String sortOrder;
 
   private transient String connector;
+
+  public void setResourcePath(String resourcePath) {
+    if (resourcePath == null) {
+      throw new IllegalArgumentException("resource path cannot be null.");
+    }
+    String[] namePath = resourcePath.split(":");
+    if (namePath.length != 2) {
+      throw new IllegalArgumentException("resource path invalid, format: $name:$path");
+    }
+    this.resourcePath = resourcePath;
+  }
+
+  public String getFileName() {
+    if (this.resourcePath == null) {
+      return null;
+    }
+    return resourcePath.split(":")[0];
+  }
+
+  public String getFilePath() {
+    if (this.resourcePath == null) {
+      return null;
+    }
+    return resourcePath.split(":")[1];
+  }
 }

@@ -17,20 +17,28 @@
 
 package org.apache.streampark.console.base.util;
 
+import org.apache.streampark.console.base.exception.ApiDetailException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** The file utils. */
 public class FileUtils {
 
+  private FileUtils() {}
+
   /**
-   * Read the end of the file.
+   * Reads the last portion of a file as a byte array.
    *
-   * @param file The file
-   * @param maxSize Maximum size of read file
-   * @return The file content
-   * @throws IOException
+   * @param file the file to read
+   * @param maxSize the maximum number of bytes to read from the end of the file
+   * @return the byte array containing the content read from the file
+   * @throws IOException if an I/O error occurs
    */
   public static byte[] readEndOfFile(File file, long maxSize) throws IOException {
     long readSize = maxSize;
@@ -48,12 +56,14 @@ public class FileUtils {
   }
 
   /**
-   * Read the end of the file.
+   * Read the content of a file from a specified offset.
    *
-   * @param file The file
-   * @param maxSize Maximum size of read file
-   * @return The file content
-   * @throws IOException
+   * @param file The file to read from
+   * @param startOffset The offset from where to start reading the file
+   * @param maxSize The maximum size of the file to read
+   * @return The content of the file as a byte array
+   * @throws IOException if an I/O error occurs while reading the file
+   * @throws IllegalArgumentException if the startOffset is greater than the file length
    */
   public static byte[] readFileFromOffset(File file, long startOffset, long maxSize)
       throws IOException {
@@ -70,5 +80,28 @@ public class FileUtils {
       raFile.read(fileContent);
     }
     return fileContent;
+  }
+
+  /**
+   * Roll View Log.
+   *
+   * @param path The file path.
+   * @param offset The offset.
+   * @param limit The limit.
+   * @return The content of the file.
+   * @throws ApiDetailException if there's an error rolling the view log.
+   */
+  public static String rollViewLog(String path, int offset, int limit) {
+    try {
+      File file = new File(path);
+      if (file.exists() && file.isFile()) {
+        try (Stream<String> stream = Files.lines(Paths.get(path))) {
+          return stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n"));
+        }
+      }
+      return null;
+    } catch (Exception e) {
+      throw new ApiDetailException("roll view log error: " + e);
+    }
   }
 }

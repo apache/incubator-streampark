@@ -82,46 +82,6 @@
         set option_state = 0
     </update>
 
-    <select id="existsByTeamId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
-        select
-            CASE
-                WHEN  count(1) > 0 THEN true ELSE false
-            END
-        from t_flink_app
-        where team_id = #{teamId}
-        limit 1
-    </select>
-
-    <select id="existsByJobName" resultType="java.lang.Boolean" parameterType="java.lang.String">
-        select
-            CASE
-                WHEN  count(1) > 0 THEN true ELSE false
-            END
-        from t_flink_app
-        where job_name = #{jobName}
-        limit 1
-    </select>
-
-    <select id="existsByUserId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
-        select
-            CASE
-                WHEN  count(1) > 0 THEN true ELSE false
-            END
-        from t_flink_app
-        where user_id = #{userId}
-        limit 1
-    </select>
-
-    <select id="existsJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
-        SELECT
-            CASE
-                WHEN  count(1) > 0 THEN true ELSE false
-            END
-        FROM t_flink_app
-        WHERE flink_cluster_id = #{clusterId}
-        limit 1
-    </select>
-
     <select id="existsRunningJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
         select
             CASE
@@ -133,15 +93,7 @@
              limit 1
     </select>
 
-    <select id="countJobsByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
-        select
-            count(1)
-        from t_flink_app
-        where flink_cluster_id = #{clusterId}
-            limit 1
-    </select>
-
-    <select id="countAffectedJobsByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+    <select id="countAffectedByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
         select
             count(1)
         from t_flink_app

@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service.alert.impl;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.mapper.AlertConfigMapper;
@@ -50,7 +50,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
   @Autowired private ApplicationService applicationService;
 
   @Override
-  public IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request) {
+  public IPage<AlertConfigParams> page(AlertConfigParams params, RestRequest request) {
     // build query conditions
     LambdaQueryWrapper<AlertConfig> wrapper = new LambdaQueryWrapper();
     wrapper.eq(params.getUserId() != null, AlertConfig::getUserId, params.getUserId());
@@ -58,12 +58,10 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
     Page<AlertConfig> page = new MybatisPager<AlertConfig>().getDefaultPage(request);
     IPage<AlertConfig> resultPage = getBaseMapper().selectPage(page, wrapper);
 
-    Page<AlertConfigWithParams> result = new Page<>();
+    Page<AlertConfigParams> result = new Page<>();
     if (CollectionUtils.isNotEmpty(resultPage.getRecords())) {
       result.setRecords(
-          resultPage.getRecords().stream()
-              .map(AlertConfigWithParams::of)
-              .collect(Collectors.toList()));
+          resultPage.getRecords().stream().map(AlertConfigParams::of).collect(Collectors.toList()));
     }
 
     return result;

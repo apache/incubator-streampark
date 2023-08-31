@@ -32,5 +32,6 @@ case class TriggerSavepointRequest(
     clusterId: String,
     jobId: String,
     savepointPath: String,
+    nativeFormat: Boolean,
     override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE)
   extends SavepointRequestTrait

@@ -531,7 +531,6 @@ export const renderResourceFrom = (model: Recordable) => {
 
 export const renderStreamParkResource = ({ model, resources }) => {
   const renderOptions = () => {
-    console.log('resources', resources);
     return (resources || [])
       .filter((item) => item.resourceType !== ResourceTypeEnum.FLINK_APP)
       .map((resource) => {
@@ -561,8 +560,7 @@ export const renderStreamParkResource = ({ model, resources }) => {
         max-tag-count={3}
         onChange={(value) => (model.teamResource = value)}
         value={model.teamResource}
-        placeholder={t('flink.app.teamResourcePlaceHolder')}
-        style="width: calc(100% - 60px)"
+        placeholder={t('flink.app.resourcePlaceHolder')}
       >
         {renderOptions()}
       </Select>
@@ -619,14 +617,14 @@ export const renderFlinkAppRestoreMode = ({ model, field }: RenderCallbackParams
         onChange={(value) => (model[field] = value)}
         placeholder="Please select restore mode"
       >
-        <Select.Option key="claim" value={RestoreModeEnum.CLAIM}>
-          <Tag color="#13c2c2" style=";margin-left: 5px;" size="small">
-            CLAIM
+        <Select.Option key="no_claim" value={RestoreModeEnum.NO_CLAIM}>
+          <Tag color="gray" style=";margin-left: 5px;" size="small">
+            NO_CLAIM
           </Tag>
         </Select.Option>
-        <Select.Option key="no_claim" value={RestoreModeEnum.NO_CLAIM}>
-          <Tag color="#2db7f5" style=";margin-left: 5px;" size="small">
-            NO_CLAIM
+        <Select.Option key="claim" value={RestoreModeEnum.CLAIM}>
+          <Tag color="#108ee9" style=";margin-left: 5px;" size="small">
+            CLAIM
           </Tag>
         </Select.Option>
         <Select.Option key="legacy" value={RestoreModeEnum.LEGACY}>

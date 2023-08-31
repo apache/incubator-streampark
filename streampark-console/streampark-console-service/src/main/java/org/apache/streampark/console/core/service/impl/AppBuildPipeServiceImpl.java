@@ -30,6 +30,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
+import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -80,6 +81,7 @@ import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -234,13 +236,21 @@ public class AppBuildPipeServiceImpl
               FsOperator fsOperator = app.getFsOperator();
               fsOperator.delete(appHome);
               if (app.isUploadJob()) {
+                String uploadJar = appUploads.concat("/").concat(app.getJar());
                 File localJar =
                     new File(
                         String.format(
                             "%s/%d/%s",
                             Workspace.local().APP_UPLOADS(), app.getTeamId(), app.getJar()));
+                if (!localJar.exists()) {
+                  Resource resource =
+                      resourceService.findByResourceName(app.getTeamId(), app.getJar());
+                  if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                    localJar = new File(resource.getFilePath());
+                    uploadJar = appUploads.concat("/").concat(localJar.getName());
+                  }
+                }
                 // upload jar copy to appHome
-                String uploadJar = appUploads.concat("/").concat(app.getJar());
                 checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
 
                 switch (app.getApplicationType()) {
@@ -413,6 +423,14 @@ public class AppBuildPipeServiceImpl
   private BuildPipeline createPipelineInstance(@Nonnull Application app) {
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
     String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
+
+    if (!new File(flinkUserJar).exists()) {
+      Resource resource = resourceService.findByResourceName(app.getTeamId(), app.getJar());
+      if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+        flinkUserJar = resource.getFilePath();
+      }
+    }
+
     ExecutionMode executionMode = app.getExecutionModeEnum();
     String mainClass = ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
     switch (executionMode) {
@@ -466,6 +484,7 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
         return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
       case KUBERNETES_NATIVE_APPLICATION:
+        DockerConfig dockerConfig = settingService.getDockerConfig();
         FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest =
             new FlinkK8sApplicationBuildRequest(
                 app.getJobName(),
@@ -482,10 +501,10 @@ public class AppBuildPipeServiceImpl
                 app.getK8sPodTemplates(),
                 app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
                 DockerConf.of(
-                    settingService.getDockerRegisterAddress(),
-                    settingService.getDockerRegisterNamespace(),
-                    settingService.getDockerRegisterUser(),
-                    settingService.getDockerRegisterPassword()),
+                    dockerConfig.getAddress(),
+                    dockerConfig.getNamespace(),
+                    dockerConfig.getUser(),
+                    dockerConfig.getPassword()),
                 app.getIngressTemplate());
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
         return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);

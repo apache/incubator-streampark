@@ -34,33 +34,17 @@ import java.io.File
 
 private[flink] object FlinkStreamingInitializer {
 
-  private[this] var flinkInitializer: FlinkStreamingInitializer = _
-
   def initialize(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit)
       : (ParameterTool, StreamExecutionEnvironment) = {
-    if (flinkInitializer == null) {
-      this.synchronized {
-        if (flinkInitializer == null) {
-          flinkInitializer = new FlinkStreamingInitializer(args, ApiType.scala)
-          flinkInitializer.streamEnvConfFunc = config
-          flinkInitializer.initEnvironment()
-        }
-      }
-    }
-    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment)
+    val flinkInitializer = new FlinkStreamingInitializer(args, ApiType.scala)
+    flinkInitializer.streamEnvConfFunc = config
+    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnv)
   }
 
   def initialize(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
-    if (flinkInitializer == null) {
-      this.synchronized {
-        if (flinkInitializer == null) {
-          flinkInitializer = new FlinkStreamingInitializer(args.args, ApiType.java)
-          flinkInitializer.javaStreamEnvConfFunc = args.conf
-          flinkInitializer.initEnvironment()
-        }
-      }
-    }
-    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment)
+    val flinkInitializer = new FlinkStreamingInitializer(args.args, ApiType.java)
+    flinkInitializer.javaStreamEnvConfFunc = args.conf
+    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnv)
   }
 }
 
@@ -75,7 +59,22 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   var javaTableEnvConfFunc: TableEnvConfigFunction = _
 
-  private[this] var localStreamEnv: StreamExecutionEnvironment = _
+  implicit private[flink] val parameter: ParameterTool = configuration.parameter
+
+  lazy val streamEnv: StreamExecutionEnvironment = {
+    val env = new StreamExecutionEnvironment(
+      JavaStreamEnv.getExecutionEnvironment(configuration.envConfig))
+
+    apiType match {
+      case ApiType.java if javaStreamEnvConfFunc != null =>
+        javaStreamEnvConfFunc.configuration(env.getJavaEnv, configuration.parameter)
+      case ApiType.scala if streamEnvConfFunc != null =>
+        streamEnvConfFunc(env, configuration.parameter)
+      case _ =>
+    }
+    env.getConfig.setGlobalJobParameters(configuration.parameter)
+    env
+  }
 
   lazy val configuration: FlinkConfiguration = initParameter()
 
@@ -145,31 +144,6 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           map += x._1.drop(prefix.length) -> x._2
         })
     map
-  }
-
-  def streamEnvironment: StreamExecutionEnvironment = {
-    if (localStreamEnv == null) {
-      this.synchronized {
-        if (localStreamEnv == null) {
-          initEnvironment()
-        }
-      }
-    }
-    localStreamEnv
-  }
-
-  def initEnvironment(): Unit = {
-    localStreamEnv = new StreamExecutionEnvironment(
-      JavaStreamEnv.getExecutionEnvironment(configuration.envConfig))
-
-    apiType match {
-      case ApiType.java if javaStreamEnvConfFunc != null =>
-        javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, configuration.parameter)
-      case ApiType.scala if streamEnvConfFunc != null =>
-        streamEnvConfFunc(localStreamEnv, configuration.parameter)
-      case _ =>
-    }
-    localStreamEnv.getConfig.setGlobalJobParameters(configuration.parameter)
   }
 
 }

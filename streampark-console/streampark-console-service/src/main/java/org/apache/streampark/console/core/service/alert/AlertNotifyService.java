@@ -18,10 +18,10 @@
 package org.apache.streampark.console.core.service.alert;
 
 import org.apache.streampark.console.base.exception.AlertException;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 
 public interface AlertNotifyService {
 
-  boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException;
+  boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template) throws AlertException;
 }

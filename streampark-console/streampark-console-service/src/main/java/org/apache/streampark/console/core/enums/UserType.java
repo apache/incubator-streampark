@@ -18,10 +18,12 @@
 package org.apache.streampark.console.core.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import lombok.Getter;
 
 import java.util.Arrays;
 
 /** The user type. */
+@Getter
 public enum UserType {
 
   /** The admin of StreamPark. */
@@ -34,10 +36,6 @@ public enum UserType {
 
   UserType(int code) {
     this.code = code;
-  }
-
-  public int getCode() {
-    return code;
   }
 
   public static UserType of(Integer code) {

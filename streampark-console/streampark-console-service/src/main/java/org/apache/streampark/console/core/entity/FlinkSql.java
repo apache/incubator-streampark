@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.core.bean.Dependency;
-import org.apache.streampark.console.core.enums.ChangedType;
+import org.apache.streampark.console.core.enums.ChangeTypeEnum;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -83,7 +83,7 @@ public class FlinkSql {
     application.setSqlId(this.id);
   }
 
-  public ChangedType checkChange(FlinkSql target) {
+  public ChangeTypeEnum checkChange(FlinkSql target) {
     // 1) determine if sql statement has changed
     boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
     // 2) determine if dependency has changed
@@ -94,18 +94,18 @@ public class FlinkSql {
     boolean teamResDifference = !Objects.equals(this.teamResource, target.getTeamResource());
 
     if (sqlDifference && depDifference && teamResDifference) {
-      return ChangedType.ALL;
+      return ChangeTypeEnum.ALL;
     }
     if (sqlDifference) {
-      return ChangedType.SQL;
+      return ChangeTypeEnum.SQL;
     }
     if (depDifference) {
-      return ChangedType.DEPENDENCY;
+      return ChangeTypeEnum.DEPENDENCY;
     }
     if (teamResDifference) {
-      return ChangedType.TEAM_RESOURCE;
+      return ChangeTypeEnum.TEAM_RESOURCE;
     }
-    return ChangedType.NONE;
+    return ChangeTypeEnum.NONE;
   }
 
   public void base64Encode() {

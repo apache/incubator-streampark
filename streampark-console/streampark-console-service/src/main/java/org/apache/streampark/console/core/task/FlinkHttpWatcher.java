@@ -38,6 +38,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.hc.client5.http.config.RequestConfig;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -49,6 +50,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -86,7 +89,7 @@ public class FlinkHttpWatcher {
   @Autowired private AutoHealthProbingTask autoHealthProbingTask;
 
   // track interval  every 5 seconds
-  private static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
+  public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
 
   // option interval within 10 seconds
   private static final Duration OPTION_INTERVAL = Duration.ofSeconds(10);
@@ -198,6 +201,12 @@ public class FlinkHttpWatcher {
       lastWatchTime = timeMillis;
       WATCHING_APPS.forEach(this::watch);
     }
+  }
+
+  @VisibleForTesting
+  public @Nullable FlinkAppState tryQueryFlinkAppState(@Nonnull Long appId) {
+    Application app = WATCHING_APPS.get(appId);
+    return (app == null || app.getState() == null) ? null : FlinkAppState.of(app.getState());
   }
 
   private void watch(Long id, Application application) {

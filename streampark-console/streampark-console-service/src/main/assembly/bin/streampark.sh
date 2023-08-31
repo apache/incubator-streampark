@@ -622,11 +622,12 @@ main() {
         echo_r "Unknown command: $1"
         echo_w "Usage: streampark.sh ( commands ... )"
         echo_w "commands:"
-        echo_w "  start \$conf               Start StreamPark with application config."
+        echo_w "  start \$conf              Start StreamPark with application config."
         echo_w "  stop                      Stop StreamPark, wait up to 3 seconds and then use kill -KILL if still running"
+        echo_w "  start_docker              start in docker or k8s mode"
         echo_w "  status                    StreamPark status"
         echo_w "  debug                     StreamPark start with debug mode,start debug mode, like: bash streampark.sh debug 10002"
-        echo_w "  restart \$conf             restart StreamPark with application config."
+        echo_w "  restart \$conf            restart StreamPark with application config."
         exit 0
         ;;
   esac

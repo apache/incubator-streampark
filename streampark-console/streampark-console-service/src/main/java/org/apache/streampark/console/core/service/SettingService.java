@@ -17,7 +17,8 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.core.bean.SenderEmail;
+import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -29,12 +30,13 @@ public interface SettingService extends IService<Setting> {
 
   Map<String, Setting> SETTINGS = new ConcurrentHashMap<>();
 
-  String KEY_MAVEN_SETTINGS = "streampark.maven.settings";
-  String KEY_MAVEN_REPOSITORY = "streampark.maven.central.repository";
-  String KEY_MAVEN_AUTH_USER = "streampark.maven.auth.user";
-  String KEY_MAVEN_AUTH_PASSWORD = "streampark.maven.auth.password";
-  String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
+  // docker
+  String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
+  String KEY_DOCKER_REGISTER_USER = "docker.register.user";
+  String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
+  String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
 
+  // alert.
   String KEY_ALERT_EMAIL_HOST = "alert.email.host";
   String KEY_ALERT_EMAIL_PORT = "alert.email.port";
   String KEY_ALERT_EMAIL_FROM = "alert.email.from";
@@ -42,11 +44,7 @@ public interface SettingService extends IService<Setting> {
   String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
   String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
 
-  String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
-  String KEY_DOCKER_REGISTER_USER = "docker.register.user";
-  String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
-
-  String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
+  String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
 
   String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
 
@@ -54,25 +52,11 @@ public interface SettingService extends IService<Setting> {
 
   boolean update(Setting setting);
 
+  MavenConfig getMavenConfig();
+
+  DockerConfig getDockerConfig();
+
   String getStreamParkAddress();
-
-  String getMavenSettings();
-
-  String getMavenRepository();
-
-  String getMavenAuthUser();
-
-  String getMavenAuthPassword();
-
-  SenderEmail getSenderEmail();
-
-  String getDockerRegisterAddress();
-
-  String getDockerRegisterUser();
-
-  String getDockerRegisterPassword();
-
-  String getDockerRegisterNamespace();
 
   String getIngressModeDefault();
 }
