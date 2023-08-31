@@ -40,8 +40,8 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,15 +49,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-@RequiredArgsConstructor
 public class ApplicationBackUpServiceImpl
     extends ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp>
     implements ApplicationBackUpService {
 
-  private final ApplicationManageService applicationManageService;
-  private final ApplicationConfigService configService;
-  private final EffectiveService effectiveService;
-  private final FlinkSqlService flinkSqlService;
+  @Autowired private ApplicationManageService applicationManageService;
+
+  @Autowired private ApplicationConfigService configService;
+
+  @Autowired private EffectiveService effectiveService;
+
+  @Autowired private FlinkSqlService flinkSqlService;
 
   @Override
   public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {

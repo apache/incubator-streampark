@@ -139,7 +139,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
             });
     buildCompletableFuture.get();
 
-    applicationManageService.start(applicationManageService.getById(100000L), false);
+    applicationActionService.start(applicationManageService.getById(100000L), false);
     CompletableFuture<Boolean> completableFuture =
         CompletableFuture.supplyAsync(
             () -> {
