@@ -142,7 +142,7 @@ object Utils {
    */
   def calPercent(num1: Long, num2: Long): Double =
     if (num1 == 0 || num2 == 0) 0.0
-    else (num1.toDouble / num2.toDouble * 100).formatted("%.1f").toDouble
+    else "%.1f".format(num1.toDouble / num2.toDouble * 100).toDouble
 
   def hashCode(elements: Any*): Int = {
     if (elements == null) return 0
