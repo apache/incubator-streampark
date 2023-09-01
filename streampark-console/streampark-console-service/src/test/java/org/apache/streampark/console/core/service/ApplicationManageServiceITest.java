@@ -27,7 +27,6 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.FlinkClusterServiceImpl;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
@@ -59,7 +58,6 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
 
   @Autowired private ApplicationManageService applicationManageService;
   @Autowired private ApplicationActionService applicationActionService;
-  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private FlinkClusterService clusterService;
 

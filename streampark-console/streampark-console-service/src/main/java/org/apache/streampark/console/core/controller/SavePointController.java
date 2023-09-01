@@ -24,8 +24,6 @@ import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.service.SavePointService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -53,8 +51,6 @@ import javax.annotation.Nullable;
 public class SavePointController {
 
   @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
-  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private SavePointService savePointService;
 

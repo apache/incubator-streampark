@@ -19,8 +19,6 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
@@ -63,8 +61,6 @@ public class FlinkK8sWatcherWrapper {
   @Lazy @Autowired private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
 
   @Lazy @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
-  @Autowired private ApplicationInfoService applicationInfoService;
 
   /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
   @Bean(destroyMethod = "close")

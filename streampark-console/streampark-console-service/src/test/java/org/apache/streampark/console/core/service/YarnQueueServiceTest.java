@@ -23,8 +23,6 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
 
@@ -55,8 +53,6 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
-  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private YarnQueueService yarnQueueService;
 

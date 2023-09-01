@@ -29,7 +29,6 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.authentication.JWTToken;
@@ -76,7 +75,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private MenuService menuService;
 
   @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
   @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private ResourceService resourceService;

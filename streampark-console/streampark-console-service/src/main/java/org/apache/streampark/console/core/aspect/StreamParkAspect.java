@@ -27,8 +27,6 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -64,8 +62,6 @@ public class StreamParkAspect {
   @Autowired private CommonService commonService;
   @Autowired private MemberService memberService;
   @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
-  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Pointcut(
       "execution(public"

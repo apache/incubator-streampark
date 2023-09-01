@@ -24,7 +24,6 @@ import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.alert.AlertService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
@@ -59,7 +58,6 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8
 public class FlinkK8sChangeEventListener {
 
   @Lazy @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
   @Autowired private ApplicationInfoService applicationInfoService;
 
   @Lazy @Autowired private AlertService alertService;

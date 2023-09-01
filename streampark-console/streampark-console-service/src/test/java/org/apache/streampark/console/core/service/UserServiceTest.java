@@ -24,7 +24,6 @@ import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineType;
 import org.apache.streampark.console.core.enums.ResourceType;
 import org.apache.streampark.console.core.enums.UserType;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.entity.User;
@@ -43,7 +42,6 @@ import java.util.Map;
 class UserServiceTest extends SpringUnitTestBase {
   @Autowired private UserService userService;
   @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationActionService applicationActionService;
   @Autowired private ApplicationInfoService applicationInfoService;
   @Autowired private ResourceService resourceService;
 
