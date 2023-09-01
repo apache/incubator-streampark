@@ -520,6 +520,15 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     String applicationArgs =
         variableService.replaceVariable(application.getTeamId(), application.getArgs());
 
+    String pyflinkFilePath = "";
+    Resource resource =
+        resourceService.findByResourceName(application.getTeamId(), application.getJar());
+    if (resource != null
+        && StringUtils.isNotBlank(resource.getFilePath())
+        && resource.getFilePath().endsWith(ConfigConst.PYTHON_SUFFIX())) {
+      pyflinkFilePath = resource.getFilePath();
+    }
+
     SubmitRequest submitRequest =
         new SubmitRequest(
             flinkEnv.getFlinkVersion(),
@@ -535,6 +544,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             getSavePointed(appParam),
             appParam.getRestoreMode() == null ? null : RestoreMode.of(appParam.getRestoreMode()),
             applicationArgs,
+            pyflinkFilePath,
             buildResult,
             kubernetesSubmitParam,
             extraParameter);
