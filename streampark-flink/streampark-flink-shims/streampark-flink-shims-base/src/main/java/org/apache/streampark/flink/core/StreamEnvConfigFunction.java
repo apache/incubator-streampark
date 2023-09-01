@@ -23,7 +23,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 @FunctionalInterface
 public interface StreamEnvConfigFunction {
   /**
-   * When used to initialize StreamExecutionEnvironment, it can be used to implement this function and customize the parameters to be set...
+   * When used to initialize StreamExecutionEnvironment, it can be used to implement this function
+   * and customize the parameters to be set...
    *
    * @param environment
    * @param parameterTool
