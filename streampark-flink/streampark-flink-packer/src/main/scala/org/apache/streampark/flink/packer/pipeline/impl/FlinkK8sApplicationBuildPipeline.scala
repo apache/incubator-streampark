@@ -229,9 +229,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       registerAddress: String,
       imageNamespace: String): String = {
     var tagName = if (tag.contains("/")) tag else s"$imageNamespace/$tag"
-    if (
-      registerAddress != null && registerAddress.nonEmpty && !tagName.startsWith(registerAddress)
-    ) {
+    if (StringUtils.isNotBlank(registerAddress) && !tagName.startsWith(registerAddress)) {
       tagName = s"$registerAddress/$tagName"
     }
     tagName.toLowerCase
