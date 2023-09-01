@@ -380,7 +380,6 @@
             <version>${project.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
@@ -409,6 +408,13 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-testcontainer</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -447,7 +453,7 @@
             <groupId>dev.zio</groupId>
             <artifactId>zio-logging_${scala.binary.version}</artifactId>
         </dependency>
-      
+
         <dependency>
             <groupId>dev.zio</groupId>
             <artifactId>zio-streams_${scala.binary.version}</artifactId>

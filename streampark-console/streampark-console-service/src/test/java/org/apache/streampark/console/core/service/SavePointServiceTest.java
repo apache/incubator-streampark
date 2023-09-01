@@ -21,7 +21,7 @@ import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.Effective;
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * org.apache.streampark.console.core.service.impl.SavePointServiceImpl} of {@link
  * SavePointService}.
  */
-class SavePointServiceTest extends SpringTestBase {
+class SavePointServiceTest extends SpringUnitTestBase {
 
   @Autowired private SavePointService savePointService;
 
