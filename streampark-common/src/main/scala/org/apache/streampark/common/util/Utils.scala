@@ -16,10 +16,11 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.ImplicitsUtils._
+
 import org.apache.commons.lang3.StringUtils
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException, PrintWriter, StringWriter}
-import java.lang.{Boolean => JavaBool, Byte => JavaByte, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
+import java.io._
 import java.net.URL
 import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
 import java.util.jar.{JarFile, JarInputStream}
@@ -107,35 +108,6 @@ object Utils {
   /** if any blank strings exist */
   def isAnyBank(items: String*): Boolean = items == null || items.exists(StringUtils.isBlank)
 
-  /*
-   * Mimicking the try-with-resource syntax of Java-8+
-   */
-  def using[R, T <: AutoCloseable](handle: T)(func: T => R)(implicit
-      excFunc: Throwable => R = null): R = {
-    try {
-      func(handle)
-    } catch {
-      case e: Throwable if excFunc != null => excFunc(e)
-    } finally {
-      if (handle != null) {
-        handle.close()
-      }
-    }
-  }
-
-  def close(closeable: AutoCloseable*)(implicit func: Throwable => Unit = null): Unit = {
-    closeable.foreach(
-      c => {
-        try {
-          if (c != null) {
-            c.close()
-          }
-        } catch {
-          case e: Throwable if func != null => func(e)
-        }
-      })
-  }
-
   /**
    * calculate the percentage of num1 / num2, the result range from 0 to 100, with one small digit
    * reserve.
@@ -159,38 +131,31 @@ object Utils {
     else {
       try {
         val stm = new StringWriter
-        val wrt = new PrintWriter(stm)
-        e.printStackTrace(wrt)
-        wrt.close()
-        stm.toString
+        new PrintWriter(stm).autoClose {
+          writer =>
+            e.printStackTrace(writer)
+            stm.toString
+        }
       } catch {
         case _: Throwable => e.getClass.getName + " (error while printing stack trace)"
       }
     }
   }
 
-  implicit class StringCasts(v: String) {
-    def cast[T](classType: Class[_]): T = {
-      classType match {
-        case c if c == classOf[String] => v.asInstanceOf[T]
-        case c if c == classOf[Byte] => v.toByte.asInstanceOf[T]
-        case c if c == classOf[Int] => v.toInt.asInstanceOf[T]
-        case c if c == classOf[Long] => v.toLong.asInstanceOf[T]
-        case c if c == classOf[Float] => v.toFloat.asInstanceOf[T]
-        case c if c == classOf[Double] => v.toDouble.asInstanceOf[T]
-        case c if c == classOf[Short] => v.toShort.asInstanceOf[T]
-        case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
-        case c if c == classOf[JavaByte] => v.toByte.asInstanceOf[T]
-        case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaFloat] => JavaFloat.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaDouble] => JavaDouble.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaShort] => JavaShort.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaBool] => JavaBool.valueOf(v).asInstanceOf[T]
-        case _ =>
-          throw new IllegalArgumentException(s"Unsupported type: $classType")
-      }
-    }
+  def close(closeable: AutoCloseable*)(implicit func: Throwable => Unit = null): Unit = {
+    closeable.foreach(
+      c => {
+        try {
+          if (c != null) {
+            if (c.isInstanceOf[Flushable]) {
+              c.asInstanceOf[Flushable].flush()
+            }
+            c.close()
+          }
+        } catch {
+          case e: Throwable if func != null => func(e)
+        }
+      })
   }
 
 }

@@ -137,7 +137,10 @@ object HadoopUtils extends Logger {
 
   def getConfigurationFromHadoopConfDir(confDir: String = hadoopConfDir): Configuration = {
     if (!configurationCache.containsKey(confDir)) {
-      FileUtils.exists(confDir)
+      if (!FileUtils.exists(confDir)) {
+        throw new ExceptionInInitializerError(
+          s"[StreamPark] hadoop conf file " + confDir + " is not exist!")
+      }
       val hadoopConfDir = new File(confDir)
       val confName = List("hdfs-default.xml", "core-site.xml", "hdfs-site.xml", "yarn-site.xml")
       val files =

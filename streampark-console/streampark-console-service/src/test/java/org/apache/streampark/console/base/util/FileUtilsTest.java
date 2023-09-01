@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.base.util;
 
+import org.apache.streampark.common.util.FileUtils;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
