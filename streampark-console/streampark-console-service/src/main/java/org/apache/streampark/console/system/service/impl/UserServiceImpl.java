@@ -26,6 +26,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.system.authentication.JWTToken;
@@ -125,6 +126,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Transactional(rollbackFor = Exception.class)
   public RestResponse updateUser(User user) {
     User existsUser = getById(user.getUserId());
+    user.setLoginType(null);
     user.setPassword(null);
     user.setModifyTime(new Date());
     if (needTransferResource(existsUser, user)) {
@@ -148,6 +150,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   public void updatePassword(User userParam) {
     User user = getById(userParam.getUserId());
     ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
+    ApiAlertException.throwIfFalse(
+        user.getLoginType() == LoginType.PASSWORD,
+        "Can only update password for user who sign in with PASSWORD");
 
     String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
     ApiAlertException.throwIfFalse(
@@ -158,16 +163,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
     user.setSalt(salt);
     user.setPassword(password);
-    this.baseMapper.updateById(user);
-  }
-
-  @Override
-  @Transactional(rollbackFor = Exception.class)
-  public void updateSaltPassword(User userParam) {
-    User user = getById(userParam.getUserId());
-    ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
-    user.setSalt(userParam.getSalt());
-    user.setPassword(userParam.getPassword());
     this.baseMapper.updateById(user);
   }
 
