@@ -20,6 +20,7 @@ package org.apache.streampark.flink.packer.pipeline
 import org.apache.streampark.common.util.Utils
 
 import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
+import org.apache.commons.lang3.StringUtils
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -36,7 +37,10 @@ class DockerPullProgress(
     var lastTime: Long) {
   // noinspection DuplicatedCode
   def update(pullRsp: PullResponseItem): Unit = {
-    if (pullRsp == null || pullRsp.getId == null || pullRsp.getStatus == null) {
+    if (
+      pullRsp == null || StringUtils.isBlank(pullRsp.getId) || StringUtils.isBlank(
+        pullRsp.getStatus)
+    ) {
       return
     }
     if (pullRsp.getStatus.contains("complete")) {
@@ -60,7 +64,7 @@ class DockerPullProgress(
 
 class DockerBuildProgress(val steps: ArrayBuffer[String], var lastTime: Long) {
   def update(buildStep: String): Unit = {
-    if (buildStep != null && buildStep.nonEmpty) {
+    if (StringUtils.isNotBlank(buildStep)) {
       steps += buildStep
       lastTime = System.currentTimeMillis
     }
@@ -75,7 +79,10 @@ class DockerPushProgress(
     var lastTime: Long) {
   // noinspection DuplicatedCode
   def update(pushRsp: PushResponseItem): Unit = {
-    if (pushRsp == null || pushRsp.getId == null || pushRsp.getStatus == null) {
+    if (
+      pushRsp == null || StringUtils.isBlank(pushRsp.getId) || StringUtils.isBlank(
+        pushRsp.getStatus)
+    ) {
       return
     }
     if (pushRsp.getStatus.contains("complete")) {
@@ -125,8 +132,8 @@ case class DockerLayerProgress(layerId: String, status: String, current: Long, t
   def percent: Double = Utils.calPercent(current, total)
 
   def currentMb: Double =
-    if (current == 0) 0 else (current.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
+    if (current == 0) 0 else "%.2f".format(current.toDouble / (1024 * 1024)).toDouble
 
   def totalMb: Double =
-    if (total == 0) 0 else (total.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
+    if (total == 0) 0 else "%.2f".format(total.toDouble / (1024 * 1024)).toDouble
 }
