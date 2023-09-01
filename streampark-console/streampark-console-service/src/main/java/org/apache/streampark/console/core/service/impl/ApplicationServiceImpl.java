@@ -1676,7 +1676,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   private Map<String, Object> getProperties(Application application) {
-    Map<String, Object> properties = application.getOptionMap();
+    Map<String, Object> properties = new HashMap<>(application.getOptionMap());
     if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
       FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
       ApiAlertException.throwIfNull(
