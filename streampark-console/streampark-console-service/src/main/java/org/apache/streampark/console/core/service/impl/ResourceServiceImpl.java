@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.Utils;
@@ -284,6 +285,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
           // get jarFile error
           resp.put("state", 1);
           resp.put("exception", Utils.stringifyException(e));
+          return RestResponse.success().data(resp);
+        }
+        if (jarFile.getName().endsWith(ConfigConst.PYTHON_SUFFIX())) {
           return RestResponse.success().data(resp);
         }
         Manifest manifest = Utils.getJarManifest(jarFile);

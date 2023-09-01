@@ -62,7 +62,7 @@ export default {
   programJar: 'Program Jar',
   dynamicProperties: 'Dynamic Properties',
   hadoopConfigTitle: 'System Hadoop Configuration',
-  dragUploadTitle: 'Click or drag jar to this area to upload',
+  dragUploadTitle: 'Click or drag jar or py to this area to upload',
   dragUploadTip:
     'Support for a single upload. You can upload a local jar here to support for current Job',
   dependencyError: 'please set flink version first.',

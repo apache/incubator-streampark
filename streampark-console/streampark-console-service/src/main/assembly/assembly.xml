@@ -70,6 +70,11 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>${project.build.directory}/../src/main/assembly/python</directory>
+            <outputDirectory>python</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.directory}/../src/main/assembly/temp</directory>
             <outputDirectory>temp</outputDirectory>
             <fileMode>0777</fileMode>
