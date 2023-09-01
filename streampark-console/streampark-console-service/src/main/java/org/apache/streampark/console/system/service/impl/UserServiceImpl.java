@@ -27,7 +27,6 @@ import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.LoginType;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
@@ -75,6 +74,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private MenuService menuService;
 
   @Autowired private ApplicationManageService applicationManageService;
+
   @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private ResourceService resourceService;

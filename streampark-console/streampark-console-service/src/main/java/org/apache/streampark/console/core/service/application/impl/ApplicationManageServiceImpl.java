@@ -54,7 +54,6 @@ import org.apache.streampark.console.core.service.application.ApplicationManageS
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -282,7 +281,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
           jarPath = resource.getFilePath();
         }
       }
-      appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
+      appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
     }
 
     if (save(appParam)) {
@@ -410,7 +409,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
         if (jarFile.exists()) {
           try {
-            long checkSum = FileUtils.checksumCRC32(jarFile);
+            long checkSum = org.apache.commons.io.FileUtils.checksumCRC32(jarFile);
             if (!Objects.equals(checkSum, application.getJarCheckSum())) {
               application.setBuild(true);
             }

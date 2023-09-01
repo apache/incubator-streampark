@@ -46,7 +46,6 @@ import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -59,7 +58,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
@@ -342,9 +340,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
                 if (!future.isDone()) {
                   future.cancel(true);
                 }
-                if (path != null) {
-                  return org.apache.streampark.console.base.util.FileUtils.rollViewLog(
-                      path, offset, limit);
+                if (org.apache.streampark.common.util.FileUtils.exists(path)) {
+                  return org.apache.streampark.common.util.FileUtils.tailOf(path, offset, limit);
                 }
                 return null;
               })
@@ -430,7 +427,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public String readConf(Application appParam) throws IOException {
     File file = new File(appParam.getConfig());
-    String conf = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+    String conf = org.apache.streampark.common.util.FileUtils.readFile(file);
     return Base64.getEncoder().encodeToString(conf.getBytes());
   }
 
