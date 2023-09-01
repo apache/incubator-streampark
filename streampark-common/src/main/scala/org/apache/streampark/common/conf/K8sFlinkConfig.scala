@@ -56,6 +56,18 @@ object K8sFlinkConfig {
     description = "retained tracking time for SILENT state flink tasks"
   )
 
+  /**
+   * If an ingress controller is specified in the configuration, the ingress class
+   * kubernetes.io/ingress.class must be specified when creating the ingress, since there are often
+   * multiple ingress controllers in a production environment.
+   */
+  val ingressClass: InternalOption = InternalOption(
+    key = "streampark.flink-k8s.ingress.class",
+    defaultValue = "streampark",
+    classType = classOf[java.lang.String],
+    description = "Direct ingress to the ingress controller."
+  )
+
   /** kubernetes default namespace */
   val DEFAULT_KUBERNETES_NAMESPACE = "default"
 
