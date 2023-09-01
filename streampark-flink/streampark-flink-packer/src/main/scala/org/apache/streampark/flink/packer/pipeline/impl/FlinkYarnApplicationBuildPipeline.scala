@@ -68,8 +68,8 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
     execStep(3) {
       mavenJars.foreach(
         jar => {
-          uploadToHdfs(FsOperator.lfs, jar, request.localWorkspace)
-          uploadToHdfs(FsOperator.hdfs, jar, request.yarnProvidedPath)
+          uploadJarToHdfsOrLfs(FsOperator.lfs, jar, request.localWorkspace)
+          uploadJarToHdfsOrLfs(FsOperator.hdfs, jar, request.yarnProvidedPath)
         })
     }.getOrElse(throw getError.exception)
 
@@ -77,7 +77,10 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
   }
 
   @throws[IOException]
-  private[this] def uploadToHdfs(fsOperator: FsOperator, origin: String, target: String): Unit = {
+  private[this] def uploadJarToHdfsOrLfs(
+      fsOperator: FsOperator,
+      origin: String,
+      target: String): Unit = {
     val originFile = new File(origin)
     if (!fsOperator.exists(target)) {
       fsOperator.mkdirs(target)
