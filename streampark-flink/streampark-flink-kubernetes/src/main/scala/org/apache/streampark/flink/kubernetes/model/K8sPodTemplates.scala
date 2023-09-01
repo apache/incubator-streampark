@@ -29,10 +29,9 @@ case class K8sPodTemplates(
     jmPodTemplate: String = "",
     tmPodTemplate: String = "") {
 
-  def nonEmpty: Boolean =
-    StringUtils.isNotBlank(podTemplate) ||
-      StringUtils.isNotBlank(jmPodTemplate) ||
-      StringUtils.isNotBlank(tmPodTemplate)
+  def nonEmpty: Boolean = StringUtils.isNotBlank(podTemplate) ||
+    StringUtils.isNotBlank(jmPodTemplate) ||
+    StringUtils.isNotBlank(tmPodTemplate)
 
   def isEmpty: Boolean = !nonEmpty
 
