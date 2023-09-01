@@ -139,6 +139,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Override
   public Boolean create(FlinkCluster flinkCluster) {
     flinkCluster.setUserId(commonService.getUserId());
+    return internalCreate(flinkCluster);
+  }
+
+  @VisibleForTesting
+  public boolean internalCreate(FlinkCluster flinkCluster) {
     boolean successful = validateQueueIfNeeded(flinkCluster);
     ApiAlertException.throwIfFalse(
         successful, String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()));

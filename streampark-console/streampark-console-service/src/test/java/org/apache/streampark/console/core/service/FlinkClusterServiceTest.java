@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.impl.FlinkClusterServiceImpl;
@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** The unit test class for {@link FlinkClusterService}. */
-class FlinkClusterServiceTest extends SpringTestBase {
+class FlinkClusterServiceTest extends SpringUnitTestBase {
 
   @Autowired private FlinkClusterService flinkClusterService;
 

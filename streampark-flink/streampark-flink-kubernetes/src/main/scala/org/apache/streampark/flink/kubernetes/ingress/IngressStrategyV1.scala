@@ -40,7 +40,7 @@ class IngressStrategyV1 extends IngressStrategy {
           Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
             .map(ingress => ingress.getSpec.getRules.get(0))
             .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
-            .map { case (host, path) => s"https://$host$path" }
+            .map { case (host, path) => s"http://$host$path" }
             .getOrElse(clusterClient.getWebInterfaceURL)
         }.recover {
           case e =>
