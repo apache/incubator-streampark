@@ -28,8 +28,10 @@ public class AlertRestTemplateConfig {
    *
    * @return RestTemplate
    */
-  @Bean(name = "alertRestTemplate")
+  @Bean(name = BEAN_NAME_ALERT_REST_TEMPLATE)
   public RestTemplate alertRestTemplate() {
     return new RestTemplate();
   }
+
+  private static final String BEAN_NAME_ALERT_REST_TEMPLATE = "alertRestTemplate";
 }

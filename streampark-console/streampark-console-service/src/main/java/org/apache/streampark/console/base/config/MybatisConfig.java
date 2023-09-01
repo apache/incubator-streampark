@@ -76,8 +76,8 @@ public class MybatisConfig {
   @Bean
   public MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer() {
     return properties -> {
-      properties.setTypeAliasesPackage("org.apache.streampark.console.*.entity");
-      properties.setMapperLocations(new String[] {"classpath:mapper/*/*.xml"});
+      properties.setTypeAliasesPackage(TYPE_ALIASES_PACKAGE);
+      properties.setMapperLocations(new String[] {MAPPER_LOCATION});
       MybatisConfiguration mybatisConfiguration = new MybatisConfiguration();
       mybatisConfiguration.setJdbcTypeForNull(JdbcType.NULL);
       properties.setConfiguration(mybatisConfiguration);
@@ -89,4 +89,7 @@ public class MybatisConfig {
       properties.setGlobalConfig(globalConfig);
     };
   }
+
+  private static final String TYPE_ALIASES_PACKAGE = "org.apache.streampark.console.*.entity";
+  private static final String MAPPER_LOCATION = "org.apache.streampark.console.*.entity";
 }

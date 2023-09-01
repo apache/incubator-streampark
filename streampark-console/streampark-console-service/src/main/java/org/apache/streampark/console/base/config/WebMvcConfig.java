@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -54,7 +55,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     registry
         .addMapping("/**")
         .allowedOriginPatterns("*")
-        .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
+        .allowedMethods(CORS_MAPPINGS_ALLOWED_METHODS)
         .allowedHeaders("*")
         .allowCredentials(true)
         .maxAge(3600);
@@ -70,6 +71,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
+    registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns(INTERCEPTOR_UPLOAD_FILE_PATH_PATTERN);
   }
+
+  private static final String INTERCEPTOR_UPLOAD_FILE_PATH_PATTERN = "/flink/app/upload";
+  private static final String[] CORS_MAPPINGS_ALLOWED_METHODS = {HttpMethod.POST.name(), HttpMethod.GET.name(),
+    HttpMethod.PUT.name(), HttpMethod.OPTIONS.name(), HttpMethod.DELETE.name()};
 }

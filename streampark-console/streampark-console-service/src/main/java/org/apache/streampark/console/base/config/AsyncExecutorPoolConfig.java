@@ -35,9 +35,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     executor.setMaxPoolSize(20);
     executor.setQueueCapacity(100);
     executor.setKeepAliveSeconds(30);
-    executor.setThreadNamePrefix("asyncTaskExecutor-");
+    executor.setThreadNamePrefix(THREAD_NAME_PREFIX_ASYNC_TASK);
 
     executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
     return executor;
   }
+
+  private static final String THREAD_NAME_PREFIX_ASYNC_TASK = "asyncTaskExecutor-";
 }
