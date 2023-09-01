@@ -60,13 +60,10 @@ object CROperator extends CROperator {
   /** Apply FlinkDeployment CR. */
   // noinspection DuplicatedCode
   override def applyDeployment(spec: FlinkDeploymentDef): IO[Throwable, Unit] = {
-    for {
-      _ <- validateDeployFlinkDeploymentCRD
-
-    } yield ()
     lazy val mirrorSpace = s"${spec.namespace}_${spec.name}"
     for {
       // Generate FlinkDeployment CR
+      _                   <- validateDeployFlinkDeploymentCRD
       correctedJob        <- mirrorJobJarToHttpFileServer(spec.job, mirrorSpace)
       correctedExtJars    <- mirrorExtJarsToHttpFileServer(spec.extJarPaths, mirrorSpace)
       correctedPod        <- correctPodSpec(
