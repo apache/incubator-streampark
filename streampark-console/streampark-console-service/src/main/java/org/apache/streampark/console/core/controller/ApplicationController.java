@@ -31,7 +31,6 @@ import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.enums.AppExistsState;
 import org.apache.streampark.console.core.enums.PermissionType;
-import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ResourceService;
@@ -71,11 +70,15 @@ import java.util.Map;
 public class ApplicationController {
 
   @Autowired private ApplicationManageService applicationManageService;
+
   @Autowired private ApplicationActionService applicationActionService;
+
   @Autowired private ApplicationInfoService applicationInfoService;
+
   @Autowired private ApplicationBackUpService backUpService;
+
   @Autowired private ApplicationLogService applicationLogService;
-  @Autowired private AppBuildPipeService appBuildPipeService;
+
   @Autowired private ResourceService resourceService;
 
   @Operation(summary = "Get application")
