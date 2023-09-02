@@ -27,8 +27,9 @@ import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.LoginType;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Team;
@@ -72,7 +73,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Autowired private MenuService menuService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private ResourceService resourceService;
 
@@ -141,7 +144,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         || User.STATUS_VALID.equals(user.getStatus())) {
       return false;
     }
-    return applicationService.existsByUserId(user.getUserId())
+    return applicationInfoService.existsByUserId(user.getUserId())
         || resourceService.existsByUserId(user.getUserId());
   }
 
@@ -270,7 +273,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void transferResource(Long userId, Long targetUserId) {
-    applicationService.changeOwnership(userId, targetUserId);
+    applicationManageService.changeOwnership(userId, targetUserId);
     resourceService.changeOwnership(userId, targetUserId);
   }
 
