@@ -61,6 +61,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
@@ -129,6 +130,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Autowired private ApplicationBackUpService backUpService;
   @Autowired private ApplicationManageService applicationManageService;
+
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private ApplicationConfigService configService;
 
@@ -379,7 +382,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Transactional(rollbackFor = {Exception.class})
   public void start(Application appParam, boolean auto) throws Exception {
     final Application application = getById(appParam.getId());
-    Utils.notNull(application);
+    ApiAlertException.throwIfNull(application, "[StreamPark] application is not exists.");
+
     if (!application.isCanBeStart()) {
       throw new ApiAlertException("[StreamPark] The application cannot be started repeatedly.");
     }
@@ -388,6 +392,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (flinkEnv == null) {
       throw new ApiAlertException("[StreamPark] can no found flink version");
     }
+
+    applicationInfoService.checkEnv(appParam);
 
     // if manually started, clear the restart flag
     if (!auto) {

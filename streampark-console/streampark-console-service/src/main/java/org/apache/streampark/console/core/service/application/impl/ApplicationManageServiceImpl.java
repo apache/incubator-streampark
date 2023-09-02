@@ -28,6 +28,7 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
@@ -53,6 +54,7 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
+import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -76,11 +78,6 @@ import javax.annotation.PostConstruct;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
@@ -220,6 +217,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     this.baseMapper.page(page, appParam);
     List<Application> records = page.getRecords();
     long now = System.currentTimeMillis();
+
+    List<Long> appIds = records.stream().map(Application::getId).collect(Collectors.toList());
+    Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
+
     List<Application> newRecords =
         records.stream()
             .peek(
@@ -236,6 +237,24 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                       record.setDuration(now - record.getStartTime().getTime());
                     }
                   }
+                  if (pipeStates.containsKey(record.getId())) {
+                    record.setBuildStatus(pipeStates.get(record.getId()).getCode());
+                  }
+
+                  AppControl appControl =
+                      new AppControl()
+                          .setAllowBuild(
+                              record.getBuildStatus() == null
+                                  || !PipelineStatus.running
+                                      .getCode()
+                                      .equals(record.getBuildStatus()))
+                          .setAllowStart(
+                              !record.shouldBeTrack()
+                                  && PipelineStatus.success
+                                      .getCode()
+                                      .equals(record.getBuildStatus()))
+                          .setAllowStop(record.isRunning());
+                  record.setAppControl(appControl);
                 })
             .collect(Collectors.toList());
     page.setRecords(newRecords);

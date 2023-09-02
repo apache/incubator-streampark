@@ -26,7 +26,6 @@ import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.annotation.PermissionAction;
-import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.ApplicationLog;
@@ -39,7 +38,6 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -63,10 +61,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Tag(name = "FLINK_APPLICATION_TAG")
 @Slf4j
@@ -78,13 +73,9 @@ public class ApplicationController {
   @Autowired private ApplicationManageService applicationManageService;
   @Autowired private ApplicationActionService applicationActionService;
   @Autowired private ApplicationInfoService applicationInfoService;
-
   @Autowired private ApplicationBackUpService backUpService;
-
   @Autowired private ApplicationLogService applicationLogService;
-
   @Autowired private AppBuildPipeService appBuildPipeService;
-
   @Autowired private ResourceService resourceService;
 
   @Operation(summary = "Get application")
@@ -128,12 +119,8 @@ public class ApplicationController {
   @PostMapping(value = "copy")
   @RequiresPermissions("app:copy")
   public RestResponse copy(@Parameter(hidden = true) Application app) throws IOException {
-    Long id = applicationManageService.copy(app);
-    Map<String, String> data = new HashMap<>();
-    data.put("id", Long.toString(id));
-    return id.equals(0L)
-        ? RestResponse.success(false).data(data)
-        : RestResponse.success(true).data(data);
+    applicationManageService.copy(app);
+    return RestResponse.success();
   }
 
   @Operation(summary = "Update application")
@@ -159,34 +146,6 @@ public class ApplicationController {
   @RequiresPermissions("app:view")
   public RestResponse list(Application app, RestRequest request) {
     IPage<Application> applicationList = applicationManageService.page(app, request);
-    List<Application> appRecords = applicationList.getRecords();
-    List<Long> appIds = appRecords.stream().map(Application::getId).collect(Collectors.toList());
-    Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
-
-    // add building pipeline status info and app control info
-    appRecords =
-        appRecords.stream()
-            .peek(
-                e -> {
-                  if (pipeStates.containsKey(e.getId())) {
-                    e.setBuildStatus(pipeStates.get(e.getId()).getCode());
-                  }
-                })
-            .peek(
-                e -> {
-                  AppControl appControl =
-                      new AppControl()
-                          .setAllowBuild(
-                              e.getBuildStatus() == null
-                                  || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
-                          .setAllowStart(
-                              !e.shouldBeTrack()
-                                  && PipelineStatus.success.getCode().equals(e.getBuildStatus()))
-                          .setAllowStop(e.isRunning());
-                  e.setAppControl(appControl);
-                })
-            .collect(Collectors.toList());
-    applicationList.setRecords(appRecords);
     return RestResponse.success(applicationList);
   }
 
@@ -245,7 +204,6 @@ public class ApplicationController {
   @RequiresPermissions("app:start")
   public RestResponse start(@Parameter(hidden = true) Application app) {
     try {
-      applicationInfoService.checkEnv(app);
       applicationActionService.start(app, false);
       return RestResponse.success(true);
     } catch (Exception e) {
