@@ -36,6 +36,7 @@ import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
+import java.util
 import java.util.Collections
 
 import scala.collection.JavaConverters._
@@ -101,10 +102,11 @@ object YarnApplicationClient extends YarnClientTrait {
       }
 
       // yarn.ship-files
+      val shipFiles = new util.ArrayList[String]()
+      shipFiles.add(submitRequest.userJarFile.getParentFile.getAbsolutePath)
+
       flinkConfig
-        .safeSet(
-          YarnConfigOptions.SHIP_FILES,
-          submitRequest.userJarFile.getParentFile.getAbsolutePath)
+        .safeSet(YarnConfigOptions.SHIP_FILES, shipFiles)
         // python.files
         .safeSet(PythonOptions.PYTHON_FILES, submitRequest.userJarFile.getParentFile.getName)
 
