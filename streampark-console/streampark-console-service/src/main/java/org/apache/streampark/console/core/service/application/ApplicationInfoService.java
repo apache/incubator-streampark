@@ -37,37 +37,37 @@ public interface ApplicationInfoService extends IService<Application> {
   /**
    * Maps the given application.
    *
-   * @param app The application to be mapped.
+   * @param appParam The application to be mapped.
    * @return True if the mapping was successful, false otherwise.
    */
-  boolean mapping(Application app);
+  boolean mapping(Application appParam);
 
   /**
    * Checks the environment for the given application.
    *
-   * @param app the application to check the environment for
+   * @param appParam the application to check the environment for
    * @return true if the environment is valid for the application, false otherwise
    * @throws ApplicationException if an error occurs while checking the environment
    */
-  boolean checkEnv(Application app) throws ApplicationException;
+  boolean checkEnv(Application appParam) throws ApplicationException;
 
   /**
    * Checks the savepoint path for the given application.
    *
-   * @param app the application to check the savepoint path for
+   * @param appParam the application to check the savepoint path for
    * @return the check message
    * @throws Exception if an error occurs while checking the savepoint path
    */
-  String checkSavepointPath(Application app) throws Exception;
+  String checkSavepointPath(Application appParam) throws Exception;
 
   /**
    * Checks if the given application meets the required alterations.
    *
-   * @param application The application to be checked.
+   * @param appParam The application to be checked.
    * @return True if the application meets the required alterations, false otherwise.
    * @throws ApplicationException If an error occurs while checking the alterations.
    */
-  boolean checkAlter(Application application);
+  boolean checkAlter(Application appParam);
 
   /**
    * Checks if a record exists in the database with the given team ID.
@@ -129,42 +129,42 @@ public interface ApplicationInfoService extends IService<Application> {
   /**
    * Gets the YARN name for the given application.
    *
-   * @param app The application for which to retrieve the YARN name.
+   * @param appParam The application for which to retrieve the YARN name.
    * @return The YARN name of the application as a String.
    */
-  String getYarnName(Application app);
+  String getYarnName(Application appParam);
 
   /**
    * Checks if the given application exists in the system.
    *
-   * @param app The application to check for existence.
+   * @param appParam The application to check for existence.
    * @return AppExistsState indicating the existence state of the application.
    */
-  AppExistsState checkExists(Application app);
+  AppExistsState checkExists(Application appParam);
 
   /**
    * Persists the metrics of the given application.
    *
-   * @param application The application which metrics need to be persisted.
+   * @param appParam The application which metrics need to be persisted.
    */
-  void persistMetrics(Application application);
+  void persistMetrics(Application appParam);
 
   /**
    * Reads the configuration for the given application and returns it as a String.
    *
-   * @param app The application for which the configuration needs to be read.
+   * @param appParam The application for which the configuration needs to be read.
    * @return The configuration for the given application as a String.
    * @throws IOException If an I/O error occurs while reading the configuration.
    */
-  String readConf(Application app) throws IOException;
+  String readConf(Application appParam) throws IOException;
 
   /**
    * Retrieves the main configuration value for the given Application.
    *
-   * @param application the Application object for which to fetch the main configuration value
+   * @param appParam the Application object for which to fetch the main configuration value
    * @return the main configuration value as a String
    */
-  String getMain(Application application);
+  String getMain(Application appParam);
 
   /**
    * Returns the dashboard for the specified team.
