@@ -25,7 +25,10 @@ public enum DevelopmentMode implements Serializable {
   CUSTOM_CODE("Custom Code", 1),
 
   /** Flink SQL */
-  FLINK_SQL("Flink SQL", 2);
+  FLINK_SQL("Flink SQL", 2),
+
+  /** Py flink */
+  PYFLINK("Python Flink", 3);
 
   private final String mode;
 
