@@ -41,7 +41,6 @@ import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
-import java.io.File
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.annotation.tailrec
@@ -251,7 +250,6 @@ trait FlinkClientTrait extends Logger {
     }
 
     val packageProgram = PackagedProgram.newBuilder
-      .setJarFile(submitRequest.userJarFile)
       .setArguments(
         flinkConfig
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
@@ -508,7 +506,10 @@ trait FlinkClientTrait extends Logger {
       }
     }
 
-    if (submitRequest.developmentMode == DevelopmentMode.PYFLINK) {
+    if (
+      submitRequest.developmentMode == DevelopmentMode.PYFLINK && !submitRequest.executionMode
+        .equals(ExecutionMode.YARN_APPLICATION)
+    ) {
       // python file
       programArgs.add("-py")
       programArgs.add(submitRequest.userJarFile.getAbsolutePath)
