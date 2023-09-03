@@ -67,7 +67,10 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     var clusterClient: ClusterClient[String] = null
 
     try {
-//      val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
+      /**
+       * This code needs to be deleted after the v2 module is successfully developed
+       */
+      //      val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
 //      clusterDescriptor = descriptor
 //
 //      val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
