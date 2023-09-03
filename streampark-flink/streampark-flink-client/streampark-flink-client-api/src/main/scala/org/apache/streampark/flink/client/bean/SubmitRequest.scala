@@ -63,6 +63,7 @@ case class SubmitRequest(
     savePoint: String,
     restoreMode: RestoreMode,
     args: String,
+    pyflinkFilePath: String = "",
     @Nullable buildResult: BuildResult,
     @Nullable k8sSubmitParam: KubernetesSubmitParam,
     @Nullable extraParameter: JavaMap[String, Any]) {

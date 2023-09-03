@@ -17,13 +17,15 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, RestoreMode}
-import org.apache.streampark.common.util.{DeflaterUtils, Logger}
+import org.apache.streampark.common.fs.FsOperator
+import org.apache.streampark.common.util.{DeflaterUtils, EnvUtils, Logger}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
+import org.apache.streampark.flink.util.FlinkUtils
 
 import com.google.common.collect.Lists
 import org.apache.commons.cli.{CommandLine, Options}
@@ -35,6 +37,7 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
+import org.apache.flink.python.PythonOptions
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
@@ -141,6 +144,17 @@ trait FlinkClientTrait extends Logger {
           })
     }
 
+    if (StringUtils.isNotBlank(submitRequest.pyflinkFilePath)) {
+      val flinkOptPath: String = System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR)
+      if (StringUtils.isBlank(flinkOptPath)) {
+        logWarn(s"Get environment variable ${ConfigConstants.ENV_FLINK_OPT_DIR} fail")
+        val flinkHome = submitRequest.flinkVersion.flinkHome
+        EnvUtils.setEnv(ConfigConstants.ENV_FLINK_OPT_DIR, s"$flinkHome/opt");
+        logInfo(
+          s"Set temporary environment variables ${ConfigConstants.ENV_FLINK_OPT_DIR} = $flinkHome/opt")
+      }
+    }
+
     setConfig(submitRequest, flinkConfig)
 
     doSubmit(submitRequest, flinkConfig)
@@ -223,16 +237,43 @@ trait FlinkClientTrait extends Logger {
       flinkConfig: Configuration,
       submitRequest: SubmitRequest,
       jarFile: File): (PackagedProgram, JobGraph) = {
-    val packageProgram = PackagedProgram.newBuilder
-      .setJarFile(jarFile)
-      .setEntryPointClassName(
-        flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
-      .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-      .setArguments(
-        flinkConfig
-          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList()): _*)
-      .build()
+    var packageProgram: PackagedProgram = null
+    if (StringUtils.isNotBlank(submitRequest.pyflinkFilePath)) {
+      val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
+      if (!FsOperator.lfs.exists(pythonVenv)) {
+        throw new RuntimeException(s"$pythonVenv File does not exist")
+      }
+      flinkConfig
+        // python.archives
+        .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
+        // python.client.executable
+        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+        // python.executable
+        .safeSet(PythonOptions.PYTHON_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+
+      val pythonFlinkconnectorJars: String =
+        FlinkUtils.getPythonFlinkconnectorJars(submitRequest.flinkVersion.flinkHome)
+      if (StringUtils.isNotBlank(pythonFlinkconnectorJars)) {
+        flinkConfig.setString(PipelineOptions.JARS.key(), pythonFlinkconnectorJars)
+      }
+
+      packageProgram = PackagedProgram.newBuilder
+        .setEntryPointClassName(ConfigConst.PYTHON_DRIVER_CLASS_NAME)
+        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
+        .setArguments("-py", submitRequest.pyflinkFilePath)
+        .build()
+    } else {
+      packageProgram = PackagedProgram.newBuilder
+        .setJarFile(jarFile)
+        .setEntryPointClassName(
+          flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
+        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
+        .setArguments(
+          flinkConfig
+            .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+            .orElse(Lists.newArrayList()): _*)
+        .build()
+    }
 
     val jobGraph = PackagedProgramUtils.createJobGraph(
       packageProgram,

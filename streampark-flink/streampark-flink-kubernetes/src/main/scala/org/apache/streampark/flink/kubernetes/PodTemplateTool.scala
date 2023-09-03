@@ -20,6 +20,7 @@ package org.apache.streampark.flink.kubernetes
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 
 import org.apache.commons.io.FileUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.configuration.Configuration
 
 import java.io.File
@@ -57,7 +58,7 @@ object PodTemplateTool {
 
     val podTempleMap = mutable.Map[String, String]()
     val outputTmplContent = (tmplContent: String, podTmpl: PodTemplateType) => {
-      if (tmplContent.nonEmpty) {
+      if (StringUtils.isNotBlank(tmplContent)) {
         val outputPath = s"$buildWorkspace/${podTmpl.fileName}"
         val outputFile = new File(outputPath)
         FileUtils.write(outputFile, tmplContent, "UTF-8")

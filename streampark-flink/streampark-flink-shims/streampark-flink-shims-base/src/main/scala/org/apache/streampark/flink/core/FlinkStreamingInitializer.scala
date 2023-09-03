@@ -130,7 +130,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         require(
           configFile.exists(),
           s"[StreamPark] Usage: application config file: $configFile is not found!!!")
-        val text = FileUtils.readString(configFile)
+        val text = FileUtils.readFile(configFile)
         readConfig(text)
     }
     map.filter(_._2.nonEmpty)

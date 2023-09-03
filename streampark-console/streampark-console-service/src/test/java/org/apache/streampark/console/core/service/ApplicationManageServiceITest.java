@@ -26,6 +26,8 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.FlinkClusterServiceImpl;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.testcontainer.flink.FlinkStandaloneSessionCluster;
@@ -47,14 +49,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test for {@link
- * org.apache.streampark.console.core.service.impl.ApplicationServiceImpl}.
+ * org.apache.streampark.console.core.service.application.ApplicationManageService}.
  */
-class ApplicationServiceITest extends SpringIntegrationTestBase {
+class ApplicationManageServiceITest extends SpringIntegrationTestBase {
 
   static FlinkStandaloneSessionCluster cluster =
       FlinkStandaloneSessionCluster.builder().slotsNumPerTm(4).slf4jLogConsumer(null).build();
 
-  @Autowired private ApplicationService appService;
+  @Autowired private ApplicationManageService applicationManageService;
+
+  @Autowired private ApplicationActionService applicationActionService;
 
   @Autowired private FlinkClusterService clusterService;
 
@@ -78,7 +82,7 @@ class ApplicationServiceITest extends SpringIntegrationTestBase {
 
   @AfterEach
   void clear() {
-    appService.getBaseMapper().delete(new QueryWrapper<>());
+    applicationManageService.getBaseMapper().delete(new QueryWrapper<>());
     clusterService.getBaseMapper().delete(new QueryWrapper<>());
     envService.getBaseMapper().delete(new QueryWrapper<>());
     appBuildPipeService.getBaseMapper().delete(new QueryWrapper<>());
@@ -104,7 +108,7 @@ class ApplicationServiceITest extends SpringIntegrationTestBase {
     Application appParam = new Application();
     appParam.setId(100000L);
     appParam.setTeamId(100000L);
-    Application application = appService.getApp(appParam);
+    Application application = applicationManageService.getApp(appParam);
     application.setFlinkClusterId(1L);
     application.setSqlId(100000L);
     application.setVersionId(1L);
@@ -118,14 +122,14 @@ class ApplicationServiceITest extends SpringIntegrationTestBase {
     sqlService.getBaseMapper().updateById(flinkSql);
 
     // Continue operations link.
-    appService.update(application);
+    applicationManageService.update(application);
     appBuildPipeService.buildApplication(100000L, false);
 
     CompletableFuture<Boolean> buildCompletableFuture =
         CompletableFuture.supplyAsync(
             () -> {
               while (true) {
-                Application app = appService.getById(100000L);
+                Application app = applicationManageService.getById(100000L);
                 if (app != null && app.getReleaseState() == ReleaseState.DONE) {
                   break;
                 }
@@ -134,7 +138,7 @@ class ApplicationServiceITest extends SpringIntegrationTestBase {
             });
     buildCompletableFuture.get();
 
-    appService.start(appService.getById(100000L), false);
+    applicationActionService.start(applicationManageService.getById(100000L), false);
     CompletableFuture<Boolean> completableFuture =
         CompletableFuture.supplyAsync(
             () -> {

@@ -24,6 +24,8 @@ import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineType;
 import org.apache.streampark.console.core.enums.ResourceType;
 import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -39,7 +41,8 @@ import java.util.Map;
 @Transactional
 class UserServiceTest extends SpringUnitTestBase {
   @Autowired private UserService userService;
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationInfoService applicationInfoService;
   @Autowired private ResourceService resourceService;
 
   @Test
@@ -107,7 +110,7 @@ class UserServiceTest extends SpringUnitTestBase {
     Application app = new Application();
     app.setUserId(user.getUserId());
     app.setTeamId(1L);
-    applicationService.save(app);
+    applicationManageService.save(app);
 
     User targetUser = new User();
     targetUser.setUsername("test0");
@@ -117,15 +120,15 @@ class UserServiceTest extends SpringUnitTestBase {
     targetUser.setStatus(User.STATUS_VALID);
     userService.save(targetUser);
 
-    Assertions.assertTrue(applicationService.existsByUserId(user.getUserId()));
+    Assertions.assertTrue(applicationInfoService.existsByUserId(user.getUserId()));
     Assertions.assertTrue(resourceService.existsByUserId(user.getUserId()));
 
     userService.transferResource(user.getUserId(), targetUser.getUserId());
 
-    Assertions.assertFalse(applicationService.existsByUserId(user.getUserId()));
+    Assertions.assertFalse(applicationInfoService.existsByUserId(user.getUserId()));
     Assertions.assertFalse(resourceService.existsByUserId(user.getUserId()));
 
-    Assertions.assertTrue(applicationService.existsByUserId(targetUser.getUserId()));
+    Assertions.assertTrue(applicationInfoService.existsByUserId(targetUser.getUserId()));
     Assertions.assertTrue(resourceService.existsByUserId(targetUser.getUserId()));
   }
 }
