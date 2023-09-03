@@ -455,13 +455,21 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
+  public boolean isCustomCodeOrPyFlinkJob() {
+    return DevelopmentMode.CUSTOM_CODE.getValue().equals(this.getJobType())
+        || DevelopmentMode.PYFLINK.getValue().equals(this.getJobType());
+  }
+
+  @JsonIgnore
   public boolean isUploadJob() {
-    return isCustomCodeJob() && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
+    return isCustomCodeOrPyFlinkJob()
+        && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
   }
 
   @JsonIgnore
   public boolean isCICDJob() {
-    return isCustomCodeJob() && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
+    return isCustomCodeOrPyFlinkJob()
+        && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
   }
 
   public boolean isStreamParkJob() {
