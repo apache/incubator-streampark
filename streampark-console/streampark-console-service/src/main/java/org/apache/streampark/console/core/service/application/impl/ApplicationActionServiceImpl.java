@@ -24,6 +24,7 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.RestoreMode;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.tuple.Tuple2;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.HadoopUtils;
@@ -370,23 +371,18 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Transactional(rollbackFor = {Exception.class})
   public void start(Application appParam, boolean auto) throws Exception {
     final Application application = getById(appParam.getId());
-    ApiAlertException.throwIfNull(application, "[StreamPark] application is not exists.");
-
+    Utils.notNull(application);
     if (!application.isCanBeStart()) {
       throw new ApiAlertException("[StreamPark] The application cannot be started repeatedly.");
     }
+
+    AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
+    Utils.notNull(buildPipeline);
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
     if (flinkEnv == null) {
       throw new ApiAlertException("[StreamPark] can no found flink version");
     }
-
-    applicationInfoService.checkEnv(appParam);
-
-    // update state to starting
-    application.setState(FlinkAppState.STARTING.getValue());
-    application.setOptionTime(new Date());
-    updateById(application);
 
     // if manually started, clear the restart flag
     if (!auto) {
@@ -398,10 +394,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       appParam.setSavePointed(true);
       application.setRestartCount(application.getRestartCount() + 1);
     }
-    application.setAllowNonRestored(appParam.getAllowNonRestored());
 
-    String appConf;
-    String flinkUserJar = null;
     String jobId = new JobID().toHexString();
     ApplicationLog applicationLog = new ApplicationLog();
     applicationLog.setOptionName(Operation.START.getValue());
@@ -410,84 +403,6 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     // set the latest to Effective, (it will only become the current effective at this time)
     applicationManageService.toEffective(application);
-
-    ApplicationConfig applicationConfig = configService.getEffective(application.getId());
-    ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
-    ApiAlertException.throwIfNull(
-        executionMode, "ExecutionMode can't be null, start application failed.");
-    if (application.isCustomCodeJob()) {
-      if (application.isUploadJob()) {
-        appConf =
-            String.format(
-                "json://{\"%s\":\"%s\"}",
-                ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
-      } else {
-        switch (application.getApplicationType()) {
-          case STREAMPARK_FLINK:
-            ConfigFileType fileType = ConfigFileType.of(applicationConfig.getFormat());
-            if (fileType != null && !fileType.equals(ConfigFileType.UNKNOWN)) {
-              appConf =
-                  String.format("%s://%s", fileType.getTypeName(), applicationConfig.getContent());
-            } else {
-              throw new IllegalArgumentException(
-                  "application' config type error,must be ( yaml| properties| hocon )");
-            }
-            break;
-          case APACHE_FLINK:
-            appConf =
-                String.format(
-                    "json://{\"%s\":\"%s\"}",
-                    ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
-            break;
-          default:
-            throw new IllegalArgumentException(
-                "[StreamPark] ApplicationType must be (StreamPark flink | Apache flink)... ");
-        }
-      }
-
-      if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
-        switch (application.getApplicationType()) {
-          case STREAMPARK_FLINK:
-            flinkUserJar =
-                String.format(
-                    "%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
-            break;
-          case APACHE_FLINK:
-            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
-            if (!FsOperator.hdfs().exists(flinkUserJar)) {
-              Resource resource =
-                  resourceService.findByResourceName(application.getTeamId(), application.getJar());
-              if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                flinkUserJar =
-                    String.format(
-                        "%s/%s",
-                        application.getAppHome(), new File(resource.getFilePath()).getName());
-              }
-            }
-            break;
-          default:
-            throw new IllegalArgumentException(
-                "[StreamPark] ApplicationType must be (StreamPark flink | Apache flink)... ");
-        }
-      }
-    } else if (application.isFlinkSqlJob()) {
-      FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-      Utils.notNull(flinkSql);
-      // 1) dist_userJar
-      String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
-      // 2) appConfig
-      appConf =
-          applicationConfig == null
-              ? null
-              : String.format("yaml://%s", applicationConfig.getContent());
-      // 3) client
-      if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
-        String clientPath = Workspace.remote().APP_CLIENT();
-        flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
-      }
-    } else {
-      throw new UnsupportedOperationException("Unsupported...");
-    }
 
     Map<String, Object> extraParameter = new HashMap<>(0);
     if (application.isFlinkSqlJob()) {
@@ -504,27 +419,18 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             application.getK8sNamespace(),
             application.getK8sRestExposedTypeEnum());
 
-    AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
-
-    Utils.notNull(buildPipeline);
+    Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(flinkEnv, application);
+    String flinkUserJar = userJarAndAppConf.f0;
+    String appConf = userJarAndAppConf.f1;
 
     BuildResult buildResult = buildPipeline.getBuildResult();
-    if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
+    if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
       buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
     }
 
     // Get the args after placeholder replacement
     String applicationArgs =
         variableService.replaceVariable(application.getTeamId(), application.getArgs());
-
-    String pyflinkFilePath = "";
-    Resource resource =
-        resourceService.findByResourceName(application.getTeamId(), application.getJar());
-    if (resource != null
-        && StringUtils.isNotBlank(resource.getFilePath())
-        && resource.getFilePath().endsWith(ConfigConst.PYTHON_SUFFIX())) {
-      pyflinkFilePath = resource.getFilePath();
-    }
 
     SubmitRequest submitRequest =
         new SubmitRequest(
@@ -541,7 +447,6 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             getSavePointed(appParam),
             appParam.getRestoreMode() == null ? null : RestoreMode.of(appParam.getRestoreMode()),
             applicationArgs,
-            pyflinkFilePath,
             buildResult,
             kubernetesSubmitParam,
             extraParameter);
@@ -641,6 +546,113 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
               applicationLogService.save(applicationLog);
               startFutureMap.remove(application.getId());
             });
+  }
+
+  private Tuple2<String, String> getUserJarAndAppConf(FlinkEnv flinkEnv, Application application) {
+    ExecutionMode executionMode = application.getExecutionModeEnum();
+    ApplicationConfig applicationConfig = configService.getEffective(application.getId());
+
+    ApiAlertException.throwIfNull(
+        executionMode, "ExecutionMode can't be null, start application failed.");
+
+    String flinkUserJar = null;
+    String appConf = null;
+
+    switch (application.getDevelopmentMode()) {
+      case FLINK_SQL:
+        FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+        Utils.notNull(flinkSql);
+        // 1) dist_userJar
+        String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
+        // 2) appConfig
+        appConf =
+            applicationConfig == null
+                ? null
+                : String.format("yaml://%s", applicationConfig.getContent());
+        // 3) client
+        if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
+          String clientPath = Workspace.remote().APP_CLIENT();
+          flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
+        }
+        break;
+
+      case PYFLINK:
+        Resource resource =
+            resourceService.findByResourceName(application.getTeamId(), application.getJar());
+
+        ApiAlertException.throwIfNull(
+            resource, "pyflink file can't be null, start application failed.");
+
+        ApiAlertException.throwIfNull(
+            resource.getFilePath(), "pyflink file can't be null, start application failed.");
+
+        ApiAlertException.throwIfFalse(
+            resource.getFilePath().endsWith(ConfigConst.PYTHON_SUFFIX()),
+            "pyflink format error, must be a \".py\" suffix, start application failed.");
+
+        flinkUserJar = resource.getFilePath();
+        break;
+
+      case CUSTOM_CODE:
+        if (application.isUploadJob()) {
+          appConf =
+              String.format(
+                  "json://{\"%s\":\"%s\"}",
+                  ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+        } else {
+          switch (application.getApplicationType()) {
+            case STREAMPARK_FLINK:
+              ConfigFileType fileType = ConfigFileType.of(applicationConfig.getFormat());
+              if (fileType != null && !fileType.equals(ConfigFileType.UNKNOWN)) {
+                appConf =
+                    String.format(
+                        "%s://%s", fileType.getTypeName(), applicationConfig.getContent());
+              } else {
+                throw new IllegalArgumentException(
+                    "application' config type error,must be ( yaml| properties| hocon )");
+              }
+              break;
+            case APACHE_FLINK:
+              appConf =
+                  String.format(
+                      "json://{\"%s\":\"%s\"}",
+                      ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+              break;
+            default:
+              throw new IllegalArgumentException(
+                  "[StreamPark] ApplicationType must be (StreamPark flink | Apache flink)... ");
+          }
+        }
+
+        if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
+          switch (application.getApplicationType()) {
+            case STREAMPARK_FLINK:
+              flinkUserJar =
+                  String.format(
+                      "%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
+              break;
+            case APACHE_FLINK:
+              flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+              if (!FsOperator.hdfs().exists(flinkUserJar)) {
+                resource =
+                    resourceService.findByResourceName(
+                        application.getTeamId(), application.getJar());
+                if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                  flinkUserJar =
+                      String.format(
+                          "%s/%s",
+                          application.getAppHome(), new File(resource.getFilePath()).getName());
+                }
+              }
+              break;
+            default:
+              throw new IllegalArgumentException(
+                  "[StreamPark] ApplicationType must be (StreamPark flink | Apache flink)... ");
+          }
+        }
+        break;
+    }
+    return Tuple2.of(flinkUserJar, appConf);
   }
 
   private Map<String, Object> getProperties(Application application) {
