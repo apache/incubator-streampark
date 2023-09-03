@@ -61,6 +61,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
@@ -130,6 +131,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Autowired private ApplicationBackUpService backUpService;
   @Autowired private ApplicationManageService applicationManageService;
 
+  @Autowired private ApplicationInfoService applicationInfoService;
+
   @Autowired private ApplicationConfigService configService;
 
   @Autowired private ApplicationLogService applicationLogService;
@@ -161,11 +164,11 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       new ConcurrentHashMap<>();
 
   @Override
-  public void revoke(Application appParma) throws ApplicationException {
-    Application application = getById(appParma.getId());
+  public void revoke(Application appParam) throws ApplicationException {
+    Application application = getById(appParam.getId());
     ApiAlertException.throwIfNull(
         application,
-        String.format("The application id=%s not found, revoke failed.", appParma.getId()));
+        String.format("The application id=%s not found, revoke failed.", appParam.getId()));
 
     // 1) delete files that have been published to workspace
     application.getFsOperator().delete(application.getAppHome());
@@ -188,16 +191,16 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public void restart(Application application) throws Exception {
-    this.cancel(application);
-    this.start(application, false);
+  public void restart(Application appParam) throws Exception {
+    this.cancel(appParam);
+    this.start(appParam, false);
   }
 
   @Override
-  public void forcedStop(Application app) {
-    CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(app.getId());
-    CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(app.getId());
-    Application application = this.baseMapper.getApp(app);
+  public void forcedStop(Application appParam) {
+    CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(appParam.getId());
+    CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(appParam.getId());
+    Application application = this.baseMapper.getApp(appParam);
     if (isKubernetesApp(application)) {
       KubernetesDeploymentHelper.watchPodTerminatedLog(
           application.getK8sNamespace(), application.getJobName(), application.getJobId());
@@ -213,7 +216,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       cancelFuture.cancel(true);
     }
     if (startFuture == null && cancelFuture == null) {
-      this.updateToStopped(app);
+      this.updateToStopped(appParam);
     }
   }
 
@@ -363,23 +366,12 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             });
   }
 
-  /**
-   * Setup task is starting (for webUI "state" display)
-   *
-   * @param application
-   */
-  @Override
-  public void starting(Application application) {
-    application.setState(FlinkAppState.STARTING.getValue());
-    application.setOptionTime(new Date());
-    updateById(application);
-  }
-
   @Override
   @Transactional(rollbackFor = {Exception.class})
   public void start(Application appParam, boolean auto) throws Exception {
     final Application application = getById(appParam.getId());
-    Utils.notNull(application);
+    ApiAlertException.throwIfNull(application, "[StreamPark] application is not exists.");
+
     if (!application.isCanBeStart()) {
       throw new ApiAlertException("[StreamPark] The application cannot be started repeatedly.");
     }
@@ -388,6 +380,13 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (flinkEnv == null) {
       throw new ApiAlertException("[StreamPark] can no found flink version");
     }
+
+    applicationInfoService.checkEnv(appParam);
+
+    // update state to starting
+    application.setState(FlinkAppState.STARTING.getValue());
+    application.setOptionTime(new Date());
+    updateById(application);
 
     // if manually started, clear the restart flag
     if (!auto) {
@@ -399,8 +398,6 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       appParam.setSavePointed(true);
       application.setRestartCount(application.getRestartCount() + 1);
     }
-
-    starting(application);
     application.setAllowNonRestored(appParam.getAllowNonRestored());
 
     String appConf;

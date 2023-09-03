@@ -37,83 +37,83 @@ public interface ApplicationManageService extends IService<Application> {
   /**
    * Retrieves a page of applications based on the provided parameters.
    *
-   * @param app The application object to be used for filtering the results.
+   * @param appParam The application object to be used for filtering the results.
    * @param request The REST request object containing additional parameters or headers.
    * @return A page of Application objects based on the provided parameters.
    */
-  IPage<Application> page(Application app, RestRequest request);
+  IPage<Application> page(Application appParam, RestRequest request);
 
   /**
    * Creates a new application.
    *
-   * @param app The application to create.
+   * @param appParam The application to create.
    * @return True if the application was successfully created, false otherwise.
    * @throws IOException If an I/O error occurs.
    */
-  boolean create(Application app) throws IOException;
+  boolean create(Application appParam) throws IOException;
 
   /**
    * Copies the given Application.
    *
-   * @param app the Application to be copied
+   * @param appParam the Application to be copied
    * @return the size of the copied Application in bytes as a Long value
    * @throws IOException if there was an error during the copy process
    */
-  Long copy(Application app) throws IOException;
+  Long copy(Application appParam) throws IOException;
 
   /**
    * Updates the given application.
    *
-   * @param app the application to be updated
+   * @param appParam the application to be updated
    * @return true if the update was successful, false otherwise
    */
-  boolean update(Application app);
+  boolean update(Application appParam);
 
   /**
    * Sets the given application to be effective.
    *
-   * @param application the application to be set effective
+   * @param appParam the application to be set effective
    */
-  void toEffective(Application application);
+  void toEffective(Application appParam);
 
   /**
    * Checks if the given application is ready to build and update.
    *
-   * @param app the application to check for readiness
+   * @param appParam the application to check for readiness
    * @return true if the application is ready to build and update, false otherwise
    */
-  boolean checkBuildAndUpdate(Application app);
+  boolean checkBuildAndUpdate(Application appParam);
 
   /**
    * Deletes the given Application from the system.
    *
-   * @param app The Application to be deleted.
+   * @param appParam The Application to be deleted.
    * @return True if the deletion was successful, false otherwise.
    */
-  Boolean delete(Application app);
+  Boolean delete(Application appParam);
 
   /**
    * Retrieves the Application with the specified details from the system.
    *
-   * @param app The Application object containing the details of the Application to retrieve.
+   * @param appParam The Application object containing the details of the Application to retrieve.
    * @return The Application object that matches the specified details, or null if no matching
    *     Application is found.
    */
-  Application getApp(Application app);
+  Application getApp(Application appParam);
 
   /**
    * Updates the release of the given application.
    *
-   * @param application The application to update the release for.
+   * @param appParam The application to update the release for.
    */
-  void updateRelease(Application application);
+  void updateRelease(Application appParam);
 
   /**
    * Cleans the application by performing necessary cleanup tasks.
    *
-   * @param app The application to clean.
+   * @param appParam The application to clean.
    */
-  void clean(Application app);
+  void clean(Application appParam);
 
   /**
    * Retrieves a list of applications by project ID.

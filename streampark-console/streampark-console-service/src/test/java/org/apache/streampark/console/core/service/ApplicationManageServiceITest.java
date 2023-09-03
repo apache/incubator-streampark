@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test for {@link
- * org.apache.streampark.console.core.service.impl.ApplicationServiceImpl}.
+ * org.apache.streampark.console.core.service.application.ApplicationManageService}.
  */
 class ApplicationManageServiceITest extends SpringIntegrationTestBase {
 
@@ -57,6 +57,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
       FlinkStandaloneSessionCluster.builder().slotsNumPerTm(4).slf4jLogConsumer(null).build();
 
   @Autowired private ApplicationManageService applicationManageService;
+
   @Autowired private ApplicationActionService applicationActionService;
 
   @Autowired private FlinkClusterService clusterService;

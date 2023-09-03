@@ -209,14 +209,14 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public boolean checkAlter(Application application) {
-    Long appId = application.getId();
-    FlinkAppState state = FlinkAppState.of(application.getState());
+  public boolean checkAlter(Application appParam) {
+    Long appId = appParam.getId();
+    FlinkAppState state = FlinkAppState.of(appParam.getState());
     if (!FlinkAppState.CANCELED.equals(state)) {
       return false;
     }
     long cancelUserId = FlinkHttpWatcher.getCanceledJobUserId(appId);
-    long appUserId = application.getUserId();
+    long appUserId = appParam.getUserId();
     return cancelUserId != -1 && cancelUserId != appUserId;
   }
 
@@ -432,16 +432,16 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public String getMain(Application application) {
+  public String getMain(Application appParam) {
     File jarFile;
-    if (application.getProjectId() == null) {
-      jarFile = new File(application.getJar());
+    if (appParam.getProjectId() == null) {
+      jarFile = new File(appParam.getJar());
     } else {
       Project project = new Project();
-      project.setId(application.getProjectId());
+      project.setId(appParam.getProjectId());
       String modulePath =
-          project.getDistHome().getAbsolutePath().concat("/").concat(application.getModule());
-      jarFile = new File(modulePath, application.getJar());
+          project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
+      jarFile = new File(modulePath, appParam.getJar());
     }
     Manifest manifest = Utils.getJarManifest(jarFile);
     return manifest.getMainAttributes().getValue("Main-Class");

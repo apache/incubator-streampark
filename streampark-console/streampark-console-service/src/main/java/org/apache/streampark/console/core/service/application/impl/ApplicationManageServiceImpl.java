@@ -28,6 +28,7 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
@@ -53,6 +54,7 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
+import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -80,6 +82,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -127,16 +130,16 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public void toEffective(Application application) {
+  public void toEffective(Application appParam) {
     // set latest to Effective
-    ApplicationConfig config = configService.getLatest(application.getId());
+    ApplicationConfig config = configService.getLatest(appParam.getId());
     if (config != null) {
-      this.configService.toEffective(application.getId(), config.getId());
+      this.configService.toEffective(appParam.getId(), config.getId());
     }
-    if (application.isFlinkSqlJob()) {
-      FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), null);
+    if (appParam.isFlinkSqlJob()) {
+      FlinkSql flinkSql = flinkSqlService.getCandidate(appParam.getId(), null);
       if (flinkSql != null) {
-        flinkSqlService.toEffective(application.getId(), flinkSql.getId());
+        flinkSqlService.toEffective(appParam.getId(), flinkSql.getId());
         // clean candidate
         flinkSqlService.cleanCandidate(flinkSql.getId());
       }
@@ -145,9 +148,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
-  public Boolean delete(Application paramApp) {
+  public Boolean delete(Application appParam) {
 
-    Application application = getById(paramApp.getId());
+    Application application = getById(appParam.getId());
 
     // 1) remove flink sql
     flinkSqlService.removeApp(application.getId());
@@ -177,7 +180,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     if (isKubernetesApp(application)) {
       k8SFlinkTrackMonitor.unWatching(toTrackId(application));
     } else {
-      FlinkHttpWatcher.unWatching(paramApp.getId());
+      FlinkHttpWatcher.unWatching(appParam.getId());
     }
     return true;
   }
@@ -220,6 +223,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     this.baseMapper.page(page, appParam);
     List<Application> records = page.getRecords();
     long now = System.currentTimeMillis();
+
+    List<Long> appIds = records.stream().map(Application::getId).collect(Collectors.toList());
+    Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
+
     List<Application> newRecords =
         records.stream()
             .peek(
@@ -236,6 +243,24 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                       record.setDuration(now - record.getStartTime().getTime());
                     }
                   }
+                  if (pipeStates.containsKey(record.getId())) {
+                    record.setBuildStatus(pipeStates.get(record.getId()).getCode());
+                  }
+
+                  AppControl appControl =
+                      new AppControl()
+                          .setAllowBuild(
+                              record.getBuildStatus() == null
+                                  || !PipelineStatus.running
+                                      .getCode()
+                                      .equals(record.getBuildStatus()))
+                          .setAllowStart(
+                              !record.shouldBeTrack()
+                                  && PipelineStatus.success
+                                      .getCode()
+                                      .equals(record.getBuildStatus()))
+                          .setAllowStop(record.isRunning());
+                  record.setAppControl(appControl);
                 })
             .collect(Collectors.toList());
     page.setRecords(newRecords);
@@ -587,13 +612,13 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public void updateRelease(Application application) {
+  public void updateRelease(Application appParam) {
     LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
-    updateWrapper.eq(Application::getId, application.getId());
-    updateWrapper.set(Application::getRelease, application.getRelease());
-    updateWrapper.set(Application::getBuild, application.getBuild());
-    if (application.getOptionState() != null) {
-      updateWrapper.set(Application::getOptionState, application.getOptionState());
+    updateWrapper.eq(Application::getId, appParam.getId());
+    updateWrapper.set(Application::getRelease, appParam.getRelease());
+    updateWrapper.set(Application::getBuild, appParam.getBuild());
+    if (appParam.getOptionState() != null) {
+      updateWrapper.set(Application::getOptionState, appParam.getOptionState());
     }
     this.update(updateWrapper);
   }
@@ -623,12 +648,12 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public boolean checkBuildAndUpdate(Application application) {
-    boolean build = application.getBuild();
+  public boolean checkBuildAndUpdate(Application appParam) {
+    boolean build = appParam.getBuild();
     if (!build) {
       LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
-      updateWrapper.eq(Application::getId, application.getId());
-      if (application.isRunning()) {
+      updateWrapper.eq(Application::getId, appParam.getId());
+      if (appParam.isRunning()) {
         updateWrapper.set(Application::getRelease, ReleaseState.NEED_RESTART.get());
       } else {
         updateWrapper.set(Application::getRelease, ReleaseState.DONE.get());
@@ -637,18 +662,18 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       this.update(updateWrapper);
 
       // backup
-      if (application.isFlinkSqlJob()) {
-        FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
-        if (!application.isNeedRollback() && newFlinkSql != null) {
-          backUpService.backup(application, newFlinkSql);
+      if (appParam.isFlinkSqlJob()) {
+        FlinkSql newFlinkSql = flinkSqlService.getCandidate(appParam.getId(), CandidateType.NEW);
+        if (!appParam.isNeedRollback() && newFlinkSql != null) {
+          backUpService.backup(appParam, newFlinkSql);
         }
       }
 
       // If the current task is not running, or the task has just been added,
       // directly set the candidate version to the official version
-      FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-      if (!application.isRunning() || flinkSql == null) {
-        this.toEffective(application);
+      FlinkSql flinkSql = flinkSqlService.getEffective(appParam.getId(), false);
+      if (!appParam.isRunning() || flinkSql == null) {
+        this.toEffective(appParam);
       }
     }
     return build;
