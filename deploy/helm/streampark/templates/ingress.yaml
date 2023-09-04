@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-  {{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -24,8 +24,8 @@ metadata:
   {{- include "streampark.labels" . | nindent 4 }}
   annotations:
     {{- with .Values.ingress.annotations }}
-      {{- toYaml . | nindent 4 }}
-      {{- end }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   rules:
     - host: {{ .Values.ingress.host }}
@@ -38,4 +38,4 @@ spec:
                   name: {{ .Values.spec.name }}
             path: {{ .Values.ingress.path }}
             pathType: {{ .Values.ingress.pathType }}
-  {{- end }}
+{{- end }}
