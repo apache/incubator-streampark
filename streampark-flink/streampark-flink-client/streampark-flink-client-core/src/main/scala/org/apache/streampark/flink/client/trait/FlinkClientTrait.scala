@@ -147,6 +147,11 @@ trait FlinkClientTrait extends Logger {
           }
         })
     }
+
+    setConfig(submitRequest, flinkConfig)
+
+    doSubmit(submitRequest, flinkConfig)
+
   }
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
@@ -304,7 +309,6 @@ trait FlinkClientTrait extends Logger {
       submitRequest.appOption
         .filter(
           x => {
-            // 验证参数是否合法...
             val verify = commandLineOptions.hasOption(x._1)
             if (!verify) logWarn(s"param:${x._1} is error,skip it.")
             verify
@@ -353,8 +357,6 @@ trait FlinkClientTrait extends Logger {
 
     logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
 
-    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
-
     val commandLine = FlinkRunOption.parse(commandLineOptions, cliArgs, true)
 
     val activeCommandLine = validateAndGetActiveCommandLine(
@@ -401,86 +403,78 @@ trait FlinkClientTrait extends Logger {
   }
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
-
     val programArgs = new ArrayBuffer[String]()
+    val args = submitRequest.args
 
-    if (StringUtils.isNotEmpty(submitRequest.args)) {
-      val multiLineChar = "\"\"\""
-      val array = submitRequest.args.split("\\s+")
-      if (!array.exists(_.startsWith(multiLineChar))) {
+    if (StringUtils.isNotEmpty(args)) {
+      val multiChar = "\""
+      val array = args.split("\\s+")
+      if (!array.exists(_.startsWith(multiChar))) {
         array.foreach(programArgs +=)
       } else {
         val argsArray = new ArrayBuffer[String]()
         val tempBuffer = new ArrayBuffer[String]()
 
-        @tailrec def processElement(index: Int, multiLine: Boolean): Unit = {
+        @tailrec
+        def processElement(index: Int, multi: Boolean): Unit = {
+
           if (index == array.length) {
             if (tempBuffer.nonEmpty) {
               argsArray += tempBuffer.mkString(" ")
             }
             return
           }
-          val next = index + 1
-          val elem = array(index)
 
-          if (elem.trim.nonEmpty) {
-            if (!multiLine) {
-              if (elem.startsWith(multiLineChar)) {
-                tempBuffer += elem.drop(3)
-                processElement(next, multiLine = true)
-              } else {
-                argsArray += elem
-                processElement(next, multiLine = false)
-              }
-            } else {
-              if (elem.endsWith(multiLineChar)) {
-                tempBuffer += elem.dropRight(3)
+          val next = index + 1
+          val elem = array(index).trim
+
+          if (elem.isEmpty) {
+            processElement(next, multi = false)
+          } else {
+            if (multi) {
+              if (elem.endsWith(multiChar)) {
+                tempBuffer += elem.dropRight(1)
                 argsArray += tempBuffer.mkString(" ")
                 tempBuffer.clear()
-                processElement(next, multiLine = false)
+                processElement(next, multi = false)
               } else {
                 tempBuffer += elem
-                processElement(next, multiLine)
+                processElement(next, multi)
+              }
+            } else {
+              val until = if (elem.endsWith(multiChar)) 1 else 0
+              if (elem.startsWith(multiChar)) {
+                tempBuffer += elem.drop(1).dropRight(until)
+                processElement(next, multi = true)
+              } else {
+                argsArray += elem.dropRight(until)
+                processElement(next, multi = false)
               }
             }
-          } else {
-            tempBuffer += elem
-            processElement(next, multiLine = false)
           }
         }
 
-        processElement(0, multiLine = false)
-        argsArray.foreach(x => programArgs += x.trim)
+        processElement(0, multi = false)
+        argsArray.foreach(x => programArgs += x)
       }
     }
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
-      programArgs += PARAM_KEY_FLINK_CONF
-      programArgs += submitRequest.flinkYaml
-      programArgs += PARAM_KEY_APP_NAME
-      programArgs += DeflaterUtils.zipString(submitRequest.effectiveAppName)
-      programArgs += PARAM_KEY_FLINK_PARALLELISM
-      programArgs += getParallelism(submitRequest).toString
+
+      programArgs += PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml
+      programArgs += PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
+      programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
+
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINK_SQL =>
-          programArgs += PARAM_KEY_FLINK_SQL
-          programArgs += submitRequest.flinkSQL
+          programArgs += PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
-            programArgs += PARAM_KEY_APP_CONF
-            programArgs += submitRequest.appConf
+            programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
           }
         case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
-          programArgs += PARAM_KEY_APP_CONF
-          programArgs += submitRequest.appConf
+          programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
       }
-    }
 
-    // execution.runtime-mode
-    if (submitRequest.properties.nonEmpty) {
-      if (submitRequest.properties.containsKey(ExecutionOptions.RUNTIME_MODE.key())) {
-        programArgs += s"--${ExecutionOptions.RUNTIME_MODE.key()}"
-        programArgs += submitRequest.properties.get(ExecutionOptions.RUNTIME_MODE.key()).toString
-      }
     }
     programArgs.toList.asJava
   }
@@ -491,8 +485,6 @@ trait FlinkClientTrait extends Logger {
       commandLine: CommandLine): Configuration = {
 
     require(activeCustomCommandLine != null, "activeCustomCommandLine must not be null.")
-    val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
-    val customConfiguration = new Configuration(executorConfig)
     val configuration = new Configuration()
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome)
     flinkDefaultConfiguration.keySet.foreach(
@@ -502,7 +494,7 @@ trait FlinkClientTrait extends Logger {
           case _ =>
         }
       })
-    configuration.addAll(customConfiguration)
+    configuration.addAll(activeCustomCommandLine.toConfiguration(commandLine))
     configuration
   }
 
