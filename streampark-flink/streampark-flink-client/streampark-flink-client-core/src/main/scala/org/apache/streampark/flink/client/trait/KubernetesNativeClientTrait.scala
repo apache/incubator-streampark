@@ -177,6 +177,6 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
   def getDefaultKubernetesConf(k8sConf: String): String = {
     val homePath: String = System.getProperty("user.home")
     if (k8sConf != null) k8sConf.replace("~", homePath)
-    else homePath.concat("/.kube/config")
+    else homePath.concat("~/.kube/config")
   }
 }
