@@ -203,29 +203,11 @@
 
         <!-- pac4j for SSO-->
         <dependency>
-            <groupId>org.pac4j</groupId>
-            <artifactId>pac4j-core</artifactId>
-            <version>${pac4jVersion}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.pac4j</groupId>
-            <artifactId>pac4j-oauth</artifactId>
-            <version>${pac4jVersion}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.pac4j</groupId>
-            <artifactId>pac4j-oidc</artifactId>
-            <version>${pac4jVersion}</version>
-        </dependency>
-
-        <dependency>
             <groupId>io.buji</groupId>
             <artifactId>buji-pac4j</artifactId>
             <version>${bujiVersion}</version>
         </dependency>
-
+        <!-- Include pac4j-config/core/oauth/oidc-->
         <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-springboot</artifactId>
@@ -234,6 +216,15 @@
                 <exclusion>
                     <groupId>commons-collections</groupId>
                     <artifactId>commons-collections</artifactId>
+                </exclusion>
+                <!-- cas & opensaml is not supported-->
+                <exclusion>
+                    <groupId>org.pac4j</groupId>
+                    <artifactId>pac4j-cas</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.pac4j</groupId>
+                    <artifactId>pac4j-saml-opensamlv3</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
