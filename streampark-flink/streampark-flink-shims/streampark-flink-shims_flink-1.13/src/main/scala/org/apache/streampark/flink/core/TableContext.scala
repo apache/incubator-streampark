@@ -16,9 +16,6 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.printLogo
-
-import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{Table, TableEnvironment}
 import org.apache.flink.table.descriptors.{ConnectorDescriptor, ConnectTableDescriptor}
@@ -49,11 +46,6 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
   @deprecated override def connect(
       connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor =
     tableEnv.connect(connectorDescriptor)
-
-  override def execute(jobName: String): JobExecutionResult = {
-    printLogo(s"FlinkTable $jobName Starting...")
-    null
-  }
 
   @deprecated override def fromTableSource(source: TableSource[_]): Table =
     tableEnv.fromTableSource(source)

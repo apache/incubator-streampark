@@ -17,9 +17,6 @@
 
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.printLogo
-
-import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{CompiledPlan, PlanReference, Table, TableDescriptor, TableEnvironment}
 import org.apache.flink.table.module.ModuleEntry
@@ -44,11 +41,6 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
   override def from(tableDescriptor: TableDescriptor): Table = tableEnv.from(tableDescriptor)
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
-
-  override def execute(jobName: String): JobExecutionResult = {
-    printLogo(s"FlinkTable $jobName Starting...")
-    null
-  }
 
   /** @since 1.15 */
   override def listTables(catalogName: String, databaseName: String): Array[String] =

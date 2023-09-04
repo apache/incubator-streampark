@@ -16,9 +16,10 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigConst.printLogo
 import org.apache.streampark.flink.core.EnhancerImplicit._
 
+import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api._
 import org.apache.flink.table.catalog.Catalog
@@ -36,6 +37,11 @@ abstract class FlinkTableTrait(val parameter: ParameterTool, private val tableEn
   def start(): Unit = {
     val appName = parameter.getAppName(required = true)
     execute(appName)
+  }
+
+  @deprecated override def execute(jobName: String): JobExecutionResult = {
+    printLogo(s"Flink Table batch job: $jobName Starting...")
+    null
   }
 
   def sql(sql: String = null): Unit = FlinkSqlExecutor.executeSql(sql, parameter, this)
