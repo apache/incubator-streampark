@@ -39,7 +39,7 @@ public enum RestoreMode implements Serializable {
   }
 
   public String getName() {
-    return RestoreMode.of(this.value).toString();
+    return String.valueOf(RestoreMode.of(this.value));
   }
 
   public static RestoreMode of(Integer value) {
