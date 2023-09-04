@@ -270,8 +270,8 @@ print_logo() {
   printf '      %s  ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        %s\n'          $PRIMARY $RESET
   printf '      %s /____/\__/_/   \___/\__,_/_/ /_/ /_/ ____/\__,_/_/  /_/|_|       %s\n'          $PRIMARY $RESET
   printf '      %s                                   /_/                            %s\n\n'        $PRIMARY $RESET
-  printf '      %s   Version:  2.1.2 %s\n'                                                $BLUE   $RESET
-  printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                   $BLUE   $RESET
+  printf '      %s   Version:  2.1.2 %s\n'                                                         $BLUE   $RESET
+  printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                  $BLUE   $RESET
   printf '      %s   GitHub :  http://github.com/apache/streampark%s\n\n'                          $BLUE   $RESET
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
 }
@@ -622,11 +622,12 @@ main() {
         echo_r "Unknown command: $1"
         echo_w "Usage: streampark.sh ( commands ... )"
         echo_w "commands:"
-        echo_w "  start \$conf               Start StreamPark with application config."
+        echo_w "  start \$conf              Start StreamPark with application config."
         echo_w "  stop                      Stop StreamPark, wait up to 3 seconds and then use kill -KILL if still running"
+        echo_w "  start_docker              start in docker or k8s mode"
         echo_w "  status                    StreamPark status"
         echo_w "  debug                     StreamPark start with debug mode,start debug mode, like: bash streampark.sh debug 10002"
-        echo_w "  restart \$conf             restart StreamPark with application config."
+        echo_w "  restart \$conf            restart StreamPark with application config."
         exit 0
         ;;
   esac

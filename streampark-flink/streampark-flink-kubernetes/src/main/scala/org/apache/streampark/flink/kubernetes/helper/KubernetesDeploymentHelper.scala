@@ -58,7 +58,13 @@ object KubernetesDeploymentHelper extends Logger {
   def getDeploymentStatusChanges(nameSpace: String, deploymentName: String): Boolean = {
     Try {
       val pods = getPods(nameSpace, deploymentName)
-      pods.head.getStatus.getContainerStatuses.head.getLastState.getTerminated != null
+      val podStatus = pods.head.getStatus
+      podStatus.getPhase match {
+        case "Unknown" => true
+        case "Failed" => true
+        case "Pending" => false
+        case _ => podStatus.getContainerStatuses.head.getLastState.getTerminated != null
+      }
     }.getOrElse(true)
   }
 

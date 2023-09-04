@@ -18,18 +18,40 @@
 # When enabled RBAC is only created for said namespaces, otherwise it is done for the cluster scope.
 # watchNamespaces: ["streampark"]
 
-timezone: "Asia/Shanghai"
-
 image:
   repository: "apache/streampark"
   pullPolicy: "IfNotPresent"
-  tag: "2.1.2"
+  tag: "2.1.1"
   pullSecret: ""
 
 rbac:
   create: true
 
 spec:
+  container:
+    env: [
+      {
+        name: TZ,
+        value: "Asia/Shanghai"
+      },
+      {
+        name: DOCKER_HOST,
+        value: "tcp://localhost:2375"
+      },
+      {
+        name: LANG,
+        value: en_US.UTF-8
+      },
+      {
+        name: LANGUAGE,
+        value: en_US:en
+      },
+      {
+        name: LC_ALL,
+        value: en_US.UTF-8
+      }
+    ]
+
   replicaCount: 1
   containerPort: 10000
   name: rest
@@ -42,7 +64,17 @@ spec:
   tolerations: [ ]
   ## Affinity is a group of affinity scheduling rules. If specified, the pod's scheduling constraints.
   ## More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#affinity-v1-core
-  resources: { }
+  resources: {
+    limits: {
+      memory: "1Gi",
+      cpu: "1"
+    },
+    requests: {
+      memory: "1Gi",
+      cpu: "1"
+    }
+  }
+
   # resources:
   #   limits:
   #     memory: "2Gi"
@@ -72,10 +104,18 @@ spec:
     successThreshold: "1"
 
 ingress:
-  enabled: false
+  enabled: true
   host: "streampark.apache.org"
-  path: "/streampark"
-  annotations: {}
+  path: "/streampark(/|$)(.*)"
+  pathType: "ImplementationSpecific"
+  annotations: {
+    nginx.ingress.kubernetes.io/rewrite-target: "/$2",
+    nginx.ingress.kubernetes.io/proxy-body-size: "1024m",
+    ## fix swagger 404: https://github.com/springdoc/springdoc-openapi/issues/1741
+    ## add rewrite ^/v3/(.*)$ /streampark/v3/$1 redirect;
+    nginx.ingress.kubernetes.io/configuration-snippet: 'rewrite ^(/streampark)$ $1/ permanent;',
+    kubernetes.io/ingress.class: "nginx"
+  }
 
 service:
   ## type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer
@@ -95,10 +135,3 @@ streamParkServiceAccount:
   create: true
   annotations: {}
   name: "streampark"
-
-nginx:
-  ingress:
-    kubernetes:
-      configurationSnippet: "rewrite ^(/streampark)$ $1/ permanent;"
-      proxyBbodySize: "1024m"
-      rewriteTarget: "/$2"
