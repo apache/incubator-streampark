@@ -34,8 +34,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,18 +41,12 @@ import java.util.Map;
 @Service
 @Lazy
 public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
-  private Template template;
+  private final Template template = FreemarkerUtils.loadTemplateFile("alert-weCom.ftl");
 
   private final RestTemplate alertRestTemplate;
 
   public WeComAlertNotifyServiceImpl(RestTemplate alertRestTemplate) {
     this.alertRestTemplate = alertRestTemplate;
-  }
-
-  @PostConstruct
-  public void loadTemplateFile() throws Exception {
-    String template = "alert-weCom.ftl";
-    this.template = FreemarkerUtils.loadTemplateFile(template);
   }
 
   @Override

@@ -22,19 +22,15 @@ import org.apache.streampark.console.base.util.FreemarkerUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.bean.EmailConfig;
-import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
 import org.apache.commons.mail.HtmlEmail;
 
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import javax.annotation.PostConstruct;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,15 +41,7 @@ import java.util.Optional;
 @Lazy
 public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
-  private Template template;
-
-  @Autowired private SettingService settingService;
-
-  @PostConstruct
-  public void loadTemplateFile() throws Exception {
-    String template = "alert-email.ftl";
-    this.template = FreemarkerUtils.loadTemplateFile(template);
-  }
+  private final Template template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
 
   @Override
   public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template)

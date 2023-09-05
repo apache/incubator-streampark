@@ -117,7 +117,6 @@ class AlertServiceTest {
   void testDingTalkAlert() throws Exception {
     DingTalkAlertNotifyServiceImpl notifyService = new DingTalkAlertNotifyServiceImpl(restTemplate);
 
-    notifyService.loadTemplateFile();
     AlertDingTalkParams dingTalkParams = new AlertDingTalkParams();
     dingTalkParams.setToken("your_token");
     dingTalkParams.setContacts("175xxxx1234");
@@ -132,7 +131,6 @@ class AlertServiceTest {
   @Test
   void testWeComAlert() throws Exception {
     WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate);
-    notifyService.loadTemplateFile();
 
     AlertWeComParams weComParams = new AlertWeComParams();
     weComParams.setToken("your_token");
@@ -146,7 +144,6 @@ class AlertServiceTest {
   @Test
   void testLarkAlert() {
     LarkAlertNotifyServiceImpl notifyService = new LarkAlertNotifyServiceImpl(restTemplate, mapper);
-    notifyService.loadTemplateFile();
 
     AlertLarkParams alertLarkParams = new AlertLarkParams();
     alertLarkParams.setToken("your_token");
@@ -193,7 +190,7 @@ class AlertServiceTest {
           String.format("StreamPark Alert: %s %s", application.getJobName(), appState.name());
       sendEmail(subject, html, "****@domain.com");
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Failed to send email alert", e);
     }
   }
 

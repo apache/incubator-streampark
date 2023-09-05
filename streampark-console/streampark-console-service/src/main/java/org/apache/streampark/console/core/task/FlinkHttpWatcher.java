@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.enums.FlinkAppState;
@@ -780,7 +781,7 @@ public class FlinkHttpWatcher {
   /**
    * The situation of abnormal operation alarm is as follows: When the job running mode is yarn per
    * job or yarn application, when the job is abnormal, an alarm will be triggered directly; The job
-   * running mode is yarn session or reome: a. If the flink cluster is not configured with an alarm
+   * running mode is yarn session or remote. If the flink cluster is not configured with an alarm
    * information, it will directly alarm when the job is abnormal. b. If the flink cluster is
    * configured with alarm information: if the abnormal behavior of the job is caused by an
    * abnormality in the flink cluster, block the alarm of the job and wait for the flink cluster
@@ -791,7 +792,7 @@ public class FlinkHttpWatcher {
     switch (app.getExecutionModeEnum()) {
       case YARN_APPLICATION:
       case YARN_PER_JOB:
-        alertService.alert(app, appState);
+        alertService.alert(app.getAlertId(), AlertTemplate.of(app, appState));
         return;
       case YARN_SESSION:
       case REMOTE:
@@ -801,7 +802,7 @@ public class FlinkHttpWatcher {
               "application with id {} is yarn session or remote and flink cluster with id {} is alive, application send alert",
               app.getId(),
               app.getFlinkClusterId());
-          alertService.alert(app, appState);
+          alertService.alert(app.getAlertId(), AlertTemplate.of(app, appState));
         }
         break;
       default:

@@ -113,7 +113,7 @@ public class AlertController {
 
   @Operation(summary = "Send alert config")
   @PostMapping("/send")
-  public RestResponse sendAlert(Long id) throws AlertException {
+  public RestResponse sendAlert(Integer id) throws AlertException {
     AlertTemplate alertTemplate = new AlertTemplate();
     alertTemplate.setTitle("Notify: StreamPark alert job for test");
     alertTemplate.setJobName("StreamPark alert job for test");
@@ -126,8 +126,7 @@ public class AlertController {
         DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
     alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
     alertTemplate.setDuration("");
-    boolean alert =
-        alertService.alert(AlertConfigParams.of(alertConfigService.getById(id)), alertTemplate);
+    boolean alert = alertService.alert(id, alertTemplate);
     return RestResponse.success(alert);
   }
 }

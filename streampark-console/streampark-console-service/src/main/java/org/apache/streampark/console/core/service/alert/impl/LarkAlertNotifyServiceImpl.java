@@ -37,7 +37,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -50,7 +49,7 @@ import java.util.Map;
 @Service
 @Lazy
 public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
-  private Template template;
+  private final Template template = FreemarkerUtils.loadTemplateFile("alert-lark.ftl");
   private final RestTemplate alertRestTemplate;
   private final ObjectMapper mapper;
 
@@ -60,12 +59,6 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
   public LarkAlertNotifyServiceImpl(RestTemplate alertRestTemplate, ObjectMapper mapper) {
     this.alertRestTemplate = alertRestTemplate;
     this.mapper = mapper;
-  }
-
-  @PostConstruct
-  public void loadTemplateFile() {
-    String template = "alert-lark.ftl";
-    this.template = FreemarkerUtils.loadTemplateFile(template);
   }
 
   @Override
