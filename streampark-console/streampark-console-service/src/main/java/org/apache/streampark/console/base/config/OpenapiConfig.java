@@ -45,8 +45,8 @@ public class OpenapiConfig implements WebMvcConfigurer {
     return new OpenAPI()
         .info(
             new Info()
-                .title(OPEN_API_INFO_TITLE)
-                .description(OPEN_API_INFO_DESCRIPTION)
+                .title(OPEN_API_INFO_OVERVIEW)
+                .description(OPEN_API_INFO_OVERVIEW)
                 .contact(
                     new Contact()
                         .name(OPEN_API_INFO_CONTACT_NAME)
@@ -77,8 +77,7 @@ public class OpenapiConfig implements WebMvcConfigurer {
     return GroupedOpenApi.builder().group("v2").pathsToMatch("/v2/**").build();
   }
 
-  private static final String OPEN_API_INFO_TITLE = "Apache StreamPark Api Docs";
-  private static final String OPEN_API_INFO_DESCRIPTION = "Apache StreamPark Api Docs";
+  private static final String OPEN_API_INFO_OVERVIEW = "Apache StreamPark Api Docs";
   private static final String OPEN_API_INFO_VERSION = "2.2.0-SNAPSHOT";
   private static final String OPEN_API_INFO_LICENSE_NAME = "Apache-2.0 license";
   private static final String OPEN_API_INFO_CONTACT_NAME = "Apache StreamPark";
