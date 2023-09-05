@@ -100,6 +100,21 @@
             <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
         </dependency>
 
+        <!-- ZIO -->
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-logging_${scala.binary.version}</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-streams_${scala.binary.version}</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-concurrent_${scala.binary.version}</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
