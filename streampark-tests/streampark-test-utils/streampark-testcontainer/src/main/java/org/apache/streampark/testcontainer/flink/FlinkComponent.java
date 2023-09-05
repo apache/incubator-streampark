@@ -19,7 +19,7 @@ package org.apache.streampark.testcontainer.flink;
 
 import javax.annotation.Nonnull;
 
-enum FlinkComponent {
+public enum FlinkComponent {
   JOBMANAGER("jobmanager"),
   TASKMANAGER("taskmanager");
 

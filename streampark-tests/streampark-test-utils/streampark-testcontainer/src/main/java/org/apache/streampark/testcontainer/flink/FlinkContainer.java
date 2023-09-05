@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.streampark.testcontainer.flink.FlinkComponent.JOBMANAGER;
 import static org.apache.streampark.testcontainer.flink.FlinkComponent.TASKMANAGER;
 
-class FlinkContainer extends GenericContainer<FlinkContainer> {
+public class FlinkContainer extends GenericContainer<FlinkContainer> {
 
   public static final AtomicInteger TM_COUNT = new AtomicInteger(0);
 

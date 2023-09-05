@@ -79,7 +79,6 @@
         <module>streampark-common</module>
         <module>streampark-flink</module>
         <module>streampark-console</module>
-        <module>streampark-test-utils</module>
     </modules>
 
     <properties>
@@ -862,6 +861,13 @@
             <id>spark</id>
             <modules>
                 <module>streampark-spark</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>tests</id>
+            <modules>
+                <module>streampark-tests</module>
             </modules>
         </profile>
     </profiles>
