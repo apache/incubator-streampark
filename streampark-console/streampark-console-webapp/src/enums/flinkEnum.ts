@@ -167,6 +167,7 @@ export enum AppTypeEnum {
 export enum JobTypeEnum {
   JAR = 1,
   SQL = 2,
+  PYFLINK = 3,
 }
 
 export enum ConfigTypeEnum {

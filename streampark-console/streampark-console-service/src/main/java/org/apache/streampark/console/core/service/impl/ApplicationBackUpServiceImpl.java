@@ -62,23 +62,23 @@ public class ApplicationBackUpServiceImpl
   @Autowired private FlinkSqlService flinkSqlService;
 
   @Override
-  public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
+  public IPage<ApplicationBackUp> page(ApplicationBackUp bakParam, RestRequest request) {
     Page<ApplicationBackUp> page = new MybatisPager<ApplicationBackUp>().getDefaultPage(request);
     LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
         new LambdaQueryWrapper<ApplicationBackUp>()
-            .eq(ApplicationBackUp::getAppId, backUp.getAppId());
+            .eq(ApplicationBackUp::getAppId, bakParam.getAppId());
     return this.baseMapper.selectPage(page, queryWrapper);
   }
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
-  public void rollback(ApplicationBackUp backParam) {
+  public void rollback(ApplicationBackUp bakParam) {
 
-    Application application = applicationManageService.getById(backParam.getAppId());
+    Application application = applicationManageService.getById(bakParam.getAppId());
 
     FsOperator fsOperator = application.getFsOperator();
     // backup files not exist
-    if (!fsOperator.exists(backParam.getPath())) {
+    if (!fsOperator.exists(bakParam.getPath())) {
       return;
     }
 
@@ -86,8 +86,8 @@ public class ApplicationBackUpServiceImpl
     // When rollback, determine the currently effective project is necessary to be
     // backed up.
     // If necessary, perform the backup first
-    if (backParam.isBackup()) {
-      application.setBackUpDescription(backParam.getDescription());
+    if (bakParam.isBackup()) {
+      application.setBackUpDescription(bakParam.getDescription());
       if (application.isFlinkSqlJob()) {
         FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
         backup(application, flinkSql);
@@ -101,13 +101,13 @@ public class ApplicationBackUpServiceImpl
     // if running, set Latest
     if (application.isRunning()) {
       // rollback to back up config
-      configService.setLatestOrEffective(true, backParam.getId(), backParam.getAppId());
+      configService.setLatestOrEffective(true, bakParam.getId(), bakParam.getAppId());
     } else {
-      effectiveService.saveOrUpdate(backParam.getAppId(), EffectiveType.CONFIG, backParam.getId());
+      effectiveService.saveOrUpdate(bakParam.getAppId(), EffectiveType.CONFIG, bakParam.getId());
       // if flink sql task, will be rollback sql and dependencies
       if (application.isFlinkSqlJob()) {
         effectiveService.saveOrUpdate(
-            backParam.getAppId(), EffectiveType.FLINKSQL, backParam.getSqlId());
+            bakParam.getAppId(), EffectiveType.FLINKSQL, bakParam.getSqlId());
       }
     }
 
@@ -116,7 +116,7 @@ public class ApplicationBackUpServiceImpl
     fsOperator.delete(application.getAppHome());
 
     // copy backup files to a valid dir
-    fsOperator.copyDir(backParam.getPath(), application.getAppHome());
+    fsOperator.copyDir(bakParam.getPath(), application.getAppHome());
 
     // update restart status
     applicationManageService.update(
@@ -127,45 +127,45 @@ public class ApplicationBackUpServiceImpl
   }
 
   @Override
-  public void revoke(Application application) {
+  public void revoke(Application appParam) {
     Page<ApplicationBackUp> page = new Page<>();
     page.setCurrent(0).setSize(1).setSearchCount(false);
     LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
         new LambdaQueryWrapper<ApplicationBackUp>()
-            .eq(ApplicationBackUp::getAppId, application.getId())
+            .eq(ApplicationBackUp::getAppId, appParam.getId())
             .orderByDesc(ApplicationBackUp::getCreateTime);
 
     Page<ApplicationBackUp> backUpPages = baseMapper.selectPage(page, queryWrapper);
     if (!backUpPages.getRecords().isEmpty()) {
       ApplicationBackUp backup = backUpPages.getRecords().get(0);
       String path = backup.getPath();
-      application.getFsOperator().move(path, application.getWorkspace().APP_WORKSPACE());
+      appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
       removeById(backup.getId());
     }
   }
 
   @Override
-  public void removeApp(Application application) {
+  public void removeApp(Application appParam) {
     try {
       baseMapper.delete(
           new LambdaQueryWrapper<ApplicationBackUp>()
-              .eq(ApplicationBackUp::getAppId, application.getId()));
-      application
+              .eq(ApplicationBackUp::getAppId, appParam.getId()));
+      appParam
           .getFsOperator()
           .delete(
-              application
+              appParam
                   .getWorkspace()
                   .APP_BACKUPS()
                   .concat("/")
-                  .concat(application.getId().toString()));
+                  .concat(appParam.getId().toString()));
     } catch (Exception e) {
       log.error(e.getMessage(), e);
     }
   }
 
   @Override
-  public void rollbackFlinkSql(Application application, FlinkSql sql) {
-    ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
+  public void rollbackFlinkSql(Application appParam, FlinkSql flinkSqlParam) {
+    ApplicationBackUp backUp = getFlinkSqlBackup(appParam.getId(), flinkSqlParam.getId());
     ApiAlertException.throwIfNull(
         backUp, "Application backup can't be null. Rollback flink sql failed.");
     // rollback config and sql
@@ -205,29 +205,29 @@ public class ApplicationBackUpServiceImpl
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
-  public void backup(Application application, FlinkSql flinkSql) {
+  public void backup(Application appParam, FlinkSql flinkSqlParam) {
     // basic configuration file backup
     String appHome =
-        (application.isCustomCodeJob() && application.isCICDJob())
-            ? application.getDistHome()
-            : application.getAppHome();
-    FsOperator fsOperator = application.getFsOperator();
+        (appParam.isCustomCodeJob() && appParam.isCICDJob())
+            ? appParam.getDistHome()
+            : appParam.getAppHome();
+    FsOperator fsOperator = appParam.getFsOperator();
     if (fsOperator.exists(appHome)) {
       // move files to back up directory
-      ApplicationConfig config = configService.getEffective(application.getId());
+      ApplicationConfig config = configService.getEffective(appParam.getId());
       if (config != null) {
-        application.setConfigId(config.getId());
+        appParam.setConfigId(config.getId());
       }
       // flink sql tasks need to back up sql and dependencies
       int version = 1;
-      if (flinkSql != null) {
-        application.setSqlId(flinkSql.getId());
-        version = flinkSql.getVersion();
+      if (flinkSqlParam != null) {
+        appParam.setSqlId(flinkSqlParam.getId());
+        version = flinkSqlParam.getVersion();
       } else if (config != null) {
         version = config.getVersion();
       }
 
-      ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
+      ApplicationBackUp applicationBackUp = new ApplicationBackUp(appParam);
       applicationBackUp.setVersion(version);
 
       this.save(applicationBackUp);

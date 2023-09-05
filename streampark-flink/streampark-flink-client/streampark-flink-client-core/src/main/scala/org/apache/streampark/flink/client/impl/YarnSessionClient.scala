@@ -106,10 +106,9 @@ object YarnSessionClient extends YarnClientTrait {
       val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
-      val packageProgramJobGraph =
-        super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
-      packageProgram = packageProgramJobGraph._1
-      val jobGraph = packageProgramJobGraph._2
+      val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
+      packageProgram = programJobGraph._1
+      val jobGraph = programJobGraph._2
 
       client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString

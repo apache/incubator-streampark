@@ -45,6 +45,13 @@ const getJobTypeOptions = () => {
       ]),
       value: 'sql',
     },
+    {
+          label: h('div', {}, [
+              h(SvgIcon, { name: 'pyflink', color: '#108ee9' }, ''),
+              h('span', { class: 'pl-10px' }, 'Python Flink'),
+          ]),
+          value: 'pyflink',
+    },
   ];
 };
 

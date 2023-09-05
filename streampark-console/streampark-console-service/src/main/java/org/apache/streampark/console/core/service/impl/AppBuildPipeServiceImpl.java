@@ -234,7 +234,7 @@ public class AppBuildPipeServiceImpl
             // 2) some preparatory work
             String appUploads = app.getWorkspace().APP_UPLOADS();
 
-            if (app.isCustomCodeJob()) {
+            if (app.isCustomCodeOrPyFlinkJob()) {
               // customCode upload jar to appHome...
               String appHome = app.getAppHome();
               FsOperator fsOperator = app.getFsOperator();
@@ -465,7 +465,7 @@ public class AppBuildPipeServiceImpl
                 app.getLocalAppHome(),
                 mainClass,
                 flinkUserJar,
-                app.isCustomCodeJob(),
+                app.isCustomCodeOrPyFlinkJob(),
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -532,6 +532,8 @@ public class AppBuildPipeServiceImpl
                 "[StreamPark] unsupported ApplicationType of custom code: "
                     + app.getApplicationType());
         }
+      case PYFLINK:
+        return String.format("%s/%s", app.getAppHome(), app.getJar());
       case FLINK_SQL:
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {

@@ -24,6 +24,8 @@ import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, Flin
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 
 import io.fabric8.kubernetes.api.model._
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionList
+import io.fabric8.kubernetes.client.CustomResource
 import org.apache.flink.v1beta1.{FlinkDeployment, FlinkSessionJob}
 import zio.{IO, UIO, ZIO}
 import zio.stream.ZStream
@@ -61,6 +63,7 @@ object CROperator extends CROperator {
     lazy val mirrorSpace = s"${spec.namespace}_${spec.name}"
     for {
       // Generate FlinkDeployment CR
+      _                   <- validateDeployFlinkDeploymentCRD
       correctedJob        <- mirrorJobJarToHttpFileServer(spec.job, mirrorSpace)
       correctedExtJars    <- mirrorExtJarsToHttpFileServer(spec.extJarPaths, mirrorSpace)
       correctedPod        <- correctPodSpec(
@@ -249,4 +252,16 @@ object CROperator extends CROperator {
         .delete()
     } *> ZIO.logInfo(s"Delete FlinkDeployment CR: namespace=$namespace, name=$name")
 
+  /** Check whether FlinkDeployment CRD is deployed in the k8s cluster. */
+  def validateDeployFlinkDeploymentCRD = {
+    usingK8sClient { client =>
+      val crds: CustomResourceDefinitionList = client.apiextensions.v1.customResourceDefinitions.list
+      val flinkDeploymentCRDName: String     = CustomResource.getCRDName(classOf[FlinkDeployment])
+
+      val exists: Boolean = crds.getItems.asScala.exists(crd => crd.getMetadata.getName == flinkDeploymentCRDName)
+
+      if (!exists)
+        throw new RuntimeException("The FlinkDeployment CRD is not currently deployed in the k8s cluster")
+    }
+  }
 }
