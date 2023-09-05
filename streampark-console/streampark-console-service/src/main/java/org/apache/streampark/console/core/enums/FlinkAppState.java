@@ -142,6 +142,11 @@ public enum FlinkAppState implements Serializable {
         || FlinkAppState.TERMINATED == flinkAppState;
   }
 
+  public static boolean isLost(Integer appState) {
+    FlinkAppState flinkAppState = FlinkAppState.of(appState);
+    return FlinkAppState.LOST == flinkAppState;
+  }
+
   /**
    * Type conversion bridging Deprecated, see {@link
    * org.apache.streampark.console.core.utils.FlinkAppStateConverter}

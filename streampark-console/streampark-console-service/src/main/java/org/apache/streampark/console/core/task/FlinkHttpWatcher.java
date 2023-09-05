@@ -575,9 +575,7 @@ public class FlinkHttpWatcher {
 
   public void cleanSavepoint(Application application) {
     SAVEPOINT_CACHE.invalidate(application.getId());
-    if (!autoHealthProbingTask.isProbeOptionState(application.getOptionState().intValue())) {
-      application.setOptionState(OptionState.NONE.getValue());
-    }
+    application.setOptionState(OptionState.NONE.getValue());
   }
 
   /** set current option state */
@@ -789,6 +787,10 @@ public class FlinkHttpWatcher {
    * normally, the job will an alarm
    */
   private void doAlert(Application app, FlinkAppState appState) {
+    if (app.isTracking()) {
+      log.info("application with id {} is probing, don't send alert", app.getId());
+      return;
+    }
     switch (app.getExecutionModeEnum()) {
       case YARN_APPLICATION:
       case YARN_PER_JOB:

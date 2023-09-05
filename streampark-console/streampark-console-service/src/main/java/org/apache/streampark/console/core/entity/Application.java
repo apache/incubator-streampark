@@ -208,6 +208,8 @@ public class Application implements Serializable {
 
   private String tags;
 
+  private Integer probing;
+
   /** running job */
   private transient JobsOverview.Task overview;
 
@@ -309,6 +311,14 @@ public class Application implements Serializable {
       default:
         return 1;
     }
+  }
+
+  public Boolean isTracking() {
+    return this.tracking == 1;
+  }
+
+  public Boolean isProbing() {
+    return this.probing == 1;
   }
 
   /**

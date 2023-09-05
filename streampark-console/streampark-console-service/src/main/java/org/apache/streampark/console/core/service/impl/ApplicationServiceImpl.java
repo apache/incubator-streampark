@@ -487,7 +487,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     // set duration
                     String restUrl = k8SFlinkTrackMonitor.getRemoteRestUrl(toTrackId(record));
                     record.setFlinkRestUrl(restUrl);
-                    if (record.getTracking() == 1
+                    if (record.isTracking()
                         && record.getStartTime() != null
                         && record.getStartTime().getTime() > 0) {
                       record.setDuration(now - record.getStartTime().getTime());

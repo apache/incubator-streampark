@@ -75,6 +75,7 @@
         <result column="rest_url" jdbcType="VARCHAR" property="restUrl"/>
         <result column="rest_port" jdbcType="INTEGER" property="restPort"/>
         <result column="tags" jdbcType="VARCHAR" property="tags"/>
+        <result column="probing" jdbcType="INTEGER" property="probing"/>
     </resultMap>
 
     <update id="resetOptionState">

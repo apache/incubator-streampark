@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.task;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.core.entity.Application;
@@ -53,6 +54,7 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.from
 import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
 
 /** Event Listener for K8sFlinkTrackMonitor */
+@Slf4j
 @Component
 public class FlinkK8sChangeEventListener {
 
@@ -97,7 +99,13 @@ public class FlinkK8sChangeEventListener {
         || FlinkAppState.LOST.equals(state)
         || FlinkAppState.RESTARTING.equals(state)
         || FlinkAppState.FINISHED.equals(state)) {
-      executor.execute(() -> alertService.alert(app, state));
+      executor.execute(() -> {
+        if (app.isProbing()) {
+          log.info("application with id {} is probing, don't send alert", app.getId());
+          return;
+        }
+        alertService.alert(app, state);
+      });
     }
   }
 
