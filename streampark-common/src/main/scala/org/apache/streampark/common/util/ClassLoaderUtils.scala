@@ -16,9 +16,11 @@
  */
 package org.apache.streampark.common.util
 
-import java.io.File
+import java.io.{File, IOException}
 import java.net.{URL, URLClassLoader}
-import java.util.function.Supplier
+import java.util.function.{Consumer, Supplier}
+
+import scala.collection.mutable.ArrayBuffer
 
 object ClassLoaderUtils extends Logger {
 
@@ -60,6 +62,15 @@ object ClassLoaderUtils extends Logger {
     } finally {
       Thread.currentThread.setContextClassLoader(originalClassLoader)
     }
+  }
+  @throws[IOException]
+  def cloneClassLoader(): ClassLoader = {
+    val urls = originalClassLoader.getResources(".")
+    val buffer = ArrayBuffer[URL]()
+    while (urls.hasMoreElements) {
+      buffer += urls.nextElement()
+    }
+    new URLClassLoader(buffer.toArray[URL], originalClassLoader)
   }
 
   def loadJar(jarFilePath: String): Unit = {

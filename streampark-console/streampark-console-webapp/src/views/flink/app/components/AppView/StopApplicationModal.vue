@@ -54,8 +54,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        afterItem: () =>
-          h('span', { class: 'conf-switch' }, 'trigger savePoint before taking cancel'),
+        afterItem: () => h('span', { class: 'tip-info' }, 'trigger savePoint before taking cancel'),
       },
       {
         field: 'customSavepoint',
@@ -65,7 +64,19 @@
           placeholder: 'Entry the custom savepoint path',
           allowClear: true,
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, 'cancel job with savepoint path'),
+        afterItem: () => h('span', { class: 'tip-info' }, 'cancel job with savepoint path'),
+        ifShow: ({ values }) => !!values.stopSavePointed,
+      },
+      {
+        field: 'nativeFormat',
+        label: 'NativeFormat',
+        component: 'Switch',
+        componentProps: {
+          checkedChildren: 'ON',
+          unCheckedChildren: 'OFF',
+        },
+        defaultValue: false,
+        afterItem: () => h('span', { class: 'conf-switch' }, 'Note: native format savepoint is supported since flink 1.15'),
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
@@ -77,7 +88,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: () => h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
+        afterItem: () => h('span', { class: 'tip-info' }, 'Send max watermark before stopped'),
       },
     ],
     colon: true,
@@ -90,12 +101,13 @@
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, customSavepoint, drain } = (await validate()) as Recordable;
+      const { stopSavePointed, customSavepoint, drain, nativeFormat } = (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
         savePointed: stopSavePointed,
         savePoint: customSavepoint,
         drain: drain,
+        nativeFormat: nativeFormat,
       };
 
       if (stopSavePointed) {

@@ -22,7 +22,7 @@ metadata:
   labels:
     {{- include "streampark.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount}}
+  replicas: {{ .Values.spec.replicaCount }}
   selector:
     matchLabels:
       {{- include "streampark.selectorLabels" . | nindent 6 }}
@@ -57,11 +57,10 @@ spec:
               containerPort: {{ .Values.spec.containerPort }}
               protocol: TCP
           env:
-            - name: TZ
-              value: {{ .Values.timezone }}
+            {{- toYaml .Values.spec.container.env | nindent 12 }}
           securityContext:
             privileged: false
-          command: ["bash","-c","bash bin/startup.sh"]
+          command: ["bash","-c","bash ./bin/streampark.sh start_docker"]
           {{- if .Values.spec.livenessProbe.enabled }}
           livenessProbe:
             exec:
@@ -83,11 +82,10 @@ spec:
             failureThreshold: {{ .Values.spec.readinessProbe.failureThreshold }}
           {{- end }}
           volumeMounts:
-            - name: volume-docker
-              mountPath: /var/run/docker.sock
-              readOnly: true
             - name: streampark-default-config-volume
-              mountPath: /streampark/conf
+              mountPath: /usr/local/service/streampark/conf
+          resources:
+          {{- toYaml .Values.spec.resources | nindent 12 }}
       volumes:
         - name: streampark-default-config-volume
           configMap:
@@ -109,9 +107,6 @@ spec:
                 path: spy.properties
               - key: ValidationMessages.properties
                 path: ValidationMessages.properties
-        - name: volume-docker
-          hostPath:
-            path: /var/run/docker.sock
-            type: ""
+
 
 

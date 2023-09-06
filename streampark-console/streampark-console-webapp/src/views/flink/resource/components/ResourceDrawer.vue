@@ -41,18 +41,20 @@
 
 <script lang="ts" setup>
   import { ref, computed, unref } from 'vue';
-  import { BasicForm, FormSchema, useForm } from '/@/components/Form';
+  import { BasicForm, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Resource from '/@/views/flink/resource/components/Resource.vue';
-  import { fetchAddResource, fetchUpdateResource } from '/@/api/flink/resource';
-  import { EngineTypeEnum } from '/@/views/flink/resource/resource.data';
+  import { fetchAddResource, fetchUpdateResource, checkResource } from '/@/api/flink/resource';
+  import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
   import {
+    renderEngineType,
     renderResourceType,
     renderStreamParkResourceGroup,
   } from '/@/views/flink/resource/useResourceRender';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { exceptionPropWidth } from '/@/utils';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -70,7 +72,7 @@
   const resourceId = ref<Nullable<number>>(null);
   const resourceRef = ref();
 
-  const getResourceFormSchema = computed((): FormSchema[] => {
+  const getResourceFormSchema = computed(() => {
     return [
       {
         field: 'resourceType',
@@ -82,17 +84,21 @@
         ],
       },
       {
+        field: 'resourceName',
+        label: t('flink.resource.resourceName'),
+        component: 'Input',
+        ifShow: ({ values }) => values?.resourceType !== ResourceTypeEnum.CONNECTOR,
+        componentProps: { placeholder: t('flink.resource.resourceNamePlaceholder') },
+        rules: [
+          { required: true, message: t('flink.resource.form.resourceNameIsRequiredMessage') },
+        ],
+      },
+      {
         field: 'engineType',
         label: t('flink.resource.engineType'),
         component: 'Select',
+        render: ({ model }) => renderEngineType({ model }),
         defaultValue: EngineTypeEnum.FLINK,
-        componentProps: {
-          placeholder: t('flink.resource.engineTypePlaceholder'),
-          options: [
-            { label: 'apache flink', value: EngineTypeEnum.FLINK, disabled: false },
-            { label: 'apache spark', value: EngineTypeEnum.SPARK, disabled: true },
-          ],
-        },
         rules: [{ required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }],
       },
       {
@@ -100,7 +106,7 @@
         label: t('flink.resource.groupName'),
         component: 'Input',
         componentProps: { placeholder: t('flink.resource.groupNamePlaceholder') },
-        ifShow: ({ values }) => values?.resourceType == 'GROUP',
+        ifShow: ({ values }) => values?.resourceType === ResourceTypeEnum.GROUP,
         rules: [{ required: true, message: t('flink.resource.groupNameIsRequiredMessage') }],
       },
       {
@@ -109,21 +115,21 @@
         component: 'Select',
         render: ({ model }) =>
           renderStreamParkResourceGroup({ model, resources: unref(props.teamResource) }),
-        ifShow: ({ values }) => values?.resourceType == 'GROUP',
+        ifShow: ({ values }) => values?.resourceType === ResourceTypeEnum.GROUP,
       },
       {
         field: 'dependency',
         label: t('flink.resource.addResource'),
         component: 'Input',
         slot: 'resource',
-        ifShow: ({ values }) => values?.resourceType !== 'GROUP',
+        ifShow: ({ values }) => values?.resourceType !== ResourceTypeEnum.GROUP,
       },
       {
         field: 'mainClass',
         label: t('flink.app.mainClass'),
         component: 'Input',
         componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
-        ifShow: ({ values }) => values?.resourceType == 'FLINK_APP',
+        ifShow: ({ values }) => values?.resourceType === ResourceTypeEnum.FLINK_APP,
         rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
@@ -148,17 +154,16 @@
   const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
     async (data: Recordable) => {
       unref(resourceRef)?.setDefaultValue({});
-      resetFields();
+      await resetFields();
       setDrawerProps({ confirmLoading: false });
       isUpdate.value = !!data?.isUpdate;
       if (unref(isUpdate)) {
         resourceId.value = data.record.id;
-        setFieldsValue(data.record);
-
-        if (data.record?.resourceType == 'GROUP') {
-          setFieldsValue({ resourceGroup: JSON.parse(data.record.resource || '[]') });
+        await setFieldsValue(data.record);
+        if (data.record?.resourceType === ResourceTypeEnum.GROUP) {
+          await setFieldsValue({ resourceGroup: JSON.parse(data.record.resource || '[]') });
         } else {
-          setFieldsValue({ dependency: data.record.resource });
+          await setFieldsValue({ dependency: data.record.resource });
           unref(resourceRef)?.setDefaultValue(JSON.parse(data.record.resource || '{}'));
         }
       }
@@ -172,17 +177,17 @@
   // form submit
   async function handleSubmit() {
     try {
+      const id = resourceId.value;
+      resourceId.value = null;
       const values = await validate();
       let resourceJson = '';
-
-      if (values.resourceType == 'GROUP') {
+      if (values.resourceType == ResourceTypeEnum.GROUP) {
         resourceJson = JSON.stringify(values.resourceGroup);
       } else {
         const resource: { pom?: string; jar?: string } = {};
         unref(resourceRef).handleApplyPom();
         const dependencyRecords = unref(resourceRef)?.dependencyRecords;
         const uploadJars = unref(resourceRef)?.uploadJars;
-
         if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
           if (unref(dependencyRecords).length > 1) {
             Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
@@ -210,26 +215,71 @@
         }
 
         resourceJson = JSON.stringify(resource);
+        // check resource
+        const resp = await checkResource({
+          id: id,
+          resource: resourceJson,
+          ...values,
+        });
+        const state = resp['state'];
+        switch (state) {
+          case 1:
+            // download error
+            if (resource.pom?.length > 0) {
+              Swal.fire({
+                icon: 'error',
+                title: t('sys.api.errorTip'),
+                width: exceptionPropWidth(),
+                html: '<pre class="api-exception">' + resp['exception'] + '</pre>',
+                focusConfirm: false,
+              });
+            } else {
+              Swal.fire('Failed', t('flink.resource.jarFileErrorTip'), 'error');
+            }
+            break;
+          case 2:
+            if (values.resourceType == ResourceTypeEnum.FLINK_APP) {
+              Swal.fire('Failed', t('flink.resource.mainNullTip'), 'error');
+            }
+            if (values.resourceType == ResourceTypeEnum.CONNECTOR) {
+              Swal.fire('Failed', t('flink.resource.connectorInvalidTip'), 'error');
+            }
+            break;
+          case 3:
+            Swal.fire(
+              'Failed',
+              t('flink.resource.connectorInfoErrorTip').concat(': ').concat(resp['name']),
+              'error',
+            );
+            break;
+          case 4:
+            Swal.fire('Failed', t('flink.resource.connectorExistsTip'), 'error');
+            break;
+          case 5:
+            Swal.fire('Failed', t('flink.resource.connectorModifyTip'), 'error');
+            break;
+          case 0:
+            const connector = resp['connector'] || null;
+            setDrawerProps({ confirmLoading: true });
+            await (isUpdate.value
+              ? fetchUpdateResource({
+                  id: id,
+                  resource: resourceJson,
+                  connector: connector,
+                  ...values,
+                })
+              : fetchAddResource({ resource: resourceJson, connector: connector, ...values }));
+            unref(resourceRef)?.setDefaultValue({});
+            closeDrawer();
+            emit('success', isUpdate.value);
+            break;
+          default:
+            break;
+        }
+        await resetFields();
       }
-
-      setDrawerProps({ confirmLoading: true });
-      await (isUpdate.value
-        ? fetchUpdateResource({ id: resourceId.value, resource: resourceJson, ...values })
-        : fetchAddResource({ resource: resourceJson, ...values }));
-      unref(resourceRef)?.setDefaultValue({});
-      resetFields();
-      closeDrawer();
-      emit('success', isUpdate.value);
     } finally {
       setDrawerProps({ confirmLoading: false });
     }
   }
 </script>
-
-<style lang="less">
-  .conf-switch {
-    display: inline-block;
-    margin-top: 10px;
-    color: darkgrey;
-  }
-</style>

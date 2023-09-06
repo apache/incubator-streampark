@@ -26,11 +26,11 @@ import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.zio.ZIOExt;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.SettingService;
-
-import org.apache.commons.lang3.StringUtils;
+import org.apache.streampark.flink.kubernetes.v2.fs.EmbeddedFileServer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class EnvInitializer implements ApplicationRunner {
 
   private static final Pattern PATTERN_FLINK_SHIMS_JAR =
       Pattern.compile(
-          "^streampark-flink-shims_flink-(1.1[2-7])_(2.11|2.12)-(.*).jar$",
+          "^streampark-flink-shims_flink-(1.1[2-7])_(2.12)-(.*).jar$",
           Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
   @Override
@@ -98,6 +98,8 @@ public class EnvInitializer implements ApplicationRunner {
     overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
     // initialize local file system resources
     storageInitialize(LFS);
+    // Launch the embedded http file server.
+    ZIOExt.unsafeRun(EmbeddedFileServer.launch());
   }
 
   private void initInternalConfig(Environment springEnv) {
@@ -111,25 +113,7 @@ public class EnvInitializer implements ApplicationRunner {
               InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 
-    String mvnSettings = settingService.getMavenSettings();
-    if (StringUtils.isNotEmpty(mvnSettings)) {
-      InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), mvnSettings);
-    }
-
-    String mvnRepository = settingService.getMavenRepository();
-    if (StringUtils.isNotEmpty(mvnRepository)) {
-      InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
-    }
-
-    String mvnAuthUser = settingService.getMavenAuthUser();
-    if (StringUtils.isNotEmpty(mvnAuthUser)) {
-      InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
-    }
-
-    String mvnAuthPassword = settingService.getMavenAuthPassword();
-    if (StringUtils.isNotEmpty(mvnAuthPassword)) {
-      InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
-    }
+    settingService.getMavenConfig().updateConfig();
 
     InternalConfigHolder.log();
   }
@@ -146,49 +130,20 @@ public class EnvInitializer implements ApplicationRunner {
       return;
     }
 
-    final String mkdirLog = "storage initialize, now mkdir [{}] starting ...";
-
     FsOperator fsOperator = FsOperator.of(storageType);
     Workspace workspace = Workspace.of(storageType);
 
     // 1. prepare workspace dir
     if (storageType.equals(LFS)) {
-      String localDist = Workspace.APP_LOCAL_DIST();
-      if (!fsOperator.exists(localDist)) {
-        log.info(mkdirLog, localDist);
-        fsOperator.mkdirs(localDist);
-      }
+      fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
     }
-
-    String appUploads = workspace.APP_UPLOADS();
-    if (!fsOperator.exists(appUploads)) {
-      log.info(mkdirLog, appUploads);
-      fsOperator.mkdirs(appUploads);
-    }
-
-    String appWorkspace = workspace.APP_WORKSPACE();
-    if (!fsOperator.exists(appWorkspace)) {
-      log.info(mkdirLog, appWorkspace);
-      fsOperator.mkdirs(appWorkspace);
-    }
-
-    String appBackups = workspace.APP_BACKUPS();
-    if (!fsOperator.exists(appBackups)) {
-      log.info(mkdirLog, appBackups);
-      fsOperator.mkdirs(appBackups);
-    }
-
-    String appSavePoints = workspace.APP_SAVEPOINTS();
-    if (!fsOperator.exists(appSavePoints)) {
-      log.info(mkdirLog, appSavePoints);
-      fsOperator.mkdirs(appSavePoints);
-    }
-
-    String appJars = workspace.APP_JARS();
-    if (!fsOperator.exists(appJars)) {
-      log.info(mkdirLog, appJars);
-      fsOperator.mkdirs(appJars);
-    }
+    Arrays.asList(
+            workspace.APP_UPLOADS(),
+            workspace.APP_WORKSPACE(),
+            workspace.APP_BACKUPS(),
+            workspace.APP_SAVEPOINTS(),
+            workspace.APP_JARS())
+        .forEach(fsOperator::mkdirsIfNotExists);
 
     // 2. upload jar.
     // 2.1) upload client jar
@@ -219,7 +174,6 @@ public class EnvInitializer implements ApplicationRunner {
     File[] shims =
         WebUtils.getAppLibDir()
             .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
-
     Utils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
 
     String appShims = workspace.APP_SHIMS();
@@ -237,7 +191,6 @@ public class EnvInitializer implements ApplicationRunner {
     }
 
     // 2.4) create maven local repository dir
-
     String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
     if (FsOperator.lfs().exists(localMavenRepo)) {
       FsOperator.lfs().mkdirs(localMavenRepo);

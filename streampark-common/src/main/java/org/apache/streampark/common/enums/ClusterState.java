@@ -19,7 +19,7 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-/** @since: 1.2.3 */
+/** @since 1.2.3 */
 public enum ClusterState implements Serializable {
   /** The cluster was just created but not started */
   CREATED(0),
@@ -32,7 +32,7 @@ public enum ClusterState implements Serializable {
   /** cluster unknown */
   UNKNOWN(4),
   STARTING(5),
-  CANCELING(6),
+  CANCELLING(6),
   FAILED(7),
   KILLED(8);
 

@@ -47,7 +47,7 @@ function asyncImportRoute(routes: AppRouteRecordRaw[] | undefined, parentName = 
     } else if (name) {
       item.component = getParentLayout();
     }
-    // Determine if all submenus are hidden, add hidenChildrenInMenu if all are hidden
+    // Determine if all submenus are hidden, add hiddenChildrenInMenu if all are hidden
     item.meta.hideChildrenInMenu = (children || []).every((child) => child.meta?.hidden);
     if (item.meta.hidden) {
       item.name = `${parentName ? parentName + '_' : ''}${item.name}`;

@@ -54,17 +54,10 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
   void resetOptionState();
 
-  Boolean existsByTeamId(@Param("teamId") Long teamId);
-
-  Boolean existsByJobName(@Param("jobName") String jobName);
-
-  Boolean existsByUserId(@Param("userId") Long userId);
-
   List<Application> getByProjectId(@Param("projectId") Long id);
 
   boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
 
-  boolean existsJobByClusterId(@Param("clusterId") Long clusterId);
-
-  Integer countJobsByClusterId(@Param("clusterId") Long clusterId);
+  Integer countAffectedByClusterId(
+      @Param("clusterId") Long clusterId, @Param("dbType") String dbType);
 }

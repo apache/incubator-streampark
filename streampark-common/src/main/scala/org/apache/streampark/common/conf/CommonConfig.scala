@@ -111,4 +111,11 @@ object CommonConfig {
     classType = classOf[String],
     description = "The maximum size of the default read log")
 
+  val SPRING_PROFILES_ACTIVE: InternalOption = InternalOption(
+    key = "spring.profiles.active",
+    defaultValue = "h2",
+    classType = classOf[String],
+    description = "Use the database type"
+  )
+
 }

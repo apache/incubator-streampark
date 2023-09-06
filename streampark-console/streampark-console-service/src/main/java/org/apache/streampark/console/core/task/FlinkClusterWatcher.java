@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.task;
 
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.HadoopUtils;
@@ -27,9 +29,9 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.alert.AlertService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -64,7 +66,7 @@ public class FlinkClusterWatcher {
 
   @Autowired private AlertService alertService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   private Long lastWatchTime = 0L;
 
@@ -130,7 +132,10 @@ public class FlinkClusterWatcher {
 
   private void alert(FlinkCluster cluster, ClusterState state) {
     if (cluster.getAlertId() != null) {
-      cluster.setJobs(applicationService.countJobsByClusterId(cluster.getId()));
+      cluster.setAllJobs(applicationInfoService.countByClusterId(cluster.getId()));
+      cluster.setAffectedJobs(
+          applicationInfoService.countAffectedByClusterId(
+              cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
       cluster.setClusterState(state.getValue());
       cluster.setEndTime(new Date());
       alertService.alert(cluster, state);
@@ -148,17 +153,7 @@ public class FlinkClusterWatcher {
     if (state != null) {
       return state;
     }
-    switch (flinkCluster.getExecutionModeEnum()) {
-      case REMOTE:
-        state = httpRemoteClusterState(flinkCluster);
-        break;
-      case YARN_SESSION:
-        state = httpYarnSessionClusterState(flinkCluster);
-        break;
-      default:
-        state = ClusterState.UNKNOWN;
-        break;
-    }
+    state = httpClusterState(flinkCluster);
     if (ClusterState.isRunning(state)) {
       FAILED_STATES.invalidate(flinkCluster.getId());
     } else {
@@ -190,6 +185,23 @@ public class FlinkClusterWatcher {
       return getStateFromYarnRestApi(flinkCluster);
     }
     return state;
+  }
+
+  /**
+   * get flink cluster state
+   *
+   * @param flinkCluster
+   * @return
+   */
+  private ClusterState httpClusterState(FlinkCluster flinkCluster) {
+    switch (flinkCluster.getExecutionModeEnum()) {
+      case REMOTE:
+        return httpRemoteClusterState(flinkCluster);
+      case YARN_SESSION:
+        return httpYarnSessionClusterState(flinkCluster);
+      default:
+        return ClusterState.UNKNOWN;
+    }
   }
 
   /**
@@ -272,9 +284,18 @@ public class FlinkClusterWatcher {
    * @return
    */
   private ClusterState yarnStateConvertClusterState(YarnApplicationState state) {
-    if (state == YarnApplicationState.FINISHED) {
-      return ClusterState.CANCELED;
-    }
-    return ClusterState.of(state.toString());
+    return state == YarnApplicationState.FINISHED
+        ? ClusterState.CANCELED
+        : ClusterState.of(state.toString());
+  }
+
+  /**
+   * Verify the cluster connection whether is valid.
+   *
+   * @return <code>false</code> if the connection of the cluster is invalid, <code>true</code> else.
+   */
+  public Boolean verifyClusterConnection(FlinkCluster flinkCluster) {
+    ClusterState clusterState = httpClusterState(flinkCluster);
+    return ClusterState.isRunning(clusterState);
   }
 }

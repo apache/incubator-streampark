@@ -34,9 +34,16 @@ enum FLINK_API {
  * flink environment data
  * @returns Promise<FlinkEnv[]>
  */
-export function fetchFlinkEnv() {
+export function fetchListFlinkEnv() {
   return defHttp.post<FlinkEnv[]>({
     url: FLINK_API.LIST,
+  });
+}
+
+export function fetchFlinkEnv(id: string) {
+  return defHttp.post<FlinkEnv>({
+    url: FLINK_API.GET,
+    data: { id: id },
   });
 }
 

@@ -35,12 +35,16 @@ import java.util.Date;
 @TableName("t_resource")
 public class Resource implements Serializable {
 
-  private static final long serialVersionUID = -7720746591258904369L;
+  private static final long serialVersionUID = 1L;
 
   @TableId(type = IdType.AUTO)
   private Long id;
 
+  // resourceName unique
   private String resourceName;
+
+  // resource path
+  private String resourcePath;
 
   private String resource;
 
@@ -54,7 +58,14 @@ public class Resource implements Serializable {
 
   private EngineType engineType;
 
+  // for flink app
   private String mainClass;
+
+  // for flink connector
+  private String connectorRequiredOptions;
+
+  // for flink connector
+  private String connectorOptionalOptions;
 
   /** user name of creator */
   private transient String creatorName;
@@ -69,4 +80,31 @@ public class Resource implements Serializable {
   private transient String sortField;
 
   private transient String sortOrder;
+
+  private transient String connector;
+
+  public void setResourcePath(String resourcePath) {
+    if (resourcePath == null) {
+      throw new IllegalArgumentException("resource path cannot be null.");
+    }
+    String[] namePath = resourcePath.split(":");
+    if (namePath.length != 2) {
+      throw new IllegalArgumentException("resource path invalid, format: $name:$path");
+    }
+    this.resourcePath = resourcePath;
+  }
+
+  public String getFileName() {
+    if (this.resourcePath == null) {
+      return null;
+    }
+    return resourcePath.split(":")[0];
+  }
+
+  public String getFilePath() {
+    if (this.resourcePath == null) {
+      return null;
+    }
+    return resourcePath.split(":")[1];
+  }
 }

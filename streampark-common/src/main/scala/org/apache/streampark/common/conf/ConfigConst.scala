@@ -24,6 +24,16 @@ object ConfigConst {
 
   val DEFAULT_DATAMASK_STRING = "********"
 
+  val PARAM_PREFIX = "--"
+
+  /** pyflink */
+
+  val PYTHON_SUFFIX = ".py"
+
+  val PYTHON_DRIVER_CLASS_NAME = "org.apache.flink.client.python.PythonDriver"
+
+  val PYTHON_EXECUTABLE = "venv.zip/venv/bin/python3"
+
   /** about parameter... */
 
   val KEY_APP_HOME = "app.home"
@@ -78,18 +88,16 @@ object ConfigConst {
   val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
 
   // flink
-  def KEY_APP_CONF(prefix: String = null): String = if (prefix == null) "conf" else s"${prefix}conf"
+  def KEY_APP_CONF(prefix: String = null): String = s"${Option(prefix).getOrElse("")}conf"
 
-  def KEY_FLINK_CONF(prefix: String = null): String =
-    if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
+  def KEY_FLINK_CONF(prefix: String = null): String = s"${Option(prefix).getOrElse("")}flink.conf"
 
-  def KEY_APP_NAME(prefix: String = null): String =
-    if (prefix == null) "app.name" else s"${prefix}app.name"
+  def KEY_APP_NAME(prefix: String = null): String = s"${Option(prefix).getOrElse("")}app.name"
 
-  def KEY_FLINK_SQL(prefix: String = null): String = if (prefix == null) "sql" else s"${prefix}sql"
+  def KEY_FLINK_SQL(prefix: String = null): String = s"${Option(prefix).getOrElse("")}sql"
 
   def KEY_FLINK_PARALLELISM(prefix: String = null): String =
-    if (prefix == null) "parallelism.default" else s"${prefix}parallelism.default"
+    s"${Option(prefix).getOrElse("")}parallelism.default"
 
   val KEY_FLINK_OPTION_PREFIX = "flink.option."
 
@@ -112,6 +120,8 @@ object ConfigConst {
   val KEY_YARN_APP_NODE_LABEL = "yarn.application.node-label"
 
   val KEY_K8S_IMAGE_PULL_POLICY = "kubernetes.container.image.pull-policy"
+
+  val FLINK_NATIVE_KUBERNETES_LABEL = "flink-native-kubernetes"
 
   // ---table---
   val KEY_FLINK_TABLE_PLANNER = "flink.table.planner"

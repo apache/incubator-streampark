@@ -17,8 +17,11 @@
 
 package org.apache.streampark.console.core.enums;
 
+import lombok.Getter;
+
 import java.io.Serializable;
 
+@Getter
 public enum EffectiveType implements Serializable {
   /** config */
   CONFIG(1),
@@ -29,9 +32,5 @@ public enum EffectiveType implements Serializable {
 
   EffectiveType(int value) {
     this.type = value;
-  }
-
-  public int getType() {
-    return type;
   }
 }

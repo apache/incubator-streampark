@@ -52,7 +52,7 @@ const stateMap = {
   [AppStateEnum.FAILED]: { color: '#f5222d', title: 'FAILED' },
   [AppStateEnum.CANCELLING]: { color: '#faad14', title: 'CANCELLING' },
   [AppStateEnum.CANCELED]: { color: '#fa8c16', title: 'CANCELED' },
-  [AppStateEnum.FINISHED]: { color: '#1890ff', title: 'FINISHED' },
+  [AppStateEnum.FINISHED]: { color: '#1677ff', title: 'FINISHED' },
   [AppStateEnum.SUSPENDED]: { color: '#722ed1', title: 'SUSPENDED' },
   [AppStateEnum.RECONCILING]: {
     color: '#eb2f96',

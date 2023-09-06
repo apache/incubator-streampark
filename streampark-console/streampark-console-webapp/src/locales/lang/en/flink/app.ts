@@ -29,8 +29,8 @@ export default {
   developmentMode: 'Development Mode',
   executionMode: 'Execution Mode',
   historyVersion: 'History Version',
-  teamResource: 'Team Resource',
-  teamResourcePlaceHolder: 'choose resource from team library',
+  resource: 'Resource',
+  resourcePlaceHolder: 'please choose resource',
   selectAppPlaceHolder: 'choose app jar',
   dependency: 'Dependency',
   appConf: 'Application Conf',
@@ -62,13 +62,15 @@ export default {
   programJar: 'Program Jar',
   dynamicProperties: 'Dynamic Properties',
   hadoopConfigTitle: 'System Hadoop Configuration',
-  dragUploadTitle: 'Click or drag jar to this area to upload',
+  dragUploadTitle: 'Click or drag jar or py to this area to upload',
   dragUploadTip:
     'Support for a single upload. You can upload a local jar here to support for current Job',
   dependencyError: 'please set flink version first.',
   status: 'Run Status',
   startTime: 'Start Time',
   endTime: 'End Time',
+  restoreModeTip:
+    'restore mode is supported since flink 1.15, usually, you do not have to set this parameter',
   release: {
     releaseTitle: 'The current release of the application is in progress.',
     releaseDesc: 'are you sure you want to force another build',

@@ -49,6 +49,7 @@ public class AlertTemplate implements Serializable {
   private Integer restartIndex;
   private Integer totalRestart;
   private boolean atAll = false;
+  private Integer allJobs;
   private Integer affectedJobs;
 
   public static AlertTemplate of(Application application, FlinkAppState appState) {
@@ -96,12 +97,13 @@ public class AlertTemplate implements Serializable {
         .setSubject(
             String.format("StreamPark Alert: %s %s", cluster.getClusterName(), clusterState))
         .setStatus(clusterState.name())
-        .setAffectedJobs(cluster.getJobs())
+        .setAllJobs(cluster.getAllJobs())
+        .setAffectedJobs(cluster.getAffectedJobs())
         .build();
   }
 
   private static class AlertTemplateBuilder {
-    private AlertTemplate alertTemplate = new AlertTemplate();
+    private final AlertTemplate alertTemplate = new AlertTemplate();
 
     public AlertTemplateBuilder setTitle(String title) {
       alertTemplate.setTitle(title);
@@ -217,8 +219,13 @@ public class AlertTemplate implements Serializable {
       return this;
     }
 
-    public AlertTemplateBuilder setAffectedJobs(Integer jobs) {
-      alertTemplate.setAffectedJobs(jobs);
+    public AlertTemplateBuilder setAllJobs(Integer allJobs) {
+      alertTemplate.setAllJobs(allJobs);
+      return this;
+    }
+
+    public AlertTemplateBuilder setAffectedJobs(Integer affectedJobs) {
+      alertTemplate.setAffectedJobs(affectedJobs);
       return this;
     }
 

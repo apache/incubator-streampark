@@ -73,6 +73,7 @@ case class SubmitRequest(
 
   lazy val appMain: String = this.developmentMode match {
     case DevelopmentMode.FLINK_SQL => ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS
+    case DevelopmentMode.PYFLINK => ConfigConst.PYTHON_DRIVER_CLASS_NAME
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
@@ -175,7 +176,7 @@ case class SubmitRequest(
   @throws[Exception]
   def checkBuildResult(): Unit = {
     executionMode match {
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION | ExecutionMode.KUBERNETES_NATIVE_APPLICATION =>
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION =>
         if (buildResult == null) {
           throw new Exception(
             s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +

@@ -25,10 +25,6 @@ import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
-import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.FlinkEnvService;
-import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineType;
 
@@ -58,14 +54,6 @@ import java.util.Optional;
 public class ApplicationBuildPipelineController {
 
   @Autowired private AppBuildPipeService appBuildPipeService;
-
-  @Autowired private ApplicationService applicationService;
-
-  @Autowired private FlinkSqlService flinkSqlService;
-
-  @Autowired private ApplicationLogService applicationLogService;
-
-  @Autowired private FlinkEnvService flinkEnvService;
 
   /**
    * Release application building pipeline.

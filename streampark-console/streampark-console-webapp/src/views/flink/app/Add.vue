@@ -143,7 +143,7 @@
     const cluster =
       unref(flinkClusters).filter((c) => {
         if (flinkClusterId) {
-          return c.id == flinkClusterId && c.clusterState === ClusterStateEnum.STARTED;
+          return c.id == flinkClusterId && c.clusterState === ClusterStateEnum.RUNNING;
         }
       })[0] || null;
     if (cluster) {
@@ -158,7 +158,7 @@
   async function handleSubmitCustomJob(values) {
     handleCluster(values);
     const params = {
-      jobType: JobTypeEnum.JAR,
+      jobType: values.jobType === 'pyflink' ?JobTypeEnum.PYFLINK : JobTypeEnum.JAR,
       projectId: values.project || null,
       module: values.module || null,
       appType: values.appType,
@@ -254,8 +254,8 @@
           }
         }
       }
-      if (formValue.jobType === 'customcode') {
-        handleSubmitCustomJob(formValue);
+      if (formValue.jobType === 'customcode' || formValue.jobType === 'pyflink') {
+          handleSubmitCustomJob(formValue);
       } else {
         handleSubmitSQL(formValue);
       }

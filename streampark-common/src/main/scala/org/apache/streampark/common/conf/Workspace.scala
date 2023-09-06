@@ -18,7 +18,7 @@ package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.enums.StorageType
 import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
-import org.apache.streampark.common.util.Utils.StringCasts
+import org.apache.streampark.common.util.ImplicitsUtils._
 
 import java.net.URI
 
@@ -66,7 +66,7 @@ case class Workspace(storageType: StorageType) {
     }
   }
 
-  private[conf] lazy val WORKSPACE: String = {
+  lazy val WORKSPACE: String = {
     storageType match {
       case StorageType.LFS =>
         val path: String = getConfigValue[String](CommonConfig.STREAMPARK_WORKSPACE_LOCAL)
@@ -101,6 +101,8 @@ case class Workspace(storageType: StorageType) {
   lazy val APP_SHIMS = s"$WORKSPACE/shims"
 
   lazy val APP_UPLOADS = s"$WORKSPACE/uploads"
+
+  lazy val APP_PYTHON_VENV = s"$WORKSPACE/python/venv.zip"
 
   lazy val APP_WORKSPACE = s"$WORKSPACE/workspace"
 

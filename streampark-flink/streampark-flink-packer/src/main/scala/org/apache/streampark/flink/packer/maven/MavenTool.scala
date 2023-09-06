@@ -43,6 +43,7 @@ import javax.annotation.{Nonnull, Nullable}
 
 import java.io.File
 import java.util
+import java.util.{List => JavaList, Set => JavaSet}
 
 import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -161,6 +162,10 @@ object MavenTool extends Logger {
     buildFatJar(mainClass, jarLibs ++ artFilePaths, outFatJarPath)
   }
 
+  @throws[Exception]
+  def resolveArtifacts(mavenArtifact: Artifact): JavaList[File] = resolveArtifacts(
+    Set(mavenArtifact))
+
   /**
    * Resolve the collectoin of artifacts, Artifacts will be download to ConfigConst.MAVEN_LOCAL_DIR
    * if necessary. notes: Only compile scope dependencies will be resolved.
@@ -171,13 +176,16 @@ object MavenTool extends Logger {
    *   jar File Object of resolved artifacts
    */
   @throws[Exception]
-  def resolveArtifacts(mavenArtifacts: Set[Artifact]): Set[File] = {
-    if (mavenArtifacts == null) Set.empty[File];
+  def resolveArtifacts(mavenArtifacts: JavaSet[Artifact]): JavaList[File] = {
+    if (mavenArtifacts == null) List.empty[File]
     else {
       val (repoSystem, session) = getMavenEndpoint()
       val artifacts = mavenArtifacts.map(
         e => {
-          new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version)
+          val artifact =
+            new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version)
+          artifact.getProperties
+          artifact
         })
       logInfo(s"start resolving dependencies: ${artifacts.mkString}")
 
@@ -201,7 +209,7 @@ object MavenTool extends Logger {
       repoSystem
         .resolveArtifacts(session, artReqs)
         .map(_.getArtifact.getFile)
-        .toSet
+        .toList
     }
   }
 
@@ -236,7 +244,7 @@ object MavenTool extends Logger {
     (repoSystem, session)
   }
 
-  class ShadeFilter extends Filter {
+  private[this] class ShadeFilter extends Filter {
     override def canFilter(jar: File): Boolean = true
 
     override def isFiltered(name: String): Boolean = {

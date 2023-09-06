@@ -51,7 +51,7 @@
       accordion: propTypes.bool.def(true),
       width: propTypes.string.def('100%'),
       collapsedWidth: propTypes.string.def('48px'),
-      indentSize: propTypes.number.def(16),
+      indentSize: propTypes.number.def(30),
       collapse: propTypes.bool.def(true),
       activeSubMenuNames: {
         type: Array as PropType<(string | number)[]>,

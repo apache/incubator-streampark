@@ -17,12 +17,13 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
+import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
 /** flink cluster identifier on kubernetes */
 case class ClusterKey(
     executeMode: FlinkK8sExecuteMode.Value,
-    namespace: String = "default",
+    namespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
     clusterId: String)
 
 object ClusterKey {

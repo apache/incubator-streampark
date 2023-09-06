@@ -160,7 +160,7 @@
 
   .big-screen:hover,
   .format-sql:hover {
-    color: #1890ff;
+    color: #1677ff;
   }
 
   .apply-pom,
@@ -186,27 +186,26 @@
   }
 
   .dependency-box {
-    margin-right: 10px;
     margin-top: 15px;
-    margin-bottom: -10px;
+    width: 100%;
     border-radius: 5px;
-    background-color: @background-color-base;
+    background-color: #e6f4ff;
+    border: 1px solid #91caff;
     display: inline-block;
+    margin-bottom: -25px;
 
     .dependency-item {
       position: relative;
       border: unset;
+      background-color: unset;
       line-height: 35px;
       padding: 0 6px;
       width: unset;
       float: left;
-      margin: 2px 4px 0;
-
       .ant-alert-close-icon {
         position: relative;
         left: 5px;
         top: 6px;
-        color: @background-color-base;
       }
     }
   }
@@ -267,8 +266,14 @@
 }
 
 [data-theme='dark'] {
-  .app_controller .icon-close {
-    color: #ffffff73;
+  .app_controller {
+    .icon-close {
+      color: #ffffff73;
+    }
+    .dependency-box {
+      background-color: #111b26;
+      border: 1px solid #153450;
+    }
   }
 }
 

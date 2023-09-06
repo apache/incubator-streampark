@@ -26,45 +26,48 @@
       <template #resetBefore> 1111 </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'resourceType'">
-          <Tag
-            class="bold-tag"
-            color="#52c41a"
-            v-if="record.resourceType == ResourceTypeEnum.FLINK_APP"
-          >
-            FLINK_APP
+          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.FLINK_APP">
+            <template #icon>
+              <img :src="flinkAppSvg" class="svg-icon" alt="Flink App" />
+            </template>
+            Flink App
           </Tag>
-          <Tag
-            class="bold-tag"
-            color="#2db7f5"
-            v-if="record.resourceType == ResourceTypeEnum.NORMAL_JAR"
-          >
-            NORMAL_JAR
+
+          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.CONNECTOR">
+            <template #icon>
+              <img :src="connectorSvg" class="svg-icon" alt="Connector" />
+            </template>
+            Connector
           </Tag>
-          <Tag
-            class="bold-tag"
-            color="#108ee9"
-            v-if="record.resourceType == ResourceTypeEnum.CONNECTOR"
-          >
-            CONNECTOR
-          </Tag>
-          <Tag class="bold-tag" color="#79f379" v-if="record.resourceType == ResourceTypeEnum.UDXF">
+
+          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.UDXF">
+            <template #icon>
+              <img :src="udxfSvg" class="svg-icon" alt="UDXF" />
+            </template>
             UDXF
           </Tag>
-          <Tag
-            class="bold-tag"
-            color="#fcaa80"
-            v-if="record.resourceType == ResourceTypeEnum.GROUP"
-          >
+
+          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.NORMAL_JAR">
+            <template #icon>
+              <img :src="normalJarSvg" class="svg-icon" alt="Normal jar" />
+            </template>
+            Normal Jar
+          </Tag>
+
+          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.GROUP">
+            <template #icon>
+              <img :src="groupSvg" class="svg-icon" alt="GROUP" />
+            </template>
             GROUP
           </Tag>
         </template>
         <template v-if="column.dataIndex === 'engineType'">
-          <Tag class="bold-tag" color="#e65270" v-if="record.engineType == EngineTypeEnum.FLINK">
-            FLINK
-          </Tag>
-          <Tag class="bold-tag" color="#f5be07" v-if="record.engineType == EngineTypeEnum.SPARK">
-            SPARK
-          </Tag>
+          <span v-if="record.engineType === EngineTypeEnum.FLINK">
+            <SvgIcon name="flink" /> Apache Flink
+          </span>
+          <span v-if="record.engineType === EngineTypeEnum.SPARK">
+            <SvgIcon name="spark" /> Apache Spark
+          </span>
         </template>
         <template v-if="column.dataIndex === 'action'">
           <TableAction
@@ -115,6 +118,13 @@
   import { fetchResourceDelete, fetchResourceList, fetchTeamResource } from '/@/api/flink/resource';
   import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
   import { Tag } from 'ant-design-vue';
+  import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
+
+  import flinkAppSvg from '/@/assets/icons/flink2.svg';
+  import connectorSvg from '/@/assets/icons/connector.svg';
+  import udxfSvg from '/@/assets/icons/fx.svg';
+  import normalJarSvg from '/@/assets/icons/jar.svg';
+  import groupSvg from '/@/assets/icons/group.svg';
 
   const teamResource = ref<Array<any>>([]);
   const [registerDrawer, { openDrawer }] = useDrawer();
@@ -176,7 +186,7 @@
     });
     if (data.status === 'success') {
       createMessage.success(t('flink.resource.deleteResource') + t('flink.resource.success'));
-      reload();
+      await reload();
       updateTeamResource();
     } else {
       createMessage.error(t('flink.resource.deleteResource') + t('flink.resource.fail'));
@@ -202,3 +212,17 @@
     updateTeamResource();
   });
 </script>
+
+<style lang="less" scoped>
+  .svg-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+
+    .svg-connector {
+      svg path {
+        fill: #fff0f6 !important;
+      }
+    }
+  }
+</style>

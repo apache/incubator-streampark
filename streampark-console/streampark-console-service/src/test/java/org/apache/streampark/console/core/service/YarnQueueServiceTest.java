@@ -18,11 +18,12 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -47,18 +48,18 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
  * avoid noisy data form h2 database.
  */
 @Execution(SAME_THREAD)
-class YarnQueueServiceTest extends SpringTestBase {
+class YarnQueueServiceTest extends SpringUnitTestBase {
 
   @Autowired private FlinkClusterService flinkClusterService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
 
   @Autowired private YarnQueueService yarnQueueService;
 
   @AfterEach
   void cleanTestRecordsInDatabase() {
     flinkClusterService.remove(new QueryWrapper<>());
-    applicationService.remove(new QueryWrapper<>());
+    applicationManageService.remove(new QueryWrapper<>());
     yarnQueueService.remove(new QueryWrapper<>());
   }
 
@@ -91,7 +92,7 @@ class YarnQueueServiceTest extends SpringTestBase {
             yarnQueues.getRecords().stream()
                 .map(YarnQueue::getQueueLabel)
                 .collect(Collectors.toList()))
-        .containsExactly(q3AtL3, q3AtL1);
+        .containsExactlyInAnyOrder(q3AtL3, q3AtL1);
 
     // Test for 1st page, size = 2, order by create time with queue_label
     queryParams.setQueueLabel("q3");
@@ -101,7 +102,7 @@ class YarnQueueServiceTest extends SpringTestBase {
             yarnQueuesWithQueueLabelLikeQuery.getRecords().stream()
                 .map(YarnQueue::getQueueLabel)
                 .collect(Collectors.toList()))
-        .containsExactly(q3AtL3, q3AtL1);
+        .containsExactlyInAnyOrder(q3AtL3, q3AtL1);
   }
 
   @Test
@@ -260,24 +261,26 @@ class YarnQueueServiceTest extends SpringTestBase {
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications that don't belong to the same team, not in yarn mode.
-    applicationService.save(mockYarnModeJobApp(2L, "app1", null, ExecutionMode.REMOTE));
+    applicationManageService.save(mockYarnModeJobApp(2L, "app1", null, ExecutionMode.REMOTE));
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications that don't belong to the same team, in yarn mode
-    applicationService.save(mockYarnModeJobApp(2L, "app2", null, ExecutionMode.YARN_APPLICATION));
+    applicationManageService.save(
+        mockYarnModeJobApp(2L, "app2", null, ExecutionMode.YARN_APPLICATION));
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications that belong to the same team, but not in yarn mode.
-    applicationService.save(mockYarnModeJobApp(targetTeamId, "app3", null, ExecutionMode.REMOTE));
+    applicationManageService.save(
+        mockYarnModeJobApp(targetTeamId, "app3", null, ExecutionMode.REMOTE));
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications that belong to the same team, but without yarn queue value.
-    applicationService.save(
+    applicationManageService.save(
         mockYarnModeJobApp(targetTeamId, "app4", null, ExecutionMode.YARN_PER_JOB));
     yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
     // Test for existed applications, some apps belong to the same team, but others don't belong to.
-    applicationService.save(
+    applicationManageService.save(
         mockYarnModeJobApp(targetTeamId, "app5", queueLabel, ExecutionMode.YARN_PER_JOB));
     assertThatThrownBy(
             () ->

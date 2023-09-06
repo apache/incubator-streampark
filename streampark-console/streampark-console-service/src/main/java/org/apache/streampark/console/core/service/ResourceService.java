@@ -18,11 +18,14 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Resource;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ResourceService extends IService<Resource> {
@@ -49,7 +52,7 @@ public interface ResourceService extends IService<Resource> {
    *
    * @param resource resource
    */
-  void addResource(Resource resource);
+  void addResource(Resource resource) throws Exception;
 
   /**
    * @param teamId team id
@@ -87,4 +90,8 @@ public interface ResourceService extends IService<Resource> {
    * @param targetUserId target user id
    */
   void changeOwnership(Long userId, Long targetUserId);
+
+  String upload(MultipartFile file) throws IOException;
+
+  RestResponse checkResource(Resource resource) throws Exception;
 }

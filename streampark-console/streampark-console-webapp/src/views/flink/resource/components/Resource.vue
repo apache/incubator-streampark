@@ -28,8 +28,10 @@
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
   import { Tabs, Alert, Tag, Space } from 'ant-design-vue';
-  import { fetchUpload } from '/@/api/flink/app/app';
+  import { fetchUpload } from '/@/api/flink/resource';
+
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
+  import { ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
 
   interface DependencyType {
     artifactId: string;
@@ -136,9 +138,8 @@
       loading.value = true;
       const formData = new FormData();
       formData.append('file', data.file);
-      await fetchUpload(formData);
       dependency.jar = {};
-      dependency.jar[data.file.name] = data.file.name;
+      dependency.jar[data.file.name] = await fetchUpload(formData);
       handleUpdateDependency();
     } catch (error) {
       console.error(error);
@@ -155,15 +156,15 @@
       deps.push(dependency.pom[v]);
     });
     Object.keys(dependency.jar).forEach((v: string) => {
-      jars.push(v);
+      jars.push(v + ':' + dependency.jar[v]);
     });
-
     dependencyRecords.value = deps;
     uploadJars.value = jars;
   }
 
   function handleRemoveJar(jar: string) {
-    delete dependency.jar[jar];
+    console.log(jar);
+    delete dependency.jar[jar.split(':')[0]];
     handleUpdateDependency();
   }
 
@@ -211,7 +212,7 @@
 </script>
 
 <template>
-  <template v-if="props.formModel.resourceType == 'FLINK_APP'">
+  <template v-if="props.formModel.resourceType === ResourceTypeEnum.FLINK_APP">
     <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
   </template>
   <template v-else>
@@ -237,7 +238,7 @@
       <template #message>
         <Space>
           <Tag class="tag-dependency" color="#108ee9">JAR</Tag>
-          {{ jar }}
+          {{ jar.split(':')[0] }}
           <Icon
             icon="ant-design:close-outlined"
             class="icon-close cursor-pointer"
@@ -251,7 +252,9 @@
 </template>
 
 <style lang="less">
-  @import url('/@/views/flink/app/styles/Add.less');
+  .dependency-box {
+    margin-top: 10px;
+  }
   .apply-pom {
     z-index: 99;
     position: absolute;

@@ -34,6 +34,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,11 +53,7 @@ public class CommonServiceImpl implements CommonService {
 
   @Override
   public Long getUserId() {
-    User user = getCurrentUser();
-    if (user != null) {
-      return user.getUserId();
-    }
-    return null;
+    return Optional.ofNullable(getCurrentUser()).map(User::getUserId).orElse(null);
   }
 
   @Override

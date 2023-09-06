@@ -29,9 +29,12 @@ import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
+import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Team;
@@ -47,7 +50,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +67,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -77,7 +78,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Autowired private MenuService menuService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private VariableService variableService;
 
@@ -147,6 +150,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   public void updatePassword(User userParam) {
     User user = getById(userParam.getUserId());
     ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
+    ApiAlertException.throwIfFalse(
+        user.getLoginType() == LoginType.PASSWORD,
+        "Can only update password for user who sign in with PASSWORD");
 
     String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
     ApiAlertException.throwIfFalse(
@@ -157,16 +163,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
     user.setSalt(salt);
     user.setPassword(password);
-    this.baseMapper.updateById(user);
-  }
-
-  @Override
-  @Transactional(rollbackFor = Exception.class)
-  public void updateSaltPassword(User userParam) {
-    User user = getById(userParam.getUserId());
-    ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
-    user.setSalt(userParam.getSalt());
-    user.setPassword(userParam.getPassword());
     this.baseMapper.updateById(user);
   }
 
@@ -330,18 +326,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public RestResponse getLoginUserInfo(User user) {
     if (user == null) {
-      return RestResponse.success().put("code", 0);
+      return RestResponse.success().put(RestResponse.CODE_KEY, 0);
     }
 
     if (User.STATUS_LOCK.equals(user.getStatus())) {
-      return RestResponse.success().put("code", 1);
+      return RestResponse.success().put(RestResponse.CODE_KEY, 1);
     }
     // set team
     fillInTeam(user);
 
     // no team.
     if (user.getLastTeamId() == null) {
-      return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
+      return RestResponse.success()
+          .data(user.getUserId())
+          .put(RestResponse.CODE_KEY, ResponseCode.CODE_FORBIDDEN);
     }
 
     updateLoginTime(user.getUsername());

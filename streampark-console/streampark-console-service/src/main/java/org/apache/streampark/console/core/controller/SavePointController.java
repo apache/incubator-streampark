@@ -23,8 +23,8 @@ import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -50,7 +50,7 @@ import javax.annotation.Nullable;
 @RequestMapping("flink/savepoint")
 public class SavePointController {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
 
   @Autowired private SavePointService savePointService;
 
@@ -73,7 +73,7 @@ public class SavePointController {
   @RequiresPermissions("savepoint:delete")
   public RestResponse delete(Long id) throws InternalException {
     SavePoint savePoint = savePointService.getById(id);
-    Application application = applicationService.getById(savePoint.getAppId());
+    Application application = applicationManageService.getById(savePoint.getAppId());
     Boolean deleted = savePointService.delete(id, application);
     return RestResponse.success(deleted);
   }
@@ -91,13 +91,18 @@ public class SavePointController {
     @Parameter(
         name = "savepointPath",
         description = "specified savepoint path",
-        schema = @Schema(implementation = String.class))
+        schema = @Schema(implementation = String.class)),
+    @Parameter(
+        name = "nativeFormat",
+        description = "use native format",
+        schema = @Schema(implementation = Boolean.class))
   })
   @ApiAccess
   @PostMapping("trigger")
   @RequiresPermissions("savepoint:trigger")
-  public RestResponse trigger(Long appId, @Nullable String savepointPath) {
-    savePointService.trigger(appId, savepointPath);
+  public RestResponse trigger(
+      Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
+    savePointService.trigger(appId, savepointPath, nativeFormat);
     return RestResponse.success(true);
   }
 }

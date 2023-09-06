@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.streampark.common.util.ImplicitsUtils._
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 
@@ -42,26 +43,26 @@ trait YarnClientTrait extends FlinkClientTrait {
       request: R,
       flinkConf: Configuration,
       actionFunc: (JobID, ClusterClient[_]) => O): O = {
-    val jobID = getJobID(request.jobId)
-    val clusterClient = {
-      flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
-      val clusterClientFactory = new YarnClusterClientFactory
-      val applicationId = clusterClientFactory.getClusterId(flinkConf)
-      if (applicationId == null) {
-        throw new FlinkException(
-          "[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
-      }
-      val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
-      clusterDescriptor.retrieve(applicationId).getClusterClient
+
+    flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
+    val clusterClientFactory = new YarnClusterClientFactory
+    val applicationId = clusterClientFactory.getClusterId(flinkConf)
+    if (applicationId == null) {
+      throw new FlinkException(
+        "[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
     }
-    Try {
-      actionFunc(jobID, clusterClient)
-    }.recover {
-      case e =>
-        throw new FlinkException(
-          s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
-            s"detail: ${Utils.stringifyException(e)}");
-    }.get
+    val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
+    clusterDescriptor
+      .retrieve(applicationId)
+      .getClusterClient
+      .autoClose(
+        client =>
+          Try(actionFunc(getJobID(request.jobId), client)).recover {
+            case e =>
+              throw new FlinkException(
+                s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
+                  s"detail: ${Utils.stringifyException(e)}");
+          }.get)
   }
 
   override def doTriggerSavepoint(

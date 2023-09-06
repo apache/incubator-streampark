@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -68,7 +68,7 @@ public class AlertConfig implements Serializable {
   /** modify time */
   private Date modifyTime;
 
-  public static AlertConfig of(AlertConfigWithParams params) {
+  public static AlertConfig of(AlertConfigParams params) {
     if (params == null) {
       return null;
     }

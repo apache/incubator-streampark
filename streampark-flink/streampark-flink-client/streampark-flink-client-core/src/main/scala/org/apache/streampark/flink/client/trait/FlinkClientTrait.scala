@@ -17,10 +17,11 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, RestoreMode}
-import org.apache.streampark.common.util.{DeflaterUtils, Logger}
+import org.apache.streampark.common.fs.FsOperator
+import org.apache.streampark.common.util.{DeflaterUtils, EnvUtils, Logger}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -35,11 +36,11 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
+import org.apache.flink.python.PythonOptions
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
-import java.io.File
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.annotation.tailrec
@@ -52,11 +53,19 @@ import scala.util.{Failure, Success, Try}
 
 trait FlinkClientTrait extends Logger {
 
-  private[client] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
-  private[client] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")
-  private[client] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF("--")
-  private[client] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME("--")
-  private[client] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM("--")
+  private[client] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF(PARAM_PREFIX)
+  private[client] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL(PARAM_PREFIX)
+  private[client] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF(PARAM_PREFIX)
+  private[client] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME(PARAM_PREFIX)
+  private[client] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM(PARAM_PREFIX)
+
+  private[this] lazy val javaEnvOpts = List(
+    CoreOptions.FLINK_JVM_OPTIONS,
+    CoreOptions.FLINK_JM_JVM_OPTIONS,
+    CoreOptions.FLINK_HS_JVM_OPTIONS,
+    CoreOptions.FLINK_TM_JVM_OPTIONS,
+    CoreOptions.FLINK_CLI_JVM_OPTIONS
+  )
 
   @throws[Exception]
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
@@ -81,13 +90,26 @@ trait FlinkClientTrait extends Logger {
          |""".stripMargin)
 
     val (commandLine, flinkConfig) = getCommandLineAndFlinkConfig(submitRequest)
-    if (submitRequest.userJarFile != null) {
-      val uri = PackagedProgramUtils.resolveURI(submitRequest.userJarFile.getAbsolutePath)
-      val programOptions = ProgramOptions.create(commandLine)
-      val executionParameters = ExecutionConfigAccessor.fromProgramOptions(
-        programOptions,
-        Collections.singletonList(uri.toString))
-      executionParameters.applyToConfiguration(flinkConfig)
+
+    submitRequest.developmentMode match {
+      case DevelopmentMode.PYFLINK =>
+        val flinkOptPath: String = System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR)
+        if (StringUtils.isBlank(flinkOptPath)) {
+          logWarn(s"Get environment variable ${ConfigConstants.ENV_FLINK_OPT_DIR} fail")
+          val flinkHome = submitRequest.flinkVersion.flinkHome
+          EnvUtils.setEnv(ConfigConstants.ENV_FLINK_OPT_DIR, s"$flinkHome/opt");
+          logInfo(
+            s"Set temporary environment variables ${ConfigConstants.ENV_FLINK_OPT_DIR} = $flinkHome/opt")
+        }
+      case _ =>
+        if (submitRequest.userJarFile != null) {
+          val uri = PackagedProgramUtils.resolveURI(submitRequest.userJarFile.getAbsolutePath)
+          val programOptions = ProgramOptions.create(commandLine)
+          val executionParameters = ExecutionConfigAccessor.fromProgramOptions(
+            programOptions,
+            Collections.singletonList(uri.toString))
+          executionParameters.applyToConfiguration(flinkConfig)
+        }
     }
 
     // set common parameter
@@ -124,35 +146,19 @@ trait FlinkClientTrait extends Logger {
     }
 
     // set JVMOptions..
-    setJvmOptions(submitRequest, flinkConfig)
+    if (MapUtils.isNotEmpty(submitRequest.properties)) {
+      submitRequest.properties.foreach(
+        x =>
+          javaEnvOpts.find(_.key == x._1.trim) match {
+            case Some(p) => flinkConfig.set(p, x._2.toString)
+            case _ =>
+          })
+    }
 
     setConfig(submitRequest, flinkConfig)
 
     doSubmit(submitRequest, flinkConfig)
 
-  }
-
-  private[this] def setJvmOptions(
-      submitRequest: SubmitRequest,
-      flinkConfig: Configuration): Unit = {
-    if (MapUtils.isNotEmpty(submitRequest.properties)) {
-      submitRequest.properties.foreach(
-        x => {
-          val k = x._1.trim
-          val v = x._2.toString
-          if (k == CoreOptions.FLINK_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_JM_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_JM_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_HS_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_HS_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_TM_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_TM_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_CLI_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_CLI_JVM_OPTIONS, v)
-          }
-        })
-    }
   }
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
@@ -166,6 +172,7 @@ trait FlinkClientTrait extends Logger {
          |     flinkVersion   : ${savepointRequest.flinkVersion.version}
          |     clusterId      : ${savepointRequest.clusterId}
          |     savePointPath  : ${savepointRequest.savepointPath}
+         |     nativeFormat   : ${savepointRequest.nativeFormat}
          |     k8sNamespace   : ${savepointRequest.kubernetesNamespace}
          |     appId          : ${savepointRequest.clusterId}
          |     jobId          : ${savepointRequest.jobId}
@@ -186,6 +193,7 @@ trait FlinkClientTrait extends Logger {
          |     withSavePoint     : ${cancelRequest.withSavepoint}
          |     savePointPath     : ${cancelRequest.savepointPath}
          |     withDrain         : ${cancelRequest.withDrain}
+         |     nativeFormat      : ${cancelRequest.nativeFormat}
          |     k8sNamespace      : ${cancelRequest.kubernetesNamespace}
          |     appId             : ${cancelRequest.clusterId}
          |     jobId             : ${cancelRequest.jobId}
@@ -206,38 +214,50 @@ trait FlinkClientTrait extends Logger {
   @throws[Exception]
   def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse
 
-  def trySubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File)(
-      restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse)(
-      jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse): SubmitResponse = {
+  def trySubmit(submitRequest: SubmitRequest, flinkConfig: Configuration)(
+      restApiFunc: (SubmitRequest, Configuration) => SubmitResponse)(
+      jobGraphFunc: (SubmitRequest, Configuration) => SubmitResponse): SubmitResponse = {
     // Prioritize using Rest API submit while using JobGraph submit plan as backup
     Try {
       logInfo(s"[flink-submit] Attempting to submit in Rest API Submit Plan.")
-      restApiFunc(submitRequest, flinkConfig, jarFile)
+      restApiFunc(submitRequest, flinkConfig)
     }.getOrElse {
       logWarn(s"[flink-submit] RestAPI Submit Plan failed,try JobGraph Submit Plan now.")
-      Try(jobGraphFunc(submitRequest, flinkConfig, jarFile)) match {
+      Try(jobGraphFunc(submitRequest, flinkConfig)) match {
         case Success(r) => r
         case Failure(e) =>
           logError(s"[flink-submit] Both Rest API Submit Plan and JobGraph Submit Plan failed.")
           throw e
       }
-
     }
   }
 
   private[client] def getJobGraph(
-      flinkConfig: Configuration,
       submitRequest: SubmitRequest,
-      jarFile: File): (PackagedProgram, JobGraph) = {
+      flinkConfig: Configuration): (PackagedProgram, JobGraph) = {
+    if (submitRequest.developmentMode == DevelopmentMode.PYFLINK) {
+      val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
+      if (!FsOperator.lfs.exists(pythonVenv)) {
+        throw new RuntimeException(s"$pythonVenv File does not exist")
+      }
+      flinkConfig
+        // python.archives
+        .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
+        // python.client.executable
+        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+        // python.executable
+        .safeSet(PythonOptions.PYTHON_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+    }
+
     val packageProgram = PackagedProgram.newBuilder
-      .setJarFile(jarFile)
-      .setEntryPointClassName(
-        flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
-      .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
       .setArguments(
         flinkConfig
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
           .orElse(Lists.newArrayList()): _*)
+      .setEntryPointClassName(
+        flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get()
+      )
+      .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
       .build()
 
     val jobGraph = PackagedProgramUtils.createJobGraph(
@@ -310,7 +330,6 @@ trait FlinkClientTrait extends Logger {
       submitRequest.appOption
         .filter(
           x => {
-            // 验证参数是否合法...
             val verify = commandLineOptions.hasOption(x._1)
             if (!verify) logWarn(s"param:${x._1} is error,skip it.")
             verify
@@ -359,8 +378,6 @@ trait FlinkClientTrait extends Logger {
 
     logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
 
-    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
-
     val commandLine = FlinkRunOption.parse(commandLineOptions, cliArgs, true)
 
     val activeCommandLine = validateAndGetActiveCommandLine(
@@ -407,78 +424,95 @@ trait FlinkClientTrait extends Logger {
   }
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
-
     val programArgs = new ArrayBuffer[String]()
+    val args = submitRequest.args
 
-    if (StringUtils.isNotEmpty(submitRequest.args)) {
-      val multiLineChar = "\"\"\""
-      val array = submitRequest.args.split("\\s+")
-      if (!array.exists(_.startsWith(multiLineChar))) {
+    if (StringUtils.isNotEmpty(args)) {
+      val multiChar = "\""
+      val array = args.split("\\s+")
+      if (!array.exists(_.startsWith(multiChar))) {
         array.foreach(programArgs +=)
       } else {
         val argsArray = new ArrayBuffer[String]()
         val tempBuffer = new ArrayBuffer[String]()
 
-        @tailrec def processElement(index: Int, multiLine: Boolean): Unit = {
+        @tailrec
+        def processElement(index: Int, multi: Boolean): Unit = {
+
           if (index == array.length) {
             if (tempBuffer.nonEmpty) {
               argsArray += tempBuffer.mkString(" ")
             }
             return
           }
-          val next = index + 1
-          val elem = array(index)
 
-          if (elem.trim.nonEmpty) {
-            if (!multiLine) {
-              if (elem.startsWith(multiLineChar)) {
-                tempBuffer += elem.drop(3)
-                processElement(next, multiLine = true)
-              } else {
-                argsArray += elem
-                processElement(next, multiLine = false)
-              }
-            } else {
-              if (elem.endsWith(multiLineChar)) {
-                tempBuffer += elem.dropRight(3)
+          val next = index + 1
+          val elem = array(index).trim
+
+          if (elem.isEmpty) {
+            processElement(next, multi = false)
+          } else {
+            if (multi) {
+              if (elem.endsWith(multiChar)) {
+                tempBuffer += elem.dropRight(1)
                 argsArray += tempBuffer.mkString(" ")
                 tempBuffer.clear()
-                processElement(next, multiLine = false)
+                processElement(next, multi = false)
               } else {
                 tempBuffer += elem
-                processElement(next, multiLine)
+                processElement(next, multi)
+              }
+            } else {
+              val until = if (elem.endsWith(multiChar)) 1 else 0
+              if (elem.startsWith(multiChar)) {
+                tempBuffer += elem.drop(1).dropRight(until)
+                processElement(next, multi = true)
+              } else {
+                argsArray += elem.dropRight(until)
+                processElement(next, multi = false)
               }
             }
-          } else {
-            tempBuffer += elem
-            processElement(next, multiLine = false)
           }
         }
 
-        processElement(0, multiLine = false)
-        argsArray.foreach(x => programArgs += x.trim)
+        processElement(0, multi = false)
+        argsArray.foreach(x => programArgs += x)
       }
     }
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
-      programArgs += PARAM_KEY_FLINK_CONF
-      programArgs += submitRequest.flinkYaml
-      programArgs += PARAM_KEY_APP_NAME
-      programArgs += DeflaterUtils.zipString(submitRequest.effectiveAppName)
-      programArgs += PARAM_KEY_FLINK_PARALLELISM
-      programArgs += getParallelism(submitRequest).toString
+
+      programArgs += PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml
+      programArgs += PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
+      programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
+
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINK_SQL =>
-          programArgs += PARAM_KEY_FLINK_SQL
-          programArgs += submitRequest.flinkSQL
+          programArgs += PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
-            programArgs += PARAM_KEY_APP_CONF
-            programArgs += submitRequest.appConf
+            programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
           }
         case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
-          programArgs += PARAM_KEY_APP_CONF
-          programArgs += submitRequest.appConf
+          programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
       }
+
+    }
+
+    // execution.runtime-mode
+    if (submitRequest.properties.nonEmpty) {
+      if (submitRequest.properties.containsKey(ExecutionOptions.RUNTIME_MODE.key())) {
+        programArgs += s"--${ExecutionOptions.RUNTIME_MODE.key()}"
+        programArgs += submitRequest.properties.get(ExecutionOptions.RUNTIME_MODE.key()).toString
+      }
+    }
+
+    if (
+      submitRequest.developmentMode == DevelopmentMode.PYFLINK && !submitRequest.executionMode
+        .equals(ExecutionMode.YARN_APPLICATION)
+    ) {
+      // python file
+      programArgs.add("-py")
+      programArgs.add(submitRequest.userJarFile.getAbsolutePath)
     }
     programArgs.toList.asJava
   }
@@ -489,8 +523,6 @@ trait FlinkClientTrait extends Logger {
       commandLine: CommandLine): Configuration = {
 
     require(activeCustomCommandLine != null, "activeCustomCommandLine must not be null.")
-    val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
-    val customConfiguration = new Configuration(executorConfig)
     val configuration = new Configuration()
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome)
     flinkDefaultConfiguration.keySet.foreach(
@@ -500,7 +532,7 @@ trait FlinkClientTrait extends Logger {
           case _ =>
         }
       })
-    configuration.addAll(customConfiguration)
+    configuration.addAll(activeCustomCommandLine.toConfiguration(commandLine))
     configuration
   }
 
@@ -530,11 +562,15 @@ trait FlinkClientTrait extends Logger {
         null
       case (true, false) =>
         clientWrapper
-          .cancelWithSavepoint(jobID, savePointDir)
+          .cancelWithSavepoint(jobID, savePointDir, cancelRequest.nativeFormat)
           .get()
       case (_, _) =>
         clientWrapper
-          .stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir)
+          .stopWithSavepoint(
+            jobID,
+            cancelRequest.withDrain,
+            savePointDir,
+            cancelRequest.nativeFormat)
           .get()
     }
   }
@@ -572,7 +608,7 @@ trait FlinkClientTrait extends Logger {
       client: ClusterClient[_]): String = {
     val savepointPath = tryGetSavepointPathIfNeed(savepointRequest)
     val clientWrapper = new FlinkClusterClient(client)
-    clientWrapper.triggerSavepoint(jobID, savepointPath).get()
+    clientWrapper.triggerSavepoint(jobID, savepointPath, savepointRequest.nativeFormat).get()
   }
 
 }

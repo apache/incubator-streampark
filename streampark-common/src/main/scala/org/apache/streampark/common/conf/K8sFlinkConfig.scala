@@ -17,7 +17,8 @@
 
 package org.apache.streampark.common.conf
 
-/** Flink kubernetes Configuration */
+/** Flink kubernetes Configuration for v1 version */
+@deprecated("see: org.apache.streampark.flink.kubernetes.v2.Config")
 object K8sFlinkConfig {
 
   val jobStatusTrackTaskTimeoutSec: InternalOption = InternalOption(
@@ -53,6 +54,18 @@ object K8sFlinkConfig {
     defaultValue = 60,
     classType = classOf[java.lang.Integer],
     description = "retained tracking time for SILENT state flink tasks"
+  )
+
+  /**
+   * If an ingress controller is specified in the configuration, the ingress class
+   * kubernetes.io/ingress.class must be specified when creating the ingress, since there are often
+   * multiple ingress controllers in a production environment.
+   */
+  val ingressClass: InternalOption = InternalOption(
+    key = "streampark.flink-k8s.ingress.class",
+    defaultValue = "streampark",
+    classType = classOf[java.lang.String],
+    description = "Direct ingress to the ingress controller."
   )
 
   /** kubernetes default namespace */

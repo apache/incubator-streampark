@@ -30,17 +30,17 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
 
   Boolean delete(Long id) throws InternalException;
 
-  void backup(Application application, FlinkSql flinkSql);
+  void backup(Application appParam, FlinkSql flinkSqlParam);
 
-  IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request);
+  IPage<ApplicationBackUp> page(ApplicationBackUp bakParam, RestRequest request);
 
-  void rollback(ApplicationBackUp backUp);
+  void rollback(ApplicationBackUp bakParam);
 
-  void revoke(Application application);
+  void revoke(Application appParam);
 
-  void removeApp(Application application);
+  void removeApp(Application appParam);
 
-  void rollbackFlinkSql(Application application, FlinkSql sql);
+  void rollbackFlinkSql(Application appParam, FlinkSql flinkSqlParam);
 
   boolean isFlinkSqlBacked(Long appId, Long sqlId);
 }

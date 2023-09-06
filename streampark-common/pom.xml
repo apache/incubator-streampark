@@ -115,6 +115,7 @@
             <optional>true</optional>
         </dependency>
 
+
         <!--logback -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
@@ -126,6 +127,33 @@
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-shaded-jackson</artifactId>
             <version>${streampark.shaded.version}</version>
+        </dependency>
+
+
+        <!-- ZIO -->
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-logging_${scala.binary.version}</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-streams_${scala.binary.version}</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.zio</groupId>
+            <artifactId>zio-concurrent_${scala.binary.version}</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- pprint -->
+        <dependency>
+            <groupId>com.lihaoyi</groupId>
+            <artifactId>pprint_${scala.binary.version}</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
@@ -158,6 +186,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.beachape:*</include>
+                                    <include>com.lihaoyi:*</include>
                                     <include>io.netty:netty-resolver</include>
                                 </includes>
                             </artifactSet>

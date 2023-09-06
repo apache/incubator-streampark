@@ -18,7 +18,7 @@
 package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
-import org.apache.streampark.common.util.Utils.StringCasts
+import org.apache.streampark.common.util.ImplicitsUtils._
 
 import javax.annotation.{Nonnull, Nullable}
 

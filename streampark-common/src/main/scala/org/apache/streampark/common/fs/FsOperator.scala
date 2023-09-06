@@ -41,6 +41,12 @@ abstract class FsOperator {
 
   def mkdirs(path: String): Unit
 
+  def mkdirsIfNotExists(path: String): Unit = {
+    if (!exists(path)) {
+      mkdirs(path)
+    }
+  }
+
   def delete(path: String): Unit
 
   def mkCleanDirs(path: String): Unit

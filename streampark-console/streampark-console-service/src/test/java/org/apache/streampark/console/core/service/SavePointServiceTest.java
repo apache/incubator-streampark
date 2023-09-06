@@ -21,13 +21,14 @@ import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.Effective;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.ConfigFileType;
 import org.apache.streampark.console.core.enums.EffectiveType;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.SavePointServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -46,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * org.apache.streampark.console.core.service.impl.SavePointServiceImpl} of {@link
  * SavePointService}.
  */
-class SavePointServiceTest extends SpringTestBase {
+class SavePointServiceTest extends SpringUnitTestBase {
 
   @Autowired private SavePointService savePointService;
 
@@ -56,7 +57,7 @@ class SavePointServiceTest extends SpringTestBase {
 
   @Autowired private FlinkEnvService flinkEnvService;
   @Autowired private FlinkClusterService flinkClusterService;
-  @Autowired ApplicationService applicationService;
+  @Autowired ApplicationManageService applicationManageService;
 
   @AfterEach
   void cleanTestRecordsInDatabase() {
@@ -65,7 +66,7 @@ class SavePointServiceTest extends SpringTestBase {
     effectiveService.remove(new QueryWrapper<>());
     flinkEnvService.remove(new QueryWrapper<>());
     flinkClusterService.remove(new QueryWrapper<>());
-    applicationService.remove(new QueryWrapper<>());
+    applicationManageService.remove(new QueryWrapper<>());
   }
 
   /**
@@ -149,7 +150,7 @@ class SavePointServiceTest extends SpringTestBase {
     application.setTeamId(teamId);
     application.setVersionId(idOfFlinkEnv);
     application.setExecutionMode(ExecutionMode.YARN_APPLICATION.getMode());
-    applicationService.save(application);
+    applicationManageService.save(application);
 
     FlinkEnv flinkEnv = new FlinkEnv();
     flinkEnv.setFlinkName("mockFlinkName");

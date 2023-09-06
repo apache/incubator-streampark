@@ -20,13 +20,15 @@ package org.apache.streampark.flink.packer.pipeline.impl
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.fs.{FsOperator, HdfsOperator, LfsOperator}
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.ImplicitsUtils._
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 
 import org.apache.commons.codec.digest.DigestUtils
 
 import java.io.{File, FileInputStream, IOException}
+
+import scala.collection.convert.ImplicitConversions._
 
 /** Building pipeline for flink yarn application mode */
 class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildRequest)
@@ -59,15 +61,15 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
           case DevelopmentMode.FLINK_SQL =>
             val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
             mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
-          case _ => Set[String]()
+          case _ => List[String]()
         }
       }.getOrElse(throw getError.exception)
 
     execStep(3) {
       mavenJars.foreach(
         jar => {
-          uploadToHdfs(FsOperator.lfs, jar, request.localWorkspace)
-          uploadToHdfs(FsOperator.hdfs, jar, request.yarnProvidedPath)
+          uploadJarToHdfsOrLfs(FsOperator.lfs, jar, request.localWorkspace)
+          uploadJarToHdfsOrLfs(FsOperator.hdfs, jar, request.yarnProvidedPath)
         })
     }.getOrElse(throw getError.exception)
 
@@ -75,7 +77,10 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
   }
 
   @throws[IOException]
-  private[this] def uploadToHdfs(fsOperator: FsOperator, origin: String, target: String): Unit = {
+  private[this] def uploadJarToHdfsOrLfs(
+      fsOperator: FsOperator,
+      origin: String,
+      target: String): Unit = {
     val originFile = new File(origin)
     if (!fsOperator.exists(target)) {
       fsOperator.mkdirs(target)
@@ -88,7 +93,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
         case FsOperator.hdfs =>
           val uploadFile = s"${Workspace.remote.APP_UPLOADS}/${originFile.getName}"
           if (fsOperator.exists(uploadFile)) {
-            Utils.using(new FileInputStream(originFile))(
+            new FileInputStream(originFile).autoClose(
               inputStream => {
                 if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadFile)) {
                   fsOperator.upload(originFile.getAbsolutePath, uploadFile)

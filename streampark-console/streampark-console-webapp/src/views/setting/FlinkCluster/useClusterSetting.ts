@@ -27,7 +27,7 @@ import {
   renderYarnQueue,
 } from '../../flink/app/hooks/useFlinkRender';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
-import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
+import { fetchListFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 import { FormSchema } from '/@/components/Table';
 import optionData from '../../flink/app/data/option';
 import {
@@ -38,6 +38,8 @@ import {
 import { handleFormValue } from '../../flink/app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
+import { fetchAlertSetting } from '/@/api/flink/setting/alert';
 
 export const useClusterSetting = () => {
   const { createMessage } = useMessage();
@@ -45,6 +47,7 @@ export const useClusterSetting = () => {
 
   const submitLoading = ref(false);
   const flinkEnvs = ref<any[]>([]);
+  const alerts = ref<AlertSetting[]>([]);
   const historyRecord = reactive<{
     k8sNamespace: string[];
     k8sSessionClusterId: string[];
@@ -155,6 +158,19 @@ export const useClusterSetting = () => {
         component: 'Input',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         render: (renderCallbackParams) => renderYarnQueue(renderCallbackParams),
+      },
+      {
+        field: 'alertId',
+        label: t('flink.app.faultAlertTemplate'),
+        component: 'Select',
+        componentProps: {
+          placeholder: t('flink.app.addAppTips.alertTemplatePlaceholder'),
+          options: unref(alerts),
+          fieldNames: { label: 'alertName', value: 'id', options: 'options' },
+        },
+        ifShow: ({ values }) =>
+          values.executionMode == ExecModeEnum.YARN_SESSION ||
+          values.executionMode == ExecModeEnum.REMOTE,
       },
       {
         field: 'clusterId',
@@ -332,6 +348,7 @@ export const useClusterSetting = () => {
       executionMode: values.executionMode,
       versionId: values.versionId,
       description: values.description,
+      alertId: values.alertId,
     };
 
     switch (values.executionMode) {
@@ -367,8 +384,11 @@ export const useClusterSetting = () => {
     }
   }
   onMounted(() => {
-    fetchFlinkEnv().then((res) => {
+    fetchListFlinkEnv().then((res) => {
       flinkEnvs.value = res;
+    });
+    fetchAlertSetting().then((res) => {
+      alerts.value = res;
     });
     fetchK8sNamespaces().then((res) => {
       historyRecord.k8sNamespace = res;

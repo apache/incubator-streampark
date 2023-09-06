@@ -53,7 +53,7 @@
 * Apache Flink & Spark stream processing application development framework
 * Out-of-the-box connectors
 * Support multiple versions of Flink & Spark
-* Scala 2.11 / 2.12 support
+* Scala 2.12 support
 * One-stop stream processing management platform
 * Support catalog、olap、streaming-warehouse etc.
 * ...
@@ -93,14 +93,6 @@ You can submit any ideas as [pull requests](https://github.com/apache/incubator-
 Thank you to all the people who already contributed to StreamPark!
 
 [![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/incubator-streampark/graphs/contributors)
-
-## ⏰ Contributor Over Time
-
-[![Stargazers Over Time](https://contributor-overtime-api.git-contributor.com/contributors-svg?chart=contributorOverTime&repo=apache/incubator-streampark)](https://git-contributor.com?chart=contributorOverTime&repo=apache/incubator-streampark)
-
-## 👍Stargazers Over Time
-
-![Stargazers over time](https://api.star-history.com/svg?repos=apache/incubator-streampark&type=Date)
 
 ## 💬 Social Media
 

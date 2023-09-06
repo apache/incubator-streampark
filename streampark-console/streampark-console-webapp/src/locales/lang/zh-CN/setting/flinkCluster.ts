@@ -24,6 +24,7 @@ export default {
   form: {
     clusterName: '集群名称',
     address: '集群URL',
+    runState: '运行状态',
     executionMode: '执行模式',
     versionId: 'Flink版本',
     addType: '添加类型',

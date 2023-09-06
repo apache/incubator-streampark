@@ -121,6 +121,9 @@ streampark:
       polling-interval-sec:
         job-status: 2
         cluster-metric: 3
+    # If you need to specify an ingress controller, you can use this.
+    ingress:
+      class: nginx
 
   # packer garbage resources collection configuration
   packer-gc:
