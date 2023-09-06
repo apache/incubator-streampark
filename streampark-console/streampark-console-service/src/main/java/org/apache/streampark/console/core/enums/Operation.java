@@ -19,11 +19,10 @@ package org.apache.streampark.console.core.enums;
 
 import lombok.Getter;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 @Getter
-public enum Operation implements Serializable {
+public enum Operation {
   RELEASE(0),
   START(1),
   SAVEPOINT(2),

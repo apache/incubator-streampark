@@ -19,12 +19,11 @@ package org.apache.streampark.console.core.enums;
 
 import lombok.Getter;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 /** This is an enumeration representing the types of changes that can occur. */
 @Getter
-public enum ChangeTypeEnum implements Serializable {
+public enum ChangeTypeEnum {
 
   /** Represents no change. */
   NONE(0, "[NONE], nothing to changed"),

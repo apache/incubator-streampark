@@ -20,12 +20,6 @@ package org.apache.streampark.console.core.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /** The AlertType enum represents different types of alerts that can be used for notifications. */
 public enum AlertType {
   /** Email */
