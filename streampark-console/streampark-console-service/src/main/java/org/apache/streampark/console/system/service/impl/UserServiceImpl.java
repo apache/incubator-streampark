@@ -27,9 +27,8 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
-import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.enums.LoginType;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
@@ -50,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +67,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -272,7 +273,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   public boolean lockUser(Long userId, Long transferToUserId) {
     AlertException.throwIfTrue(
         Objects.equals(userId, transferToUserId), "UserId and transferToUserId cannot be same.");
-    boolean hasApplication = applicationService.existsByUserId(userId);
+    boolean hasApplication = applicationInfoService.existsByUserId(userId);
     boolean hasResource = resourceService.existsByUserId(userId);
     boolean hasVariable = variableService.existsByUserId(userId);
     boolean hasAlertConfig = alertConfigService.existsByUserId(userId);
@@ -290,7 +291,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
           Objects.equals(transferToUser.getStatus(), User.STATUS_LOCK),
           "The user to whom the transfer cannot be a locked user.");
       if (hasApplication) {
-        applicationService.changeOwnership(userId, transferToUserId);
+        applicationManageService.changeOwnership(userId, transferToUserId);
       }
       if (hasResource) {
         resourceService.changeOwnership(userId, transferToUserId);
