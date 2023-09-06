@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, ExecutionOptions, JobManagerOptions, PipelineOptions, TaskManagerOptions}
 import org.apache.flink.v1beta1.FlinkDeploymentSpec.FlinkVersion
 
+import scala.collection.JavaConverters._
 import scala.language.postfixOps
 
 object KubernetesNativeApplicationClient_V2 extends KubernetesNativeClientTrait {
@@ -109,11 +110,11 @@ object KubernetesNativeApplicationClient_V2 extends KubernetesNativeClientTrait 
       extJarPaths = submitRequest.userJarFile match {
         case null => Array.empty[String]
         case file => Array(file.getAbsolutePath)
+      },
+      flinkConfiguration = submitRequest.extraParameter match {
+        case null => Map.empty
+        case e => e.asScala.map { case (key, value) => key -> value.toString }.toMap
       }
-//      flinkConfiguration = submitRequest.extraParameter match {
-//        case null => Map.empty
-//        case e => e.asInstanceOf[Map[String, String]]
-//      }
     )
     spec
   }
