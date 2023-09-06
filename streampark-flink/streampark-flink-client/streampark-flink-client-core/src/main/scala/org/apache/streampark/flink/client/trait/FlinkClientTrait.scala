@@ -147,11 +147,6 @@ trait FlinkClientTrait extends Logger {
           }
         })
     }
-
-    setConfig(submitRequest, flinkConfig)
-
-    doSubmit(submitRequest, flinkConfig)
-
   }
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
