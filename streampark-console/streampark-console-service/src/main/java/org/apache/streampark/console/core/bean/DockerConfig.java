@@ -17,8 +17,6 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.console.core.service.SettingService;
-
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,23 +40,16 @@ public class DockerConfig {
     try {
       DockerConfig dockerConfig = new DockerConfig();
 
-      dockerConfig.setAddress(
-          SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
-              .getSettingValue());
+      //      dockerConfig.setAddress(
+      //          SettingService.SETTINGS
+      //              .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
+      //              .getSettingValue());
 
-      dockerConfig.setUser(
-          SettingService.SETTINGS.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
+      dockerConfig.setUser("feiniao123456");
 
-      dockerConfig.setPassword(
-          SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_PASSWORD)
-              .getSettingValue());
+      dockerConfig.setPassword("cai020203");
 
-      dockerConfig.setNamespace(
-          SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE)
-              .getSettingValue());
+      dockerConfig.setNamespace("feiniao123456");
 
       return dockerConfig;
     } catch (Exception e) {
