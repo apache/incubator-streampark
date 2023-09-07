@@ -73,7 +73,7 @@ jobs:
           done
   build:
     name: "maven-compile (java-${{ matrix.java }})"
-    runs-on: ubuntu-latest
+    runs-on: "flinker/ubuntu-latest-with-flink-1.17.1:latest"
     strategy:
       fail-fast: false
       matrix:
@@ -90,5 +90,5 @@ jobs:
       - name: Build with Maven
         run: ./mvnw -B clean install -Pshaded,dist -DskipTests
       - name: Test with Maven
-        run:  wget -c https://dlcdn.apache.org/flink/flink-1.17.1/flink-1.17.1-bin-scala_2.12.tgz -P /tmp/ && tar -zxvf /tmp/flink-1.17.1-bin-scala_2.12.tgz -C /tmp/ && ./mvnw -B test
+        run: ./mvnw -B test
 

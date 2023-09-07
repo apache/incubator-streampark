@@ -74,7 +74,7 @@ public abstract class SpringIntegrationTestBase {
   protected static final String DEFAULT_FLINK_VERSION = "1.17.1";
   protected static final FileFilter PKG_NAME_FILTER =
       file -> file.getName().startsWith(DEFAULT_APP_HOME_DIR_NAME) && file.isDirectory();
-  protected static String defaultFlinkHome = "/tmp/flink-1.17.1";
+  protected static String defaultFlinkHome = "/streampark/flink-homes/flink-1.17.1";
   protected static String appHome;
 
   @BeforeAll
