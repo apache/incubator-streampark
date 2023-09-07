@@ -32,7 +32,7 @@ import org.apache.flink.v1beta1.FlinkDeploymentSpec.FlinkVersion
 import scala.collection.JavaConverters._
 import scala.language.postfixOps
 
-object KubernetesNativeApplicationClient_V2 extends KubernetesNativeClientTrait {
+object KubernetesNativeApplicationClientV2 extends KubernetesNativeClientTrait {
   @throws[Exception]
   override def doSubmit(
       submitRequest: SubmitRequest,
