@@ -285,7 +285,9 @@ public class ApplicationController {
   @Operation(summary = "Get application on yarn proxy address")
   @PostMapping("yarn")
   public RestResponse yarn() {
-    return RestResponse.success(YarnUtils.getRMWebAppProxyURL());
+    String rmWebAppProxyURL = YarnUtils.getRMWebAppProxyURL();
+    return RestResponse.success(
+        rmWebAppProxyURL == null ? null : rmWebAppProxyURL.replaceAll("/cluster/app", ""));
   }
 
   @Operation(summary = "Get application on yarn name")
