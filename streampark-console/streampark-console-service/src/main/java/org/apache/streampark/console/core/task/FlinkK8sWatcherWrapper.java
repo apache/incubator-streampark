@@ -96,7 +96,6 @@ public class FlinkK8sWatcherWrapper {
     final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
     queryWrapper
         .eq(Application::getTracking, 1)
-        .ne(Application::getState, FlinkAppState.LOST)
         .in(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
 
     List<Application> k8sApplication = applicationService.list(queryWrapper);

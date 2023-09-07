@@ -274,6 +274,7 @@ public class Application implements Serializable {
     this.state = state;
     FlinkAppState appState = of(this.state);
     this.tracking = shouldTracking(appState);
+    this.probing = shouldProbe(this.state);
   }
 
   public void setYarnQueueByHotParams() {
@@ -307,10 +308,15 @@ public class Application implements Serializable {
       case CANCELED:
       case TERMINATED:
       case POS_TERMINATED:
+      case LOST:
         return 0;
       default:
         return 1;
     }
+  }
+
+  public static Integer shouldProbe(@Nonnull Integer state) {
+    return FlinkAppState.isLost(state) ? 1 : 0;
   }
 
   public Boolean isTracking() {

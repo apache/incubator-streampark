@@ -643,6 +643,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public List<Application> getProbeApps() {
+    return this.baseMapper.getProbeApps();
+  }
+
+
+  @Override
   public String getYarnName(Application appParam) {
     String[] args = new String[2];
     args[0] = "--name";

@@ -20,15 +20,20 @@ package org.apache.streampark.console.core.task;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import io.fabric8.kubernetes.client.V1AdmissionRegistrationAPIGroupClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.fs.Options;
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.tuple.Tuple2;
+import org.apache.streampark.common.tuple.Tuple3;
+import org.apache.streampark.console.core.bean.AlertProbeMsg;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
 import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,12 +41,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
@@ -55,14 +61,16 @@ public class AutoHealthProbingTask {
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
+  @Autowired private AlertService alertService;
+
   /** probe interval every 30 seconds */
   private static final Duration PROBE_INTERVAL = Duration.ofSeconds(30);
 
   private static final Duration PROBE_WAIT_INTERVAL = Duration.ofSeconds(5);
 
-  private static final Short PROBE_RETRY_COUNT = 5;
+  private static final Short PROBE_RETRY_COUNT = 10;
 
-  private Long lastWatchTime = 0L;
+  private long lastWatchTime = 0L;
 
   private Boolean isProbing = false;
 
@@ -73,39 +81,95 @@ public class AutoHealthProbingTask {
 
   @Scheduled(fixedDelay = 1000)
   private void schedule() {
-    Long timeMillis = System.currentTimeMillis();
-    if (isProbing && timeMillis - lastWatchTime >= PROBE_WAIT_INTERVAL.toMillis()) {
-      handleProbeResults();
-      lastWatchTime = timeMillis;
-    } else if (!isProbing && (timeMillis - lastWatchTime >= PROBE_INTERVAL.toMillis())) {
-      lastWatchTime = timeMillis;
-      cacheProbingApps();
-      probe();
-      isProbing = true;
+    long timeMillis = System.currentTimeMillis();
+    if (isProbing) {
+      if (timeMillis - lastWatchTime >= PROBE_WAIT_INTERVAL.toMillis()) {
+        handleProbeResults();
+        lastWatchTime = timeMillis;
+      }
+    } else {
+      if (timeMillis - lastWatchTime >= PROBE_INTERVAL.toMillis()) {
+        lastWatchTime = timeMillis;
+        probe();
+        isProbing = true;
+      }
     }
   }
 
-  @Transactional(rollbackFor = {Exception.class})
   public void probe() {
-    List<Application> probeApp = PROBE_APPS
+    cacheProbingApps();
+    List<Application> probeApp = getLostApplications();
+    updateProbingState(probeApp);
+    probeApp.stream().forEach(this::monitorApp);
+  }
+
+  private List<Application> getLostApplications() {
+    return PROBE_APPS
       .values()
       .stream()
       .filter(app -> FlinkAppState.isLost(app.getState()))
       .collect(Collectors.toList());
+  }
+
+  private void updateProbingState(List<Application> probeApp) {
+    probeApp.forEach(app -> app.setState(FlinkAppState.PROBING.getValue()));
     applicationService.updateBatchById(probeApp);
-    probeApp.stream().forEach(this::monitorApp);
   }
 
   private void handleProbeResults() {
     if (shouldRetry()) {
       probe();
     } else {
-
+      List<Application> tempProbeApps  = applicationService.getProbeApps();
+      List<AlertProbeMsg> alertProbeMsgs = generateProbeResults(tempProbeApps);
+      alertProbeMsgs.stream().forEach(this::alert);
+      resetProbing();
+      retryAttempts = PROBE_RETRY_COUNT;
     }
+  }
 
-    // 根据判断是否有 LOST或重试次数是否结束本次探测
-    // 统计 failed，LOST，cancelled个数，
-    // 发送告警
+  private void resetProbing() {
+    PROBE_APPS.values().forEach(application -> {
+      application.setProbing(0);
+    });
+    applicationService.updateBatchById(PROBE_APPS.values());
+  }
+
+  private void alert(AlertProbeMsg alertProbeMsg) {
+    alertService.alert(alertProbeMsg);
+  }
+
+  private List<AlertProbeMsg> generateProbeResults(List<Application> applications) {
+    return applications
+      .stream()
+      .collect(Collectors.groupingBy(
+        app -> app.getUserId(),
+        Collectors.collectingAndThen(
+          Collectors.toList(),
+          apps -> {
+            List<Integer> alertIds = new ArrayList<>();
+            AlertProbeMsg alertProbeMsg = new AlertProbeMsg();
+            apps.forEach(app -> {
+              alertProbeMsg.setUser(app.getUserName());
+              alertProbeMsg.incrementProbeJobs();
+              if (app.getState() == FlinkAppState.LOST.getValue()) {
+                alertProbeMsg.incrementFailedJobs();
+              } else if (app.getState() == FlinkAppState.FAILED.getValue()) {
+                alertProbeMsg.incrementFailedJobs();
+              } else if (app.getState() == FlinkAppState.CANCELED.getValue()) {
+                alertProbeMsg.incrementCancelledJobs();
+              }
+              alertIds.add(app.getAlertId());
+            });
+
+            alertProbeMsg.setAlertId(alertIds);
+            return alertProbeMsg;
+          }
+        )
+      ))
+      .values()
+      .stream()
+      .collect(Collectors.toList());
   }
 
   private void monitorApp(Application app) {
@@ -118,18 +182,9 @@ public class AutoHealthProbingTask {
 
   private void cacheProbingApps() {
     PROBE_APPS.clear();
-    LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-    List<Application> applications =
-        applicationService.list(
-            new LambdaQueryWrapper<Application>()
-              .and(wrapper -> wrapper
-                  .eq(Application::getTracking, 1)
-                  .eq(Application::getState, FlinkAppState.LOST))
-              .or()
-              .eq(Application::getProbing, 1));
+    List<Application> applications = applicationService.getProbeApps();
     applications.forEach(
         (app) -> {
-          app.setProbing(1);
           PROBE_APPS.put(app.getId(), app);
         });
   }
@@ -137,9 +192,5 @@ public class AutoHealthProbingTask {
   private Boolean shouldRetry() {
     return PROBE_APPS.values().stream().anyMatch(application -> FlinkAppState.LOST.getValue() == application.getState().intValue())
       && (retryAttempts-- > 0);
-  }
-
-  public void updateLostCache(Application application) {
-    PROBE_APPS.computeIfPresent(application.getId(), (k, v) -> application);
   }
 }

@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
+import org.apache.streampark.console.core.bean.AlertProbeMsg;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.streampark.console.core.entity.Application;
@@ -63,6 +64,12 @@ public class AlertServiceImpl implements AlertService {
   public void alert(FlinkCluster flinkCluster, ClusterState clusterState) {
     AlertTemplate alertTemplate = AlertTemplate.of(flinkCluster, clusterState);
     alert(flinkCluster.getAlertId(), alertTemplate);
+  }
+
+  @Override
+  public void alert(AlertProbeMsg alertProbeMsg) {
+    AlertTemplate alertTemplate = AlertTemplate.of(alertProbeMsg);
+    alertProbeMsg.getAlertId().stream().forEach((alterId) -> alert(alterId, alertTemplate));
   }
 
   private void alert(Integer alertId, AlertTemplate alertTemplate) {
