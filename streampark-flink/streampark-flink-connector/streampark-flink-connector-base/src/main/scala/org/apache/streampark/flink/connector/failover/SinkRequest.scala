@@ -41,8 +41,10 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
     var result: List[String] = List.empty[String]
     val prefixMap: mutable.Map[String, ListBuffer[String]] =
       mutable.Map.empty[String, ListBuffer[String]]
+
     records.forEach(
       x => {
+        // group statements by the part before 'value(s)' in insert statements.
         val valueMatcher = INSERT_REGEXP.matcher(x)
         if (valueMatcher.find()) {
           val prefix = valueMatcher.group(1)
@@ -51,10 +53,12 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
             case None => prefixMap(prefix) = ListBuffer(valueMatcher.group(3))
           }
         } else {
+          // other statements will be ignored.
           logWarn(s"ignore record: $x")
         }
       })
     if (prefixMap.nonEmpty) {
+      // combine statements by the part before 'value(s)' in insert statements.
       result = prefixMap.map(m => s"""${m._1} VALUES ${m._2.mkString(",")}""").toList
     }
 

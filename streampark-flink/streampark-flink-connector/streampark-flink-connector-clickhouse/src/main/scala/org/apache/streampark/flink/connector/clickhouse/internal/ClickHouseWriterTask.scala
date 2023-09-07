@@ -63,6 +63,7 @@ case class ClickHouseWriterTask(
     }
 
   def send(sinkRequest: SinkRequest): Unit = {
+    // ClickHouse's http API does not accept EMPTY request body
     if (sinkRequest.sqlStatement == null || sinkRequest.sqlStatement.isEmpty) {
       logWarn(s"Skip empty sql statement")
       return
@@ -80,7 +81,8 @@ case class ClickHouseWriterTask(
 
   private def buildRequest(sinkRequest: SinkRequest): List[Request] = {
     logDebug(s"There is [${sinkRequest.sqlStatement.size}] statement(s) in SinkRequest ")
-    sinkRequest.sqlStatement.map(
+    // ClickHouse's http API does not accept multiple statements, so requests should be built by splitting statements
+    sinkRequest.sqlStatement.filter(_.nonEmpty).map(
       statement => {
         val host = clickHouseConf.getRandomHostUrl
         val builder = asyncHttpClient
