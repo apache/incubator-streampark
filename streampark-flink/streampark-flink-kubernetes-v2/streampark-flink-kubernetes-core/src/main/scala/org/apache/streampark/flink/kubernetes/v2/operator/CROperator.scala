@@ -22,6 +22,7 @@ import org.apache.streampark.flink.kubernetes.v2.K8sTools.usingK8sClient
 import org.apache.streampark.flink.kubernetes.v2.fs.FileMirror
 import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, FlinkSessionJobDef, JobDef}
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
+import org.apache.streampark.flink.kubernetes.v2.operator.OprError.FlinkDeploymentCRDNotFound
 
 import io.fabric8.kubernetes.api.model._
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionList
@@ -62,8 +63,8 @@ object CROperator extends CROperator {
   override def applyDeployment(spec: FlinkDeploymentDef): IO[Throwable, Unit] = {
     lazy val mirrorSpace = s"${spec.namespace}_${spec.name}"
     for {
+      _                   <- ZIO.fail(FlinkDeploymentCRDNotFound()).unlessZIO(existFlinkDeploymentCRD)
       // Generate FlinkDeployment CR
-      _                   <- validateDeployFlinkDeploymentCRD
       correctedJob        <- mirrorJobJarToHttpFileServer(spec.job, mirrorSpace)
       correctedExtJars    <- mirrorExtJarsToHttpFileServer(spec.extJarPaths, mirrorSpace)
       correctedPod        <- correctPodSpec(
@@ -253,15 +254,11 @@ object CROperator extends CROperator {
     } *> ZIO.logInfo(s"Delete FlinkDeployment CR: namespace=$namespace, name=$name")
 
   /** Check whether FlinkDeployment CRD is deployed in the k8s cluster. */
-  def validateDeployFlinkDeploymentCRD = {
+  private def existFlinkDeploymentCRD: IO[Throwable, Boolean] = {
     usingK8sClient { client =>
-      val crds: CustomResourceDefinitionList = client.apiextensions.v1.customResourceDefinitions.list
-      val flinkDeploymentCRDName: String     = CustomResource.getCRDName(classOf[FlinkDeployment])
-
-      val exists: Boolean = crds.getItems.asScala.exists(crd => crd.getMetadata.getName == flinkDeploymentCRDName)
-
-      if (!exists)
-        throw new RuntimeException("The FlinkDeployment CRD is not currently deployed in the k8s cluster")
+      val crds          = client.apiextensions.v1.customResourceDefinitions.list
+      val deployCRDName = CustomResource.getCRDName(classOf[FlinkDeployment])
+      crds.getItems.asScala.exists(crd => crd.getMetadata.getName == deployCRDName)
     }
   }
 }

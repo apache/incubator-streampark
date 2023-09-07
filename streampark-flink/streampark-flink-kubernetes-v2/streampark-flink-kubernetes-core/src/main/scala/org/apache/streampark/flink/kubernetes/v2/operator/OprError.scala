@@ -28,4 +28,6 @@ object OprError {
   case class FlinkRestEndpointNotFound(namespace: String, name: String)
     extends Exception(s"Flink cluster rest endpoint not found: namespace=$namespace, name=$name")
 
+  case class FlinkDeploymentCRDNotFound()
+    extends Exception("The FlinkDeployment CRD is not currently deployed in the kubernetes cluster")
 }
