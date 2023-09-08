@@ -17,12 +17,12 @@
 
 package org.apache.streampark.flink.client
 
+import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.enums.ExecutionMode._
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.impl._
-import org.apache.streampark.flink.kubernetes.v2.FlinkK8sConfig
 
 object FlinkClientHandler {
 
@@ -34,7 +34,7 @@ object FlinkClientHandler {
     YARN_PER_JOB -> YarnPerJobClient,
     KUBERNETES_NATIVE_SESSION -> KubernetesNativeSessionClient,
     KUBERNETES_NATIVE_APPLICATION -> {
-      if (FlinkK8sConfig.isV2Enabled) KubernetesApplicationClientV2
+      if (K8sFlinkConfig.isV2Enabled) KubernetesApplicationClientV2
       else KubernetesNativeApplicationClient
     }
   )

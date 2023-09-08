@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
@@ -59,7 +60,6 @@ import org.apache.streampark.console.core.service.application.ApplicationActionS
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
-import org.apache.streampark.flink.kubernetes.v2.FlinkK8sConfig;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
@@ -513,7 +513,7 @@ public class AppBuildPipeServiceImpl
                     dockerConfig.getPassword()),
                 app.getIngressTemplate());
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
-        if (FlinkK8sConfig.isV2Enabled()) {
+        if (K8sFlinkConfig.isV2Enabled()) {
           return FlinkK8sApplicationBuildPipelineV2.of(k8sApplicationBuildRequest);
         } else {
           return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
