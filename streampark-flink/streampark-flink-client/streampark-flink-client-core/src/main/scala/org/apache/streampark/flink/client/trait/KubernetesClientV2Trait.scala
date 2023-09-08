@@ -1,0 +1,97 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.streampark.flink.client.`trait`
+
+import org.apache.streampark.flink.client.bean.SubmitRequest
+import org.apache.streampark.flink.kubernetes.v2.model.JobDef
+import org.apache.streampark.flink.kubernetes.v2.yamlMapper
+
+import io.fabric8.kubernetes.api.model.Pod
+import org.apache.flink.client.deployment.application.ApplicationConfiguration
+import org.apache.flink.configuration.{Configuration, CoreOptions, PipelineOptions}
+import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
+
+import scala.collection.mutable
+import scala.jdk.CollectionConverters.asScalaBufferConverter
+import scala.util.Try
+
+trait KubernetesClientV2Trait extends FlinkClientTrait {
+
+  protected type FailureMessage = String
+
+  protected val KUBERNETES_JM_CPU_KEY = "kubernetes.jobmanager.cpu"
+  protected val KUBERNETES_JM_CPU_AMOUNT_KEY = "kubernetes.jobmanager.cpu.amount"
+  protected val KUBERNETES_JM_CPU_DEFAULT = 1.0
+  protected val KUBERNETES_JM_MEMORY_DEFAULT = "1600m"
+
+  protected val KUBERNETES_TM_CPU_KEY = "kubernetes.taskmanager.cpu"
+  protected val KUBERNETES_TM_CPU_AMOUNT_KEY = "kubernetes.taskmanager.cpu.amount"
+  protected val KUBERNETES_TM_CPU_DEFAULT = -1.0
+  protected val KUBERNETES_TM_MEMORY_DEFAULT = "1728m"
+
+  protected val KUBERNETES_REST_SERVICE_EXPORTED_TYPE_KEY = "kubernetes.rest-service.exposed.type"
+
+  override def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit = {}
+
+  implicit protected class FlinkConfMapOps(map: mutable.Map[String, String]) {
+    def removeKey(key: String): mutable.Map[String, String] = { map -= key; map }
+  }
+
+  protected def unmarshalPodTemplate(yaml: String): Try[Pod] = {
+    Try(yamlMapper.readValue(yaml, classOf[Pod]))
+  }
+
+  protected def genJobDef(
+      flinkConfObj: Configuration,
+      jarUriHint: Option[String]): Either[FailureMessage, JobDef] = {
+
+    val jarUri = jarUriHint
+      .orElse(flinkConfObj.getOption(PipelineOptions.JARS).flatMap(_.asScala.headOption))
+      .getOrElse(return Left("Flink job uri should not be empty"))
+
+    val parallel = flinkConfObj
+      .getOption(CoreOptions.DEFAULT_PARALLELISM)
+      .getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue())
+
+    val args = flinkConfObj
+      .getOption(ApplicationConfiguration.APPLICATION_ARGS)
+      .map(_.asScala.toArray)
+      .getOrElse(Array.empty[String])
+
+    val entryClass = flinkConfObj
+      .getOption(ApplicationConfiguration.APPLICATION_MAIN_CLASS)
+
+    val savePointPath = flinkConfObj
+      .getOption(SavepointConfigOptions.SAVEPOINT_PATH)
+
+    val allowNonRestoredState = flinkConfObj
+      .getOption(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE)
+      .map(_.booleanValue())
+
+    Right(
+      JobDef(
+        jarURI = jarUri,
+        parallelism = parallel,
+        entryClass = entryClass,
+        args = args,
+        initialSavepointPath = savePointPath,
+        allowNonRestoredState = allowNonRestoredState
+      ))
+  }
+
+}

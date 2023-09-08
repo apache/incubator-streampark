@@ -543,6 +543,13 @@ trait FlinkClientTrait extends Logger {
         case x => x
       }
     }
+    def getOption[T](key: ConfigOption[T]): Option[T] = {
+      Option(flinkConfig.get(key))
+    }
+    def remove[T](key: ConfigOption[T]): Configuration = {
+      flinkConfig.removeConfig(key)
+      flinkConfig
+    }
   }
 
   private[client] def cancelJob(
