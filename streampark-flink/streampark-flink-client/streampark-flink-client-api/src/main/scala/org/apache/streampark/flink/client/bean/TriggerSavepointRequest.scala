@@ -26,6 +26,7 @@ import java.util.{Map => JavaMap}
 
 /** Trigger savepoint request. */
 case class TriggerSavepointRequest(
+    id: Long,
     flinkVersion: FlinkVersion,
     executionMode: ExecutionMode,
     @Nullable properties: JavaMap[String, Any],

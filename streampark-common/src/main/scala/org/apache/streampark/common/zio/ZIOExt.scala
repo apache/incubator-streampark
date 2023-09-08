@@ -20,6 +20,8 @@ package org.apache.streampark.common.zio
 import zio.{IO, Runtime, Unsafe, ZIO}
 import zio.stream.ZStream
 
+import scala.util.Try
+
 /** ZIO extension */
 object ZIOExt {
 
@@ -32,11 +34,25 @@ object ZIOExt {
         .getOrThrowFiberFailure()
   }
 
+  /** unsafe run IO to Either. */
+  @inline def unsafeRunToEither[E, A](zio: IO[E, A]): Either[Throwable, A] = Unsafe.unsafe {
+    implicit u =>
+      Runtime.default.unsafe
+        .run(zio.provideLayer(Runtime.removeDefaultLoggers >>> ZIOLogger.default))
+        .toEither
+  }
+
   implicit class IOOps[E, A](io: ZIO[Any, E, A]) {
 
     /** unsafe run IO */
     @throws[Throwable]
     def runIO: A = ZIOExt.unsafeRun(io)
+
+    /** unsafe run IO to Try. */
+    def runIOAsTry: Try[A] = unsafeRunToEither(io).toTry
+
+    /** unsafe run IO to Either. */
+    def runIOAsEither: Either[Throwable, A] = unsafeRunToEither(io)
   }
 
   implicit class UIOOps[A](uio: ZIO[Any, Nothing, A]) {

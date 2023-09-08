@@ -17,18 +17,22 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.flink.client.bean.SubmitRequest
-import org.apache.streampark.flink.kubernetes.v2.model.JobDef
+import org.apache.streampark.common.zio.ZIOExt.IOOps
+import org.apache.streampark.flink.client.`trait`.KubernetesClientV2.{StopJobFail, TriggerJobSavepointFail}
+import org.apache.streampark.flink.client.bean._
+import org.apache.streampark.flink.kubernetes.v2.model.{JobDef, JobSavepointDef}
+import org.apache.streampark.flink.kubernetes.v2.operator.FlinkK8sOperator
 import org.apache.streampark.flink.kubernetes.v2.yamlMapper
 
 import io.fabric8.kubernetes.api.model.Pod
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration.{Configuration, CoreOptions, PipelineOptions}
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
+import zio.ZIO
 
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.asScalaBufferConverter
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 trait KubernetesClientV2Trait extends FlinkClientTrait {
 
@@ -94,4 +98,81 @@ trait KubernetesClientV2Trait extends FlinkClientTrait {
       ))
   }
 
+  @throws[Exception]
+  override def doCancel(request: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    val effect =
+      if (!request.withSavepoint) {
+        // cancel job
+        FlinkK8sOperator
+          .cancelJob(request.id)
+          .as(CancelResponse(null))
+      } else {
+        // stop job with savepoint
+        val savepointDef = JobSavepointDef(
+          drain = Option(request.withDrain).getOrElse(false),
+          savepointPath = Option(request.savepointPath),
+          formatType = Option(request.nativeFormat)
+            .map(if (_) JobSavepointDef.NATIVE_FORMAT else JobSavepointDef.CANONICAL_FORMAT)
+        )
+        FlinkK8sOperator
+          .stopJob(request.id, savepointDef)
+          .flatMap {
+            result =>
+              if (result.isFailed) ZIO.fail(StopJobFail(result.failureCause.get))
+              else ZIO.succeed(CancelResponse(result.location.orNull))
+          }
+      }
+
+    def richMsg: String => String = s"[flink-cancel][appId=${request.id}] " + _
+
+    effect.runIOAsTry match {
+      case Success(rsp) =>
+        logInfo(richMsg("Cancel flink job successfully."))
+        rsp
+      case Failure(err) =>
+        logError(
+          richMsg(s"Cancel flink job fail in ${request.executionMode.getName}_V2 mode!"),
+          err)
+        throw err
+    }
+  }
+
+  @throws[Exception]
+  override def doTriggerSavepoint(
+      request: TriggerSavepointRequest,
+      flinkConf: Configuration): SavepointResponse = {
+
+    val savepointDef = JobSavepointDef(
+      savepointPath = Option(request.savepointPath),
+      formatType = Option(request.nativeFormat)
+        .map(if (_) JobSavepointDef.NATIVE_FORMAT else JobSavepointDef.CANONICAL_FORMAT)
+    )
+
+    def richMsg: String => String = s"[flink-trigger-savepoint][appId=${request.id}] " + _
+
+    FlinkK8sOperator
+      .triggerJobSavepoint(request.id, savepointDef)
+      .flatMap {
+        result =>
+          if (result.isFailed) ZIO.fail(TriggerJobSavepointFail(result.failureCause.get))
+          else ZIO.succeed(SavepointResponse(result.location.orNull))
+      }
+      .runIOAsTry match {
+      case Success(rsp) =>
+        logInfo(richMsg("Cancel flink job successfully."))
+        rsp
+      case Failure(err) =>
+        logError(
+          richMsg(s"Cancel flink job fail in ${request.executionMode.getName}_V2 mode!"),
+          err)
+        throw err
+    }
+  }
+
+}
+
+object KubernetesClientV2 {
+
+  case class StopJobFail(msg: String) extends Exception(msg)
+  case class TriggerJobSavepointFail(msg: String) extends Exception(msg)
 }

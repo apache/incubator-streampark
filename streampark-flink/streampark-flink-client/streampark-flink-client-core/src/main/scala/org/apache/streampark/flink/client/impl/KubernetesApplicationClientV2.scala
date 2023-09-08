@@ -57,11 +57,13 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
     }
 
     // Submit FlinkDeployment CR to Kubernetes
-    Try(FlinkK8sOperator.deployApplicationJob(submitRequest.id, flinkDeployDef).runIO) match {
+    FlinkK8sOperator.deployApplicationJob(submitRequest.id, flinkDeployDef).runIOAsTry match {
       case Success(_) =>
-        logInfo(richMsg(s"Flink job has been submitted successfully."))
+        logInfo(richMsg("Flink job has been submitted successfully."))
       case Failure(err) =>
-        logInfo(s"Submit Flink job fail in ${submitRequest.executionMode.getName}_V2 mode.")
+        logError(
+          richMsg(s"Submit Flink job fail in ${submitRequest.executionMode.getName}_V2 mode!"),
+          err)
         throw err
     }
 
@@ -233,17 +235,4 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       ))
   }
 
-  override def doCancel(
-      cancelRequest: CancelRequest,
-      flinkConfig: Configuration): CancelResponse = {
-    // TODO
-    ???
-  }
-
-  override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
-      flinkConf: Configuration): SavepointResponse = {
-    // TODO
-    ???
-  }
 }
