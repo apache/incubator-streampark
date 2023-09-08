@@ -647,7 +647,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     return this.baseMapper.getProbeApps();
   }
 
-
   @Override
   public String getYarnName(Application appParam) {
     String[] args = new String[2];

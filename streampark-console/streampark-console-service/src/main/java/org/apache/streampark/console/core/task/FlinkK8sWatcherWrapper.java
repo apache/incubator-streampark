@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;

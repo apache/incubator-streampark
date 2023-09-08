@@ -109,13 +109,13 @@ public class AlertTemplate implements Serializable {
 
   public static AlertTemplate of(AlertProbeMsg alertProbeMsg) {
     return new AlertTemplateBuilder()
-      .setType(4)
-      .setUser(alertProbeMsg.getUser())
-      .setProbeJobs(alertProbeMsg.getProbeJobs())
-      .setFailedJobs(alertProbeMsg.getFailedJobs())
-      .setLostJobs(alertProbeMsg.getLostJobs())
-      .setCancelledJobs(alertProbeMsg.getCancelledJobs())
-      .build();
+        .setType(4)
+        .setUser(alertProbeMsg.getUser())
+        .setProbeJobs(alertProbeMsg.getProbeJobs())
+        .setFailedJobs(alertProbeMsg.getFailedJobs())
+        .setLostJobs(alertProbeMsg.getLostJobs())
+        .setCancelledJobs(alertProbeMsg.getCancelledJobs())
+        .build();
   }
 
   private static class AlertTemplateBuilder {

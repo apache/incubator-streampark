@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.task;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.core.entity.Application;
@@ -38,6 +37,7 @@ import org.apache.streampark.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -99,13 +99,14 @@ public class FlinkK8sChangeEventListener {
         || FlinkAppState.LOST.equals(state)
         || FlinkAppState.RESTARTING.equals(state)
         || FlinkAppState.FINISHED.equals(state)) {
-      executor.execute(() -> {
-        if (app.getProbing()) {
-          log.info("application with id {} is probing, don't send alert", app.getId());
-          return;
-        }
-        alertService.alert(app, state);
-      });
+      executor.execute(
+          () -> {
+            if (app.getProbing()) {
+              log.info("application with id {} is probing, don't send alert", app.getId());
+              return;
+            }
+            alertService.alert(app, state);
+          });
     }
   }
 

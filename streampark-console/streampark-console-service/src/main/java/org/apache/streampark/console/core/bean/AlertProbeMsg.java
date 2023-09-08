@@ -36,7 +36,4 @@ public class AlertProbeMsg {
   public void incrementCancelledJobs() {
     this.cancelledJobs++;
   }
-
-
-
 }
