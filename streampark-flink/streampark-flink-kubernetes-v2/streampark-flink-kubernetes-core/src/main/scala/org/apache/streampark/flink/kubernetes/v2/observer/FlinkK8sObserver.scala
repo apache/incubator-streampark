@@ -23,19 +23,27 @@ import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey._
 
 import org.apache.flink.v1beta1.{FlinkDeployment, FlinkDeploymentSpec, FlinkSessionJob, FlinkSessionJobSpec}
-import zio.{IO, Ref, Schedule, UIO}
+import zio.{IO, Ref, Schedule, UIO, ZIO}
 import zio.ZIO.logInfo
 import zio.concurrent.{ConcurrentMap, ConcurrentSet}
 import zio.stream.ZStream
 
 /** Flink Kubernetes resource observer. */
-sealed trait FlinkK8sObserver {
+sealed trait FlinkK8sObserverTrait {
 
   /** Start tracking resources. */
   def track(key: TrackKey): UIO[Unit]
 
   /** Stop tracking resources. */
   def untrack(key: TrackKey): UIO[Unit]
+
+  /** Stop tracking resources by TrackKey.id. */
+  def untrackById(appId: Long): UIO[Unit] = {
+    trackedKeys.find(_.id == appId).flatMap {
+      case Some(key) => untrack(key)
+      case None      => ZIO.unit
+    }
+  }
 
   /** All tracked key in observer. */
   def trackedKeys: ConcurrentSet[TrackKey]
@@ -88,7 +96,7 @@ sealed trait FlinkK8sObserver {
 
 }
 
-object FlinkK8sObserver extends FlinkK8sObserver {
+object FlinkK8sObserver extends FlinkK8sObserverTrait {
 
   // The following is a visible external snapshot.
   val trackedKeys          = ConcurrentSet.empty[TrackKey].runUIO

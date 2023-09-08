@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.zio
 
-import zio.{IO, Runtime, Unsafe, ZIO}
+import zio.{FiberFailure, IO, Runtime, Unsafe, ZIO}
 import zio.stream.ZStream
 
 import scala.util.Try
@@ -26,7 +26,7 @@ import scala.util.Try
 object ZIOExt {
 
   /* Unsafe run zio effect. */
-  @throws[Exception]
+  @throws[FiberFailure]
   @inline def unsafeRun[E, A](zio: IO[E, A]): A = Unsafe.unsafe {
     implicit u =>
       Runtime.default.unsafe
@@ -45,7 +45,7 @@ object ZIOExt {
   implicit class IOOps[E, A](io: ZIO[Any, E, A]) {
 
     /** unsafe run IO */
-    @throws[Throwable]
+    @throws[FiberFailure]
     def runIO: A = ZIOExt.unsafeRun(io)
 
     /** unsafe run IO to Try. */
