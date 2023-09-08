@@ -27,7 +27,8 @@ object K8sFlinkConfig {
     key = "streampark.flink-k8s.enable-v2",
     defaultValue = false,
     classType = classOf[Boolean],
-    description = "Whether to enable the v2 version(base on flink-kubernetes-operator) of flink kubernetes operation"
+    description =
+      "Whether to enable the v2 version(base on flink-kubernetes-operator) of flink kubernetes operation"
   )
 
   //  ======= deprecated =======
@@ -47,7 +48,6 @@ object K8sFlinkConfig {
     classType = classOf[java.lang.Long],
     description = "run timeout seconds of single flink-k8s job status tracking task"
   )
-
 
   @deprecated
   val jobStatueTrackTaskIntervalSec: InternalOption = InternalOption(
