@@ -208,7 +208,7 @@ public class Application implements Serializable {
 
   private String tags;
 
-  private Integer probing;
+  private Boolean probing;
 
   /** running job */
   private transient JobsOverview.Task overview;
@@ -274,7 +274,7 @@ public class Application implements Serializable {
     this.state = state;
     FlinkAppState appState = of(this.state);
     this.tracking = shouldTracking(appState);
-    this.probing = shouldProbe(this.state);
+    this.probing = shouldProbe();
   }
 
   public void setYarnQueueByHotParams() {
@@ -315,16 +315,12 @@ public class Application implements Serializable {
     }
   }
 
-  public static Integer shouldProbe(@Nonnull Integer state) {
-    return FlinkAppState.isLost(state) ? 1 : 0;
+  private Boolean shouldProbe() {
+    return this.probing || FlinkAppState.isLost(this.state);
   }
 
   public Boolean isTracking() {
     return this.tracking == 1;
-  }
-
-  public Boolean isProbing() {
-    return this.probing == 1;
   }
 
   /**

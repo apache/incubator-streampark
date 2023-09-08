@@ -97,7 +97,7 @@ public class AutoHealthProbingTask {
   }
 
   public void probe() {
-    cacheProbingApps();
+    List<Application> applications = applicationService.getProbeApps();
     List<Application> probeApp = getLostApplications();
     updateProbingState(probeApp);
     probeApp.stream().forEach(this::monitorApp);
@@ -130,7 +130,7 @@ public class AutoHealthProbingTask {
 
   private void resetProbing() {
     PROBE_APPS.values().forEach(application -> {
-      application.setProbing(0);
+      application.setProbing(false);
     });
     applicationService.updateBatchById(PROBE_APPS.values());
   }

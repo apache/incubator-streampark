@@ -786,7 +786,7 @@ public class FlinkHttpWatcher {
    * normally, the job will an alarm
    */
   private void doAlert(Application app, FlinkAppState appState) {
-    if (app.isTracking()) {
+    if (app.getProbing()) {
       log.info("application with id {} is probing, don't send alert", app.getId());
       return;
     }

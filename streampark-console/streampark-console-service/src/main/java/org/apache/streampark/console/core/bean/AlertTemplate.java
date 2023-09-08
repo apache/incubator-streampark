@@ -109,6 +109,7 @@ public class AlertTemplate implements Serializable {
 
   public static AlertTemplate of(AlertProbeMsg alertProbeMsg) {
     return new AlertTemplateBuilder()
+      .setType(4)
       .setUser(alertProbeMsg.getUser())
       .setProbeJobs(alertProbeMsg.getProbeJobs())
       .setFailedJobs(alertProbeMsg.getFailedJobs())
