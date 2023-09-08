@@ -42,7 +42,7 @@ public enum PipelineType {
   /** flink native kubernetes application mode */
   FLINK_NATIVE_K8S_APPLICATION(
       2,
-      "flink native kubernetes session mode task building pipeline",
+      "flink native kubernetes application mode task building pipeline",
       ImmutableMap.<Integer, String>builder()
           .put(1, "Create building workspace")
           .put(2, "Export kubernetes pod template")
@@ -70,7 +70,16 @@ public enum PipelineType {
           .put(2, "Resolve maven dependencies")
           .put(3, "upload jar to yarn.provided.lib.dirs")
           .build(),
-      SimpleBuildResponse.class);
+      SimpleBuildResponse.class),
+
+  FLINK_K8S_APPLICATION_V2(
+      5,
+      "flink kubernetes application mode task building pipeline v2",
+      ImmutableMap.<Integer, String>builder()
+          .put(1, "Create building workspace")
+          .put(2, "Build shaded flink app jar")
+          .build(),
+      K8sAppModeBuildResponse.class);
 
   private final Integer code;
   /** short description of pipeline type. */

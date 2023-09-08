@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.v2.model
 
 import org.apache.streampark.flink.kubernetes.v2.jacksonMapper
-import org.apache.streampark.flink.kubernetes.v2.model.FlinkDeploymentDef.mapPodToPodTemplate
+import org.apache.streampark.flink.kubernetes.v2.model.FlinkDeploymentDef.{mapPodToPodTemplate, DEFAULT_SERVICE_ACCOUNT}
 
 import io.fabric8.kubernetes.api.model.{ObjectMeta, Pod}
 import org.apache.flink.v1beta1.{flinkdeploymentspec, FlinkDeployment, FlinkDeploymentSpec}
@@ -58,7 +58,7 @@ case class FlinkDeploymentDef(
     name: String,
     image: String,
     imagePullPolicy: Option[String] = None,
-    serviceAccount: String = "flink",
+    serviceAccount: String = DEFAULT_SERVICE_ACCOUNT,
     flinkVersion: FlinkVersion,
     jobManager: JobManagerDef,
     taskManager: TaskManagerDef,
@@ -108,6 +108,9 @@ case class FlinkDeploymentDef(
 }
 
 object FlinkDeploymentDef {
+
+  lazy val DEFAULT_SERVICE_ACCOUNT = "flink"
+
   def mapPodToPodTemplate[A: ClassTag](pod: Pod, clz: Class[A]): Try[A] = Try {
     val json = jacksonMapper.writeValueAsString(pod)
     jacksonMapper.readValue(json, clz)

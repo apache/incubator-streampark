@@ -17,9 +17,18 @@
 
 package org.apache.streampark.flink.kubernetes.v2
 
-import org.apache.streampark.common.conf.{InternalOption, Workspace}
+import org.apache.streampark.common.conf.{InternalConfigHolder, InternalOption, Workspace}
 
 object FlinkK8sConfig {
+
+  val ENABLE_V2: InternalOption = InternalOption(
+    key = "streampark.flink-k8s.enable-v2",
+    defaultValue = false,
+    classType = classOf[Boolean],
+    description = "Whether to enable the v2 version(base on flink-kubernetes-operator) of flink kubernetes operation"
+  )
+
+  lazy val isV2Enabled: Boolean = InternalConfigHolder.get(ENABLE_V2)
 
   // ----- embedded http file server config -----
 

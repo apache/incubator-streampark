@@ -59,6 +59,7 @@ import org.apache.streampark.console.core.service.application.ApplicationActionS
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.flink.kubernetes.v2.FlinkK8sConfig;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
@@ -78,6 +79,7 @@ import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 import org.apache.streampark.flink.packer.pipeline.PipelineType;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
+import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipelineV2;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
@@ -511,7 +513,11 @@ public class AppBuildPipeServiceImpl
                     dockerConfig.getPassword()),
                 app.getIngressTemplate());
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
-        return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
+        if (FlinkK8sConfig.isV2Enabled()) {
+          return FlinkK8sApplicationBuildPipelineV2.of(k8sApplicationBuildRequest);
+        } else {
+          return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
+        }
       default:
         throw new UnsupportedOperationException(
             "Unsupported Building Application for ExecutionMode: " + app.getExecutionModeEnum());
