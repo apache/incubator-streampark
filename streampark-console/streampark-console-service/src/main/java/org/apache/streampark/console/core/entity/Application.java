@@ -208,7 +208,7 @@ public class Application implements Serializable {
 
   private String tags;
 
-  private Boolean probing;
+  private Boolean probing = false;
 
   /** running job */
   private transient JobsOverview.Task overview;
@@ -317,10 +317,6 @@ public class Application implements Serializable {
 
   private Boolean shouldProbe() {
     return this.probing || FlinkAppState.isLost(this.state);
-  }
-
-  public Boolean isTracking() {
-    return this.tracking == 1;
   }
 
   /**
