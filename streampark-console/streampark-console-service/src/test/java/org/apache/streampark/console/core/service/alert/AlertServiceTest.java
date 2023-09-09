@@ -160,7 +160,7 @@ class AlertServiceTest {
     application.setStartTime(new Date());
     application.setJobName("Test My Job");
     application.setAppId("1234567890");
-    application.setAlertId(1);
+    application.setAlertId(1L);
 
     application.setRestartCount(5);
     application.setRestartSize(100);

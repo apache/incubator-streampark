@@ -32,8 +32,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,13 +51,14 @@ import java.util.TimeZone;
 @Tag(name = "ALERT_TAG")
 @Slf4j
 @Validated
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/flink/alert")
 public class AlertController {
 
-  @Autowired private AlertConfigService alertConfigService;
+  private final AlertConfigService alertConfigService;
 
-  @Autowired private AlertService alertService;
+  private final AlertService alertService;
 
   @Operation(summary = "Create alert config")
   @PostMapping(value = "/add")
@@ -113,7 +114,7 @@ public class AlertController {
 
   @Operation(summary = "Send alert config")
   @PostMapping("/send")
-  public RestResponse sendAlert(Integer id) throws AlertException {
+  public RestResponse sendAlert(Long id) throws AlertException {
     AlertTemplate alertTemplate = new AlertTemplate();
     alertTemplate.setTitle("Notify: StreamPark alert job for test");
     alertTemplate.setJobName("StreamPark alert job for test");
@@ -126,7 +127,6 @@ public class AlertController {
         DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
     alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
     alertTemplate.setDuration("");
-    boolean alert = alertService.alert(id, alertTemplate);
-    return RestResponse.success(alert);
+    return RestResponse.success(alertService.alert(id, alertTemplate));
   }
 }

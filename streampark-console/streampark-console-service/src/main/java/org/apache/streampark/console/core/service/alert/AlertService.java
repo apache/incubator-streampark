@@ -29,5 +29,5 @@ public interface AlertService {
    * @param alertTemplate the alert template to use for generating the alert content
    * @return true if the alert is sent successfully, false otherwise
    */
-  boolean alert(Integer alertConfigId, AlertTemplate alertTemplate);
+  boolean alert(Long alertConfigId, AlertTemplate alertTemplate);
 }

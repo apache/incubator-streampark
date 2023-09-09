@@ -122,7 +122,7 @@ public class Application implements Serializable {
 
   /** alert id */
   @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private Integer alertId;
+  private Long alertId;
 
   private String args;
   /** application module */
