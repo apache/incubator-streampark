@@ -83,10 +83,9 @@ object YarnPerJobClient extends YarnClientTrait {
                    |------------------------------------------------------------------
                    |""".stripMargin)
 
-        val packageProgramJobGraph =
-          super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
-        packagedProgram = packageProgramJobGraph._1
-        val jobGraph = packageProgramJobGraph._2
+        val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
+        packagedProgram = programJobGraph._1
+        val jobGraph = programJobGraph._2
 
         logInfo(s"""
                    |-------------------------<<applicationId>>------------------------

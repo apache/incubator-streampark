@@ -88,7 +88,7 @@ jobs:
           distribution: "adopt"
           cache: "maven"
       - name: Build with Maven
-        run: ./mvnw -B clean install -Pshaded,dist -DskipTests
+        run: ./mvnw -B clean install -Pshaded -DskipTests
       - name: Test with Maven
-        run:  wget -c https://dlcdn.apache.org/flink/flink-1.17.1/flink-1.17.1-bin-scala_2.12.tgz -P /tmp/ && tar -zxvf /tmp/flink-1.17.1-bin-scala_2.12.tgz -C /tmp/ && ./mvnw -B test
+        run: ./mvnw -B test
 

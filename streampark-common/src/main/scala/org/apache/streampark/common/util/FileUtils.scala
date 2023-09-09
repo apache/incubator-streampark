@@ -16,10 +16,16 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.ImplicitsUtils._
+
 import java.io._
 import java.net.URL
+import java.nio.ByteBuffer
+import java.nio.channels.Channels
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Paths}
 import java.util
-import java.util.Scanner
+import java.util.stream.Collectors
 
 import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
@@ -44,12 +50,12 @@ object FileUtils {
     if (input == null) {
       throw new RuntimeException("The inputStream can not be null")
     }
-    Utils.using(input) {
-      in =>
+    input.autoClose(
+      in => {
         val b = new Array[Byte](4)
         in.read(b, 0, b.length)
         bytesToHexString(b)
-    } == "504B0304"
+      }) == "504B0304"
   }
 
   def isJarFileType(file: File): Boolean = {
@@ -71,12 +77,6 @@ object FileUtils {
     }
     throw new IllegalStateException(
       s"[StreamPark] Failed to create directory within $TEMP_DIR_ATTEMPTS  attempts (tried $baseName 0 to $baseName ${TEMP_DIR_ATTEMPTS - 1})")
-  }
-
-  def exists(path: String): Unit = {
-    require(
-      path != null && path.nonEmpty && new File(path).exists(),
-      s"[StreamPark] FileUtils.exists: file $path is not exist!")
   }
 
   def getPathFromEnv(env: String): String = {
@@ -115,6 +115,14 @@ object FileUtils {
     }
   }
 
+  def exists(file: Serializable): Boolean = {
+    file match {
+      case null => false
+      case f: File => f.exists()
+      case p => new File(p.toString).exists()
+    }
+  }
+
   def equals(file1: File, file2: File): Boolean = {
     (file1, file2) match {
       case (a, b) if a == null || b == null => false
@@ -143,20 +151,115 @@ object FileUtils {
   }
 
   @throws[IOException]
-  def readString(file: File): String = {
-    require(file != null && file.isFile)
-    val reader = new FileReader(file)
-    val scanner = new Scanner(reader)
-    val buffer = new mutable.StringBuilder()
-    if (scanner.hasNextLine) {
-      buffer.append(scanner.nextLine())
+  def readInputStream(in: InputStream, array: Array[Byte]): Unit = {
+    in.autoClose(
+      is => {
+        var toRead = array.length
+        var ret = 0
+        var off = 0
+        while (toRead > 0) {
+          ret = is.read(array, off, toRead)
+          if (ret < 0) throw new IOException("Bad inputStream, premature EOF")
+          toRead -= ret
+          off += ret
+        }
+      })
+  }
+
+  @throws[IOException]
+  def readFile(file: File): String = {
+    if (file.length >= Int.MaxValue) {
+      throw new IOException("Too large file, unexpected!")
+    } else {
+      val len = file.length
+      val array = new Array[Byte](len.toInt)
+      Files
+        .newInputStream(file.toPath)
+        .autoClose(
+          is => {
+            readInputStream(is, array)
+            new String(array, StandardCharsets.UTF_8)
+          })
     }
-    while (scanner.hasNextLine) {
-      buffer.append("\r\n")
-      buffer.append(scanner.nextLine())
+  }
+
+  @throws[IOException]
+  def writeFile(content: String, file: File): Unit = {
+    val outputStream = Files.newOutputStream(file.toPath)
+    val channel = Channels.newChannel(outputStream)
+    val buffer = ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8))
+    channel.write(buffer)
+    Utils.close(channel, outputStream)
+  }
+
+  @throws[IOException]
+  def readEndOfFile(file: File, maxSize: Long): Array[Byte] = {
+    var readSize = maxSize
+    new RandomAccessFile(file, "r").autoClose(
+      raFile => {
+        if (raFile.length > maxSize) {
+          raFile.seek(raFile.length - maxSize)
+        } else if (raFile.length < maxSize) {
+          readSize = raFile.length.toInt
+        }
+        val fileContent = new Array[Byte](readSize.toInt)
+        raFile.read(fileContent)
+        fileContent
+      })
+  }
+
+  /**
+   * Read the content of a file from a specified offset.
+   *
+   * @param file
+   *   The file to read from
+   * @param startOffset
+   *   The offset from where to start reading the file
+   * @param maxSize
+   *   The maximum size of the file to read
+   * @return
+   *   The content of the file as a byte array
+   * @throws IOException
+   *   if an I/O error occurs while reading the file
+   * @throws IllegalArgumentException
+   *   if the startOffset is greater than the file length
+   */
+  @throws[IOException]
+  def readFileFromOffset(file: File, startOffset: Long, maxSize: Long): Array[Byte] = {
+    if (file.length < startOffset) {
+      throw new IllegalArgumentException(
+        s"The startOffset $startOffset is great than the file length ${file.length}")
     }
-    Utils.close(scanner, reader)
-    buffer.toString()
+    new RandomAccessFile(file, "r").autoClose(
+      raFile => {
+        val readSize = Math.min(maxSize, file.length - startOffset)
+        raFile.seek(startOffset)
+        val fileContent = new Array[Byte](readSize.toInt)
+        raFile.read(fileContent)
+        fileContent
+      })
+  }
+
+  /**
+   * Roll View Log.
+   *
+   * @param path
+   *   The file path.
+   * @param offset
+   *   The offset.
+   * @param limit
+   *   The limit.
+   * @return
+   *   The content of the file.
+   */
+  def tailOf(path: String, offset: Int, limit: Int): String = try {
+    val file = new File(path)
+    if (file.exists && file.isFile) {
+      Files
+        .lines(Paths.get(path))
+        .autoClose(stream => stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n")))
+    }
+    null
   }
 
 }

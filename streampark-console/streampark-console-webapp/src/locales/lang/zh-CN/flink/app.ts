@@ -62,7 +62,7 @@ export default {
   programJar: '程序Jar文件',
   dynamicProperties: '动态参数',
   hadoopConfigTitle: '系统 Hadoop',
-  dragUploadTitle: '单击或拖动 jar 到此区域以上传',
+  dragUploadTitle: '单击或拖动 jar或py 到此区域以上传',
   dragUploadTip: '支持单次上传。您可以在此处上传本地 jar 以支持当前作业',
   dependencyError: '请先检查flink 版本.',
   status: '运行状态',

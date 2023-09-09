@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,7 +43,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     implements FlinkEnvService {
 
   @Autowired private FlinkClusterService flinkClusterService;
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   /**
    * two places will be checked: <br>
@@ -164,7 +164,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
     // 3.check if it is being used by any application
     ApiAlertException.throwIfTrue(
-        applicationService.existsByFlinkEnvId(flinkEnv.getId()),
+        applicationInfoService.existsByFlinkEnvId(flinkEnv.getId()),
         "The flink home is still in use by some application, please check.");
   }
 }

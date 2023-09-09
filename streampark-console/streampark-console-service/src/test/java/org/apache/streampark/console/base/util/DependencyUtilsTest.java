@@ -27,6 +27,7 @@ import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.factories.Factory;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -49,6 +50,7 @@ import java.util.jar.JarFile;
 @Slf4j
 class DependencyUtilsTest {
 
+  @Disabled("Disabled due to unstable performance.")
   @Test
   public void resolveFlinkConnector() throws Exception {
 

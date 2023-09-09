@@ -20,8 +20,8 @@ package org.apache.streampark.console.core.task;
 import org.apache.streampark.console.core.bean.AlertProbeMsg;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.alert.AlertService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isK
 @Component
 public class AutoHealthProbingTask {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
@@ -80,18 +80,18 @@ public class AutoHealthProbingTask {
 
   public void probe(List<Application> applications) {
     List<Application> probeApp =
-        applications.isEmpty() ? applicationService.getProbeApps() : applications;
+        applications.isEmpty() ? applicationManageService.getProbeApps() : applications;
     updateProbingState(probeApp);
     probeApp.stream().forEach(this::monitorApp);
   }
 
   private void updateProbingState(List<Application> probeApp) {
     probeApp.forEach(app -> app.setState(FlinkAppState.PROBING.getValue()));
-    applicationService.updateBatchById(probeApp);
+    applicationManageService.updateBatchById(probeApp);
   }
 
   private void handleProbeResults() {
-    List<Application> probeApps = applicationService.getProbeApps();
+    List<Application> probeApps = applicationManageService.getProbeApps();
     if (shouldRetry(probeApps)) {
       probe(probeApps);
     } else {
@@ -107,7 +107,7 @@ public class AutoHealthProbingTask {
         application -> {
           application.setProbing(false);
         });
-    applicationService.updateBatchById(applications);
+    applicationManageService.updateBatchById(applications);
   }
 
   private void alert(AlertProbeMsg alertProbeMsg) {
