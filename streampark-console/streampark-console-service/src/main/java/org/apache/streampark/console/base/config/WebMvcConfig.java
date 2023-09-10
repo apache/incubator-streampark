@@ -42,6 +42,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Autowired private UploadFileTypeInterceptor uploadFileTypeInterceptor;
 
+  private static final String[] CORS_MAPPINGS_ALLOWED_METHODS = {
+    HttpMethod.POST.name(),
+    HttpMethod.GET.name(),
+    HttpMethod.PUT.name(),
+    HttpMethod.OPTIONS.name(),
+    HttpMethod.DELETE.name()
+  };
+
   @Override
   public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
     converters.add(new ByteArrayHttpMessageConverter());
@@ -74,11 +82,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
     registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
   }
 
-  private static final String[] CORS_MAPPINGS_ALLOWED_METHODS = {
-    HttpMethod.POST.name(),
-    HttpMethod.GET.name(),
-    HttpMethod.PUT.name(),
-    HttpMethod.OPTIONS.name(),
-    HttpMethod.DELETE.name()
-  };
 }
