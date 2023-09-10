@@ -40,6 +40,13 @@ import java.util.Collections;
 @ConditionalOnWebApplication
 public class OpenapiConfig implements WebMvcConfigurer {
 
+  private static final String OPEN_API_INFO_OVERVIEW = "Apache StreamPark Api Docs";
+  private static final String OPEN_API_INFO_VERSION = "2.2.0-SNAPSHOT";
+  private static final String OPEN_API_INFO_LICENSE_NAME = "Apache-2.0 license";
+  private static final String OPEN_API_INFO_CONTACT_NAME = "Apache StreamPark";
+  private static final String OPEN_API_INFO_CONTACT_URL = "https://streampark.apache.org";
+  private static final String OPEN_API_INFO_CONTACT_EMAIL = "dev@streampark.apache.org";
+
   @Bean
   public OpenAPI apiV1Info() {
     return new OpenAPI()
@@ -77,10 +84,4 @@ public class OpenapiConfig implements WebMvcConfigurer {
     return GroupedOpenApi.builder().group("v2").pathsToMatch("/v2/**").build();
   }
 
-  private static final String OPEN_API_INFO_OVERVIEW = "Apache StreamPark Api Docs";
-  private static final String OPEN_API_INFO_VERSION = "2.2.0-SNAPSHOT";
-  private static final String OPEN_API_INFO_LICENSE_NAME = "Apache-2.0 license";
-  private static final String OPEN_API_INFO_CONTACT_NAME = "Apache StreamPark";
-  private static final String OPEN_API_INFO_CONTACT_URL = "https://streampark.apache.org/";
-  private static final String OPEN_API_INFO_CONTACT_EMAIL = "dev@streampark.apache.org";
 }
