@@ -15,24 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.client.bean
+package org.apache.streampark.common.zio
 
-import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
-import org.apache.streampark.common.enums.ExecutionMode
+import zio.{FiberFailure, IO, UIO}
 
-import javax.annotation.Nullable
+/** Util for running ZIO effects in Java. */
+object ZIOJavaUtil {
 
-import java.util.{Map => JavaMap}
+  @throws[FiberFailure]
+  def runIO[E, A](zio: IO[E, A]): A = ZIOExt.unsafeRun(zio)
 
-/** Trigger savepoint request. */
-case class TriggerSavepointRequest(
-    id: Long,
-    flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
-    jobId: String,
-    savepointPath: String,
-    nativeFormat: Boolean,
-    override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE)
-  extends SavepointRequestTrait
+  def runUIO[A](uio: UIO[A]): A = ZIOExt.unsafeRun(uio)
+
+}

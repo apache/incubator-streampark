@@ -66,3 +66,19 @@ case class DockerImageBuildResponse(
       s"dockerInnerMainJarPath: $dockerInnerMainJarPath, " +
       s"pass: $pass }"
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+case class K8sAppModeBuildResponse(
+    workspacePath: String,
+    flinkBaseImage: String,
+    mainJarPath: String,
+    extraLibJarPaths: Set[String],
+    pass: Boolean = false
+) extends FlinkBuildResult {
+  override def toString: String =
+    s"{ workspacePath: $workspacePath, " +
+      s"flinkBaseImage: $flinkBaseImage, " +
+      s"mainJarPath: $mainJarPath, " +
+      s"extraLibJarPaths: ${extraLibJarPaths.mkString(",")}, " +
+      s"pass: $pass }"
+}

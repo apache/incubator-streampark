@@ -294,6 +294,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     CancelRequest cancelRequest =
         new CancelRequest(
+            application.getId(),
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
             properties,
@@ -413,10 +414,13 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       extraParameter.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
     }
 
+    // TODO Need to display more K8s submission parameters in the front-end UI.
+    //      See: org.apache.streampark.flink.client.bean.KubernetesSubmitParam
     KubernetesSubmitParam kubernetesSubmitParam =
-        new KubernetesSubmitParam(
+        KubernetesSubmitParam.apply(
             application.getClusterId(),
             application.getK8sNamespace(),
+            application.getFlinkImage(),
             application.getK8sRestExposedTypeEnum());
 
     Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(flinkEnv, application);
