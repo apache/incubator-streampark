@@ -83,5 +83,4 @@ public class OpenapiConfig implements WebMvcConfigurer {
   public GroupedOpenApi publicApiV2() {
     return GroupedOpenApi.builder().group("v2").pathsToMatch("/v2/**").build();
   }
-
 }
