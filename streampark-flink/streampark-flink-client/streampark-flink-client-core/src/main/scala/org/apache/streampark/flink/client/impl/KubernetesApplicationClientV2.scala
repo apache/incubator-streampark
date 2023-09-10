@@ -25,6 +25,7 @@ import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, JobM
 import org.apache.streampark.flink.kubernetes.v2.operator.FlinkK8sOperator
 import org.apache.streampark.flink.packer.pipeline.K8sAppModeBuildResponse
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
@@ -88,12 +89,12 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       .getOrElse("default")
 
     val name = Option(submitReq.k8sSubmitParam.clusterId)
-      .filter(!_.isBlank)
+      .filter(str => StringUtils.isNotBlank(str))
       .getOrElse(return Left("cluster-id should not be empty"))
 
     val image = submitReq.k8sSubmitParam.baseImage
       .orElse(Option(buildResult.flinkBaseImage))
-      .filter(!_.isBlank)
+      .filter(str => StringUtils.isNotBlank(str))
       .getOrElse(return Left("Flink base image should not be empty"))
 
     val imagePullPolicy = flinkConfObj
@@ -180,7 +181,10 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
         logConfigs
           .map { case (name, path) => name -> os.Path(path) }
           .filter { case (_, path) => Try(os.exists(path) && os.isFile(path)).getOrElse(false) }
-          .map { case (name, path) => name -> Try(os.read(path)).toOption.filter(!_.isBlank) }
+          .map {
+            case (name, path) =>
+              name -> Try(os.read(path)).toOption.filter(str => StringUtils.isNotBlank(str))
+          }
           .filter { case (_, content) => content.isDefined }
           .map { case (name, content) => name -> content.get }
           .foreach { case (name, content) => items += name -> content }
