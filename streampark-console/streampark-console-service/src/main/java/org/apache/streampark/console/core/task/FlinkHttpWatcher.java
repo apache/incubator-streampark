@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.enums.FlinkAppState;
@@ -270,10 +271,11 @@ public class FlinkHttpWatcher {
   }
 
   /**
-   * Get the current task running status information from flink restapi
+   * Get the current task running status information from Flink rest api.
    *
-   * @param application application
-   * @param stopFrom stopFrom
+   * @param application The application for which to retrieve the information
+   * @param stopFrom The stop source from which the method was called
+   * @throws Exception if an error occurs while retrieving the information from the Flink REST API
    */
   private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
     JobsOverview jobsOverview = httpJobsOverview(application);
@@ -780,14 +782,25 @@ public class FlinkHttpWatcher {
   }
 
   /**
-   * The situation of abnormal operation alarm is as follows: When the job running mode is yarn per
-   * job or yarn application, when the job is abnormal, an alarm will be triggered directly; The job
-   * running mode is yarn session or reome: a. If the flink cluster is not configured with an alarm
-   * information, it will directly alarm when the job is abnormal. b. If the flink cluster is
-   * configured with alarm information: if the abnormal behavior of the job is caused by an
-   * abnormality in the flink cluster, block the alarm of the job and wait for the flink cluster
-   * alarm; If the abnormal behavior of the job is caused by itself and the flink cluster is running
-   * normally, the job will an alarm
+   * Describes the alarming behavior under abnormal operation for different job running modes:
+   *
+   * <p>- <strong>yarn per job</strong> or <strong>yarn application</strong>
+   *
+   * <p>Directly triggers an alarm when the job encounters an abnormal condition.<br>
+   *
+   * <p>- <strong>yarn session</strong> or <strong>remote</strong>
+   *
+   * <p>If the Flink cluster configuration lacks alarm information, it triggers an alarm directly
+   * when the job is abnormal.<br>
+   * If the Flink cluster configuration has alarm information:
+   *
+   * <p>When the job is abnormal due to an issue in the Flink cluster, the job's alarm will be held
+   * back, instead waiting for the Flink cluster's alarm.<br>
+   * When the job is abnormal due to the job itself and the Flink cluster is running normally, an
+   * alarm specific to the job will be triggered.
+   *
+   * @param app application
+   * @param appState application state
    */
   private void doAlert(Application app, FlinkAppState appState) {
     if (app.getProbing()) {
@@ -797,7 +810,7 @@ public class FlinkHttpWatcher {
     switch (app.getExecutionModeEnum()) {
       case YARN_APPLICATION:
       case YARN_PER_JOB:
-        alertService.alert(app, appState);
+        alertService.alert(app.getAlertId(), AlertTemplate.of(app, appState));
         return;
       case YARN_SESSION:
       case REMOTE:
@@ -807,7 +820,7 @@ public class FlinkHttpWatcher {
               "application with id {} is yarn session or remote and flink cluster with id {} is alive, application send alert",
               app.getId(),
               app.getFlinkClusterId());
-          alertService.alert(app, appState);
+          alertService.alert(app.getAlertId(), AlertTemplate.of(app, appState));
         }
         break;
       default:

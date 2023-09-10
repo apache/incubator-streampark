@@ -493,6 +493,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     Map<String, Object> properties = this.tryGetRestProps(application, cluster);
 
     return new TriggerSavepointRequest(
+        application.getId(),
         flinkEnv.getFlinkVersion(),
         application.getExecutionModeEnum(),
         properties,

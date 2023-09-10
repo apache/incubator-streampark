@@ -15,37 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.common.zio
 
-import java.util.Arrays;
+import zio.{FiberFailure, IO, UIO}
 
-public enum BuildState {
+/** Util for running ZIO effects in Java. */
+object ZIOJavaUtil {
 
-  /** has changed, need rebuild */
-  NEED_REBUILD(-2),
-  /** has cancelled, not build */
-  NOT_BUILD(-1),
+  @throws[FiberFailure]
+  def runIO[E, A](zio: IO[E, A]): A = ZIOExt.unsafeRun(zio)
 
-  /** building */
-  BUILDING(0),
+  def runUIO[A](uio: UIO[A]): A = ZIOExt.unsafeRun(uio)
 
-  /** build successful */
-  SUCCESSFUL(1),
-
-  /** build failed */
-  FAILED(2);
-
-  private final int value;
-
-  BuildState(int value) {
-    this.value = value;
-  }
-
-  public int get() {
-    return this.value;
-  }
-
-  public static BuildState of(Integer state) {
-    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
-  }
 }

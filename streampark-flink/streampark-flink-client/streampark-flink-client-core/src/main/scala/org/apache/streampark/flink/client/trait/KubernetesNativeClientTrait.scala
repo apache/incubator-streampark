@@ -44,7 +44,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
       .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
       .safeSet(
         KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
-        covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))
+        covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType.get))
 
     if (submitRequest.buildResult != null) {
       if (submitRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {

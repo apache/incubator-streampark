@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class AlertProbeMsg {
 
-  private List<Integer> alertId;
+  private List<Long> alertId;
 
   private String user;
 

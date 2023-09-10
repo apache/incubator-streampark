@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.common.zio.ZIOJavaUtil;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -54,6 +56,7 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
+import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import org.apache.commons.lang3.StringUtils;
@@ -176,9 +179,11 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     // 8) remove app
     removeApp(application);
-
     if (isKubernetesApp(application)) {
       k8SFlinkTrackMonitor.unWatching(toTrackId(application));
+      if (K8sFlinkConfig.isV2Enabled()) {
+        ZIOJavaUtil.runUIO(FlinkK8sObserver.untrackById(application.getId()));
+      }
     } else {
       FlinkHttpWatcher.unWatching(appParam.getId());
     }

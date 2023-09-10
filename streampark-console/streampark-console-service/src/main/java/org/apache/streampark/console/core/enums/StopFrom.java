@@ -17,9 +17,7 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
-
-public enum StopFrom implements Serializable {
+public enum StopFrom {
   /** None */
   NONE,
   /** StreamPark */

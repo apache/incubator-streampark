@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public enum CandidateType implements Serializable {
+public enum CandidateType {
 
   /** non candidate */
   NONE(0),

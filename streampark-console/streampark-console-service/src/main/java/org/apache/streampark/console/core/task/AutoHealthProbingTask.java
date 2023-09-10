@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.console.core.bean.AlertProbeMsg;
+import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.service.alert.AlertService;
@@ -111,7 +112,8 @@ public class AutoHealthProbingTask {
   }
 
   private void alert(AlertProbeMsg alertProbeMsg) {
-    alertService.alert(alertProbeMsg);
+    alertProbeMsg.getAlertId().stream()
+        .forEach((alterId) -> alertService.alert(alterId, AlertTemplate.of(alertProbeMsg)));
   }
 
   private List<AlertProbeMsg> generateProbeResults(List<Application> applications) {
@@ -122,7 +124,7 @@ public class AutoHealthProbingTask {
                 Collectors.collectingAndThen(
                     Collectors.toList(),
                     apps -> {
-                      List<Integer> alertIds = new ArrayList<>();
+                      List<Long> alertIds = new ArrayList<>();
                       AlertProbeMsg alertProbeMsg = new AlertProbeMsg();
                       apps.forEach(
                           app -> {

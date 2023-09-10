@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.OptionState;
@@ -107,7 +108,7 @@ public class FlinkK8sChangeEventListener {
               log.info("application with id {} is probing, don't send alert", app.getId());
               return;
             }
-            alertService.alert(app, state);
+            alertService.alert(app.getAlertId(), AlertTemplate.of(app, state));
           });
     }
   }

@@ -26,6 +26,7 @@ import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
@@ -138,15 +139,15 @@ public class FlinkClusterWatcher {
               cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
       cluster.setClusterState(state.getValue());
       cluster.setEndTime(new Date());
-      alertService.alert(cluster, state);
+      alertService.alert(cluster.getAlertId(), AlertTemplate.of(cluster, state));
     }
   }
 
   /**
-   * cluster get state from flink or yarn api
+   * Retrieves the state of a cluster from the Flink or YARN API.
    *
-   * @param flinkCluster
-   * @return
+   * @param flinkCluster The FlinkCluster object representing the cluster.
+   * @return The ClusterState object representing the state of the cluster.
    */
   public ClusterState getClusterState(FlinkCluster flinkCluster) {
     ClusterState state = FAILED_STATES.getIfPresent(flinkCluster.getId());
@@ -164,10 +165,10 @@ public class FlinkClusterWatcher {
   }
 
   /**
-   * get remote cluster state
+   * Retrieves the state of a cluster from the Flink or YARN API using the remote HTTP endpoint.
    *
-   * @param flinkCluster
-   * @return
+   * @param flinkCluster The FlinkCluster object representing the cluster.
+   * @return The ClusterState object representing the state of the cluster.
    */
   private ClusterState httpRemoteClusterState(FlinkCluster flinkCluster) {
     return getStateFromFlinkRestApi(flinkCluster);

@@ -36,19 +36,6 @@ import java.util.{Map => JavaMap}
 import scala.collection.convert.ImplicitConversions._
 import scala.util.Try
 
-/**
- * @param clusterId
- *   flink cluster id in k8s cluster.
- * @param kubernetesNamespace
- *   k8s namespace.
- * @param flinkRestExposedType
- *   flink rest-service exposed type on k8s cluster.
- */
-case class KubernetesSubmitParam(
-    clusterId: String,
-    kubernetesNamespace: String,
-    @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
-
 case class SubmitRequest(
     flinkVersion: FlinkVersion,
     executionMode: ExecutionMode,

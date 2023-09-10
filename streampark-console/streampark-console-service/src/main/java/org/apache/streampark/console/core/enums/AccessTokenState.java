@@ -17,9 +17,7 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
-
-public enum AccessTokenState implements Serializable {
+public enum AccessTokenState {
 
   /** not added token */
   NULL(0),

@@ -32,6 +32,7 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.flink.kubernetes.v2.fs.EmbeddedFileServer;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -72,6 +73,7 @@ public class EnvInitializer implements ApplicationRunner {
           "^streampark-flink-shims_flink-(1.1[2-7])_(2.12)-(.*).jar$",
           Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+  @SneakyThrows
   @Override
   public void run(ApplicationArguments args) throws Exception {
     Optional<String> profile =

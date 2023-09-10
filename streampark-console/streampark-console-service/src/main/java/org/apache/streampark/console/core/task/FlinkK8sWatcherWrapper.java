@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.task;
 
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
@@ -82,11 +83,15 @@ public class FlinkK8sWatcherWrapper {
   }
 
   private void initFlinkK8sWatcher(@Nonnull FlinkK8sWatcher trackMonitor) {
-    // register change event listener
-    trackMonitor.registerListener(flinkK8sChangeEventListener);
-    // recovery tracking list
-    List<TrackId> k8sApp = getK8sWatchingApps();
-    k8sApp.forEach(trackMonitor::doWatching);
+    if (!K8sFlinkConfig.isV2Enabled()) {
+      // register change event listener
+      trackMonitor.registerListener(flinkK8sChangeEventListener);
+      // recovery tracking list
+      List<TrackId> k8sApp = getK8sWatchingApps();
+      k8sApp.forEach(trackMonitor::doWatching);
+    } else {
+      // TODO [flink-k8s-v2] Recovery tracking list and invoke FlinkK8sObserver.track()
+    }
   }
 
   /** get flink-k8s job tracking application from db. */

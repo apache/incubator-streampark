@@ -25,6 +25,7 @@ import javax.annotation.Nullable
 import java.util.{Map => JavaMap}
 
 case class CancelRequest(
+    id: Long,
     flinkVersion: FlinkVersion,
     executionMode: ExecutionMode,
     @Nullable properties: JavaMap[String, Any],

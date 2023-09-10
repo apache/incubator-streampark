@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.{BuildInEvent, FlinkJobStateEvent, FlinkJobStatusChangeEvent}
@@ -64,13 +65,15 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   }
 
   def doWatching(trackId: TrackId): Unit = {
-    if (trackId.isLegal) {
+    if (!K8sFlinkConfig.isV2Enabled && trackId.isLegal) {
       watchController.trackIds.set(trackId)
     }
   }
 
   def unWatching(trackId: TrackId): Unit = {
-    watchController.canceling.set(trackId)
+    if (!K8sFlinkConfig.isV2Enabled) {
+      watchController.canceling.set(trackId)
+    }
   }
 
   override def isInWatching(trackId: TrackId): Boolean = watchController.isInWatching(trackId)

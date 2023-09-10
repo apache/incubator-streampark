@@ -17,10 +17,8 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
-
 /** configFile Type enum */
-public enum PlaceholderType implements Serializable {
+public enum PlaceholderType {
   JOB_ID("job_id"),
 
   JOB_NAME("job_name"),

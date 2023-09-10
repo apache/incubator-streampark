@@ -40,20 +40,27 @@ import java.util.Collections;
 @ConditionalOnWebApplication
 public class OpenapiConfig implements WebMvcConfigurer {
 
+  private static final String OPEN_API_INFO_OVERVIEW = "Apache StreamPark Api Docs";
+  private static final String OPEN_API_INFO_VERSION = "2.2.0-SNAPSHOT";
+  private static final String OPEN_API_INFO_LICENSE_NAME = "Apache-2.0 license";
+  private static final String OPEN_API_INFO_CONTACT_NAME = "Apache StreamPark";
+  private static final String OPEN_API_INFO_CONTACT_URL = "https://streampark.apache.org";
+  private static final String OPEN_API_INFO_CONTACT_EMAIL = "dev@streampark.apache.org";
+
   @Bean
   public OpenAPI apiV1Info() {
     return new OpenAPI()
         .info(
             new Info()
-                .title("Apache StreamPark Api Docs")
-                .description("Apache StreamPark Api Docs")
+                .title(OPEN_API_INFO_OVERVIEW)
+                .description(OPEN_API_INFO_OVERVIEW)
                 .contact(
                     new Contact()
-                        .name("Apache StreamPark")
-                        .url("https://streampark.apache.org/")
-                        .email("dev@streampark.apache.org"))
-                .version("2.2.0-SNAPSHOT")
-                .license(new License().name("Apache-2.0 license")))
+                        .name(OPEN_API_INFO_CONTACT_NAME)
+                        .url(OPEN_API_INFO_CONTACT_URL)
+                        .email(OPEN_API_INFO_CONTACT_EMAIL))
+                .version(OPEN_API_INFO_VERSION)
+                .license(new License().name(OPEN_API_INFO_LICENSE_NAME)))
         .components(
             new Components()
                 .addSecuritySchemes(

@@ -21,12 +21,10 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 
 import lombok.Getter;
 
-import java.io.Serializable;
-
 import scala.Enumeration;
 
 @Getter
-public enum FlinkAppState implements Serializable {
+public enum FlinkAppState {
 
   /** Added new job to database. */
   ADDED(0),

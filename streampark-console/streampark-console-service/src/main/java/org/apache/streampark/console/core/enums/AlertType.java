@@ -17,7 +17,15 @@
 
 package org.apache.streampark.console.core.enums;
 
+import org.apache.streampark.console.core.service.alert.AlertNotifyService;
+import org.apache.streampark.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
+import org.apache.streampark.console.core.service.alert.impl.EmailAlertNotifyServiceImpl;
+import org.apache.streampark.console.core.service.alert.impl.HttpCallbackAlertNotifyServiceImpl;
+import org.apache.streampark.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
+import org.apache.streampark.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
+
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -27,27 +35,32 @@ import java.util.List;
 import java.util.Map;
 
 /** The AlertType enum represents different types of alerts that can be used for notifications. */
+@Getter
 public enum AlertType {
+
   /** Email */
-  EMAIL(1),
+  EMAIL(1, EmailAlertNotifyServiceImpl.class),
 
   /** Ding talk */
-  DING_TALK(2),
+  DING_TALK(2, DingTalkAlertNotifyServiceImpl.class),
 
   /** WeChat work */
-  WE_COM(4),
+  WE_COM(4, WeComAlertNotifyServiceImpl.class),
 
   /** Http callback */
-  HTTP_CALLBACK(8),
+  HTTP_CALLBACK(8, HttpCallbackAlertNotifyServiceImpl.class),
 
   /** Lark */
-  LARK(16);
+  LARK(16, LarkAlertNotifyServiceImpl.class);
 
   /** The empty level */
   private static final Integer EMPTY_LEVEL = 0;
 
   /** Get the alert type by the code */
-  private final Integer code;
+  @JsonValue private final Integer code;
+
+  /** Holds the reference to a Class object. */
+  private final Class<? extends AlertNotifyService> clazz;
 
   /** A cache map used to quickly get the alert type from an integer code */
   private static final Map<Integer, AlertType> CACHE_MAP = createCacheMap();
@@ -60,13 +73,9 @@ public enum AlertType {
     return Collections.unmodifiableMap(map);
   }
 
-  AlertType(Integer code) {
+  AlertType(Integer code, Class<? extends AlertNotifyService> clazz) {
     this.code = code;
-  }
-
-  @JsonValue
-  public int getCode() {
-    return this.code;
+    this.clazz = clazz;
   }
 
   public static List<AlertType> decode(Integer level) {
