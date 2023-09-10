@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public enum CheckPointStatus implements Serializable {
+public enum CheckPointStatus {
   /** IN_PROGRESS */
   IN_PROGRESS(1),
   /** COMPLETED */

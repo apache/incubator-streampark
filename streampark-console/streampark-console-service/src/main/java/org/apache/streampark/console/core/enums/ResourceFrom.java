@@ -19,11 +19,10 @@ package org.apache.streampark.console.core.enums;
 
 import lombok.Getter;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 @Getter
-public enum ResourceFrom implements Serializable {
+public enum ResourceFrom {
 
   /** cicd(build from cvs) */
   CICD(1),

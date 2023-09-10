@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public enum ReleaseState implements Serializable {
+public enum ReleaseState {
 
   /** release failed */
   FAILED(-1),

@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public enum NoticeType implements Serializable {
+public enum NoticeType {
   /** exception */
   EXCEPTION(1),
   /** message */

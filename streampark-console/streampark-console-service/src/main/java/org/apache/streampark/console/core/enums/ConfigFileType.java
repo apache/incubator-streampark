@@ -19,12 +19,11 @@ package org.apache.streampark.console.core.enums;
 
 import lombok.Getter;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 /** configFile Type enum */
 @Getter
-public enum ConfigFileType implements Serializable {
+public enum ConfigFileType {
   YAML(1, "yaml"),
 
   PROPERTIES(2, "prop"),

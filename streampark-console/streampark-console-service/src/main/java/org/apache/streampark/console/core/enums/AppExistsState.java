@@ -17,9 +17,7 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
-
-public enum AppExistsState implements Serializable {
+public enum AppExistsState {
 
   /** no exists */
   NO(0),

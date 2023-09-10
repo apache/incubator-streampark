@@ -19,10 +19,8 @@ package org.apache.streampark.console.core.enums;
 
 import lombok.Getter;
 
-import java.io.Serializable;
-
 @Getter
-public enum EffectiveType implements Serializable {
+public enum EffectiveType {
   /** config */
   CONFIG(1),
   /** FLINKSQL */

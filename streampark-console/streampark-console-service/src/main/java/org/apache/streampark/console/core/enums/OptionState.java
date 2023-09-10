@@ -19,11 +19,10 @@ package org.apache.streampark.console.core.enums;
 
 import lombok.Getter;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 @Getter
-public enum OptionState implements Serializable {
+public enum OptionState {
 
   /** Application which is currently action: none. */
   NONE(0),
