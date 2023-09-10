@@ -17,22 +17,17 @@
 
 package org.apache.streampark.console.core.service.alert;
 
-import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.console.base.exception.AlertException;
-import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.FlinkCluster;
-import org.apache.streampark.console.core.enums.CheckPointStatus;
-import org.apache.streampark.console.core.enums.FlinkAppState;
 
+/** The AlertService interface represents a service for sending alert. */
 public interface AlertService {
 
-  void alert(Application application, CheckPointStatus checkPointStatus);
-
-  void alert(Application application, FlinkAppState appState);
-
-  void alert(FlinkCluster flinkCluster, ClusterState clusterState);
-
-  boolean alert(AlertConfigParams params, AlertTemplate alertTemplate) throws AlertException;
+  /**
+   * Sends an alert based on the given alert configuration ID and alert template.
+   *
+   * @param alertConfigId the ID of the alert configuration
+   * @param alertTemplate the alert template to use for generating the alert content
+   * @return true if the alert is sent successfully, false otherwise
+   */
+  boolean alert(Long alertConfigId, AlertTemplate alertTemplate);
 }

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.task;
 
+import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
@@ -110,7 +111,8 @@ public class CheckpointProcessor {
           }
           switch (failoverStrategy) {
             case ALERT:
-              alertService.alert(application, CheckPointStatus.FAILED);
+              alertService.alert(
+                  application.getAlertId(), AlertTemplate.of(application, CheckPointStatus.FAILED));
               break;
             case RESTART:
               try {
