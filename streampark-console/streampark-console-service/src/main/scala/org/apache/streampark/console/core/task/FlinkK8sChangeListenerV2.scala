@@ -40,6 +40,7 @@ import org.springframework.stereotype.Component
 import zio.{UIO, ZIO}
 import zio.ZIO.{logError => zlogError}
 import zio.ZIOAspect.annotated
+import zio.stream.{UStream, ZStream}
 
 import javax.annotation.PostConstruct
 
@@ -85,65 +86,77 @@ class FlinkK8sChangeListenerV2 extends Logger {
   }
 
   /** Subscribe Flink job status change from FlinkK8sObserver */
-  private def subscribeJobStatusChange: UIO[Unit] = FlinkK8sObserver.evaluatedJobSnaps
-    .flatSubscribeValues()
-    // Convert EvalJobState to FlinkAppState
-    .map(snap => snap -> FlinkAppStateConverter.k8sEvalJobStateToFlinkAppState(snap.evalState))
-    // Update the corresponding columns of Application record
-    .tap {
-      case (snap: JobSnapshot, convertedState: FlinkAppState) =>
-        safeUpdateApplicationRecord(snap.appId) {
-          wrapper =>
-            snap.jobStatus.foreach {
-              jobStatus =>
-                wrapper.typedSet(_.getJobId, jobStatus.jobId)
-                wrapper.typedSet(_.getStartTime, new Date(jobStatus.startTs))
-                wrapper.typedSet(_.getEndTime, jobStatus.endTs.map(new Date(_)).orNull)
-                wrapper.typedSet(_.getDuration, jobStatus.duration)
-                wrapper.typedSet(_.getTotalTask, jobStatus.tasks.map(_.total).getOrElse(0))
-            }
-            wrapper.typedSet(_.getState, convertedState.getValue)
-            // when a flink job status change event can be received,
-            // it means that the operation command sent by streampark has been completed.
-            wrapper.typedSet(_.getOptions, OptionState.NONE.getValue)
-        }
-    }
-    // Alert for unhealthy job states in parallel
-    .filter { case (_, state) => alterStateList.contains(state) }
-    .mapZIOPar(10) {
-      case (snap, state) =>
-        safeGetApplicationRecord(snap.appId).flatMap {
-          case None => ZIO.unit
-          case Some(app) =>
-            ZIO
-              .attemptBlocking(alertService.alert(app.getAlertId, AlertTemplate.of(app, state)))
-              .retryN(3)
-              .tapError(err => zlogError(s"Fail to alter unhealthy state: ${err.getMessage}"))
-              .ignore @@
-              annotated("appId" -> app.getId.toString, "state" -> state.toString)
-        }
-    }
-    .runDrain
+  private def subscribeJobStatusChange: UIO[Unit] = {
+
+    def process(subStream: UStream[JobSnapshot]): UStream[Unit] = subStream
+      // Convert EvalJobState to FlinkAppState
+      .map(snap => snap -> FlinkAppStateConverter.k8sEvalJobStateToFlinkAppState(snap.evalState))
+      // Update the corresponding columns of Application record
+      .tap {
+        case (snap: JobSnapshot, convertedState: FlinkAppState) =>
+          safeUpdateApplicationRecord(snap.appId) {
+            wrapper =>
+              snap.jobStatus.foreach {
+                jobStatus =>
+                  wrapper.typedSet(_.getJobId, jobStatus.jobId)
+                  wrapper.typedSet(_.getStartTime, new Date(jobStatus.startTs))
+                  wrapper.typedSet(_.getEndTime, jobStatus.endTs.map(new Date(_)).orNull)
+                  wrapper.typedSet(_.getDuration, jobStatus.duration)
+                  wrapper.typedSet(_.getTotalTask, jobStatus.tasks.map(_.total).getOrElse(0))
+              }
+              wrapper.typedSet(_.getState, convertedState.getValue)
+              // when a flink job status change event can be received,
+              // it means that the operation command sent by streampark has been completed.
+              wrapper.typedSet(_.getOptions, OptionState.NONE.getValue)
+          }
+      }
+      // Alert for unhealthy job states in parallel
+      .filter { case (_, state) => alterStateList.contains(state) }
+      .mapZIOPar(10) {
+        case (snap, state) =>
+          safeGetApplicationRecord(snap.appId).flatMap {
+            case None => ZIO.unit
+            case Some(app) =>
+              ZIO
+                .attemptBlocking(alertService.alert(app.getAlertId, AlertTemplate.of(app, state)))
+                .retryN(3)
+                .tapError(err => zlogError(s"Fail to alter unhealthy state: ${err.getMessage}"))
+                .ignore @@
+                annotated("appId" -> app.getId.toString, "state" -> state.toString)
+          }
+      }
+
+    FlinkK8sObserver.evaluatedJobSnaps
+      .flatSubscribeValues()
+      // Handle events grouped by appId in parallel while each appId group would be executed in serial.
+      .groupByKey(_.appId) { case (_, substream) => process(substream) }
+      .runDrain
+  }
 
   /** Subscribe Flink application job metrics change from FlinkK8sObserver */
-  private def subscribeApplicationJobMetricsChange: UIO[Unit] = FlinkK8sObserver.clusterMetricsSnaps
-    .flatSubscribe()
-    // Combine with the corresponding ApplicationJobKey
-    .combineWithTypedTrackKey[ApplicationJobKey]
-    .filterSome
-    // Update metrics info of the corresponding Application record
-    .mapZIO {
-      case (trackKey: ApplicationJobKey, metrics: ClusterMetrics) =>
-        safeUpdateApplicationRecord(trackKey.id) {
-          wrapper =>
-            wrapper.typedSet(_.getJmMemory, metrics.totalJmMemory)
-            wrapper.typedSet(_.getTmMemory, metrics.totalTmMemory)
-            wrapper.typedSet(_.getTotalTM, metrics.totalTm)
-            wrapper.typedSet(_.getTotalSlot, metrics.totalSlot)
-            wrapper.typedSet(_.getAvailableSlot, metrics.availableSlot)
-        }
-    }
-    .runDrain
+  private def subscribeApplicationJobMetricsChange: UIO[Unit] = {
+    FlinkK8sObserver.clusterMetricsSnaps
+      .flatSubscribe()
+      // Combine with the corresponding ApplicationJobKey
+      .combineWithTypedTrackKey[ApplicationJobKey]
+      .filterSome
+      .groupByKey(_._1.id) {
+        case (_, substream) =>
+          // Update metrics info of the corresponding Application record
+          substream.mapZIO {
+            case (trackKey: ApplicationJobKey, metrics: ClusterMetrics) =>
+              safeUpdateApplicationRecord(trackKey.id) {
+                wrapper =>
+                  wrapper.typedSet(_.getJmMemory, metrics.totalJmMemory)
+                  wrapper.typedSet(_.getTmMemory, metrics.totalTmMemory)
+                  wrapper.typedSet(_.getTotalTM, metrics.totalTm)
+                  wrapper.typedSet(_.getTotalSlot, metrics.totalSlot)
+                  wrapper.typedSet(_.getAvailableSlot, metrics.availableSlot)
+              }
+          }
+      }
+      .runDrain
+  }
 
   /** Subscribe K8s rest endpoint of Flink Application mode job from FlinkK8sObserver. */
   private def subscribeApplicationJobRestSvcEndpointChange: UIO[Unit] = {
@@ -152,10 +165,13 @@ class FlinkK8sChangeListenerV2 extends Logger {
       // Combine with the corresponding ApplicationJobKey
       .combineWithTypedTrackKey[ApplicationJobKey]
       .filterSome
-      .mapZIO {
-        case (key: ApplicationJobKey, endpoint: RestSvcEndpoint) =>
-          safeUpdateApplicationRecord(key.id) {
-            wrapper => wrapper.typedSet(_.getJobManagerUrl, endpoint.ipRest)
+      .groupByKey(_._1.id) {
+        case (_, substream) =>
+          // Update jobManagerUrl of the corresponding Application record
+          substream.mapZIO {
+            case (key: ApplicationJobKey, endpoint: RestSvcEndpoint) =>
+              safeUpdateApplicationRecord(key.id)(
+                wrapper => wrapper.typedSet(_.getJobManagerUrl, endpoint.ipRest))
           }
       }
       .runDrain
