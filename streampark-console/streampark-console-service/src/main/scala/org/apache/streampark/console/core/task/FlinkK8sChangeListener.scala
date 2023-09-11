@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.task
 
 import org.apache.streampark.common.enums.ExecutionMode
-import org.apache.streampark.common.util.ThreadUtils
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
 import org.apache.streampark.common.zio.ZIOExt.IOOps
 import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
@@ -27,7 +26,6 @@ import org.apache.streampark.console.core.service.{ApplicationService, FlinkClus
 import org.apache.streampark.console.core.service.alert.AlertService
 import org.apache.streampark.console.core.utils.FlinkAppStateConverter
 import org.apache.streampark.flink.kubernetes.v2.model._
-import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 import org.apache.streampark.flink.kubernetes.v2.observer.{FlinkK8sObserver, Name, Namespace}
 import org.apache.streampark.flink.kubernetes.v2.operator.OprError.TrackKeyNotFound
 
@@ -35,9 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import zio.{UIO, ZIO}
+import zio.ZIO.logError
+import zio.ZIOAspect.annotated
 
 import java.util.Date
-import java.util.concurrent.{ExecutorService, LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
 @Component
 class FlinkK8sChangeListener {
@@ -49,47 +48,58 @@ class FlinkK8sChangeListener {
   @Lazy @Autowired
   private var alertService: AlertService = _
 
-  private val executor: ExecutorService = new ThreadPoolExecutor(
-    Runtime.getRuntime.availableProcessors * 5,
-    Runtime.getRuntime.availableProcessors * 10,
-    20L,
-    TimeUnit.SECONDS,
-    new LinkedBlockingQueue[Runnable](1024),
-    ThreadUtils.threadFactory("streampark-notify-executor"),
-    new ThreadPoolExecutor.AbortPolicy)
-
   subscribeJobStatusChange.forkDaemon.runIO
   subscribeMetricsChange.forkDaemon.runIO
   subscribeRestSvcEndpointChange.forkDaemon.runIO
 
+  private val alterStateList =
+    Array(
+      FlinkAppState.FAILED,
+      FlinkAppState.LOST,
+      FlinkAppState.RESTARTING,
+      FlinkAppState.FINISHED)
+
   def subscribeJobStatusChange: UIO[Unit] = {
     FlinkK8sObserver.evaluatedJobSnaps
       .flatSubscribeValues()
-      .foreach {
+      // Get Application records and convert JobSnapshot to Application
+      .mapZIO {
         jobSnap =>
           ZIO
-            .attempt {
-              // update application recrod
-              val appId = jobSnap.appId
-              // get pre application record
-              val app: Application = applicationService.getById(appId)
-              if (app == null || jobSnap.evalState != null) return ZIO.unit
-              applicationService.persistMetrics(app)
-              // update application record
-              setByJobStatusCV(app, jobSnap)
-
-              // send alert
-              val state: FlinkAppState = FlinkAppState.of(app.getState)
-              if (
-                FlinkAppState.FAILED == state || FlinkAppState.LOST == state || FlinkAppState.RESTARTING == state || FlinkAppState.FINISHED == state
-              ) {
-                executor.execute(() => alertService.alert(app, state))
-              }
-
+            .attemptBlocking {
+              Option(applicationService.getById(jobSnap.appId))
+                .map(app => setByJobStatusCV(app, jobSnap))
             }
-            .retryN(3)
-            .ignore
+            .catchAll {
+              err =>
+                logError(s"Fail to get Application records: ${err.getMessage}")
+                  .as(None) @@ annotated("appId" -> jobSnap.appId.toString)
+            }
       }
+      .filter(_.nonEmpty)
+      .map(_.get)
+      // Save Application records
+      .tap {
+        app =>
+          ZIO
+            .attemptBlocking(applicationService.persistMetrics(app))
+            .retryN(3)
+            .tapError(err => logError(s"Fail to persist Application status: ${err.getMessage}"))
+            .ignore @@ annotated("appId" -> app.getAppId)
+      }
+      // Alert for unhealthy states in parallel
+      .mapZIOPar(10) {
+        app =>
+          val state = FlinkAppState.of(app.getState)
+          ZIO
+            .attemptBlocking(alertService.alert(app, state))
+            .when(alterStateList.contains(state))
+            .retryN(3)
+            .tapError(
+              err => logError(s"Fail to alter unhealthy application state: ${err.getMessage}"))
+            .ignore @@ annotated("appId" -> app.getAppId, "state" -> state.toString)
+      }
+      .runDrain
   }
 
   def subscribeMetricsChange: UIO[Unit] = {
@@ -145,8 +155,8 @@ class FlinkK8sChangeListener {
 
               val flinkCluster: FlinkCluster = flinkClusterService.getById(app.getFlinkClusterId)
 
-              if (restSvcEndpoint == null || restSvcEndpoint.chooseRest == null) return ZIO.unit
-              val url = restSvcEndpoint.chooseRest
+              if (restSvcEndpoint == null || restSvcEndpoint.ipRest == null) return ZIO.unit
+              val url = restSvcEndpoint.ipRest
               app.setFlinkRestUrl(url)
               applicationService.persistMetrics(app)
 
@@ -159,12 +169,9 @@ class FlinkK8sChangeListener {
       }
   }
 
-  private def setByJobStatusCV(app: Application, jobSnapshot: JobSnapshot): Unit = { // infer the final flink job state
-    val evalJobState: EvalJobState = inferEvalJobStateFromPersist(
-      jobSnapshot.evalState,
-      FlinkAppStateConverter.flinkAppStateToK8sEvalJobState(FlinkAppState.of(app.getState)))
-
-    val state: FlinkAppState = FlinkAppStateConverter.k8sEvalJobStateToFlinkAppState(evalJobState)
+  private def setByJobStatusCV(app: Application, jobSnapshot: JobSnapshot): Application = { // infer the final flink job state
+    val state: FlinkAppState =
+      FlinkAppStateConverter.k8sEvalJobStateToFlinkAppState(jobSnapshot.evalState)
     val jobStatusOption: Option[JobStatus] = jobSnapshot.jobStatus
 
     if (jobStatusOption.nonEmpty) {
@@ -203,20 +210,6 @@ class FlinkK8sChangeListener {
     // when a flink job status change event can be received, it means
     // that the operation command sent by streampark has been completed.
     app.setOptionState(OptionState.NONE.getValue)
-  }
-
-  def inferEvalJobStateFromPersist(current: EvalJobState, previous: EvalJobState): EvalJobState = {
-    current match {
-      case EvalJobState.LOST =>
-        if (EvalJobState.effectEndStates.contains(current)) previous else EvalJobState.TERMINATED
-      case EvalJobState.TERMINATED =>
-        previous match {
-          case EvalJobState.CANCELLING => EvalJobState.CANCELED
-          case EvalJobState.FAILING => EvalJobState.FAILED
-          case _ =>
-            EvalJobState.TERMINATED
-        }
-      case _ => current
-    }
+    app
   }
 }
