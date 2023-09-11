@@ -45,7 +45,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
     submitRequest.checkBuildResult()
     val buildResult = submitRequest.buildResult.asInstanceOf[K8sAppModeBuildResponse]
 
-    // Convert to FlinkDeployment CR definition
+    // Convert to FlinkSessionJobDef CR definition
     val flinkSessionJobDef = genFlinkSessionJobDef(submitRequest, flinkConfig, buildResult) match {
       case Right(result) => result
       case Left(errMsg) =>
@@ -53,7 +53,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
           richMsg(s"Error occurred while parsing parameters: $errMsg"))
     }
 
-    // Submit FlinkDeployment CR to Kubernetes
+    // Submit FlinkSessionJobDef CR to Kubernetes
     FlinkK8sOperator.deploySessionJob(submitRequest.id, flinkSessionJobDef).runIOAsTry match {
       case Success(_) =>
         logInfo(richMsg("Flink job has been submitted successfully."))
@@ -72,7 +72,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
     )
   }
 
-  // Generate FlinkDeployment CR definition, it is a pure effect function.
+  // Generate FlinkSessionJobDef CR definition, it is a pure effect function.
   private def genFlinkSessionJobDef(
       submitReq: SubmitRequest,
       originFlinkConfig: Configuration,
