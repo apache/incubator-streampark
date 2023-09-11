@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.task
 
-import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
 import org.apache.streampark.common.zio.ZIOExt.IOOps
 import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
@@ -105,10 +104,10 @@ class FlinkK8sChangeListener {
   def subscribeMetricsChange: UIO[Unit] = {
     FlinkK8sObserver.clusterMetricsSnaps
       .flatSubscribe()
-      .foreach {
+      .mapZIO {
         metricsSnap =>
           ZIO
-            .attempt {
+            .attemptBlocking {
               val namespaceAndName: (Namespace, Name) = metricsSnap._1
               val trackKey: ZIO[Any, TrackKeyNotFound, TrackKey] = FlinkK8sObserver.trackedKeys
                 .find(
@@ -116,13 +115,22 @@ class FlinkK8sChangeListener {
                     trackedKey.clusterNamespace == namespaceAndName._1 && trackedKey.clusterName == namespaceAndName._2)
                 .someOrFail(TrackKeyNotFound(namespaceAndName._1, namespaceAndName._2))
 
-              val app: Application = applicationService.getById(trackKey.map(_.id))
-
-              // discard session mode change
-              if (app == null || ExecutionMode.isKubernetesSessionMode(app.getExecutionMode))
-                return ZIO.unit
-
-              val clusterMetrics: ClusterMetrics = metricsSnap._2
+              Option(applicationService.getById(trackKey.map(_.id)), metricsSnap._2)
+            }
+            .catchAll {
+              err =>
+                logError(s"Fail to get Application records: ${err.getMessage}")
+                  .as(None) @@ annotated("name" -> metricsSnap._1._2)
+            }
+      }
+      .filter(_.nonEmpty)
+      .map(_.get)
+      .tap {
+        appAndMetrics =>
+          ZIO
+            .attemptBlocking {
+              val app: Application = appAndMetrics._1
+              val clusterMetrics: ClusterMetrics = appAndMetrics._2
               app.setJmMemory(clusterMetrics.totalJmMemory)
               app.setTmMemory(clusterMetrics.totalTmMemory)
               app.setTotalTM(clusterMetrics.totalTm)
@@ -131,8 +139,10 @@ class FlinkK8sChangeListener {
               applicationService.persistMetrics(app)
             }
             .retryN(3)
-            .ignore
+            .tapError(err => logError(s"Fail to persist Application Metrics: ${err.getMessage}"))
+            .ignore @@ annotated("appId" -> appAndMetrics._1.getAppId)
       }
+      .runDrain
   }
 
   def subscribeRestSvcEndpointChange: UIO[Unit] = {
