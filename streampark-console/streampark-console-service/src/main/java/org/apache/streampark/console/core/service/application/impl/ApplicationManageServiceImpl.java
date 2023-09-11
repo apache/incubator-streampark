@@ -331,7 +331,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (save(appParam)) {
-      if (appParam.isFlinkSqlJob()) {
+      if (appParam.isFlinkSqlJobOrPyFlinkJob()) {
         FlinkSql flinkSql = new FlinkSql(appParam);
         flinkSqlService.create(flinkSql);
       }
