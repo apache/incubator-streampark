@@ -26,7 +26,7 @@ import org.apache.flink.v1beta1.{FlinkDeployment, FlinkDeploymentSpec, FlinkSess
 import zio.{IO, Ref, Schedule, UIO, ZIO}
 import zio.ZIO.logInfo
 import zio.concurrent.{ConcurrentMap, ConcurrentSet}
-import zio.stream.ZStream
+import zio.stream.{UStream, ZStream}
 
 /** Flink Kubernetes resource observer. */
 sealed trait FlinkK8sObserverTrait {
@@ -286,6 +286,42 @@ object FlinkK8sObserver extends FlinkK8sObserverTrait {
           .get()
       ).map(_.getSpec)
     }
+  }
+
+}
+
+object FlinkK8sObserverSnapSubscriptionHelper {
+
+  implicit class ClusterMetricsSnapsSubscriptionOps(stream: UStream[((Namespace, Name), ClusterMetrics)]) {
+    def combineWithTrackKey: UStream[Option[(TrackKey, ClusterMetrics)]] =
+      combineValueWithTrackKey[ClusterMetrics](stream)
+
+    def combineWithTypedTrackKey[Key <: TrackKey]: UStream[Option[(Key, ClusterMetrics)]] =
+      combineValueWithTypedTrackKey[Key, ClusterMetrics](stream)
+  }
+
+  implicit class RestSvcEndpointSnapsSubscriptionOps(stream: UStream[((Namespace, Name), RestSvcEndpoint)]) {
+    def combineWithTrackKey: UStream[Option[(TrackKey, RestSvcEndpoint)]] =
+      combineValueWithTrackKey[RestSvcEndpoint](stream)
+
+    def combineWithTypedTrackKey[Key <: TrackKey]: UStream[Option[(Key, RestSvcEndpoint)]] =
+      combineValueWithTypedTrackKey[Key, RestSvcEndpoint](stream)
+  }
+
+  private[this] def combineValueWithTrackKey[Value](
+      stream: UStream[((Namespace, Name), Value)]): UStream[Option[(TrackKey, Value)]] = stream.mapZIO {
+    case ((namespace, name), value) =>
+      FlinkK8sObserver.trackedKeys
+        .find(key => key.clusterNamespace == namespace && key.clusterName == name)
+        .map(key => key.map(_ -> value))
+  }
+
+  private[this] def combineValueWithTypedTrackKey[Key <: TrackKey, Value](
+      stream: UStream[((Namespace, Name), Value)]): UStream[Option[(Key, Value)]] = stream.mapZIO {
+    case ((namespace, name), value) =>
+      FlinkK8sObserver.trackedKeys
+        .find(key => key.isInstanceOf[Key] && key.clusterNamespace == namespace && key.clusterName == name)
+        .map(key => key.map(_.asInstanceOf[Key] -> value))
   }
 
 }

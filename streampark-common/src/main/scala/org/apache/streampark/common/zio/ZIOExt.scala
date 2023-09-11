@@ -110,4 +110,10 @@ object ZIOExt {
       .map { case (_, cur) => cur }
   }
 
+  implicit class ZStreamOptionEffectOps[R, E, A](zstream: ZStream[R, E, Option[A]]) {
+
+    /** Filter Some value and flatten the value */
+    @inline def filterSome: ZStream[R, E, A] = zstream.filter(_.isDefined).map(_.get)
+  }
+
 }
