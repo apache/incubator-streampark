@@ -19,10 +19,12 @@ package org.apache.streampark.console.core.task
 
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
 import org.apache.streampark.common.zio.ZIOExt.IOOps
+import org.apache.streampark.console.core.bean.AlertTemplate
 import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
 import org.apache.streampark.console.core.enums.{FlinkAppState, OptionState}
-import org.apache.streampark.console.core.service.{ApplicationService, FlinkClusterService}
+import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.alert.AlertService
+import org.apache.streampark.console.core.service.application.{ApplicationInfoService, ApplicationManageService}
 import org.apache.streampark.console.core.utils.FlinkAppStateConverter
 import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.observer.{FlinkK8sObserver, Name, Namespace}
@@ -40,7 +42,11 @@ import java.util.Date
 @Component
 class FlinkK8sChangeListener {
   @Lazy @Autowired
-  private var applicationService: ApplicationService = _
+  private var applicationManageService: ApplicationManageService = _
+
+  @Lazy
+  @Autowired
+  private var applicationInfoService: ApplicationInfoService = _
 
   @Lazy @Autowired
   private var flinkClusterService: FlinkClusterService = _
@@ -66,7 +72,7 @@ class FlinkK8sChangeListener {
         jobSnap =>
           ZIO
             .attemptBlocking {
-              Option(applicationService.getById(jobSnap.appId))
+              Option(applicationManageService.getById(jobSnap.appId))
                 .map(app => setByJobStatusCV(app, jobSnap))
             }
             .catchAll {
@@ -81,7 +87,7 @@ class FlinkK8sChangeListener {
       .tap {
         app =>
           ZIO
-            .attemptBlocking(applicationService.persistMetrics(app))
+            .attemptBlocking(applicationInfoService.persistMetrics(app))
             .retryN(3)
             .tapError(err => logError(s"Fail to persist Application status: ${err.getMessage}"))
             .ignore @@ annotated("appId" -> app.getAppId)
@@ -91,7 +97,7 @@ class FlinkK8sChangeListener {
         app =>
           val state = FlinkAppState.of(app.getState)
           ZIO
-            .attemptBlocking(alertService.alert(app, state))
+            .attemptBlocking(alertService.alert(app.getAlertId(), AlertTemplate.of(app, state)))
             .when(alterStateList.contains(state))
             .retryN(3)
             .tapError(
@@ -115,7 +121,7 @@ class FlinkK8sChangeListener {
                     trackedKey.clusterNamespace == namespaceAndName._1 && trackedKey.clusterName == namespaceAndName._2)
                 .someOrFail(TrackKeyNotFound(namespaceAndName._1, namespaceAndName._2))
 
-              Option(applicationService.getById(trackKey.map(_.id)), metricsSnap._2)
+              Option(applicationManageService.getById(trackKey.map(_.id)), metricsSnap._2)
             }
             .catchAll {
               err =>
@@ -136,7 +142,7 @@ class FlinkK8sChangeListener {
               app.setTotalTM(clusterMetrics.totalTm)
               app.setTotalSlot(clusterMetrics.totalSlot)
               app.setAvailableSlot(clusterMetrics.availableSlot)
-              applicationService.persistMetrics(app)
+              applicationInfoService.persistMetrics(app)
             }
             .retryN(3)
             .tapError(err => logError(s"Fail to persist Application Metrics: ${err.getMessage}"))
@@ -161,14 +167,14 @@ class FlinkK8sChangeListener {
                 .someOrFail(TrackKeyNotFound(namespaceAndName._1, namespaceAndName._2))
               val restSvcEndpoint: RestSvcEndpoint = restSvcEndpointSnap._2
 
-              val app: Application = applicationService.getById(trackKey.map(_.id))
+              val app: Application = applicationManageService.getById(trackKey.map(_.id))
 
               val flinkCluster: FlinkCluster = flinkClusterService.getById(app.getFlinkClusterId)
 
               if (restSvcEndpoint == null || restSvcEndpoint.ipRest == null) return ZIO.unit
               val url = restSvcEndpoint.ipRest
               app.setFlinkRestUrl(url)
-              applicationService.persistMetrics(app)
+              applicationInfoService.persistMetrics(app)
 
               flinkCluster.setAddress(url)
               flinkClusterService.update(flinkCluster)
