@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component
 import zio.{UIO, ZIO}
 import zio.ZIO.{logError => zlogError}
 import zio.ZIOAspect.annotated
-import zio.stream.{UStream, ZStream}
+import zio.stream.UStream
 
 import javax.annotation.PostConstruct
 
@@ -96,14 +96,34 @@ class FlinkK8sChangeListenerV2 extends Logger {
         case (snap: JobSnapshot, convertedState: FlinkAppState) =>
           safeUpdateApplicationRecord(snap.appId) {
             wrapper =>
-              snap.jobStatus.foreach {
-                jobStatus =>
-                  wrapper.typedSet(_.getJobId, jobStatus.jobId)
-                  wrapper.typedSet(_.getStartTime, new Date(jobStatus.startTs))
-                  wrapper.typedSet(_.getEndTime, jobStatus.endTs.map(new Date(_)).orNull)
-                  wrapper.typedSet(_.getDuration, jobStatus.duration)
-                  wrapper.typedSet(_.getTotalTask, jobStatus.tasks.map(_.total).getOrElse(0))
+              // update JobStatus related columns
+              snap.jobStatus match {
+                case Some(status) =>
+                  wrapper
+                    .typedSet(_.getJobId, status.jobId)
+                    .typedSet(_.getStartTime, new Date(status.startTs))
+                    .typedSet(_.getEndTime, status.endTs.map(new Date(_)).orNull)
+                    .typedSet(_.getDuration, status.duration)
+                    .typedSet(_.getTotalTask, status.tasks.map(_.total).getOrElse(0))
+                case None =>
+                  wrapper
+                    .typedSet(_.getJobId, null)
+                    .typedSet(_.getStartTime, null)
+                    .typedSet(_.getEndTime, null)
+                    .typedSet(_.getDuration, null)
+                    .typedSet(_.getTotalTask, null)
               }
+              // Copy the logic from resources/mapper/core/ApplicationMapper.xml:persistMetrics
+              if (FlinkAppState.isEndState(convertedState.getValue)) {
+                wrapper
+                  .typedSet(_.getTotalTM, null)
+                  .typedSet(_.getTotalSlot, null)
+                  .typedSet(_.getTotalSlot, null)
+                  .typedSet(_.getAvailableSlot, null)
+                  .typedSet(_.getJmMemory, null)
+                  .typedSet(_.getTmMemory, null)
+              }
+              // Update job state column
               wrapper.typedSet(_.getState, convertedState.getValue)
               // when a flink job status change event can be received,
               // it means that the operation command sent by streampark has been completed.
@@ -147,11 +167,12 @@ class FlinkK8sChangeListenerV2 extends Logger {
             case (trackKey: ApplicationJobKey, metrics: ClusterMetrics) =>
               safeUpdateApplicationRecord(trackKey.id) {
                 wrapper =>
-                  wrapper.typedSet(_.getJmMemory, metrics.totalJmMemory)
-                  wrapper.typedSet(_.getTmMemory, metrics.totalTmMemory)
-                  wrapper.typedSet(_.getTotalTM, metrics.totalTm)
-                  wrapper.typedSet(_.getTotalSlot, metrics.totalSlot)
-                  wrapper.typedSet(_.getAvailableSlot, metrics.availableSlot)
+                  wrapper
+                    .typedSet(_.getJmMemory, metrics.totalJmMemory)
+                    .typedSet(_.getTmMemory, metrics.totalTmMemory)
+                    .typedSet(_.getTotalTM, metrics.totalTm)
+                    .typedSet(_.getTotalSlot, metrics.totalSlot)
+                    .typedSet(_.getAvailableSlot, metrics.availableSlot)
               }
           }
       }
@@ -202,8 +223,9 @@ class FlinkK8sChangeListenerV2 extends Logger {
   implicit private class ApplicationLambdaUpdateOps(wrapper: LambdaUpdateWrapper[Application]) {
     def typedSet[Value](
         func: Application => Value,
-        value: Value): LambdaUpdateWrapper[Application] =
-      wrapper.set((e: Application) => func(e), value)
+        value: Value): LambdaUpdateWrapper[Application] = {
+      wrapper.set((e: Application) => func(e), value); wrapper
+    }
   }
 
 }
