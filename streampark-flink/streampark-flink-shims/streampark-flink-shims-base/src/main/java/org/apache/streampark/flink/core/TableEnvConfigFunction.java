@@ -23,7 +23,8 @@ import org.apache.flink.table.api.TableConfig;
 @FunctionalInterface
 public interface TableEnvConfigFunction {
   /**
-   * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
+   * When used to initialize the TableEnvironment, it can be used to implement this function and
+   * customize the parameters to be set...
    *
    * @param tableConfig
    * @param parameterTool

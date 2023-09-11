@@ -33,7 +33,7 @@ import zio.stream.ZStream
  * When deploying or deleting flink resources, the FlinkK8sOperator will automatically
  * handle the related tracing.
  */
-sealed trait FlinkK8sOperator {
+sealed trait FlinkK8sOperatorTrait {
 
   /** Directly operate Flink Kubernetes CR. */
   val k8sCrOpr: CROperator.type = CROperator
@@ -95,7 +95,7 @@ sealed trait FlinkK8sOperator {
 
 }
 
-object FlinkK8sOperator extends FlinkK8sOperator {
+object FlinkK8sOperator extends FlinkK8sOperatorTrait {
 
   private val obr       = FlinkK8sObserver
   private val flinkRest = FlinkRestRequest

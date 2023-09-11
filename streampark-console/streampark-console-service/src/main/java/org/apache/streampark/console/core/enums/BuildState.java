@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public enum BuildState implements Serializable {
+public enum BuildState {
 
   /** has changed, need rebuild */
   NEED_REBUILD(-2),

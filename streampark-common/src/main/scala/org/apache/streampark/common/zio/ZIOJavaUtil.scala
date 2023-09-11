@@ -15,17 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.bean;
+package org.apache.streampark.common.zio
 
-import lombok.Data;
+import zio.{FiberFailure, IO, UIO}
 
-@Data
-public class SenderEmail {
+/** Util for running ZIO effects in Java. */
+object ZIOJavaUtil {
 
-  private String smtpHost;
-  private Integer smtpPort;
-  private String from;
-  private String userName;
-  private String password;
-  private boolean ssl;
+  @throws[FiberFailure]
+  def runIO[E, A](zio: IO[E, A]): A = ZIOExt.unsafeRun(zio)
+
+  def runUIO[A](uio: UIO[A]): A = ZIOExt.unsafeRun(uio)
+
 }

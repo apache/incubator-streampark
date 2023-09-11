@@ -17,9 +17,10 @@
 
 package org.apache.streampark.console.core.task;
 
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
@@ -60,7 +61,7 @@ public class FlinkK8sWatcherWrapper {
 
   @Lazy @Autowired private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
 
-  @Lazy @Autowired private ApplicationService applicationService;
+  @Lazy @Autowired private ApplicationManageService applicationManageService;
 
   /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
   @Bean(destroyMethod = "close")
@@ -82,11 +83,15 @@ public class FlinkK8sWatcherWrapper {
   }
 
   private void initFlinkK8sWatcher(@Nonnull FlinkK8sWatcher trackMonitor) {
-    // register change event listener
-    trackMonitor.registerListener(flinkK8sChangeEventListener);
-    // recovery tracking list
-    List<TrackId> k8sApp = getK8sWatchingApps();
-    k8sApp.forEach(trackMonitor::doWatching);
+    if (!K8sFlinkConfig.isV2Enabled()) {
+      // register change event listener
+      trackMonitor.registerListener(flinkK8sChangeEventListener);
+      // recovery tracking list
+      List<TrackId> k8sApp = getK8sWatchingApps();
+      k8sApp.forEach(trackMonitor::doWatching);
+    } else {
+      // TODO [flink-k8s-v2] Recovery tracking list and invoke FlinkK8sObserver.track()
+    }
   }
 
   /** get flink-k8s job tracking application from db. */
@@ -97,7 +102,7 @@ public class FlinkK8sWatcherWrapper {
         .eq(Application::getTracking, 1)
         .in(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
 
-    List<Application> k8sApplication = applicationService.list(queryWrapper);
+    List<Application> k8sApplication = applicationManageService.list(queryWrapper);
     if (CollectionUtils.isEmpty(k8sApplication)) {
       return Lists.newArrayList();
     }
@@ -107,7 +112,7 @@ public class FlinkK8sWatcherWrapper {
             .filter(app -> !Bridge.toTrackId(app).isLegal())
             .collect(Collectors.toList());
     if (CollectionUtils.isNotEmpty(correctApps)) {
-      applicationService.saveOrUpdateBatch(correctApps);
+      applicationManageService.saveOrUpdateBatch(correctApps);
     }
     // filter out the application that should be tracking
     return k8sApplication.stream()

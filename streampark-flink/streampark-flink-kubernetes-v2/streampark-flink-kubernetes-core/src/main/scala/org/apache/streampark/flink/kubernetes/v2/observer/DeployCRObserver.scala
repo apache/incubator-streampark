@@ -53,15 +53,6 @@ case class DeployCRObserver(deployCRSnaps: ConcurrentMap[(Namespace, Name), (Dep
         watchers.remove((namespace, name)).unit
       }
 
-//  private def existCr(namespace: String, name: String): IO[Throwable, Boolean] =
-//    usingK8sClient { client =>
-//      client
-//        .resources(classOf[FlinkDeployment])
-//        .inNamespace(namespace)
-//        .withName(name)
-//        .get != null
-//    }
-
   private def launchProc(namespace: String, name: String): K8sResourceWatcher[FlinkDeployment] =
     watchK8sResourceForever(client =>
       client

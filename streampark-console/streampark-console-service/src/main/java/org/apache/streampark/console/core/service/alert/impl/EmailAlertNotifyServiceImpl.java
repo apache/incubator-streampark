@@ -19,22 +19,18 @@ package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
-import org.apache.streampark.console.core.bean.SenderEmail;
-import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.bean.EmailConfig;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
 import org.apache.commons.mail.HtmlEmail;
 
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import javax.annotation.PostConstruct;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,21 +41,13 @@ import java.util.Optional;
 @Lazy
 public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
-  private Template template;
-
-  @Autowired private SettingService settingService;
-
-  @PostConstruct
-  public void loadTemplateFile() throws Exception {
-    String template = "alert-email.ftl";
-    this.template = FreemarkerUtils.loadTemplateFile(template);
-  }
+  private final Template template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
 
   @Override
-  public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template)
+  public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template)
       throws AlertException {
-    SenderEmail senderEmail =
-        Optional.ofNullable(settingService.getSenderEmail())
+    EmailConfig emailConfig =
+        Optional.ofNullable(EmailConfig.fromSetting())
             .orElseThrow(() -> new AlertException("Please configure first mail sender"));
     String contacts =
         alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
@@ -67,12 +55,11 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
       throw new AlertException("Please configure a valid contacts");
     }
     String[] emails = contacts.split(",");
-    return sendEmail(senderEmail, template, emails);
+    return sendEmail(emailConfig, template, emails);
   }
 
-  private boolean sendEmail(SenderEmail senderEmail, AlertTemplate mail, String... mails)
+  private boolean sendEmail(EmailConfig emailConfig, AlertTemplate mail, String... mails)
       throws AlertException {
-    log.info(mail.getSubject());
     try {
       Map<String, AlertTemplate> out = new HashMap<>(16);
       out.put("mail", mail);
@@ -80,15 +67,15 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
       HtmlEmail htmlEmail = new HtmlEmail();
       htmlEmail.setCharset("UTF-8");
-      htmlEmail.setHostName(senderEmail.getSmtpHost());
-      htmlEmail.setAuthentication(senderEmail.getUserName(), senderEmail.getPassword());
-      htmlEmail.setFrom(senderEmail.getFrom());
-      if (senderEmail.isSsl()) {
+      htmlEmail.setHostName(emailConfig.getSmtpHost());
+      htmlEmail.setAuthentication(emailConfig.getUserName(), emailConfig.getPassword());
+      htmlEmail.setFrom(emailConfig.getFrom());
+      if (emailConfig.isSsl()) {
         htmlEmail.setSSLCheckServerIdentity(true);
         htmlEmail.setSSLOnConnect(true);
-        htmlEmail.setSslSmtpPort(senderEmail.getSmtpPort().toString());
+        htmlEmail.setSslSmtpPort(emailConfig.getSmtpPort().toString());
       } else {
-        htmlEmail.setSmtpPort(senderEmail.getSmtpPort());
+        htmlEmail.setSmtpPort(emailConfig.getSmtpPort());
       }
       htmlEmail.setSubject(mail.getSubject());
       htmlEmail.setHtmlMsg(html);

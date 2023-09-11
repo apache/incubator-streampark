@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.enums.FlinkAppState;
@@ -32,12 +33,15 @@ import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.hc.client5.http.config.RequestConfig;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -49,6 +53,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -71,7 +77,9 @@ import java.util.stream.Collectors;
 @Component
 public class FlinkHttpWatcher {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationActionService applicationActionService;
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private AlertService alertService;
 
@@ -84,7 +92,7 @@ public class FlinkHttpWatcher {
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
   // track interval  every 5 seconds
-  private static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
+  public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
 
   // option interval within 10 seconds
   private static final Duration OPTION_INTERVAL = Duration.ofSeconds(10);
@@ -159,7 +167,7 @@ public class FlinkHttpWatcher {
   public void init() {
     WATCHING_APPS.clear();
     List<Application> applications =
-        applicationService.list(
+        applicationManageService.list(
             new LambdaQueryWrapper<Application>()
                 .eq(Application::getTracking, 1)
                 .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode()));
@@ -174,7 +182,7 @@ public class FlinkHttpWatcher {
   public void doStop() {
     log.info(
         "FlinkHttpWatcher StreamPark Console will be shutdown,persistent application to database.");
-    WATCHING_APPS.forEach((k, v) -> applicationService.persistMetrics(v));
+    WATCHING_APPS.forEach((k, v) -> applicationInfoService.persistMetrics(v));
   }
 
   /**
@@ -195,6 +203,12 @@ public class FlinkHttpWatcher {
       lastWatchTime = timeMillis;
       WATCHING_APPS.forEach(this::watch);
     }
+  }
+
+  @VisibleForTesting
+  public @Nullable FlinkAppState tryQueryFlinkAppState(@Nonnull Long appId) {
+    Application app = WATCHING_APPS.get(appId);
+    return (app == null || app.getState() == null) ? null : FlinkAppState.of(app.getState());
   }
 
   private void watch(Long id, Application application) {
@@ -242,7 +256,7 @@ public class FlinkHttpWatcher {
                   doAlert(application, FlinkAppState.of(application.getState()));
                   if (appState.equals(FlinkAppState.FAILED)) {
                     try {
-                      applicationService.start(application, true);
+                      applicationActionService.start(application, true);
                     } catch (Exception e) {
                       log.error(e.getMessage(), e);
                     }
@@ -255,10 +269,11 @@ public class FlinkHttpWatcher {
   }
 
   /**
-   * Get the current task running status information from flink restapi
+   * Get the current task running status information from Flink rest api.
    *
-   * @param application application
-   * @param stopFrom stopFrom
+   * @param application The application for which to retrieve the information
+   * @param stopFrom The stop source from which the method was called
+   * @throws Exception if an error occurs while retrieving the information from the Flink REST API
    */
   private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
     JobsOverview jobsOverview = httpJobsOverview(application);
@@ -380,7 +395,7 @@ public class FlinkHttpWatcher {
               new LambdaUpdateWrapper<Application>()
                   .eq(Application::getId, application.getId())
                   .set(Application::getRelease, ReleaseState.DONE.get());
-          applicationService.update(updateWrapper);
+          applicationManageService.update(updateWrapper);
           break;
         default:
           break;
@@ -414,7 +429,7 @@ public class FlinkHttpWatcher {
     } else {
       WATCHING_APPS.put(application.getId(), application);
     }
-    applicationService.persistMetrics(application);
+    applicationInfoService.persistMetrics(application);
   }
 
   /**
@@ -444,7 +459,7 @@ public class FlinkHttpWatcher {
             currentState.name());
         cleanSavepoint(application);
         application.setState(currentState.getValue());
-        if (StopFrom.NONE.equals(stopFrom) || applicationService.checkAlter(application)) {
+        if (StopFrom.NONE.equals(stopFrom) || applicationInfoService.checkAlter(application)) {
           if (StopFrom.NONE.equals(stopFrom)) {
             log.info(
                 "FlinkHttpWatcher getFromFlinkRestApi, job cancel is not form StreamPark,savePoint expired!");
@@ -463,7 +478,7 @@ public class FlinkHttpWatcher {
         application.setState(FlinkAppState.FAILED.getValue());
         doPersistMetrics(application, true);
         doAlert(application, FlinkAppState.FAILED);
-        applicationService.start(application, true);
+        applicationActionService.start(application, true);
         break;
       case RESTARTING:
         log.info(
@@ -538,11 +553,11 @@ public class FlinkHttpWatcher {
           if (flinkAppState.equals(FlinkAppState.FAILED)
               || flinkAppState.equals(FlinkAppState.LOST)
               || (flinkAppState.equals(FlinkAppState.CANCELED) && StopFrom.NONE.equals(stopFrom))
-              || applicationService.checkAlter(application)) {
+              || applicationInfoService.checkAlter(application)) {
             doAlert(application, flinkAppState);
             stopCanceledJob(application.getId());
             if (flinkAppState.equals(FlinkAppState.FAILED)) {
-              applicationService.start(application, true);
+              applicationActionService.start(application, true);
             }
           }
         } catch (Exception e) {
@@ -765,20 +780,31 @@ public class FlinkHttpWatcher {
   }
 
   /**
-   * The situation of abnormal operation alarm is as follows: When the job running mode is yarn per
-   * job or yarn application, when the job is abnormal, an alarm will be triggered directly; The job
-   * running mode is yarn session or reome: a. If the flink cluster is not configured with an alarm
-   * information, it will directly alarm when the job is abnormal. b. If the flink cluster is
-   * configured with alarm information: if the abnormal behavior of the job is caused by an
-   * abnormality in the flink cluster, block the alarm of the job and wait for the flink cluster
-   * alarm; If the abnormal behavior of the job is caused by itself and the flink cluster is running
-   * normally, the job will an alarm
+   * Describes the alarming behavior under abnormal operation for different job running modes:
+   *
+   * <p>- <strong>yarn per job</strong> or <strong>yarn application</strong>
+   *
+   * <p>Directly triggers an alarm when the job encounters an abnormal condition.<br>
+   *
+   * <p>- <strong>yarn session</strong> or <strong>remote</strong>
+   *
+   * <p>If the Flink cluster configuration lacks alarm information, it triggers an alarm directly
+   * when the job is abnormal.<br>
+   * If the Flink cluster configuration has alarm information:
+   *
+   * <p>When the job is abnormal due to an issue in the Flink cluster, the job's alarm will be held
+   * back, instead waiting for the Flink cluster's alarm.<br>
+   * When the job is abnormal due to the job itself and the Flink cluster is running normally, an
+   * alarm specific to the job will be triggered.
+   *
+   * @param app application
+   * @param appState application state
    */
   private void doAlert(Application app, FlinkAppState appState) {
     switch (app.getExecutionModeEnum()) {
       case YARN_APPLICATION:
       case YARN_PER_JOB:
-        alertService.alert(app, appState);
+        alertService.alert(app.getAlertId(), AlertTemplate.of(app, appState));
         return;
       case YARN_SESSION:
       case REMOTE:
@@ -788,7 +814,7 @@ public class FlinkHttpWatcher {
               "application with id {} is yarn session or remote and flink cluster with id {} is alive, application send alert",
               app.getId(),
               app.getFlinkClusterId());
-          alertService.alert(app, appState);
+          alertService.alert(app.getAlertId(), AlertTemplate.of(app, appState));
         }
         break;
       default:

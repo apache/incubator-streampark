@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertLarkParams;
 import org.apache.streampark.console.core.bean.AlertLarkRobotResponse;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -37,7 +37,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -50,7 +49,7 @@ import java.util.Map;
 @Service
 @Lazy
 public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
-  private Template template;
+  private final Template template = FreemarkerUtils.loadTemplateFile("alert-lark.ftl");
   private final RestTemplate alertRestTemplate;
   private final ObjectMapper mapper;
 
@@ -62,14 +61,8 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
     this.mapper = mapper;
   }
 
-  @PostConstruct
-  public void loadTemplateFile() {
-    String template = "alert-lark.ftl";
-    this.template = FreemarkerUtils.loadTemplateFile(template);
-  }
-
   @Override
-  public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate)
+  public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate alertTemplate)
       throws AlertException {
     AlertLarkParams alertLarkParams = alertConfig.getLarkParams();
     if (alertLarkParams.getIsAtAll()) {

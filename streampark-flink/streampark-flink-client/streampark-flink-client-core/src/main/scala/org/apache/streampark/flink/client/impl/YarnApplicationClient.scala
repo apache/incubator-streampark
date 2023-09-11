@@ -17,8 +17,9 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util.{HdfsUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
@@ -28,14 +29,15 @@ import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
+import org.apache.flink.python.PythonOptions
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
+import java.util
 import java.util.Collections
-import java.util.concurrent.Callable
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -93,6 +95,35 @@ object YarnApplicationClient extends YarnClientTrait {
       // yarn application Type
       .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
 
+    if (submitRequest.developmentMode == DevelopmentMode.PYFLINK) {
+      val pyVenv: String = workspace.APP_PYTHON_VENV
+      if (!FsOperator.hdfs.exists(pyVenv)) {
+        throw new RuntimeException(s"$pyVenv File does not exist")
+      }
+
+      // yarn.ship-files
+      val shipFiles = new util.ArrayList[String]()
+      shipFiles.add(submitRequest.userJarFile.getParentFile.getAbsolutePath)
+
+      flinkConfig
+        .safeSet(YarnConfigOptions.SHIP_FILES, shipFiles)
+        // python.files
+        .safeSet(PythonOptions.PYTHON_FILES, submitRequest.userJarFile.getParentFile.getName)
+        // python.archives
+        .safeSet(PythonOptions.PYTHON_ARCHIVES, pyVenv)
+        // python.client.executable
+        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+        // python.executable
+        .safeSet(PythonOptions.PYTHON_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+
+      val args: util.List[String] = flinkConfig.get(ApplicationConfiguration.APPLICATION_ARGS)
+      // Caused by: java.lang.UnsupportedOperationException
+      val argsList: util.ArrayList[String] = new util.ArrayList[String](args)
+      argsList.add("-pym")
+      argsList.add(submitRequest.userJarFile.getName.dropRight(ConfigConst.PYTHON_SUFFIX.length))
+      flinkConfig.safeSet(ApplicationConfiguration.APPLICATION_ARGS, argsList)
+    }
+
     logInfo(s"""
                |------------------------------------------------------------------
                |Effective submit configuration: $flinkConfig
@@ -104,8 +135,8 @@ object YarnApplicationClient extends YarnClientTrait {
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
     SecurityUtils.install(new SecurityConfiguration(flinkConfig))
-    SecurityUtils.getInstalledContext.runSecured(new Callable[SubmitResponse] {
-      override def call(): SubmitResponse = {
+    SecurityUtils.getInstalledContext.runSecured(
+      () => {
         val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
         val clientFactory =
           clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
@@ -137,8 +168,7 @@ object YarnApplicationClient extends YarnClientTrait {
         } finally {
           Utils.close(clusterDescriptor, clusterClient)
         }
-      }
-    })
+      })
   }
 
 }

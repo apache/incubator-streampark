@@ -18,10 +18,22 @@
 package org.apache.streampark.console.core.service.alert;
 
 import org.apache.streampark.console.base.exception.AlertException;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 
+/**
+ * This interface defines a service for sending alert notifications, it has multiple
+ * implementations.
+ */
 public interface AlertNotifyService {
 
-  boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException;
+  /**
+   * Performs an alert with the given alert configuration parameters and alert template.
+   *
+   * @param alertConfig alert configuration parameters.
+   * @param template alert template to use.
+   * @return true if the alert was successfully triggered, false otherwise.
+   * @throws AlertException if an error occurs while performing the alert.
+   */
+  boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template) throws AlertException;
 }

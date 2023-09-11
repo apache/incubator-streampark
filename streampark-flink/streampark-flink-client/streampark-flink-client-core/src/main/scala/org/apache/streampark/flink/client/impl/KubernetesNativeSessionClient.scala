@@ -36,8 +36,6 @@ import org.apache.flink.kubernetes.configuration.{KubernetesConfigOptions, Kuber
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
 import org.apache.flink.kubernetes.kubeclient.{FlinkKubeClient, FlinkKubeClientFactory}
 
-import java.io.File
-
 import scala.collection.convert.ImplicitConversions._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
@@ -54,16 +52,12 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
       s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
-    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(
-      jobGraphSubmit)
+    super.trySubmit(submitRequest, flinkConfig)(restApiSubmit)(jobGraphSubmit)
   }
 
   /** Submit flink session job via rest api. */
   @throws[Exception]
-  def restApiSubmit(
-      submitRequest: SubmitRequest,
-      flinkConfig: Configuration,
-      fatJar: File): SubmitResponse = {
+  def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     Try {
       // get jm rest url of flink session cluster
       val clusterKey = ClusterKey(
@@ -75,7 +69,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         .getOrElse(throw new Exception(
           s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
       // submit job via rest api
-      val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
+      val jobId =
+        FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, submitRequest.userJarFile, flinkConfig)
       SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId, jmRestUrl)
     } match {
       case Success(s) => s
@@ -87,10 +82,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
 
   /** Submit flink session job with building JobGraph via ClusterClient api. */
   @throws[Exception]
-  def jobGraphSubmit(
-      submitRequest: SubmitRequest,
-      flinkConfig: Configuration,
-      jarFile: File): SubmitResponse = {
+  def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
@@ -99,9 +91,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       // build JobGraph
-      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
-      packageProgram = packageProgramJobGraph._1
-      val jobGraph = packageProgramJobGraph._2
+      val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
+      packageProgram = programJobGraph._1
+      val jobGraph = programJobGraph._2
       // retrieve client and submit JobGraph
       client = clusterDescriptor
         .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))

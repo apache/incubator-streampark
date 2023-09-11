@@ -122,7 +122,7 @@ public class Application implements Serializable {
 
   /** alert id */
   @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private Integer alertId;
+  private Long alertId;
 
   private String args;
   /** application module */
@@ -230,6 +230,8 @@ public class Application implements Serializable {
   private transient String savePoint;
   private transient Boolean savePointed = false;
   private transient Boolean drain = false;
+  private transient Boolean nativeFormat = false;
+  private transient Long savePointTimeout = 60L;
   private transient Boolean allowNonRestored = false;
   private transient Integer restoreMode;
   private transient String socketId;
@@ -453,13 +455,21 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
+  public boolean isCustomCodeOrPyFlinkJob() {
+    return DevelopmentMode.CUSTOM_CODE.getValue().equals(this.getJobType())
+        || DevelopmentMode.PYFLINK.getValue().equals(this.getJobType());
+  }
+
+  @JsonIgnore
   public boolean isUploadJob() {
-    return isCustomCodeJob() && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
+    return isCustomCodeOrPyFlinkJob()
+        && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
   }
 
   @JsonIgnore
   public boolean isCICDJob() {
-    return isCustomCodeJob() && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
+    return isCustomCodeOrPyFlinkJob()
+        && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
   }
 
   public boolean isStreamParkJob() {

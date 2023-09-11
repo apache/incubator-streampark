@@ -59,9 +59,11 @@ public class AuthenticatorImpl implements Authenticator {
 
   private User passwordAuthenticate(String username, String password) {
     User user = usersService.findByName(username);
-    if (user == null || user.getLoginType() != LoginType.PASSWORD) {
-      throw new ApiAlertException(
-          String.format("user [%s] does not exist or can not login with PASSWORD", username));
+    if (user == null) {
+      throw new ApiAlertException(String.format("user [%s] does not exist", username));
+    }
+    if (user.getLoginType() != LoginType.PASSWORD) {
+      throw new ApiAlertException(String.format("user [%s] can not login with PASSWORD", username));
     }
     String salt = user.getSalt();
     password = ShaHashUtils.encrypt(salt, password);
@@ -84,21 +86,9 @@ public class AuthenticatorImpl implements Authenticator {
         throw new ApiAlertException(
             String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
       }
-      String saltPassword = ShaHashUtils.encrypt(user.getSalt(), password);
-
-      // ldap password changed, we should update user password
-      if (!StringUtils.equals(saltPassword, user.getPassword())) {
-
-        // encrypt password again
-        String salt = ShaHashUtils.getRandomSalt();
-        saltPassword = ShaHashUtils.encrypt(salt, password);
-        user.setSalt(salt);
-        user.setPassword(saltPassword);
-        usersService.updateSaltPassword(user);
-      }
       return user;
     }
-    return this.newUserCreate(LoginType.LDAP, username, password);
+    return this.newUserCreate(LoginType.LDAP, username);
   }
 
   private User ssoAuthenticate(String username) throws Exception {
@@ -111,11 +101,10 @@ public class AuthenticatorImpl implements Authenticator {
       }
       return user;
     }
-    return this.newUserCreate(LoginType.SSO, username, null);
+    return this.newUserCreate(LoginType.SSO, username);
   }
 
-  private User newUserCreate(LoginType loginType, String username, String password)
-      throws Exception {
+  private User newUserCreate(LoginType loginType, String username) throws Exception {
     User newUser = new User();
     newUser.setCreateTime(new Date());
     newUser.setUsername(username);
@@ -124,9 +113,6 @@ public class AuthenticatorImpl implements Authenticator {
     newUser.setUserType(UserType.USER);
     newUser.setStatus(User.STATUS_VALID);
     newUser.setSex(User.SEX_UNKNOWN);
-    if (password != null) {
-      newUser.setPassword(password);
-    }
     usersService.createUser(newUser);
     return newUser;
   }

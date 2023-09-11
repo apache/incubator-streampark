@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
@@ -30,6 +31,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
+import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -48,13 +50,15 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
@@ -75,6 +79,7 @@ import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 import org.apache.streampark.flink.packer.pipeline.PipelineType;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
+import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipelineV2;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
@@ -130,7 +135,9 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private MessageService messageService;
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+
+  @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private ApplicationLogService applicationLogService;
 
@@ -171,7 +178,7 @@ public class AppBuildPipeServiceImpl
     // check the build environment
     checkBuildEnv(appId, forceBuild);
 
-    Application app = applicationService.getById(appId);
+    Application app = applicationManageService.getById(appId);
     ApplicationLog applicationLog = new ApplicationLog();
     applicationLog.setOptionName(RELEASE.getValue());
     applicationLog.setAppId(app.getId());
@@ -180,7 +187,7 @@ public class AppBuildPipeServiceImpl
     // check if you need to go through the build process (if the jar and pom have changed,
     // you need to go through the build process, if other common parameters are modified,
     // you don't need to go through the build process)
-    boolean needBuild = applicationService.checkBuildAndUpdate(app);
+    boolean needBuild = applicationManageService.checkBuildAndUpdate(app);
     if (!needBuild) {
       applicationLog.setSuccess(true);
       applicationLogService.save(applicationLog);
@@ -217,19 +224,19 @@ public class AppBuildPipeServiceImpl
             saveEntity(buildPipeline);
 
             app.setRelease(ReleaseState.RELEASING.get());
-            applicationService.updateRelease(app);
+            applicationManageService.updateRelease(app);
 
             if (flinkHttpWatcher.isWatchingApp(app.getId())) {
               flinkHttpWatcher.init();
             }
 
             // 1) checkEnv
-            applicationService.checkEnv(app);
+            applicationInfoService.checkEnv(app);
 
             // 2) some preparatory work
             String appUploads = app.getWorkspace().APP_UPLOADS();
 
-            if (app.isCustomCodeJob()) {
+            if (app.isCustomCodeOrPyFlinkJob()) {
               // customCode upload jar to appHome...
               String appHome = app.getAppHome();
               FsOperator fsOperator = app.getFsOperator();
@@ -312,7 +319,7 @@ public class AppBuildPipeServiceImpl
                 // If the current task is not running, or the task has just been added, directly set
                 // the candidate version to the official version
                 if (app.isFlinkSqlJob()) {
-                  applicationService.toEffective(app);
+                  applicationManageService.toEffective(app);
                 } else {
                   if (app.isStreamParkJob()) {
                     ApplicationConfig config = applicationConfigService.getLatest(app.getId());
@@ -349,7 +356,7 @@ public class AppBuildPipeServiceImpl
               applicationLog.setException(Utils.stringifyException(snapshot.error().exception()));
               applicationLog.setSuccess(false);
             }
-            applicationService.updateRelease(app);
+            applicationManageService.updateRelease(app);
             applicationLogService.save(applicationLog);
             if (flinkHttpWatcher.isWatchingApp(app.getId())) {
               flinkHttpWatcher.init();
@@ -398,7 +405,7 @@ public class AppBuildPipeServiceImpl
    * @return
    */
   private void checkBuildEnv(Long appId, boolean forceBuild) {
-    Application app = applicationService.getById(appId);
+    Application app = applicationManageService.getById(appId);
 
     // 1) check flink version
     FlinkEnv env = flinkEnvService.getById(app.getVersionId());
@@ -407,7 +414,7 @@ public class AppBuildPipeServiceImpl
         checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
 
     // 2) check env
-    boolean envOk = applicationService.checkEnv(app);
+    boolean envOk = applicationInfoService.checkEnv(app);
     ApiAlertException.throwIfFalse(
         envOk, "Check flink env failed, please check the flink version of this job");
 
@@ -422,6 +429,14 @@ public class AppBuildPipeServiceImpl
   private BuildPipeline createPipelineInstance(@Nonnull Application app) {
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
     String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
+
+    if (!FileUtils.exists(flinkUserJar)) {
+      Resource resource = resourceService.findByResourceName(app.getTeamId(), app.getJar());
+      if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+        flinkUserJar = resource.getFilePath();
+      }
+    }
+
     ExecutionMode executionMode = app.getExecutionModeEnum();
     String mainClass = ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
     switch (executionMode) {
@@ -452,7 +467,7 @@ public class AppBuildPipeServiceImpl
                 app.getLocalAppHome(),
                 mainClass,
                 flinkUserJar,
-                app.isCustomCodeJob(),
+                app.isCustomCodeOrPyFlinkJob(),
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -475,6 +490,7 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
         return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
       case KUBERNETES_NATIVE_APPLICATION:
+        DockerConfig dockerConfig = settingService.getDockerConfig();
         FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest =
             new FlinkK8sApplicationBuildRequest(
                 app.getJobName(),
@@ -491,20 +507,24 @@ public class AppBuildPipeServiceImpl
                 app.getK8sPodTemplates(),
                 app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
                 DockerConf.of(
-                    settingService.getDockerRegisterAddress(),
-                    settingService.getDockerRegisterNamespace(),
-                    settingService.getDockerRegisterUser(),
-                    settingService.getDockerRegisterPassword()),
+                    dockerConfig.getAddress(),
+                    dockerConfig.getNamespace(),
+                    dockerConfig.getUser(),
+                    dockerConfig.getPassword()),
                 app.getIngressTemplate());
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
-        return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
+        if (K8sFlinkConfig.isV2Enabled()) {
+          return FlinkK8sApplicationBuildPipelineV2.of(k8sApplicationBuildRequest);
+        } else {
+          return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
+        }
       default:
         throw new UnsupportedOperationException(
             "Unsupported Building Application for ExecutionMode: " + app.getExecutionModeEnum());
     }
   }
 
-  /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
+  /** copy from {@link ApplicationActionService#start(Application, boolean)} */
   private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
     switch (app.getDevelopmentMode()) {
       case CUSTOM_CODE:
@@ -518,6 +538,8 @@ public class AppBuildPipeServiceImpl
                 "[StreamPark] unsupported ApplicationType of custom code: "
                     + app.getApplicationType());
         }
+      case PYFLINK:
+        return String.format("%s/%s", app.getAppHome(), app.getJar());
       case FLINK_SQL:
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
@@ -616,13 +638,12 @@ public class AppBuildPipeServiceImpl
                         JacksonUtils.read(resource.getResource(), String[].class);
                     Arrays.stream(groupElements)
                         .forEach(
-                            resourceIdInGroup -> {
-                              mergeDependency(
-                                  application,
-                                  mvnArtifacts,
-                                  jarLibs,
-                                  resourceService.getById(resourceIdInGroup));
-                            });
+                            resourceIdInGroup ->
+                                mergeDependency(
+                                    application,
+                                    mvnArtifacts,
+                                    jarLibs,
+                                    resourceService.getById(resourceIdInGroup)));
                   } catch (JsonProcessingException e) {
                     throw new ApiAlertException("Parse resource group failed.", e);
                   }
@@ -644,21 +665,20 @@ public class AppBuildPipeServiceImpl
     dependency
         .getPom()
         .forEach(
-            pom -> {
-              mvnArtifacts.add(
-                  new Artifact(
-                      pom.getGroupId(),
-                      pom.getArtifactId(),
-                      pom.getVersion(),
-                      pom.getClassifier()));
-            });
+            pom ->
+                mvnArtifacts.add(
+                    new Artifact(
+                        pom.getGroupId(),
+                        pom.getArtifactId(),
+                        pom.getVersion(),
+                        pom.getClassifier())));
     dependency
         .getJar()
         .forEach(
-            jar -> {
-              jarLibs.add(
-                  String.format(
-                      "%s/%d/%s", Workspace.local().APP_UPLOADS(), application.getTeamId(), jar));
-            });
+            jar ->
+                jarLibs.add(
+                    String.format(
+                        "%s/%d/%s",
+                        Workspace.local().APP_UPLOADS(), application.getTeamId(), jar)));
   }
 }

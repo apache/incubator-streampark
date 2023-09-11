@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,10 +34,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +45,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /** base tester. */
-@Transactional
+@Slf4j
+@EnableScheduling
 @ActiveProfiles("test")
 @AutoConfigureTestEntityManager
 @AutoConfigureWebTestClient(timeout = "60000")
@@ -53,9 +55,9 @@ import java.nio.file.Path;
 @SpringBootTest(
     classes = StreamParkConsoleBootstrap.class,
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public abstract class SpringTestBase {
+public abstract class SpringUnitTestBase {
 
-  protected static final Logger LOG = LoggerFactory.getLogger(SpringTestBase.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(SpringUnitTestBase.class);
 
   @BeforeAll
   public static void init(@TempDir File tempPath) throws IOException {

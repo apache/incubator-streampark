@@ -47,10 +47,9 @@ object LocalClient extends FlinkClientTrait {
     var client: ClusterClient[MiniClusterId] = null
     try {
       // build JobGraph
-      val packageProgramJobGraph =
-        super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
-      packageProgram = packageProgramJobGraph._1
-      val jobGraph = packageProgramJobGraph._2
+      val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
+      packageProgram = programJobGraph._1
+      val jobGraph = programJobGraph._2
       client = createLocalCluster(flinkConfig)
       val jobId = client.submitJob(jobGraph).get().toString
       SubmitResponse(jobId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)

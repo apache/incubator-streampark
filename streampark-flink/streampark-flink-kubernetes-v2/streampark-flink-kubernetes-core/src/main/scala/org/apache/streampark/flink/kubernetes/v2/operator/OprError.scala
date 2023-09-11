@@ -31,4 +31,6 @@ object OprError {
   case class TrackKeyNotFound(namespace: String, name: String)
     extends Exception(s"TrackKey not found: namespace=$namespace, name=$name")
 
+  case class FlinkDeploymentCRDNotFound()
+    extends Exception("The FlinkDeployment CRD is not currently deployed in the kubernetes cluster")
 }

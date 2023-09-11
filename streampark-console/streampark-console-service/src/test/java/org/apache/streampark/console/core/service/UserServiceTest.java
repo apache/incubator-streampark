@@ -17,28 +17,32 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.SpringTestBase;
+import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineType;
 import org.apache.streampark.console.core.enums.ResourceType;
 import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
-import com.baomidou.mybatisplus.extension.toolkit.Db;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Map;
 
 /** org.apache.streampark.console.core.service.UserServiceTest. */
-class UserServiceTest extends SpringTestBase {
+@Transactional
+class UserServiceTest extends SpringUnitTestBase {
   @Autowired private UserService userService;
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ApplicationManageService applicationManageService;
+  @Autowired private ApplicationInfoService applicationInfoService;
   @Autowired private ResourceService resourceService;
 
   @Test
@@ -50,7 +54,7 @@ class UserServiceTest extends SpringTestBase {
     user.setPassword("test");
     user.setUserType(UserType.USER);
     user.setStatus(User.STATUS_VALID);
-    Db.save(user);
+    userService.createUser(user);
     // lock user
     user.setStatus(User.STATUS_LOCK);
     Map<String, Object> data =
@@ -74,7 +78,7 @@ class UserServiceTest extends SpringTestBase {
     resource.setEngineType(EngineType.FLINK);
     resource.setTeamId(1L);
     resource.setCreatorId(user.getUserId());
-    Db.save(resource);
+    resourceService.save(resource);
     // lock user when has resource
     user.setStatus(User.STATUS_LOCK);
     Map<String, Object> data2 =
@@ -93,7 +97,7 @@ class UserServiceTest extends SpringTestBase {
     user.setPassword("test");
     user.setUserType(UserType.USER);
     user.setStatus(User.STATUS_VALID);
-    Db.save(user);
+    userService.save(user);
 
     Resource resource = new Resource();
     resource.setResourceName("test");
@@ -101,12 +105,12 @@ class UserServiceTest extends SpringTestBase {
     resource.setEngineType(EngineType.FLINK);
     resource.setTeamId(1L);
     resource.setCreatorId(user.getUserId());
-    Db.save(resource);
+    resourceService.save(resource);
 
     Application app = new Application();
     app.setUserId(user.getUserId());
     app.setTeamId(1L);
-    Db.save(app);
+    applicationManageService.save(app);
 
     User targetUser = new User();
     targetUser.setUsername("test0");
@@ -114,17 +118,17 @@ class UserServiceTest extends SpringTestBase {
     targetUser.setPassword("test0");
     targetUser.setUserType(UserType.USER);
     targetUser.setStatus(User.STATUS_VALID);
-    Db.save(targetUser);
+    userService.save(targetUser);
 
-    Assertions.assertTrue(applicationService.existsByUserId(user.getUserId()));
+    Assertions.assertTrue(applicationInfoService.existsByUserId(user.getUserId()));
     Assertions.assertTrue(resourceService.existsByUserId(user.getUserId()));
 
     userService.transferResource(user.getUserId(), targetUser.getUserId());
 
-    Assertions.assertFalse(applicationService.existsByUserId(user.getUserId()));
+    Assertions.assertFalse(applicationInfoService.existsByUserId(user.getUserId()));
     Assertions.assertFalse(resourceService.existsByUserId(user.getUserId()));
 
-    Assertions.assertTrue(applicationService.existsByUserId(targetUser.getUserId()));
+    Assertions.assertTrue(applicationInfoService.existsByUserId(targetUser.getUserId()));
     Assertions.assertTrue(resourceService.existsByUserId(targetUser.getUserId()));
   }
 }

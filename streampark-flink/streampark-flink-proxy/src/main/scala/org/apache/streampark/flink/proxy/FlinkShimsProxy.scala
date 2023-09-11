@@ -19,6 +19,7 @@ package org.apache.streampark.flink.proxy
 
 import org.apache.streampark.common.conf.{ConfigConst, FlinkVersion}
 import org.apache.streampark.common.util.{ClassLoaderUtils, Logger, Utils}
+import org.apache.streampark.common.util.ImplicitsUtils._
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
 import java.net.URL
@@ -196,13 +197,14 @@ object FlinkShimsProxy extends Logger {
   @throws[Exception]
   def getObject[T](loader: ClassLoader, obj: Object): T = {
     val arrayOutputStream = new ByteArrayOutputStream
-    val result = Utils.using(new ObjectOutputStream(arrayOutputStream))(
-      objectOutputStream => {
-        objectOutputStream.writeObject(obj)
-        val byteArrayInputStream = new ByteArrayInputStream(arrayOutputStream.toByteArray)
-        Utils.using(new ClassLoaderObjectInputStream(loader, byteArrayInputStream))(_.readObject)
-      })
-    result.asInstanceOf[T]
+    new ObjectOutputStream(arrayOutputStream)
+      .autoClose(
+        objectOutputStream => {
+          objectOutputStream.writeObject(obj)
+          val byteArrayInputStream = new ByteArrayInputStream(arrayOutputStream.toByteArray)
+          new ClassLoaderObjectInputStream(loader, byteArrayInputStream).autoClose(_.readObject())
+        })
+      .asInstanceOf[T]
   }
 
 }

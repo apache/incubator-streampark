@@ -21,8 +21,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public enum RestoreMode implements Serializable {
-  CLAIM(1),
-  NO_CLAIM(2),
+  NO_CLAIM(1),
+  CLAIM(2),
   LEGACY(3);
 
   public static final String RESTORE_MODE = "execution.savepoint-restore-mode";
@@ -39,7 +39,7 @@ public enum RestoreMode implements Serializable {
   }
 
   public String getName() {
-    return RestoreMode.of(this.value).toString();
+    return String.valueOf(RestoreMode.of(this.value));
   }
 
   public static RestoreMode of(Integer value) {

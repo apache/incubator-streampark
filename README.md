@@ -53,7 +53,7 @@
 * Apache Flink & Spark stream processing application development framework
 * Out-of-the-box connectors
 * Support multiple versions of Flink & Spark
-* Scala 2.11 / 2.12 support
+* Scala 2.12 support
 * One-stop stream processing management platform
 * Support catalog、olap、streaming-warehouse etc.
 * ...

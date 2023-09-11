@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client
 
+import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.enums.ExecutionMode._
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
@@ -32,7 +33,10 @@ object FlinkClientHandler {
     YARN_SESSION -> YarnSessionClient,
     YARN_PER_JOB -> YarnPerJobClient,
     KUBERNETES_NATIVE_SESSION -> KubernetesNativeSessionClient,
-    KUBERNETES_NATIVE_APPLICATION -> KubernetesNativeApplicationClient
+    KUBERNETES_NATIVE_APPLICATION -> {
+      if (K8sFlinkConfig.isV2Enabled) KubernetesApplicationClientV2
+      else KubernetesNativeApplicationClient
+    }
   )
 
   def submit(request: SubmitRequest): SubmitResponse = {

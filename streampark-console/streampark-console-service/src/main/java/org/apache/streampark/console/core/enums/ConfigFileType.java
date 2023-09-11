@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
+import lombok.Getter;
+
 import java.util.Arrays;
 
 /** configFile Type enum */
-public enum ConfigFileType implements Serializable {
+@Getter
+public enum ConfigFileType {
   YAML(1, "yaml"),
 
   PROPERTIES(2, "prop"),
@@ -36,14 +38,6 @@ public enum ConfigFileType implements Serializable {
   ConfigFileType(int value, String name) {
     this.value = value;
     this.typeName = name;
-  }
-
-  public int getValue() {
-    return value;
-  }
-
-  public String getTypeName() {
-    return typeName;
   }
 
   public static ConfigFileType of(Integer value) {

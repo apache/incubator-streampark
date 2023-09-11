@@ -186,6 +186,7 @@ public class AccessTokenController {
               .addFormData("id", appId)
               .addFormData("savePointed", "false")
               .addFormData("drain", "false")
+              .addFormData("nativeFormat", "false")
               .addFormData("savePoint", "")
               .build();
     }

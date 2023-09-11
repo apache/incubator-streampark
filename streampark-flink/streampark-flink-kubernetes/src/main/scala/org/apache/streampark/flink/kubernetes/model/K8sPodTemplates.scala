@@ -19,6 +19,8 @@ package org.apache.streampark.flink.kubernetes.model
 
 import org.apache.streampark.common.util.Utils
 
+import org.apache.commons.lang3.StringUtils
+
 import scala.util.Try
 
 /** Pod template for flink k8s cluster */
@@ -27,9 +29,9 @@ case class K8sPodTemplates(
     jmPodTemplate: String = "",
     tmPodTemplate: String = "") {
 
-  def nonEmpty: Boolean = Option(podTemplate).exists(_.trim.nonEmpty) ||
-    Option(jmPodTemplate).exists(_.trim.nonEmpty) ||
-    Option(tmPodTemplate).exists(_.trim.nonEmpty)
+  def nonEmpty: Boolean = StringUtils.isNotBlank(podTemplate) ||
+    StringUtils.isNotBlank(jmPodTemplate) ||
+    StringUtils.isNotBlank(tmPodTemplate)
 
   def isEmpty: Boolean = !nonEmpty
 

@@ -26,6 +26,14 @@ object ConfigConst {
 
   val PARAM_PREFIX = "--"
 
+  /** pyflink */
+
+  val PYTHON_SUFFIX = ".py"
+
+  val PYTHON_DRIVER_CLASS_NAME = "org.apache.flink.client.python.PythonDriver"
+
+  val PYTHON_EXECUTABLE = "venv.zip/venv/bin/python3"
+
   /** about parameter... */
 
   val KEY_APP_HOME = "app.home"

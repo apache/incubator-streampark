@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public enum CheckPointType implements Serializable {
+public enum CheckPointType {
   /** CHECKPOINT */
   CHECKPOINT(1),
   /** SAVEPOINT */

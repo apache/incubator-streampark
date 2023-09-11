@@ -617,14 +617,14 @@ export const renderFlinkAppRestoreMode = ({ model, field }: RenderCallbackParams
         onChange={(value) => (model[field] = value)}
         placeholder="Please select restore mode"
       >
-        <Select.Option key="claim" value={RestoreModeEnum.CLAIM}>
-          <Tag color="#13c2c2" style=";margin-left: 5px;" size="small">
-            CLAIM
+        <Select.Option key="no_claim" value={RestoreModeEnum.NO_CLAIM}>
+          <Tag color="gray" style=";margin-left: 5px;" size="small">
+            NO_CLAIM
           </Tag>
         </Select.Option>
-        <Select.Option key="no_claim" value={RestoreModeEnum.NO_CLAIM}>
-          <Tag color="#2db7f5" style=";margin-left: 5px;" size="small">
-            NO_CLAIM
+        <Select.Option key="claim" value={RestoreModeEnum.CLAIM}>
+          <Tag color="#108ee9" style=";margin-left: 5px;" size="small">
+            CLAIM
           </Tag>
         </Select.Option>
         <Select.Option key="legacy" value={RestoreModeEnum.LEGACY}>

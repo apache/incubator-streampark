@@ -15,16 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.bean;
+package org.apache.streampark.testcontainer.flink;
 
-import lombok.Data;
+import javax.annotation.Nonnull;
 
-import java.util.Map;
+enum FlinkComponent {
+  JOBMANAGER("jobmanager"),
+  TASKMANAGER("taskmanager");
 
-@Data
-public class FlinkConnectorResource {
-  private String className;
-  private String factoryIdentifier;
-  Map<String, String> requiredOptions;
-  Map<String, String> optionalOptions;
+  private final String name;
+
+  FlinkComponent(@Nonnull String name) {
+    this.name = name;
+  }
+
+  @Nonnull
+  public String getName() {
+    return name;
+  }
 }

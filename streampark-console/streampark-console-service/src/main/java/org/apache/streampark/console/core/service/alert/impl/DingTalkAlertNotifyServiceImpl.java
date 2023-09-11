@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertConfigWithParams;
+import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertDingTalkParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.bean.RobotResponse;
@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -55,7 +54,7 @@ import java.util.StringJoiner;
 @Service
 @Lazy
 public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
-  private Template template;
+  private final Template template = FreemarkerUtils.loadTemplateFile("alert-dingTalk.ftl");
 
   private final RestTemplate alertRestTemplate;
 
@@ -63,14 +62,8 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     this.alertRestTemplate = alertRestTemplate;
   }
 
-  @PostConstruct
-  public void loadTemplateFile() throws Exception {
-    String template = "alert-dingTalk.ftl";
-    this.template = FreemarkerUtils.loadTemplateFile(template);
-  }
-
   @Override
-  public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate)
+  public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate alertTemplate)
       throws AlertException {
     AlertDingTalkParams dingTalkParams = alertConfig.getDingTalkParams();
     try {
@@ -81,7 +74,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         Collections.addAll(contactList, contacts.split(","));
       }
       String title = alertTemplate.getTitle();
-      if (contactList.size() > 0) {
+      if (!contactList.isEmpty()) {
         StringJoiner joiner = new StringJoiner(",@", title + " @", "");
         contactList.forEach(joiner::add);
         title = joiner.toString();

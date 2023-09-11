@@ -22,9 +22,9 @@ import scala.collection.convert.ImplicitConversions._
 
 class CURLBuilder(val url: String) {
 
-  val headers: util.Map[String, String] = new util.HashMap[String, String]
+  private[this] val headers: util.Map[String, String] = new util.HashMap[String, String]
 
-  val formDatas: util.Map[String, String] = new util.HashMap[String, String]
+  private[this] val formData: util.Map[String, String] = new util.HashMap[String, String]
 
   def addHeader(k: String, v: String): CURLBuilder = {
     this.headers.put(k, v)
@@ -32,7 +32,7 @@ class CURLBuilder(val url: String) {
   }
 
   def addFormData(k: String, v: String): CURLBuilder = {
-    this.formDatas.put(k, v)
+    this.formData.put(k, v)
     this
   }
 
@@ -40,12 +40,9 @@ class CURLBuilder(val url: String) {
     require(url != null, "[StreamPark] CURL build failed, url must not be null")
     val cURL = new StringBuilder("curl -X POST ")
     cURL.append(String.format("'%s' \\\n", url))
-    for (headerKey <- headers.keySet) {
-      cURL.append(String.format("-H \'%s: %s\' \\\n", headerKey, headers.get(headerKey)))
-    }
-    for (field <- formDatas.keySet) {
-      cURL.append(String.format("--data-urlencode \'%s=%s\' \\\n", field, formDatas.get(field)))
-    }
+    headers.keySet.foreach(h => cURL.append(String.format("-H \'%s: %s\' \\\n", h, headers.get(h))))
+    formData.foreach(
+      k => cURL.append(String.format("--data-urlencode \'%s=%s\' \\\n", k, formData.get(k))))
     cURL.append("-i")
     cURL.toString
   }
