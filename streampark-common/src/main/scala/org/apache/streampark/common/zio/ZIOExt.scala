@@ -18,7 +18,7 @@
 package org.apache.streampark.common.zio
 
 import zio.{FiberFailure, IO, Runtime, Unsafe, ZIO}
-import zio.stream.ZStream
+import zio.stream.{UStream, ZStream}
 
 import scala.util.Try
 
@@ -114,6 +114,10 @@ object ZIOExt {
 
     /** Filter Some value and flatten the value */
     @inline def filterSome: ZStream[R, E, A] = zstream.filter(_.isDefined).map(_.get)
+  }
+
+  implicit class IterableZStreamConverter[A](iter: Iterable[A]) {
+    @inline def asZStream: UStream[A] = ZStream.fromIterable(iter)
   }
 
 }

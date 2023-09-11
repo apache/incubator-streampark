@@ -17,32 +17,30 @@
 
 package org.apache.streampark.console.core.task
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
-import org.apache.streampark.common.zio.ZIOExt.{UIOOps, ZStreamOptionEffectOps}
+import org.apache.streampark.common.zio.ZIOExt.{IterableZStreamConverter, UIOOps, ZStreamOptionEffectOps}
 import org.apache.streampark.console.core.bean.AlertTemplate
 import org.apache.streampark.console.core.entity.Application
 import org.apache.streampark.console.core.enums.{FlinkAppState, OptionState}
 import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.alert.AlertService
-import org.apache.streampark.console.core.service.application.{ApplicationActionService, ApplicationInfoService}
+import org.apache.streampark.console.core.service.application.ApplicationActionService
 import org.apache.streampark.console.core.utils.FlinkAppStateConverter
-import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ApplicationJobKey
+import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserverSnapSubscriptionHelper.{ClusterMetricsSnapsSubscriptionOps, RestSvcEndpointSnapsSubscriptionOps}
-
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import zio.{Fiber, Ref, UIO, ZIO}
 import zio.ZIO.{logError, logInfo}
 import zio.ZIOAspect.annotated
-import zio.stream.{UStream, ZStream}
-
-import javax.annotation.{PostConstruct, PreDestroy}
+import zio.stream.UStream
+import zio.{Fiber, Ref, UIO, ZIO}
 
 import java.util.Date
+import javax.annotation.{PostConstruct, PreDestroy}
 
 /** Flink status change listener on Kubernetes. */
 @Component
@@ -50,12 +48,6 @@ class FlinkK8sChangeListenerV2 @Autowired() (
     applicationService: ApplicationActionService,
     flinkClusterService: FlinkClusterService,
     alertService: AlertService) {
-
-  private val alterStateList = Array(
-    FlinkAppState.FAILED,
-    FlinkAppState.LOST,
-    FlinkAppState.RESTARTING,
-    FlinkAppState.FINISHED)
 
   private var fibers: Array[Fiber.Runtime[Nothing, Unit]] = Array.empty
 
@@ -68,8 +60,8 @@ class FlinkK8sChangeListenerV2 @Autowired() (
         f2 <- subscribeApplicationJobMetricsChange.forkDaemon
         f3 <- subscribeApplicationJobRestSvcEndpointChange.forkDaemon
         f4 <- subscribeGlobalClusterMetricChange.forkDaemon
-        _ <- ZIO.succeed(fibers = Array(f1, f2, f3, f4))
-        _ <- logInfo("Launch FlinkK8sChangeListenerV2.")
+        _  <- ZIO.succeed(fibers = Array(f1, f2, f3, f4))
+        _  <- logInfo("Launch FlinkK8sChangeListenerV2.")
       } yield ()
     if (K8sFlinkConfig.isV2Enabled) launchAll.runUIO
   }
@@ -79,6 +71,9 @@ class FlinkK8sChangeListenerV2 @Autowired() (
     ZIO.foreachPar(fibers)(_.interrupt).runUIO
   }
 
+  private val alterStateList =
+    Array(FlinkAppState.FAILED, FlinkAppState.LOST, FlinkAppState.RESTARTING, FlinkAppState.FINISHED)
+
   /** Subscribe Flink job status change from FlinkK8sObserver */
   private def subscribeJobStatusChange: UIO[Unit] = {
 
@@ -86,51 +81,47 @@ class FlinkK8sChangeListenerV2 @Autowired() (
       // Convert EvalJobState to FlinkAppState
       .map(snap => snap -> FlinkAppStateConverter.k8sEvalJobStateToFlinkAppState(snap.evalState))
       // Update the corresponding columns of Application record
-      .tap {
-        case (snap: JobSnapshot, convertedState: FlinkAppState) =>
-          safeUpdateApplicationRecord(snap.appId) {
-            wrapper =>
-              // update JobStatus related columns
-              snap.jobStatus.foreach {
-                status =>
-                  wrapper
-                    .typedSet(_.getJobId, status.jobId)
-                    .typedSet(_.getStartTime, new Date(status.startTs))
-                    .typedSet(_.getEndTime, status.endTs.map(new Date(_)).orNull)
-                    .typedSet(_.getDuration, status.duration)
-                    .typedSet(_.getTotalTask, status.tasks.map(_.total).getOrElse(0))
-              }
-              // Copy the logic from resources/mapper/core/ApplicationMapper.xml:persistMetrics
-              if (FlinkAppState.isEndState(convertedState.getValue)) {
-                wrapper
-                  .typedSet(_.getTotalTM, null)
-                  .typedSet(_.getTotalSlot, null)
-                  .typedSet(_.getTotalSlot, null)
-                  .typedSet(_.getAvailableSlot, null)
-                  .typedSet(_.getJmMemory, null)
-                  .typedSet(_.getTmMemory, null)
-              }
-              // update job state column
-              wrapper.typedSet(_.getState, convertedState.getValue)
-              // when a flink job status change event can be received,
-              // it means that the operation command sent by streampark has been completed.
-              wrapper.typedSet(_.getOptions, OptionState.NONE.getValue)
+      .tap { case (snap: JobSnapshot, convertedState: FlinkAppState) =>
+        safeUpdateApplicationRecord(snap.appId) { wrapper =>
+          // update JobStatus related columns
+          snap.jobStatus.foreach { status =>
+            wrapper
+              .typedSet(_.getJobId, status.jobId)
+              .typedSet(_.getStartTime, new Date(status.startTs))
+              .typedSet(_.getEndTime, status.endTs.map(new Date(_)).orNull)
+              .typedSet(_.getDuration, status.duration)
+              .typedSet(_.getTotalTask, status.tasks.map(_.total).getOrElse(0))
           }
+          // Copy the logic from resources/mapper/core/ApplicationMapper.xml:persistMetrics
+          if (FlinkAppState.isEndState(convertedState.getValue)) {
+            wrapper
+              .typedSet(_.getTotalTM, null)
+              .typedSet(_.getTotalSlot, null)
+              .typedSet(_.getTotalSlot, null)
+              .typedSet(_.getAvailableSlot, null)
+              .typedSet(_.getJmMemory, null)
+              .typedSet(_.getTmMemory, null)
+          }
+          // update job state column
+          wrapper.typedSet(_.getState, convertedState.getValue)
+          // when a flink job status change event can be received,
+          // it means that the operation command sent by streampark has been completed.
+          wrapper.typedSet(_.getOptions, OptionState.NONE.getValue)
+        }
       }
       // Alert for unhealthy job states in parallel
       .filter { case (_, state) => alterStateList.contains(state) }
-      .mapZIOPar(10) {
-        case (snap, state) =>
-          safeGetApplicationRecord(snap.appId).flatMap {
-            case None => ZIO.unit
-            case Some(app) =>
-              ZIO
-                .attemptBlocking(alertService.alert(app.getAlertId, AlertTemplate.of(app, state)))
-                .retryN(3)
-                .tapError(err => logInfo(s"Fail to alter unhealthy state: ${err.getMessage}"))
-                .ignore @@
-                annotated("appId" -> app.getId.toString, "state" -> state.toString)
-          }
+      .mapZIOPar(10) { case (snap, state) =>
+        safeGetApplicationRecord(snap.appId).flatMap {
+          case None      => ZIO.unit
+          case Some(app) =>
+            ZIO
+              .attemptBlocking(alertService.alert(app.getAlertId, AlertTemplate.of(app, state)))
+              .retryN(3)
+              .tapError(err => logInfo(s"Fail to alter unhealthy state: ${err.getMessage}"))
+              .ignore @@
+            annotated("appId" -> app.getId.toString, "state" -> state.toString)
+        }
       }
 
     FlinkK8sObserver.evaluatedJobSnaps
@@ -147,21 +138,18 @@ class FlinkK8sChangeListenerV2 @Autowired() (
       // Combine with the corresponding ApplicationJobKey
       .combineWithTypedTrackKey[ApplicationJobKey]
       .filterSome
-      .groupByKey(_._1.id) {
-        case (_, substream) =>
-          // Update metrics info of the corresponding Application record
-          substream.mapZIO {
-            case (trackKey: ApplicationJobKey, metrics: ClusterMetrics) =>
-              safeUpdateApplicationRecord(trackKey.id) {
-                wrapper =>
-                  wrapper
-                    .typedSet(_.getJmMemory, metrics.totalJmMemory)
-                    .typedSet(_.getTmMemory, metrics.totalTmMemory)
-                    .typedSet(_.getTotalTM, metrics.totalTm)
-                    .typedSet(_.getTotalSlot, metrics.totalSlot)
-                    .typedSet(_.getAvailableSlot, metrics.availableSlot)
-              }
+      .groupByKey(_._1.id) { case (_, substream) =>
+        // Update metrics info of the corresponding Application record
+        substream.mapZIO { case (trackKey: ApplicationJobKey, metrics: ClusterMetrics) =>
+          safeUpdateApplicationRecord(trackKey.id) { wrapper =>
+            wrapper
+              .typedSet(_.getJmMemory, metrics.totalJmMemory)
+              .typedSet(_.getTmMemory, metrics.totalTmMemory)
+              .typedSet(_.getTotalTM, metrics.totalTm)
+              .typedSet(_.getTotalSlot, metrics.totalSlot)
+              .typedSet(_.getAvailableSlot, metrics.availableSlot)
           }
+        }
       }
       .runDrain
   }
@@ -173,14 +161,11 @@ class FlinkK8sChangeListenerV2 @Autowired() (
       // Combine with the corresponding ApplicationJobKey
       .combineWithTypedTrackKey[ApplicationJobKey]
       .filterSome
-      .groupByKey(_._1.id) {
-        case (_, substream) =>
-          // Update jobManagerUrl of the corresponding Application record
-          substream.mapZIO {
-            case (key: ApplicationJobKey, endpoint: RestSvcEndpoint) =>
-              safeUpdateApplicationRecord(key.id)(
-                wrapper => wrapper.typedSet(_.getJobManagerUrl, endpoint.ipRest))
-          }
+      .groupByKey(_._1.id) { case (_, substream) =>
+        // Update jobManagerUrl of the corresponding Application record
+        substream.mapZIO { case (key: ApplicationJobKey, endpoint: RestSvcEndpoint) =>
+          safeUpdateApplicationRecord(key.id)(wrapper => wrapper.typedSet(_.getJobManagerUrl, endpoint.ipRest))
+        }
       }
       .runDrain
   }
@@ -192,7 +177,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
   def getAggGlobalClusterMetric(teamId: Long): ClusterMetrics = {
     for {
       metrics <- aggFlinkMetric.get
-      result = metrics.get(teamId)
+      result   = metrics.get(teamId)
     } yield result.getOrElse(ClusterMetrics.empty)
   }.runUIO
 
@@ -200,38 +185,34 @@ class FlinkK8sChangeListenerV2 @Autowired() (
   private def subscribeGlobalClusterMetricChange: UIO[Unit] = {
     FlinkK8sObserver.clusterMetricsSnaps
       .subscribe()
-      // Combine with appIds: Chunk[((Namespace, Name), ClusterMetrics)] -> Set[AppId]
-      .mapZIO(metricItems => FlinkK8sObserver.trackedKeys.toSet.map(metricItems -> _))
-      .map {
-        case (metricItems, trackKeys) =>
-          metricItems.map {
-            case ((ns, name), metric) =>
-              metric ->
-                trackKeys.filter(k => k.clusterNamespace == ns && k.clusterName == name).map(_.id)
-          }
+      .mapZIO { metricItems =>
+        for {
+          // Combine with appIds
+          trackKeys         <- FlinkK8sObserver.trackedKeys.toSet
+          metricWithAppIds   = metricItems.map { case ((ns, name), metric) =>
+                                 metric ->
+                                 trackKeys.filter(k => k.clusterNamespace == ns && k.clusterName == name).map(_.id)
+                               }
+          // Combine with teamId from persistent application records in parallel
+          itemIdWithMetrics <- metricWithAppIds.asZStream
+                                 .flatMapPar(10) { case (metric, appIds) =>
+                                   appIds.asZStream
+                                     .mapZIOParUnordered(10)(appId => safeGetApplicationRecord(appId))
+                                     .map(_.flatMap(app => Option(app.getTeamId)))
+                                     .filterSome
+                                     .map(teamId => teamId.toLong -> metric)
+                                 }
+                                 .runCollect
+          // Groups ClusterMetrics by teamId and aggregate for each grouping
+          aggMetricsMap      = itemIdWithMetrics
+                                 .groupBy { case (itemId, _) => itemId }
+                                 .map { case (itemId, metric) =>
+                                   itemId -> metric.map(_._2).foldLeft(ClusterMetrics.empty)((acc, e) => acc + e)
+                                 }
+          // Update aggFlinkMetric cache
+          _                 <- aggFlinkMetric.set(aggMetricsMap)
+        } yield ()
       }
-      // Combine with teamId from persistent application records in parallel
-      // out: Map[teamId: Long, ClusterMetrics]
-      .mapZIO {
-        ZStream
-          .fromIterable(_)
-          .flatMapPar(10) {
-            case (metric, appIds) =>
-              ZStream
-                .fromIterable(appIds)
-                .mapZIOParUnordered(10)(appId => safeGetApplicationRecord(appId))
-                .map(_.flatMap(app => Option(app.getTeamId)))
-                .filterSome
-                .map(teamId => teamId.toLong -> metric)
-          }
-          .runCollect
-      }
-      // Groups ClusterMetrics by teamId and aggregate for each grouping
-      .map(_.groupBy(_._1).map {
-        case (k, v) => k -> v.map(_._2).foldLeft(ClusterMetrics.empty)((acc, e) => acc + e)
-      })
-      // Update aggFlinkMetric cache
-      .mapZIO(result => aggFlinkMetric.set(result))
       .runDrain
   }
 
@@ -258,9 +239,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
   } @@ annotated("appId" -> appId.toString)
 
   implicit private class ApplicationLambdaUpdateOps(wrapper: LambdaUpdateWrapper[Application]) {
-    def typedSet[Value](
-        func: Application => Value,
-        value: Value): LambdaUpdateWrapper[Application] = {
+    def typedSet[Value](func: Application => Value, value: Value): LambdaUpdateWrapper[Application] = {
       wrapper.set((e: Application) => func(e), value); wrapper
     }
   }
