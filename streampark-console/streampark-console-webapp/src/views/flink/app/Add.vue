@@ -157,10 +157,30 @@
   /* custom mode */
   async function handleSubmitCustomJob(values) {
     handleCluster(values);
+    // Trigger a pom confirmation operation.
+    await unref(dependencyRef)?.handleApplyPom();
+    // common params...
+    const dependency: { pom?: string; jar?: string } = {};
+    const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
+    const uploadJars = unref(dependencyRef)?.uploadJars;
+    if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
+      Object.assign(dependency, {
+        pom: unref(dependencyRecords),
+      });
+    }
+    if (uploadJars && unref(uploadJars).length > 0) {
+      Object.assign(dependency, {
+        jar: unref(uploadJars),
+      });
+    }
     const params = {
       jobType: values.jobType === 'pyflink' ?JobTypeEnum.PYFLINK : JobTypeEnum.JAR,
       projectId: values.project || null,
       module: values.module || null,
+      dependency:
+          dependency.pom === undefined && dependency.jar === undefined
+              ? null
+              : JSON.stringify(dependency),
       appType: values.appType,
     };
     handleSubmitParams(params, values, k8sTemplate);

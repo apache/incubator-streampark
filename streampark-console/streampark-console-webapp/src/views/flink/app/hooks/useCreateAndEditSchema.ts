@@ -141,11 +141,11 @@ export const useCreateAndEditSchema = (
         component: 'Input',
         slot: 'dependency',
         ifShow: ({ values }) => {
-          if (edit?.appId) {
-            return values.jobType == JobTypeEnum.SQL;
-          } else {
-            return values?.jobType == 'sql';
-          }
+            if (edit?.appId) {
+                return values.jobType == JobTypeEnum.SQL || values.jobType == JobTypeEnum.PYFLINK;
+            } else {
+                return values?.jobType == 'sql' || values?.jobType == 'pyflink';
+            }
         },
       },
       { field: 'configOverride', label: '', component: 'Input', show: false },

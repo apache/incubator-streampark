@@ -16,6 +16,8 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.commons.lang3.StringUtils
+
 import java.io.ByteArrayOutputStream
 import java.util.Base64
 import java.util.zip.{DataFormatException, Deflater, Inflater}
@@ -24,6 +26,7 @@ object DeflaterUtils {
 
   /** Compress the specified text */
   def zipString(text: String): String = {
+    if (StringUtils.isBlank(text)) return ""
     // compression level (0 ~ 9): low to high
     // create a new deflater with the specified compression level
     val deflater = new Deflater(Deflater.BEST_COMPRESSION)
