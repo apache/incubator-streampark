@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
@@ -41,10 +42,12 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.task.FlinkClusterWatcher;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkK8sChangeListenerV2;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
+import org.apache.streampark.flink.kubernetes.v2.model.ClusterMetrics;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -95,6 +98,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Autowired private EnvInitializer envInitializer;
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
+
+  @Autowired private FlinkK8sChangeListenerV2 k8sChangeListenerV2;
 
   @Autowired private FlinkClusterService flinkClusterService;
 
@@ -149,19 +154,34 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     }
 
     // merge metrics from flink kubernetes cluster
-    FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
-    if (k8sMetric != null) {
-      totalJmMemory += k8sMetric.totalJmMemory();
-      totalTmMemory += k8sMetric.totalTmMemory();
-      totalTm += k8sMetric.totalTm();
-      totalSlot += k8sMetric.totalSlot();
-      availableSlot += k8sMetric.availableSlot();
-      runningJob += k8sMetric.runningJob();
-      overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
-      overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
-      overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
-      overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
-      overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
+    if (K8sFlinkConfig.isV2Enabled()) {
+      ClusterMetrics metrics = k8sChangeListenerV2.getAggGlobalClusterMetric(teamId);
+      totalJmMemory += metrics.totalJmMemory();
+      totalTmMemory += metrics.totalTmMemory();
+      totalTm += metrics.totalTm();
+      totalSlot += metrics.totalSlot();
+      availableSlot += metrics.availableSlot();
+      runningJob += metrics.runningJob();
+      overview.setTotal(overview.getTotal() + metrics.totalJob());
+      overview.setRunning(overview.getRunning() + metrics.runningJob());
+      overview.setFinished(overview.getFinished() + metrics.finishedJob());
+      overview.setCanceled(overview.getCanceled() + metrics.cancelledJob());
+      overview.setFailed(overview.getFailed() + metrics.failedJob());
+    } else {
+      FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
+      if (k8sMetric != null) {
+        totalJmMemory += k8sMetric.totalJmMemory();
+        totalTmMemory += k8sMetric.totalTmMemory();
+        totalTm += k8sMetric.totalTm();
+        totalSlot += k8sMetric.totalSlot();
+        availableSlot += k8sMetric.availableSlot();
+        runningJob += k8sMetric.runningJob();
+        overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
+        overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
+        overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
+        overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
+        overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
+      }
     }
 
     // result json

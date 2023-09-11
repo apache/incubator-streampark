@@ -108,15 +108,22 @@ case class RawClusterObserver(
           .map(e => Try(e.toInt).getOrElse(0))
           .getOrElse(0)
 
+        val totalTm       = Option(clusterOv.taskManagers).getOrElse(0)
+        val totalSlot     = Option(clusterOv.slotsTotal).getOrElse(0)
+        val availableSlot = Option(clusterOv.slotsAvailable).getOrElse(0)
+        val runningJob    = Option(clusterOv.jobsRunning).getOrElse(0)
+        val cancelledJob  = Option(clusterOv.jobsFinished).getOrElse(0)
+        val failedJob     = Option(clusterOv.jobsFailed).getOrElse(0)
+
         ClusterMetrics(
           totalJmMemory = totalJmMemory,
           totalTmMemory = totalTmMemory,
-          totalTm = clusterOv.taskManagers,
-          totalSlot = clusterOv.slotsTotal,
-          availableSlot = clusterOv.slotsAvailable,
-          runningJob = clusterOv.jobsRunning,
-          cancelledJob = clusterOv.jobsFinished,
-          failedJob = clusterOv.jobsFailed
+          totalTm = totalTm,
+          totalSlot = totalSlot,
+          availableSlot = availableSlot,
+          runningJob = runningJob,
+          cancelledJob = cancelledJob,
+          failedJob = failedJob
         )
       }
       .tap(metrics => clusterMetricsSnaps.put((namespace, name), metrics))

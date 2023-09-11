@@ -460,6 +460,12 @@
                 <version>${zio.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>dev.zio</groupId>
+                <artifactId>zio-cache_${scala.binary.version}</artifactId>
+                <version>${zio-cache.version}</version>
+            </dependency>
+
             <!-- pprint -->
             <dependency>
                 <groupId>com.lihaoyi</groupId>

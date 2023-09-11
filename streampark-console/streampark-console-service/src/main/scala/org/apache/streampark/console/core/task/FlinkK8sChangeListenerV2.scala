@@ -18,15 +18,14 @@
 package org.apache.streampark.console.core.task
 
 import org.apache.streampark.common.conf.K8sFlinkConfig
-import org.apache.streampark.common.util.Logger
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
-import org.apache.streampark.common.zio.ZIOExt.{IOOps, UIOOps, ZStreamOptionEffectOps}
+import org.apache.streampark.common.zio.ZIOExt.{UIOOps, ZStreamOptionEffectOps}
 import org.apache.streampark.console.core.bean.AlertTemplate
 import org.apache.streampark.console.core.entity.Application
 import org.apache.streampark.console.core.enums.{FlinkAppState, OptionState}
 import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.alert.AlertService
-import org.apache.streampark.console.core.service.application.ApplicationInfoService
+import org.apache.streampark.console.core.service.application.{ApplicationActionService, ApplicationInfoService}
 import org.apache.streampark.console.core.utils.FlinkAppStateConverter
 import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ApplicationJobKey
@@ -35,12 +34,11 @@ import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserverSnapSu
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
-import zio.{Fiber, UIO, ZIO}
-import zio.ZIO.{logError => zlogError}
+import zio.{Fiber, Ref, UIO, ZIO}
+import zio.ZIO.{logError, logInfo}
 import zio.ZIOAspect.annotated
-import zio.stream.UStream
+import zio.stream.{UStream, ZStream}
 
 import javax.annotation.{PostConstruct, PreDestroy}
 
@@ -48,44 +46,32 @@ import java.util.Date
 
 /** Flink status change listener on Kubernetes. */
 @Component
-class FlinkK8sChangeListenerV2 extends Logger {
+class FlinkK8sChangeListenerV2 @Autowired() (
+    applicationService: ApplicationActionService,
+    flinkClusterService: FlinkClusterService,
+    alertService: AlertService) {
 
-  @Lazy @Autowired
-  private var applicationInfoService: ApplicationInfoService = _
+  private val alterStateList = Array(
+    FlinkAppState.FAILED,
+    FlinkAppState.LOST,
+    FlinkAppState.RESTARTING,
+    FlinkAppState.FINISHED)
 
-  @Lazy @Autowired
-  private var flinkClusterService: FlinkClusterService = _
+  private var fibers: Array[Fiber.Runtime[Nothing, Unit]] = Array.empty
 
-  @Lazy @Autowired
-  private var alertService: AlertService = _
-
-  private val alterStateList =
-    Array(
-      FlinkAppState.FAILED,
-      FlinkAppState.LOST,
-      FlinkAppState.RESTARTING,
-      FlinkAppState.FINISHED)
-
-  private[this] var fibers: Array[Fiber.Runtime[Nothing, Unit]] = Array.empty
-
+  // launch all subscription effect when enable flink-k8s v2
   @PostConstruct
   def init(): Unit = {
-    // launch all subscription effect when enable flink-k8s v2
-    lazy val launch = for {
-      f1 <- subscribeJobStatusChange.forkDaemon
-      f2 <- subscribeApplicationJobMetricsChange.forkDaemon
-      f3 <- subscribeApplicationJobRestSvcEndpointChange.forkDaemon
-      _ <- ZIO.succeed(fibers = Array(f1, f2, f3))
-    } yield ()
-
-    if (K8sFlinkConfig.isV2Enabled) {
-      logInfo(
-        s"Launch FlinkK8sChangeListenerV2 as enabled by the \"${K8sFlinkConfig.ENABLE_V2.key}\"")
-      launch.runIO
-    } else {
-      logInfo(
-        s"Skip launching FlinkK8sChangeListenerV2 as disabled by the \"${K8sFlinkConfig.ENABLE_V2.key}\"")
-    }
+    val launchAll: UIO[Unit] =
+      for {
+        f1 <- subscribeJobStatusChange.forkDaemon
+        f2 <- subscribeApplicationJobMetricsChange.forkDaemon
+        f3 <- subscribeApplicationJobRestSvcEndpointChange.forkDaemon
+        f4 <- subscribeGlobalClusterMetricChange.forkDaemon
+        _ <- ZIO.succeed(fibers = Array(f1, f2, f3, f4))
+        _ <- logInfo("Launch FlinkK8sChangeListenerV2.")
+      } yield ()
+    if (K8sFlinkConfig.isV2Enabled) launchAll.runUIO
   }
 
   @PreDestroy
@@ -141,7 +127,7 @@ class FlinkK8sChangeListenerV2 extends Logger {
               ZIO
                 .attemptBlocking(alertService.alert(app.getAlertId, AlertTemplate.of(app, state)))
                 .retryN(3)
-                .tapError(err => zlogError(s"Fail to alter unhealthy state: ${err.getMessage}"))
+                .tapError(err => logInfo(s"Fail to alter unhealthy state: ${err.getMessage}"))
                 .ignore @@
                 annotated("appId" -> app.getId.toString, "state" -> state.toString)
           }
@@ -199,11 +185,61 @@ class FlinkK8sChangeListenerV2 extends Logger {
       .runDrain
   }
 
+  // Aggregated flink cluster metrics by teamId
+  private val aggFlinkMetric = Ref.make(Map.empty[Long, ClusterMetrics]).runUIO
+
+  /** Get aggregated metrics of all flink jobs on k8s cluster by team-id. */
+  def getAggGlobalClusterMetric(teamId: Long): ClusterMetrics = {
+    for {
+      metrics <- aggFlinkMetric.get
+      result = metrics.get(teamId)
+    } yield result.getOrElse(ClusterMetrics.empty)
+  }.runUIO
+
+  /** Subscribe Flink cluster metrics change from FlinkK8sObserver and aggregate it by teamId */
+  private def subscribeGlobalClusterMetricChange: UIO[Unit] = {
+    FlinkK8sObserver.clusterMetricsSnaps
+      .subscribe()
+      // Combine with appIds: Chunk[((Namespace, Name), ClusterMetrics)] -> Set[AppId]
+      .mapZIO(metricItems => FlinkK8sObserver.trackedKeys.toSet.map(metricItems -> _))
+      .map {
+        case (metricItems, trackKeys) =>
+          metricItems.map {
+            case ((ns, name), metric) =>
+              metric ->
+                trackKeys.filter(k => k.clusterNamespace == ns && k.clusterName == name).map(_.id)
+          }
+      }
+      // Combine with teamId from persistent application records in parallel
+      // out: Map[teamId: Long, ClusterMetrics]
+      .mapZIO {
+        ZStream
+          .fromIterable(_)
+          .flatMapPar(10) {
+            case (metric, appIds) =>
+              ZStream
+                .fromIterable(appIds)
+                .mapZIOParUnordered(10)(appId => safeGetApplicationRecord(appId))
+                .map(_.flatMap(app => Option(app.getTeamId)))
+                .filterSome
+                .map(teamId => teamId.toLong -> metric)
+          }
+          .runCollect
+      }
+      // Groups ClusterMetrics by teamId and aggregate for each grouping
+      .map(_.groupBy(_._1).map {
+        case (k, v) => k -> v.map(_._2).foldLeft(ClusterMetrics.empty)((acc, e) => acc + e)
+      })
+      // Update aggFlinkMetric cache
+      .mapZIO(result => aggFlinkMetric.set(result))
+      .runDrain
+  }
+
   // Get Application record by appId from persistent storage.
   private def safeGetApplicationRecord(appId: Long): UIO[Option[Application]] = {
     ZIO
-      .attemptBlocking(Option(applicationInfoService.getById(appId)))
-      .catchAll(err => zlogError(s"Fail to get Application record: ${err.getMessage}").as(None))
+      .attemptBlocking(Option(applicationService.getById(appId)))
+      .catchAll(err => logError(s"Fail to get Application record: ${err.getMessage}").as(None))
   } @@ annotated("appId" -> appId.toString)
 
   // Update Application record by appId into persistent storage.
@@ -214,10 +250,10 @@ class FlinkK8sChangeListenerV2 extends Logger {
         val wrapper = new LambdaUpdateWrapper[Application]()
         mapperSetFunc(wrapper)
         wrapper.eq((e: Application) => e.getId, appId)
-        applicationInfoService.update(null, wrapper)
+        applicationService.update(null, wrapper)
       }
       .retryN(3)
-      .tapError(err => zlogError(s"Fail to update Application record: ${err.getMessage}"))
+      .tapError(err => logError(s"Fail to update Application record: ${err.getMessage}"))
       .ignore
   } @@ annotated("appId" -> appId.toString)
 
