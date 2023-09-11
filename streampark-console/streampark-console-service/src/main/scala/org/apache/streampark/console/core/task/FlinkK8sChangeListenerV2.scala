@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.task
 import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
-import org.apache.streampark.common.zio.ZIOExt.{IOOps, ZStreamOptionEffectOps}
+import org.apache.streampark.common.zio.ZIOExt.{IOOps, UIOOps, ZStreamOptionEffectOps}
 import org.apache.streampark.console.core.bean.AlertTemplate
 import org.apache.streampark.console.core.entity.Application
 import org.apache.streampark.console.core.enums.{FlinkAppState, OptionState}
@@ -37,12 +37,12 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
-import zio.{UIO, ZIO}
+import zio.{Fiber, UIO, ZIO}
 import zio.ZIO.{logError => zlogError}
 import zio.ZIOAspect.annotated
 import zio.stream.UStream
 
-import javax.annotation.PostConstruct
+import javax.annotation.{PostConstruct, PreDestroy}
 
 import java.util.Date
 
@@ -66,13 +66,16 @@ class FlinkK8sChangeListenerV2 extends Logger {
       FlinkAppState.RESTARTING,
       FlinkAppState.FINISHED)
 
+  private[this] var fibers: Array[Fiber.Runtime[Nothing, Unit]] = Array.empty
+
   @PostConstruct
   def init(): Unit = {
     // launch all subscription effect when enable flink-k8s v2
     lazy val launch = for {
-      _ <- subscribeJobStatusChange.forkDaemon
-      _ <- subscribeApplicationJobMetricsChange.forkDaemon
-      _ <- subscribeApplicationJobRestSvcEndpointChange.forkDaemon
+      f1 <- subscribeJobStatusChange.forkDaemon
+      f2 <- subscribeApplicationJobMetricsChange.forkDaemon
+      f3 <- subscribeApplicationJobRestSvcEndpointChange.forkDaemon
+      _ <- ZIO.succeed(fibers = Array(f1, f2, f3))
     } yield ()
 
     if (K8sFlinkConfig.isV2Enabled) {
@@ -83,6 +86,11 @@ class FlinkK8sChangeListenerV2 extends Logger {
       logInfo(
         s"Skip launching FlinkK8sChangeListenerV2 as disabled by the \"${K8sFlinkConfig.ENABLE_V2.key}\"")
     }
+  }
+
+  @PreDestroy
+  def destroy(): Unit = {
+    ZIO.foreachPar(fibers)(_.interrupt).runUIO
   }
 
   /** Subscribe Flink job status change from FlinkK8sObserver */
@@ -97,21 +105,14 @@ class FlinkK8sChangeListenerV2 extends Logger {
           safeUpdateApplicationRecord(snap.appId) {
             wrapper =>
               // update JobStatus related columns
-              snap.jobStatus match {
-                case Some(status) =>
+              snap.jobStatus.foreach {
+                status =>
                   wrapper
                     .typedSet(_.getJobId, status.jobId)
                     .typedSet(_.getStartTime, new Date(status.startTs))
                     .typedSet(_.getEndTime, status.endTs.map(new Date(_)).orNull)
                     .typedSet(_.getDuration, status.duration)
                     .typedSet(_.getTotalTask, status.tasks.map(_.total).getOrElse(0))
-                case None =>
-                  wrapper
-                    .typedSet(_.getJobId, null)
-                    .typedSet(_.getStartTime, null)
-                    .typedSet(_.getEndTime, null)
-                    .typedSet(_.getDuration, null)
-                    .typedSet(_.getTotalTask, null)
               }
               // Copy the logic from resources/mapper/core/ApplicationMapper.xml:persistMetrics
               if (FlinkAppState.isEndState(convertedState.getValue)) {
@@ -123,7 +124,7 @@ class FlinkK8sChangeListenerV2 extends Logger {
                   .typedSet(_.getJmMemory, null)
                   .typedSet(_.getTmMemory, null)
               }
-              // Update job state column
+              // update job state column
               wrapper.typedSet(_.getState, convertedState.getValue)
               // when a flink job status change event can be received,
               // it means that the operation command sent by streampark has been completed.
