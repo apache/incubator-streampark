@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.utils
 
 import org.apache.streampark.console.core.enums.FlinkAppState
+import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState
 import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 
 import scala.util.Try
@@ -27,6 +28,11 @@ object FlinkAppStateConverter {
   /** Convert [[EvalJobState]] to [[FlinkAppState]]. */
   def k8sEvalJobStateToFlinkAppState(jobState: EvalJobState): FlinkAppState = {
     Try(FlinkAppState.valueOf(jobState.toString)).getOrElse(FlinkAppState.OTHER)
+  }
+
+  /** Convert [[FlinkAppState]] to [[EvalJobState]]. */
+  def flinkAppStateToK8sEvalJobState(jobState: FlinkAppState): EvalJobState = {
+    EvalJobState.values.find(e => e.toString == jobState.toString).getOrElse(EvalJobState.OTHER)
   }
 
 }
