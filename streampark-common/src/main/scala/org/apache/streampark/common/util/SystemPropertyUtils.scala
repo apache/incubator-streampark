@@ -18,6 +18,7 @@ package org.apache.streampark.common.util
 
 import java.io.File
 import java.security.{AccessController, PrivilegedAction}
+import java.util
 
 import scala.util.{Failure, Success, Try}
 
@@ -95,6 +96,21 @@ object SystemPropertyUtils extends Logger {
   /** Sets the value of the Java system property with the specified {@code key} */
   def set(key: String, value: String): String =
     System.getProperties.setProperty(key, value).asInstanceOf[String]
+
+  @throws[Exception]
+  def setEnv(name: String, value: String): Unit = {
+    val envClass = Class.forName("java.lang.ProcessEnvironment")
+    val getEnv = envClass.getDeclaredMethod("getenv")
+    getEnv.setAccessible(true)
+    val unmodifiableEnvironment = getEnv.invoke(null)
+    val clazz = Class.forName("java.util.Collections$UnmodifiableMap")
+    val field = clazz.getDeclaredField("m")
+    field.setAccessible(true)
+    field
+      .get(unmodifiableEnvironment)
+      .asInstanceOf[util.Map[String, String]]
+      .put(name, value)
+  }
 
   def getOrElseUpdate(key: String, default: String): String = {
     get(key) match {
