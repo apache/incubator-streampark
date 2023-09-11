@@ -20,7 +20,7 @@ package org.apache.streampark.flink.client.impl
 import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.fs.FsOperator
-import org.apache.streampark.common.util.{HdfsUtils, Utils}
+import org.apache.streampark.common.util.{FileUtils, HdfsUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
@@ -99,6 +99,11 @@ object YarnApplicationClient extends YarnClientTrait {
       val pyVenv: String = workspace.APP_PYTHON_VENV
       if (!FsOperator.hdfs.exists(pyVenv)) {
         throw new RuntimeException(s"$pyVenv File does not exist")
+      }
+
+      val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
+      if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
+        flinkConfig.safeSet(PipelineOptions.JARS, util.Arrays.asList(localLib))
       }
 
       // yarn.ship-files

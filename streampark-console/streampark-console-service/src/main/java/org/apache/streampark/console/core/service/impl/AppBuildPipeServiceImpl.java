@@ -201,7 +201,7 @@ public class AppBuildPipeServiceImpl
     // 1) flink sql setDependency
     FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
-    if (app.isFlinkSqlJob()) {
+    if (app.isFlinkSqlJobOrPyFlinkJob()) {
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
       Utils.notNull(flinkSql);
       app.setDependency(flinkSql.getDependency());
@@ -618,6 +618,9 @@ public class AppBuildPipeServiceImpl
 
   private DependencyInfo getMergedDependencyInfo(Application application) {
     DependencyInfo dependencyInfo = application.getDependencyInfo();
+    if (StringUtils.isBlank(application.getTeamResource())) {
+      return dependencyInfo;
+    }
 
     try {
       String[] resourceIds = JacksonUtils.read(application.getTeamResource(), String[].class);

@@ -123,6 +123,14 @@ object FileUtils {
     }
   }
 
+  def directoryNotBlank(file: Serializable): Boolean = {
+    file match {
+      case null => false
+      case f: File => f.isDirectory && f.list().length > 0
+      case p => new File(p.toString).isDirectory && new File(p.toString).list().length > 0
+    }
+  }
+
   def equals(file1: File, file2: File): Boolean = {
     (file1, file2) match {
       case (a, b) if a == null || b == null => false

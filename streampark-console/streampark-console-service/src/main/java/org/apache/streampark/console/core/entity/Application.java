@@ -450,6 +450,12 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
+  public boolean isFlinkSqlJobOrPyFlinkJob() {
+    return DevelopmentMode.FLINK_SQL.getValue().equals(this.getJobType())
+        || DevelopmentMode.PYFLINK.getValue().equals(this.getJobType());
+  }
+
+  @JsonIgnore
   public boolean isCustomCodeJob() {
     return DevelopmentMode.CUSTOM_CODE.getValue().equals(this.getJobType());
   }
