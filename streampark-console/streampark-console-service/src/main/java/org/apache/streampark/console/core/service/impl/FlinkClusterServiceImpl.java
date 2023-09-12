@@ -98,7 +98,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
-  @Autowired private FlinkK8sObserverStub flinkK8sObserverStub;
+  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
 
   @Override
   public ResponseResult check(FlinkCluster cluster) {
@@ -164,7 +164,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       FlinkClusterWatcher.addWatching(flinkCluster);
     }
     if (shouldWatchForK8s(flinkCluster)) {
-      flinkK8sObserverStub.watchFlinkCluster(flinkCluster);
+      flinkK8sObserver.watchFlinkCluster(flinkCluster);
     }
     return ret;
   }
@@ -194,7 +194,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       updateById(flinkCluster);
       FlinkClusterWatcher.addWatching(flinkCluster);
       if (shouldWatchForK8s(flinkCluster)) {
-        flinkK8sObserverStub.watchFlinkCluster(flinkCluster);
+        flinkK8sObserver.watchFlinkCluster(flinkCluster);
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -236,7 +236,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkCluster.setYarnQueue(paramOfCluster.getYarnQueue());
     }
     if (shouldWatchForK8s(flinkCluster)) {
-      flinkK8sObserverStub.watchFlinkCluster(flinkCluster);
+      flinkK8sObserver.watchFlinkCluster(flinkCluster);
     }
     updateById(flinkCluster);
   }
@@ -273,11 +273,17 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     checkActiveIfNeeded(flinkCluster);
 
     // 3) check job if running on cluster
-    boolean existsRunningJob =
-        applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
-    ApiAlertException.throwIfTrue(
-        existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
-
+    if (shouldWatchForK8s(cluster)) {
+      boolean existActiveJobs = flinkK8sObserver.existActiveJobsOnFlinkCluster(flinkCluster);
+      ApiAlertException.throwIfTrue(
+          existActiveJobs,
+          "Due to the presence of active jobs on the cluster, the cluster should not be shutdown");
+    } else {
+      boolean existsRunningJob =
+          applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
+      ApiAlertException.throwIfTrue(
+          existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
+    }
     return true;
   }
 
@@ -348,7 +354,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
           "Flink cluster is running, cannot be delete, please check.");
     }
     if (shouldWatchForK8s(flinkCluster)) {
-      flinkK8sObserverStub.unwatchFlinkCluster(flinkCluster);
+      flinkK8sObserver.unwatchFlinkCluster(flinkCluster);
     }
 
     ApiAlertException.throwIfTrue(

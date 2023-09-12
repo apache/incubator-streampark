@@ -34,6 +34,9 @@ public interface FlinkK8sObserverStub {
   /** Stub method: Compatible with old code of flink-k8s-v1. */
   FlinkMetricCV getAggClusterMetricCV(Long teamId);
 
+  /** Stub method: Whether there are active jobs on the Flink cluster. */
+  boolean existActiveJobsOnFlinkCluster(FlinkCluster flinkCluster);
+
   /**
    * Stub method: Add FlinkCluster to the watchlist. Normally, after a successful deployment of a
    * Flink Cluster, the relevant resources would be self-tracked

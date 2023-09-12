@@ -228,7 +228,8 @@ class FlinkK8sObserverBroker @Autowired() (
         .mapZIOPar(5) { case (id, state, _) =>
           safeGetFlinkClusterRecord(id).someOrUnitZIO { flinkCluster =>
             ZIO
-              .attemptBlocking(alertService.alert(flinkCluster.getAlertId, AlertTemplate.of(flinkCluster, state)))
+              .attemptBlocking(alertService
+                .alert(flinkCluster.getAlertId, AlertTemplate.of(flinkCluster, state)))
               .retryN(5)
               .tapError(err => logInfo(s"Fail to alter unhealthy state: ${err.getMessage}"))
               .ignore @@
@@ -353,9 +354,8 @@ class FlinkK8sObserverBroker @Autowired() (
   }
 
   /**
-   * Stub method: Remove FlinkCluster from the watchlist.
-   * When there are associated SessionJobs with FlinkCluster,
-   * the tracking of FlinkCluster will not be removed in reality.
+   * Stub method: Remove FlinkCluster from the watchlist. When there are associated SessionJobs with
+   * FlinkCluster, the tracking of FlinkCluster will not be removed in reality.
    */
   override def unwatchFlinkCluster(flinkCluster: FlinkCluster): Unit = {
     ZIO
@@ -369,6 +369,21 @@ class FlinkK8sObserverBroker @Autowired() (
     observer.trackedKeys
       .find(_.id == id)
       .someOrUnitZIO(key => observer.untrack(key))
+  }
+
+  /** Stub method: Whether there are active jobs on the Flink cluster. */
+  override def existActiveJobsOnFlinkCluster(flinkCluster: FlinkCluster): Boolean = {
+    if (flinkCluster.getClusterId == null) false
+    else {
+      observer.clusterJobStatusSnaps
+        .get(flinkCluster.getClusterId, Option(flinkCluster.getK8sNamespace).getOrElse("default"))
+        .map {
+          case None             => false
+          case Some(statusList) =>
+            statusList.exists(status => JobState.activeStates.contains(status.state))
+        }
+        .runUIO
+    }
   }
 
 }
