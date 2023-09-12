@@ -461,6 +461,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     boolean mapping = this.baseMapper.mapping(appParam);
     Application application = getById(appParam.getId());
     if (isKubernetesApp(application)) {
+      // todo mark
       k8SFlinkTrackMonitor.doWatching(toTrackId(application));
       if (K8sFlinkConfig.isV2Enabled()) {
         flinkK8sObserver.watchApplication(application);
