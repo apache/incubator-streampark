@@ -19,12 +19,13 @@ package org.apache.streampark.console.core.utils
 
 import org.apache.streampark.common.enums.ClusterState
 import org.apache.streampark.console.core.enums.FlinkAppState
-import org.apache.streampark.flink.kubernetes.v2.model.{DeployCRStatus, EvalJobState, EvalState}
+import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
+import org.apache.streampark.flink.kubernetes.v2.model.{ClusterMetrics, DeployCRStatus, EvalJobState, EvalState}
 import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 
 import scala.util.Try
 
-object FlinkK8sStateConverter {
+object FlinkK8sDataTypeConverter {
 
   /** Convert [[EvalJobState]] to [[FlinkAppState]]. */
   def k8sEvalJobStateToFlinkAppState(jobState: EvalJobState): FlinkAppState = {
@@ -41,6 +42,22 @@ object FlinkK8sStateConverter {
       case EvalState.DELETED   => ClusterState.KILLED
       case _                   => ClusterState.UNKNOWN
     }
+  }
+
+  /** Convert [[ClusterMetrics]] to [[FlinkMetricCV]]. */
+  def clusterMetricsToFlinkMetricCV(metrics: ClusterMetrics): FlinkMetricCV = {
+    FlinkMetricCV(
+      totalJmMemory = metrics.totalJmMemory,
+      totalTmMemory = metrics.totalTmMemory,
+      totalTm = metrics.totalTm,
+      totalSlot = metrics.totalTm,
+      availableSlot = metrics.availableSlot,
+      runningJob = metrics.runningJob,
+      finishedJob = metrics.finishedJob,
+      cancelledJob = metrics.cancelledJob,
+      failedJob = metrics.failedJob,
+      pollAckTime = 0L
+    )
   }
 
 }

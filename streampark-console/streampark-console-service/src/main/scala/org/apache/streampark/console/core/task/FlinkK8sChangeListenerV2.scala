@@ -27,9 +27,10 @@ import org.apache.streampark.console.core.enums.{FlinkAppState, OptionState}
 import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.alert.AlertService
 import org.apache.streampark.console.core.service.application.ApplicationActionService
-import org.apache.streampark.console.core.utils.FlinkK8sStateConverter
-import org.apache.streampark.console.core.utils.FlinkK8sStateConverter.k8sDeployStateToClusterState
+import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter
+import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.{clusterMetricsToFlinkMetricCV, k8sDeployStateToClusterState}
 import org.apache.streampark.console.core.utils.MybatisScalaExt.LambdaUpdateOps
+import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
 import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.{ApplicationJobKey, ClusterKey}
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
@@ -45,14 +46,16 @@ import zio.stream.UStream
 
 import javax.annotation.{PostConstruct, PreDestroy}
 
+import java.lang
 import java.util.Date
 
 /** Flink status change listener on Kubernetes. */
 @Component
 class FlinkK8sChangeListenerV2 @Autowired() (
-    applicationService: ApplicationActionService,
+    applicationActionService: ApplicationActionService,
     flinkClusterService: FlinkClusterService,
-    alertService: AlertService) {
+    alertService: AlertService)
+  extends FlinkK8sObserverStub {
 
   private val alertJobStateList: Array[FlinkAppState] = Array(
     FlinkAppState.FAILED,
@@ -101,7 +104,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
 
     def process(subStream: UStream[JobSnapshot]): UStream[Unit] = subStream
       // Convert EvalJobState to FlinkAppState
-      .map(snap => snap -> FlinkK8sStateConverter.k8sEvalJobStateToFlinkAppState(snap.evalState))
+      .map(snap => snap -> FlinkK8sDataTypeConverter.k8sEvalJobStateToFlinkAppState(snap.evalState))
       // Update the corresponding columns of Application record
       .tap { case (snap: JobSnapshot, convertedState: FlinkAppState) =>
         safeUpdateApplicationRecord(snap.appId) { wrapper =>
@@ -252,13 +255,17 @@ class FlinkK8sChangeListenerV2 @Autowired() (
   // Aggregated flink cluster metrics by teamId
   private val aggFlinkMetric = Ref.make(Map.empty[Long, ClusterMetrics]).runUIO
 
-  /** Get aggregated metrics of all flink jobs on k8s cluster by team-id. */
-  def getAggGlobalClusterMetric(teamId: Long): ClusterMetrics = {
+  /** Get aggregated metrics of all flink jobs on k8s cluster by team-id */
+  override def getAggClusterMetric(teamId: lang.Long): ClusterMetrics = {
     for {
       metrics <- aggFlinkMetric.get
       result   = metrics.get(teamId)
     } yield result.getOrElse(ClusterMetrics.empty)
   }.runUIO
+
+  override def getAggClusterMetricCV(teamId: lang.Long): FlinkMetricCV = {
+    clusterMetricsToFlinkMetricCV(getAggClusterMetric(teamId))
+  }
 
   /** Subscribe Flink cluster metrics change from FlinkK8sObserver and aggregate it by teamId */
   private def subscribeGlobalClusterMetricChange: UIO[Unit] = {
@@ -298,7 +305,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
   // Get Application record by appId from persistent storage.
   private def safeGetApplicationRecord(appId: Long): UIO[Option[Application]] = {
     ZIO
-      .attemptBlocking(Option(applicationService.getById(appId)))
+      .attemptBlocking(Option(applicationActionService.getById(appId)))
       .retryN(2)
       .catchAll(err => logError(s"Fail to get Application record: ${err.getMessage}").as(None))
   } @@ annotated("appId" -> appId.toString)
@@ -311,7 +318,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
         val wrapper = new LambdaUpdateWrapper[Application]()
         wrapperSetFunc(wrapper)
         wrapper.eq((e: Application) => e.getId, appId)
-        applicationService.update(null, wrapper)
+        applicationActionService.update(null, wrapper)
       }
       .retryN(2)
       .tapError(err => logError(s"Fail to update Application record: ${err.getMessage}"))

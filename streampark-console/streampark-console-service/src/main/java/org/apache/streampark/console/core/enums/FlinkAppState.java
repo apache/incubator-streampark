@@ -139,7 +139,7 @@ public enum FlinkAppState {
 
   /**
    * Type conversion bridging Deprecated, see {@link
-   * org.apache.streampark.console.core.utils.FlinkK8sStateConverter}
+   * org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter}
    */
   @Deprecated
   public static class Bridge {
