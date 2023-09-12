@@ -26,7 +26,7 @@ import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response
 
 import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
 
-import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
+import scala.collection.convert.ImplicitConversions._
 import scala.util.Try
 
 case class ClickHouseWriterTask(
