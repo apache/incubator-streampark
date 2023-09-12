@@ -419,6 +419,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     KubernetesSubmitParam kubernetesSubmitParam =
         KubernetesSubmitParam.apply(
             application.getClusterId(),
+            application.getK8sName(),
             application.getK8sNamespace(),
             application.getFlinkImage(),
             application.getK8sRestExposedTypeEnum());

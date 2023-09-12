@@ -33,10 +33,10 @@ import java.util.{Map => JMap}
  * The logic of conversion is located at：
  * [[org.apache.streampark.flink.client.impl.KubernetesApplicationClientV2#genFlinkDeployDef]]
  */
-// todo split into Application mode and SessionJob mode
 case class KubernetesSubmitParam(
     clusterId: String,
     kubernetesNamespace: String,
+    kubernetesName: Option[String],
     baseImage: Option[String] = None,
     imagePullPolicy: Option[String] = None,
     serviceAccount: Option[String] = None,
@@ -67,12 +67,14 @@ object KubernetesSubmitParam {
    */
   def apply(
       clusterId: String,
+      kubernetesName: String,
       kubernetesNamespace: String,
       baseImage: String,
       @Nullable flinkRestExposedType: FlinkK8sRestExposedType): KubernetesSubmitParam =
     KubernetesSubmitParam(
       clusterId = clusterId,
       kubernetesNamespace = kubernetesNamespace,
+      kubernetesName = Option(kubernetesName),
       baseImage = Some(baseImage),
       flinkRestExposedType = Option(flinkRestExposedType))
 }

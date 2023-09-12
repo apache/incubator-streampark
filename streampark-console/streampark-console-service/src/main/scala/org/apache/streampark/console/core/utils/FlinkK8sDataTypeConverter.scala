@@ -20,14 +20,29 @@ package org.apache.streampark.console.core.utils
 import org.apache.streampark.common.enums.{ClusterState, ExecutionMode}
 import org.apache.streampark.console.core.entity.FlinkCluster
 import org.apache.streampark.console.core.enums.FlinkAppState
+import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.genSessionJobCRName
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
 import org.apache.streampark.flink.kubernetes.v2.model.{ClusterMetrics, DeployCRStatus, EvalJobState, EvalState}
 import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ClusterKey
 
+import org.springframework.stereotype.Component
+
+import java.util.UUID
+
 import scala.util.Try
 
+@Component
+class FlinkK8sDataTypeConverter() extends FlinkK8sDataTypeConverterStub {
+  override def genSessionJobK8sCRName(clusterId: String): String = genSessionJobCRName(clusterId)
+}
+
 object FlinkK8sDataTypeConverter {
+
+  /** Create default name for Flink SessionJob CR for k8s-native compatibility. */
+  def genSessionJobCRName(clusterId: String): String = {
+    s"$clusterId-${UUID.randomUUID().toString.replace("-", "").take(8)}"
+  }
 
   /** Convert [[EvalJobState]] to [[FlinkAppState]]. */
   def k8sEvalJobStateToFlinkAppState(jobState: EvalJobState): FlinkAppState = {
