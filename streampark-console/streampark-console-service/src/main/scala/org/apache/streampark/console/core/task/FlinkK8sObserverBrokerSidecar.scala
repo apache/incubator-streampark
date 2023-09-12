@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.task
 import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
 import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.application.ApplicationInfoService
+import org.apache.streampark.console.core.utils.MybatisScalaExt.LambdaUpdateOps
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
@@ -34,7 +35,6 @@ trait FlinkK8sObserverBrokerSidecar {
   def applicationInfoService: ApplicationInfoService
   def flinkClusterService: FlinkClusterService
 
-
   // Get Application record by appId from persistent storage.
   protected def safeGetApplicationRecord(appId: Long): UIO[Option[Application]] = {
     ZIO
@@ -44,15 +44,9 @@ trait FlinkK8sObserverBrokerSidecar {
   } @@ annotated("appId" -> appId.toString)
 
   // Update Application record by appId into persistent storage.
-  protected def safeUpdateApplicationRecord(appId: Long)(
-      wrapperSetFunc: LambdaUpdateWrapper[Application] => Unit): UIO[Unit] = {
+  protected def safeUpdateApplicationRecord(appId: Long)(update: LambdaUpdateWrapper[Application]): UIO[Unit] = {
     ZIO
-      .attemptBlocking {
-        val wrapper = new LambdaUpdateWrapper[Application]()
-        wrapperSetFunc(wrapper)
-        wrapper.eq((e: Application) => e.getId, appId)
-        applicationInfoService.update(null, wrapper)
-      }
+      .attemptBlocking(applicationInfoService.update(null, update.typedEq(_.getId, appId)))
       .retryN(2)
       .tapError(err => logError(s"Fail to update Application record: ${err.getMessage}"))
       .ignore
@@ -67,29 +61,19 @@ trait FlinkK8sObserverBrokerSidecar {
   } @@ annotated("id" -> id.toString)
 
   // Update FlinkCluster record by id into persistent storage.
-  protected def safeUpdateFlinkClusterRecord(id: Long)(
-      wrapperSetFunc: LambdaUpdateWrapper[FlinkCluster] => Unit): UIO[Unit] = {
+  protected def safeUpdateFlinkClusterRecord(id: Long)(update: LambdaUpdateWrapper[FlinkCluster]): UIO[Unit] = {
     ZIO
-      .attemptBlocking {
-        val wrapper = new LambdaUpdateWrapper[FlinkCluster]()
-        wrapperSetFunc(wrapper)
-        wrapper.eq((e: FlinkCluster) => e.getId, id)
-        flinkClusterService.update(null, wrapper)
-      }
+      .attemptBlocking(flinkClusterService.update(null, update.typedEq(_.getId, id)))
       .retryN(3)
       .tapError(err => logError(s"Fail to update FlinkCluster record: ${err.getMessage}"))
       .ignore
   } @@ annotated("id" -> id.toString)
 
-
   // Find Application record.
-  protected def safeFindApplication(retryN: Int)(
-    wrapperFunc: LambdaQueryWrapper[Application] => Unit): UIO[Vector[Application]] = {
+  protected def safeFindApplication(query: LambdaQueryWrapper[Application])(retryN: Int): UIO[Vector[Application]] = {
     ZIO
       .attemptBlocking {
-        val wrapper = new LambdaQueryWrapper[Application]()
-        wrapperFunc(wrapper)
-        val result = applicationInfoService.list(wrapper)
+        val result = applicationInfoService.getBaseMapper.selectList(query)
         if (result == null) Vector.empty[Application] else result.asScala.toVector
       }
       .retryN(retryN)
@@ -98,5 +82,18 @@ trait FlinkK8sObserverBrokerSidecar {
       }
   }
 
+  // Find Application record.
+  protected def safeFindFlinkClusterRecord(query: LambdaQueryWrapper[FlinkCluster])(
+      retryN: Int): UIO[Vector[FlinkCluster]] = {
+    ZIO
+      .attemptBlocking {
+        val result = flinkClusterService.getBaseMapper.selectList(query)
+        if (result == null) Vector.empty[FlinkCluster] else result.asScala.toVector
+      }
+      .retryN(retryN)
+      .catchAll { err =>
+        logError(s"Fail to list Application records: ${err.getMessage}").as(Vector.empty[FlinkCluster])
+      }
+  }
 
 }

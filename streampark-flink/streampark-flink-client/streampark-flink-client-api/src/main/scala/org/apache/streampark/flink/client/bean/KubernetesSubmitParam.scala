@@ -76,5 +76,6 @@ object KubernetesSubmitParam {
       kubernetesNamespace = kubernetesNamespace,
       kubernetesName = Option(kubernetesName),
       baseImage = Some(baseImage),
-      flinkRestExposedType = Option(flinkRestExposedType))
+      flinkRestExposedType = Option(flinkRestExposedType)
+    )
 }

@@ -18,14 +18,15 @@
 package org.apache.streampark.common
 
 import scala.language.implicitConversions
+import scala.util.Try
 
 package object zio {
 
   /** Similar to python's pprint, format print any type of instance. */
-  @inline def toPrettyString(value: Any): String = value match {
+  @inline def toPrettyString(value: Any): String = Try(value match {
     case v: String => v
     case v => pprint.apply(v, height = 2000, showFieldNames = true).render
-  }
+  }).getOrElse(value.toString)
 
   implicit class PrettyStringOps(value: Any) {
     @inline def prettyStr: String = toPrettyString(value)

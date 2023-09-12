@@ -17,14 +17,42 @@
 
 package org.apache.streampark.console.core.utils
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction
+
+import scala.jdk.CollectionConverters._
+import scala.language.implicitConversions
 
 /** MyBatis scala extension. */
 object MybatisScalaExt {
 
-  implicit class LambdaUpdateOps[Entity](wrapper: LambdaUpdateWrapper[Entity]) {
-    def typedSet[Value](func: Entity => Value, value: Value): LambdaUpdateWrapper[Entity] = {
-      wrapper.set((e: Entity) => func(e), value); wrapper
+  def lambdaQuery[E]: LambdaQueryWrapper[E]   = new LambdaQueryWrapper[E]()
+  def lambdaUpdate[E]: LambdaUpdateWrapper[E] = new LambdaUpdateWrapper[E]()
+
+  // noinspection DuplicatedCode
+  implicit class LambdaQueryOps[E](wrapper: LambdaQueryWrapper[E]) {
+    def typedIn[V](column: E => V, values: Iterable[V]): LambdaQueryWrapper[E] = {
+      wrapper.in(new SFunction[E, V] { override def apply(t: E): V = column(t) }, values.asJavaCollection)
+    }
+
+    def typedEq[V](column: E => V, value: V): LambdaQueryWrapper[E] = {
+      wrapper.eq(new SFunction[E, V] { override def apply(t: E): V = column(t) }, value)
+    }
+  }
+
+  // noinspection DuplicatedCode
+  implicit class LambdaUpdateOps[E](wrapper: LambdaUpdateWrapper[E]) {
+    def typedSet[V](column: E => V, value: V): LambdaUpdateWrapper[E] = {
+      wrapper.set((e: E) => column(e), value)
+    }
+
+    def typedSet[V](cond: Boolean, column: E => V, value: V): LambdaUpdateWrapper[E] = {
+      wrapper.set(cond, new SFunction[E, V] { override def apply(t: E): V = column(t) }, value)
+    }
+
+    def typedEq[V](column: E => V, value: V): LambdaUpdateWrapper[E] = {
+      wrapper.eq(new SFunction[E, V] { override def apply(t: E): V = column(t) }, value)
     }
   }
 
