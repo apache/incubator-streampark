@@ -32,7 +32,10 @@ object FlinkClientHandler {
     YARN_APPLICATION -> YarnApplicationClient,
     YARN_SESSION -> YarnSessionClient,
     YARN_PER_JOB -> YarnPerJobClient,
-    KUBERNETES_NATIVE_SESSION -> KubernetesNativeSessionClient,
+    KUBERNETES_NATIVE_SESSION -> {
+      if (K8sFlinkConfig.isV2Enabled) KubernetesSessionClientV2
+      else KubernetesNativeSessionClient
+    },
     KUBERNETES_NATIVE_APPLICATION -> {
       if (K8sFlinkConfig.isV2Enabled) KubernetesApplicationClientV2
       else KubernetesNativeApplicationClient
