@@ -22,10 +22,11 @@ import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
 import org.apache.streampark.console.core.enums.FlinkAppState
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.genSessionJobCRName
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
-import org.apache.streampark.flink.kubernetes.v2.model.{ClusterMetrics, DeployCRStatus, EvalJobState, EvalState, TrackKey}
+import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ClusterKey
 
+import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 
 import java.util.UUID
@@ -83,8 +84,8 @@ object FlinkK8sDataTypeConverter {
       flinkCluster != null &&
       flinkCluster.getId != null &&
       ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode) &&
-      Option(flinkCluster.getClusterId).exists(!_.isBlank) &&
-      Option(flinkCluster.getK8sNamespace).exists(!_.isBlank)
+      StringUtils.isNoneBlank(flinkCluster.getClusterId) &&
+      StringUtils.isNoneBlank(flinkCluster.getK8sNamespace)
     }
     if (isLegal) Some(ClusterKey(flinkCluster.getId, flinkCluster.getK8sNamespace, flinkCluster.getClusterId))
     else None
@@ -98,8 +99,8 @@ object FlinkK8sDataTypeConverter {
       app != null &&
       app.getId != null &&
       ExecutionMode.isKubernetesSessionMode(app.getExecutionMode) &&
-      Option(app.getClusterId).exists(!_.isBlank) &&
-      Option(app.getK8sNamespace).exists(!_.isBlank)
+      StringUtils.isNoneBlank(app.getClusterId) &&
+      StringUtils.isNoneBlank(app.getK8sNamespace)
     }
 
     if (isLegal) None
