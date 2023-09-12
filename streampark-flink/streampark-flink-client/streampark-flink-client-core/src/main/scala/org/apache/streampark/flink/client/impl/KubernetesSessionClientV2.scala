@@ -143,7 +143,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
         shutDownRequest.clusterId)
       .runIOAsTry match {
       case Success(rsp) =>
-        logInfo(richMsg("Cancel flink job successfully."))
+        logInfo(richMsg("Delete flink job successfully."))
         rsp
       case Failure(err) =>
         logError(
