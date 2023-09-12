@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.task;
 
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.v2.model.ClusterMetrics;
@@ -33,8 +34,17 @@ public interface FlinkK8sObserverStub {
   /** Stub method: Compatible with old code of flink-k8s-v1. */
   FlinkMetricCV getAggClusterMetricCV(Long teamId);
 
-  /** Stub method: Add FlinkCluster to the watchlist. */
+  /**
+   * Stub method: Add FlinkCluster to the watchlist. Normally, after a successful deployment of a
+   * Flink Cluster, the relevant resources would be self-tracked
+   */
   void watchFlinkCluster(FlinkCluster flinkCluster);
+
+  /**
+   * Stub method: Add Application to the watchlist. Normally, after a successful deployment of a
+   * Flink App, the relevant resources would be self-tracked
+   */
+  void watchApplication(Application app);
 
   /**
    * Stub method: Notify FlinkK8sObserver to remove FlinkCluster from the watchlist. When there are

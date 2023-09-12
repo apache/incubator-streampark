@@ -29,7 +29,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.alert.AlertService
 import org.apache.streampark.console.core.service.application.ApplicationInfoService
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter
-import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.{clusterMetricsToFlinkMetricCV, flinkClusterToClusterKey, k8sDeployStateToClusterState}
+import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.{applicationToTrackKey, clusterMetricsToFlinkMetricCV, flinkClusterToClusterKey, k8sDeployStateToClusterState}
 import org.apache.streampark.console.core.utils.MybatisScalaExt.{lambdaQuery, lambdaUpdate, LambdaQueryOps, LambdaUpdateOps}
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
 import org.apache.streampark.flink.kubernetes.v2.model._
@@ -110,31 +110,18 @@ class FlinkK8sObserverBroker @Autowired() (
 
   /** Restore track list from persistent storage into FlinkK8sObserver. */
   private def restoreTrackKeyRecords: UIO[Unit] = {
-    import ExecutionMode._
-
-    def convertAppToTrackKey(app: Application): Option[TrackKey] = app.getExecutionModeEnum match {
-      case KUBERNETES_NATIVE_APPLICATION => Some(TrackKey.appJob(app.getId, app.getK8sNamespace, app.getClusterId))
-      case KUBERNETES_NATIVE_SESSION     =>
-        Option(app.getK8sName) match {
-          case Some(name) => Some(TrackKey.sessionJob(app.getId, app.getK8sNamespace, name, app.getClusterId))
-          case None       =>
-            Some(TrackKey.unmanagedSessionJob(app.getId, app.getK8sNamespace, app.getClusterId, app.getJobId))
-        }
-
-      case _ => None
-    }
 
     val fromApplicationRecords: UIO[Unit] = it
       .safeFindApplication(
         lambdaQuery[Application].typedIn(_.getExecutionMode, ExecutionMode.getKubernetesMode.asScala)
       )(10)
-      .map(apps => apps.map(app => convertAppToTrackKey(app)).filterSome.toVector)
+      .map(apps => apps.map(app => applicationToTrackKey(app)).filterSome.toVector)
       .tap(keys => logInfo(s"Restore Flink K8s track-keys from Application records:\n${keys.prettyStr}"))
       .flatMap(keys => ZIO.foreachDiscard(keys)(observer.track))
 
     val fromFlinkClusterRecords: UIO[Unit] = it
       .safeFindFlinkClusterRecord(
-        lambdaQuery[FlinkCluster].typedEq(_.getExecutionMode, KUBERNETES_NATIVE_SESSION.getMode)
+        lambdaQuery[FlinkCluster].typedEq(_.getExecutionMode, ExecutionMode.KUBERNETES_NATIVE_SESSION.getMode)
       )(10)
       .map(clusters => clusters.map(e => TrackKey.cluster(e.getId, e.getK8sNamespace, e.getClusterId)))
       .tap(keys => logInfo(s"Restore Flink K8s track-keys from FlinkCluster records:\n${keys.prettyStr}"))
@@ -339,6 +326,18 @@ class FlinkK8sObserverBroker @Autowired() (
 
   override def getAggClusterMetricCV(teamId: lang.Long): FlinkMetricCV = {
     clusterMetricsToFlinkMetricCV(getAggClusterMetric(teamId))
+  }
+
+  /** Stub method: Add Application to the watchlist. */
+  override def watchApplication(app: Application): Unit = {
+    ZIO
+      .succeed(applicationToTrackKey(app))
+      .someOrUnitZIO { key =>
+        observer.track(key) *>
+        logInfo("Add Application into k8s observer tracking list") @@
+        annotated("jobId" -> app.getId.toString)
+      }
+      .runUIO
   }
 
   /** Stub method: Add FlinkCluster to the watchlist. */

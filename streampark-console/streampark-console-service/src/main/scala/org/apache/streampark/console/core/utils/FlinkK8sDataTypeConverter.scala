@@ -18,11 +18,11 @@
 package org.apache.streampark.console.core.utils
 
 import org.apache.streampark.common.enums.{ClusterState, ExecutionMode}
-import org.apache.streampark.console.core.entity.FlinkCluster
+import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
 import org.apache.streampark.console.core.enums.FlinkAppState
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.genSessionJobCRName
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
-import org.apache.streampark.flink.kubernetes.v2.model.{ClusterMetrics, DeployCRStatus, EvalJobState, EvalState}
+import org.apache.streampark.flink.kubernetes.v2.model.{ClusterMetrics, DeployCRStatus, EvalJobState, EvalState, TrackKey}
 import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ClusterKey
 
@@ -81,12 +81,42 @@ object FlinkK8sDataTypeConverter {
   def flinkClusterToClusterKey(flinkCluster: FlinkCluster): Option[ClusterKey] = {
     val isLegal = {
       flinkCluster != null &&
+      flinkCluster.getId != null &&
       ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode) &&
       Option(flinkCluster.getClusterId).exists(!_.isBlank) &&
       Option(flinkCluster.getK8sNamespace).exists(!_.isBlank)
     }
     if (isLegal) Some(ClusterKey(flinkCluster.getId, flinkCluster.getK8sNamespace, flinkCluster.getClusterId))
     else None
+  }
+
+  /** Convert [[Application]] to [[TrackKey]]. */
+  def applicationToTrackKey(app: Application): Option[TrackKey] = {
+    import ExecutionMode._
+
+    val isLegal = {
+      app != null &&
+      app.getId != null &&
+      ExecutionMode.isKubernetesSessionMode(app.getExecutionMode) &&
+      Option(app.getClusterId).exists(!_.isBlank) &&
+      Option(app.getK8sNamespace).exists(!_.isBlank)
+    }
+
+    if (isLegal) None
+    else
+      app.getExecutionModeEnum match {
+        case KUBERNETES_NATIVE_APPLICATION => Some(TrackKey.appJob(app.getId, app.getK8sNamespace, app.getClusterId))
+        case KUBERNETES_NATIVE_SESSION     =>
+          Option(app.getK8sName) match {
+            case Some(name) => Some(TrackKey.sessionJob(app.getId, app.getK8sNamespace, name, app.getClusterId))
+            case None       =>
+              Option(app.getJobId) match {
+                case Some(jid) =>
+                  Some(TrackKey.unmanagedSessionJob(app.getId, app.getK8sNamespace, app.getClusterId, jid))
+                case None      => None
+              }
+          }
+      }
   }
 
 }
