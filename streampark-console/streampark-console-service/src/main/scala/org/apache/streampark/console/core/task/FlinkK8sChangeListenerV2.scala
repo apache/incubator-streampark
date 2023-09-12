@@ -17,30 +17,35 @@
 
 package org.apache.streampark.console.core.task
 
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import org.apache.streampark.common.conf.K8sFlinkConfig
+import org.apache.streampark.common.enums.ClusterState
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
-import org.apache.streampark.common.zio.ZIOExt.{IterableZStreamConverter, UIOOps, ZStreamOptionEffectOps}
+import org.apache.streampark.common.zio.ZIOExt.{IterableZStreamConverter, OptionZIOOps, UIOOps, ZStreamOptionEffectOps}
 import org.apache.streampark.console.core.bean.AlertTemplate
-import org.apache.streampark.console.core.entity.Application
+import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
 import org.apache.streampark.console.core.enums.{FlinkAppState, OptionState}
 import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.alert.AlertService
 import org.apache.streampark.console.core.service.application.ApplicationActionService
-import org.apache.streampark.console.core.utils.FlinkAppStateConverter
-import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ApplicationJobKey
+import org.apache.streampark.console.core.utils.FlinkK8sStateConverter
+import org.apache.streampark.console.core.utils.FlinkK8sStateConverter.k8sDeployStateToClusterState
+import org.apache.streampark.console.core.utils.MybatisScalaExt.LambdaUpdateOps
 import org.apache.streampark.flink.kubernetes.v2.model._
+import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.{ApplicationJobKey, ClusterKey}
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
-import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserverSnapSubscriptionHelper.{ClusterMetricsSnapsSubscriptionOps, RestSvcEndpointSnapsSubscriptionOps}
+import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserverSnapSubscriptionHelper.{ClusterMetricsSnapsSubscriptionOps, DeployCRSnapsSubscriptionOps, RestSvcEndpointSnapsSubscriptionOps}
+
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import zio.ZIO.{logError, logInfo}
+import zio.{Fiber, Ref, UIO, ZIO}
+import zio.ZIO.{interruptible, logError, logInfo}
 import zio.ZIOAspect.annotated
 import zio.stream.UStream
-import zio.{Fiber, Ref, UIO, ZIO}
+
+import javax.annotation.{PostConstruct, PreDestroy}
 
 import java.util.Date
-import javax.annotation.{PostConstruct, PreDestroy}
 
 /** Flink status change listener on Kubernetes. */
 @Component
@@ -49,37 +54,54 @@ class FlinkK8sChangeListenerV2 @Autowired() (
     flinkClusterService: FlinkClusterService,
     alertService: AlertService) {
 
-  private var fibers: Array[Fiber.Runtime[Nothing, Unit]] = Array.empty
+  private val alertJobStateList: Array[FlinkAppState] = Array(
+    FlinkAppState.FAILED,
+    FlinkAppState.LOST,
+    FlinkAppState.RESTARTING,
+    FlinkAppState.FINISHED
+  )
+
+  private val alertClusterStateList = Array(
+    ClusterState.FAILED,
+    ClusterState.UNKNOWN,
+    ClusterState.LOST,
+    ClusterState.KILLED
+  )
+
+  private def allDaemonEffects: Array[UIO[Unit]] = Array(
+    subscribeJobStatusChange,
+    subscribeApplicationJobMetricsChange,
+    subscribeApplicationJobRestSvcEndpointChange,
+    subscribeGlobalClusterMetricChange,
+    subscribeClusterRestSvcEndpointChange,
+    subscribeClusterStateChange
+  )
+
+  private val daemonFibers = Ref.make(Array.empty[Fiber.Runtime[Nothing, Unit]]).runUIO
 
   // launch all subscription effect when enable flink-k8s v2
   @PostConstruct
   def init(): Unit = {
     val launchAll: UIO[Unit] =
       for {
-        f1 <- subscribeJobStatusChange.forkDaemon
-        f2 <- subscribeApplicationJobMetricsChange.forkDaemon
-        f3 <- subscribeApplicationJobRestSvcEndpointChange.forkDaemon
-        f4 <- subscribeGlobalClusterMetricChange.forkDaemon
-        _  <- ZIO.succeed(fibers = Array(f1, f2, f3, f4))
-        _  <- logInfo("Launch FlinkK8sChangeListenerV2.")
+        fibers <- ZIO.foreach(allDaemonEffects)(interruptible(_).forkDaemon)
+        _      <- daemonFibers.set(fibers)
+        _      <- logInfo("Launch FlinkK8sChangeListenerV2.")
       } yield ()
     if (K8sFlinkConfig.isV2Enabled) launchAll.runUIO
   }
 
   @PreDestroy
   def destroy(): Unit = {
-    ZIO.foreachPar(fibers)(_.interrupt).runUIO
+    daemonFibers.get.flatMap(fibers => ZIO.foreach(fibers)(_.interrupt)).runUIO
   }
-
-  private val alterStateList =
-    Array(FlinkAppState.FAILED, FlinkAppState.LOST, FlinkAppState.RESTARTING, FlinkAppState.FINISHED)
 
   /** Subscribe Flink job status change from FlinkK8sObserver */
   private def subscribeJobStatusChange: UIO[Unit] = {
 
     def process(subStream: UStream[JobSnapshot]): UStream[Unit] = subStream
       // Convert EvalJobState to FlinkAppState
-      .map(snap => snap -> FlinkAppStateConverter.k8sEvalJobStateToFlinkAppState(snap.evalState))
+      .map(snap => snap -> FlinkK8sStateConverter.k8sEvalJobStateToFlinkAppState(snap.evalState))
       // Update the corresponding columns of Application record
       .tap { case (snap: JobSnapshot, convertedState: FlinkAppState) =>
         safeUpdateApplicationRecord(snap.appId) { wrapper =>
@@ -110,17 +132,15 @@ class FlinkK8sChangeListenerV2 @Autowired() (
         }
       }
       // Alert for unhealthy job states in parallel
-      .filter { case (_, state) => alterStateList.contains(state) }
-      .mapZIOPar(10) { case (snap, state) =>
-        safeGetApplicationRecord(snap.appId).flatMap {
-          case None      => ZIO.unit
-          case Some(app) =>
-            ZIO
-              .attemptBlocking(alertService.alert(app.getAlertId, AlertTemplate.of(app, state)))
-              .retryN(3)
-              .tapError(err => logInfo(s"Fail to alter unhealthy state: ${err.getMessage}"))
-              .ignore @@
-            annotated("appId" -> app.getId.toString, "state" -> state.toString)
+      .filter { case (_, state) => alertJobStateList.contains(state) }
+      .mapZIOPar(5) { case (snap, state) =>
+        safeGetApplicationRecord(snap.appId).someOrUnitZIO { app =>
+          ZIO
+            .attemptBlocking(alertService.alert(app.getAlertId, AlertTemplate.of(app, state)))
+            .retryN(3)
+            .tapError(err => logInfo(s"Fail to alter unhealthy state: ${err.getMessage}"))
+            .ignore @@
+          annotated("appId" -> app.getId.toString, "state" -> state.toString)
         }
       }
 
@@ -154,6 +174,46 @@ class FlinkK8sChangeListenerV2 @Autowired() (
       .runDrain
   }
 
+  /** Subscribe Flink cluster status change from FlinkK8sObserver */
+  private def subscribeClusterStateChange: UIO[Unit] = {
+
+    def process(substream: UStream[(ClusterKey, (DeployCRStatus, Option[JobStatus]))]): UStream[Unit] = {
+      substream
+        // Convert K8s CR status to ClusterState
+        .map { case (key, (crStatus, _)) =>
+          (key.id, k8sDeployStateToClusterState(crStatus), crStatus.error)
+        }
+        // Update the corresponding FlinkCluster record
+        .tap { case (id, state, error) =>
+          safeUpdateFlinkClusterRecord(id) { wrapper =>
+            wrapper.typedSet(_.getClusterState, state.getValue)
+            error.foreach(wrapper.typedSet(_.getException, _))
+          }
+        }
+        // Alter for unhealthy state in parallel
+        .filter { case (_, state, _) => alertClusterStateList.contains(state) }
+        .mapZIOPar(5) { case (id, state, _) =>
+          safeGetFlinkClusterRecord(id).someOrUnitZIO { flinkCluster =>
+            ZIO
+              .attemptBlocking(alertService.alert(flinkCluster.getAlertId, AlertTemplate.of(flinkCluster, state)))
+              .retryN(5)
+              .tapError(err => logInfo(s"Fail to alter unhealthy state: ${err.getMessage}"))
+              .ignore @@
+            annotated("FlinkCluster.id" -> id.toString, "state" -> state.toString)
+          }
+        }
+    }
+
+    FlinkK8sObserver.deployCRSnaps
+      .flatSubscribe()
+      // Combine with the corresponding ClusterKey
+      .combineWithTypedTrackKey[ClusterKey]
+      .filterSome
+      // Handle events grouped by id in parallel while each group would be executed in serial.
+      .groupByKey(_._1) { case (_, substream) => process(substream) }
+      .runDrain
+  }
+
   /** Subscribe K8s rest endpoint of Flink Application mode job from FlinkK8sObserver. */
   private def subscribeApplicationJobRestSvcEndpointChange: UIO[Unit] = {
     FlinkK8sObserver.restSvcEndpointSnaps
@@ -165,6 +225,25 @@ class FlinkK8sChangeListenerV2 @Autowired() (
         // Update jobManagerUrl of the corresponding Application record
         substream.mapZIO { case (key: ApplicationJobKey, endpoint: RestSvcEndpoint) =>
           safeUpdateApplicationRecord(key.id)(wrapper => wrapper.typedSet(_.getJobManagerUrl, endpoint.ipRest))
+        }
+      }
+      .runDrain
+  }
+
+  /** Subscribe K8s rest endpoint of Flink cluster from FlinkK8sObserver. */
+  private def subscribeClusterRestSvcEndpointChange: UIO[Unit] = {
+    FlinkK8sObserver.restSvcEndpointSnaps
+      .flatSubscribe()
+      // Combine with the corresponding ClusterKey
+      .combineWithTypedTrackKey[ClusterKey]
+      .filterSome
+      .groupByKey(_._1) { case (_, substream) =>
+        substream.mapZIO { case (key: ClusterKey, endpoint: RestSvcEndpoint) =>
+          safeUpdateFlinkClusterRecord(key.id) { wrapper =>
+            wrapper
+              .typedSet(_.getAddress, endpoint.ipRest)
+              .typedSet(_.getJobManagerUrl, endpoint.ipRest)
+          }
         }
       }
       .runDrain
@@ -220,28 +299,46 @@ class FlinkK8sChangeListenerV2 @Autowired() (
   private def safeGetApplicationRecord(appId: Long): UIO[Option[Application]] = {
     ZIO
       .attemptBlocking(Option(applicationService.getById(appId)))
+      .retryN(2)
       .catchAll(err => logError(s"Fail to get Application record: ${err.getMessage}").as(None))
   } @@ annotated("appId" -> appId.toString)
 
   // Update Application record by appId into persistent storage.
   private def safeUpdateApplicationRecord(appId: Long)(
-      mapperSetFunc: LambdaUpdateWrapper[Application] => Unit): UIO[Unit] = {
+      wrapperSetFunc: LambdaUpdateWrapper[Application] => Unit): UIO[Unit] = {
     ZIO
       .attemptBlocking {
         val wrapper = new LambdaUpdateWrapper[Application]()
-        mapperSetFunc(wrapper)
+        wrapperSetFunc(wrapper)
         wrapper.eq((e: Application) => e.getId, appId)
         applicationService.update(null, wrapper)
       }
-      .retryN(3)
+      .retryN(2)
       .tapError(err => logError(s"Fail to update Application record: ${err.getMessage}"))
       .ignore
   } @@ annotated("appId" -> appId.toString)
 
-  implicit private class ApplicationLambdaUpdateOps(wrapper: LambdaUpdateWrapper[Application]) {
-    def typedSet[Value](func: Application => Value, value: Value): LambdaUpdateWrapper[Application] = {
-      wrapper.set((e: Application) => func(e), value); wrapper
-    }
-  }
+  // Get FlinkCluster record by appId from persistent storage.
+  private def safeGetFlinkClusterRecord(id: Long): UIO[Option[FlinkCluster]] = {
+    ZIO
+      .attemptBlocking(Option(flinkClusterService.getById(id)))
+      .retryN(3)
+      .catchAll(err => logError(s"Fail to get FlinkCluster record: ${err.getMessage}").as(None))
+  } @@ annotated("FlinkCluster.id" -> id.toString)
+
+  // Update FlinkCluster record by id into persistent storage.
+  private def safeUpdateFlinkClusterRecord(id: Long)(
+      wrapperSetFunc: LambdaUpdateWrapper[FlinkCluster] => Unit): UIO[Unit] = {
+    ZIO
+      .attemptBlocking {
+        val wrapper = new LambdaUpdateWrapper[FlinkCluster]()
+        wrapperSetFunc(wrapper)
+        wrapper.eq((e: FlinkCluster) => e.getId, id)
+        flinkClusterService.update(null, wrapper)
+      }
+      .retryN(3)
+      .tapError(err => logError(s"Fail to update FlinkCluster record: ${err.getMessage}"))
+      .ignore
+  } @@ annotated("FlinkCluster.id" -> id.toString)
 
 }

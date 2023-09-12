@@ -89,7 +89,7 @@ public class AlertTemplate implements Serializable {
     return new AlertTemplateBuilder()
         .setDuration(cluster.getStartTime(), cluster.getEndTime())
         .setJobName(cluster.getClusterName())
-        .setLink(ExecutionMode.YARN_SESSION, cluster.getClusterId())
+        .setLink(cluster.getExecutionModeEnum(), cluster.getClusterId())
         .setStartTime(cluster.getStartTime())
         .setEndTime(cluster.getEndTime())
         .setType(3)

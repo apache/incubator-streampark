@@ -308,6 +308,15 @@ object FlinkK8sObserverSnapSubscriptionHelper {
       combineValueWithTypedTrackKey[Key, RestSvcEndpoint](stream)
   }
 
+  implicit class DeployCRSnapsSubscriptionOps(
+      stream: UStream[((Namespace, Name), (DeployCRStatus, Option[JobStatus]))]) {
+    def combineWithTrackKey: UStream[Option[(TrackKey, (DeployCRStatus, Option[JobStatus]))]] =
+      combineValueWithTrackKey[(DeployCRStatus, Option[JobStatus])](stream)
+
+    def combineWithTypedTrackKey[Key <: TrackKey]: UStream[Option[(Key, (DeployCRStatus, Option[JobStatus]))]] =
+      combineValueWithTypedTrackKey[Key, (DeployCRStatus, Option[JobStatus])](stream)
+  }
+
   private[this] def combineValueWithTrackKey[Value](
       stream: UStream[((Namespace, Name), Value)]): UStream[Option[(TrackKey, Value)]] = stream.mapZIO {
     case ((namespace, name), value) =>

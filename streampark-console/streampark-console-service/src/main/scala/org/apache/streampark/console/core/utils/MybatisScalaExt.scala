@@ -17,22 +17,15 @@
 
 package org.apache.streampark.console.core.utils
 
-import org.apache.streampark.console.core.enums.FlinkAppState
-import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState
-import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 
-import scala.util.Try
+/** MyBatis scala extension. */
+object MybatisScalaExt {
 
-object FlinkAppStateConverter {
-
-  /** Convert [[EvalJobState]] to [[FlinkAppState]]. */
-  def k8sEvalJobStateToFlinkAppState(jobState: EvalJobState): FlinkAppState = {
-    Try(FlinkAppState.valueOf(jobState.toString)).getOrElse(FlinkAppState.OTHER)
-  }
-
-  /** Convert [[FlinkAppState]] to [[EvalJobState]]. */
-  def flinkAppStateToK8sEvalJobState(jobState: FlinkAppState): EvalJobState = {
-    EvalJobState.values.find(e => e.toString == jobState.toString).getOrElse(EvalJobState.OTHER)
+  implicit class LambdaUpdateOps[Entity](wrapper: LambdaUpdateWrapper[Entity]) {
+    def typedSet[Value](func: Entity => Value, value: Value): LambdaUpdateWrapper[Entity] = {
+      wrapper.set((e: Entity) => func(e), value); wrapper
+    }
   }
 
 }
