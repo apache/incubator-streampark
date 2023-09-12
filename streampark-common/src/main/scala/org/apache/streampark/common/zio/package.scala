@@ -34,4 +34,8 @@ package object zio {
   /** Automatically converts value to Some value. */
   implicit def liftValueAsSome[A](value: A): Option[A] = Some(value)
 
+  implicit class OptionTraversableOps[A](iter: Traversable[Option[A]]) {
+    def filterSome: Traversable[A] = iter.filter(_.isDefined).map(_.get)
+  }
+
 }

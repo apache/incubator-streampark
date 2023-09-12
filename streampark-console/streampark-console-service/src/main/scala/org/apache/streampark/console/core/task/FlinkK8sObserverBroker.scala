@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.task
 
 import org.apache.streampark.common.conf.K8sFlinkConfig
-import org.apache.streampark.common.enums.ClusterState
+import org.apache.streampark.common.enums.{ClusterState, ExecutionMode}
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
 import org.apache.streampark.common.zio.ZIOExt.{IterableZStreamConverter, OptionZIOOps, UIOOps, ZStreamOptionEffectOps}
 import org.apache.streampark.console.core.bean.AlertTemplate
@@ -26,9 +26,9 @@ import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
 import org.apache.streampark.console.core.enums.{FlinkAppState, OptionState}
 import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.alert.AlertService
-import org.apache.streampark.console.core.service.application.ApplicationActionService
+import org.apache.streampark.console.core.service.application.ApplicationInfoService
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter
-import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.{clusterMetricsToFlinkMetricCV, k8sDeployStateToClusterState}
+import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.{clusterMetricsToFlinkMetricCV, flinkClusterToClusterKey, k8sDeployStateToClusterState}
 import org.apache.streampark.console.core.utils.MybatisScalaExt.LambdaUpdateOps
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
 import org.apache.streampark.flink.kubernetes.v2.model._
@@ -36,11 +36,10 @@ import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.{ApplicationJobK
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserverSnapSubscriptionHelper.{ClusterMetricsSnapsSubscriptionOps, DeployCRSnapsSubscriptionOps, RestSvcEndpointSnapsSubscriptionOps}
 
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import zio.{Fiber, Ref, UIO, ZIO}
-import zio.ZIO.{interruptible, logError, logInfo}
+import zio.ZIO.{interruptible, logInfo}
 import zio.ZIOAspect.annotated
 import zio.stream.UStream
 
@@ -49,13 +48,16 @@ import javax.annotation.{PostConstruct, PreDestroy}
 import java.lang
 import java.util.Date
 
-/** Flink status change listener on Kubernetes. */
+/** Broker of FlinkK8sObserver which is the observer for Flink on Kubernetes */
 @Component
-class FlinkK8sChangeListenerV2 @Autowired() (
-    applicationActionService: ApplicationActionService,
-    flinkClusterService: FlinkClusterService,
-    alertService: AlertService)
-  extends FlinkK8sObserverStub {
+class FlinkK8sObserverBroker @Autowired() (
+    var applicationInfoService: ApplicationInfoService,
+    var flinkClusterService: FlinkClusterService,
+    var alertService: AlertService)
+  extends FlinkK8sObserverStub
+  with FlinkK8sObserverBrokerSidecar {
+
+  private val observer = FlinkK8sObserver
 
   private val alertJobStateList: Array[FlinkAppState] = Array(
     FlinkAppState.FAILED,
@@ -71,7 +73,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
     ClusterState.KILLED
   )
 
-  private def allDaemonEffects: Array[UIO[Unit]] = Array(
+  private lazy val allDaemonEffects: Array[UIO[Unit]] = Array(
     subscribeJobStatusChange,
     subscribeApplicationJobMetricsChange,
     subscribeApplicationJobRestSvcEndpointChange,
@@ -80,7 +82,10 @@ class FlinkK8sChangeListenerV2 @Autowired() (
     subscribeClusterStateChange
   )
 
-  private val daemonFibers = Ref.make(Array.empty[Fiber.Runtime[Nothing, Unit]]).runUIO
+  // All fibers running on the daemon。
+  private val daemonFibers   = Ref.make(Array.empty[Fiber.Runtime[Nothing, Unit]]).runUIO
+  // Aggregated flink cluster metrics by teamId
+  private val aggFlinkMetric = Ref.make(Map.empty[Long, ClusterMetrics]).runUIO
 
   // launch all subscription effect when enable flink-k8s v2
   @PostConstruct
@@ -97,6 +102,45 @@ class FlinkK8sChangeListenerV2 @Autowired() (
   @PreDestroy
   def destroy(): Unit = {
     daemonFibers.get.flatMap(fibers => ZIO.foreach(fibers)(_.interrupt)).runUIO
+  }
+
+  /**
+   * Only stop tracking when the CR resource is in DELETE state
+   * see：[[org.apache.streampark.flink.kubernetes.v2.model.JobSnapshot.evalFinalJobState]]
+   */
+  private def recoveryRecords = {
+    val fromApplicationRecords = safeFindApplication(10)(wrapper =>
+      wrapper.in(
+        (e: Application) => e.getExecutionMode,
+        ExecutionMode.KUBERNETES_NATIVE_APPLICATION,
+        ExecutionMode.KUBERNETES_NATIVE_SESSION))
+      .map { apps =>
+        apps.map { app =>
+          app.getExecutionModeEnum match {
+            case ExecutionMode.KUBERNETES_NATIVE_APPLICATION =>
+              Some(ApplicationJobKey(app.getId, app.getK8sNamespace, app.getNickName))
+            case ExecutionMode.KUBERNETES_NATIVE_SESSION     =>
+              Some()
+            case _ =>
+              None
+          }
+        }
+
+//      apps
+//        .map(app => Option(ExecutionMode.of(app.getExecutionMode)).map(_ -> app))
+//        .filterSome
+//        .map {
+//          case (ExecutionMode.KUBERNETES_NATIVE_APPLICATION, app) =>
+//            Some(ApplicationJobKey(app.getId, app.getK8sNamespace, app.getNickName))
+//          case (ExecutionMode.KUBERNETES_NATIVE_SESSION, app)     =>
+//            // TODO [flink-v2] Distinguish between SessionJobKey and UnmanagedSessionJobKey.
+//            None
+//          case _                                                  => None
+//        }
+      }
+
+    val fromFlinkCluster = {}
+
   }
 
   /** Subscribe Flink job status change from FlinkK8sObserver */
@@ -147,7 +191,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
         }
       }
 
-    FlinkK8sObserver.evaluatedJobSnaps
+    observer.evaluatedJobSnaps
       .flatSubscribeValues()
       // Handle events grouped by appId in parallel while each appId group would be executed in serial.
       .groupByKey(_.appId) { case (_, substream) => process(substream) }
@@ -156,7 +200,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
 
   /** Subscribe Flink application job metrics change from FlinkK8sObserver */
   private def subscribeApplicationJobMetricsChange: UIO[Unit] = {
-    FlinkK8sObserver.clusterMetricsSnaps
+    observer.clusterMetricsSnaps
       .flatSubscribe()
       // Combine with the corresponding ApplicationJobKey
       .combineWithTypedTrackKey[ApplicationJobKey]
@@ -207,7 +251,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
         }
     }
 
-    FlinkK8sObserver.deployCRSnaps
+    observer.deployCRSnaps
       .flatSubscribe()
       // Combine with the corresponding ClusterKey
       .combineWithTypedTrackKey[ClusterKey]
@@ -219,7 +263,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
 
   /** Subscribe K8s rest endpoint of Flink Application mode job from FlinkK8sObserver. */
   private def subscribeApplicationJobRestSvcEndpointChange: UIO[Unit] = {
-    FlinkK8sObserver.restSvcEndpointSnaps
+    observer.restSvcEndpointSnaps
       .flatSubscribe()
       // Combine with the corresponding ApplicationJobKey
       .combineWithTypedTrackKey[ApplicationJobKey]
@@ -235,7 +279,7 @@ class FlinkK8sChangeListenerV2 @Autowired() (
 
   /** Subscribe K8s rest endpoint of Flink cluster from FlinkK8sObserver. */
   private def subscribeClusterRestSvcEndpointChange: UIO[Unit] = {
-    FlinkK8sObserver.restSvcEndpointSnaps
+    observer.restSvcEndpointSnaps
       .flatSubscribe()
       // Combine with the corresponding ClusterKey
       .combineWithTypedTrackKey[ClusterKey]
@@ -252,24 +296,9 @@ class FlinkK8sChangeListenerV2 @Autowired() (
       .runDrain
   }
 
-  // Aggregated flink cluster metrics by teamId
-  private val aggFlinkMetric = Ref.make(Map.empty[Long, ClusterMetrics]).runUIO
-
-  /** Get aggregated metrics of all flink jobs on k8s cluster by team-id */
-  override def getAggClusterMetric(teamId: lang.Long): ClusterMetrics = {
-    for {
-      metrics <- aggFlinkMetric.get
-      result   = metrics.get(teamId)
-    } yield result.getOrElse(ClusterMetrics.empty)
-  }.runUIO
-
-  override def getAggClusterMetricCV(teamId: lang.Long): FlinkMetricCV = {
-    clusterMetricsToFlinkMetricCV(getAggClusterMetric(teamId))
-  }
-
   /** Subscribe Flink cluster metrics change from FlinkK8sObserver and aggregate it by teamId */
   private def subscribeGlobalClusterMetricChange: UIO[Unit] = {
-    FlinkK8sObserver.clusterMetricsSnaps
+    observer.clusterMetricsSnaps
       .subscribe()
       .mapZIO { metricItems =>
         for {
@@ -302,50 +331,47 @@ class FlinkK8sChangeListenerV2 @Autowired() (
       .runDrain
   }
 
-  // Get Application record by appId from persistent storage.
-  private def safeGetApplicationRecord(appId: Long): UIO[Option[Application]] = {
-    ZIO
-      .attemptBlocking(Option(applicationActionService.getById(appId)))
-      .retryN(2)
-      .catchAll(err => logError(s"Fail to get Application record: ${err.getMessage}").as(None))
-  } @@ annotated("appId" -> appId.toString)
+  /** Stub method: Get aggregated metrics of all flink jobs on k8s cluster by team-id */
+  override def getAggClusterMetric(teamId: lang.Long): ClusterMetrics = {
+    for {
+      metrics <- aggFlinkMetric.get
+      result   = metrics.get(teamId)
+    } yield result.getOrElse(ClusterMetrics.empty)
+  }.runUIO
 
-  // Update Application record by appId into persistent storage.
-  private def safeUpdateApplicationRecord(appId: Long)(
-      wrapperSetFunc: LambdaUpdateWrapper[Application] => Unit): UIO[Unit] = {
+  override def getAggClusterMetricCV(teamId: lang.Long): FlinkMetricCV = {
+    clusterMetricsToFlinkMetricCV(getAggClusterMetric(teamId))
+  }
+
+  /** Stub method: Add FlinkCluster to the watchlist. */
+  override def watchFlinkCluster(flinkCluster: FlinkCluster): Unit = {
     ZIO
-      .attemptBlocking {
-        val wrapper = new LambdaUpdateWrapper[Application]()
-        wrapperSetFunc(wrapper)
-        wrapper.eq((e: Application) => e.getId, appId)
-        applicationActionService.update(null, wrapper)
+      .succeed(flinkClusterToClusterKey(flinkCluster))
+      .someOrUnitZIO { trackKey =>
+        observer.track(trackKey) *>
+        logInfo("Add FlinkCluster into k8s observer tracking list") @@
+        annotated("id" -> flinkCluster.getId.toString)
       }
-      .retryN(2)
-      .tapError(err => logError(s"Fail to update Application record: ${err.getMessage}"))
-      .ignore
-  } @@ annotated("appId" -> appId.toString)
+      .runUIO
+  }
 
-  // Get FlinkCluster record by appId from persistent storage.
-  private def safeGetFlinkClusterRecord(id: Long): UIO[Option[FlinkCluster]] = {
+  /**
+   * Stub method: Remove FlinkCluster from the watchlist.
+   * When there are associated SessionJobs with FlinkCluster,
+   * the tracking of FlinkCluster will not be removed in reality.
+   */
+  override def unwatchFlinkCluster(flinkCluster: FlinkCluster): Unit = {
     ZIO
-      .attemptBlocking(Option(flinkClusterService.getById(id)))
-      .retryN(3)
-      .catchAll(err => logError(s"Fail to get FlinkCluster record: ${err.getMessage}").as(None))
-  } @@ annotated("FlinkCluster.id" -> id.toString)
+      .succeed(flinkClusterToClusterKey(flinkCluster))
+      .someOrUnitZIO(trackKey => FlinkK8sObserver.untrack(trackKey))
+      .runUIO
+  }
 
-  // Update FlinkCluster record by id into persistent storage.
-  private def safeUpdateFlinkClusterRecord(id: Long)(
-      wrapperSetFunc: LambdaUpdateWrapper[FlinkCluster] => Unit): UIO[Unit] = {
-    ZIO
-      .attemptBlocking {
-        val wrapper = new LambdaUpdateWrapper[FlinkCluster]()
-        wrapperSetFunc(wrapper)
-        wrapper.eq((e: FlinkCluster) => e.getId, id)
-        flinkClusterService.update(null, wrapper)
-      }
-      .retryN(3)
-      .tapError(err => logError(s"Fail to update FlinkCluster record: ${err.getMessage}"))
-      .ignore
-  } @@ annotated("FlinkCluster.id" -> id.toString)
+  /** Stub method: Notify FlinkK8sObserver to remove tracking resources by TrackKey.id. */
+  override def unWatchById(id: lang.Long): Unit = {
+    observer.trackedKeys
+      .find(_.id == id)
+      .someOrUnitZIO(key => observer.untrack(key))
+  }
 
 }

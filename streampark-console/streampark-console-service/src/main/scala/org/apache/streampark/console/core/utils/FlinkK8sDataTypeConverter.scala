@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.core.utils
 
-import org.apache.streampark.common.enums.ClusterState
+import org.apache.streampark.common.enums.{ClusterState, ExecutionMode}
+import org.apache.streampark.console.core.entity.FlinkCluster
 import org.apache.streampark.console.core.enums.FlinkAppState
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
 import org.apache.streampark.flink.kubernetes.v2.model.{ClusterMetrics, DeployCRStatus, EvalJobState, EvalState}
 import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
+import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ClusterKey
 
 import scala.util.Try
 
@@ -58,6 +60,18 @@ object FlinkK8sDataTypeConverter {
       failedJob = metrics.failedJob,
       pollAckTime = 0L
     )
+  }
+
+  /** Convert [[FlinkCluster]] to [[ClusterKey]]. */
+  def flinkClusterToClusterKey(flinkCluster: FlinkCluster): Option[ClusterKey] = {
+    val isLegal = {
+      flinkCluster != null &&
+      ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode) &&
+      Option(flinkCluster.getClusterId).exists(!_.isBlank) &&
+      Option(flinkCluster.getK8sNamespace).exists(!_.isBlank)
+    }
+    if (isLegal) Some(ClusterKey(flinkCluster.getId, flinkCluster.getK8sNamespace, flinkCluster.getClusterId))
+    else None
   }
 
 }

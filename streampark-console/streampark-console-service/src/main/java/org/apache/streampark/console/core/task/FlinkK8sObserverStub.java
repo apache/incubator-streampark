@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.task;
 
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.v2.model.ClusterMetrics;
 
@@ -26,9 +27,22 @@ import org.apache.streampark.flink.kubernetes.v2.model.ClusterMetrics;
  */
 public interface FlinkK8sObserverStub {
 
-  /** Get aggregated metrics of all flink jobs on k8s cluster by team-id */
+  /** Stub method: Get aggregated metrics of all flink jobs on k8s cluster by team-id */
   ClusterMetrics getAggClusterMetric(Long teamId);
 
-  /** Compatible with old code of flink-k8s-v1. */
+  /** Stub method: Compatible with old code of flink-k8s-v1. */
   FlinkMetricCV getAggClusterMetricCV(Long teamId);
+
+  /** Stub method: Add FlinkCluster to the watchlist. */
+  void watchFlinkCluster(FlinkCluster flinkCluster);
+
+  /**
+   * Stub method: Notify FlinkK8sObserver to remove FlinkCluster from the watchlist. When there are
+   * associated SessionJobs with FlinkCluster, the tracking of FlinkCluster will not be removed in
+   * reality.
+   */
+  void unwatchFlinkCluster(FlinkCluster flinkCluster);
+
+  /** Stub method: Notify FlinkK8sObserver to remove tracking resources by TrackKey.id. */
+  void unWatchById(Long id);
 }

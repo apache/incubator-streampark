@@ -37,14 +37,6 @@ sealed trait FlinkK8sObserverTrait {
   /** Stop tracking resources. */
   def untrack(key: TrackKey): UIO[Unit]
 
-  /** Stop tracking resources by TrackKey.id. */
-  def untrackById(appId: Long): UIO[Unit] = {
-    trackedKeys.find(_.id == appId).flatMap {
-      case Some(key) => untrack(key)
-      case None      => ZIO.unit
-    }
-  }
-
   /** All tracked key in observer. */
   def trackedKeys: ConcurrentSet[TrackKey]
 
