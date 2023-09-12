@@ -172,6 +172,7 @@ public class FlinkHttpWatcher {
         applicationManageService.list(
             new LambdaQueryWrapper<Application>()
                 .eq(Application::getTracking, 1)
+                .ne(Application::getState, FlinkAppState.LOST.getValue())
                 .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode()));
     applications.forEach(
         (app) -> {

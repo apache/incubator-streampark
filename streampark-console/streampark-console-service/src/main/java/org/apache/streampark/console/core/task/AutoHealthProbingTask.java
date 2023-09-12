@@ -52,8 +52,10 @@ public class AutoHealthProbingTask {
   /** probe interval every 30 seconds */
   private static final Duration PROBE_INTERVAL = Duration.ofSeconds(30);
 
+  /** probe wait interval every 5 seconds */
   private static final Duration PROBE_WAIT_INTERVAL = Duration.ofSeconds(5);
 
+  /** probe failed retry count */
   private static final Short PROBE_RETRY_COUNT = 10;
 
   private long lastWatchTime = 0L;
@@ -80,15 +82,21 @@ public class AutoHealthProbingTask {
   }
 
   public void probe(List<Application> applications) {
-    List<Application> probeApp =
+    List<Application> probeApplication =
         applications.isEmpty() ? applicationManageService.getProbeApps() : applications;
-    updateProbingState(probeApp);
-    probeApp.stream().forEach(this::monitorApp);
+    updateProbingState(probeApplication);
+    probeApplication.stream().forEach(this::monitorApplication);
   }
 
-  private void updateProbingState(List<Application> probeApp) {
-    probeApp.forEach(app -> app.setState(FlinkAppState.PROBING.getValue()));
-    applicationManageService.updateBatchById(probeApp);
+  private void updateProbingState(List<Application> applications) {
+    applications.stream()
+      .filter(application -> FlinkAppState.isLost(application.getState()))
+      .forEach(
+        application -> {
+          application.setState(FlinkAppState.PROBING.getValue());
+          application.setProbing(true);
+        });
+    applicationManageService.updateBatchById(applications);
   }
 
   private void handleProbeResults() {
@@ -107,6 +115,7 @@ public class AutoHealthProbingTask {
     applications.forEach(
         application -> {
           application.setProbing(false);
+          application.setTracking(0);
         });
     applicationManageService.updateBatchById(applications);
   }
@@ -116,6 +125,7 @@ public class AutoHealthProbingTask {
         .forEach((alterId) -> alertService.alert(alterId, AlertTemplate.of(alertProbeMsg)));
   }
 
+  
   private List<AlertProbeMsg> generateProbeResults(List<Application> applications) {
     return applications.stream()
         .collect(
@@ -148,11 +158,11 @@ public class AutoHealthProbingTask {
         .collect(Collectors.toList());
   }
 
-  private void monitorApp(Application app) {
-    if (isKubernetesApp(app)) {
-      k8SFlinkTrackMonitor.doWatching(toTrackId(app));
+  private void monitorApplication(Application application) {
+    if (isKubernetesApp(application)) {
+      k8SFlinkTrackMonitor.doWatching(toTrackId(application));
     } else {
-      FlinkHttpWatcher.doWatching(app);
+      FlinkHttpWatcher.doWatching(application);
     }
   }
 
