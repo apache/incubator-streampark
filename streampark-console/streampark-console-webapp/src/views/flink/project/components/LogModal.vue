@@ -33,7 +33,6 @@
 
   let startOffset: Nullable<number> = null;
   const logTime = ref<string>('');
-  const getLogLoading = ref<boolean>(false);
   const showRefresh = ref<boolean>(false);
   const project = reactive<Recordable>({});
 
@@ -49,17 +48,16 @@
     await refreshLog();
     start();
   }
-  const { isPending, start, stop } = useTimeoutFn(
+  const { start, stop } = useTimeoutFn(
     () => {
       refreshLog();
     },
-    3000,
+    2000,
     { immediate: false },
   );
 
   async function refreshLog() {
     try {
-      getLogLoading.value = true;
       const { data } = await buildLog({
         id: project.id,
         startOffset,
@@ -79,16 +77,11 @@
       closeModal();
       console.error('logModal error', error);
     } finally {
-      getLogLoading.value = false;
       changeLoading(false);
     }
   }
   async function handleClose() {
     stop();
-  }
-  function handleLogStatus() {
-    if (isPending.value) stop();
-    else start();
   }
 </script>
 <template>
@@ -108,19 +101,6 @@
       <div class="flex align-items-center">
         <div class="flex-1 text-left">{{ t('flink.app.view.refreshTime') }}:{{ logTime }}</div>
         <div class="button-group">
-          <template v-if="showRefresh">
-            <a-button
-              key="status"
-              :type="isPending ? 'error' : 'primary'"
-              @click="handleLogStatus()"
-            >
-              {{ isPending ? 'pause' : 'resume' }}
-            </a-button>
-            <a-button key="refresh" type="primary" @click="refreshLog" :loading="getLogLoading">
-              {{ t('flink.app.view.refresh') }}
-            </a-button>
-          </template>
-
           <a-button key="stop" type="primary" @click="closeModal()">
             {{ t('common.closeText') }}
           </a-button>
