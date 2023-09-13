@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
 
-@Order
+@Order(1)
 @Slf4j
 @Component
 public class EnvInitializer implements ApplicationRunner {
