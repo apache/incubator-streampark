@@ -24,10 +24,10 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-test-utils</artifactId>
+    <artifactId>streampark-tests</artifactId>
     <packaging>pom</packaging>
 
-    <name>StreamPark : Test Utils</name>
+    <name>StreamPark : Tests</name>
     <url>http://maven.apache.org</url>
     <modules>
         <module>streampark-testcontainer</module>

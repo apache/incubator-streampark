@@ -33,7 +33,8 @@
     <url>https://streampark.apache.org/</url>
 
     <description>
-        StreamPark, Make stream processing easier! easy-to-use streaming application development framework and operation platform
+        StreamPark, Make stream processing easier! easy-to-use streaming application development framework and operation
+        platform
     </description>
 
     <organization>
@@ -79,7 +80,7 @@
         <module>streampark-common</module>
         <module>streampark-flink</module>
         <module>streampark-console</module>
-        <module>streampark-test-utils</module>
+        <module>streampark-tests</module>
     </modules>
 
     <properties>
@@ -597,7 +598,9 @@
                                 <style>GOOGLE</style>
                             </googleJavaFormat>
                             <importOrder>
-                                <order>org.apache.streampark,org.apache.streampark.shaded,org.apache,,javax,java,scala,\#</order>
+                                <order>
+                                    org.apache.streampark,org.apache.streampark.shaded,org.apache,,javax,java,scala,\#
+                                </order>
                             </importOrder>
                             <replaceRegex>
                                 <name>Remove wildcard imports</name>
@@ -614,7 +617,7 @@
                                 <searchRegex>import\s+org\.junit\.[^jupiter][^\*\s]*(|\*);(\r\n|\r|\n)</searchRegex>
                                 <replacement>$1</replacement>
                             </replaceRegex>
-                            <removeUnusedImports />
+                            <removeUnusedImports/>
                         </java>
                         <scala>
                             <scalafmt>
@@ -690,7 +693,8 @@
                     <configuration>
                         <shadedArtifactId>true</shadedArtifactId>
                         <createDependencyReducedPom>true</createDependencyReducedPom>
-                        <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                        <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml
+                        </dependencyReducedPomLocation>
                         <artifactSet>
                             <includes>
                                 <!--

@@ -15,28 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common
+package org.apache.streampark.console.core.utils;
 
-import scala.language.implicitConversions
-import scala.util.Try
+public interface FlinkK8sDataTypeConverterStub {
 
-package object zio {
-
-  /** Similar to python's pprint, format print any type of instance. */
-  @inline def toPrettyString(value: Any): String = Try(value match {
-    case v: String => v
-    case v => pprint.apply(v, height = 2000, showFieldNames = true).render
-  }).getOrElse(value.toString)
-
-  implicit class PrettyStringOps(value: Any) {
-    @inline def prettyStr: String = toPrettyString(value)
-  }
-
-  /** Automatically converts value to Some value. */
-  implicit def liftValueAsSome[A](value: A): Option[A] = Some(value)
-
-  implicit class OptionTraversableOps[A](iter: Traversable[Option[A]]) {
-    def filterSome: Traversable[A] = iter.filter(_.isDefined).map(_.get)
-  }
-
+  /** Create default name for Flink SessionJob CR for k8s-native compatibility. */
+  String genSessionJobK8sCRName(String clusterId);
 }

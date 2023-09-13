@@ -212,6 +212,7 @@ create table "public"."t_flink_app" (
   "job_manager_url" varchar(255) collate "pg_catalog"."default",
   "version_id" int8,
   "cluster_id" varchar(45) collate "pg_catalog"."default",
+  "k8s_name" varchar(63) collate "pg_catalog"."default",
   "k8s_namespace" varchar(63) collate "pg_catalog"."default",
   "flink_image" varchar(128) collate "pg_catalog"."default",
   "state" int2,

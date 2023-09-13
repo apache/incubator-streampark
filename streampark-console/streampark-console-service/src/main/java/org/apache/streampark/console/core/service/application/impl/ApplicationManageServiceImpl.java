@@ -23,7 +23,6 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.zio.ZIOJavaUtil;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -55,8 +54,9 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
+import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
-import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import org.apache.commons.lang3.StringUtils;
@@ -127,6 +127,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Autowired private ResourceService resourceService;
 
+  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
+
+  @Autowired private FlinkK8sDataTypeConverterStub flinkK8sDataTypeConverter;
+
   @PostConstruct
   public void resetOptionState() {
     this.baseMapper.resetOptionState();
@@ -182,7 +186,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     if (isKubernetesApp(application)) {
       k8SFlinkTrackMonitor.unWatching(toTrackId(application));
       if (K8sFlinkConfig.isV2Enabled()) {
-        ZIOJavaUtil.runUIO(FlinkK8sObserver.untrackById(application.getId()));
+        flinkK8sObserver.unWatchById(application.getId());
       }
     } else {
       FlinkHttpWatcher.unWatching(appParam.getId());
@@ -314,8 +318,20 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
     }
 
+    if (shouldHandleK8sName(appParam)) {
+      switch (appParam.getExecutionModeEnum()) {
+        case KUBERNETES_NATIVE_APPLICATION:
+          appParam.setK8sName(appParam.getClusterId());
+          break;
+        case KUBERNETES_NATIVE_SESSION:
+          appParam.setK8sName(
+              flinkK8sDataTypeConverter.genSessionJobK8sCRName(appParam.getClusterId()));
+          break;
+      }
+    }
+
     if (save(appParam)) {
-      if (appParam.isFlinkSqlJob()) {
+      if (appParam.isFlinkSqlJobOrPyFlinkJob()) {
         FlinkSql flinkSql = new FlinkSql(appParam);
         flinkSqlService.create(flinkSql);
       }
@@ -326,6 +342,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     } else {
       throw new ApiAlertException("create application failed");
     }
+  }
+
+  private boolean shouldHandleK8sName(Application app) {
+    return K8sFlinkConfig.isV2Enabled() && ExecutionMode.isKubernetesMode(app.getExecutionMode());
   }
 
   private boolean existsByJobName(String jobName) {
@@ -526,6 +546,20 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         break;
       default:
         break;
+    }
+
+    if (shouldHandleK8sName(appParam)) {
+      switch (appParam.getExecutionModeEnum()) {
+        case KUBERNETES_NATIVE_APPLICATION:
+          application.setK8sName(appParam.getClusterId());
+          break;
+        case KUBERNETES_NATIVE_SESSION:
+          if (!Objects.equals(application.getClusterId(), appParam.getClusterId())) {
+            application.setK8sName(
+                flinkK8sDataTypeConverter.genSessionJobK8sCRName(appParam.getClusterId()));
+          }
+          break;
+      }
     }
 
     // Flink Sql job...

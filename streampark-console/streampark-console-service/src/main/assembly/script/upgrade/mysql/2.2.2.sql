@@ -15,18 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.utils
+use streampark;
 
-import org.apache.streampark.console.core.enums.FlinkAppState
-import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
+set names utf8mb4;
+set foreign_key_checks = 0;
 
-import scala.util.Try
+alter table `t_flink_app`
+    add column `k8s_name` varchar(63) collate utf8mb4_general_ci default null;
 
-object FlinkAppStateConverter {
-
-  /** Convert [[EvalJobState]] to [[FlinkAppState]]. */
-  def k8sEvalJobStateToFlinkAppState(jobState: EvalJobState): FlinkAppState = {
-    Try(FlinkAppState.valueOf(jobState.toString)).getOrElse(FlinkAppState.OTHER)
-  }
-
-}

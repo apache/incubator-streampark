@@ -100,6 +100,7 @@ public class FlinkClusterWatcher {
         flinkClusterService.list(
             new LambdaQueryWrapper<FlinkCluster>()
                 .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getValue())
+                // excluding flink clusters on kubernetes
                 .notIn(FlinkCluster::getExecutionMode, ExecutionMode.getKubernetesMode()));
     flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
   }
@@ -264,7 +265,8 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    */
   public static void addWatching(FlinkCluster flinkCluster) {
-    if (!WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
+    if (!ExecutionMode.isKubernetesMode(flinkCluster.getExecutionModeEnum())
+        && !WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
       log.info("add the cluster with id:{} to watcher cluster cache", flinkCluster.getId());
       WATCHER_CLUSTERS.put(flinkCluster.getId(), flinkCluster);
     }

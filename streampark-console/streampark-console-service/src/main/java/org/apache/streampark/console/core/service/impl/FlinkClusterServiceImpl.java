@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -32,6 +33,7 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.task.FlinkClusterWatcher;
+import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
 import org.apache.streampark.flink.client.bean.DeployResponse;
@@ -96,6 +98,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
+  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
+
   @Override
   public ResponseResult check(FlinkCluster cluster) {
     ResponseResult result = new ResponseResult();
@@ -159,6 +163,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     if (ret && ExecutionMode.isRemoteMode(flinkCluster.getExecutionMode())) {
       FlinkClusterWatcher.addWatching(flinkCluster);
     }
+    if (shouldWatchForK8s(flinkCluster)) {
+      flinkK8sObserver.watchFlinkCluster(flinkCluster);
+    }
     return ret;
   }
 
@@ -186,6 +193,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkCluster.setEndTime(null);
       updateById(flinkCluster);
       FlinkClusterWatcher.addWatching(flinkCluster);
+      if (shouldWatchForK8s(flinkCluster)) {
+        flinkK8sObserver.watchFlinkCluster(flinkCluster);
+      }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       flinkCluster.setClusterState(ClusterState.FAILED.getValue());
@@ -225,6 +235,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkCluster.setFlinkImage(paramOfCluster.getFlinkImage());
       flinkCluster.setYarnQueue(paramOfCluster.getYarnQueue());
     }
+    if (shouldWatchForK8s(flinkCluster)) {
+      flinkK8sObserver.watchFlinkCluster(flinkCluster);
+    }
     updateById(flinkCluster);
   }
 
@@ -260,11 +273,17 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     checkActiveIfNeeded(flinkCluster);
 
     // 3) check job if running on cluster
-    boolean existsRunningJob =
-        applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
-    ApiAlertException.throwIfTrue(
-        existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
-
+    if (shouldWatchForK8s(cluster)) {
+      boolean existActiveJobs = flinkK8sObserver.existActiveJobsOnFlinkCluster(flinkCluster);
+      ApiAlertException.throwIfTrue(
+          existActiveJobs,
+          "Due to the presence of active jobs on the cluster, the cluster should not be shutdown");
+    } else {
+      boolean existsRunningJob =
+          applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
+      ApiAlertException.throwIfTrue(
+          existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
+    }
     return true;
   }
 
@@ -333,6 +352,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       ApiAlertException.throwIfTrue(
           ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
           "Flink cluster is running, cannot be delete, please check.");
+    }
+    if (shouldWatchForK8s(flinkCluster)) {
+      flinkK8sObserver.unwatchFlinkCluster(flinkCluster);
     }
 
     ApiAlertException.throwIfTrue(
@@ -453,5 +475,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                 "The ExecutionModeEnum %s can't %s!", executionModeEnum.getName(), action));
     }
     return null;
+  }
+
+  private boolean shouldWatchForK8s(FlinkCluster flinkCluster) {
+    return K8sFlinkConfig.isV2Enabled()
+        && ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode());
   }
 }

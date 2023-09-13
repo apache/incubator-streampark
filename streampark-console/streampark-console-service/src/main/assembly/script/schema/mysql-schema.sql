@@ -64,6 +64,7 @@ create table `t_flink_app` (
   `job_manager_url` varchar(255) collate utf8mb4_general_ci default null,
   `version_id` bigint default null,
   `cluster_id` varchar(45) collate utf8mb4_general_ci default null,
+  `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
   `k8s_namespace` varchar(63) collate utf8mb4_general_ci default null,
   `flink_image` varchar(128) collate utf8mb4_general_ci default null,
   `state` int default null,

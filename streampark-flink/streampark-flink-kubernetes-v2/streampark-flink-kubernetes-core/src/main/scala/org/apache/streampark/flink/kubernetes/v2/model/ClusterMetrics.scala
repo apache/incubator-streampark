@@ -31,4 +31,24 @@ case class ClusterMetrics(
     runningJob: Integer = 0,
     finishedJob: Integer = 0,
     cancelledJob: Integer = 0,
-    failedJob: Integer = 0)
+    failedJob: Integer = 0) {
+
+  lazy val totalJob: Integer = runningJob + finishedJob + cancelledJob + failedJob
+
+  def +(another: ClusterMetrics): ClusterMetrics =
+    ClusterMetrics(
+      totalJmMemory = another.totalJmMemory + totalJmMemory,
+      totalTmMemory = another.totalTmMemory + totalTmMemory,
+      totalTm = another.totalTm + totalTm,
+      totalSlot = another.totalSlot + totalSlot,
+      availableSlot = another.availableSlot + availableSlot,
+      runningJob = another.runningJob + runningJob,
+      finishedJob = another.finishedJob + finishedJob,
+      cancelledJob = another.cancelledJob + cancelledJob,
+      failedJob = another.failedJob + failedJob
+    )
+}
+
+object ClusterMetrics {
+  lazy val empty: ClusterMetrics = ClusterMetrics()
+}

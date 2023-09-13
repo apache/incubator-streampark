@@ -90,8 +90,6 @@ public class FlinkK8sWatcherWrapper {
       // recovery tracking list
       List<TrackId> k8sApp = getK8sWatchingApps();
       k8sApp.forEach(trackMonitor::doWatching);
-    } else {
-      // TODO [flink-k8s-v2] Recovery tracking list and invoke FlinkK8sObserver.track()
     }
   }
 

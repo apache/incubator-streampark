@@ -32,7 +32,11 @@ object JobState extends Enumeration {
   val UNKNOWN = Value
 
   def valueOf(raw: String): JobState = values.find(_.toString == raw).getOrElse(UNKNOWN)
-  val maybeDeploying                 = Set(INITIALIZING, CREATED, RESTARTING, RECONCILING)
+
+  val maybeDeploying = Set(INITIALIZING, CREATED, RESTARTING, RECONCILING)
+
+  lazy val activeStates =
+    Set(INITIALIZING, CREATED, RUNNING, FAILING, CANCELLING, RESTARTING, RECONCILING)
 }
 
 /**

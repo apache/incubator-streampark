@@ -24,7 +24,7 @@ import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.impl._
 
-object FlinkClientHandler {
+object FlinkClientEndpoint {
 
   private[this] val clients: Map[ExecutionMode, FlinkClientTrait] = Map(
     LOCAL -> LocalClient,
@@ -32,7 +32,10 @@ object FlinkClientHandler {
     YARN_APPLICATION -> YarnApplicationClient,
     YARN_SESSION -> YarnSessionClient,
     YARN_PER_JOB -> YarnPerJobClient,
-    KUBERNETES_NATIVE_SESSION -> KubernetesNativeSessionClient,
+    KUBERNETES_NATIVE_SESSION -> {
+      if (K8sFlinkConfig.isV2Enabled) KubernetesSessionClientV2
+      else KubernetesNativeSessionClient
+    },
     KUBERNETES_NATIVE_APPLICATION -> {
       if (K8sFlinkConfig.isV2Enabled) KubernetesApplicationClientV2
       else KubernetesNativeApplicationClient
@@ -77,7 +80,10 @@ object FlinkClientHandler {
   def shutdown(request: ShutDownRequest): ShutDownResponse = {
     request.executionMode match {
       case YARN_SESSION => YarnSessionClient.shutdown(request)
-      case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.shutdown(request)
+      case KUBERNETES_NATIVE_SESSION => {
+        if (K8sFlinkConfig.isV2Enabled) KubernetesSessionClientV2.shutdown(request)
+        else KubernetesNativeSessionClient.shutdown(request)
+      }
       case _ =>
         throw new UnsupportedOperationException(
           s"Unsupported ${request.executionMode} shutdown cluster ")

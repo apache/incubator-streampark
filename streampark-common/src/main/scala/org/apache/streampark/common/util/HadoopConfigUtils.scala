@@ -32,10 +32,10 @@ import scala.util.{Failure, Success, Try}
 /** Hadoop client configuration tools mainly for flink use. */
 object HadoopConfigUtils {
 
-  val HADOOP_CLIENT_CONF_FILES: Array[String] =
+  private[this] val HADOOP_CLIENT_CONF_FILES: Array[String] =
     Array("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
 
-  val HIVE_CLIENT_CONF_FILES: Array[String] =
+  private[this] val HIVE_CLIENT_CONF_FILES: Array[String] =
     Array("core-site.xml", "hdfs-site.xml", "hive-site.xml")
 
   /** Get Hadoop configuration directory path from system. */

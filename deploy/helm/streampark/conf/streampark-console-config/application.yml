@@ -113,6 +113,13 @@ streampark:
 
   # flink-k8s tracking configuration
   flink-k8s:
+    enable-v2: false
+    fs-server.port: 10030
+    log-cr-yaml: true
+    flink-rest:
+      # When streampark is running in a Kubernetes pod, please prioritize using the value of DNS.
+      access-type: IP
+    # When enable-v2 is enabled, the following configuration would be disabled
     tracking:
       silent-state-keep-sec: 10
       polling-task-timeout-sec:

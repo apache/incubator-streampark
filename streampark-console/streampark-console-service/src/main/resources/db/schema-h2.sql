@@ -57,6 +57,7 @@ create table if not exists `t_flink_app` (
   `job_manager_url` varchar(255)  default null,
   `version_id` bigint default null,
   `cluster_id` varchar(45)  default null,
+  `k8s_name` varchar(63)  default null,
   `k8s_namespace` varchar(63)  default null,
   `flink_image` varchar(128)  default null,
   `state` int default null,
