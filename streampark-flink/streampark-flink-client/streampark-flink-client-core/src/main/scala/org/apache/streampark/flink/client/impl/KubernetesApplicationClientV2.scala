@@ -98,6 +98,8 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       .filter(str => StringUtils.isNotBlank(str))
       .getOrElse(return Left("Flink base image should not be empty"))
 
+    val ingress = submitReq.k8sSubmitParam.ingressDefinition
+
     val imagePullPolicy = flinkConfObj
       .getOption(KubernetesConfigOptions.CONTAINER_IMAGE_PULL_POLICY)
       .map(_.toString)
@@ -220,8 +222,6 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       result.toMap
     }
 
-    // TODO Migrate the construction logic of ingress to here and set it into FlinkDeploymentDef.ingress
-    //  See: org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline Step-8
     Right(
       FlinkDeploymentDef(
         namespace = namespace,
@@ -236,7 +236,8 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
         logConfiguration = logConfiguration,
         podTemplate = podTemplate,
         job = Some(jobDef),
-        extJarPaths = Array.empty
+        extJarPaths = Array.empty,
+        ingress = ingress
       ))
   }
 

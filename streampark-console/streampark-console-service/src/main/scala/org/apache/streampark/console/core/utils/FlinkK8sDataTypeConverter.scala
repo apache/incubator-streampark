@@ -17,9 +17,11 @@
 
 package org.apache.streampark.console.core.utils
 
+import org.apache.streampark.common.conf.{InternalConfigHolder, K8sFlinkConfig}
 import org.apache.streampark.common.enums.{ClusterState, ExecutionMode}
 import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
 import org.apache.streampark.console.core.enums.FlinkAppState
+import org.apache.streampark.console.core.service.SettingService
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.genSessionJobCRName
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
 import org.apache.streampark.flink.kubernetes.v2.model._
@@ -27,15 +29,40 @@ import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ClusterKey
 
 import org.apache.commons.lang3.StringUtils
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
+import javax.annotation.Nullable
 
 import java.util.UUID
 
 import scala.util.Try
 
 @Component
-class FlinkK8sDataTypeConverter() extends FlinkK8sDataTypeConverterStub {
+class FlinkK8sDataTypeConverter @Autowired() (
+    settingService: SettingService
+) extends FlinkK8sDataTypeConverterStub {
+
   override def genSessionJobK8sCRName(clusterId: String): String = genSessionJobCRName(clusterId)
+
+  /**
+   * Create default FlinkDeployment CR definition,
+   * Used for compatibility with streampark flink k8s v1 logic.
+   */
+  @throws[Exception] @Nullable
+  override def genDefaultFlinkDeploymentIngressDef(): IngressDef = {
+    val domainName = settingService.getIngressModeDefault
+    if (StringUtils.isBlank(domainName)) null
+    else {
+      val ingressClass = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
+      IngressDef(
+        template = domainName + "/{{namespace}}/{{name}}(/|$)(.*)",
+        annotations = Map("nginx.ingress.kubernetes.io/rewrite-target" -> "/$2"),
+        className = Option(ingressClass)
+      )
+    }
+  }
+
 }
 
 object FlinkK8sDataTypeConverter {

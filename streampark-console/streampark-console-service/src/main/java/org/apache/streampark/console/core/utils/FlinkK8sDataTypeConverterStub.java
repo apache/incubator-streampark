@@ -17,8 +17,19 @@
 
 package org.apache.streampark.console.core.utils;
 
+import org.apache.streampark.flink.kubernetes.v2.model.IngressDef;
+
+import javax.annotation.Nullable;
+
 public interface FlinkK8sDataTypeConverterStub {
 
   /** Create default name for Flink SessionJob CR for k8s-native compatibility. */
   String genSessionJobK8sCRName(String clusterId);
+
+  /**
+   * Create default FlinkDeployment CR definition, Used for compatibility with streampark flink k8s
+   * v1 logic.
+   */
+  @Nullable
+  IngressDef genDefaultFlinkDeploymentIngressDef();
 }
