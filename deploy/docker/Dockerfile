@@ -50,3 +50,4 @@ RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.t
 RUN mkdir -p ~/.kube
 
 EXPOSE 10000
+EXPOSE 10030

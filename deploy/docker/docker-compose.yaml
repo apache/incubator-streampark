@@ -21,6 +21,7 @@ services:
     command: ${RUN_COMMAND}
     ports:
       - 10000:10000
+      - 10030:10030
     env_file: .env
     volumes:
       - flink:/streampark/flink/${FLINK}

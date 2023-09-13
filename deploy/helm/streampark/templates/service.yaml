@@ -27,3 +27,6 @@ spec:
     - name: {{ .Values.spec.name }}
       port: {{ .Values.spec.containerPort }}
       protocol: TCP
+    - name: efs
+      port: {{ .Values.spec.efsPort }}
+      protocol: TCP
