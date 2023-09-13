@@ -33,7 +33,9 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
@@ -62,7 +64,7 @@ public class AutoHealthProbingTask {
 
   private Boolean isProbing = false;
 
-  private Short retryAttempts = PROBE_RETRY_COUNT;
+  private Short retryAttempts = 1;
 
   @Scheduled(fixedDelay = 1000)
   private void schedule() {
@@ -71,6 +73,7 @@ public class AutoHealthProbingTask {
       if (timeMillis - lastWatchTime >= PROBE_WAIT_INTERVAL.toMillis()) {
         handleProbeResults();
         lastWatchTime = timeMillis;
+        isProbing = false;
       }
     } else {
       if (timeMillis - lastWatchTime >= PROBE_INTERVAL.toMillis()) {
@@ -84,18 +87,23 @@ public class AutoHealthProbingTask {
   public void probe(List<Application> applications) {
     List<Application> probeApplication =
         applications.isEmpty() ? applicationManageService.getProbeApps() : applications;
+    probeApplication =
+        probeApplication.stream()
+            .filter(
+                application -> FlinkAppState.LOST.getValue() == application.getState().intValue())
+            .collect(Collectors.toList());
     updateProbingState(probeApplication);
     probeApplication.stream().forEach(this::monitorApplication);
   }
 
   private void updateProbingState(List<Application> applications) {
     applications.stream()
-      .filter(application -> FlinkAppState.isLost(application.getState()))
-      .forEach(
-        application -> {
-          application.setState(FlinkAppState.PROBING.getValue());
-          application.setProbing(true);
-        });
+        .filter(application -> FlinkAppState.isLost(application.getState()))
+        .forEach(
+            application -> {
+              application.setState(FlinkAppState.PROBING.getValue());
+              application.setProbing(true);
+            });
     applicationManageService.updateBatchById(applications);
   }
 
@@ -125,23 +133,25 @@ public class AutoHealthProbingTask {
         .forEach((alterId) -> alertService.alert(alterId, AlertTemplate.of(alertProbeMsg)));
   }
 
-  
   private List<AlertProbeMsg> generateProbeResults(List<Application> applications) {
-    return applications.stream()
+    if (applications == null || applications.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return new ArrayList<>(applications.stream()
         .collect(
             Collectors.groupingBy(
-                app -> app.getUserId(),
+                Application::getUserId,
                 Collectors.collectingAndThen(
                     Collectors.toList(),
                     apps -> {
-                      List<Long> alertIds = new ArrayList<>();
+                      Set<Long> alertIds = new HashSet<>();
                       AlertProbeMsg alertProbeMsg = new AlertProbeMsg();
                       apps.forEach(
                           app -> {
                             alertProbeMsg.setUser(app.getUserName());
                             alertProbeMsg.incrementProbeJobs();
                             if (app.getState() == FlinkAppState.LOST.getValue()) {
-                              alertProbeMsg.incrementFailedJobs();
+                              alertProbeMsg.incrementLostJobs();
                             } else if (app.getState() == FlinkAppState.FAILED.getValue()) {
                               alertProbeMsg.incrementFailedJobs();
                             } else if (app.getState() == FlinkAppState.CANCELED.getValue()) {
@@ -153,9 +163,7 @@ public class AutoHealthProbingTask {
                       alertProbeMsg.setAlertId(alertIds);
                       return alertProbeMsg;
                     })))
-        .values()
-        .stream()
-        .collect(Collectors.toList());
+        .values());
   }
 
   private void monitorApplication(Application application) {

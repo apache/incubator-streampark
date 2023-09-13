@@ -20,23 +20,23 @@ package org.apache.streampark.console.core.bean;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @Data
 public class AlertProbeMsg {
 
-  private List<Long> alertId;
+  private Set<Long> alertId;
 
   private String user;
 
-  private Integer probeJobs;
+  private Integer probeJobs = 0;
 
-  private Integer failedJobs;
+  private Integer failedJobs = 0;
 
-  private Integer lostJobs;
+  private Integer lostJobs = 0;
 
-  private Integer cancelledJobs;
+  private Integer cancelledJobs = 0;
 
   public void incrementProbeJobs() {
     this.probeJobs++;

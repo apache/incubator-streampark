@@ -184,28 +184,28 @@
 </#if>
 <#if  type == 4 >
        {
-         "is_short": true,
+         "is_short": false,
          "text": {
            "content": "**Probe Jobs：${probeJobs}**",
            "tag": "lark_md"
          }
        },
        {
-         "is_short": true,
+         "is_short": false,
          "text": {
            "content": "**Failed Jobs：${failedJobs}**",
            "tag": "lark_md"
          }
        },
        {
-         "is_short": true,
+         "is_short": false,
          "text": {
            "content": "**Lost Jobs：${lostJobs}**",
            "tag": "lark_md"
          }
        },
        {
-         "is_short": true,
+         "is_short": false,
          "text": {
            "content": "**Cancelled Jobs：${cancelledJobs}**",
            "tag": "lark_md"

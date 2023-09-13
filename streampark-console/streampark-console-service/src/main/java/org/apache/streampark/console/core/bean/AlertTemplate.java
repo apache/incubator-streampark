@@ -115,6 +115,7 @@ public class AlertTemplate implements Serializable {
         .setFailedJobs(alertProbeMsg.getFailedJobs())
         .setLostJobs(alertProbeMsg.getLostJobs())
         .setCancelledJobs(alertProbeMsg.getCancelledJobs())
+        .setSubject("StreamPark Alert: PROBE")
         .build();
   }
 

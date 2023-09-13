@@ -3,13 +3,13 @@
 # ${subject}
 
 
-<#if  type == 1 || type == 2 || type ==3>
-### **Dear StreamPark user:**
+<#if  type == 1 || type == 2 || type == 3>
+### **Dear StreamPark User:**
 
 > ** Oops! I'm sorry to inform you that something wrong with your app **
 </#if>
 <#if  type == 4 >
-### **Dear StreamPark user:${user}**
+### **Dear StreamPark User:${user}**
 
 > ** This is the latest auto probe result **
 </#if>
