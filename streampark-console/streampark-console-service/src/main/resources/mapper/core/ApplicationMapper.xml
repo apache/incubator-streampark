@@ -32,6 +32,7 @@
         <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
         <result column="flink_cluster_id" jdbcType="BIGINT" property="flinkClusterId"/>
         <result column="flink_image" jdbcType="VARCHAR" property="flinkImage"/>
+        <result column="k8s_name" jdbcType="VARCHAR" property="k8sName"/>
         <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="app_type" jdbcType="INTEGER" property="appType"/>
         <result column="job_type" jdbcType="INTEGER" property="jobType"/>

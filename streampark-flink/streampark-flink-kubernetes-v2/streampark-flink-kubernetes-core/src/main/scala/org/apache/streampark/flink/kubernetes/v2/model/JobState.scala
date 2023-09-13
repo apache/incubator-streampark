@@ -32,7 +32,11 @@ object JobState extends Enumeration {
   val UNKNOWN = Value
 
   def valueOf(raw: String): JobState = values.find(_.toString == raw).getOrElse(UNKNOWN)
-  val maybeDeploying                 = Set(INITIALIZING, CREATED, RESTARTING, RECONCILING)
+
+  val maybeDeploying = Set(INITIALIZING, CREATED, RESTARTING, RECONCILING)
+
+  lazy val activeStates =
+    Set(INITIALIZING, CREATED, RUNNING, FAILING, CANCELLING, RESTARTING, RECONCILING)
 }
 
 /**
@@ -49,11 +53,6 @@ object EvalJobState extends Enumeration {
 
   // copy from [[org.apache.streampark.console.core.enums.FlinkAppState]]
   val LOST, TERMINATED, OTHER = Value
-
-  // ending flink states, the tracking monitor will stop tracking these states of flink job.
-  val endingStates = Seq(FAILED, CANCELED, FINISHED, TERMINATED, LOST)
-
-  val effectEndStates = endingStates.filter(_ != LOST)
 
   def of(state: JobState): EvalJobState = values.find(e => e.toString == state.toString).getOrElse(OTHER)
 

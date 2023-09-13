@@ -43,7 +43,13 @@ case class JobStatus(
     startTs: Long,
     endTs: Option[Long] = None,
     tasks: Option[TaskStats] = None,
-    updatedTs: Long)
+    updatedTs: Long) {
+
+  lazy val duration: Long = {
+    if (startTs <= 0L) 0L
+    else endTs.getOrElse(System.currentTimeMillis()) - startTs
+  }
+}
 
 object JobStatus {
 

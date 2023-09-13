@@ -47,7 +47,7 @@
                     <scala>
                         <scalafmt>
                             <version>${spotless.scalafmt.version}</version>
-                            <file>.scalafmt-fp.conf</file>
+                            <file>${maven.multiModuleProjectDirectory}/.scalafmt-fp.conf</file>
                         </scalafmt>
                     </scala>
                 </configuration>

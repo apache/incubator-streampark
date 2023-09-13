@@ -15,19 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.kubernetes.v2.operator
+package org.apache.streampark.console.core.utils;
 
-object OprError {
+public interface FlinkK8sDataTypeConverterStub {
 
-  case class UnsupportedAction(msg: String) extends Exception("Unsupported action: " + msg)
-
-  case class FlinkResourceNotFound(id: Long) extends Exception(s"Flink resource not found: id=$id")
-
-  case class FlinkJobNotFound(appId: Long) extends Exception(s"Flink job not found: appId=$appId")
-
-  case class FlinkRestEndpointNotFound(namespace: String, name: String)
-    extends Exception(s"Flink cluster rest endpoint not found: namespace=$namespace, name=$name")
-
-  case class FlinkDeploymentCRDNotFound()
-    extends Exception("The FlinkDeployment CRD is not currently deployed in the kubernetes cluster")
+  /** Create default name for Flink SessionJob CR for k8s-native compatibility. */
+  String genSessionJobK8sCRName(String clusterId);
 }

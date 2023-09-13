@@ -54,7 +54,14 @@ import scala.Enumeration;
 import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.fromK8sFlinkJobState;
 import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
 
-/** Event Listener for K8sFlinkTrackMonitor */
+/**
+ * Event Listener for K8sFlinkTrackMonitor。
+ *
+ * <p>Use FlinkK8sChangeListenerV2 listeners instead:
+ *
+ * @link org.apache.streampark.console.core.task.FlinkK8sChangeListenerV2
+ */
+@Deprecated
 @Component
 public class FlinkK8sChangeEventListener {
 

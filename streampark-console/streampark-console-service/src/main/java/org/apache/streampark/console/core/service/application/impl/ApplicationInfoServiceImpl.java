@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
@@ -41,6 +42,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.task.FlinkClusterWatcher;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
@@ -96,6 +98,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
+  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
+
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
@@ -149,7 +153,12 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     }
 
     // merge metrics from flink kubernetes cluster
-    FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
+    FlinkMetricCV k8sMetric;
+    if (K8sFlinkConfig.isV2Enabled()) {
+      k8sMetric = flinkK8sObserver.getAggClusterMetricCV(teamId);
+    } else {
+      k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
+    }
     if (k8sMetric != null) {
       totalJmMemory += k8sMetric.totalJmMemory();
       totalTmMemory += k8sMetric.totalTmMemory();
@@ -452,7 +461,11 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     boolean mapping = this.baseMapper.mapping(appParam);
     Application application = getById(appParam.getId());
     if (isKubernetesApp(application)) {
+      // todo mark
       k8SFlinkTrackMonitor.doWatching(toTrackId(application));
+      if (K8sFlinkConfig.isV2Enabled()) {
+        flinkK8sObserver.watchApplication(application);
+      }
     } else {
       FlinkHttpWatcher.doWatching(application);
     }

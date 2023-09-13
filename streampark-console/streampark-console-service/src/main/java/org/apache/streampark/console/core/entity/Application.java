@@ -100,8 +100,25 @@ public class Application implements Serializable {
   /** flink docker base image */
   private String flinkImage;
 
+  /** The resource name of the flink job on k8s, equivalent to clusterId in application mode. */
+  private String k8sName;
+
   /** k8s namespace */
   private String k8sNamespace = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE();
+
+  /** The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type) */
+  private Integer k8sRestExposedType;
+  /** flink kubernetes pod template */
+  private String k8sPodTemplate;
+
+  private String k8sJmPodTemplate;
+  private String k8sTmPodTemplate;
+
+  private String ingressTemplate;
+  private String defaultModeIngress;
+
+  /** flink-hadoop integration on flink-k8s mode */
+  private Boolean k8sHadoopIntegration;
 
   private Integer state;
   /** task release status */
@@ -189,22 +206,8 @@ public class Application implements Serializable {
 
   private Date modifyTime;
 
-  /** The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type) */
-  private Integer k8sRestExposedType;
-  /** flink kubernetes pod template */
-  private String k8sPodTemplate;
-
-  private String k8sJmPodTemplate;
-  private String k8sTmPodTemplate;
-
-  private String ingressTemplate;
-  private String defaultModeIngress;
-
   /** 1: cicd (build from csv) 2: upload (upload local jar job) */
   private Integer resourceFrom;
-
-  /** flink-hadoop integration on flink-k8s mode */
-  private Boolean k8sHadoopIntegration;
 
   private String tags;
 

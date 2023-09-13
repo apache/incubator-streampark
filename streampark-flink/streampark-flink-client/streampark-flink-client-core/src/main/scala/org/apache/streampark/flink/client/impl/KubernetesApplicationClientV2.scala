@@ -39,7 +39,7 @@ import scala.util.{Failure, Success, Try}
 /** Flink K8s application mode task operation client via Flink K8s Operator */
 object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger {
 
-  @throws[Exception]
+  @throws[Throwable]
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
@@ -88,9 +88,10 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
     val namespace = Option(submitReq.k8sSubmitParam.kubernetesNamespace)
       .getOrElse("default")
 
-    val name = Option(submitReq.k8sSubmitParam.clusterId)
+    val name = submitReq.k8sSubmitParam.kubernetesName
+      .orElse(Option(submitReq.k8sSubmitParam.clusterId))
       .filter(str => StringUtils.isNotBlank(str))
-      .getOrElse(return Left("cluster-id should not be empty"))
+      .getOrElse(return Left("Kubernetes CR name should not be empty"))
 
     val image = submitReq.k8sSubmitParam.baseImage
       .orElse(Option(buildResult.flinkBaseImage))
