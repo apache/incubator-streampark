@@ -23,14 +23,14 @@ object FlinkK8sConfig {
 
   // ----- embedded http file server config -----
 
-  val EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR: InternalOption = InternalOption(
+  lazy val EMBEDDED_HTTP_FILE_SERVER_LOCAL_MIRROR_DIR: InternalOption = InternalOption(
     key = "streampark.flink-k8s.fs.mirror-dir",
     defaultValue = s"${Workspace.local.WORKSPACE}/mirror",
     classType = classOf[String],
     description = "Local mirror directory for embedded file server"
   )
 
-  val EMBEDDED_HTTP_FILE_SERVER_PORT: InternalOption = InternalOption(
+  lazy val EMBEDDED_HTTP_FILE_SERVER_PORT: InternalOption = InternalOption(
     key = "streampark.flink-k8s.fs-server.port",
     defaultValue = 10030,
     classType = classOf[Integer],
@@ -39,35 +39,35 @@ object FlinkK8sConfig {
 
   // ----- observer config -----
 
-  val EVAL_FLINK_JOB_SNAPSHOT_PARALLELISM: InternalOption = InternalOption(
+  lazy val EVAL_FLINK_JOB_SNAPSHOT_PARALLELISM: InternalOption = InternalOption(
     key = "streampark.flink-k8s.job-snapshot.eval-parallelism",
     defaultValue = 5,
     classType = classOf[Integer],
     description = "Parallelism of fibers evaluating flink job status"
   )
 
-  val EVAL_FLINK_JOB_SNAP_INTERVAL_MILLIS: InternalOption = InternalOption(
+  lazy val EVAL_FLINK_JOB_SNAP_INTERVAL_MILLIS: InternalOption = InternalOption(
     key = "streampark.flink-k8s.job-snapshot.eval-interval",
     defaultValue = 1000L,
     classType = classOf[Long],
     description = "Interval for evaluating the status of the flink task, in milliseconds"
   )
 
-  val POLL_FLINK_REST_INTERVAL: InternalOption = InternalOption(
+  lazy val POLL_FLINK_REST_INTERVAL: InternalOption = InternalOption(
     key = "streampark.flink-k8s.flink-rest.poll-interval",
     defaultValue = 1000L,
     classType = classOf[Long],
     description = "Interval for polling the flink rest api, in milliseconds"
   )
 
-  val RETRY_FLINK_REST_INTERVAL: InternalOption = InternalOption(
+  lazy val RETRY_FLINK_REST_INTERVAL: InternalOption = InternalOption(
     key = "streampark.flink-k8s.flink-rest.poll-retry-interval",
     defaultValue = 2000L,
     classType = classOf[Long],
     description = "Polling interval when the flink rest api request fails, in milliseconds"
   )
 
-  val REACH_FLINK_REST_TYPE: InternalOption = InternalOption(
+  lazy val REACH_FLINK_REST_TYPE: InternalOption = InternalOption(
     key = "streampark.flink-k8s.flink-rest.access-type",
     defaultValue = "IP",
     classType = classOf[String],
@@ -76,7 +76,7 @@ object FlinkK8sConfig {
 
   // ----- operator config -----
 
-  val LOG_FLINK_CR_YAML: InternalOption = InternalOption(
+  lazy val LOG_FLINK_CR_YAML: InternalOption = InternalOption(
     key = "streampark.flink-k8s.log-cr-yaml",
     defaultValue = true,
     classType = classOf[Boolean],
