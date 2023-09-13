@@ -56,6 +56,9 @@ spec:
             - name: {{ .Values.spec.name }}
               containerPort: {{ .Values.spec.containerPort }}
               protocol: TCP
+            - name: efs
+              containerPort: {{ .Values.spec.efsPort }}
+              protocol: TCP
           env:
             {{- toYaml .Values.spec.container.env | nindent 12 }}
           securityContext:

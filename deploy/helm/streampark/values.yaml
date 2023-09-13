@@ -54,6 +54,7 @@ spec:
 
   replicaCount: 1
   containerPort: 10000
+  efsPort: 10030
   name: rest
   affinity: { }
   ## Compute Resources required by this container. Cannot be updated.
