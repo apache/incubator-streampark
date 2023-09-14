@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
@@ -65,6 +66,7 @@ import org.apache.streampark.console.core.service.application.ApplicationActionS
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -157,6 +159,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Autowired private VariableService variableService;
 
   @Autowired private ResourceService resourceService;
+
+  @Autowired private FlinkK8sDataTypeConverterStub flinkK8sDataTypeConverter;
 
   private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap =
       new ConcurrentHashMap<>();
@@ -422,7 +426,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             application.getK8sName(),
             application.getK8sNamespace(),
             application.getFlinkImage(),
-            application.getK8sRestExposedTypeEnum());
+            application.getK8sRestExposedTypeEnum(),
+            flinkK8sDataTypeConverter.genDefaultFlinkDeploymentIngressDef());
 
     Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(flinkEnv, application);
     String flinkUserJar = userJarAndAppConf.f0;
@@ -527,7 +532,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             })
         .whenComplete(
             (t, e) -> {
-              if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+              if (!K8sFlinkConfig.isV2Enabled()
+                  && ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
                 String domainName = settingService.getIngressModeDefault();
                 if (StringUtils.isNotBlank(domainName)) {
                   try {
