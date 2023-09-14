@@ -28,11 +28,11 @@ import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.URI;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,11 +45,31 @@ import java.util.UUID;
 @Slf4j
 public final class CommonUtils implements Serializable {
 
-  private CommonUtils() {}
-
   private static final long serialVersionUID = 1L;
 
-  private static final String OS = System.getProperty("os.name").toLowerCase();
+  private static final String OS_NAME = "os.name";
+  private static final String LINUX = "linux";
+  private static final String MAC = "mac";
+  private static final String WINDOWS = "windows";
+  private static final String MAC_OS = "os";
+  private static final String OS2 = "os/2";
+  private static final String SOLARIS = "solaris";
+  private static final String SUNOS = "sunos";
+  private static final String MPE_IX = "mpe/ix";
+  private static final String HP_UX = "hp-ux";
+  private static final String AIX = "aix";
+  private static final String OS_390 = "os/390";
+  private static final String FREEBSD = "freebsd";
+  private static final String IRIX = "irix";
+  private static final String DIGITAL = "digital";
+  private static final String UNIX = "unix";
+  private static final String NETWARE = "netware";
+  private static final String OSF1 = "osf1";
+  private static final String OPENVMS = "openvms";
+
+  private static final String OS = System.getProperty(OS_NAME).toLowerCase();
+
+  private CommonUtils() {}
 
   /**
    * is empty
@@ -61,7 +81,6 @@ public final class CommonUtils implements Serializable {
    * @since 1.0
    */
   public static Boolean isEmpty(Object... objs) {
-
     if (objs == null) {
       return Boolean.TRUE;
     }
@@ -76,7 +95,7 @@ public final class CommonUtils implements Serializable {
       }
 
       // char sequence
-      if ((obj instanceof CharSequence) && "".equals(obj.toString().trim())) {
+      if ((obj instanceof CharSequence) && obj.toString().trim().isEmpty()) {
         return true;
       }
       // collection
@@ -116,7 +135,6 @@ public final class CommonUtils implements Serializable {
         return true;
       }
     }
-
     return false;
   }
 
@@ -262,7 +280,7 @@ public final class CommonUtils implements Serializable {
   }
 
   public static <A, E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
-    ArrayList<A> elements = new ArrayList<A>();
+    List<A> elements = new ArrayList<>();
     while (enumeration.hasMoreElements()) {
       elements.add(enumeration.nextElement());
     }
@@ -299,8 +317,7 @@ public final class CommonUtils implements Serializable {
         throw new UnsupportedOperationException("Not supported");
       }
     }
-
-    return new EnumerationIterator<E>(enumeration);
+    return new EnumerationIterator<>(enumeration);
   }
 
   public static String getOsName() {
@@ -308,71 +325,71 @@ public final class CommonUtils implements Serializable {
   }
 
   public static boolean isLinux() {
-    return OS.indexOf("linux") >= 0;
+    return OS.contains(LINUX);
   }
 
   public static boolean isMacOS() {
-    return OS.indexOf("mac") >= 0 && OS.indexOf("os") > 0 && OS.indexOf("x") < 0;
+    return OS.contains(MAC) && OS.indexOf(MAC_OS) > 0 && !OS.contains("x");
   }
 
   public static boolean isMacOSX() {
-    return OS.indexOf("mac") >= 0 && OS.indexOf("os") > 0 && OS.indexOf("x") > 0;
+    return OS.contains(MAC) && OS.indexOf(MAC_OS) > 0 && OS.indexOf("x") > 0;
   }
 
   public static boolean isWindows() {
-    return OS.indexOf("windows") >= 0;
+    return OS.contains(WINDOWS);
   }
 
   public static boolean isOS2() {
-    return OS.indexOf("os/2") >= 0;
+    return OS.contains(OS2);
   }
 
   public static boolean isSolaris() {
-    return OS.indexOf("solaris") >= 0;
+    return OS.contains(SOLARIS);
   }
 
   public static boolean isSunOS() {
-    return OS.indexOf("sunos") >= 0;
+    return OS.contains(SUNOS);
   }
 
   public static boolean isMPEiX() {
-    return OS.indexOf("mpe/ix") >= 0;
+    return OS.contains(MPE_IX);
   }
 
   public static boolean isHPUX() {
-    return OS.indexOf("hp-ux") >= 0;
+    return OS.contains(HP_UX);
   }
 
   public static boolean isAix() {
-    return OS.indexOf("aix") >= 0;
+    return OS.contains(AIX);
   }
 
   public static boolean isOS390() {
-    return OS.indexOf("os/390") >= 0;
+    return OS.contains(OS_390);
   }
 
   public static boolean isFreeBSD() {
-    return OS.indexOf("freebsd") >= 0;
+    return OS.contains(FREEBSD);
   }
 
   public static boolean isIrix() {
-    return OS.indexOf("irix") >= 0;
+    return OS.contains(IRIX);
   }
 
   public static boolean isDigitalUnix() {
-    return OS.indexOf("digital") >= 0 && OS.indexOf("unix") > 0;
+    return OS.contains(DIGITAL) && OS.indexOf(UNIX) > 0;
   }
 
   public static boolean isNetWare() {
-    return OS.indexOf("netware") >= 0;
+    return OS.contains(NETWARE);
   }
 
   public static boolean isOSF1() {
-    return OS.indexOf("osf1") >= 0;
+    return OS.contains(OSF1);
   }
 
   public static boolean isOpenVMS() {
-    return OS.indexOf("openvms") >= 0;
+    return OS.contains(OPENVMS);
   }
 
   public static boolean isUnix() {
@@ -441,8 +458,8 @@ public final class CommonUtils implements Serializable {
   }
 
   public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map) {
-    List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>(map.entrySet());
-    Collections.sort(list, Comparator.comparing(Map.Entry::getValue));
+    List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
+    list.sort(Map.Entry.comparingByValue());
     Map<K, V> result = new LinkedHashMap<>();
     for (Map.Entry<K, V> entry : list) {
       result.put(entry.getKey(), entry.getValue());
@@ -482,11 +499,10 @@ public final class CommonUtils implements Serializable {
 
   public static <T> T[] arrayInsertIndex(T[] array, int index, T t) {
     Utils.notNull(array);
-    List<T> arrayList = new ArrayList<T>(array.length + 1);
+    List<T> arrayList = new ArrayList<>(array.length + 1);
     if (index == 0) {
       arrayList.add(t);
       Collections.addAll(arrayList, array);
-
     } else {
       T[] before = Arrays.copyOfRange(array, 0, index);
       T[] after = Arrays.copyOfRange(array, index, array.length);
@@ -523,13 +539,13 @@ public final class CommonUtils implements Serializable {
     if (number.doubleValue() == 0.00) {
       return 0D;
     }
-    String prefix = "";
+    StringBuilder prefix = new StringBuilder();
     while (offset > 0) {
-      prefix += "0";
+      prefix.append("0");
       offset -= 1;
     }
 
-    java.text.DecimalFormat df = new java.text.DecimalFormat("#." + prefix);
+    DecimalFormat df = new DecimalFormat("#." + prefix);
     try {
       return Double.parseDouble(df.format(number));
     } catch (NumberFormatException e) {
@@ -587,7 +603,7 @@ public final class CommonUtils implements Serializable {
    */
   public static <T> List<Map<String, Object>> objectsToMaps(List<T> objList) {
     List<Map<String, Object>> list = new ArrayList<>();
-    if (objList != null && objList.size() > 0) {
+    if (objList != null && !objList.isEmpty()) {
       Map<String, Object> map = null;
       T bean = null;
       for (T t : objList) {
@@ -611,7 +627,7 @@ public final class CommonUtils implements Serializable {
   public static <T> List<T> mapsToObjects(List<Map<String, Object>> maps, Class<T> clazz)
       throws InstantiationException, IllegalAccessException {
     List<T> list = new ArrayList<>();
-    if (maps != null && maps.size() > 0) {
+    if (maps != null && !maps.isEmpty()) {
       Map<String, Object> map;
       T bean;
       for (Map<String, Object> stringObjectMap : maps) {
