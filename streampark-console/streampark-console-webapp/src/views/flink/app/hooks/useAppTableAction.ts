@@ -306,6 +306,7 @@ export const useAppTableAction = (
             options: [
               { label: 'JAR', value: JobTypeEnum.JAR },
               { label: 'SQL', value: JobTypeEnum.SQL },
+              { label: 'PYFLINK', value: JobTypeEnum.PYFLINK },
             ],
             onChange: handlePageDataReload.bind(null, false),
           },

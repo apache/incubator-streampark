@@ -199,9 +199,9 @@
     <BasicTable @register="registerTable" class="app_list !px-0 pt-20px" :formConfig="formConfig">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'jobName'">
-          <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
-          <span class="app_type app_sql" v-if="record['jobType'] === JobTypeEnum.SQL"> SQL </span>
-
+          <span class="app_type app_jar" v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
+          <span class="app_type app_sql" v-if="record['jobType'] == JobTypeEnum.SQL"> SQL </span>
+          <span class="app_type app_py" v-if="record['jobType'] == JobTypeEnum.PYFLINK"> PyFlink </span>
           <span
             class="link"
             :class="{
@@ -214,7 +214,7 @@
             <Tooltip :title="record.description"> {{ record.jobName }} </Tooltip>
           </span>
 
-          <template v-if="record['jobType'] === JobTypeEnum.JAR">
+          <template v-if="record['jobType'] == JobTypeEnum.JAR">
             <Badge
               v-if="record.release === ReleaseStateEnum.NEED_CHECK"
               class="build-badge"
