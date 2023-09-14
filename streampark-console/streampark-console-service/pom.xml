@@ -206,6 +206,13 @@
             <groupId>io.buji</groupId>
             <artifactId>buji-pac4j</artifactId>
             <version>${bujiVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.pac4j</groupId>
+                    <artifactId>pac4j-core</artifactId>
+                </exclusion>
+            </exclusions>
+
         </dependency>
         <!-- Include pac4j-config/core/oauth/oidc-->
         <dependency>
