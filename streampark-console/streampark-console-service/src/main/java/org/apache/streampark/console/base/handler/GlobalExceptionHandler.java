@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public RestResponse handleException(Exception e) {
     log.info("Internal server error：", e);
-    return RestResponse.fail(ResponseCode.CODE_FAIL, "internal server error: %s", e.getMessage());
+    return RestResponse.fail(ResponseCode.CODE_FAIL, "internal server error: {}", e.getMessage());
   }
 
   @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
   public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
     log.info("not supported request method，exception：{}", e.getMessage());
     return RestResponse.fail(
-        ResponseCode.CODE_FAIL, "not supported request method，exception：%s", e.getMessage());
+        ResponseCode.CODE_FAIL, "not supported request method，exception：{}", e.getMessage());
   }
 
   @ExceptionHandler(value = AbstractApiException.class)

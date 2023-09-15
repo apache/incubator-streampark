@@ -17,9 +17,10 @@
 
 package org.apache.streampark.console.base.domain;
 
+import org.slf4j.helpers.MessageFormatter;
+
 import javax.validation.constraints.NotNull;
 
-import java.util.Formatter;
 import java.util.HashMap;
 
 public class RestResponse extends HashMap<String, Object> {
@@ -49,7 +50,7 @@ public class RestResponse extends HashMap<String, Object> {
   }
 
   public static RestResponse fail(Long code, String format, Object... args) {
-    String message = new Formatter().format(format, args).toString();
+    String message = MessageFormatter.arrayFormat(format, args).getMessage();
     RestResponse resp = new RestResponse();
     resp.put(STATUS_KEY, STATUS_FAIL);
     resp.put(MESSAGE_KEY, message);
