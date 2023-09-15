@@ -19,6 +19,7 @@ package org.apache.streampark.console.base.domain;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Formatter;
 import java.util.HashMap;
 
 public class RestResponse extends HashMap<String, Object> {
@@ -47,7 +48,8 @@ public class RestResponse extends HashMap<String, Object> {
     return resp;
   }
 
-  public static RestResponse fail(String message, Long code) {
+  public static RestResponse fail(Long code, String format, Object... args) {
+    String message = new Formatter().format(format, args).toString();
     RestResponse resp = new RestResponse();
     resp.put(STATUS_KEY, STATUS_FAIL);
     resp.put(MESSAGE_KEY, message);
