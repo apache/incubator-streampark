@@ -61,8 +61,14 @@
         type: Array as PropType<MenuType[]>,
         default: () => [],
       },
-      collapse: propTypes.bool,
-      mixSider: propTypes.bool,
+      collapse: {
+        type: Boolean,
+        default: false,
+      },
+      mixSider: {
+        type: Boolean,
+        default: false,
+      },
       theme: propTypes.string,
       accordion: propTypes.bool.def(true),
       collapsedShowTitle: propTypes.bool,

@@ -147,7 +147,7 @@ export const useCreateAndEditSchema = (
 
   async function handleFlinkVersion(id: number | string) {
     if (!dependencyRef) return;
-    scalaVersion = await fetchFlinkEnv(id)?.scalaVersion;
+    scalaVersion = (await fetchFlinkEnv(id as string))?.scalaVersion;
     checkPomScalaVersion();
   }
 
@@ -523,6 +523,7 @@ export const useCreateAndEditSchema = (
           } else if (model.jobType == JobTypeEnum.PYFLINK) {
             return getAlertSvgIcon('py', 'Py Flink');
           }
+          return '';
         },
       },
       {
@@ -539,6 +540,7 @@ export const useCreateAndEditSchema = (
           } else if (model.appType == AppTypeEnum.STREAMPARK_SPARK) {
             return getAlertSvgIcon('spark', 'StreamPark Spark');
           }
+          return '';
         },
       },
     ];

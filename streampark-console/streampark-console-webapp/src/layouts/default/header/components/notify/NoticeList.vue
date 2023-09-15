@@ -28,14 +28,16 @@
         <a-list-item-meta>
           <template #title>
             <div class="title">
-              <a-typography-paragraph
-                style="width: 100%; margin-bottom: 0 !important"
-                :disabled="!!item.readed"
-                :delete="!!item.readed"
-                :ellipsis="true"
-                :ellipsisTooltip="item.title"
-                :content="item.title"
-              />
+              <div class="w-full !mb-0">
+                <a-typography-paragraph
+                  :disabled="!!item.readed"
+                  :delete="!!item.readed"
+                  :ellipsis="{
+                    tooltip: item.title,
+                  }"
+                  :content="item.title"
+                />
+              </div>
               <div class="extra" v-if="item.extra">
                 <a-tag class="tag" color="red">
                   {{ item.extra }}
@@ -55,14 +57,16 @@
           <template #description>
             <div>
               <div class="description" v-if="item.context">
-                <a-typography-paragraph
-                  style="width: 100%; color: #7f838b; margin-bottom: 0 !important"
-                  :disabled="!!item.readed"
-                  :delete="!!item.readed"
-                  :ellipsis="true"
-                  :ellipsisTooltip="item.context"
-                  :content="item.context"
-                />
+                <div class="w-full !mb-0">
+                  <a-typography-paragraph
+                    :disabled="!!item.readed"
+                    :delete="!!item.readed"
+                    :ellipsis="{
+                      tooltip: item.context,
+                    }"
+                    :content="item.context"
+                  />
+                </div>
               </div>
               <div class="datetime">
                 <clock-circle-outlined />
@@ -144,7 +148,7 @@
       );
       const getPagination = computed(() => {
         const { list, pageSize } = props;
-        if (pageSize > 0 && list && list.length > pageSize) {
+        if (isNumber(pageSize) && pageSize > 0 && list && list.length > pageSize) {
           return {
             total: list.length,
             pageSize,

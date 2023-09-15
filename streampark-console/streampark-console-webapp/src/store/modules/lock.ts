@@ -61,7 +61,7 @@ export const useLockStore = defineStore({
             {
               username,
               password: password!,
-              loginType,
+              loginType: loginType!,
             },
             'none',
           );
