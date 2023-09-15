@@ -317,7 +317,8 @@ public final class CommonUtils implements Serializable {
         throw new UnsupportedOperationException("Not supported");
       }
     }
-    return new EnumerationIterator<>(enumeration);
+
+    return new EnumerationIterator<E>(enumeration);
   }
 
   public static String getOsName() {
