@@ -133,7 +133,7 @@ public class UserController {
   public RestResponse initTeam(Long teamId, Long userId) {
     Team team = teamService.getById(teamId);
     if (team == null) {
-      return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
+      return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "teamId is invalid");
     }
     userService.setLastTeam(teamId, userId);
     return RestResponse.success();
@@ -144,7 +144,7 @@ public class UserController {
   public RestResponse setTeam(Long teamId) {
     Team team = teamService.getById(teamId);
     if (team == null) {
-      return RestResponse.fail("TeamId is invalid, set team failed.", ResponseCode.CODE_FAIL_ALERT);
+      return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
     }
     User user = commonService.getCurrentUser();
     ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");

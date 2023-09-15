@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.base.util;
 
+import org.apache.streampark.common.util.FileUtils;
+import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitCredential;
 
@@ -100,13 +102,23 @@ public class GitUtils {
                     @Override
                     protected JSch createDefaultJSch(FS fs) throws JSchException {
                       JSch jSch = super.createDefaultJSch(fs);
-                      if (project.getPrvkeyPath() == null) {
+                      String prvkeyPath = project.getPrvkeyPath();
+                      if (StringUtils.isBlank(prvkeyPath)) {
+                        String userHome = SystemPropertyUtils.getUserHome();
+                        if (userHome != null) {
+                          String rsaPath = userHome.concat("/.ssh/id_rsa");
+                          if (FileUtils.exists(rsaPath)) {
+                            prvkeyPath = rsaPath;
+                          }
+                        }
+                      }
+                      if (prvkeyPath == null) {
                         return jSch;
                       }
                       if (StringUtils.isEmpty(project.getPassword())) {
-                        jSch.addIdentity(project.getPrvkeyPath());
+                        jSch.addIdentity(prvkeyPath);
                       } else {
-                        jSch.addIdentity(project.getPrvkeyPath(), project.getPassword());
+                        jSch.addIdentity(prvkeyPath, project.getPassword());
                       }
                       return jSch;
                     }

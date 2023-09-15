@@ -156,21 +156,19 @@
   async function handleAppUpdate(values) {
     try {
       submitLoading.value = true;
-      if (app.jobType == JobTypeEnum.JAR) {
-        handleSubmitCustomJob(values);
-      } else {
-        if (app.jobType == JobTypeEnum.SQL) {
-          if (values.flinkSql == null || values.flinkSql.trim() === '') {
-            createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
-          } else {
-            const access = await flinkSql?.value?.handleVerifySql();
-            if (!access) {
-              createMessage.warning(t('flink.app.editStreamPark.sqlCheck'));
-              throw new Error(access);
-            }
-            handleSubmitSQL(values);
+      if (app.jobType == JobTypeEnum.SQL) {
+        if (values.flinkSql == null || values.flinkSql.trim() === '') {
+          createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
+        } else {
+          const access = await flinkSql?.value?.handleVerifySql();
+          if (!access) {
+            createMessage.warning(t('flink.app.editStreamPark.sqlCheck'));
+            throw new Error(access);
           }
+          handleSubmitSQL(values);
         }
+      } else {
+        handleSubmitCustomJob(values);
       }
     } catch (error) {
       console.error(error);

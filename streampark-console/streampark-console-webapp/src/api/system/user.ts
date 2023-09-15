@@ -51,7 +51,7 @@ export function getPermCode(): Promise<string[]> {
  * @param {BasicTableParams} data
  * @returns {Promise<UserListRecord>} user array
  */
-export function getUserList(data: BasicTableParams): Promise<UserListRecord[]> {
+export function getUserList(data: BasicTableParams): Promise<{ records: UserListRecord[] }> {
   return defHttp.post({ url: Api.UserList, data });
 }
 

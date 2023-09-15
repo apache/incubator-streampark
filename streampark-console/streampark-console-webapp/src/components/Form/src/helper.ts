@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { ValidationRule } from 'ant-design-vue/lib/form/Form';
+import type { RuleObject } from 'ant-design-vue/lib/form';
 import type { ComponentType } from './types/index';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { dateUtil } from '/@/utils/dateUtil';
@@ -51,7 +51,7 @@ function genType() {
 }
 
 export function setComponentRuleType(
-  rule: ValidationRule,
+  rule: RuleObject,
   component: ComponentType,
   valueFormat: string,
 ) {

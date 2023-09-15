@@ -515,15 +515,15 @@ export const renderResourceFrom = (model: Recordable) => {
       value={model.resourceFrom}
       placeholder="Please select resource from"
     >
-      <Select.Option value="csv">
+      <Select.Option value="1">
         <SvgIcon name="github" />
-        <span class="pl-10px">CICD</span>
-        <span class="gray">(build from CVS)</span>
+        <span class="pl-10px">Project</span>
+        <span class="gray"> (build from Project)</span>
       </Select.Option>
-      <Select.Option value="upload">
+      <Select.Option value="2">
         <SvgIcon name="upload" />
         <span class="pl-10px">Upload</span>
-        <span class="gray">(upload local job)</span>
+        <span class="gray"> (upload local job)</span>
       </Select.Option>
     </Select>
   );

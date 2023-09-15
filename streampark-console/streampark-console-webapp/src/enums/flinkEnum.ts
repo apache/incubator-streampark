@@ -191,8 +191,8 @@ export enum CandidateTypeEnum {
 }
 
 export enum ResourceFromEnum {
-  /** cicd(build from cvs) */
-  CICD = 1,
+  /** from PROJECT */
+  PROJECT = 1,
   /** upload local jar */
   UPLOAD = 2,
 }

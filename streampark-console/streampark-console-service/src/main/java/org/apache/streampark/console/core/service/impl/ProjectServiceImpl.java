@@ -377,7 +377,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       String error =
           String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
       log.error(error, e);
-      return RestResponse.fail(error + e.getMessage(), ResponseCode.CODE_FAIL);
+      return RestResponse.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
     }
   }
 

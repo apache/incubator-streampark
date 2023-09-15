@@ -174,21 +174,21 @@
       });
     }
     const params = {
-      jobType: values.jobType === 'pyflink' ?JobTypeEnum.PYFLINK : JobTypeEnum.JAR,
+      jobType: values.jobType,
       projectId: values.project || null,
       module: values.module || null,
       dependency:
-          dependency.pom === undefined && dependency.jar === undefined
-              ? null
-              : JSON.stringify(dependency),
+        dependency.pom === undefined && dependency.jar === undefined
+          ? null
+          : JSON.stringify(dependency),
       appType: values.appType,
     };
     handleSubmitParams(params, values, k8sTemplate);
     // common params...
     const resourceFrom = values.resourceFrom;
     if (resourceFrom) {
-      if (resourceFrom === 'csv') {
-        params['resourceFrom'] = ResourceFromEnum.CICD;
+      if (resourceFrom == ResourceFromEnum.PROJECT) {
+        params['resourceFrom'] = ResourceFromEnum.PROJECT;
         //streampark flink
         if (values.appType == AppTypeEnum.STREAMPARK_FLINK) {
           const configVal = values.config;
@@ -263,7 +263,7 @@
   async function handleAppCreate(formValue: Recordable) {
     try {
       submitLoading.value = true;
-      if (formValue.jobType === 'sql') {
+      if (formValue.jobType == JobTypeEnum.SQL) {
         if (formValue.flinkSql == null || formValue.flinkSql.trim() === '') {
           createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
         } else {
@@ -273,11 +273,9 @@
             throw new Error(access);
           }
         }
-      }
-      if (formValue.jobType === 'customcode' || formValue.jobType === 'pyflink') {
-          handleSubmitCustomJob(formValue);
-      } else {
         handleSubmitSQL(formValue);
+      } else {
+        handleSubmitCustomJob(formValue);
       }
     } catch (error) {
       submitLoading.value = false;
@@ -334,7 +332,6 @@
         <SettingTwoTone
           v-if="model[field]"
           class="ml-10px"
-          theme="twoTone"
           two-tone-color="#4a9ff5"
           @click="handleSQLConf(true, model)"
         />
@@ -347,11 +344,13 @@
         />
       </template>
       <template #args="{ model }">
-        <ProgramArgs
-          v-model:value="model.args"
-          :suggestions="suggestions"
-          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
-        />
+        <template v-if="model.args !== undefined">
+          <ProgramArgs
+            v-model:value="model.args"
+            :suggestions="suggestions"
+            @preview="(value) => openReviewDrawer(true, { value, suggestions })"
+          />
+        </template>
       </template>
       <template #useSysHadoopConf="{ model, field }">
         <UseSysHadoopConf v-model:hadoopConf="model[field]" />
