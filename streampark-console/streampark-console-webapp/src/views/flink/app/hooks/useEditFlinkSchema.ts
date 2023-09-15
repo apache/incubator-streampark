@@ -47,8 +47,8 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Resource From',
         component: 'Input',
         render: ({ model }) => {
-          if (model.resourceFrom == ResourceFromEnum.CICD)
-            return getAlertSvgIcon('github', 'CICD (build from CSV)');
+          if (model.resourceFrom == ResourceFromEnum.PROJECT)
+            return getAlertSvgIcon('github', 'Project (build from CSV)');
           else if (model.resourceFrom == ResourceFromEnum.UPLOAD)
             return getAlertSvgIcon('upload', 'Upload (upload local job)');
           else return '';
@@ -60,14 +60,14 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Project',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
-        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD && model.projectName,
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.PROJECT && model.projectName,
       },
       {
         field: 'module',
         label: 'Module',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
-        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD && model.module,
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.PROJECT && model.module,
       },
       {
         field: 'jar',
@@ -88,7 +88,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
             },
           };
         },
-        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD,
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.PROJECT,
         rules: [{ required: true, message: 'Please select jar' }],
       },
       {
@@ -96,14 +96,14 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Upload Job Jar',
         component: 'Select',
         slot: 'uploadJobJar',
-        ifShow: ({ model }) => model.resourceFrom != ResourceFromEnum.CICD,
+        ifShow: ({ model }) => model.resourceFrom != ResourceFromEnum.PROJECT,
       },
       {
         field: 'jar',
         label: 'Program Jar',
         component: 'Input',
         dynamicDisabled: true,
-        ifShow: ({ model }) => model.resourceFrom !== ResourceFromEnum.CICD,
+        ifShow: ({ model }) => model.resourceFrom != ResourceFromEnum.PROJECT,
       },
       {
         field: 'mainClass',

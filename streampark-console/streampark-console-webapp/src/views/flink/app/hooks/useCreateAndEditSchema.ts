@@ -56,6 +56,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
 import { fetchTeamResource } from '/@/api/flink/resource';
 const { t } = useI18n();
+
 export interface HistoryRecord {
   k8sNamespace: Array<string>;
   k8sSessionClusterId: Array<string>;
@@ -113,13 +114,7 @@ export const useCreateAndEditSchema = (
         label: 'Flink SQL',
         component: 'Input',
         slot: 'flinkSql',
-        ifShow: ({ values }) => {
-          if (edit?.appId) {
-            return values?.jobType == JobTypeEnum.SQL;
-          } else {
-            return values?.jobType == 'sql';
-          }
-        },
+        ifShow: ({ values }) => values?.jobType == JobTypeEnum.SQL,
         rules: [{ required: true, message: t('flink.app.addAppTips.flinkSqlIsRequiredMessage') }],
       },
       {
@@ -127,39 +122,22 @@ export const useCreateAndEditSchema = (
         label: t('flink.app.resource'),
         component: 'Select',
         render: ({ model }) => renderStreamParkResource({ model, resources: unref(teamResource) }),
-        ifShow: ({ values }) => {
-          if (edit?.appId) {
-            return values.jobType == JobTypeEnum.SQL;
-          } else {
-            return values?.jobType == 'sql';
-          }
-        },
+        ifShow: ({ values }) => values.jobType == JobTypeEnum.SQL,
       },
       {
         field: 'dependency',
         label: t('flink.app.dependency'),
         component: 'Input',
         slot: 'dependency',
-        ifShow: ({ values }) => {
-            if (edit?.appId) {
-                return values.jobType == JobTypeEnum.SQL || values.jobType == JobTypeEnum.PYFLINK;
-            } else {
-                return values?.jobType == 'sql' || values?.jobType == 'pyflink';
-            }
-        },
+        ifShow: ({ values }) => values.jobType != JobTypeEnum.JAR,
       },
       { field: 'configOverride', label: '', component: 'Input', show: false },
       {
         field: 'isSetConfig',
         label: t('flink.app.appConf'),
         component: 'Switch',
-        ifShow: ({ values }) => {
-          if (edit?.appId) {
-            return values?.jobType == JobTypeEnum.SQL && !isK8sExecMode(values.executionMode);
-          } else {
-            return values?.jobType == 'sql' && !isK8sExecMode(values.executionMode);
-          }
-        },
+        ifShow: ({ values }) =>
+          values?.jobType == JobTypeEnum.SQL && !isK8sExecMode(values.executionMode),
         render({ model, field }) {
           return renderIsSetConfig(model, field, registerConfDrawer, openConfDrawer);
         },
@@ -508,7 +486,7 @@ export const useCreateAndEditSchema = (
         component: 'InputTextArea',
         defaultValue: '',
         slot: 'args',
-        ifShow: ({ values }) => (edit?.mode ? true : values.jobType == 'customcode'),
+        ifShow: ({ values }) => (edit?.mode ? true : values.jobType != JobTypeEnum.SQL),
       },
       {
         field: 'description',
@@ -540,8 +518,10 @@ export const useCreateAndEditSchema = (
                 ],
               },
             );
-          } else {
+          } else if (model.jobType == JobTypeEnum.SQL) {
             return getAlertSvgIcon('fql', 'Flink SQL');
+          } else if (model.jobType == JobTypeEnum.PYFLINK) {
+            return getAlertSvgIcon('py', 'Py Flink');
           }
         },
       },
