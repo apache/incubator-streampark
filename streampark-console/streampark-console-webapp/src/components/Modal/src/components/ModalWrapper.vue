@@ -67,7 +67,7 @@
 
       let stopElResizeFn: Fn = () => {};
 
-      useWindowSizeFn(setModalHeight.bind(null, false));
+      useWindowSizeFn(setModalHeight.bind(null));
 
       useMutationObserver(
         spinRef,

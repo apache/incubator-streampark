@@ -91,7 +91,7 @@
         const { record, column, index } = props;
 
         if (isFunction(compProps)) {
-          compProps = compProps({ text: val, record, column, index }) ?? {};
+          compProps = compProps({ text: val, record: record || {}, column, index }) ?? {};
         }
         const component = unref(getComponent);
         const apiSelectProps: Recordable = {};

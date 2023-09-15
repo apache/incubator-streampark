@@ -86,7 +86,7 @@ export const useSavepoint = (updateOption: Fn) => {
                 checkedValue={true}
                 unCheckedValue={false}
                 checked={nativeFormat.value}
-                onClick={(checked, e) => (nativeFormat.value = checked || false)}
+                onClick={(checked, _) => (nativeFormat.value = (checked as boolean) || false)}
               />
             </Form.Item>
           </Form>

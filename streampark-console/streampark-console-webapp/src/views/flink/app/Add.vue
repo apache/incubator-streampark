@@ -332,7 +332,6 @@
         <SettingTwoTone
           v-if="model[field]"
           class="ml-10px"
-          theme="twoTone"
           two-tone-color="#4a9ff5"
           @click="handleSQLConf(true, model)"
         />
@@ -345,11 +344,13 @@
         />
       </template>
       <template #args="{ model }">
-        <ProgramArgs
-          v-model:value="model.args"
-          :suggestions="suggestions"
-          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
-        />
+        <template v-if="model.args !== undefined">
+          <ProgramArgs
+            v-model:value="model.args"
+            :suggestions="suggestions"
+            @preview="(value) => openReviewDrawer(true, { value, suggestions })"
+          />
+        </template>
       </template>
       <template #useSysHadoopConf="{ model, field }">
         <UseSysHadoopConf v-model:hadoopConf="model[field]" />

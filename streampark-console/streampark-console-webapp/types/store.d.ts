@@ -49,7 +49,7 @@ export interface ErrorLogInfo {
 export interface UserInfo {
   userId: string | number;
   username: string;
-  loginType: string;
+  loginType?: string;
   nickName: string;
   avatar: string;
   desc?: string;
