@@ -177,43 +177,40 @@ public class ProjectBuildTask extends AbstractLogFileTask {
   }
 
   private void findTarOrJar(List<File> list, File path) {
-    for (File file : Objects.requireNonNull(path.listFiles())) {
+    for (File file : path.listFiles()) {
       // navigate to the target directory:
-      if (file.isDirectory() && "target".equals(file.getName())) {
-        // find the tar.gz file or the jar file in the target path.
-        // note: only one of the two can be selected, which cannot be satisfied at the same time.
-        File tar = null;
-        File jar = null;
-        for (File targetFile : Objects.requireNonNull(file.listFiles())) {
-          // 1) exit once the tar.gz file is found.
-          if (targetFile.getName().endsWith("tar.gz")) {
-            tar = targetFile;
-            break;
-          }
-          // 2) try look for jar files, there may be multiple jars found.
-          if (!targetFile.getName().startsWith("original-")
-              && !targetFile.getName().endsWith("-sources.jar")
-              && targetFile.getName().endsWith(".jar")) {
-            if (jar == null) {
-              jar = targetFile;
-            } else {
-              // there may be multiple jars found, in this case, select the jar with the largest and
-              // return
-              if (targetFile.length() > jar.length()) {
+      if (file.isDirectory()) {
+        if ("target".equals(file.getName())) {
+          // find the tar.gz file or the jar file in the target path.
+          // note: only one of the two can be selected, which cannot be satisfied at the same time.
+          File tar = null;
+          File jar = null;
+          for (File targetFile : file.listFiles()) {
+            // 1) exit once the tar.gz file is found.
+            if (targetFile.getName().endsWith("tar.gz")) {
+              tar = targetFile;
+              break;
+            }
+            // 2) try look for jar files, there may be multiple jars found.
+            if (!targetFile.getName().startsWith("original-")
+                && !targetFile.getName().endsWith("-sources.jar")
+                && targetFile.getName().endsWith(".jar")) {
+              if (jar == null) {
                 jar = targetFile;
+              } else {
+                if (targetFile.length() > jar.length()) {
+                  jar = targetFile;
+                }
               }
             }
           }
-        }
-        File target = tar == null ? jar : tar;
-        if (target == null) {
-          fileLogger.warn("[StreamPark] can't find tar.gz or jar in {}", file.getAbsolutePath());
+          File target = tar == null ? jar : tar;
+          if (target != null) {
+            list.add(target);
+          }
         } else {
-          list.add(target);
+          findTarOrJar(list, file);
         }
-      }
-      if (file.isDirectory()) {
-        findTarOrJar(list, file);
       }
     }
   }
