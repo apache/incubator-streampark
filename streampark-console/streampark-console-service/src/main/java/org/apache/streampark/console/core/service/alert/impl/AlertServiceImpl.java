@@ -44,6 +44,7 @@ public class AlertServiceImpl implements AlertService {
 
   @Override
   public boolean alert(Long alertConfigId, AlertTemplate alertTemplate) {
+
     if (alertConfigId == null) {
       log.warn("alertConfigId is null");
       return false;
