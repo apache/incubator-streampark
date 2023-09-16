@@ -78,5 +78,7 @@ export default {
     updateProject: '更新项目',
     deleteProject: '删除项目',
     deleteProjectMessage: '确定删除项目?',
+    httpsCredential: '通过WebURL方式进行Git连接',
+    sshCredential: '使用受密码保护的SSH密钥进行Git连接',
   },
 };

@@ -79,7 +79,7 @@
         afterItem: () =>
           h(
             'span',
-            { class: 'conf-switch' },
+            { class: 'tip-info' },
             'Note: native format savepoint is supported since flink 1.15',
           ),
         ifShow: ({ values }) => !!values.stopSavePointed,

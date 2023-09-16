@@ -375,6 +375,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Override
   @Transactional(rollbackFor = {Exception.class})
   public void start(Application appParam, boolean auto) throws Exception {
+    // 1) check application
     final Application application = getById(appParam.getId());
     Utils.notNull(application);
     if (!application.isCanBeStart()) {
@@ -399,6 +400,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       appParam.setSavePointed(true);
       application.setRestartCount(application.getRestartCount() + 1);
     }
+
+    // 2) update app state to starting...
+    starting(application);
 
     String jobId = new JobID().toHexString();
     ApplicationLog applicationLog = new ApplicationLog();
@@ -557,6 +561,12 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
               applicationLogService.save(applicationLog);
               startFutureMap.remove(application.getId());
             });
+  }
+
+  private void starting(Application application) {
+    application.setState(FlinkAppState.STARTING.getValue());
+    application.setOptionTime(new Date());
+    updateById(application);
   }
 
   private Tuple2<String, String> getUserJarAndAppConf(FlinkEnv flinkEnv, Application application) {
