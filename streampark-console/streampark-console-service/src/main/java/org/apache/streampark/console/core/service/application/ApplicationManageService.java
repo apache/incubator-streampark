@@ -150,5 +150,10 @@ public interface ApplicationManageService extends IService<Application> {
   List<Application> getByTeamIdAndExecutionModes(
       Long teamId, Collection<ExecutionMode> executionModes);
 
+  /**
+   * Retrieves a list of applications be probing or need to probe.
+   *
+   * @return a list of applications be probing or need to probe.
+   */
   List<Application> getProbeApps();
 }
