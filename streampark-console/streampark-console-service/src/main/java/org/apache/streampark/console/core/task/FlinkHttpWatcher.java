@@ -91,8 +91,6 @@ public class FlinkHttpWatcher {
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
-  @Autowired private AutoHealthProbingTask autoHealthProbingTask;
-
   // track interval  every 5 seconds
   public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
 
