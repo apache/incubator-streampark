@@ -81,19 +81,19 @@ public class MavenConfig {
    */
   public void updateConfig() {
 
-    if (StringUtils.isNotEmpty(mvnSettings)) {
+    if (StringUtils.isNotBlank(mvnSettings)) {
       InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), mvnSettings);
     }
 
-    if (StringUtils.isNotEmpty(mvnRepository)) {
+    if (StringUtils.isNotBlank(mvnRepository)) {
       InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
     }
 
-    if (StringUtils.isNotEmpty(mvnAuthUser)) {
+    if (StringUtils.isNotBlank(mvnAuthUser)) {
       InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
     }
 
-    if (StringUtils.isNotEmpty(mvnAuthPassword)) {
+    if (StringUtils.isNotBlank(mvnAuthPassword)) {
       InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
     }
   }

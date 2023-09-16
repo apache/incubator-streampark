@@ -78,8 +78,8 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
     long start = System.nanoTime();
     if (value instanceof DorisSinkRowDataWithMeta) {
       DorisSinkRowDataWithMeta data = (DorisSinkRowDataWithMeta) value;
-      if (StringUtils.isEmpty(data.getDatabase())
-          || StringUtils.isEmpty(data.getTable())
+      if (StringUtils.isBlank(data.getDatabase())
+          || StringUtils.isBlank(data.getTable())
           || null == data.getDataRows()) {
         LOGGER.warn(
             String.format(
@@ -89,7 +89,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
       }
       dorisSinkWriter.writeRecords(data.getDatabase(), data.getTable(), data.getDataRows());
     } else {
-      if (StringUtils.isEmpty(dorisConfig.database()) || StringUtils.isEmpty(dorisConfig.table())) {
+      if (StringUtils.isBlank(dorisConfig.database()) || StringUtils.isBlank(dorisConfig.table())) {
         throw new RuntimeException(
             " database|table  is empty ,please check your config or create DorisSinkRowDataWithMeta instance");
       }

@@ -187,7 +187,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
    */
   @Override
   public String replaceVariable(Long teamId, String mixed) {
-    if (StringUtils.isEmpty(mixed)) {
+    if (StringUtils.isBlank(mixed)) {
       return mixed;
     }
     List<Variable> variables = findByTeamId(teamId);
@@ -203,7 +203,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
       String placeholder = matcher.group();
       String variableCode = getCodeFromPlaceholder(placeholder);
       String variableValue = variableMap.get(variableCode);
-      if (StringUtils.isNotEmpty(variableValue)) {
+      if (StringUtils.isNotBlank(variableValue)) {
         restore = restore.replace(placeholder, variableValue);
       }
     }
@@ -249,7 +249,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
    * @return If mixed can match the variableCode, return true, otherwise return false
    */
   private boolean isDepend(String variableCode, String mixed) {
-    if (StringUtils.isEmpty(mixed)) {
+    if (StringUtils.isBlank(mixed)) {
       return false;
     }
     String placeholder = String.format("%s%s%s", PLACEHOLDER_START, variableCode, PLACEHOLDER_END);

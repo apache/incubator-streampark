@@ -659,7 +659,7 @@ public class FlinkHttpWatcher {
       if (application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)
           || application.getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
         String reqURL;
-        if (StringUtils.isEmpty(application.getJobManagerUrl())) {
+        if (StringUtils.isBlank(application.getJobManagerUrl())) {
           String format = "proxy/%s/overview";
           reqURL = String.format(format, appId);
         } else {
@@ -677,7 +677,7 @@ public class FlinkHttpWatcher {
     ExecutionMode execMode = application.getExecutionModeEnum();
     if (ExecutionMode.isYarnMode(execMode)) {
       String reqURL;
-      if (StringUtils.isEmpty(application.getJobManagerUrl())) {
+      if (StringUtils.isBlank(application.getJobManagerUrl())) {
         String format = "proxy/%s/" + flinkUrl;
         reqURL = String.format(format, application.getAppId());
       } else {
@@ -711,7 +711,7 @@ public class FlinkHttpWatcher {
     ExecutionMode execMode = application.getExecutionModeEnum();
     if (ExecutionMode.isYarnMode(execMode)) {
       String reqURL;
-      if (StringUtils.isEmpty(application.getJobManagerUrl())) {
+      if (StringUtils.isBlank(application.getJobManagerUrl())) {
         String format = "proxy/%s/" + flinkUrl;
         reqURL = String.format(format, application.getAppId(), application.getJobId());
       } else {

@@ -427,7 +427,7 @@ trait FlinkClientTrait extends Logger {
     val programArgs = new ArrayBuffer[String]()
     val args = submitRequest.args
 
-    if (StringUtils.isNotEmpty(args)) {
+    if (StringUtils.isNotBlank(args)) {
       val multiChar = "\""
       val array = args.split("\\s+")
       if (!array.exists(_.startsWith(multiChar))) {
@@ -585,7 +585,7 @@ trait FlinkClientTrait extends Logger {
   private def tryGetSavepointPathIfNeed(request: SavepointRequestTrait): String = {
     if (!request.withSavepoint) null
     else {
-      if (StringUtils.isNotEmpty(request.savepointPath)) {
+      if (StringUtils.isNotBlank(request.savepointPath)) {
         request.savepointPath
       } else {
         val configDir = getOptionFromDefaultFlinkConfig[String](
@@ -600,7 +600,7 @@ trait FlinkClientTrait extends Logger {
             }
         )
 
-        if (StringUtils.isEmpty(configDir)) {
+        if (StringUtils.isBlank(configDir)) {
           throw new FlinkException(
             s"[StreamPark] executionMode: ${request.executionMode.getName}, savePoint path is null or invalid.")
         } else configDir

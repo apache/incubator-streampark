@@ -79,7 +79,7 @@ public class PassportController {
       @NotBlank(message = "{required}") String loginType)
       throws Exception {
 
-    if (StringUtils.isEmpty(username)) {
+    if (StringUtils.isBlank(username)) {
       return RestResponse.success().put(RestResponse.CODE_KEY, 0);
     }
     User user = authenticator.authenticate(username, password, loginType);

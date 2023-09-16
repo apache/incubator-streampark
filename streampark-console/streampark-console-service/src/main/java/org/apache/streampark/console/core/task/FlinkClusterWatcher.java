@@ -216,7 +216,7 @@ public class FlinkClusterWatcher {
     String address = flinkCluster.getAddress();
     String jobManagerUrl = flinkCluster.getJobManagerUrl();
     String flinkUrl =
-        StringUtils.isEmpty(jobManagerUrl)
+        StringUtils.isBlank(jobManagerUrl)
             ? address.concat("/overview")
             : jobManagerUrl.concat("/overview");
     try {

@@ -53,6 +53,6 @@ public class MavenPom {
         groupId,
         artifactId,
         version,
-        StringUtils.isEmpty(classifier) ? "" : ":".concat(classifier));
+        StringUtils.isBlank(classifier) ? "" : ":".concat(classifier));
   }
 }

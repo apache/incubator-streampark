@@ -272,7 +272,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private String getFinalSavepointDir(@Nullable String savepointPath, Application application) {
     String result = savepointPath;
-    if (StringUtils.isEmpty(savepointPath)) {
+    if (StringUtils.isBlank(savepointPath)) {
       try {
         result = this.getSavePointPath(application);
       } catch (Exception e) {
@@ -388,7 +388,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   private Optional<Integer> tryGetChkNumRetainedFromDynamicProps(String dynamicProps) {
     String rawCfgValue =
         extractDynamicPropertiesAsJava(dynamicProps).get(MAX_RETAINED_CHECKPOINTS.key());
-    if (StringUtils.isEmpty(rawCfgValue)) {
+    if (StringUtils.isBlank(rawCfgValue)) {
       return Optional.empty();
     }
     try {
@@ -410,7 +410,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       @Nonnull FlinkEnv flinkEnv, @Nonnull Application application) {
     String flinkConfNumRetained =
         flinkEnv.convertFlinkYamlAsMap().get(MAX_RETAINED_CHECKPOINTS.key());
-    if (StringUtils.isEmpty(flinkConfNumRetained)) {
+    if (StringUtils.isBlank(flinkConfNumRetained)) {
       log.info(
           "The application: {} is not set {} in dynamicProperties or value is invalid, and flink-conf.yaml is the same problem of flink env: {}, default value: {} will be use.",
           application.getJobName(),

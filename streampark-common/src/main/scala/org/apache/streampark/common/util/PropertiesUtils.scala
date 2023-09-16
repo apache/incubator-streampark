@@ -278,7 +278,7 @@ object PropertiesUtils extends Logger {
 
   /** extract flink configuration from application.properties */
   @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
-    if (StringUtils.isEmpty(properties)) Map.empty[String, String]
+    if (StringUtils.isBlank(properties)) Map.empty[String, String]
     else {
       val map = mutable.Map[String, String]()
       val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
