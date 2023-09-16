@@ -35,10 +35,7 @@ public enum OptionState {
   STARTING(3),
 
   /** Application which is currently action: savepointing. */
-  SAVEPOINTING(4),
-
-  /** Application which is currently action: probe. */
-  PROBING(5);
+  SAVEPOINTING(4);
 
   private final int value;
 
