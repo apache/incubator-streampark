@@ -116,7 +116,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     // 2) Check target-cluster is already exists
     String clusterId = cluster.getClusterId();
-    if (StringUtils.isNotEmpty(clusterId) && this.existsByClusterId(clusterId, cluster.getId())) {
+    if (StringUtils.isNotBlank(clusterId) && this.existsByClusterId(clusterId, cluster.getId())) {
       result.setMsg("The clusterId " + clusterId + " is already exists,please check!");
       result.setStatus(2);
       return result;

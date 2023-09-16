@@ -163,7 +163,7 @@ public class FlinkCluster implements Serializable {
     String json =
         HttpClientUtils.httpGetRequest(
             restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
-    if (StringUtils.isEmpty(json)) {
+    if (StringUtils.isBlank(json)) {
       return Collections.emptyMap();
     }
     List<Map<String, String>> confList =

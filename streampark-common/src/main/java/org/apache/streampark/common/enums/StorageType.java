@@ -40,7 +40,7 @@ public enum StorageType implements Serializable {
   }
 
   public static StorageType of(String identifier) {
-    if (StringUtils.isEmpty(identifier)) {
+    if (StringUtils.isBlank(identifier)) {
       return LFS;
     }
     for (StorageType type : values()) {

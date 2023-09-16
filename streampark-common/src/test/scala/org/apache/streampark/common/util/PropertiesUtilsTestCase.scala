@@ -31,7 +31,7 @@ class PropertiesUtilsTestCase {
       "--c d\r\n" +
       "--including-tables \"BASE_CARD_ETPS|BASE_CHECKED_STAT\"\n"
     val programArgs = new ArrayBuffer[String]()
-    if (StringUtils.isNotEmpty(argsStr)) {
+    if (StringUtils.isNotBlank(argsStr)) {
       val multiChar = "\""
       val array = argsStr.split("\\s+")
       if (!array.exists(_.startsWith(multiChar))) {

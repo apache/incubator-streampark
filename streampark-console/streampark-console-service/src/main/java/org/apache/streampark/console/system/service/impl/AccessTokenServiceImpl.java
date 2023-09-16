@@ -62,7 +62,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
       return RestResponse.success().put(RestResponse.CODE_KEY, 0).message("user not available");
     }
 
-    if (StringUtils.isEmpty(expireTime)) {
+    if (StringUtils.isBlank(expireTime)) {
       expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
     }
     Long ttl = DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault());

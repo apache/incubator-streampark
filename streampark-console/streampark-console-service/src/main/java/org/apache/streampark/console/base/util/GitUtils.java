@@ -82,7 +82,7 @@ public class GitUtils {
     GitCredential gitCredential = GitCredential.of(project.getGitCredential());
     switch (gitCredential) {
       case HTTPS:
-        if (!StringUtils.isAllEmpty(project.getUserName(), project.getPassword())) {
+        if (!StringUtils.isAllBlank(project.getUserName(), project.getPassword())) {
           UsernamePasswordCredentialsProvider credentialsProvider =
               new UsernamePasswordCredentialsProvider(project.getUserName(), project.getPassword());
           transportCommand.setCredentialsProvider(credentialsProvider);
@@ -115,7 +115,7 @@ public class GitUtils {
                       if (prvkeyPath == null) {
                         return jSch;
                       }
-                      if (StringUtils.isEmpty(project.getPassword())) {
+                      if (StringUtils.isBlank(project.getPassword())) {
                         jSch.addIdentity(prvkeyPath);
                       } else {
                         jSch.addIdentity(prvkeyPath, project.getPassword());

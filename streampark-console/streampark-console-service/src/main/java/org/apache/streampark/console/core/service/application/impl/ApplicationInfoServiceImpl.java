@@ -512,7 +512,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   private Boolean checkJobName(String jobName) {
-    if (!StringUtils.isEmpty(jobName.trim())) {
+    if (!StringUtils.isBlank(jobName.trim())) {
       return JOB_NAME_PATTERN.matcher(jobName).matches()
           && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
     }

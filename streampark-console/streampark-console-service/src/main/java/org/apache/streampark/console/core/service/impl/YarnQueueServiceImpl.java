@@ -93,7 +93,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
     ResponseResult<String> responseResult = new ResponseResult<>();
 
-    if (StringUtils.isEmpty(yarnQueue.getQueueLabel())) {
+    if (StringUtils.isBlank(yarnQueue.getQueueLabel())) {
       responseResult.setStatus(3);
       responseResult.setMsg(QUEUE_EMPTY_HINT);
       return responseResult;
@@ -184,7 +184,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
   @Override
   public boolean isDefaultQueue(String queueLabel) {
-    return StringUtils.equals(DEFAULT_QUEUE, queueLabel) || StringUtils.isEmpty(queueLabel);
+    return StringUtils.equals(DEFAULT_QUEUE, queueLabel) || StringUtils.isBlank(queueLabel);
   }
 
   @Override
