@@ -71,7 +71,7 @@
   <PageWrapper contentFullHeight contentBackground contentClass="p-26px">
     <BasicForm
       @register="registerForm"
-      @submit="(values:Recordable)=>handleSubmit(values,handleCreateAction)"
+      @submit="(values: Recordable) => handleSubmit(values, handleCreateAction)"
     >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">

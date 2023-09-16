@@ -461,7 +461,7 @@ export const renderSqlHistory = (
             )}
 
             <span style="color: darkgrey">
-                <Icon icon="ant-design:clock-circle-outlined" />
+              <Icon icon="ant-design:clock-circle-outlined" />
               {ver.createTime}
             </span>
           </div>
