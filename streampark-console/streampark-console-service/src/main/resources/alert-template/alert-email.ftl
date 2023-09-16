@@ -856,7 +856,7 @@
                                                                         <td colspan="2">
                                                                             <br>
                                                                             <p style="margin: 0 0 1em;">
-                                                                                Dear StreamPark user:${mail.user}
+                                                                                Dear StreamPark user: ${mail.user}
                                                                             </p>
                                                                             <p style="margin: 0 1em 1em;">
                                                                                 This is the latest auto probe result

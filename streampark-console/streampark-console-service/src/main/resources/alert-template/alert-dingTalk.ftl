@@ -9,7 +9,7 @@
 > ** Oops! I'm sorry to inform you that something wrong with your app **
 </#if>
 <#if  type == 4 >
-### **Dear StreamPark User:${user}**
+### **Dear StreamPark User: ${user}**
 
 > ** This is the latest auto probe result **
 </#if>

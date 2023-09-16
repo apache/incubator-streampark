@@ -30,7 +30,7 @@
 <#if type == 4>
     {
       "tag": "markdown",
-      "content": "**Dear StreamPark user:${user}**"
+      "content": "**Dear StreamPark user: ${user}**"
     },
     {
       "tag": "note",
