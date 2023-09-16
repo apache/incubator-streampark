@@ -836,18 +836,35 @@
                                                                     border="0px"
                                                                     width="550px">
                                                                 <tbody>
-                                                                <tr>
-                                                                    <td colspan="2">
-                                                                        <br>
-                                                                        <p style="margin: 0 0 1em;">
-                                                                            Dear StreamPark user:
-                                                                        </p>
-                                                                        <p style="margin: 0 1em 1em;">
-                                                                            Oops! I'm sorry to inform you that something wrong with your app
-                                                                        </p>
-                                                                        <br>
-                                                                    </td>
-                                                                </tr>
+                                                                <#if mail.type == 1 || mail.type == 2 || mail.type == 3>
+                                                                    <tr>
+                                                                        <td colspan="2">
+                                                                            <br>
+                                                                            <p style="margin: 0 0 1em;">
+                                                                                Dear StreamPark user:
+                                                                            </p>
+                                                                            <p style="margin: 0 1em 1em;">
+                                                                                Oops! I'm sorry to inform you that something wrong with your app
+                                                                            </p>
+                                                                            <br>
+                                                                        </td>
+                                                                    </tr>
+                                                                </#if>
+
+                                                                <#if mail.type == 4>
+                                                                    <tr>
+                                                                        <td colspan="2">
+                                                                            <br>
+                                                                            <p style="margin: 0 0 1em;">
+                                                                                Dear StreamPark user: ${mail.user}
+                                                                            </p>
+                                                                            <p style="margin: 0 1em 1em;">
+                                                                                This is the latest auto probe result
+                                                                            </p>
+                                                                            <br>
+                                                                        </td>
+                                                                    </tr>
+                                                                </#if>
 
                                                                 <#if  mail.type == 1 >
                                                                     <tr>
@@ -1028,6 +1045,41 @@
                                                                         </td>
                                                                     </tr>
 
+                                                                </#if>
+
+                                                                <#if  mail.type == 4 >
+                                                                    <tr>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Probe Jobs
+                                                                        </td>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5);border-right-style:solid; border-right-width: 1px; border-right-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.probeJobs}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Failed Jobs
+                                                                        </td>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5);border-right-style:solid; border-right-width: 1px; border-right-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            <span style="font-size: 1.25em;font-weight: bold;color: RED;">${mail.failedJobs}</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Lost Jobs
+                                                                        </td>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5);border-right-style:solid; border-right-width: 1px; border-right-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.lostJobs}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            Cancelled Jobs
+                                                                        </td>
+                                                                        <td style="border-left-style:solid; border-left-width: 1px; border-left-color: rgba(169,169,169,.5);border-right-style:solid; border-right-width: 1px; border-right-color: rgba(169,169,169,.5); border-top-style:solid; border-top-width: 1px; border-top-color: rgba(169,169,169,.5); padding: 1em">
+                                                                            ${mail.cancelledJobs}
+                                                                        </td>
+                                                                    </tr>
                                                                 </#if>
 
                                                                 <tr>

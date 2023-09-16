@@ -1,11 +1,17 @@
 > Apache StreamPark , Make stream processing easier!
 
 # ${subject}
-
+<#if  type == 1 || type == 2 || type == 3>
 ### **Dear StreamPark user:**
 
 `Oops! I'm sorry to inform you that something wrong with your app`
-<#if  type == 1 || type ==2 >
+</#if>
+<#if  type == 4>
+### **Dear StreamPark user: ${user}**
+
+`This is the latest auto probe result`
+</#if>
+<#if  type == 1 || type == 2 >
 -   **Job Name：${jobName}**
 </#if>
 <#if  type == 3 >
@@ -34,6 +40,12 @@
 -   **Duration：${duration}**
 -   **All Jobs：${allJobs}**
 -   **About Affected Jobs：${affectedJobs}**
+</#if>
+<#if  type == 4 >
+-   **Probe Jobs：${probeJobs}**
+-   **Failed Jobs：${failedJobs}**
+-   **Lost Jobs：${lostJobs}**
+-   **Cancelled Jobs：${cancelledJobs}**
 </#if>
 
 > Best Wishes!

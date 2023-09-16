@@ -170,6 +170,7 @@ public class FlinkHttpWatcher {
         applicationManageService.list(
             new LambdaQueryWrapper<Application>()
                 .eq(Application::getTracking, 1)
+                .ne(Application::getState, FlinkAppState.LOST.getValue())
                 .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode()));
     applications.forEach(
         (app) -> {
@@ -801,6 +802,10 @@ public class FlinkHttpWatcher {
    * @param appState application state
    */
   private void doAlert(Application app, FlinkAppState appState) {
+    if (app.getProbing()) {
+      log.info("application with id {} is probing, don't send alert", app.getId());
+      return;
+    }
     switch (app.getExecutionModeEnum()) {
       case YARN_APPLICATION:
       case YARN_PER_JOB:

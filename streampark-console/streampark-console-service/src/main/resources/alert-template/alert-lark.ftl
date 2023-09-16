@@ -12,6 +12,7 @@
         }
       ]
     },
+<#if type == 1 || type == 2 || type == 3>
     {
       "tag": "markdown",
       "content": "**Dear StreamPark user:**"
@@ -25,6 +26,22 @@
         }
       ]
     },
+</#if>
+<#if type == 4>
+    {
+      "tag": "markdown",
+      "content": "**Dear StreamPark user: ${user}**"
+    },
+    {
+      "tag": "note",
+      "elements": [
+        {
+          "tag": "plain_text",
+          "content": "This is the latest auto probe result"
+        }
+      ]
+    },
+</#if>
     {
       "fields": [
 <#if type == 1 || type == 2>
@@ -163,6 +180,36 @@
             "content": "**About Affected Jobs：${affectedJobs}**",
             "tag": "lark_md"
           }
+       }
+</#if>
+<#if  type == 4 >
+       {
+         "is_short": false,
+         "text": {
+           "content": "**Probe Jobs：${probeJobs}**",
+           "tag": "lark_md"
+         }
+       },
+       {
+         "is_short": false,
+         "text": {
+           "content": "**Failed Jobs：${failedJobs}**",
+           "tag": "lark_md"
+         }
+       },
+       {
+         "is_short": false,
+         "text": {
+           "content": "**Lost Jobs：${lostJobs}**",
+           "tag": "lark_md"
+         }
+       },
+       {
+         "is_short": false,
+         "text": {
+           "content": "**Cancelled Jobs：${cancelledJobs}**",
+           "tag": "lark_md"
+         }
        }
 </#if>
       ],

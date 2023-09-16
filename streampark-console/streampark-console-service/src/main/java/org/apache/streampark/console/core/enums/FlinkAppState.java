@@ -99,6 +99,9 @@ public enum FlinkAppState {
   /** Job SUCCEEDED on yarn. */
   SUCCEEDED(20),
 
+  /** Job auto Health probe */
+  PROBING(21),
+
   /** Has killed in Yarn. */
   KILLED(-9);
 
@@ -135,6 +138,11 @@ public enum FlinkAppState {
         || FlinkAppState.SUCCEEDED == flinkAppState
         || FlinkAppState.LOST == flinkAppState
         || FlinkAppState.TERMINATED == flinkAppState;
+  }
+
+  public static boolean isLost(Integer appState) {
+    FlinkAppState flinkAppState = FlinkAppState.of(appState);
+    return FlinkAppState.LOST == flinkAppState;
   }
 
   /**

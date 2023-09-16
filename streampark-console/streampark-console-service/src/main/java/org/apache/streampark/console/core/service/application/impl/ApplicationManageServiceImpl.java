@@ -686,6 +686,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                         .collect(Collectors.toSet())));
   }
 
+  public List<Application> getProbeApps() {
+    return this.baseMapper.getProbeApps();
+  }
+
   @Override
   public boolean checkBuildAndUpdate(Application appParam) {
     boolean build = appParam.getBuild();

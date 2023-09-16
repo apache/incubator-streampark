@@ -43,6 +43,9 @@ unique key `un_team_vcode_inx` (`team_id`,`resource_name`) using btree
 alter table `t_flink_sql`
     add column `team_resource` varchar(64) default null;
 
+alter table `t_flink_app`
+    add column `probing` tinyint default 0;
+
 alter table `t_flink_cluster`
     add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`,
     add column `start_time` datetime default null comment 'start time',

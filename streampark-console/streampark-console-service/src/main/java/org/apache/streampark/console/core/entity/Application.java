@@ -211,6 +211,8 @@ public class Application implements Serializable {
 
   private String tags;
 
+  private Boolean probing = false;
+
   /** running job */
   private transient JobsOverview.Task overview;
 
@@ -308,7 +310,6 @@ public class Application implements Serializable {
       case CANCELED:
       case TERMINATED:
       case POS_TERMINATED:
-      case LOST:
         return 0;
       default:
         return 1;

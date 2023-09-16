@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.task;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
@@ -98,6 +99,7 @@ public class FlinkK8sWatcherWrapper {
     final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
     queryWrapper
         .eq(Application::getTracking, 1)
+        .ne(Application::getState, FlinkAppState.LOST.getValue())
         .in(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
 
     List<Application> k8sApplication = applicationManageService.list(queryWrapper);

@@ -71,6 +71,11 @@ const stateMap = {
     class: 'status-processing-initializing',
   },
   [AppStateEnum.TERMINATED]: { color: '#8E50FF', title: 'TERMINATED' },
+  [AppStateEnum.PROBING]: {
+    color: '#2febc9',
+    title: 'PROBING',
+    class: 'status-processing-probing',
+  },
 };
 /*  option state map*/
 const optionStateMap = {
