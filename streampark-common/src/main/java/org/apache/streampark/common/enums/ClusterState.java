@@ -46,7 +46,7 @@ public enum ClusterState implements Serializable {
   /** cluster failed */
   FAILED(7),
 
-  /** cluster killed*/
+  /** cluster killed */
   KILLED(8);
 
   private final Integer value;

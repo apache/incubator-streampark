@@ -22,7 +22,9 @@ import java.io.Serializable;
 /** Flink consistency semantics */
 public enum Semantic implements Serializable {
 
-  /** Ensure that the counting results obtained after a fault are consistent with the correct values. */
+  /**
+   * Ensure that the counting results obtained after a fault are consistent with the correct values.
+   */
   EXACTLY_ONCE,
 
   /** The program may calculate more after a malfunction, but it will never calculate less. */
