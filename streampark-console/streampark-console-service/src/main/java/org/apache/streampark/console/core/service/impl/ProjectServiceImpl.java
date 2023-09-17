@@ -38,7 +38,7 @@ import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 
 import org.apache.flink.configuration.MemorySize;
@@ -82,7 +82,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Autowired private ApplicationManageService applicationManageService;
 
-  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
@@ -207,7 +207,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
               if (buildState == BuildState.SUCCESSFUL) {
                 baseMapper.updateBuildTime(id);
               }
-              flinkHttpWatcher.init();
+              flinkAppHttpWatcher.init();
             },
             fileLogger -> {
               List<Application> applications =
@@ -222,7 +222,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     app.setBuild(true);
                     this.applicationManageService.updateRelease(app);
                   });
-              flinkHttpWatcher.init();
+              flinkAppHttpWatcher.init();
             });
     CompletableFuture<Void> buildTask =
         CompletableFuture.runAsync(projectBuildTask, executorService);

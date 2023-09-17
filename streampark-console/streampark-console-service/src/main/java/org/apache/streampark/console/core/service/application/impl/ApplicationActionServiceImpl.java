@@ -65,7 +65,7 @@ import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
@@ -227,7 +227,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public void cancel(Application appParam) throws Exception {
-    FlinkHttpWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
+    FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
     Application application = getById(appParam.getId());
     application.setState(FlinkAppState.CANCELLING.getValue());
 
@@ -239,7 +239,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     applicationLog.setYarnAppId(application.getClusterId());
 
     if (appParam.getSavePointed()) {
-      FlinkHttpWatcher.addSavepoint(application.getId());
+      FlinkAppHttpWatcher.addSavepoint(application.getId());
       application.setOptionState(OptionState.SAVEPOINTING.getValue());
     } else {
       application.setOptionState(OptionState.CANCELLING.getValue());
@@ -250,7 +250,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     Long userId = commonService.getUserId();
     if (!application.getUserId().equals(userId)) {
-      FlinkHttpWatcher.addCanceledApp(application.getId(), userId);
+      FlinkAppHttpWatcher.addCanceledApp(application.getId(), userId);
     }
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
@@ -357,7 +357,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                   k8SFlinkTrackMonitor.unWatching(id);
                   k8SFlinkTrackMonitor.doWatching(id);
                 } else {
-                  FlinkHttpWatcher.unWatching(application.getId());
+                  FlinkAppHttpWatcher.unWatching(application.getId());
                 }
 
                 String exception = Utils.stringifyException(e);
@@ -508,8 +508,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
               if (isKubernetesApp(application)) {
                 k8SFlinkTrackMonitor.doWatching(toTrackId(application));
               } else {
-                FlinkHttpWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
-                FlinkHttpWatcher.doWatching(application);
+                FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
+                FlinkAppHttpWatcher.doWatching(application);
               }
 
               applicationLog.setSuccess(true);
@@ -530,7 +530,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 if (isKubernetesApp(app)) {
                   k8SFlinkTrackMonitor.unWatching(toTrackId(app));
                 } else {
-                  FlinkHttpWatcher.unWatching(appParam.getId());
+                  FlinkAppHttpWatcher.unWatching(appParam.getId());
                 }
               }
             })
@@ -750,7 +750,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       k8SFlinkTrackMonitor.unWatching(id);
       k8SFlinkTrackMonitor.doWatching(id);
     } else {
-      FlinkHttpWatcher.unWatching(application.getId());
+      FlinkAppHttpWatcher.unWatching(application.getId());
     }
   }
 

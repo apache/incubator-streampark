@@ -265,9 +265,9 @@
                 else u.nick_name
                 end as nick_name
         from t_flink_app t
-                 inner join t_user u
-                            on t.user_id = u.user_id
-        where (t.tracking = 1 and t.state = 13) or t.probing = 1
+        inner join t_user u
+        on t.user_id = u.user_id
+        where t.probing = 1 or (t.tracking = 1 and t.state = 13)
     </select>
 
     <update id="mapping" parameterType="org.apache.streampark.console.core.entity.Application">

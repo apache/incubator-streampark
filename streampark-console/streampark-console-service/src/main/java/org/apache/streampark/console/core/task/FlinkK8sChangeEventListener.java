@@ -72,7 +72,7 @@ public class FlinkK8sChangeEventListener {
 
   @Lazy @Autowired private AlertService alertService;
 
-  @Lazy @Autowired private CheckpointProcessor checkpointProcessor;
+  @Lazy @Autowired private FlinkCheckpointProcessor checkpointProcessor;
 
   private final ExecutorService executor =
       new ThreadPoolExecutor(
@@ -104,7 +104,7 @@ public class FlinkK8sChangeEventListener {
     applicationInfoService.persistMetrics(app);
 
     // email alerts when necessary
-    FlinkAppState state = FlinkAppState.of(app.getState());
+    FlinkAppState state = app.getStateEnum();
     if (FlinkAppState.FAILED.equals(state)
         || FlinkAppState.LOST.equals(state)
         || FlinkAppState.RESTARTING.equals(state)
@@ -175,7 +175,7 @@ public class FlinkK8sChangeEventListener {
     // infer the final flink job state
     Enumeration.Value state =
         FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-            jobStatus.jobState(), toK8sFlinkJobState(FlinkAppState.of(app.getState())));
+            jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
 
     // corrective start-time / end-time / duration
     long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;

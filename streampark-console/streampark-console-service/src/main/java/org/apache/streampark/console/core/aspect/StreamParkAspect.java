@@ -28,7 +28,7 @@ import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
@@ -58,7 +58,7 @@ import java.util.Objects;
 @Aspect
 public class StreamParkAspect {
 
-  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
   @Autowired private CommonService commonService;
   @Autowired private MemberService memberService;
   @Autowired private ApplicationManageService applicationManageService;
@@ -93,7 +93,7 @@ public class StreamParkAspect {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
     log.debug("appUpdated aspect, method:{}", methodSignature.getName());
     Object target = joinPoint.proceed();
-    flinkHttpWatcher.init();
+    flinkAppHttpWatcher.init();
     return target;
   }
 
