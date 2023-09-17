@@ -21,8 +21,10 @@ import java.io.Serializable;
 
 /** classloader.resolve-order */
 public enum ResolveOrder implements Serializable {
+
   /** parent-first */
   PARENT_FIRST("parent-first", 0),
+
   /** child-first */
   CHILD_FIRST("child-first", 1);
 

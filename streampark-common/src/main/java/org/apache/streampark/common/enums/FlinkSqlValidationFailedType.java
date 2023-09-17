@@ -20,14 +20,19 @@ package org.apache.streampark.common.enums;
 import java.io.Serializable;
 
 public enum FlinkSqlValidationFailedType implements Serializable {
+
   /** Basic test failed (such as null, etc.) */
   VERIFY_FAILED(1),
+
   /** syntax error */
   SYNTAX_ERROR(2),
+
   /** unsupported dialect */
   UNSUPPORTED_DIALECT(3),
+
   /** unsupported sql command */
   UNSUPPORTED_SQL(4),
+
   /** Not at the end of ";" */
   ENDS_WITH(5);
 

@@ -20,12 +20,16 @@ package org.apache.streampark.common.enums;
 import java.io.Serializable;
 
 public enum ApplicationType implements Serializable {
+
   /** StreamPark Flink */
   STREAMPARK_FLINK(1, "StreamPark Flink"),
+
   /** Apache Flink */
   APACHE_FLINK(2, "Apache Flink"),
+
   /** StreamPark Spark */
   STREAMPARK_SPARK(3, "StreamPark Spark"),
+
   /** Apache Spark */
   APACHE_SPARK(4, "Apache Spark");
 

@@ -21,19 +21,32 @@ import java.io.Serializable;
 
 /** @since 1.2.3 */
 public enum ClusterState implements Serializable {
+
   /** The cluster was just created but not started */
   CREATED(0),
+
   /** cluster started */
   RUNNING(1),
+
   /** cluster stopped */
   CANCELED(2),
+
   /** cluster lost */
   LOST(3),
+
   /** cluster unknown */
   UNKNOWN(4),
+
+  /** cluster starting */
   STARTING(5),
+
+  /** cluster cancelling */
   CANCELLING(6),
+
+  /** cluster failed */
   FAILED(7),
+
+  /** cluster killed*/
   KILLED(8);
 
   private final Integer value;
