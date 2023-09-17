@@ -78,9 +78,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
               jar => {
                 val lfs: FsOperator = FsOperator.lfs
                 val lib = request.workspace.concat("/lib")
-                if (!lfs.exists(lib)) {
-                  lfs.mkdirs(lib)
-                }
+                lfs.mkdirsIfNotExists(lib)
                 val originFile = new File(jar)
                 if (originFile.isFile) {
                   lfs.copy(originFile.getAbsolutePath, lib)
