@@ -29,7 +29,7 @@ import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.FlinkClusterServiceImpl;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.testcontainer.flink.FlinkStandaloneSessionCluster;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -45,7 +45,7 @@ import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.streampark.console.core.task.FlinkHttpWatcher.WATCHING_INTERVAL;
+import static org.apache.streampark.console.core.task.FlinkAppHttpWatcher.WATCHING_INTERVAL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -70,7 +70,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
 
   @Autowired private FlinkSqlService sqlService;
 
-  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   @BeforeAll
   static void setup() {
@@ -145,7 +145,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
         CompletableFuture.supplyAsync(
             () -> {
               while (true) {
-                if (flinkHttpWatcher.tryQueryFlinkAppState(application.getId())
+                if (flinkAppHttpWatcher.tryQueryFlinkAppState(application.getId())
                     == FlinkAppState.RUNNING) {
                   break;
                 }

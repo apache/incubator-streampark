@@ -49,8 +49,6 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nonnull;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
@@ -58,8 +56,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import static org.apache.streampark.console.core.enums.FlinkAppState.of;
 
 @Data
 @TableName("t_flink_app")
@@ -275,8 +271,7 @@ public class Application implements Serializable {
 
   public void setState(Integer state) {
     this.state = state;
-    FlinkAppState appState = of(this.state);
-    this.tracking = shouldTracking(appState);
+    this.tracking = shouldTracking() ? 1 : 0;
   }
 
   public void setYarnQueueByHotParams() {
@@ -301,8 +296,8 @@ public class Application implements Serializable {
    *
    * @return 1: need to be tracked | 0: no need to be tracked.
    */
-  public static Integer shouldTracking(@Nonnull FlinkAppState state) {
-    switch (state) {
+  public Boolean shouldTracking() {
+    switch (getStateEnum()) {
       case ADDED:
       case CREATED:
       case FINISHED:
@@ -310,9 +305,9 @@ public class Application implements Serializable {
       case CANCELED:
       case TERMINATED:
       case POS_TERMINATED:
-        return 0;
+        return false;
       default:
-        return 1;
+        return true;
     }
   }
 
@@ -322,8 +317,7 @@ public class Application implements Serializable {
    * @return true: can start | false: can not start.
    */
   public boolean isCanBeStart() {
-    FlinkAppState state = FlinkAppState.of(getState());
-    switch (state) {
+    switch (getStateEnum()) {
       case ADDED:
       case CREATED:
       case FAILED:
@@ -340,10 +334,6 @@ public class Application implements Serializable {
     }
   }
 
-  public boolean shouldBeTrack() {
-    return shouldTracking(FlinkAppState.of(getState())) == 1;
-  }
-
   @JsonIgnore
   public ReleaseState getReleaseState() {
     return ReleaseState.of(release);
@@ -355,7 +345,7 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
-  public FlinkAppState getFlinkAppStateEnum() {
+  public FlinkAppState getStateEnum() {
     return FlinkAppState.of(state);
   }
 

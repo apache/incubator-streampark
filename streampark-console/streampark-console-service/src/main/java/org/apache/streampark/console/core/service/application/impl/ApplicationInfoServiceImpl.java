@@ -40,8 +40,8 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkClusterWatcher;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
@@ -115,7 +115,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     Integer runningJob = 0;
 
     // stat metrics from other than kubernetes mode
-    for (Application app : FlinkHttpWatcher.getWatchingApps()) {
+    for (Application app : FlinkAppHttpWatcher.getWatchingApps()) {
       if (!teamId.equals(app.getTeamId())) {
         continue;
       }
@@ -220,11 +220,10 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public boolean checkAlter(Application appParam) {
     Long appId = appParam.getId();
-    FlinkAppState state = FlinkAppState.of(appParam.getState());
-    if (!FlinkAppState.CANCELED.equals(state)) {
+    if (FlinkAppState.CANCELED != appParam.getStateEnum()) {
       return false;
     }
-    long cancelUserId = FlinkHttpWatcher.getCanceledJobUserId(appId);
+    long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
     long appUserId = appParam.getUserId();
     return cancelUserId != -1 && cancelUserId != appUserId;
   }
@@ -244,11 +243,11 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public boolean existsRunningByClusterId(Long clusterId) {
     return baseMapper.existsRunningJobByClusterId(clusterId)
-        || FlinkHttpWatcher.getWatchingApps().stream()
+        || FlinkAppHttpWatcher.getWatchingApps().stream()
             .anyMatch(
                 application ->
                     clusterId.equals(application.getFlinkClusterId())
-                        && FlinkAppState.RUNNING.equals(application.getFlinkAppStateEnum()));
+                        && FlinkAppState.RUNNING.equals(application.getStateEnum()));
   }
 
   @Override
@@ -467,7 +466,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         flinkK8sObserver.watchApplication(application);
       }
     } else {
-      FlinkHttpWatcher.doWatching(application);
+      FlinkAppHttpWatcher.doWatching(application);
     }
     return mapping;
   }

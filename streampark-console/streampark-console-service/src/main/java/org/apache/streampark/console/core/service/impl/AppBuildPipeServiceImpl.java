@@ -59,7 +59,7 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
@@ -141,7 +141,7 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationLogService applicationLogService;
 
-  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   @Autowired private ApplicationConfigService applicationConfigService;
 
@@ -226,8 +226,8 @@ public class AppBuildPipeServiceImpl
             app.setRelease(ReleaseState.RELEASING.get());
             applicationManageService.updateRelease(app);
 
-            if (flinkHttpWatcher.isWatchingApp(app.getId())) {
-              flinkHttpWatcher.init();
+            if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
+              flinkAppHttpWatcher.init();
             }
 
             // 1) checkEnv
@@ -358,8 +358,8 @@ public class AppBuildPipeServiceImpl
             }
             applicationManageService.updateRelease(app);
             applicationLogService.save(applicationLog);
-            if (flinkHttpWatcher.isWatchingApp(app.getId())) {
-              flinkHttpWatcher.init();
+            if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
+              flinkAppHttpWatcher.init();
             }
           }
         });

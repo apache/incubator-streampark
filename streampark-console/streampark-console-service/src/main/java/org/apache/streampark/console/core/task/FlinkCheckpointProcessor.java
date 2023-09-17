@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-public class CheckpointProcessor {
+public class FlinkCheckpointProcessor {
 
   private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
   private static final Integer SAVEPOINT_CACHE_HOUR = 1;
@@ -70,7 +70,7 @@ public class CheckpointProcessor {
 
   @Autowired private SavePointService savePointService;
 
-  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   public void process(Application application, @Nonnull CheckPoints checkPoints) {
     checkPoints.getLatestCheckpoint().forEach(checkPoint -> process(application, checkPoint));
@@ -86,7 +86,7 @@ public class CheckpointProcessor {
       if (shouldStoreAsSavepoint(checkPointKey, checkPoint)) {
         savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
         saveSavepoint(checkPoint, application.getId());
-        flinkHttpWatcher.cleanSavepoint(application);
+        flinkAppHttpWatcher.cleanSavepoint(application);
         return;
       }
 

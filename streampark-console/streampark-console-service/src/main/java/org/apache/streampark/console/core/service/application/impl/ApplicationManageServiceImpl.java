@@ -53,7 +53,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
@@ -189,7 +189,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         flinkK8sObserver.unWatchById(application.getId());
       }
     } else {
-      FlinkHttpWatcher.unWatching(appParam.getId());
+      FlinkAppHttpWatcher.unWatching(appParam.getId());
     }
     return true;
   }
@@ -264,7 +264,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                                       .getCode()
                                       .equals(record.getBuildStatus()))
                           .setAllowStart(
-                              !record.shouldBeTrack()
+                              !record.shouldTracking()
                                   && PipelineStatus.success
                                       .getCode()
                                       .equals(record.getBuildStatus()))
