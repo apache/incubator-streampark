@@ -33,16 +33,16 @@ abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
 
   def cancelWithSavepoint(
       jobID: JobID,
-      s: String,
+      savepointDir: String,
       nativeFormat: Boolean): CompletableFuture[String] = {
-    clusterClient.cancelWithSavepoint(jobID, s)
+    clusterClient.cancelWithSavepoint(jobID, savepointDir)
   }
 
   def stopWithSavepoint(
       jobID: JobID,
-      b: Boolean,
-      s: String,
+      advanceToEndOfEventTime: Boolean,
+      savepointDir: String,
       nativeFormat: Boolean): CompletableFuture[String] =
-    clusterClient.stopWithSavepoint(jobID, b, s)
+    clusterClient.stopWithSavepoint(jobID, advanceToEndOfEventTime, savepointDir)
 
 }
