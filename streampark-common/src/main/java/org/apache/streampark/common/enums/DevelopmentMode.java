@@ -17,9 +17,7 @@
 
 package org.apache.streampark.common.enums;
 
-import java.io.Serializable;
-
-public enum DevelopmentMode implements Serializable {
+public enum DevelopmentMode {
 
   /** custom code */
   CUSTOM_CODE("Custom Code", 1),

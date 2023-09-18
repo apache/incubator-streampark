@@ -19,10 +19,9 @@ package org.apache.streampark.common.enums;
 
 import com.google.common.collect.Lists;
 
-import java.io.Serializable;
 import java.util.List;
 
-public enum ExecutionMode implements Serializable {
+public enum ExecutionMode {
 
   /** Local mode */
   LOCAL(0, "local"),

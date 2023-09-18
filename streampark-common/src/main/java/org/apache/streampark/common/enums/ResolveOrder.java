@@ -17,10 +17,8 @@
 
 package org.apache.streampark.common.enums;
 
-import java.io.Serializable;
-
 /** classloader.resolve-order */
-public enum ResolveOrder implements Serializable {
+public enum ResolveOrder {
   /** parent-first */
   PARENT_FIRST("parent-first", 0),
   /** child-first */
