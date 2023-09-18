@@ -569,7 +569,7 @@ public class Application implements Serializable {
   }
 
   private boolean needFillYarnQueueLabel(ExecutionMode mode) {
-    return ExecutionMode.YARN_PER_JOB.equals(mode) || ExecutionMode.YARN_APPLICATION.equals(mode);
+    return ExecutionMode.YARN_PER_JOB == mode || ExecutionMode.YARN_APPLICATION == mode;
   }
 
   @Override

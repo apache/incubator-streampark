@@ -268,7 +268,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       clusterId = application.getClusterId();
     } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         ApiAlertException.throwIfNull(
             cluster,
@@ -438,7 +438,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     String appConf = userJarAndAppConf.f1;
 
     BuildResult buildResult = buildPipeline.getBuildResult();
-    if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
+    if (ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()) {
       buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
     }
 
@@ -591,7 +591,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 ? null
                 : String.format("yaml://%s", applicationConfig.getContent());
         // 3) client
-        if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
+        if (ExecutionMode.YARN_APPLICATION == executionMode) {
           String clientPath = Workspace.remote().APP_CLIENT();
           flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
         }
@@ -624,7 +624,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           switch (application.getApplicationType()) {
             case STREAMPARK_FLINK:
               ConfigFileType fileType = ConfigFileType.of(applicationConfig.getFormat());
-              if (fileType != null && !fileType.equals(ConfigFileType.UNKNOWN)) {
+              if (fileType != null && ConfigFileType.UNKNOWN != fileType) {
                 appConf =
                     String.format(
                         "%s://%s", fileType.getTypeName(), applicationConfig.getContent());
@@ -645,7 +645,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           }
         }
 
-        if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
+        if (ExecutionMode.YARN_APPLICATION == executionMode) {
           switch (application.getApplicationType()) {
             case STREAMPARK_FLINK:
               flinkUserJar =
@@ -690,7 +690,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         ApiAlertException.throwIfNull(
             cluster,

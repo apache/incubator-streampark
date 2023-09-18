@@ -443,8 +443,8 @@ public class AppBuildPipeServiceImpl
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
         String localWorkspace = app.getLocalAppHome().concat("/lib");
-        if (app.getDevelopmentMode().equals(DevelopmentMode.CUSTOM_CODE)
-            && app.getApplicationType().equals(ApplicationType.APACHE_FLINK)) {
+        if (DevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
+            && ApplicationType.APACHE_FLINK == app.getApplicationType()) {
           yarnProvidedPath = app.getAppHome();
           localWorkspace = app.getLocalAppHome();
         }

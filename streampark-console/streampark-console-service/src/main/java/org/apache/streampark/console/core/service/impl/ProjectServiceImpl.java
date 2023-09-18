@@ -141,7 +141,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
     if (projectParam.getBuildState() != null) {
       project.setBuildState(projectParam.getBuildState());
-      if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
+      if (BuildState.NEED_REBUILD == BuildState.of(projectParam.getBuildState())) {
         List<Application> applications = getApplications(project);
         // Update deployment status
         applications.forEach(
@@ -235,7 +235,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     Project project = getById(id);
     Utils.notNull(project);
 
-    if (!BuildState.SUCCESSFUL.equals(BuildState.of(project.getBuildState()))
+    if (BuildState.SUCCESSFUL != BuildState.of(project.getBuildState())
         || !project.getDistHome().exists()) {
       return Collections.emptyList();
     }
