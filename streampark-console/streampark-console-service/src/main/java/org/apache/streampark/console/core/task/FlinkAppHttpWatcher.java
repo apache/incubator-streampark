@@ -280,8 +280,7 @@ public class FlinkAppHttpWatcher {
     JobsOverview jobsOverview = httpJobsOverview(application);
     Optional<JobsOverview.Job> optional;
     ExecutionMode execMode = application.getExecutionModeEnum();
-    if (ExecutionMode.YARN_APPLICATION == execMode
-        || ExecutionMode.YARN_PER_JOB == execMode) {
+    if (ExecutionMode.YARN_APPLICATION == execMode || ExecutionMode.YARN_PER_JOB == execMode) {
       optional =
           jobsOverview.getJobs().size() > 1
               ? jobsOverview.getJobs().stream()

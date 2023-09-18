@@ -445,8 +445,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     int cpThreshold =
         tryGetChkNumRetainedFromDynamicProps(application.getDynamicProperties())
             .orElse(getChkNumRetainedFromFlinkEnv(flinkEnv, application));
-    cpThreshold =
-        CHECKPOINT == CheckPointType.of(entity.getType()) ? cpThreshold - 1 : cpThreshold;
+    cpThreshold = CHECKPOINT == CheckPointType.of(entity.getType()) ? cpThreshold - 1 : cpThreshold;
 
     if (cpThreshold == 0) {
       LambdaQueryWrapper<SavePoint> queryWrapper =

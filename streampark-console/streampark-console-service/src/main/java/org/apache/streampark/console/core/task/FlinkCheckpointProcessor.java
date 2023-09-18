@@ -161,9 +161,7 @@ public class FlinkCheckpointProcessor {
 
   private boolean shouldProcessFailedTrigger(
       CheckPoints.CheckPoint checkPoint, boolean cpFailedTrigger, CheckPointStatus status) {
-    return CheckPointStatus.FAILED == status
-        && !checkPoint.getIsSavepoint()
-        && cpFailedTrigger;
+    return CheckPointStatus.FAILED == status && !checkPoint.getIsSavepoint() && cpFailedTrigger;
   }
 
   private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Long appId) {
