@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
@@ -25,7 +26,6 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.RestoreMode;
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.tuple.Tuple2;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.HadoopUtils;
