@@ -75,17 +75,17 @@ public enum ExecutionMode implements Serializable {
   }
 
   public static boolean isYarnMode(ExecutionMode mode) {
-    return YARN_PER_JOB.equals(mode) || YARN_APPLICATION.equals(mode) || YARN_SESSION.equals(mode);
+    return YARN_PER_JOB == mode || YARN_APPLICATION == mode || YARN_SESSION == mode;
   }
 
   // TODO: We'll inline this method back to the corresponding caller lines
   //  after dropping the yarn perjob mode.
   public static boolean isYarnPerJobOrAppMode(ExecutionMode mode) {
-    return YARN_PER_JOB.equals(mode) || YARN_APPLICATION.equals(mode);
+    return YARN_PER_JOB == mode || YARN_APPLICATION == mode;
   }
 
   public static boolean isYarnSessionMode(ExecutionMode mode) {
-    return YARN_SESSION.equals(mode);
+    return YARN_SESSION == mode;
   }
 
   public static boolean isYarnMode(Integer value) {
@@ -93,11 +93,11 @@ public enum ExecutionMode implements Serializable {
   }
 
   public static boolean isKubernetesSessionMode(Integer value) {
-    return KUBERNETES_NATIVE_SESSION.equals(of(value));
+    return KUBERNETES_NATIVE_SESSION == of(value);
   }
 
   public static boolean isKubernetesMode(ExecutionMode mode) {
-    return KUBERNETES_NATIVE_SESSION.equals(mode) || KUBERNETES_NATIVE_APPLICATION.equals(mode);
+    return KUBERNETES_NATIVE_SESSION == mode || KUBERNETES_NATIVE_APPLICATION == mode;
   }
 
   public static boolean isKubernetesMode(Integer value) {
@@ -105,7 +105,7 @@ public enum ExecutionMode implements Serializable {
   }
 
   public static boolean isKubernetesApplicationMode(Integer value) {
-    return KUBERNETES_NATIVE_APPLICATION.equals(of(value));
+    return KUBERNETES_NATIVE_APPLICATION == of(value);
   }
 
   public static List<Integer> getKubernetesMode() {
@@ -114,7 +114,7 @@ public enum ExecutionMode implements Serializable {
   }
 
   public static boolean isSessionMode(ExecutionMode mode) {
-    return KUBERNETES_NATIVE_SESSION.equals(mode) || YARN_SESSION.equals(mode);
+    return KUBERNETES_NATIVE_SESSION == mode || YARN_SESSION == mode;
   }
 
   public static boolean isRemoteMode(Integer value) {
@@ -122,6 +122,6 @@ public enum ExecutionMode implements Serializable {
   }
 
   public static boolean isRemoteMode(ExecutionMode mode) {
-    return REMOTE.equals(mode);
+    return REMOTE == mode;
   }
 }

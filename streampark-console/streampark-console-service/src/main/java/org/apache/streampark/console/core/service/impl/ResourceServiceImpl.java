@@ -304,7 +304,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         FlinkConnector connectorResource;
 
         ApiAlertException.throwIfFalse(
-            ResourceType.CONNECTOR.equals(resourceParam.getResourceType()),
+            ResourceType.CONNECTOR == resourceParam.getResourceType(),
             "getConnectorId method error, resource not flink connector.");
 
         List<File> jars;

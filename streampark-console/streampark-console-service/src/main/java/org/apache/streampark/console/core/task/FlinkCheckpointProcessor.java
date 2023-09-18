@@ -82,7 +82,7 @@ public class FlinkCheckpointProcessor {
     CheckPointStatus status = checkPoint.getCheckPointStatus();
     CheckPointKey checkPointKey = new CheckPointKey(appId, jobID, checkPoint.getId());
 
-    if (CheckPointStatus.COMPLETED.equals(status)) {
+    if (CheckPointStatus.COMPLETED == status) {
       if (shouldStoreAsSavepoint(checkPointKey, checkPoint)) {
         savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
         saveSavepoint(checkPoint, application.getId());
@@ -161,7 +161,7 @@ public class FlinkCheckpointProcessor {
 
   private boolean shouldProcessFailedTrigger(
       CheckPoints.CheckPoint checkPoint, boolean cpFailedTrigger, CheckPointStatus status) {
-    return CheckPointStatus.FAILED.equals(status)
+    return CheckPointStatus.FAILED == status
         && !checkPoint.getIsSavepoint()
         && cpFailedTrigger;
   }

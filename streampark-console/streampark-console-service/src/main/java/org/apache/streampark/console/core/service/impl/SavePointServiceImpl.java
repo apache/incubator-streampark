@@ -306,7 +306,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       return application.getClusterId();
     } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
         Utils.notNull(
             cluster,
             String.format(
@@ -446,7 +446,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         tryGetChkNumRetainedFromDynamicProps(application.getDynamicProperties())
             .orElse(getChkNumRetainedFromFlinkEnv(flinkEnv, application));
     cpThreshold =
-        CHECKPOINT.equals(CheckPointType.of(entity.getType())) ? cpThreshold - 1 : cpThreshold;
+        CHECKPOINT == CheckPointType.of(entity.getType()) ? cpThreshold - 1 : cpThreshold;
 
     if (cpThreshold == 0) {
       LambdaQueryWrapper<SavePoint> queryWrapper =

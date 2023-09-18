@@ -202,8 +202,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       envInitializer.checkFlinkEnv(application.getStorageType(), flinkEnv);
       envInitializer.storageInitialize(application.getStorageType());
 
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())
-          || ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()
+          || ExecutionMode.REMOTE == application.getExecutionModeEnum()) {
         FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
         boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
         if (!conned) {
@@ -247,7 +247,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             .anyMatch(
                 application ->
                     clusterId.equals(application.getFlinkClusterId())
-                        && FlinkAppState.RUNNING.equals(application.getStateEnum()));
+                        && FlinkAppState.RUNNING == application.getStateEnum());
   }
 
   @Override
