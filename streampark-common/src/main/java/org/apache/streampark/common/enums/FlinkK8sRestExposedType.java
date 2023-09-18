@@ -17,10 +17,8 @@
 
 package org.apache.streampark.common.enums;
 
-import java.io.Serializable;
-
 /** kubernetes.rest-service.exposed.type */
-public enum FlinkK8sRestExposedType implements Serializable {
+public enum FlinkK8sRestExposedType {
 
   /** LoadBalancer */
   LOAD_BALANCER("LoadBalancer", 0),

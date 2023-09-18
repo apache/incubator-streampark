@@ -17,9 +17,7 @@
 
 package org.apache.streampark.common.enums;
 
-import java.io.Serializable;
-
-public enum FlinkSqlValidationFailedType implements Serializable {
+public enum FlinkSqlValidationFailedType {
   /** Basic test failed (such as null, etc.) */
   VERIFY_FAILED(1),
   /** syntax error */
