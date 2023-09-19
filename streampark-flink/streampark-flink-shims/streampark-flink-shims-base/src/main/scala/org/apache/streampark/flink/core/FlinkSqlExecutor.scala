@@ -20,6 +20,7 @@ import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.core.SqlCommand._
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.table.api.TableEnvironment
@@ -39,8 +40,8 @@ object FlinkSqlExecutor extends Logger {
       parameter: ParameterTool,
       context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
     val flinkSql: String =
-      if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
-    require(flinkSql != null && flinkSql.trim.nonEmpty, "verify failed: flink sql cannot be empty")
+      if (StringUtils.isBlank(sql)) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
+    require(StringUtils.isNotBlank(flinkSql), "verify failed: flink sql cannot be empty")
 
     def callback(r: String): Unit = {
       callbackFunc match {
