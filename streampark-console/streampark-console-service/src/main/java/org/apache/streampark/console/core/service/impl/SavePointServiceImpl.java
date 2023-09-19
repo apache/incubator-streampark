@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.Constant;
@@ -254,7 +255,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             },
             e -> {
               log.error("Trigger savepoint for flink job failed.", e);
-              String exception = Utils.stringifyException(e);
+              String exception = ExceptionUtils.stringifyException(e);
               applicationLog.setException(exception);
               if (!(e instanceof TimeoutException)) {
                 applicationLog.setSuccess(false);

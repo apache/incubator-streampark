@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -212,7 +213,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       }
       return true;
     } catch (Exception e) {
-      log.error(Utils.stringifyException(e));
+      log.error(ExceptionUtils.stringifyException(e));
       throw new ApiDetailException(e);
     }
   }

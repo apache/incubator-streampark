@@ -24,6 +24,7 @@ import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
@@ -347,13 +348,14 @@ public class AppBuildPipeServiceImpl
                       commonService.getUserId(),
                       app.getId(),
                       app.getJobName().concat(" release failed"),
-                      Utils.stringifyException(snapshot.error().exception()),
+                      ExceptionUtils.stringifyException(snapshot.error().exception()),
                       NoticeType.EXCEPTION);
               messageService.push(message);
               app.setRelease(ReleaseState.FAILED.get());
               app.setOptionState(OptionState.NONE.getValue());
               app.setBuild(true);
-              applicationLog.setException(Utils.stringifyException(snapshot.error().exception()));
+              applicationLog.setException(
+                  ExceptionUtils.stringifyException(snapshot.error().exception()));
               applicationLog.setSuccess(false);
             }
             applicationManageService.updateRelease(app);

@@ -15,20 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.exception;
+package org.apache.streampark.common.util;
 
-import org.apache.streampark.common.util.ExceptionUtils;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-public class AlertException extends ApiAlertException {
-  public AlertException(String message) {
-    super(message);
-  }
+/** Utils to process exception message. */
+public class ExceptionUtils {
 
-  public AlertException(Throwable cause) {
-    super(ExceptionUtils.stringifyException(cause));
-  }
+  private ExceptionUtils() {}
 
-  public AlertException(String message, Throwable cause) {
-    super(message, cause);
+  public static String stringifyException(Throwable throwable) {
+    if (throwable == null) {
+      return "(null)";
+    }
+    try (StringWriter stm = new StringWriter();
+        PrintWriter writer = new PrintWriter(stm)) {
+      throwable.printStackTrace(writer);
+      return stm.toString();
+    } catch (IOException e) {
+      return e.getClass().getName() + " (error while printing stack trace)";
+    }
   }
 }

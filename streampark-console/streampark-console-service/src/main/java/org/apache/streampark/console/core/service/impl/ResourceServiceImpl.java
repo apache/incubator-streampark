@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
@@ -284,7 +285,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         } catch (Exception e) {
           // get jarFile error
           resp.put("state", 1);
-          resp.put("exception", Utils.stringifyException(e));
+          resp.put("exception", ExceptionUtils.stringifyException(e));
           return RestResponse.success().data(resp);
         }
         if (jarFile.getName().endsWith(ConfigConst.PYTHON_SUFFIX())) {
@@ -321,7 +322,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
           } catch (Exception e) {
             // connector download is null
             resp.put("state", 1);
-            resp.put("exception", Utils.stringifyException(e));
+            resp.put("exception", ExceptionUtils.stringifyException(e));
             return RestResponse.success().data(resp);
           }
           String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
@@ -343,7 +344,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         } catch (Exception e) {
           // flink connector invalid
           resp.put("state", 2);
-          resp.put("exception", Utils.stringifyException(e));
+          resp.put("exception", ExceptionUtils.stringifyException(e));
           return RestResponse.success().data(resp);
         }
 
