@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
@@ -82,6 +81,7 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
