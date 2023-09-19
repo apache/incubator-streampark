@@ -17,7 +17,7 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
-import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.common.util.{ExceptionUtils, Logger, Utils}
 import org.apache.streampark.flink.core.SqlCommand._
 
 import org.apache.calcite.config.Lex
@@ -104,7 +104,7 @@ object FlinkSqlValidator extends Logger {
             }
           } match {
             case Failure(e) =>
-              val exception = Utils.stringifyException(e)
+              val exception = ExceptionUtils.stringifyException(e)
               val causedBy = exception.drop(exception.indexOf("Caused by:"))
               val cleanUpError = exception.replaceAll("[\r\n]", "")
               if (SYNTAX_ERROR_REGEXP.findAllMatchIn(cleanUpError).nonEmpty) {
