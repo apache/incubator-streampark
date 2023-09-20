@@ -22,6 +22,8 @@ import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.streampark.flink.core.{SqlCommand, SqlCommandParser}
 import org.apache.streampark.flink.core.scala.{FlinkStreamTable, FlinkTable}
 
+import org.apache.commons.lang3.StringUtils
+import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.ExecutionOptions
 
@@ -34,7 +36,7 @@ object SqlClient extends App {
 
   private[this] val flinkSql = {
     val sql = parameterTool.get(KEY_FLINK_SQL())
-    require(sql != null && sql.trim.nonEmpty, "Usage: flink sql cannot be null")
+    require(StringUtils.isNotBlank(sql), "Usage: flink sql cannot be null")
     Try(DeflaterUtils.unzipString(sql)) match {
       case Success(value) => value
       case Failure(_) =>
@@ -44,7 +46,7 @@ object SqlClient extends App {
 
   private[this] val sets = SqlCommandParser.parseSQL(flinkSql).filter(_.command == SqlCommand.SET)
 
-  private[this] val defaultMode = "streaming"
+  private[this] val defaultMode = RuntimeExecutionMode.STREAMING.name().toLowerCase()
 
   private[this] val mode = sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
     case Some(e) =>

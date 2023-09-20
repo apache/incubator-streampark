@@ -34,7 +34,7 @@ public enum GitCredential {
   }
 
   public static boolean isSSH(Integer gitCredential) {
-    return GitCredential.SSH.equals(GitCredential.of(gitCredential));
+    return GitCredential.SSH == GitCredential.of(gitCredential);
   }
 
   public Integer getValue() {

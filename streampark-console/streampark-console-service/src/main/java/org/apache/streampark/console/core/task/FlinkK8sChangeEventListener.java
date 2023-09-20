@@ -105,10 +105,10 @@ public class FlinkK8sChangeEventListener {
 
     // email alerts when necessary
     FlinkAppState state = app.getStateEnum();
-    if (FlinkAppState.FAILED.equals(state)
-        || FlinkAppState.LOST.equals(state)
-        || FlinkAppState.RESTARTING.equals(state)
-        || FlinkAppState.FINISHED.equals(state)) {
+    if (FlinkAppState.FAILED == state
+        || FlinkAppState.LOST == state
+        || FlinkAppState.RESTARTING == state
+        || FlinkAppState.FINISHED == state) {
       executor.execute(
           () -> {
             if (app.getProbing()) {
@@ -131,7 +131,7 @@ public class FlinkK8sChangeEventListener {
     TrackId trackId = event.trackId();
     ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.executeMode());
     // discard session mode change
-    if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
+    if (ExecutionMode.KUBERNETES_NATIVE_SESSION == mode) {
       return;
     }
 

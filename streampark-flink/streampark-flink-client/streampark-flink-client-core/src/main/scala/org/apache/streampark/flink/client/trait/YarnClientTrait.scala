@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.streampark.common.util.{ExceptionUtils, Utils}
 import org.apache.streampark.common.util.ImplicitsUtils._
-import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 
 import org.apache.flink.api.common.JobID
@@ -61,7 +61,7 @@ trait YarnClientTrait extends FlinkClientTrait {
             case e =>
               throw new FlinkException(
                 s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
-                  s"detail: ${Utils.stringifyException(e)}");
+                  s"detail: ${ExceptionUtils.stringifyException(e)}");
           }.get)
   }
 

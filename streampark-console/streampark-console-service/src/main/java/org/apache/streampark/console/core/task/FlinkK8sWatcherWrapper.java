@@ -127,14 +127,14 @@ public class FlinkK8sWatcherWrapper {
     // covert Application to TrackId
     public static TrackId toTrackId(@Nonnull Application app) {
       Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
-      if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
+      if (FlinkK8sExecuteMode.APPLICATION() == mode) {
         return TrackId.onApplication(
             app.getK8sNamespace(),
             app.getClusterId(),
             app.getId(),
             app.getJobId(),
             app.getTeamId().toString());
-      } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
+      } else if (FlinkK8sExecuteMode.SESSION() == mode) {
         return TrackId.onSession(
             app.getK8sNamespace(),
             app.getClusterId(),

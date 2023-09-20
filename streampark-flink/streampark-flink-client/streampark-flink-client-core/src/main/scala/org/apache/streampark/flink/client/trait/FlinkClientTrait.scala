@@ -514,8 +514,8 @@ trait FlinkClientTrait extends Logger {
     }
 
     if (
-      submitRequest.developmentMode == DevelopmentMode.PYFLINK && !submitRequest.executionMode
-        .equals(ExecutionMode.YARN_APPLICATION)
+      submitRequest.developmentMode == DevelopmentMode.PYFLINK
+      && submitRequest.executionMode != ExecutionMode.YARN_APPLICATION
     ) {
       // python file
       programArgs.add("-py")

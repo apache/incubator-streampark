@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -202,8 +203,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       envInitializer.checkFlinkEnv(application.getStorageType(), flinkEnv);
       envInitializer.storageInitialize(application.getStorageType());
 
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())
-          || ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()
+          || ExecutionMode.REMOTE == application.getExecutionModeEnum()) {
         FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
         boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
         if (!conned) {
@@ -212,7 +213,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       }
       return true;
     } catch (Exception e) {
-      log.error(Utils.stringifyException(e));
+      log.error(ExceptionUtils.stringifyException(e));
       throw new ApiDetailException(e);
     }
   }
@@ -247,7 +248,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             .anyMatch(
                 application ->
                     clusterId.equals(application.getFlinkClusterId())
-                        && FlinkAppState.RUNNING.equals(application.getStateEnum()));
+                        && FlinkAppState.RUNNING == application.getStateEnum());
   }
 
   @Override

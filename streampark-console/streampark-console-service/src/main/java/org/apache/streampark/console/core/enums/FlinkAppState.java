@@ -153,7 +153,7 @@ public enum FlinkAppState {
   public static class Bridge {
     /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */
     public static FlinkAppState fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
-      if (FlinkJobState.K8S_INITIALIZING().equals(flinkJobState)) {
+      if (FlinkJobState.K8S_INITIALIZING() == flinkJobState) {
         return INITIALIZING;
       } else {
         return of(flinkJobState.toString());

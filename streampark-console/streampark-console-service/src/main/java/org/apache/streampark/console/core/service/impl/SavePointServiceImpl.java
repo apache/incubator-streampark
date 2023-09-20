@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.Constant;
@@ -254,7 +255,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             },
             e -> {
               log.error("Trigger savepoint for flink job failed.", e);
-              String exception = Utils.stringifyException(e);
+              String exception = ExceptionUtils.stringifyException(e);
               applicationLog.setException(exception);
               if (!(e instanceof TimeoutException)) {
                 applicationLog.setSuccess(false);
@@ -306,7 +307,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       return application.getClusterId();
     } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
         Utils.notNull(
             cluster,
             String.format(
@@ -445,8 +446,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     int cpThreshold =
         tryGetChkNumRetainedFromDynamicProps(application.getDynamicProperties())
             .orElse(getChkNumRetainedFromFlinkEnv(flinkEnv, application));
-    cpThreshold =
-        CHECKPOINT.equals(CheckPointType.of(entity.getType())) ? cpThreshold - 1 : cpThreshold;
+    cpThreshold = CHECKPOINT == CheckPointType.of(entity.getType()) ? cpThreshold - 1 : cpThreshold;
 
     if (cpThreshold == 0) {
       LambdaQueryWrapper<SavePoint> queryWrapper =

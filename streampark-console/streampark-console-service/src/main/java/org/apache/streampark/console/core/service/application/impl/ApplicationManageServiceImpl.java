@@ -497,8 +497,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     // 4) yarn application mode change
     if (!application.getBuild()) {
       if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
-        if (appParam.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)
-            || application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)) {
+        if (ExecutionMode.YARN_APPLICATION == appParam.getExecutionModeEnum()
+            || ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()) {
           application.setBuild(true);
         }
       }

@@ -17,10 +17,10 @@
 
 package org.apache.streampark.common.enums;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public enum RestoreMode implements Serializable {
+
+public enum RestoreMode {
 
   /**
    * In this mode Flink claims ownership of the snapshot and essentially treats it like a
