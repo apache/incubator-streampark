@@ -21,5 +21,9 @@ public enum StopFrom {
   /** None */
   NONE,
   /** StreamPark */
-  STREAMPARK
+  STREAMPARK;
+
+  public boolean isNone() {
+    return this.equals(NONE);
+  }
 }
