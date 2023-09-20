@@ -48,7 +48,8 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
             FileUtils.isJarFileType(multipartFile.getInputStream())
                 || FileUtils.isPythonFileType(multipartFile.getContentType());
         ApiAlertException.throwIfFalse(
-            fileType, "Illegal file type, Only support standard jar files. Upload file failed.");
+            fileType,
+            "Illegal file type, Only support standard jar or py files. Upload file failed.");
       }
     }
     return true;
