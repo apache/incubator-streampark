@@ -15,38 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.enums;
+package org.apache.streampark.common.util;
 
-public enum DevelopmentMode {
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-  /** custom code */
-  CUSTOM_CODE("Custom Code", 1),
+/** Utils to process exception message. */
+public class ExceptionUtils {
 
-  /** Flink SQL */
-  FLINK_SQL("Flink SQL", 2),
+  private ExceptionUtils() {}
 
-  /** Py flink */
-  PYFLINK("Python Flink", 3);
-
-  private final String name;
-
-  private final Integer mode;
-
-  DevelopmentMode(String name, Integer mode) {
-    this.name = name;
-    this.mode = mode;
-  }
-
-  public static DevelopmentMode of(Integer value) {
-    for (DevelopmentMode developmentMode : values()) {
-      if (developmentMode.mode.equals(value)) {
-        return developmentMode;
-      }
+  public static String stringifyException(Throwable throwable) {
+    if (throwable == null) {
+      return "(null)";
     }
-    return null;
-  }
-
-  public Integer getMode() {
-    return mode;
+    try (StringWriter stm = new StringWriter();
+        PrintWriter writer = new PrintWriter(stm)) {
+      throwable.printStackTrace(writer);
+      return stm.toString();
+    } catch (IOException e) {
+      return e.getClass().getName() + " (error while printing stack trace)";
+    }
   }
 }

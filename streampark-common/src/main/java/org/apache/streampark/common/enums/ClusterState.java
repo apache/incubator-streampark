@@ -17,10 +17,8 @@
 
 package org.apache.streampark.common.enums;
 
-import java.io.Serializable;
-
 /** @since 1.2.3 */
-public enum ClusterState implements Serializable {
+public enum ClusterState {
 
   /** The cluster was just created but not started */
   CREATED(0),

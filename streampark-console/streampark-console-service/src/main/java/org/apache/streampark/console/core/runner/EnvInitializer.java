@@ -136,7 +136,7 @@ public class EnvInitializer implements ApplicationRunner {
     Workspace workspace = Workspace.of(storageType);
 
     // 1. prepare workspace dir
-    if (storageType.equals(LFS)) {
+    if (LFS == storageType) {
       fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
     }
     Arrays.asList(

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.exception;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 
 /**
@@ -37,11 +37,11 @@ public class ApiDetailException extends AbstractApiException {
   }
 
   public ApiDetailException(Throwable cause) {
-    super(Utils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
+    super(ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
   }
 
   public ApiDetailException(String message, Throwable cause) {
-    super(message + Utils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
+    super(message + ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
   }
 
   @Override

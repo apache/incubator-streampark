@@ -21,6 +21,7 @@ import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.Logger
 
 import enumeratum.EnumEntry
+import org.apache.commons.lang3.StringUtils
 
 import java.lang.{Boolean => JavaBool}
 import java.util.Scanner
@@ -37,7 +38,7 @@ object SqlCommandParser extends Logger {
       sql: String,
       validationCallback: FlinkSqlValidationResult => Unit = null): List[SqlCommandCall] = {
     val sqlEmptyError = "verify failed: flink sql cannot be empty."
-    require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
+    require(StringUtils.isNotBlank(sql), sqlEmptyError)
     val sqlSegments = SqlSplitter.splitSql(sql)
     sqlSegments match {
       case s if s.isEmpty =>
@@ -121,7 +122,7 @@ sealed abstract class SqlCommand(
   var matcher: Matcher = _
 
   def matches(input: String): Boolean = {
-    if (regex == null) false
+    if (StringUtils.isBlank(regex)) false
     else {
       val pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
       matcher = pattern.matcher(input)
@@ -433,7 +434,7 @@ object SqlSplitter {
    */
   def splitSql(sql: String): List[SqlSegment] = {
     val queries = ListBuffer[String]()
-    val lastIndex = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
+    val lastIndex = if (StringUtils.isNotBlank(sql)) sql.length - 1 else 0
     var query = new mutable.StringBuilder
 
     var multiLineComment = false
@@ -454,7 +455,7 @@ object SqlSplitter {
       while (scanner.hasNextLine) {
         lineNumber += 1
         val line = scanner.nextLine().trim
-        val nonEmpty = line.nonEmpty && !line.startsWith(PARAM_PREFIX)
+        val nonEmpty = StringUtils.isNotBlank(line) && !line.startsWith(PARAM_PREFIX)
         if (line.startsWith("/*")) {
           startComment = true
           hasComment = true

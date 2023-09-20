@@ -66,7 +66,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                     new IllegalArgumentException(
                         String.format("The userId [%s] not found", userId)));
     // Admin has the permission for all menus.
-    if (UserType.ADMIN.equals(user.getUserType())) {
+    if (UserType.ADMIN == user.getUserType()) {
       return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
     }
     return this.baseMapper.findUserPermissions(userId, teamId);
@@ -81,7 +81,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                     new IllegalArgumentException(
                         String.format("The userId:[%s] not found", userId)));
     // Admin has the permission for all menus.
-    if (UserType.ADMIN.equals(user.getUserType())) {
+    if (UserType.ADMIN == user.getUserType()) {
       LambdaQueryWrapper<Menu> queryWrapper =
           new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum);
       return this.list(queryWrapper);
