@@ -381,7 +381,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   // ---- ANALYZE Statement--------------------------------------------------------------------------------------------------------------------------------
 
   /** flink-1.16 support ANALYZE Statements */
-  case object ANALYZE extends SqlCommand("analyze table", "(ANALYZE\\s+TABLE\\s+.+)")
+  case object ANALYZE_TABLE extends SqlCommand("analyze table", "(ANALYZE\\s+TABLE\\s+.+)")
 
   // ----INSERT SET Statements--------------------------------------------------------------------------------------------------------------------------------
   /*
