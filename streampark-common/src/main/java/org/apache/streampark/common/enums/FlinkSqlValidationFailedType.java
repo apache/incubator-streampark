@@ -17,7 +17,6 @@
 
 package org.apache.streampark.common.enums;
 
-
 public enum FlinkSqlValidationFailedType {
 
   /** Basic test failed (such as null, etc.) */

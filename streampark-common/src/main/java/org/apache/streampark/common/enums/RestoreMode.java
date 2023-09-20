@@ -19,7 +19,6 @@ package org.apache.streampark.common.enums;
 
 import java.util.Arrays;
 
-
 public enum RestoreMode {
 
   /**

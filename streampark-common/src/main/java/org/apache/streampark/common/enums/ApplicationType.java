@@ -17,7 +17,6 @@
 
 package org.apache.streampark.common.enums;
 
-
 public enum ApplicationType {
 
   /** StreamPark Flink */

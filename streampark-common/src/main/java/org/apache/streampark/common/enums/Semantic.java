@@ -17,8 +17,6 @@
 
 package org.apache.streampark.common.enums;
 
-
-
 /** Flink consistency semantics */
 public enum Semantic {
 
