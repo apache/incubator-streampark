@@ -369,17 +369,18 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   /** RESET */
   case object RESET_ALL extends SqlCommand("reset all", "RESET", _ => Some(Array[String]("ALL")))
 
-  /** flink-1.15 support JAR Statements */
   // ---- JAR Statement--------------------------------------------------------------------------------------------------------------------------------
+
+  /** flink-1.15 support JAR Statements */
   case object SHOW_JARS extends SqlCommand("show jars", "(SHOW\\s+JARS\\s*)")
 
   case object ADD_JAR extends SqlCommand("add jar", "(ADD\\s+JAR\\s+.+)")
 
   case object REMOVE_JAR extends SqlCommand("remove jar", "(REMOVE\\s+JAR\\s+.+)")
 
-  /** flink-1.16 support ANALYZE Statements */
   // ---- ANALYZE Statement--------------------------------------------------------------------------------------------------------------------------------
 
+  /** flink-1.16 support ANALYZE Statements */
   case object ANALYZE extends SqlCommand("analyze table", "(ANALYZE\\s+TABLE\\s+.+)")
 
   // ----INSERT SET Statements--------------------------------------------------------------------------------------------------------------------------------
