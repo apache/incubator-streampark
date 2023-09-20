@@ -130,7 +130,7 @@ object LfsOperator extends FsOperator with Logger {
     }
   }
 
-  override def fileMd5(path: String): String = {
+  override def computeFileNameMd5(path: String): String = {
     require(
       path != null && path.nonEmpty,
       s"[StreamPark] LFsOperator.fileMd5: file must not be null.")

@@ -32,7 +32,7 @@ import scala.collection.mutable
 
 object FileUtils {
 
-  private[this] def bytesToHexString(src: Array[Byte]): String = {
+  private[this] def convertBytesToHexString(src: Array[Byte]): String = {
     val stringBuilder = new mutable.StringBuilder
     if (src == null || src.length <= 0) return null
     for (i <- src.indices) {
@@ -54,7 +54,7 @@ object FileUtils {
       in => {
         val b = new Array[Byte](4)
         in.read(b, 0, b.length)
-        bytesToHexString(b)
+        convertBytesToHexString(b)
       }) == "504B0304"
   }
 
@@ -260,7 +260,7 @@ object FileUtils {
    * @return
    *   The content of the file.
    */
-  def tailOf(path: String, offset: Int, limit: Int): String = try {
+  def getTailOf(path: String, offset: Int, limit: Int): String = try {
     val file = new File(path)
     if (file.exists && file.isFile) {
       Files

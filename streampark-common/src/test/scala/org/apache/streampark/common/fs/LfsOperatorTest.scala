@@ -318,10 +318,12 @@ class LfsOperatorTest {
   }
 
   @Test
-  def testfileMd5(): Unit = {
-    assertThrows(classOf[IllegalArgumentException], LfsOperator.fileMd5(null))
-    assertThrows(classOf[IllegalArgumentException], LfsOperator.fileMd5(""))
-    assertThrows(classOf[IllegalArgumentException], LfsOperator.fileMd5("ttt/144514.dat"))
+  def testcomputeFileNameMd5(): Unit = {
+    assertThrows(classOf[IllegalArgumentException], LfsOperator.computeFileNameMd5(null))
+    assertThrows(classOf[IllegalArgumentException], LfsOperator.computeFileNameMd5(""))
+    assertThrows(
+      classOf[IllegalArgumentException],
+      LfsOperator.computeFileNameMd5("ttt/144514.dat"))
   }
 
 }

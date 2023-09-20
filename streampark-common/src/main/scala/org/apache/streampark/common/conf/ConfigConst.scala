@@ -50,12 +50,6 @@ object ConfigConst {
   val KEY_SEMANTIC = "semantic"
 
   /** sign.... */
-  val SIGN_COLON = ":"
-
-  val SIGN_SEMICOLON = ";"
-
-  val SIGN_COMMA = ","
-
   val SIGN_EMPTY = ""
 
   /** kerberos */

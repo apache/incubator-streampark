@@ -40,13 +40,13 @@ object DateUtils {
     df.parse(date)
   }
 
-  def stringToDate(date: String): Date = {
+  def convertStringToDate(date: String): Date = {
     parse(date)
   }
 
-  def milliSecond2Date(time: Long): Date = new Date(time)
+  def convertMilliSecondToDate(time: Long): Date = new Date(time)
 
-  def second2Date(time: Long): Date = milliSecond2Date(time * 1000)
+  def convertSecondToDate(time: Long): Date = convertMilliSecondToDate(time * 1000)
 
   def now(
       dateFormat: String = format_yyyyMMdd,
@@ -56,22 +56,24 @@ object DateUtils {
     df.format(new Date())
   }
 
-  def minuteOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
+  def countMinuteOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
     val calendar = Calendar.getInstance()
     calendar.setTimeZone(timeZone)
     calendar.setTime(date)
     calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
   }
 
-  def minuteOf(date: Date = new Date()): Int = (date.getTime / 1000 / 60).toInt
+  /** Calculate the number of minutes within a specific time period */
+  def calculateMinuteOf(date: Date = new Date()): Int = (date.getTime / 1000 / 60).toInt
 
-  def secondOf(date: Date = new Date()): Int = (date.getTime / 1000).toInt
+  /** Calculate the number of second within a specific time period */
+  def calculateSecondOf(date: Date = new Date()): Int = (date.getTime / 1000).toInt
 
-  def secondOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
+  def countSecondOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
     val calendar = Calendar.getInstance()
     calendar.setTimeZone(timeZone)
     calendar.setTime(date)
-    minuteOfDay(date) * 60 + calendar.get(Calendar.SECOND)
+    countMinuteOfDay(date) * 60 + calendar.get(Calendar.SECOND)
   }
 
   def format(
@@ -109,12 +111,12 @@ object DateUtils {
     cal.getTime
   }
 
-  def localToUTC(localTime: String, format: String = fullFormat): Date = {
+  def convertLocalToUTC(localTime: String, format: String = fullFormat): Date = {
     val value = new SimpleDateFormat(format).parse(localTime)
-    localToUTC(value)
+    convertLocalToUTC(value)
   }
 
-  def localToUTC(localTime: Date): Date = {
+  def convertLocalToUTC(localTime: Date): Date = {
     val localTimeInMillis = localTime.getTime
     // convert long time to calendar
     val calendar = Calendar.getInstance
@@ -129,7 +131,7 @@ object DateUtils {
     new Date(calendar.getTimeInMillis)
   }
 
-  def utcToLocal(utcDate: Date): Date = {
+  def convertUtcToLocal(utcDate: Date): Date = {
     val sdf = new SimpleDateFormat()
     sdf.setTimeZone(TimeZone.getDefault)
     val localTime = sdf.format(utcDate.getTime)
@@ -138,11 +140,11 @@ object DateUtils {
   }
 
   /** <p>Description: convert UTC time to local time</p> */
-  def utcToLocal(utcTime: String, format: String = fullFormat): Date = {
+  def convertUtcToLocal(utcTime: String, format: String = fullFormat): Date = {
     val sdf = new SimpleDateFormat(format)
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
     val utcDate: Date = sdf.parse(utcTime)
-    utcToLocal(utcDate)
+    convertUtcToLocal(utcDate)
   }
 
   /**
@@ -152,7 +154,7 @@ object DateUtils {
    * @param milliseconds
    * @return
    */
-  def toDuration(milliseconds: Long): String = {
+  def convertDuration(milliseconds: Long): String = {
     val duration = Duration.ofMillis(milliseconds)
     val days = duration.toDays
 

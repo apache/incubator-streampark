@@ -39,7 +39,7 @@ object SqlConvertUtils extends Logger {
    * @param length
    * @return
    */
-  private[this] def toFlinkDataType(dataType: String, length: String): String = {
+  private[this] def convertToFlinkDataType(dataType: String, length: String): String = {
     dataType.toUpperCase() match {
       case "TEXT" | "LONGTEXT" => "VARCHAR"
       case "DATETIME" => "TIMESTAMP"
@@ -55,7 +55,7 @@ object SqlConvertUtils extends Logger {
    * @param length
    * @return
    */
-  private[this] def toClickhouseDataType(dataType: String, length: String): String = {
+  private[this] def convertToClickhouseDataType(dataType: String, length: String): String = {
     dataType.toUpperCase() match {
       case "TEXT" | "LONGTEXT" | "BLOB" | "VARCHAR" | "VARBINARY" => "String"
       case "DATETIME" | "TIMESTAMP" => "DateTime"
@@ -123,7 +123,7 @@ object SqlConvertUtils extends Logger {
       }
     }
 
-    @tailrec def lengthJoin(
+    @tailrec def joinByLength(
         map: util.Map[Integer, String],
         index: Integer,
         segment: String): (Integer, String) = {
@@ -131,7 +131,7 @@ object SqlConvertUtils extends Logger {
         case None => commentJoin(map, index, segment)
         case Some(_) =>
           val nextLine = map(index + 1)
-          lengthJoin(map, index + 1, s"${segment.trim}$nextLine")
+          joinByLength(map, index + 1, s"${segment.trim}$nextLine")
       }
     }
 
@@ -152,7 +152,7 @@ object SqlConvertUtils extends Logger {
     map.foreach(
       a => {
         if (a._1 > skipNo) {
-          val length = lengthJoin(map, a._1, a._2)
+          val length = joinByLength(map, a._1, a._2)
           if (length._1 > a._1) {
             sqlBuffer.append(length._2).append("\n")
             skipNo = length._1
@@ -237,9 +237,9 @@ object SqlConvertUtils extends Logger {
     }
   }
 
-  def mysqlToFlinkSql(sql: String, postfix: String): String = convertSql(
+  def convertMysqlToFlinkSql(sql: String, postfix: String): String = convertSql(
     sql,
-    toFlinkDataType,
+    convertToFlinkDataType,
     x => {
       val matcher = PRIMARY_REGEXP.matcher(x)
       matcher.find() match {
@@ -247,9 +247,10 @@ object SqlConvertUtils extends Logger {
         case _ => null
       }
     },
-    postfix)
+    postfix
+  )
 
-  def mysqlToClickhouse(sql: String, postfix: String): String =
-    convertSql(sql, toClickhouseDataType, postfix = postfix)
+  def convertMysqlToClickhouse(sql: String, postfix: String): String =
+    convertSql(sql, convertToClickhouseDataType, postfix = postfix)
 
 }

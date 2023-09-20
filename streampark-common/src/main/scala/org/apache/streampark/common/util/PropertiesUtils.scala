@@ -53,7 +53,7 @@ object PropertiesUtils extends Logger {
     buffer.toString()
   }
 
-  private[this] def eachAppendYamlItem(
+  private[this] def handleEachAppendYamlItem(
       prefix: String,
       k: String,
       v: Any,
@@ -64,8 +64,8 @@ object PropertiesUtils extends Logger {
           .flatMap(
             x => {
               prefix match {
-                case "" => eachAppendYamlItem(k, x._1, x._2, proper)
-                case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
+                case "" => handleEachAppendYamlItem(k, x._1, x._2, proper)
+                case other => handleEachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
               }
             })
           .toMap
@@ -82,13 +82,13 @@ object PropertiesUtils extends Logger {
     }
   }
 
-  def fromYamlText(text: String): Map[String, String] = {
+  def parseYamlText(text: String): Map[String, String] = {
     try {
       val map = MutableMap[String, String]()
       new Yaml()
         .load(text)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .flatMap(x => handleEachAppendYamlItem("", x._1, x._2, map))
         .toMap
     } catch {
       case e: IOException =>
@@ -96,7 +96,7 @@ object PropertiesUtils extends Logger {
     }
   }
 
-  def fromHoconText(conf: String): Map[String, String] = {
+  def parseHoconText(conf: String): Map[String, String] = {
     require(conf != null, s"[StreamPark] fromHoconText: Hocon content must not be null")
     try parseHoconByReader(new StringReader(conf))
     catch {
@@ -104,7 +104,7 @@ object PropertiesUtils extends Logger {
     }
   }
 
-  def fromPropertiesText(conf: String): Map[String, String] = {
+  def parsePropertiesText(conf: String): Map[String, String] = {
     try {
       val properties = new Properties()
       properties.load(new StringReader(conf))
@@ -116,34 +116,34 @@ object PropertiesUtils extends Logger {
   }
 
   /** Load Yaml present in the given file. */
-  def fromYamlFile(filename: String): Map[String, String] = {
+  def loadYamlFile(filename: String): Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"[StreamPark] fromYamlFile: Yaml file $file does not exist")
     require(file.isFile, s"[StreamPark] fromYamlFile: Yaml file $file is not a normal file")
     val inputStream: InputStream = new FileInputStream(file)
-    fromYamlFile(inputStream)
+    loadYamlFile(inputStream)
   }
 
-  def fromHoconFile(filename: String): Map[String, String] = {
+  def loadHoconFile(filename: String): Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"[StreamPark] fromHoconFile: file $file does not exist")
     val inputStream = new FileInputStream(file)
-    fromHoconFile(inputStream)
+    loadHoconFile(inputStream)
   }
 
   /** Load properties present in the given file. */
-  def fromPropertiesFile(filename: String): Map[String, String] = {
+  def loadPropertiesFile(filename: String): Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"[StreamPark] fromPropertiesFile: Properties file $file does not exist")
     require(
       file.isFile,
       s"[StreamPark] fromPropertiesFile: Properties file $file is not a normal file")
     val inputStream = new FileInputStream(file)
-    fromPropertiesFile(inputStream)
+    loadPropertiesFile(inputStream)
   }
 
   /** Load Yaml present in the given file. */
-  def fromYamlFile(inputStream: InputStream): Map[String, String] = {
+  def loadYamlFile(inputStream: InputStream): Map[String, String] = {
     require(
       inputStream != null,
       s"[StreamPark] fromYamlFile: Properties inputStream  must not be null")
@@ -152,7 +152,7 @@ object PropertiesUtils extends Logger {
       new Yaml()
         .load(inputStream)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .flatMap(x => handleEachAppendYamlItem("", x._1, x._2, map))
         .toMap
     } catch {
       case e: IOException =>
@@ -162,7 +162,7 @@ object PropertiesUtils extends Logger {
     }
   }
 
-  def fromHoconFile(inputStream: InputStream): Map[String, String] = {
+  def loadHoconFile(inputStream: InputStream): Map[String, String] = {
     require(inputStream != null, s"[StreamPark] fromHoconFile: Hocon inputStream  must not be null")
     try
       parseHoconByReader(new InputStreamReader(inputStream))
@@ -189,7 +189,7 @@ object PropertiesUtils extends Logger {
   }
 
   /** Load properties present in the given file. */
-  def fromPropertiesFile(inputStream: InputStream): Map[String, String] = {
+  def loadPropertiesFile(inputStream: InputStream): Map[String, String] = {
     require(
       inputStream != null,
       s"[StreamPark] fromPropertiesFile: Properties inputStream  must not be null")
@@ -205,32 +205,32 @@ object PropertiesUtils extends Logger {
     }
   }
 
-  def fromYamlTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlText(text).asJava)
+  def convertYamlTextToJava(text: String): JavaMap[String, String] =
+    new JavaMap[String, String](parseYamlText(text).asJava)
 
-  def fromHoconTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconText(text).asJava)
+  def convertHoconTextToJava(text: String): JavaMap[String, String] =
+    new JavaMap[String, String](parseHoconText(text).asJava)
 
-  def fromPropertiesTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesText(text).asJava)
+  def convertPropertiesTextToJava(text: String): JavaMap[String, String] =
+    new JavaMap[String, String](parsePropertiesText(text).asJava)
 
-  def fromYamlFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlFile(filename).asJava)
+  def parseYamlFileToJava(filename: String): JavaMap[String, String] =
+    new JavaMap[String, String](loadYamlFile(filename).asJava)
 
-  def fromHoconFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconFile(filename).asJava)
+  def parseHoconFileToJava(filename: String): JavaMap[String, String] =
+    new JavaMap[String, String](loadHoconFile(filename).asJava)
 
-  def fromPropertiesFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesFile(filename).asJava)
+  def parsePropertiesFileToJava(filename: String): JavaMap[String, String] =
+    new JavaMap[String, String](loadPropertiesFile(filename).asJava)
 
-  def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlFile(inputStream).asJava)
+  def parseYamlFileToJava(inputStream: InputStream): JavaMap[String, String] =
+    new JavaMap[String, String](loadYamlFile(inputStream).asJava)
 
-  def fromHoconFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconFile(inputStream).asJava)
+  def parseHoconFileToJava(inputStream: InputStream): JavaMap[String, String] =
+    new JavaMap[String, String](loadHoconFile(inputStream).asJava)
 
-  def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesFile(inputStream).asJava)
+  def parsePropertiesFileToJava(inputStream: InputStream): JavaMap[String, String] =
+    new JavaMap[String, String](loadPropertiesFile(inputStream).asJava)
 
   /**
    * @param file

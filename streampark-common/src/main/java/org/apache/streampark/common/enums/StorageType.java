@@ -29,14 +29,14 @@ public enum StorageType implements Serializable {
   /** local File system */
   LFS("lfs");
 
-  private final String identifier;
+  private final String type;
 
-  StorageType(String identifier) {
-    this.identifier = identifier;
+  StorageType(String type) {
+    this.type = type;
   }
 
-  public String getIdentifier() {
-    return identifier;
+  public String getType() {
+    return type;
   }
 
   public static StorageType of(String identifier) {
@@ -44,7 +44,7 @@ public enum StorageType implements Serializable {
       return LFS;
     }
     for (StorageType type : values()) {
-      if (type.identifier.equals(identifier)) {
+      if (type.type.equals(identifier)) {
         return type;
       }
     }

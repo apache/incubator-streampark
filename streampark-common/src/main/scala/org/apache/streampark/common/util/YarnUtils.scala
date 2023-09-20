@@ -68,7 +68,7 @@ object YarnUtils extends Logger {
     val appStates = util.EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
     val appIds =
       try {
-        HadoopUtils.yarnClient
+        HadoopUtils.createYarnClient
           .getApplications(appStates)
           .filter(_.getName == appName)
           .map(_.getApplicationId)
@@ -90,7 +90,7 @@ object YarnUtils extends Logger {
     val applicationId = ApplicationId.fromString(appId)
     val state =
       try {
-        val applicationReport = HadoopUtils.yarnClient.getApplicationReport(applicationId)
+        val applicationReport = HadoopUtils.createYarnClient.getApplicationReport(applicationId)
         applicationReport.getYarnApplicationState
       } catch {
         case e: Exception =>
@@ -109,7 +109,7 @@ object YarnUtils extends Logger {
    * @return
    */
   def isContains(appName: String): Boolean = {
-    val runningApps = HadoopUtils.yarnClient.getApplications(util.EnumSet.of(RUNNING))
+    val runningApps = HadoopUtils.createYarnClient.getApplications(util.EnumSet.of(RUNNING))
     if (runningApps != null) {
       runningApps.exists(_.getName == appName)
     } else {
@@ -124,7 +124,7 @@ object YarnUtils extends Logger {
   def getRMWebAppURL(getLatest: Boolean = false): String = {
     if (rmHttpURL == null || getLatest) {
       synchronized {
-        val conf = HadoopUtils.hadoopConf
+        val conf = HadoopUtils.loadHadoopConf
         val useHttps = YarnConfiguration.useHttps(conf)
         val (addressPrefix, defaultPort, protocol) = useHttps match {
           case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")
@@ -235,7 +235,7 @@ object YarnUtils extends Logger {
   }
 
   def getYarnAppTrackingUrl(applicationId: ApplicationId): String =
-    HadoopUtils.yarnClient.getApplicationReport(applicationId).getTrackingUrl
+    HadoopUtils.createYarnClient.getApplicationReport(applicationId).getTrackingUrl
 
   /**
    * @param url

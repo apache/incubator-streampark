@@ -153,11 +153,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         successful, String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()));
     flinkCluster.setCreateTime(new Date());
     if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
-      flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
+      flinkCluster.setClusterState(ClusterState.RUNNING.getState());
       flinkCluster.setStartTime(new Date());
       flinkCluster.setEndTime(null);
     } else {
-      flinkCluster.setClusterState(ClusterState.CREATED.getValue());
+      flinkCluster.setClusterState(ClusterState.CREATED.getState());
     }
     boolean ret = save(flinkCluster);
     if (ret && ExecutionMode.isRemoteMode(flinkCluster.getExecutionMode())) {
@@ -188,7 +188,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flinkCluster.setAddress(deployResponse.address());
       }
       flinkCluster.setClusterId(deployResponse.clusterId());
-      flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
+      flinkCluster.setClusterState(ClusterState.RUNNING.getState());
       flinkCluster.setException(null);
       flinkCluster.setEndTime(null);
       updateById(flinkCluster);
@@ -198,7 +198,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
-      flinkCluster.setClusterState(ClusterState.FAILED.getValue());
+      flinkCluster.setClusterState(ClusterState.FAILED.getState());
       flinkCluster.setException(e.toString());
       updateById(flinkCluster);
       throw new ApiDetailException(e);
@@ -217,7 +217,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     flinkCluster.setDescription(paramOfCluster.getDescription());
     if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
       flinkCluster.setAddress(paramOfCluster.getAddress());
-      flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
+      flinkCluster.setClusterState(ClusterState.RUNNING.getState());
       flinkCluster.setStartTime(new Date());
       flinkCluster.setEndTime(null);
       FlinkClusterWatcher.addWatching(flinkCluster);
@@ -249,7 +249,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       ShutDownResponse shutDownResponse =
           shutdownInternal(flinkCluster, flinkCluster.getClusterId());
       ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
-      flinkCluster.setClusterState(ClusterState.CANCELED.getValue());
+      flinkCluster.setClusterState(ClusterState.CANCELED.getState());
       flinkCluster.setEndTime(new Date());
       updateById(flinkCluster);
       FlinkClusterWatcher.unWatching(flinkCluster);
@@ -321,7 +321,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     LambdaUpdateWrapper<FlinkCluster> updateWrapper =
         new LambdaUpdateWrapper<FlinkCluster>()
             .eq(FlinkCluster::getId, id)
-            .set(FlinkCluster::getClusterState, state.getValue());
+            .set(FlinkCluster::getClusterState, state.getState());
 
     switch (state) {
       case KILLED:
@@ -447,7 +447,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
           ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
           "Current cluster is not active, please check!");
       if (!flinkClusterWatcher.verifyClusterConnection(flinkCluster)) {
-        flinkCluster.setClusterState(ClusterState.LOST.getValue());
+        flinkCluster.setClusterState(ClusterState.LOST.getState());
         updateById(flinkCluster);
         throw new ApiAlertException("Current cluster is not active, please check!");
       }

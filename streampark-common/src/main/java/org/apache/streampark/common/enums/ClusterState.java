@@ -49,32 +49,32 @@ public enum ClusterState implements Serializable {
   /** cluster killed */
   KILLED(8);
 
-  private final Integer value;
+  private final Integer state;
 
-  ClusterState(Integer value) {
-    this.value = value;
+  ClusterState(Integer state) {
+    this.state = state;
   }
 
   public static ClusterState of(Integer value) {
     for (ClusterState clusterState : values()) {
-      if (clusterState.value.equals(value)) {
+      if (clusterState.state.equals(value)) {
         return clusterState;
       }
     }
     return ClusterState.UNKNOWN;
   }
 
-  public static ClusterState of(String value) {
+  public static ClusterState of(String name) {
     for (ClusterState clusterState : values()) {
-      if (clusterState.name().equals(value)) {
+      if (clusterState.name().equals(name)) {
         return clusterState;
       }
     }
     return ClusterState.UNKNOWN;
   }
 
-  public Integer getValue() {
-    return value;
+  public Integer getState() {
+    return state;
   }
 
   public static boolean isRunning(ClusterState state) {

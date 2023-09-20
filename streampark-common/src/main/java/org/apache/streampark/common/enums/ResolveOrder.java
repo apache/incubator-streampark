@@ -30,16 +30,16 @@ public enum ResolveOrder implements Serializable {
 
   private final String name;
 
-  private final Integer value;
+  private final Integer order;
 
-  ResolveOrder(String name, Integer value) {
+  ResolveOrder(String name, Integer order) {
     this.name = name;
-    this.value = value;
+    this.order = order;
   }
 
   public static ResolveOrder of(Integer value) {
     for (ResolveOrder order : values()) {
-      if (order.value.equals(value)) {
+      if (order.order.equals(value)) {
         return order;
       }
     }
@@ -50,7 +50,7 @@ public enum ResolveOrder implements Serializable {
     return name;
   }
 
-  public Integer getValue() {
-    return value;
+  public Integer getOrder() {
+    return order;
   }
 }

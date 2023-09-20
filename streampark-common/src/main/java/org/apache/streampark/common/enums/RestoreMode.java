@@ -22,33 +22,45 @@ import java.util.Arrays;
 
 public enum RestoreMode implements Serializable {
 
-  /** */
+  /**
+   * In this mode Flink claims ownership of the snapshot and essentially treats it like a
+   * checkpoint: its controls the lifecycle and might delete it if it is not needed for recovery
+   * anymore. Hence, it is not safe to manually delete the snapshot or to start two jobs from the
+   * same snapshot. Flink keeps around a configured number of checkpoints.
+   */
   CLAIM(1),
 
-  /** */
+  /**
+   * In the NO_CLAIM mode Flink will not assume ownership of the snapshot. It will leave the files
+   * in user’s control and never delete any of the files. In this mode you can start multiple jobs
+   * from the same snapshot.
+   */
   NO_CLAIM(2),
 
-  /** */
+  /**
+   * The legacy mode is how Flink worked until 1.15. In this mode Flink will never delete the
+   * initial checkpoint. At the same time, it is not clear if a user can ever delete it as well.
+   */
   LEGACY(3);
 
   public static final String RESTORE_MODE = "execution.savepoint-restore-mode";
   public static final int SINCE_FLINK_VERSION = 15;
 
-  private final int value;
+  private final int mode;
 
   public int get() {
-    return this.value;
+    return this.mode;
   }
 
-  RestoreMode(int value) {
-    this.value = value;
+  RestoreMode(int mode) {
+    this.mode = mode;
   }
 
   public String getName() {
-    return RestoreMode.of(this.value).toString();
+    return RestoreMode.of(this.mode).toString();
   }
 
   public static RestoreMode of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    return Arrays.stream(values()).filter((x) -> x.mode == value).findFirst().orElse(null);
   }
 }

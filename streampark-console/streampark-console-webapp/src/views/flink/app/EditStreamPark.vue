@@ -404,7 +404,7 @@
         <CompareConf v-model:value="model.compareConf" :configVersions="configVersions" />
       </template>
       <template #useSysHadoopConf="{ model, field }">
-        <UseSysHadoopConf v-model:hadoopConf="model[field]" />
+        <UseSysHadoopConf v-model:loadHadoopConf="model[field]" />
       </template>
 
       <template #formFooter>

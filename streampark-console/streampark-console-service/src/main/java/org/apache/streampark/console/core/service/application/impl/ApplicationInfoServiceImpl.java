@@ -349,7 +349,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
                   future.cancel(true);
                 }
                 if (org.apache.streampark.common.util.FileUtils.exists(path)) {
-                  return org.apache.streampark.common.util.FileUtils.tailOf(path, offset, limit);
+                  return org.apache.streampark.common.util.FileUtils.getTailOf(path, offset, limit);
                 }
                 return null;
               })

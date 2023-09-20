@@ -80,14 +80,14 @@ public class ApplicationConfig {
     if (fileType != null) {
       switch (fileType) {
         case YAML:
-          configs = PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
+          configs = PropertiesUtils.convertYamlTextToJava(DeflaterUtils.unzipString(this.content));
           break;
         case PROPERTIES:
           configs =
-              PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
+              PropertiesUtils.convertPropertiesTextToJava(DeflaterUtils.unzipString(this.content));
           break;
         case HOCON:
-          configs = PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
+          configs = PropertiesUtils.convertHoconTextToJava(DeflaterUtils.unzipString(this.content));
           break;
         default:
           configs = Collections.emptyMap();

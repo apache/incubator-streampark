@@ -81,7 +81,7 @@ public class SettingController {
   @PostMapping("checkHadoop")
   public RestResponse checkHadoop() {
     try {
-      HadoopUtils.hdfs().getStatus();
+      HadoopUtils.getOrCreateHdfs().getStatus();
       return RestResponse.success(true);
     } catch (Exception e) {
       return RestResponse.success(false).message(e.getMessage());

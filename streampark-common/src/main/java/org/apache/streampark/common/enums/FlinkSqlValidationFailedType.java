@@ -36,22 +36,22 @@ public enum FlinkSqlValidationFailedType implements Serializable {
   /** Not at the end of ";" */
   ENDS_WITH(5);
 
-  private final int value;
+  private final int failedType;
 
-  FlinkSqlValidationFailedType(int value) {
-    this.value = value;
+  FlinkSqlValidationFailedType(int failedType) {
+    this.failedType = failedType;
   }
 
   public static FlinkSqlValidationFailedType of(Integer value) {
     for (FlinkSqlValidationFailedType type : values()) {
-      if (type.value == value) {
+      if (type.failedType == value) {
         return type;
       }
     }
     return null;
   }
 
-  public int getValue() {
-    return value;
+  public int getFailedType() {
+    return failedType;
   }
 }

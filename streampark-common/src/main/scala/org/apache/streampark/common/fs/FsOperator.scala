@@ -52,13 +52,13 @@ abstract class FsOperator {
   def mkCleanDirs(path: String): Unit
 
   def upload(srcPath: String, dstPath: String): Unit =
-    upload(srcPath, dstPath, delSrc = false, overwrite = true)
+    upload(srcPath, dstPath)
 
   def copy(srcPath: String, dstPath: String): Unit =
-    copy(srcPath, dstPath, delSrc = false, overwrite = true)
+    copy(srcPath, dstPath)
 
   def copyDir(srcPath: String, dstPath: String): Unit =
-    copyDir(srcPath, dstPath, delSrc = false, overwrite = true)
+    copyDir(srcPath, dstPath)
 
   def upload(
       srcPath: String,
@@ -80,6 +80,6 @@ abstract class FsOperator {
 
   def move(srcPath: String, dstPath: String): Unit
 
-  def fileMd5(path: String): String
+  def computeFileNameMd5(path: String): String
 
 }

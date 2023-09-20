@@ -82,7 +82,7 @@ public class AlertTemplate implements Serializable {
         .setStartTime(application.getStartTime())
         .setType(2)
         .setCpFailureRateInterval(
-            DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60))
+            DateUtils.convertDuration(application.getCpFailureRateInterval() * 1000 * 60))
         .setCpMaxFailureInterval(application.getCpMaxFailureInterval())
         .setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()))
         .setSubject(
@@ -177,7 +177,7 @@ public class AlertTemplate implements Serializable {
       } else {
         duration = end.getTime() - start.getTime();
       }
-      alertTemplate.setDuration(DateUtils.toDuration(duration));
+      alertTemplate.setDuration(DateUtils.convertDuration(duration));
       return this;
     }
 

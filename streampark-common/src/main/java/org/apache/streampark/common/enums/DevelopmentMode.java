@@ -30,25 +30,25 @@ public enum DevelopmentMode implements Serializable {
   /** Py flink */
   PYFLINK("Python Flink", 3);
 
-  private final String mode;
+  private final String name;
 
-  private final Integer value;
+  private final Integer mode;
 
-  DevelopmentMode(String mode, Integer value) {
+  DevelopmentMode(String name, Integer mode) {
+    this.name = name;
     this.mode = mode;
-    this.value = value;
   }
 
   public static DevelopmentMode of(Integer value) {
-    for (DevelopmentMode mode : values()) {
-      if (mode.value.equals(value)) {
-        return mode;
+    for (DevelopmentMode developmentMode : values()) {
+      if (developmentMode.mode.equals(value)) {
+        return developmentMode;
       }
     }
     return null;
   }
 
-  public Integer getValue() {
-    return value;
+  public Integer getMode() {
+    return mode;
   }
 }

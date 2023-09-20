@@ -715,7 +715,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
       try {
-        HadoopUtils.yarnClient();
+        HadoopUtils.createYarnClient();
         properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
       } catch (Exception e) {
         // skip
