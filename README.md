@@ -90,6 +90,10 @@ You can submit any ideas as [pull requests](https://github.com/apache/incubator-
 
 > If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
+### 🍻 How to Contribute
+
+We welcome your suggestions, comments (including criticisms), comments and contributions. See 🔗[How to Contribute](https://streampark.apache.org/community/submit_guide/submit_code) and 🔗[Code Submission Guide](https://streampark.apache.org/community/submit_guide/submit_code)
+
 Thank you to all the people who already contributed to StreamPark!
 
 [![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/incubator-streampark/graphs/contributors)
