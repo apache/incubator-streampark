@@ -23,7 +23,7 @@ import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.enums.PermissionType;
+import org.apache.streampark.console.core.enums.PermissionTypeEnum;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineType;
@@ -75,7 +75,7 @@ public class ApplicationBuildPipelineController {
         schema = @Schema(defaultValue = "false", implementation = boolean.class))
   })
   @ApiAccess
-  @PermissionAction(id = "#appId", type = PermissionType.APP)
+  @PermissionAction(id = "#appId", type = PermissionTypeEnum.APP)
   @PostMapping(value = "build")
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {

@@ -38,17 +38,17 @@ import scala.util.Try
 
 case class SubmitRequest(
     flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
+    executionMode: ExecutionModeEnum,
     properties: JavaMap[String, Any],
     flinkYaml: String,
-    developmentMode: DevelopmentMode,
+    developmentMode: DevelopmentModeEnum,
     id: Long,
     jobId: String,
     appName: String,
     appConf: String,
-    applicationType: ApplicationType,
+    applicationType: ApplicationTypeEnum,
     savePoint: String,
-    restoreMode: RestoreMode,
+    restoreMode: RestoreModeEnum,
     args: String,
     @Nullable buildResult: BuildResult,
     @Nullable k8sSubmitParam: KubernetesSubmitParam,
@@ -59,8 +59,8 @@ case class SubmitRequest(
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case DevelopmentMode.FLINK_SQL => ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS
-    case DevelopmentMode.PYFLINK => ConfigConst.PYTHON_DRIVER_CLASS_NAME
+    case DevelopmentModeEnum.FLINK_SQL => ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS
+    case DevelopmentModeEnum.PYFLINK => ConfigConst.PYTHON_DRIVER_CLASS_NAME
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
@@ -82,7 +82,7 @@ case class SubmitRequest(
 
   lazy val userJarFile: File = {
     executionMode match {
-      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => null
+      case ExecutionModeEnum.KUBERNETES_NATIVE_APPLICATION => null
       case _ =>
         checkBuildResult()
         new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
@@ -163,7 +163,7 @@ case class SubmitRequest(
   @throws[Exception]
   def checkBuildResult(): Unit = {
     executionMode match {
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION =>
+      case ExecutionModeEnum.KUBERNETES_NATIVE_SESSION =>
         if (buildResult == null) {
           throw new Exception(
             s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +

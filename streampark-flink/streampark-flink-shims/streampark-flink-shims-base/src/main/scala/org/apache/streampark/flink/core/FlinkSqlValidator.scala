@@ -16,7 +16,6 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.{ExceptionUtils, Logger, Utils}
 import org.apache.streampark.flink.core.SqlCommand._
 
@@ -28,6 +27,7 @@ import org.apache.flink.table.api.SqlDialect
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.config.TableConfigOptions
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
+import org.apache.streampark.common.enums.FlinkSqlValidationFailedTypeEnum
 
 import scala.util.{Failure, Try}
 
@@ -103,7 +103,7 @@ object FlinkSqlValidator extends Logger {
                 val errorLine = call.lineStart + line.toInt - 1
                 return FlinkSqlValidationResult(
                   success = false,
-                  failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                  failedType = FlinkSqlValidationFailedTypeEnum.SYNTAX_ERROR,
                   lineStart = call.lineStart,
                   lineEnd = call.lineEnd,
                   errorLine = errorLine,
@@ -114,7 +114,7 @@ object FlinkSqlValidator extends Logger {
               } else {
                 return FlinkSqlValidationResult(
                   success = false,
-                  failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                  failedType = FlinkSqlValidationFailedTypeEnum.SYNTAX_ERROR,
                   lineStart = call.lineStart,
                   lineEnd = call.lineEnd,
                   sql = call.originSql,
@@ -131,7 +131,7 @@ object FlinkSqlValidator extends Logger {
     } else {
       FlinkSqlValidationResult(
         success = false,
-        failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+        failedType = FlinkSqlValidationFailedTypeEnum.SYNTAX_ERROR,
         lineStart = sqlCommands.head.lineStart,
         lineEnd = sqlCommands.last.lineEnd,
         exception = "No 'INSERT' statement to trigger the execution of the Flink job."

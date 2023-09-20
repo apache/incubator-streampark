@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.application;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.ExecutionModeEnum;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.Application;
 
@@ -143,12 +143,12 @@ public interface ApplicationManageService extends IService<Application> {
    * Retrieves a list of applications by team ID and execution modes.
    *
    * @param teamId The ID of the team to filter by
-   * @param executionModes The collection of execution modes to filter by
+   * @param executionModeEnums The collection of execution modes to filter by
    * @return A list of applications that belong to the specified team and have the specified
    *     execution modes
    */
   List<Application> getByTeamIdAndExecutionModes(
-      Long teamId, Collection<ExecutionMode> executionModes);
+      Long teamId, Collection<ExecutionModeEnum> executionModeEnums);
 
   /**
    * Retrieves a list of applications be probing or need to probe.

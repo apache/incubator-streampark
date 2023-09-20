@@ -18,8 +18,8 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
-import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.ClusterStateEnum;
+import org.apache.streampark.common.enums.ExecutionModeEnum;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -123,13 +123,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     // 3) Check connection
-    if (ExecutionMode.isRemoteMode(cluster.getExecutionModeEnum())
+    if (ExecutionModeEnum.isRemoteMode(cluster.getExecutionModeEnum())
         && !flinkClusterWatcher.verifyClusterConnection(cluster)) {
       result.setMsg("The remote cluster connection failed, please check!");
       result.setStatus(3);
       return result;
     }
-    if (ExecutionMode.isYarnMode(cluster.getExecutionModeEnum())
+    if (ExecutionModeEnum.isYarnMode(cluster.getExecutionModeEnum())
         && cluster.getClusterId() != null
         && !flinkClusterWatcher.verifyClusterConnection(cluster)) {
       result.setMsg("The flink cluster connection failed, please check!");
@@ -152,15 +152,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     ApiAlertException.throwIfFalse(
         successful, String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()));
     flinkCluster.setCreateTime(new Date());
-    if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
-      flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
+    if (ExecutionModeEnum.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
+      flinkCluster.setClusterState(ClusterStateEnum.RUNNING.getValue());
       flinkCluster.setStartTime(new Date());
       flinkCluster.setEndTime(null);
     } else {
-      flinkCluster.setClusterState(ClusterState.CREATED.getValue());
+      flinkCluster.setClusterState(ClusterStateEnum.CREATED.getValue());
     }
     boolean ret = save(flinkCluster);
-    if (ret && ExecutionMode.isRemoteMode(flinkCluster.getExecutionMode())) {
+    if (ret && ExecutionModeEnum.isRemoteMode(flinkCluster.getExecutionMode())) {
       FlinkClusterWatcher.addWatching(flinkCluster);
     }
     if (shouldWatchForK8s(flinkCluster)) {
@@ -178,7 +178,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       ApiAlertException.throwIfNull(
           deployResponse,
           "Deploy cluster failed, unknown reason，please check you params or StreamPark error log");
-      if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
+      if (ExecutionModeEnum.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
         String address =
             String.format(
                 "%s/proxy/%s/", YarnUtils.getRMWebAppURL(true), deployResponse.clusterId());
@@ -188,7 +188,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flinkCluster.setAddress(deployResponse.address());
       }
       flinkCluster.setClusterId(deployResponse.clusterId());
-      flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
+      flinkCluster.setClusterState(ClusterStateEnum.RUNNING.getValue());
       flinkCluster.setException(null);
       flinkCluster.setEndTime(null);
       updateById(flinkCluster);
@@ -198,7 +198,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
-      flinkCluster.setClusterState(ClusterState.FAILED.getValue());
+      flinkCluster.setClusterState(ClusterStateEnum.FAILED.getValue());
       flinkCluster.setException(e.toString());
       updateById(flinkCluster);
       throw new ApiDetailException(e);
@@ -215,9 +215,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     flinkCluster.setClusterName(paramOfCluster.getClusterName());
     flinkCluster.setAlertId(paramOfCluster.getAlertId());
     flinkCluster.setDescription(paramOfCluster.getDescription());
-    if (ExecutionMode.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
+    if (ExecutionModeEnum.isRemoteMode(flinkCluster.getExecutionModeEnum())) {
       flinkCluster.setAddress(paramOfCluster.getAddress());
-      flinkCluster.setClusterState(ClusterState.RUNNING.getValue());
+      flinkCluster.setClusterState(ClusterStateEnum.RUNNING.getValue());
       flinkCluster.setStartTime(new Date());
       flinkCluster.setEndTime(null);
       FlinkClusterWatcher.addWatching(flinkCluster);
@@ -249,7 +249,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       ShutDownResponse shutDownResponse =
           shutdownInternal(flinkCluster, flinkCluster.getClusterId());
       ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
-      flinkCluster.setClusterState(ClusterState.CANCELED.getValue());
+      flinkCluster.setClusterState(ClusterStateEnum.CANCELED.getValue());
       flinkCluster.setEndTime(new Date());
       updateById(flinkCluster);
       FlinkClusterWatcher.unWatching(flinkCluster);
@@ -305,19 +305,19 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes) {
+  public List<FlinkCluster> getByExecutionModes(Collection<ExecutionModeEnum> executionModeEnums) {
     return getBaseMapper()
         .selectList(
             new LambdaQueryWrapper<FlinkCluster>()
                 .in(
                     FlinkCluster::getExecutionMode,
-                    executionModes.stream()
-                        .map(ExecutionMode::getMode)
+                    executionModeEnums.stream()
+                        .map(ExecutionModeEnum::getMode)
                         .collect(Collectors.toSet())));
   }
 
   @Override
-  public void updateClusterState(Long id, ClusterState state) {
+  public void updateClusterState(Long id, ClusterStateEnum state) {
     LambdaUpdateWrapper<FlinkCluster> updateWrapper =
         new LambdaUpdateWrapper<FlinkCluster>()
             .eq(FlinkCluster::getId, id)
@@ -347,10 +347,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     FlinkCluster flinkCluster = getById(id);
     ApiAlertException.throwIfNull(flinkCluster, "Flink cluster not exist, please check.");
 
-    if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())
-        || ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode())) {
+    if (ExecutionModeEnum.isYarnSessionMode(flinkCluster.getExecutionModeEnum())
+        || ExecutionModeEnum.isKubernetesSessionMode(flinkCluster.getExecutionMode())) {
       ApiAlertException.throwIfTrue(
-          ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
+          ClusterStateEnum.isRunning(flinkCluster.getClusterStateEnum()),
           "Flink cluster is running, cannot be delete, please check.");
     }
     if (shouldWatchForK8s(flinkCluster)) {
@@ -393,7 +393,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       return true;
     }
 
-    if (ExecutionMode.isYarnSessionMode(newCluster.getExecutionModeEnum())
+    if (ExecutionModeEnum.isYarnSessionMode(newCluster.getExecutionModeEnum())
         && StringUtils.equals(oldCluster.getYarnQueue(), newCluster.getYarnQueue())) {
       return true;
     }
@@ -409,7 +409,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
    *     default), return true, false else.
    */
   private boolean isYarnNotDefaultQueue(FlinkCluster cluster) {
-    return ExecutionMode.isYarnSessionMode(cluster.getExecutionModeEnum())
+    return ExecutionModeEnum.isYarnSessionMode(cluster.getExecutionModeEnum())
         && !yarnQueueService.isDefaultQueue(cluster.getYarnQueue());
   }
 
@@ -442,12 +442,12 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   private void checkActiveIfNeeded(FlinkCluster flinkCluster) {
-    if (ExecutionMode.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
+    if (ExecutionModeEnum.isYarnSessionMode(flinkCluster.getExecutionModeEnum())) {
       ApiAlertException.throwIfFalse(
-          ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
+          ClusterStateEnum.isRunning(flinkCluster.getClusterStateEnum()),
           "Current cluster is not active, please check!");
       if (!flinkClusterWatcher.verifyClusterConnection(flinkCluster)) {
-        flinkCluster.setClusterState(ClusterState.LOST.getValue());
+        flinkCluster.setClusterState(ClusterStateEnum.LOST.getValue());
         updateById(flinkCluster);
         throw new ApiAlertException("Current cluster is not active, please check!");
       }
@@ -457,7 +457,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Nullable
   private KubernetesDeployParam getKubernetesDeployDesc(
       @Nonnull FlinkCluster flinkCluster, String action) {
-    ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
+    ExecutionModeEnum executionModeEnum = flinkCluster.getExecutionModeEnum();
     switch (executionModeEnum) {
       case YARN_SESSION:
         break;
@@ -479,6 +479,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   private boolean shouldWatchForK8s(FlinkCluster flinkCluster) {
     return K8sFlinkConfig.isV2Enabled()
-        && ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode());
+        && ExecutionModeEnum.isKubernetesSessionMode(flinkCluster.getExecutionMode());
   }
 }

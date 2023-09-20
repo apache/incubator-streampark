@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
-import org.apache.streampark.common.enums.DevelopmentMode
 import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.common.util.ThreadUtils
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
@@ -31,6 +30,7 @@ import com.github.dockerjava.api.command.PushImageCmd
 import com.github.dockerjava.core.command.{HackBuildImageCmd, HackPullImageCmd, HackPushImageCmd}
 import com.google.common.collect.Sets
 import org.apache.commons.lang3.StringUtils
+import org.apache.streampark.common.enums.DevelopmentModeEnum
 
 import java.io.File
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
@@ -91,8 +91,8 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       execStep(3) {
         val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
         val extJarLibs = request.developmentMode match {
-          case DevelopmentMode.FLINK_SQL => request.dependencyInfo.extJarLibs
-          case DevelopmentMode.CUSTOM_CODE => Set[String]()
+          case DevelopmentModeEnum.FLINK_SQL => request.dependencyInfo.extJarLibs
+          case DevelopmentModeEnum.CUSTOM_CODE => Set[String]()
         }
         val shadedJar =
           MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)

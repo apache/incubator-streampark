@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.DevelopmentMode;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.ApplicationTypeEnum;
+import org.apache.streampark.common.enums.DevelopmentModeEnum;
+import org.apache.streampark.common.enums.ExecutionModeEnum;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FileUtils;
@@ -41,11 +41,8 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.enums.CandidateType;
-import org.apache.streampark.console.core.enums.NoticeType;
-import org.apache.streampark.console.core.enums.OptionState;
-import org.apache.streampark.console.core.enums.ReleaseState;
-import org.apache.streampark.console.core.enums.ResourceType;
+import org.apache.streampark.console.core.enums.*;
+import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -115,7 +112,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.core.enums.Operation.RELEASE;
+import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 
 @Service
 @Slf4j
@@ -200,7 +197,7 @@ public class AppBuildPipeServiceImpl
     }
 
     // 1) flink sql setDependency
-    FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
+    FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateTypeEnum.NEW);
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
     if (app.isFlinkSqlJobOrPyFlinkJob()) {
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
@@ -224,7 +221,7 @@ public class AppBuildPipeServiceImpl
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
 
-            app.setRelease(ReleaseState.RELEASING.get());
+            app.setRelease(ReleaseStateEnum.RELEASING.get());
             applicationManageService.updateRelease(app);
 
             if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
@@ -313,10 +310,10 @@ public class AppBuildPipeServiceImpl
             if (result.pass()) {
               // running job ...
               if (app.isRunning()) {
-                app.setRelease(ReleaseState.NEED_RESTART.get());
+                app.setRelease(ReleaseStateEnum.NEED_RESTART.get());
               } else {
-                app.setOptionState(OptionState.NONE.getValue());
-                app.setRelease(ReleaseState.DONE.get());
+                app.setOptionState(OptionStateEnum.NONE.getValue());
+                app.setRelease(ReleaseStateEnum.DONE.get());
                 // If the current task is not running, or the task has just been added, directly set
                 // the candidate version to the official version
                 if (app.isFlinkSqlJob()) {
@@ -349,10 +346,10 @@ public class AppBuildPipeServiceImpl
                       app.getId(),
                       app.getJobName().concat(" release failed"),
                       ExceptionUtils.stringifyException(snapshot.error().exception()),
-                      NoticeType.EXCEPTION);
+                      NoticeTypeEnum.EXCEPTION);
               messageService.push(message);
-              app.setRelease(ReleaseState.FAILED.get());
-              app.setOptionState(OptionState.NONE.getValue());
+              app.setRelease(ReleaseStateEnum.FAILED.get());
+              app.setOptionState(OptionStateEnum.NONE.getValue());
               app.setBuild(true);
               applicationLog.setException(
                   ExceptionUtils.stringifyException(snapshot.error().exception()));
@@ -439,14 +436,14 @@ public class AppBuildPipeServiceImpl
       }
     }
 
-    ExecutionMode executionMode = app.getExecutionModeEnum();
+    ExecutionModeEnum executionModeEnum = app.getExecutionModeEnum();
     String mainClass = ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
-    switch (executionMode) {
+    switch (executionModeEnum) {
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
         String localWorkspace = app.getLocalAppHome().concat("/lib");
-        if (DevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
-            && ApplicationType.APACHE_FLINK == app.getApplicationType()) {
+        if (DevelopmentModeEnum.CUSTOM_CODE == app.getDevelopmentMode()
+            && ApplicationTypeEnum.APACHE_FLINK == app.getApplicationType()) {
           yarnProvidedPath = app.getAppHome();
           localWorkspace = app.getLocalAppHome();
         }
@@ -544,7 +541,7 @@ public class AppBuildPipeServiceImpl
         return String.format("%s/%s", app.getAppHome(), app.getJar());
       case FLINK_SQL:
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
-        if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+        if (app.getExecutionModeEnum() == ExecutionModeEnum.YARN_APPLICATION) {
           String clientPath = Workspace.remote().APP_CLIENT();
           return String.format("%s/%s", clientPath, sqlDistJar);
         }
@@ -635,7 +632,7 @@ public class AppBuildPipeServiceImpl
               resourceId -> {
                 Resource resource = resourceService.getById(resourceId);
 
-                if (resource.getResourceType() != ResourceType.GROUP) {
+                if (resource.getResourceTypeEnum() != ResourceTypeEnum.GROUP) {
                   mergeDependency(application, mvnArtifacts, jarLibs, resource);
                 } else {
                   try {

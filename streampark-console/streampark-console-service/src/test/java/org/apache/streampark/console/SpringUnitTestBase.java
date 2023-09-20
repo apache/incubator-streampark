@@ -19,7 +19,7 @@ package org.apache.streampark.console;
 
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.ConfigConst;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.ExecutionModeEnum;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
@@ -90,17 +90,17 @@ public abstract class SpringUnitTestBase {
     cluster.setClusterName(name);
     cluster.setYarnQueue(yarnQueue);
     cluster.setVersionId(versionId);
-    cluster.setExecutionMode(ExecutionMode.YARN_SESSION.getMode());
+    cluster.setExecutionMode(ExecutionModeEnum.YARN_SESSION.getMode());
     return cluster;
   }
 
   protected Application mockYarnModeJobApp(
-      Long teamId, String name, String yarnQueue, ExecutionMode executionMode) {
+      Long teamId, String name, String yarnQueue, ExecutionModeEnum executionModeEnum) {
     Application application = new Application();
     application.setYarnQueue(yarnQueue);
     application.setTeamId(teamId);
     application.setJobName(name);
-    application.setExecutionMode(executionMode.getMode());
+    application.setExecutionMode(executionModeEnum.getMode());
     application.doSetHotParams();
     return application;
   }

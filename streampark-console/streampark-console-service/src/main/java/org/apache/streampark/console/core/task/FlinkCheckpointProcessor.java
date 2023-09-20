@@ -20,8 +20,8 @@ package org.apache.streampark.console.core.task;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
-import org.apache.streampark.console.core.enums.CheckPointStatus;
-import org.apache.streampark.console.core.enums.FailoverStrategy;
+import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
+import org.apache.streampark.console.core.enums.FailoverStrategyEnum;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
@@ -79,10 +79,10 @@ public class FlinkCheckpointProcessor {
   private void process(Application application, @Nonnull CheckPoints.CheckPoint checkPoint) {
     String jobID = application.getJobId();
     Long appId = application.getId();
-    CheckPointStatus status = checkPoint.getCheckPointStatus();
+    CheckPointStatusEnum status = checkPoint.getCheckPointStatus();
     CheckPointKey checkPointKey = new CheckPointKey(appId, jobID, checkPoint.getId());
 
-    if (CheckPointStatus.COMPLETED == status) {
+    if (CheckPointStatusEnum.COMPLETED == status) {
       if (shouldStoreAsSavepoint(checkPointKey, checkPoint)) {
         savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
         saveSavepoint(checkPoint, application.getId());
@@ -104,15 +104,15 @@ public class FlinkCheckpointProcessor {
         if (minute <= application.getCpFailureRateInterval()
             && counter.getCount() >= application.getCpMaxFailureInterval()) {
           checkPointFailedCache.remove(appId);
-          FailoverStrategy failoverStrategy = FailoverStrategy.of(application.getCpFailureAction());
-          if (failoverStrategy == null) {
+          FailoverStrategyEnum failoverStrategyEnum = FailoverStrategyEnum.of(application.getCpFailureAction());
+          if (failoverStrategyEnum == null) {
             throw new IllegalArgumentException(
                 "Unexpected cpFailureAction: " + application.getCpFailureAction());
           }
-          switch (failoverStrategy) {
+          switch (failoverStrategyEnum) {
             case ALERT:
               alertService.alert(
-                  application.getAlertId(), AlertTemplate.of(application, CheckPointStatus.FAILED));
+                  application.getAlertId(), AlertTemplate.of(application, CheckPointStatusEnum.FAILED));
               break;
             case RESTART:
               try {
@@ -160,8 +160,8 @@ public class FlinkCheckpointProcessor {
   }
 
   private boolean shouldProcessFailedTrigger(
-      CheckPoints.CheckPoint checkPoint, boolean cpFailedTrigger, CheckPointStatus status) {
-    return CheckPointStatus.FAILED == status && !checkPoint.getIsSavepoint() && cpFailedTrigger;
+      CheckPoints.CheckPoint checkPoint, boolean cpFailedTrigger, CheckPointStatusEnum status) {
+    return CheckPointStatusEnum.FAILED == status && !checkPoint.getIsSavepoint() && cpFailedTrigger;
   }
 
   private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Long appId) {

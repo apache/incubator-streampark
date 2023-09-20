@@ -18,8 +18,8 @@
 package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.common.conf.K8sFlinkConfig
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobStateEnum
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.{BuildInEvent, FlinkJobStateEvent, FlinkJobStatusChangeEvent}
 import org.apache.streampark.flink.kubernetes.model._
 import org.apache.streampark.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
@@ -97,8 +97,8 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
     if (!trackId.isLegal) false;
     else {
-      val nonLost = (state: FlinkJobState.Value) =>
-        state != FlinkJobState.LOST || state != FlinkJobState.SILENT
+      val nonLost = (state: FlinkJobStateEnum.Value) =>
+        state != FlinkJobStateEnum.LOST || state != FlinkJobStateEnum.SILENT
       trackId.executeMode match {
         case SESSION =>
           jobStatusWatcher.touchSessionJob(trackId).exists(e => nonLost(e.jobState))

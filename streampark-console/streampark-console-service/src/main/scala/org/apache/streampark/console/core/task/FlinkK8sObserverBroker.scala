@@ -18,13 +18,13 @@
 package org.apache.streampark.console.core.task
 
 import org.apache.streampark.common.conf.K8sFlinkConfig
-import org.apache.streampark.common.enums.{ClusterState, ExecutionMode}
+import org.apache.streampark.common.enums.{ClusterStateEnum, ExecutionModeEnum}
 import org.apache.streampark.common.zio.{OptionTraversableOps, PrettyStringOps}
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
 import org.apache.streampark.common.zio.ZIOExt.{IterableZStreamConverter, OptionZIOOps, UIOOps, ZStreamOptionEffectOps}
 import org.apache.streampark.console.core.bean.AlertTemplate
 import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
-import org.apache.streampark.console.core.enums.{FlinkAppState, OptionState}
+import org.apache.streampark.console.core.enums.{FlinkAppStateEnum, OptionStateEnum}
 import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.alert.AlertService
 import org.apache.streampark.console.core.service.application.ApplicationInfoService
@@ -62,18 +62,18 @@ class FlinkK8sObserverBroker @Autowired() (
 
   private val observer = FlinkK8sObserver
 
-  private val alertJobStateList: Array[FlinkAppState] = Array(
-    FlinkAppState.FAILED,
-    FlinkAppState.LOST,
-    FlinkAppState.RESTARTING,
-    FlinkAppState.FINISHED
+  private val alertJobStateList: Array[FlinkAppStateEnum] = Array(
+    FlinkAppStateEnum.FAILED,
+    FlinkAppStateEnum.LOST,
+    FlinkAppStateEnum.RESTARTING,
+    FlinkAppStateEnum.FINISHED
   )
 
   private val alertClusterStateList = Array(
-    ClusterState.FAILED,
-    ClusterState.UNKNOWN,
-    ClusterState.LOST,
-    ClusterState.KILLED
+    ClusterStateEnum.FAILED,
+    ClusterStateEnum.UNKNOWN,
+    ClusterStateEnum.LOST,
+    ClusterStateEnum.KILLED
   )
 
   private lazy val allDaemonEffects: Array[UIO[Unit]] = Array(
@@ -113,7 +113,7 @@ class FlinkK8sObserverBroker @Autowired() (
 
     val fromApplicationRecords: UIO[Unit] = it
       .safeFindApplication(
-        lambdaQuery[Application].typedIn(_.getExecutionMode, ExecutionMode.getKubernetesMode.asScala)
+        lambdaQuery[Application].typedIn(_.getExecutionMode, ExecutionModeEnum.getKubernetesMode.asScala)
       )(10)
       .map(apps => apps.map(app => applicationToTrackKey(app)).filterSome.toVector)
       .tap(keys => logInfo(s"Restore Flink K8s track-keys from Application records:\n${keys.prettyStr}"))
@@ -121,7 +121,7 @@ class FlinkK8sObserverBroker @Autowired() (
 
     val fromFlinkClusterRecords: UIO[Unit] = it
       .safeFindFlinkClusterRecord(
-        lambdaQuery[FlinkCluster].typedEq(_.getExecutionMode, ExecutionMode.KUBERNETES_NATIVE_SESSION.getMode)
+        lambdaQuery[FlinkCluster].typedEq(_.getExecutionMode, ExecutionModeEnum.KUBERNETES_NATIVE_SESSION.getMode)
       )(10)
       .map(clusters => clusters.map(e => TrackKey.cluster(e.getId, e.getK8sNamespace, e.getClusterId)))
       .tap(keys => logInfo(s"Restore Flink K8s track-keys from FlinkCluster records:\n${keys.prettyStr}"))
@@ -137,12 +137,12 @@ class FlinkK8sObserverBroker @Autowired() (
       // Convert EvalJobState to FlinkAppState
       .map(snap => snap -> FlinkK8sDataTypeConverter.k8sEvalJobStateToFlinkAppState(snap.evalState))
       // Update the corresponding columns of Application record
-      .tap { case (snap: JobSnapshot, convertedState: FlinkAppState) =>
+      .tap { case (snap: JobSnapshot, convertedState: FlinkAppStateEnum) =>
         safeUpdateApplicationRecord(snap.appId) {
 
           var update = lambdaUpdate[Application]
             .typedSet(_.getState, convertedState.getValue)
-            .typedSet(_.getOptions, OptionState.NONE.getValue)
+            .typedSet(_.getOptions, OptionStateEnum.NONE.getValue)
           // update JobStatus related columns
           snap.jobStatus.foreach { status =>
             update = update
@@ -153,7 +153,7 @@ class FlinkK8sObserverBroker @Autowired() (
               .typedSet(_.getTotalTask, status.tasks.map(_.total).getOrElse(0))
           }
           // Copy the logic from resources/mapper/core/ApplicationMapper.xml:persistMetrics
-          if (FlinkAppState.isEndState(convertedState.getValue)) {
+          if (FlinkAppStateEnum.isEndState(convertedState.getValue)) {
             update = update
               .typedSet(_.getTotalTM, null)
               .typedSet(_.getTotalSlot, null)

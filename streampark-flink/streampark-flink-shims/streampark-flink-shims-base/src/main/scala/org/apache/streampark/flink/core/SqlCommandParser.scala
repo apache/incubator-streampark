@@ -17,11 +17,11 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigConst.PARAM_PREFIX
-import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.Logger
 
 import enumeratum.EnumEntry
 import org.apache.commons.lang3.StringUtils
+import org.apache.streampark.common.enums.FlinkSqlValidationFailedTypeEnum
 
 import java.lang.{Boolean => JavaBool}
 import java.util.Scanner
@@ -46,7 +46,7 @@ object SqlCommandParser extends Logger {
           validationCallback(
             FlinkSqlValidationResult(
               success = false,
-              failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+              failedType = FlinkSqlValidationFailedTypeEnum.VERIFY_FAILED,
               exception = sqlEmptyError))
           null
         } else {
@@ -62,7 +62,7 @@ object SqlCommandParser extends Logger {
                 validationCallback(
                   FlinkSqlValidationResult(
                     success = false,
-                    failedType = FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
+                    failedType = FlinkSqlValidationFailedTypeEnum.UNSUPPORTED_SQL,
                     lineStart = segment.start,
                     lineEnd = segment.end,
                     exception = s"unsupported sql",
@@ -80,7 +80,7 @@ object SqlCommandParser extends Logger {
               validationCallback(
                 FlinkSqlValidationResult(
                   success = false,
-                  failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+                  failedType = FlinkSqlValidationFailedTypeEnum.VERIFY_FAILED,
                   exception = "flink sql syntax error, no executable sql"))
               null
             } else {
@@ -407,7 +407,7 @@ case class SqlCommandCall(
 
 case class FlinkSqlValidationResult(
     success: JavaBool = true,
-    failedType: FlinkSqlValidationFailedType = null,
+    failedType: FlinkSqlValidationFailedTypeEnum = null,
     lineStart: Int = 0,
     lineEnd: Int = 0,
     errorLine: Int = 0,

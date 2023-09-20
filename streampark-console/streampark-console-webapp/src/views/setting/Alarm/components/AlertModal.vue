@@ -22,7 +22,7 @@
 <script setup lang="ts" name="AlertModal">
   import { ref, defineComponent, h } from 'vue';
   import { omit } from 'lodash-es';
-  import { alertFormSchema, alertTypes } from '../index.data';
+  import { alertFormSchema, alertTypeEnums } from '../index.data';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { BasicForm, useForm } from '/@/components/Form';
   import { Form, Select, Input, Divider } from 'ant-design-vue';
@@ -38,7 +38,7 @@
   const { t } = useI18n();
   const emit = defineEmits(['reload', 'register']);
   const alertId = ref<string | null>(null);
-  const alertType = ref<string[]>([]);
+  const alertTypeEnum = ref<string[]>([]);
 
   const { Swal } = useMessage();
   const userStore = useUserStore();
@@ -99,10 +99,10 @@
   const [registerModal, { changeOkLoading, closeModal }] = useModalInner((data) => {
     resetFields();
     alertId.value = '';
-    alertType.value = [];
+    alertTypeEnum.value = [];
     if (data && Object.keys(data).length > 0) {
       alertId.value = data.alertId;
-      alertType.value = data.alertType;
+      alertTypeEnum.value = data.alertTypeEnum;
       setFieldsValue(omit(data, 'alertId'));
     }
   });
@@ -116,7 +116,7 @@
         id: alertId.value,
         alertName: formValue.alertName,
         userId: userStore.getUserInfo?.userId,
-        alertType: eval(formValue.alertType.join('+')),
+        alertTypeEnum: eval(formValue.alertTypeEnum.join('+')),
         emailParams: { contacts: formValue.alertEmail },
         dingTalkParams: {
           token: formValue.dingtalkToken,
@@ -209,10 +209,10 @@
           :placeholder="t('setting.alarm.faultAlertType')"
           allowClear
           mode="multiple"
-          @change="(value: string[]) => (alertType = value)"
+          @change="(value: string[]) => (alertTypeEnum = value)"
         >
           <SelectOption
-            v-for="(v, k) in alertTypes"
+            v-for="(v, k) in alertTypeEnums"
             :key="`alertType_${k}`"
             :disabled="v.disabled"
             :value="k"
@@ -224,7 +224,7 @@
       </template>
       <template #alertEmail="{ model, field }">
         <!-- Alert Email -->
-        <template v-if="(alertType || []).includes('1')">
+        <template v-if="(alertTypeEnum || []).includes('1')">
           <Divider>
             <SvgIcon name="mail" size="20" />
             {{ t('setting.alarm.email') }}
@@ -254,7 +254,7 @@
         </template>
       </template>
 
-      <template #alertDingURL="{ model, field }" v-if="(alertType || []).includes('2')">
+      <template #alertDingURL="{ model, field }" v-if="(alertTypeEnum || []).includes('2')">
         <Divider>
           <SvgIcon name="dingtalk" size="20" />
           {{ t('setting.alarm.dingTalk') }}
@@ -280,14 +280,14 @@
       </template>
 
       <!-- WeChat -->
-      <template #weToken="{ model, field, schema }" v-if="(alertType || []).includes('4')">
+      <template #weToken="{ model, field, schema }" v-if="(alertTypeEnum || []).includes('4')">
         <Divider> <SvgIcon name="wecom" size="20" /> {{ t('setting.alarm.weChat') }} </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
           <InputTextArea v-model:value="model[field]" v-bind="schema.componentProps" />
         </FormItem>
       </template>
 
-      <template #alertSms="{ model, field, schema }" v-if="(alertType || []).includes('8')">
+      <template #alertSms="{ model, field, schema }" v-if="(alertTypeEnum || []).includes('8')">
         <Divider> <SvgIcon name="message" size="20" /> {{ t('setting.alarm.sms') }} </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
           <Input v-model:value="model[field]" v-bind="schema.componentProps" />
@@ -295,7 +295,7 @@
       </template>
 
       <!-- lark -->
-      <template #larkToken="{ model, field, schema }" v-if="(alertType || []).includes('16')">
+      <template #larkToken="{ model, field, schema }" v-if="(alertTypeEnum || []).includes('16')">
         <Divider> <SvgIcon name="lark" size="20" /> {{ t('setting.alarm.lark') }} </Divider>
         <FormItem :label="schema.label" :name="field" :rules="schema.rules">
           <Input

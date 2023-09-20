@@ -19,7 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.enums.LoginType;
+import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.UserService;
@@ -83,7 +83,7 @@ public class SsoController {
       throw new ApiAlertException("Please configure the correct Principal Name Attribute");
     }
 
-    User user = authenticator.authenticate(principal.getName(), null, LoginType.SSO.toString());
+    User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
     return userService.getLoginUserInfo(user);
   }
 }

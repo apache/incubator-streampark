@@ -29,8 +29,8 @@ import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.ApplicationLog;
-import org.apache.streampark.console.core.enums.AppExistsState;
-import org.apache.streampark.console.core.enums.PermissionType;
+import org.apache.streampark.console.core.enums.AppExistsStateEnum;
+import org.apache.streampark.console.core.enums.PermissionTypeEnum;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ResourceService;
@@ -92,7 +92,7 @@ public class ApplicationController {
 
   @Operation(summary = "Create application")
   @ApiAccess
-  @PermissionAction(id = "#app.teamId", type = PermissionType.TEAM)
+  @PermissionAction(id = "#app.teamId", type = PermissionTypeEnum.TEAM)
   @PostMapping("create")
   @RequiresPermissions("app:create")
   public RestResponse create(Application app) throws IOException {
@@ -118,7 +118,7 @@ public class ApplicationController {
     @Parameter(name = "args", description = "new application args", in = ParameterIn.QUERY)
   })
   @ApiAccess
-  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
   @PostMapping(value = "copy")
   @RequiresPermissions("app:copy")
   public RestResponse copy(@Parameter(hidden = true) Application app) throws IOException {
@@ -128,7 +128,7 @@ public class ApplicationController {
 
   @Operation(summary = "Update application")
   @AppUpdated
-  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
   @PostMapping("update")
   @RequiresPermissions("app:update")
   public RestResponse update(Application app) {
@@ -163,7 +163,7 @@ public class ApplicationController {
 
   @Operation(summary = "Revoke application")
   @AppUpdated
-  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
   @PostMapping("revoke")
   @RequiresPermissions("app:release")
   public RestResponse revoke(Application app) {
@@ -202,7 +202,7 @@ public class ApplicationController {
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @ApiAccess
-  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
   @PostMapping(value = "start")
   @RequiresPermissions("app:start")
   public RestResponse start(@Parameter(hidden = true) Application app) {
@@ -253,7 +253,7 @@ public class ApplicationController {
         example = "false",
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
-  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
   @PostMapping(value = "cancel")
   @RequiresPermissions("app:cancel")
   public RestResponse cancel(@Parameter(hidden = true) Application app) throws Exception {
@@ -264,7 +264,7 @@ public class ApplicationController {
   @Operation(summary = "Clean application")
   @AppUpdated
   @ApiAccess
-  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
   @PostMapping("clean")
   @RequiresPermissions("app:clean")
   public RestResponse clean(Application app) {
@@ -274,7 +274,7 @@ public class ApplicationController {
 
   /** force stop(stop normal start or in progress) */
   @Operation(summary = "Force stop application")
-  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
   @PostMapping("forcedStop")
   @RequiresPermissions("app:cancel")
   public RestResponse forcedStop(Application app) {
@@ -298,7 +298,7 @@ public class ApplicationController {
   @Operation(summary = "Check the application exist status")
   @PostMapping("checkName")
   public RestResponse checkName(Application app) {
-    AppExistsState exists = applicationInfoService.checkExists(app);
+    AppExistsStateEnum exists = applicationInfoService.checkExists(app);
     return RestResponse.success(exists.get());
   }
 
@@ -331,7 +331,7 @@ public class ApplicationController {
   }
 
   @Operation(summary = "Delete application operation log")
-  @PermissionAction(id = "#applicationLog.appId", type = PermissionType.APP)
+  @PermissionAction(id = "#applicationLog.appId", type = PermissionTypeEnum.APP)
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
   public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
@@ -340,7 +340,7 @@ public class ApplicationController {
   }
 
   @Operation(summary = "Delete application")
-  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
@@ -349,7 +349,7 @@ public class ApplicationController {
   }
 
   @Operation(summary = "Backup application when deleted")
-  @PermissionAction(id = "#backUp.appId", type = PermissionType.APP)
+  @PermissionAction(id = "#backUp.appId", type = PermissionTypeEnum.APP)
   @PostMapping("deletebak")
   public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
     Boolean deleted = backUpService.delete(backUp.getId());

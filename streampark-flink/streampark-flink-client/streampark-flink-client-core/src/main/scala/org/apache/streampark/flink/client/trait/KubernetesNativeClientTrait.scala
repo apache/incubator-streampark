@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
+import org.apache.streampark.common.enums.{ExecutionModeEnum, FlinkK8sRestExposedTypeEnum}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
@@ -48,7 +48,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
         covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType.get))
 
     if (submitRequest.buildResult != null) {
-      if (submitRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+      if (submitRequest.executionMode == ExecutionModeEnum.KUBERNETES_NATIVE_APPLICATION) {
         val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
         buildResult.podTemplatePaths.foreach(
           p => {
@@ -170,11 +170,11 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
         KubernetesConfigOptions.CLUSTER_ID)}, " +
       s"namespace=${conf.get(KubernetesConfigOptions.NAMESPACE)}"
 
-  private def covertToServiceExposedType(exposedType: FlinkK8sRestExposedType): ServiceExposedType =
+  private def covertToServiceExposedType(exposedType: FlinkK8sRestExposedTypeEnum): ServiceExposedType =
     exposedType match {
-      case FlinkK8sRestExposedType.CLUSTER_IP => ServiceExposedType.ClusterIP
-      case FlinkK8sRestExposedType.LOAD_BALANCER => ServiceExposedType.LoadBalancer
-      case FlinkK8sRestExposedType.NODE_PORT => ServiceExposedType.NodePort
+      case FlinkK8sRestExposedTypeEnum.CLUSTER_IP => ServiceExposedType.ClusterIP
+      case FlinkK8sRestExposedTypeEnum.LOAD_BALANCER => ServiceExposedType.LoadBalancer
+      case FlinkK8sRestExposedTypeEnum.NODE_PORT => ServiceExposedType.NodePort
       case _ => ServiceExposedType.LoadBalancer
     }
 

@@ -25,7 +25,7 @@ import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
-import org.apache.streampark.console.core.enums.GitAuthorizedError;
+import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -150,18 +150,18 @@ public class Project implements Serializable {
     }
   }
 
-  public GitAuthorizedError gitCheck() {
+  public GitAuthorizedErrorEnum gitCheck() {
     try {
       GitUtils.getBranchList(this);
-      return GitAuthorizedError.SUCCESS;
+      return GitAuthorizedErrorEnum.SUCCESS;
     } catch (Exception e) {
       String err = e.getMessage();
       if (err.contains("not authorized")) {
-        return GitAuthorizedError.ERROR;
+        return GitAuthorizedErrorEnum.ERROR;
       } else if (err.contains("Authentication is required")) {
-        return GitAuthorizedError.REQUIRED;
+        return GitAuthorizedErrorEnum.REQUIRED;
       }
-      return GitAuthorizedError.UNKNOW;
+      return GitAuthorizedErrorEnum.UNKNOW;
     }
   }
 

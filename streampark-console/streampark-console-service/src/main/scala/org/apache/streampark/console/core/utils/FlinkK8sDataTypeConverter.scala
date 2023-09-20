@@ -18,9 +18,8 @@
 package org.apache.streampark.console.core.utils
 
 import org.apache.streampark.common.conf.{InternalConfigHolder, K8sFlinkConfig}
-import org.apache.streampark.common.enums.{ClusterState, ExecutionMode}
+import org.apache.streampark.common.enums.{ClusterStateEnum, ExecutionModeEnum}
 import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
-import org.apache.streampark.console.core.enums.FlinkAppState
 import org.apache.streampark.console.core.service.SettingService
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.genSessionJobCRName
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
@@ -29,6 +28,7 @@ import org.apache.streampark.flink.kubernetes.v2.model.EvalJobState.EvalJobState
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ClusterKey
 
 import org.apache.commons.lang3.StringUtils
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -72,20 +72,20 @@ object FlinkK8sDataTypeConverter {
     s"$clusterId-${UUID.randomUUID().toString.replace("-", "").take(8)}"
   }
 
-  /** Convert [[EvalJobState]] to [[FlinkAppState]]. */
-  def k8sEvalJobStateToFlinkAppState(jobState: EvalJobState): FlinkAppState = {
-    Try(FlinkAppState.valueOf(jobState.toString)).getOrElse(FlinkAppState.OTHER)
+  /** Convert [[EvalJobState]] to [[FlinkAppStateEnum]]. */
+  def k8sEvalJobStateToFlinkAppState(jobState: EvalJobState): FlinkAppStateEnum = {
+    Try(FlinkAppStateEnum.valueOf(jobState.toString)).getOrElse(FlinkAppStateEnum.OTHER)
   }
 
-  /** Convert [[DeployCRStatus]] to [[ClusterState]]. */
-  def k8sDeployStateToClusterState(crState: DeployCRStatus): ClusterState = {
+  /** Convert [[DeployCRStatus]] to [[ClusterStateEnum]]. */
+  def k8sDeployStateToClusterState(crState: DeployCRStatus): ClusterStateEnum = {
     crState.evalState match {
-      case EvalState.DEPLOYING => ClusterState.STARTING
-      case EvalState.READY     => ClusterState.RUNNING
-      case EvalState.SUSPENDED => ClusterState.CANCELED
-      case EvalState.FAILED    => ClusterState.FAILED
-      case EvalState.DELETED   => ClusterState.KILLED
-      case _                   => ClusterState.UNKNOWN
+      case EvalState.DEPLOYING => ClusterStateEnum.STARTING
+      case EvalState.READY     => ClusterStateEnum.RUNNING
+      case EvalState.SUSPENDED => ClusterStateEnum.CANCELED
+      case EvalState.FAILED    => ClusterStateEnum.FAILED
+      case EvalState.DELETED   => ClusterStateEnum.KILLED
+      case _                   => ClusterStateEnum.UNKNOWN
     }
   }
 
@@ -110,7 +110,7 @@ object FlinkK8sDataTypeConverter {
     val isLegal = {
       flinkCluster != null &&
       flinkCluster.getId != null &&
-      ExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode) &&
+      ExecutionModeEnum.isKubernetesSessionMode(flinkCluster.getExecutionMode) &&
       StringUtils.isNoneBlank(flinkCluster.getClusterId) &&
       StringUtils.isNoneBlank(flinkCluster.getK8sNamespace)
     }
@@ -120,12 +120,12 @@ object FlinkK8sDataTypeConverter {
 
   /** Convert [[Application]] to [[TrackKey]]. */
   def applicationToTrackKey(app: Application): Option[TrackKey] = {
-    import ExecutionMode._
+    import org.apache.streampark.common.enums.ExecutionModeEnum._
 
     val isLegal = {
       app != null &&
       app.getId != null &&
-      ExecutionMode.isKubernetesSessionMode(app.getExecutionMode) &&
+      ExecutionModeEnum.isKubernetesSessionMode(app.getExecutionMode) &&
       StringUtils.isNoneBlank(app.getClusterId) &&
       StringUtils.isNoneBlank(app.getK8sNamespace)
     }

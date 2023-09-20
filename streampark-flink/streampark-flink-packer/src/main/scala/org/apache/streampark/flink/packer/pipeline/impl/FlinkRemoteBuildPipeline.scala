@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
-import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.enums.DevelopmentModeEnum
 import org.apache.streampark.common.fs.{FsOperator, LfsOperator}
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
@@ -50,7 +50,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
       val shadedJar =
         execStep(2) {
           request.developmentMode match {
-            case DevelopmentMode.FLINK_SQL =>
+            case DevelopmentModeEnum.FLINK_SQL =>
               val output = MavenTool.buildFatJar(
                 request.mainClass,
                 request.providedLibs,
@@ -64,7 +64,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
       val mavenJars =
         execStep(3) {
           request.developmentMode match {
-            case DevelopmentMode.PYFLINK =>
+            case DevelopmentModeEnum.PYFLINK =>
               val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts.asJava)
               mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
             case _ => List[String]()
@@ -73,7 +73,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
 
       execStep(4) {
         request.developmentMode match {
-          case DevelopmentMode.PYFLINK =>
+          case DevelopmentModeEnum.PYFLINK =>
             mavenJars.foreach(
               jar => {
                 val lfs: FsOperator = FsOperator.lfs

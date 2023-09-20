@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.annotation;
 
-import org.apache.streampark.console.core.enums.PermissionType;
+import org.apache.streampark.console.core.enums.PermissionTypeEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -29,5 +29,5 @@ import java.lang.annotation.Target;
 public @interface PermissionAction {
   String id();
 
-  PermissionType type();
+  PermissionTypeEnum type();
 }

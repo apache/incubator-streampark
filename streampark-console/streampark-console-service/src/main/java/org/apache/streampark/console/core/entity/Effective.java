@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.console.core.enums.EffectiveType;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -45,11 +45,11 @@ public class Effective {
   private Long targetId;
   private Date createTime;
 
-  private transient EffectiveType effectiveType;
+  private transient EffectiveTypeEnum effectiveTypeEnum;
 
   public Effective() {}
 
-  public Effective(Long appId, EffectiveType type, Long targetId) {
+  public Effective(Long appId, EffectiveTypeEnum type, Long targetId) {
     this.appId = appId;
     this.targetType = type.getType();
     this.targetId = targetId;
