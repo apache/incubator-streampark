@@ -112,11 +112,10 @@ case class SubmitRequest(
     } else {
       lazy val content = DeflaterUtils.unzipString(this.appConf.trim.drop(7))
       val map = format match {
-        case "yaml://" => PropertiesUtils.parseYamlText(content)
-        case "conf://" => PropertiesUtils.parseHoconText(content)
-        case "prop://" => PropertiesUtils.parsePropertiesText(content)
+        case "yaml://" => PropertiesUtils.fromYamlText(content)
+        case "conf://" => PropertiesUtils.fromHoconText(content)
+        case "prop://" => PropertiesUtils.fromPropertiesText(content)
         case "hdfs://" =>
-          // 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
           /**
            * If the configuration file is HDFS mode, you need to copy the HDFS related configuration
            * file to resources.
@@ -124,9 +123,9 @@ case class SubmitRequest(
           val text = HdfsUtils.read(this.appConf)
           val extension = this.appConf.split("\\.").last.toLowerCase
           extension match {
-            case "yml" | "yaml" => PropertiesUtils.parseYamlText(text)
-            case "conf" => PropertiesUtils.parseHoconText(text)
-            case "properties" => PropertiesUtils.parsePropertiesText(text)
+            case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+            case "conf" => PropertiesUtils.fromHoconText(text)
+            case "properties" => PropertiesUtils.fromPropertiesText(text)
             case _ =>
               throw new IllegalArgumentException(
                 "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]")
@@ -143,7 +142,6 @@ case class SubmitRequest(
 
   private[client] lazy val hdfsWorkspace = {
 
-    /** 必须保持本机flink和hdfs里的flink版本和配置都完全一致. */
     /**
      * The flink version and configuration in the native flink and hdfs must be kept exactly the
      * same.

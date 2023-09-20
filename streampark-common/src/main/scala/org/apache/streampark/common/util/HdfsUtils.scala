@@ -29,15 +29,15 @@ import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
 
-  def getDefaultFS: String = HadoopUtils.loadHadoopConf.get(FileSystem.FS_DEFAULT_NAME_KEY)
+  def getDefaultFS: String = HadoopUtils.hadoopConf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
   def list(src: String): List[FileStatus] =
-    HadoopUtils.getOrCreateHdfs.listStatus(getPath(src)).toList
+    HadoopUtils.hdfs.listStatus(getPath(src)).toList
 
   def move(src: String, dst: String): Unit =
-    HadoopUtils.getOrCreateHdfs.rename(getPath(src), getPath(dst))
+    HadoopUtils.hdfs.rename(getPath(src), getPath(dst))
 
-  def mkdirs(path: String): Unit = HadoopUtils.getOrCreateHdfs.mkdirs(getPath(path))
+  def mkdirs(path: String): Unit = HadoopUtils.hdfs.mkdirs(getPath(path))
 
   def copyHdfs(
       src: String,
@@ -46,20 +46,20 @@ object HdfsUtils extends Logger {
       overwrite: Boolean = true): Unit = {
     val srcPath = getPath(src)
     val dstPath = getPath(dst)
-    val dstStatus = HadoopUtils.getOrCreateHdfs.getFileStatus(dstPath)
+    val dstStatus = HadoopUtils.hdfs.getFileStatus(dstPath)
     val dstFinalPath =
       if (dstStatus.isFile) dstPath
       else {
         getPath(s"$dst/${srcPath.getName}")
       }
     FileUtil.copy(
-      HadoopUtils.getOrCreateHdfs,
+      HadoopUtils.hdfs,
       srcPath,
-      HadoopUtils.getOrCreateHdfs,
+      HadoopUtils.hdfs,
       dstFinalPath,
       delSrc,
       overwrite,
-      HadoopUtils.loadHadoopConf)
+      HadoopUtils.hadoopConf)
   }
 
   def copyHdfsDir(
@@ -70,38 +70,33 @@ object HdfsUtils extends Logger {
     list(src).foreach(
       x =>
         FileUtil.copy(
-          HadoopUtils.getOrCreateHdfs,
+          HadoopUtils.hdfs,
           x,
-          HadoopUtils.getOrCreateHdfs,
+          HadoopUtils.hdfs,
           getPath(dst),
           delSrc,
           overwrite,
-          HadoopUtils.loadHadoopConf))
+          HadoopUtils.hadoopConf))
   }
 
   def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
-    HadoopUtils.getOrCreateHdfs.copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst))
+    HadoopUtils.hdfs.copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst))
 
   def uploadMulti(
       src: Array[String],
       dst: String,
       delSrc: Boolean = false,
       overwrite: Boolean = true): Unit =
-    HadoopUtils.getOrCreateHdfs.copyFromLocalFile(delSrc, overwrite, src.map(getPath), getPath(dst))
+    HadoopUtils.hdfs.copyFromLocalFile(delSrc, overwrite, src.map(getPath), getPath(dst))
 
   def download(
       src: String,
       dst: String,
       delSrc: Boolean = false,
       useRawLocalFileSystem: Boolean = false): Unit =
-    HadoopUtils.getOrCreateHdfs.copyToLocalFile(
-      delSrc,
-      getPath(src),
-      getPath(dst),
-      useRawLocalFileSystem)
+    HadoopUtils.hdfs.copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem)
 
-  def getNameNode: String = Try(
-    getAddressOfActive(HadoopUtils.getOrCreateHdfs).getHostString) match {
+  def getNameNode: String = Try(getAddressOfActive(HadoopUtils.hdfs).getHostString) match {
     case Success(value) => value
     case Failure(exception) => throw exception
   }
@@ -115,24 +110,22 @@ object HdfsUtils extends Logger {
    */
   def create(fileName: String, content: String): Unit = {
     val path: Path = getPath(fileName)
-    require(
-      HadoopUtils.getOrCreateHdfs.exists(path),
-      s"[StreamPark] HdfsUtils.create $fileName is exists!! ")
-    val outputStream: FSDataOutputStream = HadoopUtils.getOrCreateHdfs.create(path)
+    require(HadoopUtils.hdfs.exists(path), s"[StreamPark] HdfsUtils.create $fileName is exists!! ")
+    val outputStream: FSDataOutputStream = HadoopUtils.hdfs.create(path)
     outputStream.writeUTF(content)
     outputStream.flush()
     outputStream.close()
   }
 
-  def exists(path: String): Boolean = HadoopUtils.getOrCreateHdfs.exists(getPath(path))
+  def exists(path: String): Boolean = HadoopUtils.hdfs.exists(getPath(path))
 
   def read(fileName: String): String = {
     val path: Path = getPath(fileName)
     require(
-      HadoopUtils.getOrCreateHdfs.exists(path) && !HadoopUtils.getOrCreateHdfs.isDirectory(path),
+      HadoopUtils.hdfs.exists(path) && !HadoopUtils.hdfs.isDirectory(path),
       s"[StreamPark] HdfsUtils.read: path($fileName) not exists or isDirectory "
     )
-    val in = HadoopUtils.getOrCreateHdfs.open(path)
+    val in = HadoopUtils.hdfs.open(path)
     val out = new ByteArrayOutputStream()
     IOUtils.copyBytes(in, out, 4096, false)
     out.flush()
@@ -143,8 +136,8 @@ object HdfsUtils extends Logger {
 
   def delete(src: String): Unit = {
     val path: Path = getPath(src)
-    if (HadoopUtils.getOrCreateHdfs.exists(path)) {
-      HadoopUtils.getOrCreateHdfs.delete(path, true)
+    if (HadoopUtils.hdfs.exists(path)) {
+      HadoopUtils.hdfs.delete(path, true)
     } else {
       logWarn(s"hdfs delete $src,but file $src is not exists!")
     }
@@ -152,7 +145,7 @@ object HdfsUtils extends Logger {
 
   def computeFileNameMd5(fileName: String): String = {
     val path = getPath(fileName)
-    val in = HadoopUtils.getOrCreateHdfs.open(path)
+    val in = HadoopUtils.hdfs.open(path)
     Try(DigestUtils.md5Hex(in)) match {
       case Success(s) =>
         in.close()
@@ -165,7 +158,7 @@ object HdfsUtils extends Logger {
 
   def downToLocal(hdfsPath: String, localPath: String): Unit = {
     val path: Path = getPath(hdfsPath)
-    val input: FSDataInputStream = HadoopUtils.getOrCreateHdfs.open(path)
+    val input: FSDataInputStream = HadoopUtils.hdfs.open(path)
     val content: String = input.readUTF
     val fw: FileWriter = new FileWriter(localPath)
     fw.write(content)

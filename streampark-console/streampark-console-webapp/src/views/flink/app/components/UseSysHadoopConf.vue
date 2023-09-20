@@ -30,12 +30,12 @@
   import HadoopConfDrawer from './HadoopConfDrawer.vue';
   const { t } = useI18n();
   defineProps({
-    loadHadoopConf: {
+    hadoopConf: {
       type: Boolean,
       required: true,
     },
   });
-  const emit = defineEmits(['update:loadHadoopConf']);
+  const emit = defineEmits(['update:hadoopConf']);
   const [registerHadoopConf, { openDrawer: openHadoopConfDrawer }] = useDrawer();
 </script>
 
@@ -44,8 +44,8 @@
     <Switch
       checked-children="ON"
       un-checked-children="OFF"
-      :checked="loadHadoopConf"
-      @change="(checked) => emit('update:loadHadoopConf', checked)"
+      :checked="hadoopConf"
+      @change="(checked) => emit('update:hadoopConf', checked)"
     />
     <Space>
       <Popover title="Tips">
@@ -56,7 +56,7 @@
         <Icon icon="ant-design:question-circle-outlined" class="ml-10px" />
       </Popover>
       <transition name="slide-fade">
-        <a-button size="small" v-if="loadHadoopConf" @click="openHadoopConfDrawer(true, {})">
+        <a-button size="small" v-if="hadoopConf" @click="openHadoopConfDrawer(true, {})">
           <div class="flex items-center">
             <Icon icon="ant-design:eye-outlined" class="pr-5px" />
 

@@ -57,7 +57,7 @@ object SqlClient extends App {
           parameterTool.get(KEY_APP_CONF(), null) match {
             case null => defaultMode
             case f =>
-              val parameter = PropertiesUtils.parseYamlText(DeflaterUtils.unzipString(f.drop(7)))
+              val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(f.drop(7)))
               // 3) application conf execution.runtime-mode
               parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode)
           }

@@ -108,9 +108,9 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     def readConfig(text: String): Map[String, String] = {
       val format = config.split("\\.").last.toLowerCase
       format match {
-        case "yml" | "yaml" => PropertiesUtils.parseYamlText(text)
-        case "conf" => PropertiesUtils.parseHoconText(text)
-        case "properties" => PropertiesUtils.parsePropertiesText(text)
+        case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+        case "conf" => PropertiesUtils.fromHoconText(text)
+        case "properties" => PropertiesUtils.fromPropertiesText(text)
         case _ =>
           throw new IllegalArgumentException(
             "[StreamPark] Usage: application config file error,must be [yaml|conf|properties]")
@@ -118,9 +118,9 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     }
 
     val map = config match {
-      case x if x.startsWith("yaml://") => PropertiesUtils.parseYamlText(content)
-      case x if x.startsWith("conf://") => PropertiesUtils.parseHoconText(content)
-      case x if x.startsWith("prop://") => PropertiesUtils.parsePropertiesText(content)
+      case x if x.startsWith("yaml://") => PropertiesUtils.fromYamlText(content)
+      case x if x.startsWith("conf://") => PropertiesUtils.fromHoconText(content)
+      case x if x.startsWith("prop://") => PropertiesUtils.fromPropertiesText(content)
       case x if x.startsWith("hdfs://") =>
         // If the configuration file with the hdfs, user will need to copy the hdfs-related configuration files under the resources dir
         val text = HdfsUtils.read(x)

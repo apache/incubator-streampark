@@ -65,13 +65,13 @@ object HadoopUtils extends Logger {
     SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME, null) match {
       case null =>
         getClass.getResourceAsStream("/kerberos.yml") match {
-          case x if x != null => PropertiesUtils.loadYamlFile(x)
+          case x if x != null => PropertiesUtils.fromYamlFile(x)
           case _ => null
         }
       case f =>
         val file = new File(s"$f/conf/kerberos.yml")
         if (file.exists() && file.isFile) {
-          PropertiesUtils.loadYamlFile(file.getAbsolutePath)
+          PropertiesUtils.fromYamlFile(file.getAbsolutePath)
         } else null
     }
 
@@ -160,7 +160,7 @@ object HadoopUtils extends Logger {
    * Automatically goes to $HADOOP_HOME/etc/hadoop to load the configuration.<br> We recommend the
    * second method, without copying the configuration files.<br> </pre>
    */
-  def loadHadoopConf: Configuration = Option(reusableConf).getOrElse {
+  def hadoopConf: Configuration = Option(reusableConf).getOrElse {
     reusableConf = getConfigurationFromHadoopConfDir(hadoopConfDir)
     // add hadoopConfDir to classpath...you know why???
     ClassLoaderUtils.loadResource(hadoopConfDir)
@@ -214,10 +214,10 @@ object HadoopUtils extends Logger {
 
     System.setProperty("sun.security.spnego.debug", kerberosDebug)
     System.setProperty("sun.security.krb5.debug", kerberosDebug)
-    loadHadoopConf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
+    hadoopConf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
 
     Try {
-      UserGroupInformation.setConfiguration(loadHadoopConf)
+      UserGroupInformation.setConfiguration(hadoopConf)
       val ugi =
         UserGroupInformation.loginUserFromKeytabAndReturnUGI(kerberosPrincipal, kerberosKeytab)
       UserGroupInformation.setLoginUser(ugi)
@@ -229,12 +229,12 @@ object HadoopUtils extends Logger {
     }
   }
 
-  def getOrCreateHdfs: FileSystem = {
+  def hdfs: FileSystem = {
     Option(reusableHdfs).getOrElse {
       reusableHdfs = Try {
         getUgi().doAs[FileSystem](new PrivilegedAction[FileSystem]() {
           // scalastyle:off FileSystemGet
-          override def run(): FileSystem = FileSystem.get(loadHadoopConf)
+          override def run(): FileSystem = FileSystem.get(hadoopConf)
           // scalastyle:on FileSystemGet
         })
       } match {
@@ -264,10 +264,10 @@ object HadoopUtils extends Logger {
     }
   }
 
-  def createYarnClient: YarnClient = {
+  def yarnClient: YarnClient = {
     if (reusableYarnClient == null || !reusableYarnClient.isInState(STATE.STARTED)) {
       reusableYarnClient = YarnClient.createYarnClient
-      val yarnConf = new YarnConfiguration(loadHadoopConf)
+      val yarnConf = new YarnConfiguration(hadoopConf)
       reusableYarnClient.init(yarnConf)
       reusableYarnClient.start()
     }
