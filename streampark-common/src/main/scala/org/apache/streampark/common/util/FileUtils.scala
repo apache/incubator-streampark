@@ -18,6 +18,8 @@ package org.apache.streampark.common.util
 
 import org.apache.streampark.common.util.ImplicitsUtils._
 
+import org.apache.commons.lang3.StringUtils
+
 import java.io._
 import java.net.URL
 import java.nio.ByteBuffer
@@ -56,6 +58,16 @@ object FileUtils {
         in.read(b, 0, b.length)
         bytesToHexString(b)
       }) == "504B0304"
+  }
+
+  def isPythonFileType(contentType: String): Boolean = {
+    if (
+      StringUtils.isNotBlank(contentType) && contentType.equalsIgnoreCase("text/x-python-script")
+    ) {
+      true
+    } else {
+      false
+    }
   }
 
   def isJarFileType(file: File): Boolean = {
