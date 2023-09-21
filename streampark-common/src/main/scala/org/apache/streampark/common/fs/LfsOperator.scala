@@ -133,9 +133,9 @@ object LfsOperator extends FsOperator with Logger {
   override def computeFileNameMd5(path: String): String = {
     require(
       path != null && path.nonEmpty,
-      s"[StreamPark] LFsOperator.fileMd5: file must not be null.")
+      s"[StreamPark] LFsOperator.computeFileNameMd5: file must not be null.")
     val file = new File(path)
-    require(file.exists, s"[StreamPark] LFsOperator.fileMd5: file must exists.")
+    require(file.exists, s"[StreamPark] LFsOperator.computeFileNameMd5: file must exists.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 

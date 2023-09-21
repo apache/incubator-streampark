@@ -60,7 +60,7 @@ object HdfsOperator extends FsOperator with Logger {
   override def computeFileNameMd5(path: String): String = {
     require(
       path != null && path.nonEmpty,
-      "[StreamPark] HdfsOperator.fileMd5: file must not be null.")
+      "[StreamPark] HdfsOperator.computeFileNameMd5: file must not be null.")
     HdfsUtils.computeFileNameMd5(convertToHdfsPath(path))
   }
 
