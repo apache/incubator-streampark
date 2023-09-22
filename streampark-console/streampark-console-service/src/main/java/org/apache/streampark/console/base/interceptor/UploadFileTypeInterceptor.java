@@ -46,7 +46,8 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
             multipartFile, "File to upload can't be null. Upload file failed.");
         boolean isJarOrPyFile =
             FileUtils.isJarFileType(multipartFile.getInputStream())
-                || FileUtils.isPythonFileType(multipartFile.getContentType());
+                || FileUtils.isPythonFileType(
+                    multipartFile.getContentType(), multipartFile.getInputStream());
         ApiAlertException.throwIfFalse(
             isJarOrPyFile,
             "Illegal file type, Only support standard jar or py files. Upload file failed.");

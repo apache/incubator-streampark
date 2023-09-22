@@ -19,6 +19,10 @@ package org.apache.streampark.common.util
 import org.apache.streampark.common.util.ImplicitsUtils._
 
 import org.apache.commons.lang3.StringUtils
+import org.apache.tika.metadata.{HttpHeaders, Metadata}
+import org.apache.tika.mime.MediaType
+import org.apache.tika.parser.{AutoDetectParser, ParseContext}
+import org.xml.sax.helpers.DefaultHandler
 
 import java.io._
 import java.net.URL
@@ -60,9 +64,26 @@ object FileUtils {
       }) == "504B0304"
   }
 
-  def isPythonFileType(contentType: String): Boolean =
-    StringUtils.isNotBlank(
-      contentType) && ("text/x-python" == contentType || "text/x-python-script" == contentType)
+  def isPythonFileType(contentType: String, input: InputStream): Boolean = {
+    if (StringUtils.isBlank(contentType) || input == null) {
+      throw new RuntimeException("The contentType or inputStream can not be null")
+    }
+
+    if (
+      contentType.contains("text/x-python") && getMimeType(input).equals(
+        MediaType.TEXT_PLAIN.toString)
+    ) {
+      return true
+    }
+    false
+  }
+
+  def getMimeType(stream: InputStream): String = {
+    val metadata: Metadata = new Metadata
+    val parser: AutoDetectParser = new AutoDetectParser
+    parser.parse(stream, new DefaultHandler, metadata, new ParseContext)
+    metadata.get(HttpHeaders.CONTENT_TYPE)
+  }
 
   def isJarFileType(file: File): Boolean = {
     if (!file.exists || !file.isFile) {
