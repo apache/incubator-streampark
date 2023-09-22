@@ -30,13 +30,14 @@ import org.apache.streampark.console.core.service.alert.AlertService
 import org.apache.streampark.console.core.service.application.ApplicationInfoService
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.{applicationToTrackKey, clusterMetricsToFlinkMetricCV, flinkClusterToClusterKey, k8sDeployStateToClusterState}
-import org.apache.streampark.console.core.utils.MybatisScalaExt.{lambdaQuery, lambdaUpdate, LambdaQueryOps, LambdaUpdateOps}
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
 import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.{ApplicationJobKey, ClusterKey}
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserverSnapSubscriptionHelper.{ClusterMetricsSnapsSubscriptionOps, DeployCRSnapsSubscriptionOps, RestSvcEndpointSnapsSubscriptionOps}
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import zio.{Fiber, Ref, UIO, ZIO}
@@ -48,8 +49,6 @@ import javax.annotation.{PostConstruct, PreDestroy}
 
 import java.lang
 import java.util.Date
-
-import scala.jdk.CollectionConverters.collectionAsScalaIterableConverter
 
 /** Broker of FlinkK8sObserver which is the observer for Flink on Kubernetes */
 @Component
@@ -113,7 +112,8 @@ class FlinkK8sObserverBroker @Autowired() (
 
     val fromApplicationRecords: UIO[Unit] = it
       .safeFindApplication(
-        lambdaQuery[Application].typedIn(_.getExecutionMode, ExecutionMode.getKubernetesMode.asScala)
+        new LambdaQueryWrapper[Application]
+          .in(Application.SFunc.EXECUTION_MODE, ExecutionMode.getKubernetesMode)
       )(10)
       .map(apps => apps.map(app => applicationToTrackKey(app)).filterSome.toVector)
       .tap(keys => logInfo(s"Restore Flink K8s track-keys from Application records:\n${keys.prettyStr}"))
@@ -121,7 +121,8 @@ class FlinkK8sObserverBroker @Autowired() (
 
     val fromFlinkClusterRecords: UIO[Unit] = it
       .safeFindFlinkClusterRecord(
-        lambdaQuery[FlinkCluster].typedEq(_.getExecutionMode, ExecutionMode.KUBERNETES_NATIVE_SESSION.getMode)
+        new LambdaQueryWrapper[FlinkCluster]
+          .eq(FlinkCluster.SFunc.EXECUTION_MODE, ExecutionMode.KUBERNETES_NATIVE_SESSION.getMode)
       )(10)
       .map(clusters => clusters.map(e => TrackKey.cluster(e.getId, e.getK8sNamespace, e.getClusterId)))
       .tap(keys => logInfo(s"Restore Flink K8s track-keys from FlinkCluster records:\n${keys.prettyStr}"))
@@ -140,27 +141,27 @@ class FlinkK8sObserverBroker @Autowired() (
       .tap { case (snap: JobSnapshot, convertedState: FlinkAppState) =>
         safeUpdateApplicationRecord(snap.appId) {
 
-          var update = lambdaUpdate[Application]
-            .typedSet(_.getState, convertedState.getValue)
-            .typedSet(_.getOptions, OptionState.NONE.getValue)
+          var update = new LambdaUpdateWrapper[Application]
+            .set(Application.SFunc.STATE, convertedState.getValue)
+            .set(Application.SFunc.OPTIONS, OptionState.NONE.getValue)
           // update JobStatus related columns
           snap.jobStatus.foreach { status =>
             update = update
-              .typedSet(_.getJobId, status.jobId)
-              .typedSet(_.getStartTime, new Date(status.startTs))
-              .typedSet(_.getEndTime, status.endTs.map(new Date(_)).orNull)
-              .typedSet(_.getDuration, status.duration)
-              .typedSet(_.getTotalTask, status.tasks.map(_.total).getOrElse(0))
+              .set(Application.SFunc.JOB_ID, status.jobId)
+              .set(Application.SFunc.START_TIME, new Date(status.startTs))
+              .set(Application.SFunc.END_TIME, status.endTs.map(new Date(_)).orNull)
+              .set(Application.SFunc.DURATION, status.duration)
+              .set(Application.SFunc.TOTAL_TASK, status.tasks.map(_.total).getOrElse(0))
           }
           // Copy the logic from resources/mapper/core/ApplicationMapper.xml:persistMetrics
           if (FlinkAppState.isEndState(convertedState.getValue)) {
             update = update
-              .typedSet(_.getTotalTM, null)
-              .typedSet(_.getTotalSlot, null)
-              .typedSet(_.getTotalSlot, null)
-              .typedSet(_.getAvailableSlot, null)
-              .typedSet(_.getJmMemory, null)
-              .typedSet(_.getTmMemory, null)
+              .set(Application.SFunc.TOTAL_TM, null)
+              .set(Application.SFunc.TOTAL_SLOT, null)
+              .set(Application.SFunc.AVAILABLE_SLOT, null)
+              .set(Application.SFunc.TOTAL_TASK, null)
+              .set(Application.SFunc.JM_MEMORY, null)
+              .set(Application.SFunc.TM_MEMORY, null)
           }
           update
         }
@@ -196,12 +197,12 @@ class FlinkK8sObserverBroker @Autowired() (
         // Update metrics info of the corresponding Application record
         substream.mapZIO { case (trackKey: ApplicationJobKey, metrics: ClusterMetrics) =>
           safeUpdateApplicationRecord(trackKey.id)(
-            lambdaUpdate[Application]
-              .typedSet(_.getJmMemory, metrics.totalJmMemory)
-              .typedSet(_.getTmMemory, metrics.totalTmMemory)
-              .typedSet(_.getTotalTM, metrics.totalTm)
-              .typedSet(_.getTotalSlot, metrics.totalSlot)
-              .typedSet(_.getAvailableSlot, metrics.availableSlot))
+            new LambdaUpdateWrapper[Application]
+              .set(Application.SFunc.JM_MEMORY, metrics.totalJmMemory)
+              .set(Application.SFunc.TM_MEMORY, metrics.totalTmMemory)
+              .set(Application.SFunc.TOTAL_TM, metrics.totalTm)
+              .set(Application.SFunc.TOTAL_SLOT, metrics.totalSlot)
+              .set(Application.SFunc.AVAILABLE_SLOT, metrics.availableSlot))
         }
       }
       .runDrain
@@ -219,9 +220,9 @@ class FlinkK8sObserverBroker @Autowired() (
         // Update the corresponding FlinkCluster record
         .tap { case (id, state, error) =>
           safeUpdateFlinkClusterRecord(id)(
-            lambdaUpdate[FlinkCluster]
-              .typedSet(_.getClusterState, state.getState)
-              .typedSet(error.isDefined, _.getException, error.get))
+            new LambdaUpdateWrapper[FlinkCluster]
+              .set(FlinkCluster.SFunc.CLUSTER_STATE, state.getValue)
+              .set(error.isDefined, FlinkCluster.SFunc.EXCEPTION, error.get))
         }
         // Alter for unhealthy state in parallel
         .filter { case (_, state, _) => alertClusterStateList.contains(state) }
@@ -258,7 +259,9 @@ class FlinkK8sObserverBroker @Autowired() (
       .groupByKey(_._1.id) { case (_, substream) =>
         // Update jobManagerUrl of the corresponding Application record
         substream.mapZIO { case (key: ApplicationJobKey, endpoint: RestSvcEndpoint) =>
-          safeUpdateApplicationRecord(key.id)(lambdaUpdate[Application].typedSet(_.getJobManagerUrl, endpoint.ipRest))
+          safeUpdateApplicationRecord(key.id)(
+            new LambdaUpdateWrapper[Application].set(Application.SFunc.JOB_MANAGER_URL, endpoint.ipRest)
+          )
         }
       }
       .runDrain
@@ -274,9 +277,9 @@ class FlinkK8sObserverBroker @Autowired() (
       .groupByKey(_._1) { case (_, substream) =>
         substream.mapZIO { case (key: ClusterKey, endpoint: RestSvcEndpoint) =>
           safeUpdateFlinkClusterRecord(key.id)(
-            lambdaUpdate[FlinkCluster]
-              .typedSet(_.getAddress, endpoint.ipRest)
-              .typedSet(_.getJobManagerUrl, endpoint.ipRest))
+            new LambdaUpdateWrapper[FlinkCluster]
+              .set(FlinkCluster.SFunc.ADDRESS, endpoint.ipRest)
+              .set(FlinkCluster.SFunc.JOB_MANAGER_URL, endpoint.ipRest))
         }
       }
       .runDrain

@@ -25,7 +25,7 @@ object K8sFlinkConfig {
   val ENABLE_V2: InternalOption = InternalOption(
     key = "streampark.flink-k8s.enable-v2",
     defaultValue = false,
-    classType = classOf[Boolean],
+    classType = classOf[java.lang.Boolean],
     description =
       "Whether to enable the v2 version(base on flink-kubernetes-operator) of flink kubernetes operation"
   )
