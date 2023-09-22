@@ -36,6 +36,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -185,5 +186,17 @@ public class FlinkCluster implements Serializable {
       map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
     }
     return map;
+  }
+
+  public static class SFunc {
+    public static final SFunction<FlinkCluster, Long> ID = FlinkCluster::getId;
+    public static final SFunction<FlinkCluster, String> ADDRESS = FlinkCluster::getAddress;
+    public static final SFunction<FlinkCluster, String> JOB_MANAGER_URL =
+        FlinkCluster::getJobManagerUrl;
+    public static final SFunction<FlinkCluster, Integer> CLUSTER_STATE =
+        FlinkCluster::getClusterState;
+    public static final SFunction<FlinkCluster, Integer> EXECUTION_MODE =
+        FlinkCluster::getExecutionMode;
+    public static final SFunction<FlinkCluster, String> EXCEPTION = FlinkCluster::getException;
   }
 }
