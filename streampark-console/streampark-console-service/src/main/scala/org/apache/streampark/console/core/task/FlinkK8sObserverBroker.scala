@@ -221,7 +221,7 @@ class FlinkK8sObserverBroker @Autowired() (
         .tap { case (id, state, error) =>
           safeUpdateFlinkClusterRecord(id)(
             new LambdaUpdateWrapper[FlinkCluster]
-              .set(FlinkCluster.SFunc.CLUSTER_STATE, state.getValue)
+              .set(FlinkCluster.SFunc.CLUSTER_STATE, state.getState)
               .set(error.isDefined, FlinkCluster.SFunc.EXCEPTION, error.get))
         }
         // Alter for unhealthy state in parallel
