@@ -116,6 +116,18 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
       ))
   }
 
+  override def doCancel(
+      cancelRequest: CancelRequest,
+      flinkConfig: Configuration): CancelResponse = {
+    super.doCancel(cancelRequest, flinkConfig)
+  }
+
+  override def doTriggerSavepoint(
+      request: TriggerSavepointRequest,
+      flinkConf: Configuration): SavepointResponse = {
+    super.doTriggerSavepoint(request, flinkConf)
+  }
+
   /** Shutdown Flink cluster. */
   @throws[Throwable]
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {

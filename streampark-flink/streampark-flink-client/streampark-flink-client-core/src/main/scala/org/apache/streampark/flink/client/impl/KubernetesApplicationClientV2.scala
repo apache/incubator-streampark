@@ -76,6 +76,18 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
     )
   }
 
+  override def doCancel(
+      cancelRequest: CancelRequest,
+      flinkConfig: Configuration): CancelResponse = {
+    super.doCancel(cancelRequest, flinkConfig)
+  }
+
+  override def doTriggerSavepoint(
+      request: TriggerSavepointRequest,
+      flinkConf: Configuration): SavepointResponse = {
+    super.doTriggerSavepoint(request, flinkConf)
+  }
+
   // Generate FlinkDeployment CR definition, it is a pure effect function.
   private def genFlinkDeployDef(
       submitReq: SubmitRequest,
