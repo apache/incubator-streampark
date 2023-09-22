@@ -131,6 +131,12 @@ streampark:
     max-resource-expired-hours: 120
     # gc task running interval hours
     exec-cron: 0 0 0/6 * * ?
+  # application backup clean configuration
+  backup-clean:
+    # maximum retention number of backup
+    max-backup-num: 5
+    # default running once a day
+    exec-cron: 0 0 1 * * ?
 
   shiro:
     # token timeout, unit second
