@@ -21,7 +21,7 @@ import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, RestoreMode}
 import org.apache.streampark.common.fs.FsOperator
-import org.apache.streampark.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
+import org.apache.streampark.common.util.{DeflaterUtils, FileUtils, Logger, SystemPropertyUtils}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -41,6 +41,7 @@ import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
+import java.util
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.annotation.tailrec
@@ -240,6 +241,12 @@ trait FlinkClientTrait extends Logger {
       if (!FsOperator.lfs.exists(pythonVenv)) {
         throw new RuntimeException(s"$pythonVenv File does not exist")
       }
+
+      val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
+      if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
+        flinkConfig.safeSet(PipelineOptions.JARS, util.Arrays.asList(localLib))
+      }
+
       flinkConfig
         // python.archives
         .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
@@ -427,7 +434,7 @@ trait FlinkClientTrait extends Logger {
     val programArgs = new ArrayBuffer[String]()
     val args = submitRequest.args
 
-    if (StringUtils.isNotEmpty(args)) {
+    if (StringUtils.isNotBlank(args)) {
       val multiChar = "\""
       val array = args.split("\\s+")
       if (!array.exists(_.startsWith(multiChar))) {
@@ -507,8 +514,8 @@ trait FlinkClientTrait extends Logger {
     }
 
     if (
-      submitRequest.developmentMode == DevelopmentMode.PYFLINK && !submitRequest.executionMode
-        .equals(ExecutionMode.YARN_APPLICATION)
+      submitRequest.developmentMode == DevelopmentMode.PYFLINK
+      && submitRequest.executionMode != ExecutionMode.YARN_APPLICATION
     ) {
       // python file
       programArgs.add("-py")
@@ -585,7 +592,7 @@ trait FlinkClientTrait extends Logger {
   private def tryGetSavepointPathIfNeed(request: SavepointRequestTrait): String = {
     if (!request.withSavepoint) null
     else {
-      if (StringUtils.isNotEmpty(request.savepointPath)) {
+      if (StringUtils.isNotBlank(request.savepointPath)) {
         request.savepointPath
       } else {
         val configDir = getOptionFromDefaultFlinkConfig[String](
@@ -600,7 +607,7 @@ trait FlinkClientTrait extends Logger {
             }
         )
 
-        if (StringUtils.isEmpty(configDir)) {
+        if (StringUtils.isBlank(configDir)) {
           throw new FlinkException(
             s"[StreamPark] executionMode: ${request.executionMode.getName}, savePoint path is null or invalid.")
         } else configDir

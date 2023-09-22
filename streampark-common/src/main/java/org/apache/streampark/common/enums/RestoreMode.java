@@ -17,10 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-public enum RestoreMode implements Serializable {
+public enum RestoreMode {
   NO_CLAIM(1),
   CLAIM(2),
   LEGACY(3);

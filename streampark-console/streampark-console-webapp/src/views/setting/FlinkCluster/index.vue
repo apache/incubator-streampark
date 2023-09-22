@@ -48,7 +48,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTitle } from '/@/components/Basic';
-  import State from './State.tsx'
+  import State from './State';
 
   const ListItem = List.Item;
   const ListItemMeta = ListItem.Meta;

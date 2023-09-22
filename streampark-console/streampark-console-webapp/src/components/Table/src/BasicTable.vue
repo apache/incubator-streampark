@@ -305,7 +305,7 @@
         getSelectRowKeys,
         deleteSelectRowByKey,
         setPagination,
-        setTableData,
+        setTableData: setTableData as any,
         updateTableDataRecord,
         deleteTableDataRecord,
         insertTableDataRecord,

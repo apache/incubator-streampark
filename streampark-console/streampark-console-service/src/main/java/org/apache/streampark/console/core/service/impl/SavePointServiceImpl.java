@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.Constant;
@@ -43,7 +44,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
@@ -101,7 +102,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Autowired private ApplicationLogService applicationLogService;
 
-  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
@@ -176,12 +177,12 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     applicationLog.setOptionTime(new Date());
     applicationLog.setYarnAppId(application.getClusterId());
 
-    FlinkHttpWatcher.addSavepoint(application.getId());
+    FlinkAppHttpWatcher.addSavepoint(application.getId());
 
     application.setOptionState(OptionState.SAVEPOINTING.getValue());
     application.setOptionTime(new Date());
     this.applicationManageService.updateById(application);
-    flinkHttpWatcher.init();
+    flinkAppHttpWatcher.init();
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
 
@@ -254,7 +255,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             },
             e -> {
               log.error("Trigger savepoint for flink job failed.", e);
-              String exception = Utils.stringifyException(e);
+              String exception = ExceptionUtils.stringifyException(e);
               applicationLog.setException(exception);
               if (!(e instanceof TimeoutException)) {
                 applicationLog.setSuccess(false);
@@ -266,13 +267,13 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               application.setOptionState(OptionState.NONE.getValue());
               application.setOptionTime(new Date());
               applicationManageService.update(application);
-              flinkHttpWatcher.init();
+              flinkAppHttpWatcher.init();
             });
   }
 
   private String getFinalSavepointDir(@Nullable String savepointPath, Application application) {
     String result = savepointPath;
-    if (StringUtils.isEmpty(savepointPath)) {
+    if (StringUtils.isBlank(savepointPath)) {
       try {
         result = this.getSavePointPath(application);
       } catch (Exception e) {
@@ -306,7 +307,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       return application.getClusterId();
     } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
         Utils.notNull(
             cluster,
             String.format(
@@ -388,7 +389,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   private Optional<Integer> tryGetChkNumRetainedFromDynamicProps(String dynamicProps) {
     String rawCfgValue =
         extractDynamicPropertiesAsJava(dynamicProps).get(MAX_RETAINED_CHECKPOINTS.key());
-    if (StringUtils.isEmpty(rawCfgValue)) {
+    if (StringUtils.isBlank(rawCfgValue)) {
       return Optional.empty();
     }
     try {
@@ -410,7 +411,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       @Nonnull FlinkEnv flinkEnv, @Nonnull Application application) {
     String flinkConfNumRetained =
         flinkEnv.convertFlinkYamlAsMap().get(MAX_RETAINED_CHECKPOINTS.key());
-    if (StringUtils.isEmpty(flinkConfNumRetained)) {
+    if (StringUtils.isBlank(flinkConfNumRetained)) {
       log.info(
           "The application: {} is not set {} in dynamicProperties or value is invalid, and flink-conf.yaml is the same problem of flink env: {}, default value: {} will be use.",
           application.getJobName(),
@@ -445,8 +446,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     int cpThreshold =
         tryGetChkNumRetainedFromDynamicProps(application.getDynamicProperties())
             .orElse(getChkNumRetainedFromFlinkEnv(flinkEnv, application));
-    cpThreshold =
-        CHECKPOINT.equals(CheckPointType.of(entity.getType())) ? cpThreshold - 1 : cpThreshold;
+    cpThreshold = CHECKPOINT == CheckPointType.of(entity.getType()) ? cpThreshold - 1 : cpThreshold;
 
     if (cpThreshold == 0) {
       LambdaQueryWrapper<SavePoint> queryWrapper =

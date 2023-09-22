@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.task;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
@@ -98,6 +99,7 @@ public class FlinkK8sWatcherWrapper {
     final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
     queryWrapper
         .eq(Application::getTracking, 1)
+        .ne(Application::getState, FlinkAppState.LOST.getValue())
         .in(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
 
     List<Application> k8sApplication = applicationManageService.list(queryWrapper);
@@ -114,7 +116,7 @@ public class FlinkK8sWatcherWrapper {
     }
     // filter out the application that should be tracking
     return k8sApplication.stream()
-        .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum())))
+        .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getStateEnum())))
         .map(Bridge::toTrackId)
         .collect(Collectors.toList());
   }
@@ -125,14 +127,14 @@ public class FlinkK8sWatcherWrapper {
     // covert Application to TrackId
     public static TrackId toTrackId(@Nonnull Application app) {
       Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
-      if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
+      if (FlinkK8sExecuteMode.APPLICATION() == mode) {
         return TrackId.onApplication(
             app.getK8sNamespace(),
             app.getClusterId(),
             app.getId(),
             app.getJobId(),
             app.getTeamId().toString());
-      } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
+      } else if (FlinkK8sExecuteMode.SESSION() == mode) {
         return TrackId.onSession(
             app.getK8sNamespace(),
             app.getClusterId(),

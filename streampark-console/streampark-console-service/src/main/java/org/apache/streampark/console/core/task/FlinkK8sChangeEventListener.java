@@ -39,6 +39,7 @@ import org.apache.streampark.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -62,6 +63,7 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8
  * @link org.apache.streampark.console.core.task.FlinkK8sChangeListenerV2
  */
 @Deprecated
+@Slf4j
 @Component
 public class FlinkK8sChangeEventListener {
 
@@ -70,7 +72,7 @@ public class FlinkK8sChangeEventListener {
 
   @Lazy @Autowired private AlertService alertService;
 
-  @Lazy @Autowired private CheckpointProcessor checkpointProcessor;
+  @Lazy @Autowired private FlinkCheckpointProcessor checkpointProcessor;
 
   private final ExecutorService executor =
       new ThreadPoolExecutor(
@@ -102,12 +104,19 @@ public class FlinkK8sChangeEventListener {
     applicationInfoService.persistMetrics(app);
 
     // email alerts when necessary
-    FlinkAppState state = FlinkAppState.of(app.getState());
-    if (FlinkAppState.FAILED.equals(state)
-        || FlinkAppState.LOST.equals(state)
-        || FlinkAppState.RESTARTING.equals(state)
-        || FlinkAppState.FINISHED.equals(state)) {
-      executor.execute(() -> alertService.alert(app.getAlertId(), AlertTemplate.of(app, state)));
+    FlinkAppState state = app.getStateEnum();
+    if (FlinkAppState.FAILED == state
+        || FlinkAppState.LOST == state
+        || FlinkAppState.RESTARTING == state
+        || FlinkAppState.FINISHED == state) {
+      executor.execute(
+          () -> {
+            if (app.getProbing()) {
+              log.info("application with id {} is probing, don't send alert", app.getId());
+              return;
+            }
+            alertService.alert(app.getAlertId(), AlertTemplate.of(app, state));
+          });
     }
   }
 
@@ -122,7 +131,7 @@ public class FlinkK8sChangeEventListener {
     TrackId trackId = event.trackId();
     ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.executeMode());
     // discard session mode change
-    if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
+    if (ExecutionMode.KUBERNETES_NATIVE_SESSION == mode) {
       return;
     }
 
@@ -166,7 +175,7 @@ public class FlinkK8sChangeEventListener {
     // infer the final flink job state
     Enumeration.Value state =
         FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-            jobStatus.jobState(), toK8sFlinkJobState(FlinkAppState.of(app.getState())));
+            jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
 
     // corrective start-time / end-time / duration
     long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;

@@ -24,6 +24,8 @@ import scala.util.{Failure, Success, Try}
 
 object SystemPropertyUtils extends Logger {
 
+  def getUserHome(): String = System.getProperty("user.home")
+
   /**
    * Returns {@code true} if and only if the system property with the specified {@code key} exists.
    */

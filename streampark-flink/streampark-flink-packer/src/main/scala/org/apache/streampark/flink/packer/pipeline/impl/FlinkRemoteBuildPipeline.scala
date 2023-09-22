@@ -17,9 +17,15 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
-import org.apache.streampark.common.fs.LfsOperator
+import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.fs.{FsOperator, LfsOperator}
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
+
+import java.io.File
+
+import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 /** Building pipeline for flink standalone session mode */
 class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends BuildPipeline {
@@ -43,13 +49,45 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
       // build flink job shaded jar
       val shadedJar =
         execStep(2) {
-          val output = MavenTool.buildFatJar(
-            request.mainClass,
-            request.providedLibs,
-            request.getShadedJarPath(request.workspace))
-          logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
-          output
+          request.developmentMode match {
+            case DevelopmentMode.FLINK_SQL =>
+              val output = MavenTool.buildFatJar(
+                request.mainClass,
+                request.providedLibs,
+                request.getShadedJarPath(request.workspace))
+              logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
+              output
+            case _ => new File(request.customFlinkUserJar);
+          }
         }.getOrElse(throw getError.exception)
+
+      val mavenJars =
+        execStep(3) {
+          request.developmentMode match {
+            case DevelopmentMode.PYFLINK =>
+              val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts.asJava)
+              mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
+            case _ => List[String]()
+          }
+        }.getOrElse(throw getError.exception)
+
+      execStep(4) {
+        request.developmentMode match {
+          case DevelopmentMode.PYFLINK =>
+            mavenJars.foreach(
+              jar => {
+                val lfs: FsOperator = FsOperator.lfs
+                val lib = request.workspace.concat("/lib")
+                lfs.mkdirsIfNotExists(lib)
+                val originFile = new File(jar)
+                if (originFile.isFile) {
+                  lfs.copy(originFile.getAbsolutePath, lib)
+                }
+
+              })
+          case _ =>
+        }
+      }.getOrElse(throw getError.exception)
       ShadedBuildResponse(request.workspace, shadedJar.getAbsolutePath)
     }
 

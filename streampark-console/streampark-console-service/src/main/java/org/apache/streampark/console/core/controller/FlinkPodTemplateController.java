@@ -72,7 +72,7 @@ public class FlinkPodTemplateController {
   }
 
   private Map<String, String> covertHostsParamToMap(String hosts) {
-    if (StringUtils.isEmpty(hosts)) {
+    if (StringUtils.isBlank(hosts)) {
       return new HashMap<>(0);
     } else {
       return Arrays.stream(hosts.split(","))

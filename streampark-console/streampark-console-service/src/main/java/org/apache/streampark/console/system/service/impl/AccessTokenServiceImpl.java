@@ -62,7 +62,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
       return RestResponse.success().put(RestResponse.CODE_KEY, 0).message("user not available");
     }
 
-    if (StringUtils.isEmpty(expireTime)) {
+    if (StringUtils.isBlank(expireTime)) {
       expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
     }
     Long ttl = DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault());
@@ -105,13 +105,13 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   public RestResponse toggleToken(Long tokenId) {
     AccessToken tokenInfo = baseMapper.getById(tokenId);
     if (Objects.isNull(tokenInfo)) {
-      return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_FAIL_ALERT);
+      return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "accessToken could not be found!");
     }
 
     if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
       return RestResponse.fail(
-          "user status is locked, could not operate this accessToken!",
-          ResponseCode.CODE_FAIL_ALERT);
+          ResponseCode.CODE_FAIL_ALERT,
+          "user status is locked, could not operate this accessToken!");
     }
 
     Integer status =

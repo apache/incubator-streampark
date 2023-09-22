@@ -19,9 +19,7 @@ package org.apache.streampark.common.enums;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.Serializable;
-
-public enum StorageType implements Serializable {
+public enum StorageType {
 
   /** hdfs */
   HDFS("hdfs"),
@@ -40,7 +38,7 @@ public enum StorageType implements Serializable {
   }
 
   public static StorageType of(String identifier) {
-    if (StringUtils.isEmpty(identifier)) {
+    if (StringUtils.isBlank(identifier)) {
       return LFS;
     }
     for (StorageType type : values()) {

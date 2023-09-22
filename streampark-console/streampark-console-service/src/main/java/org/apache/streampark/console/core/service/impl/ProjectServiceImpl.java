@@ -38,7 +38,7 @@ import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 
 import org.apache.flink.configuration.MemorySize;
@@ -82,7 +82,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Autowired private ApplicationManageService applicationManageService;
 
-  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
@@ -141,7 +141,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
     if (projectParam.getBuildState() != null) {
       project.setBuildState(projectParam.getBuildState());
-      if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
+      if (BuildState.NEED_REBUILD == BuildState.of(projectParam.getBuildState())) {
         List<Application> applications = getApplications(project);
         // Update deployment status
         applications.forEach(
@@ -207,7 +207,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
               if (buildState == BuildState.SUCCESSFUL) {
                 baseMapper.updateBuildTime(id);
               }
-              flinkHttpWatcher.init();
+              flinkAppHttpWatcher.init();
             },
             fileLogger -> {
               List<Application> applications =
@@ -222,7 +222,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     app.setBuild(true);
                     this.applicationManageService.updateRelease(app);
                   });
-              flinkHttpWatcher.init();
+              flinkAppHttpWatcher.init();
             });
     CompletableFuture<Void> buildTask =
         CompletableFuture.runAsync(projectBuildTask, executorService);
@@ -235,7 +235,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     Project project = getById(id);
     Utils.notNull(project);
 
-    if (!BuildState.SUCCESSFUL.equals(BuildState.of(project.getBuildState()))
+    if (BuildState.SUCCESSFUL != BuildState.of(project.getBuildState())
         || !project.getDistHome().exists()) {
       return Collections.emptyList();
     }
@@ -377,7 +377,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       String error =
           String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
       log.error(error, e);
-      return RestResponse.fail(error + e.getMessage(), ResponseCode.CODE_FAIL);
+      return RestResponse.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
     }
   }
 

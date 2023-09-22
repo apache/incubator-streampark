@@ -109,28 +109,28 @@ public class FlinkEnv implements Serializable {
   }
 
   public String getLargeVersion() {
-    if (StringUtils.isNotEmpty(this.version)) {
+    if (StringUtils.isNotBlank(this.version)) {
       return this.version.substring(0, this.version.lastIndexOf("."));
     }
     return null;
   }
 
   public String getVersionOfFirst() {
-    if (StringUtils.isNotEmpty(this.version)) {
+    if (StringUtils.isNotBlank(this.version)) {
       return this.version.split("\\.")[0];
     }
     return null;
   }
 
   public String getVersionOfMiddle() {
-    if (StringUtils.isNotEmpty(this.version)) {
+    if (StringUtils.isNotBlank(this.version)) {
       return this.version.split("\\.")[1];
     }
     return null;
   }
 
   public String getVersionOfLast() {
-    if (StringUtils.isNotEmpty(this.version)) {
+    if (StringUtils.isNotBlank(this.version)) {
       return this.version.split("\\.")[2];
     }
     return null;

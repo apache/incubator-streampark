@@ -41,7 +41,7 @@
 
 <script lang="ts" setup>
   import { ref, computed, unref } from 'vue';
-  import { BasicForm, useForm } from '/@/components/Form';
+  import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -60,7 +60,7 @@
 
   const props = defineProps({
     teamResource: {
-      type: Object as Array<any>,
+      type: Object as PropType<any>,
       required: true,
     },
   });
@@ -72,7 +72,7 @@
   const resourceId = ref<Nullable<number>>(null);
   const resourceRef = ref();
 
-  const getResourceFormSchema = computed(() => {
+  const getResourceFormSchema = computed((): FormSchema[] => {
     return [
       {
         field: 'resourceType',
@@ -209,7 +209,7 @@
           return;
         }
 
-        if (resource.pom?.length > 0 && resource.jar?.length > 0) {
+        if (resource.pom && resource.pom.length > 0 && resource.jar && resource.jar.length > 0) {
           Swal.fire('Failed', t('flink.resource.multiPomTip'), 'error');
           return;
         }
@@ -225,7 +225,7 @@
         switch (state) {
           case 1:
             // download error
-            if (resource.pom?.length > 0) {
+            if (resource.pom && resource.pom.length > 0) {
               Swal.fire({
                 icon: 'error',
                 title: t('sys.api.errorTip'),

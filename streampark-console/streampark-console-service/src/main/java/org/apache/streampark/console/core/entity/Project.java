@@ -201,12 +201,12 @@ public class Project implements Serializable {
 
     StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
-    if (StringUtils.isNotEmpty(this.buildArgs)) {
+    if (StringUtils.isNotBlank(this.buildArgs)) {
       cmdBuffer.append(this.buildArgs.trim());
     }
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
-    if (StringUtils.isNotEmpty(setting)) {
+    if (StringUtils.isNotBlank(setting)) {
       cmdBuffer.append(" --settings ").append(setting);
     }
 

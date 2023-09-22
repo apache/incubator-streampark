@@ -17,9 +17,7 @@
 
 package org.apache.streampark.common.enums;
 
-import java.io.Serializable;
-
-public enum Semantic implements Serializable {
+public enum Semantic {
 
   /** */
   EXACTLY_ONCE,

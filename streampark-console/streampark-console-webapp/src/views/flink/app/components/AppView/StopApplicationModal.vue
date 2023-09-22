@@ -76,7 +76,12 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: () => h('span', { class: 'conf-switch' }, 'Note: native format savepoint is supported since flink 1.15'),
+        afterItem: () =>
+          h(
+            'span',
+            { class: 'tip-info' },
+            'Note: native format savepoint is supported since flink 1.15',
+          ),
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
@@ -101,7 +106,8 @@
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, customSavepoint, drain, nativeFormat } = (await validate()) as Recordable;
+      const { stopSavePointed, customSavepoint, drain, nativeFormat } =
+        (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
         savePointed: stopSavePointed,

@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-public class CheckpointProcessor {
+public class FlinkCheckpointProcessor {
 
   private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
   private static final Integer SAVEPOINT_CACHE_HOUR = 1;
@@ -70,7 +70,7 @@ public class CheckpointProcessor {
 
   @Autowired private SavePointService savePointService;
 
-  @Autowired private FlinkHttpWatcher flinkHttpWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   public void process(Application application, @Nonnull CheckPoints checkPoints) {
     checkPoints.getLatestCheckpoint().forEach(checkPoint -> process(application, checkPoint));
@@ -82,11 +82,11 @@ public class CheckpointProcessor {
     CheckPointStatus status = checkPoint.getCheckPointStatus();
     CheckPointKey checkPointKey = new CheckPointKey(appId, jobID, checkPoint.getId());
 
-    if (CheckPointStatus.COMPLETED.equals(status)) {
+    if (CheckPointStatus.COMPLETED == status) {
       if (shouldStoreAsSavepoint(checkPointKey, checkPoint)) {
         savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
         saveSavepoint(checkPoint, application.getId());
-        flinkHttpWatcher.cleanSavepoint(application);
+        flinkAppHttpWatcher.cleanSavepoint(application);
         return;
       }
 
@@ -161,9 +161,7 @@ public class CheckpointProcessor {
 
   private boolean shouldProcessFailedTrigger(
       CheckPoints.CheckPoint checkPoint, boolean cpFailedTrigger, CheckPointStatus status) {
-    return CheckPointStatus.FAILED.equals(status)
-        && !checkPoint.getIsSavepoint()
-        && cpFailedTrigger;
+    return CheckPointStatus.FAILED == status && !checkPoint.getIsSavepoint() && cpFailedTrigger;
   }
 
   private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Long appId) {

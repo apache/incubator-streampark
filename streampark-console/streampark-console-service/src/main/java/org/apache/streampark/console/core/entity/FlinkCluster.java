@@ -137,7 +137,7 @@ public class FlinkCluster implements Serializable {
       return Collections.emptyMap();
     }
     Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
-    if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
+    if (ExecutionMode.YARN_SESSION == getExecutionModeEnum()) {
       map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
       map.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
     }
@@ -164,7 +164,7 @@ public class FlinkCluster implements Serializable {
     String json =
         HttpClientUtils.httpGetRequest(
             restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
-    if (StringUtils.isEmpty(json)) {
+    if (StringUtils.isBlank(json)) {
       return Collections.emptyMap();
     }
     List<Map<String, String>> confList =

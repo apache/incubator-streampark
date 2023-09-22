@@ -14,15 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License. 
 */
-import { defineComponent } from 'vue';
+import { defineComponent, h } from 'vue';
 import type { PropType } from 'vue';
-import { Form, Input, Select } from 'ant-design-vue';
+import { Form, Input, Select, Tag } from 'ant-design-vue';
 export interface RepositoryProps {
   gitCredential: string | number;
   url: string;
 }
 import { useI18n } from '/@/hooks/web/useI18n';
 import { GitCredentialEnum } from '/@/enums/projectEnum';
+import { SvgIcon } from '/@/components/Icon';
 export default defineComponent({
   name: 'RepositoryUrl',
   props: {
@@ -45,8 +46,14 @@ export default defineComponent({
     };
 
     const options = [
-      { label: 'http/https', value: GitCredentialEnum.HTTPS },
-      { label: 'ssh', value: GitCredentialEnum.SSH },
+      {
+        label: h('div', {}, [h(SvgIcon, { name: 'http', color: '#108ee9', size: '30' }, '')]),
+        value: GitCredentialEnum.HTTPS,
+      },
+      {
+        label: h('div', {}, [h(SvgIcon, { name: 'ssh', color: '#108ee9', size: '30' }, '')]),
+        value: GitCredentialEnum.SSH,
+      },
     ];
 
     return () => {
@@ -55,7 +62,7 @@ export default defineComponent({
           <Input.Group compact class="!flex custom-input-group">
             <Select
               name="gitCredential"
-              style="width: 120px"
+              style="width: 80px"
               placeholder={t('flink.project.form.gitCredentialPlaceholder')}
               value={props.value?.gitCredential}
               onChange={(e: any) => handleProtocolChange(e)}
@@ -70,6 +77,19 @@ export default defineComponent({
               onInput={(e: any) => handleUrlChange(e.target.value)}
             />
           </Input.Group>
+          <p class="conf-desc mt-10px">
+            <span class="note-info">
+              <Tag color="#2db7f5" class="tag-note">
+                {t('flink.app.noteInfo.note')}
+              </Tag>
+              {props.value?.gitCredential === 1 && (
+                <span>{t('flink.project.operationTips.httpsCredential')}</span>
+              )}
+              {props.value?.gitCredential === 2 && (
+                <span>{t('flink.project.operationTips.sshCredential')}</span>
+              )}
+            </span>
+          </p>
         </div>
       );
     };

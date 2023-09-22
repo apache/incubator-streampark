@@ -51,6 +51,11 @@ public class AlertTemplate implements Serializable {
   private boolean atAll = false;
   private Integer allJobs;
   private Integer affectedJobs;
+  private String user;
+  private Integer probeJobs;
+  private Integer failedJobs;
+  private Integer lostJobs;
+  private Integer cancelledJobs;
 
   public static AlertTemplate of(Application application, FlinkAppState appState) {
     return new AlertTemplateBuilder()
@@ -99,6 +104,19 @@ public class AlertTemplate implements Serializable {
         .setStatus(clusterState.name())
         .setAllJobs(cluster.getAllJobs())
         .setAffectedJobs(cluster.getAffectedJobs())
+        .build();
+  }
+
+  public static AlertTemplate of(AlertProbeMsg alertProbeMsg) {
+    return new AlertTemplateBuilder()
+        .setType(4)
+        .setUser(alertProbeMsg.getUser())
+        .setProbeJobs(alertProbeMsg.getProbeJobs())
+        .setFailedJobs(alertProbeMsg.getFailedJobs())
+        .setLostJobs(alertProbeMsg.getLostJobs())
+        .setCancelledJobs(alertProbeMsg.getCancelledJobs())
+        .setSubject("StreamPark Alert: PROBE")
+        .setTitle("PROBE")
         .build();
   }
 
@@ -226,6 +244,31 @@ public class AlertTemplate implements Serializable {
 
     public AlertTemplateBuilder setAffectedJobs(Integer affectedJobs) {
       alertTemplate.setAffectedJobs(affectedJobs);
+      return this;
+    }
+
+    public AlertTemplateBuilder setUser(String user) {
+      alertTemplate.setUser(user);
+      return this;
+    }
+
+    public AlertTemplateBuilder setProbeJobs(Integer probeJobs) {
+      alertTemplate.setProbeJobs(probeJobs);
+      return this;
+    }
+
+    public AlertTemplateBuilder setFailedJobs(Integer failedJobs) {
+      alertTemplate.setFailedJobs(failedJobs);
+      return this;
+    }
+
+    public AlertTemplateBuilder setLostJobs(Integer lostJobs) {
+      alertTemplate.setLostJobs(lostJobs);
+      return this;
+    }
+
+    public AlertTemplateBuilder setCancelledJobs(Integer cancelledJobs) {
+      alertTemplate.setCancelledJobs(cancelledJobs);
       return this;
     }
 

@@ -98,9 +98,6 @@ object Utils {
   def copyProperties(original: Properties, target: Properties): Unit =
     original.foreach(x => target.put(x._1, x._2))
 
-  /** get os name */
-  def getOsName: String = OS
-
   def isLinux: Boolean = OS.indexOf("linux") >= 0
 
   def isWindows: Boolean = OS.indexOf("windows") >= 0
@@ -124,22 +121,6 @@ object Utils {
       result = 31 * result + hash
     }
     result
-  }
-
-  def stringifyException(e: Throwable): String = {
-    if (e == null) "(null)"
-    else {
-      try {
-        val stm = new StringWriter
-        new PrintWriter(stm).autoClose {
-          writer =>
-            e.printStackTrace(writer)
-            stm.toString
-        }
-      } catch {
-        case _: Throwable => e.getClass.getName + " (error while printing stack trace)"
-      }
-    }
   }
 
   def close(closeable: AutoCloseable*)(implicit func: Throwable => Unit = null): Unit = {

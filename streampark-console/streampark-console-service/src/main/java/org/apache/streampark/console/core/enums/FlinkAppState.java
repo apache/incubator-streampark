@@ -99,6 +99,9 @@ public enum FlinkAppState {
   /** Job SUCCEEDED on yarn. */
   SUCCEEDED(20),
 
+  /** Job auto Health probe */
+  PROBING(21),
+
   /** Has killed in Yarn. */
   KILLED(-9);
 
@@ -137,6 +140,11 @@ public enum FlinkAppState {
         || FlinkAppState.TERMINATED == flinkAppState;
   }
 
+  public static boolean isLost(Integer appState) {
+    FlinkAppState flinkAppState = FlinkAppState.of(appState);
+    return FlinkAppState.LOST == flinkAppState;
+  }
+
   /**
    * Type conversion bridging Deprecated, see {@link
    * org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter}
@@ -145,7 +153,7 @@ public enum FlinkAppState {
   public static class Bridge {
     /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */
     public static FlinkAppState fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
-      if (FlinkJobState.K8S_INITIALIZING().equals(flinkJobState)) {
+      if (FlinkJobState.K8S_INITIALIZING() == flinkJobState) {
         return INITIALIZING;
       } else {
         return of(flinkJobState.toString());

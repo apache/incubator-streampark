@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -40,8 +41,8 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkClusterWatcher;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
@@ -115,7 +116,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     Integer runningJob = 0;
 
     // stat metrics from other than kubernetes mode
-    for (Application app : FlinkHttpWatcher.getWatchingApps()) {
+    for (Application app : FlinkAppHttpWatcher.getWatchingApps()) {
       if (!teamId.equals(app.getTeamId())) {
         continue;
       }
@@ -202,8 +203,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       envInitializer.checkFlinkEnv(application.getStorageType(), flinkEnv);
       envInitializer.storageInitialize(application.getStorageType());
 
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())
-          || ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()
+          || ExecutionMode.REMOTE == application.getExecutionModeEnum()) {
         FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
         boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
         if (!conned) {
@@ -212,7 +213,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       }
       return true;
     } catch (Exception e) {
-      log.error(Utils.stringifyException(e));
+      log.error(ExceptionUtils.stringifyException(e));
       throw new ApiDetailException(e);
     }
   }
@@ -220,11 +221,10 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public boolean checkAlter(Application appParam) {
     Long appId = appParam.getId();
-    FlinkAppState state = FlinkAppState.of(appParam.getState());
-    if (!FlinkAppState.CANCELED.equals(state)) {
+    if (FlinkAppState.CANCELED != appParam.getStateEnum()) {
       return false;
     }
-    long cancelUserId = FlinkHttpWatcher.getCanceledJobUserId(appId);
+    long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
     long appUserId = appParam.getUserId();
     return cancelUserId != -1 && cancelUserId != appUserId;
   }
@@ -244,11 +244,11 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public boolean existsRunningByClusterId(Long clusterId) {
     return baseMapper.existsRunningJobByClusterId(clusterId)
-        || FlinkHttpWatcher.getWatchingApps().stream()
+        || FlinkAppHttpWatcher.getWatchingApps().stream()
             .anyMatch(
                 application ->
                     clusterId.equals(application.getFlinkClusterId())
-                        && FlinkAppState.RUNNING.equals(application.getFlinkAppStateEnum()));
+                        && FlinkAppState.RUNNING == application.getStateEnum());
   }
 
   @Override
@@ -467,7 +467,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         flinkK8sObserver.watchApplication(application);
       }
     } else {
-      FlinkHttpWatcher.doWatching(application);
+      FlinkAppHttpWatcher.doWatching(application);
     }
     return mapping;
   }
@@ -512,7 +512,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   private Boolean checkJobName(String jobName) {
-    if (!StringUtils.isEmpty(jobName.trim())) {
+    if (!StringUtils.isBlank(jobName.trim())) {
       return JOB_NAME_PATTERN.matcher(jobName).matches()
           && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
     }

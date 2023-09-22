@@ -19,7 +19,7 @@
     <div
       ref="wrap"
       :class="[wrapClass, 'scrollbar__wrap', native ? '' : 'scrollbar__wrap--hidden-default']"
-      :style="style"
+      :style="getStyle"
       @scroll="handleScroll"
     >
       <component :is="tag" ref="resize" :class="['scrollbar__view', viewClass]" :style="viewStyle">
@@ -48,6 +48,7 @@
     unref,
   } from 'vue';
   import Bar from './bar';
+  import { CSSProperties } from 'vue';
 
   export default defineComponent({
     name: 'Scrollbar',
@@ -90,11 +91,11 @@
 
       provide('scroll-bar-wrap', wrap);
 
-      const style = computed(() => {
+      const getStyle = computed(() => {
         if (Array.isArray(props.wrapStyle)) {
-          return toObject(props.wrapStyle);
+          return toObject(props.wrapStyle) as CSSProperties;
         }
-        return props.wrapStyle;
+        return props.wrapStyle as unknown as CSSProperties;
       });
 
       const handleScroll = () => {
@@ -138,7 +139,7 @@
         moveY,
         sizeWidth,
         sizeHeight,
-        style,
+        getStyle,
         wrap,
         resize,
         update,

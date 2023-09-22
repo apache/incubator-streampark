@@ -74,7 +74,7 @@ public class ApplicationConfigServiceImpl
 
     if (application.getFormat() != null) {
       ConfigFileType fileType = ConfigFileType.of(application.getFormat());
-      if (fileType == null || ConfigFileType.UNKNOWN.equals(fileType)) {
+      if (fileType == null || ConfigFileType.UNKNOWN == fileType) {
         throw new ApiAlertException(
             "application' config error. must be (.properties|.yaml|.yml |.conf)");
       }

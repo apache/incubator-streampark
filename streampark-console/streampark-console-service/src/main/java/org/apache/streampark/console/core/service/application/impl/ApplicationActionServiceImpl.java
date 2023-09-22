@@ -25,9 +25,9 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.RestoreMode;
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.common.tuple.Tuple2;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -65,8 +65,8 @@ import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
+import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -82,6 +82,7 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
@@ -227,7 +228,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public void cancel(Application appParam) throws Exception {
-    FlinkHttpWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
+    FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
     Application application = getById(appParam.getId());
     application.setState(FlinkAppState.CANCELLING.getValue());
 
@@ -239,7 +240,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     applicationLog.setYarnAppId(application.getClusterId());
 
     if (appParam.getSavePointed()) {
-      FlinkHttpWatcher.addSavepoint(application.getId());
+      FlinkAppHttpWatcher.addSavepoint(application.getId());
       application.setOptionState(OptionState.SAVEPOINTING.getValue());
     } else {
       application.setOptionState(OptionState.CANCELLING.getValue());
@@ -250,7 +251,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     Long userId = commonService.getUserId();
     if (!application.getUserId().equals(userId)) {
-      FlinkHttpWatcher.addCanceledApp(application.getId(), userId);
+      FlinkAppHttpWatcher.addCanceledApp(application.getId(), userId);
     }
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
@@ -268,7 +269,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       clusterId = application.getClusterId();
     } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         ApiAlertException.throwIfNull(
             cluster,
@@ -357,10 +358,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                   k8SFlinkTrackMonitor.unWatching(id);
                   k8SFlinkTrackMonitor.doWatching(id);
                 } else {
-                  FlinkHttpWatcher.unWatching(application.getId());
+                  FlinkAppHttpWatcher.unWatching(application.getId());
                 }
 
-                String exception = Utils.stringifyException(e);
+                String exception = ExceptionUtils.stringifyException(e);
                 applicationLog.setException(exception);
                 applicationLog.setSuccess(false);
               }
@@ -375,6 +376,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Override
   @Transactional(rollbackFor = {Exception.class})
   public void start(Application appParam, boolean auto) throws Exception {
+    // 1) check application
     final Application application = getById(appParam.getId());
     Utils.notNull(application);
     if (!application.isCanBeStart()) {
@@ -399,6 +401,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       appParam.setSavePointed(true);
       application.setRestartCount(application.getRestartCount() + 1);
     }
+
+    // 2) update app state to starting...
+    starting(application);
 
     String jobId = new JobID().toHexString();
     ApplicationLog applicationLog = new ApplicationLog();
@@ -434,7 +439,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     String appConf = userJarAndAppConf.f1;
 
     BuildResult buildResult = buildPipeline.getBuildResult();
-    if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
+    if (ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()) {
       buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
     }
 
@@ -504,8 +509,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
               if (isKubernetesApp(application)) {
                 k8SFlinkTrackMonitor.doWatching(toTrackId(application));
               } else {
-                FlinkHttpWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
-                FlinkHttpWatcher.doWatching(application);
+                FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
+                FlinkAppHttpWatcher.doWatching(application);
               }
 
               applicationLog.setSuccess(true);
@@ -516,7 +521,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
               if (e.getCause() instanceof CancellationException) {
                 updateToStopped(application);
               } else {
-                String exception = Utils.stringifyException(e);
+                String exception = ExceptionUtils.stringifyException(e);
                 applicationLog.setException(exception);
                 applicationLog.setSuccess(false);
                 Application app = getById(appParam.getId());
@@ -526,7 +531,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 if (isKubernetesApp(app)) {
                   k8SFlinkTrackMonitor.unWatching(toTrackId(app));
                 } else {
-                  FlinkHttpWatcher.unWatching(appParam.getId());
+                  FlinkAppHttpWatcher.unWatching(appParam.getId());
                 }
               }
             })
@@ -559,6 +564,12 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             });
   }
 
+  private void starting(Application application) {
+    application.setState(FlinkAppState.STARTING.getValue());
+    application.setOptionTime(new Date());
+    updateById(application);
+  }
+
   private Tuple2<String, String> getUserJarAndAppConf(FlinkEnv flinkEnv, Application application) {
     ExecutionMode executionMode = application.getExecutionModeEnum();
     ApplicationConfig applicationConfig = configService.getEffective(application.getId());
@@ -581,7 +592,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 ? null
                 : String.format("yaml://%s", applicationConfig.getContent());
         // 3) client
-        if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
+        if (ExecutionMode.YARN_APPLICATION == executionMode) {
           String clientPath = Workspace.remote().APP_CLIENT();
           flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
         }
@@ -614,7 +625,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           switch (application.getApplicationType()) {
             case STREAMPARK_FLINK:
               ConfigFileType fileType = ConfigFileType.of(applicationConfig.getFormat());
-              if (fileType != null && !fileType.equals(ConfigFileType.UNKNOWN)) {
+              if (fileType != null && ConfigFileType.UNKNOWN != fileType) {
                 appConf =
                     String.format(
                         "%s://%s", fileType.getTypeName(), applicationConfig.getContent());
@@ -635,7 +646,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           }
         }
 
-        if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {
+        if (ExecutionMode.YARN_APPLICATION == executionMode) {
           switch (application.getApplicationType()) {
             case STREAMPARK_FLINK:
               flinkUserJar =
@@ -680,7 +691,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         ApiAlertException.throwIfNull(
             cluster,
@@ -740,7 +751,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       k8SFlinkTrackMonitor.unWatching(id);
       k8SFlinkTrackMonitor.doWatching(id);
     } else {
-      FlinkHttpWatcher.unWatching(application.getId());
+      FlinkAppHttpWatcher.unWatching(application.getId());
     }
   }
 
