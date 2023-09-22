@@ -61,7 +61,8 @@ object FileUtils {
   }
 
   def isPythonFileType(contentType: String): Boolean =
-    StringUtils.isNotBlank(contentType) && contentType.equalsIgnoreCase("text/x-python-script")
+    StringUtils.isNotBlank(
+      contentType) && ("text/x-python" == contentType || "text/x-python-script" == contentType)
 
   def isJarFileType(file: File): Boolean = {
     if (!file.exists || !file.isFile) {
