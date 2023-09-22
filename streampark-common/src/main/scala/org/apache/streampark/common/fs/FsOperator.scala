@@ -80,6 +80,6 @@ abstract class FsOperator {
 
   def move(srcPath: String, dstPath: String): Unit
 
-  def computeFileNameMd5(path: String): String
+  def fileMd5(path: String): String
 
 }

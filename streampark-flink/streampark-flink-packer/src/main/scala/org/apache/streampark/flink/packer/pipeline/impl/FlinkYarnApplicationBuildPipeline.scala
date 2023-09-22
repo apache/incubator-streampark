@@ -95,7 +95,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
           if (fsOperator.exists(uploadFile)) {
             new FileInputStream(originFile).autoClose(
               inputStream => {
-                if (DigestUtils.md5Hex(inputStream) != fsOperator.computeFileNameMd5(uploadFile)) {
+                if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadFile)) {
                   fsOperator.upload(originFile.getAbsolutePath, uploadFile)
                 }
               })

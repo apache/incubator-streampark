@@ -143,7 +143,7 @@ object HdfsUtils extends Logger {
     }
   }
 
-  def computeFileNameMd5(fileName: String): String = {
+  def fileMd5(fileName: String): String = {
     val path = getPath(fileName)
     val in = HadoopUtils.hdfs.open(path)
     Try(DigestUtils.md5Hex(in)) match {

@@ -73,7 +73,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     accessToken.setToken(jwtToken.getToken());
     accessToken.setUserId(user.getUserId());
     accessToken.setDescription(description);
-    accessToken.setExpireTime(DateUtils.convertStringToDate(jwtToken.getExpireAt()));
+    accessToken.setExpireTime(DateUtils.stringToDate(jwtToken.getExpireAt()));
     accessToken.setCreateTime(new Date());
     accessToken.setStatus(AccessToken.STATUS_ENABLE);
 

@@ -53,7 +53,7 @@ object PropertiesUtils extends Logger {
     buffer.toString()
   }
 
-  private[this] def handleEachAppendYamlItem(
+  private[this] def eachAppendYamlItem(
       prefix: String,
       k: String,
       v: Any,
@@ -64,8 +64,8 @@ object PropertiesUtils extends Logger {
           .flatMap(
             x => {
               prefix match {
-                case "" => handleEachAppendYamlItem(k, x._1, x._2, proper)
-                case other => handleEachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
+                case "" => eachAppendYamlItem(k, x._1, x._2, proper)
+                case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
               }
             })
           .toMap
@@ -88,7 +88,7 @@ object PropertiesUtils extends Logger {
       new Yaml()
         .load(text)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => handleEachAppendYamlItem("", x._1, x._2, map))
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
         .toMap
     } catch {
       case e: IOException =>
@@ -152,7 +152,7 @@ object PropertiesUtils extends Logger {
       new Yaml()
         .load(inputStream)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => handleEachAppendYamlItem("", x._1, x._2, map))
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
         .toMap
     } catch {
       case e: IOException =>
