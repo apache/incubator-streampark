@@ -19,6 +19,7 @@ package org.apache.streampark.console.base.interceptor;
 
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.core.utils.MimeTypeUtils;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,7 +47,7 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
             multipartFile, "File to upload can't be null. Upload file failed.");
         boolean isJarOrPyFile =
             FileUtils.isJarFileType(multipartFile.getInputStream())
-                || FileUtils.isPythonFileType(
+                || MimeTypeUtils.isPythonFileType(
                     multipartFile.getContentType(), multipartFile.getInputStream());
         ApiAlertException.throwIfFalse(
             isJarOrPyFile,
