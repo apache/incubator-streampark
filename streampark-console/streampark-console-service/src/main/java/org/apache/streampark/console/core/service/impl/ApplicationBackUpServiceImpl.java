@@ -165,29 +165,16 @@ public class ApplicationBackUpServiceImpl
 
   @Override
   public void rollbackFlinkSql(Application appParam, FlinkSql flinkSqlParam) {
-    ApplicationBackUp backUp = getFlinkSqlBackup(appParam.getId(), flinkSqlParam.getId());
+    LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
+        new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, appParam.getId())
+            .eq(ApplicationBackUp::getSqlId, flinkSqlParam.getId());
+    ApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
     ApiAlertException.throwIfNull(
         backUp, "Application backup can't be null. Rollback flink sql failed.");
     // rollback config and sql
     effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
     effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-  }
-
-  @Override
-  public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
-    LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-        new LambdaQueryWrapper<ApplicationBackUp>()
-            .eq(ApplicationBackUp::getAppId, appId)
-            .eq(ApplicationBackUp::getSqlId, sqlId);
-    return baseMapper.selectCount(queryWrapper) > 0;
-  }
-
-  private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
-    LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-        new LambdaQueryWrapper<ApplicationBackUp>()
-            .eq(ApplicationBackUp::getAppId, appId)
-            .eq(ApplicationBackUp::getSqlId, sqlId);
-    return baseMapper.selectOne(queryWrapper);
   }
 
   @Override

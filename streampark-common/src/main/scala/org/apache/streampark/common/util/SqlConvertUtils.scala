@@ -247,7 +247,8 @@ object SqlConvertUtils extends Logger {
         case _ => null
       }
     },
-    postfix)
+    postfix
+  )
 
   def mysqlToClickhouse(sql: String, postfix: String): String =
     convertSql(sql, toClickhouseDataType, postfix = postfix)

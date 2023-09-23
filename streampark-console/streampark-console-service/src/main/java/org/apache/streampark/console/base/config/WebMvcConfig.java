@@ -79,6 +79,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
+    registry
+        .addInterceptor(uploadFileTypeInterceptor)
+        .addPathPatterns("/flink/app/upload", "/resource/upload");
   }
 }

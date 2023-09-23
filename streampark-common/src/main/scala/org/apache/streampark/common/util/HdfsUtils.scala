@@ -31,9 +31,11 @@ object HdfsUtils extends Logger {
 
   def getDefaultFS: String = HadoopUtils.hadoopConf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
-  def list(src: String): List[FileStatus] = HadoopUtils.hdfs.listStatus(getPath(src)).toList
+  def list(src: String): List[FileStatus] =
+    HadoopUtils.hdfs.listStatus(getPath(src)).toList
 
-  def move(src: String, dst: String): Unit = HadoopUtils.hdfs.rename(getPath(src), getPath(dst))
+  def move(src: String, dst: String): Unit =
+    HadoopUtils.hdfs.rename(getPath(src), getPath(dst))
 
   def mkdirs(path: String): Unit = HadoopUtils.hdfs.mkdirs(getPath(path))
 
@@ -121,7 +123,8 @@ object HdfsUtils extends Logger {
     val path: Path = getPath(fileName)
     require(
       HadoopUtils.hdfs.exists(path) && !HadoopUtils.hdfs.isDirectory(path),
-      s"[StreamPark] HdfsUtils.read: path($fileName) not exists or isDirectory ")
+      s"[StreamPark] HdfsUtils.read: path($fileName) not exists or isDirectory "
+    )
     val in = HadoopUtils.hdfs.open(path)
     val out = new ByteArrayOutputStream()
     IOUtils.copyBytes(in, out, 4096, false)

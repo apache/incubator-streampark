@@ -65,7 +65,7 @@ public class FlinkAppLostWatcher {
 
   private long lastWatchTime = 0L;
 
-  private AtomicBoolean isProbing = new AtomicBoolean(false);
+  private final AtomicBoolean isProbing = new AtomicBoolean(false);
 
   private Short retryAttempts = PROBE_RETRY_COUNT;
 

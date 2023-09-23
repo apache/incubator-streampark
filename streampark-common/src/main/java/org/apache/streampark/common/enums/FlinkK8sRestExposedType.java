@@ -31,16 +31,16 @@ public enum FlinkK8sRestExposedType {
 
   private final String name;
 
-  private final Integer value;
+  private final Integer type;
 
-  FlinkK8sRestExposedType(String name, Integer value) {
+  FlinkK8sRestExposedType(String name, Integer type) {
     this.name = name;
-    this.value = value;
+    this.type = type;
   }
 
   public static FlinkK8sRestExposedType of(Integer value) {
     for (FlinkK8sRestExposedType order : values()) {
-      if (order.value.equals(value)) {
+      if (order.type.equals(value)) {
         return order;
       }
     }
@@ -51,7 +51,7 @@ public enum FlinkK8sRestExposedType {
     return name;
   }
 
-  public Integer getValue() {
-    return value;
+  public Integer getType() {
+    return type;
   }
 }
