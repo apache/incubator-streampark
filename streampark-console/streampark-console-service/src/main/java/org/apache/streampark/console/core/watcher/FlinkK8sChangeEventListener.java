@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.task;
+package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
+import org.apache.streampark.console.core.component.FlinkCheckpointProcessor;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 import org.apache.streampark.console.core.enums.OptionState;
@@ -60,7 +61,7 @@ import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8
  *
  * <p>Use FlinkK8sChangeListenerV2 listeners instead:
  *
- * @link org.apache.streampark.console.core.task.FlinkK8sChangeListenerV2
+ * @link org.apache.streampark.console.core.watcher.FlinkK8sChangeListenerV2
  */
 @Deprecated
 @Slf4j

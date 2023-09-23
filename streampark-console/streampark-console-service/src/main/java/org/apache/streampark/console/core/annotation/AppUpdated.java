@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.annotation;
 
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 

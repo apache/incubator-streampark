@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.task;
+package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.enums.ExecutionMode;
