@@ -21,13 +21,11 @@ import java.time.LocalDateTime
 object ConfigConst {
 
   /** common const */
-
   val DEFAULT_DATAMASK_STRING = "********"
 
   val PARAM_PREFIX = "--"
 
   /** pyflink */
-
   val PYTHON_SUFFIX = ".py"
 
   val PYTHON_DRIVER_CLASS_NAME = "org.apache.flink.client.python.PythonDriver"
@@ -35,7 +33,6 @@ object ConfigConst {
   val PYTHON_EXECUTABLE = "venv.zip/venv/bin/python3"
 
   /** about parameter... */
-
   val KEY_APP_HOME = "app.home"
 
   val KEY_HOST = "host"
@@ -53,12 +50,6 @@ object ConfigConst {
   val KEY_SEMANTIC = "semantic"
 
   /** sign.... */
-  val SIGN_COLON = ":"
-
-  val SIGN_SEMICOLON = ";"
-
-  val SIGN_COMMA = ","
-
   val SIGN_EMPTY = ""
 
   /** kerberos */
@@ -79,15 +70,14 @@ object ConfigConst {
 
   val KEY_SECURITY_KERBEROS_KRB5_CONF = "security.kerberos.login.krb5"
 
-  // spark
-
+  /** about spark */
   val KEY_SPARK_MAIN_CLASS = "spark.main.class"
 
   val KEY_SPARK_APP_NAME = "spark.app.name"
 
   val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
 
-  // flink
+  /** about config flink */
   def KEY_APP_CONF(prefix: String = null): String = s"${Option(prefix).getOrElse("")}conf"
 
   def KEY_FLINK_CONF(prefix: String = null): String = s"${Option(prefix).getOrElse("")}flink.conf"
@@ -123,7 +113,7 @@ object ConfigConst {
 
   val FLINK_NATIVE_KUBERNETES_LABEL = "flink-native-kubernetes"
 
-  // ---table---
+  /** about flink table */
   val KEY_FLINK_TABLE_PLANNER = "flink.table.planner"
 
   val KEY_FLINK_TABLE_MODE = "flink.table.mode"
@@ -133,7 +123,6 @@ object ConfigConst {
   val KEY_FLINK_TABLE_DATABASE = "flink.table.database"
 
   /** about config Kafka */
-
   val KAFKA_SINK_PREFIX = "kafka.sink."
 
   val KAFKA_SOURCE_PREFIX = "kafka.source."

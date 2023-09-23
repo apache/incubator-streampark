@@ -99,7 +99,7 @@ public class FlinkClusterWatcher {
     List<FlinkCluster> flinkClusters =
         flinkClusterService.list(
             new LambdaQueryWrapper<FlinkCluster>()
-                .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getValue())
+                .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getState())
                 // excluding flink clusters on kubernetes
                 .notIn(FlinkCluster::getExecutionMode, ExecutionMode.getKubernetesMode()));
     flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
@@ -138,7 +138,7 @@ public class FlinkClusterWatcher {
       cluster.setAffectedJobs(
           applicationInfoService.countAffectedByClusterId(
               cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
-      cluster.setClusterState(state.getValue());
+      cluster.setClusterState(state.getState());
       cluster.setEndTime(new Date());
       alertService.alert(cluster.getAlertId(), AlertTemplate.of(cluster, state));
     }

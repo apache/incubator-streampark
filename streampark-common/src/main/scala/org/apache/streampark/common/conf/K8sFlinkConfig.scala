@@ -18,7 +18,6 @@
 package org.apache.streampark.common.conf
 
 /** Flink kubernetes Configuration for v1 version */
-
 object K8sFlinkConfig {
 
   lazy val isV2Enabled: Boolean = InternalConfigHolder.get(ENABLE_V2)

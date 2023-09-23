@@ -25,16 +25,22 @@ public enum ExecutionMode {
 
   /** Local mode */
   LOCAL(0, "local"),
+
   /** remote */
   REMOTE(1, "remote"),
+
   /** yarn-per-job mode */
   YARN_PER_JOB(2, "yarn-per-job"),
+
   /** yarn session */
   YARN_SESSION(3, "yarn-session"),
+
   /** yarn application */
   YARN_APPLICATION(4, "yarn-application"),
+
   /** kubernetes session */
   KUBERNETES_NATIVE_SESSION(5, "kubernetes-session"),
+
   /** kubernetes application */
   KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
 

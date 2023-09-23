@@ -441,24 +441,24 @@ public class Application implements Serializable {
 
   @JsonIgnore
   public boolean isFlinkSqlJob() {
-    return DevelopmentMode.FLINK_SQL.getValue().equals(this.getJobType());
+    return DevelopmentMode.FLINK_SQL.getMode().equals(this.getJobType());
   }
 
   @JsonIgnore
   public boolean isFlinkSqlJobOrPyFlinkJob() {
-    return DevelopmentMode.FLINK_SQL.getValue().equals(this.getJobType())
-        || DevelopmentMode.PYFLINK.getValue().equals(this.getJobType());
+    return DevelopmentMode.FLINK_SQL.getMode().equals(this.getJobType())
+        || DevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
   }
 
   @JsonIgnore
   public boolean isCustomCodeJob() {
-    return DevelopmentMode.CUSTOM_CODE.getValue().equals(this.getJobType());
+    return DevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType());
   }
 
   @JsonIgnore
   public boolean isCustomCodeOrPyFlinkJob() {
-    return DevelopmentMode.CUSTOM_CODE.getValue().equals(this.getJobType())
-        || DevelopmentMode.PYFLINK.getValue().equals(this.getJobType());
+    return DevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
+        || DevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
   }
 
   @JsonIgnore

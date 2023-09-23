@@ -116,7 +116,10 @@ case class SubmitRequest(
         case "conf://" => PropertiesUtils.fromHoconText(content)
         case "prop://" => PropertiesUtils.fromPropertiesText(content)
         case "hdfs://" =>
-          // 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
+          /**
+           * If the configuration file is HDFS mode, you need to copy the HDFS related configuration
+           * file to resources.
+           */
           val text = HdfsUtils.read(this.appConf)
           val extension = this.appConf.split("\\.").last.toLowerCase
           extension match {
@@ -139,7 +142,10 @@ case class SubmitRequest(
 
   private[client] lazy val hdfsWorkspace = {
 
-    /** 必须保持本机flink和hdfs里的flink版本和配置都完全一致. */
+    /**
+     * The flink version and configuration in the native flink and hdfs must be kept exactly the
+     * same.
+     */
     val workspace = Workspace.remote
     val flinkHome = flinkVersion.flinkHome
     val flinkHomeDir = new File(flinkHome)
