@@ -56,7 +56,7 @@ public enum RestoreMode {
   }
 
   public String getName() {
-    return RestoreMode.of(this.mode).toString();
+    return this.toString();
   }
 
   public static RestoreMode of(Integer value) {
