@@ -68,14 +68,7 @@ object FileUtils {
     if (StringUtils.isBlank(contentType) || input == null) {
       throw new RuntimeException("The contentType or inputStream can not be null")
     }
-
-    if (
-      contentType.contains("text/x-python") && getMimeType(input).equals(
-        MediaType.TEXT_PLAIN.toString)
-    ) {
-      return true
-    }
-    false
+    getMimeType(input) == MediaType.TEXT_PLAIN.toString && contentType.contains("text/x-python")
   }
 
   def getMimeType(stream: InputStream): String = {
