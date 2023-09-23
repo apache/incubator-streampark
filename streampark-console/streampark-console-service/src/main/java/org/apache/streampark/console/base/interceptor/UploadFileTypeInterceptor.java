@@ -19,21 +19,33 @@ package org.apache.streampark.console.base.interceptor;
 
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.utils.MimeTypeUtils;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.InputStream;
 import java.util.Map;
 
 @Component
 public class UploadFileTypeInterceptor implements HandlerInterceptor {
+
+  private static final Logger logger = LoggerFactory.getLogger(UploadFileTypeInterceptor.class);
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -45,16 +57,34 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
         MultipartFile multipartFile = multipartRequest.getFile(file);
         ApiAlertException.throwIfNull(
             multipartFile, "File to upload can't be null. Upload file failed.");
-        boolean isJarOrPyFile =
+        boolean fileType =
             FileUtils.isJarFileType(multipartFile.getInputStream())
-                || MimeTypeUtils.isPythonFileType(
-                    multipartFile.getContentType(), multipartFile.getInputStream());
+                || isPythonFileType(multipartFile.getContentType(), multipartFile.getInputStream());
         ApiAlertException.throwIfFalse(
-            isJarOrPyFile,
-            "Illegal file type, Only support standard jar or py files. Upload file failed.");
+            fileType, "Illegal file type, Only support standard jar files. Upload file failed.");
       }
     }
     return true;
+  }
+
+  public boolean isPythonFileType(String contentType, InputStream input) {
+    if (StringUtils.isBlank(contentType) || input == null) {
+      throw new RuntimeException("The contentType or inputStream can not be null");
+    }
+    try {
+      return getMimeType(input) == MediaType.TEXT_PLAIN.toString()
+          && contentType.contains("text/x-python");
+    } catch (Exception e) {
+      logger.warn("MimeType parse failed", e);
+      return false;
+    }
+  }
+
+  public String getMimeType(InputStream stream) throws Exception {
+    Metadata metadata = new Metadata();
+    AutoDetectParser parser = new AutoDetectParser();
+    parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
+    return metadata.get(HttpHeaders.CONTENT_TYPE);
   }
 
   @Override
