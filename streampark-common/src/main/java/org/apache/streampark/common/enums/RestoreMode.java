@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.enums;
 
-import java.util.Arrays;
+import java.util.Objects;
 
 public enum RestoreMode {
 
@@ -60,6 +60,11 @@ public enum RestoreMode {
   }
 
   public static RestoreMode of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.mode == value).findFirst().orElse(null);
+    for (RestoreMode restoreMode : values()) {
+      if (Objects.equals(restoreMode.mode, value)) {
+        return restoreMode;
+      }
+    }
+    return null;
   }
 }
