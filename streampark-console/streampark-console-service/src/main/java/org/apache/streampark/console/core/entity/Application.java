@@ -20,11 +20,11 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ApplicationTypeEnum;
-import org.apache.streampark.common.enums.DevelopmentModeEnum;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
-import org.apache.streampark.common.enums.FlinkK8sRestExposedTypeEnum;
-import org.apache.streampark.common.enums.StorageTypeEnum;
+import org.apache.streampark.common.enums.ApplicationType;
+import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
+import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AppControl;
@@ -276,8 +276,8 @@ public class Application implements Serializable {
   }
 
   public void setYarnQueueByHotParams() {
-    if (!(ExecutionModeEnum.YARN_APPLICATION == this.getExecutionModeEnum()
-        || ExecutionModeEnum.YARN_PER_JOB == this.getExecutionModeEnum())) {
+    if (!(FlinkExecutionMode.YARN_APPLICATION == this.getFlinkExecutionMode()
+        || FlinkExecutionMode.YARN_PER_JOB == this.getFlinkExecutionMode())) {
       return;
     }
 
@@ -341,8 +341,8 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
-  public DevelopmentModeEnum getDevelopmentMode() {
-    return DevelopmentModeEnum.of(jobType);
+  public FlinkDevelopmentMode getDevelopmentMode() {
+    return FlinkDevelopmentMode.of(jobType);
   }
 
   @JsonIgnore
@@ -351,13 +351,13 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
-  public FlinkK8sRestExposedTypeEnum getK8sRestExposedTypeEnum() {
-    return FlinkK8sRestExposedTypeEnum.of(this.k8sRestExposedType);
+  public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
+    return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
   }
 
   @JsonIgnore
-  public ExecutionModeEnum getExecutionModeEnum() {
-    return ExecutionModeEnum.of(executionMode);
+  public FlinkExecutionMode getFlinkExecutionMode() {
+    return FlinkExecutionMode.of(executionMode);
   }
 
   public boolean cpFailedTrigger() {
@@ -398,10 +398,10 @@ public class Application implements Serializable {
     return path;
   }
 
-  /** Automatically identify remoteAppHome or localAppHome based on app ExecutionModeEnum */
+  /** Automatically identify remoteAppHome or localAppHome based on app FlinkExecutionMode */
   @JsonIgnore
   public String getAppHome() {
-    switch (this.getExecutionModeEnum()) {
+    switch (this.getFlinkExecutionMode()) {
       case KUBERNETES_NATIVE_APPLICATION:
       case KUBERNETES_NATIVE_SESSION:
       case YARN_PER_JOB:
@@ -413,7 +413,7 @@ public class Application implements Serializable {
         return getRemoteAppHome();
       default:
         throw new UnsupportedOperationException(
-            "unsupported executionMode ".concat(getExecutionModeEnum().getName()));
+            "unsupported executionMode ".concat(getFlinkExecutionMode().getName()));
     }
   }
 
@@ -423,8 +423,8 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
-  public ApplicationTypeEnum getApplicationType() {
-    return ApplicationTypeEnum.of(appType);
+  public ApplicationType getApplicationType() {
+    return ApplicationType.of(appType);
   }
 
   @JsonIgnore
@@ -441,24 +441,24 @@ public class Application implements Serializable {
 
   @JsonIgnore
   public boolean isFlinkSqlJob() {
-    return DevelopmentModeEnum.FLINK_SQL.getMode().equals(this.getJobType());
+    return FlinkDevelopmentMode.FLINK_SQL.getMode().equals(this.getJobType());
   }
 
   @JsonIgnore
   public boolean isFlinkSqlJobOrPyFlinkJob() {
-    return DevelopmentModeEnum.FLINK_SQL.getMode().equals(this.getJobType())
-        || DevelopmentModeEnum.PYFLINK.getMode().equals(this.getJobType());
+    return FlinkDevelopmentMode.FLINK_SQL.getMode().equals(this.getJobType())
+        || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
   }
 
   @JsonIgnore
   public boolean isCustomCodeJob() {
-    return DevelopmentModeEnum.CUSTOM_CODE.getMode().equals(this.getJobType());
+    return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType());
   }
 
   @JsonIgnore
   public boolean isCustomCodeOrPyFlinkJob() {
-    return DevelopmentModeEnum.CUSTOM_CODE.getMode().equals(this.getJobType())
-        || DevelopmentModeEnum.PYFLINK.getMode().equals(this.getJobType());
+    return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
+        || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
   }
 
   @JsonIgnore
@@ -474,7 +474,7 @@ public class Application implements Serializable {
   }
 
   public boolean isStreamParkJob() {
-    return this.getAppType() == ApplicationTypeEnum.STREAMPARK_FLINK.getType();
+    return this.getAppType() == ApplicationType.STREAMPARK_FLINK.getType();
   }
 
   @JsonIgnore
@@ -507,21 +507,21 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
-  public StorageTypeEnum getStorageType() {
+  public StorageType getStorageType() {
     return getStorageType(getExecutionMode());
   }
 
-  public static StorageTypeEnum getStorageType(Integer execMode) {
-    ExecutionModeEnum executionModeEnum = ExecutionModeEnum.of(execMode);
+  public static StorageType getStorageType(Integer execMode) {
+    FlinkExecutionMode executionModeEnum = FlinkExecutionMode.of(execMode);
     switch (Objects.requireNonNull(executionModeEnum)) {
       case YARN_APPLICATION:
-        return StorageTypeEnum.HDFS;
+        return StorageType.HDFS;
       case YARN_PER_JOB:
       case YARN_SESSION:
       case KUBERNETES_NATIVE_SESSION:
       case KUBERNETES_NATIVE_APPLICATION:
       case REMOTE:
-        return StorageTypeEnum.LFS;
+        return StorageType.LFS;
       default:
         throw new UnsupportedOperationException("Unsupported ".concat(executionModeEnum.getName()));
     }
@@ -559,7 +559,7 @@ public class Application implements Serializable {
     if (appParam != this) {
       this.hotParams = null;
     }
-    ExecutionModeEnum executionModeEnum = appParam.getExecutionModeEnum();
+    FlinkExecutionMode executionModeEnum = appParam.getFlinkExecutionMode();
     Map<String, String> hotParams = new HashMap<>(0);
     if (needFillYarnQueueLabel(executionModeEnum)) {
       hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
@@ -569,8 +569,8 @@ public class Application implements Serializable {
     }
   }
 
-  private boolean needFillYarnQueueLabel(ExecutionModeEnum mode) {
-    return ExecutionModeEnum.YARN_PER_JOB == mode || ExecutionModeEnum.YARN_APPLICATION == mode;
+  private boolean needFillYarnQueueLabel(FlinkExecutionMode mode) {
+    return FlinkExecutionMode.YARN_PER_JOB == mode || FlinkExecutionMode.YARN_APPLICATION == mode;
   }
 
   @Override

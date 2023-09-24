@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.application;
 
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.Application;
 
@@ -148,7 +148,7 @@ public interface ApplicationManageService extends IService<Application> {
    *     execution modes
    */
   List<Application> getByTeamIdAndExecutionModes(
-      Long teamId, Collection<ExecutionModeEnum> executionModeEnums);
+      Long teamId, Collection<FlinkExecutionMode> executionModeEnums);
 
   /**
    * Retrieves a list of applications be probing or need to probe.

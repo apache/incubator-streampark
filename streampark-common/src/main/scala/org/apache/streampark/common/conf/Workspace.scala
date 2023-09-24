@@ -16,7 +16,7 @@
  */
 package org.apache.streampark.common.conf
 
-import org.apache.streampark.common.enums.StorageTypeEnum
+import org.apache.streampark.common.enums.StorageType
 import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
 import org.apache.streampark.common.util.ImplicitsUtils._
 
@@ -24,11 +24,11 @@ import java.net.URI
 
 object Workspace {
 
-  def of(storageType: StorageTypeEnum): Workspace = Workspace(storageType)
+  def of(storageType: StorageType): Workspace = Workspace(storageType)
 
-  lazy val local: Workspace = Workspace.of(StorageTypeEnum.LFS)
+  lazy val local: Workspace = Workspace.of(StorageType.LFS)
 
-  lazy val remote: Workspace = Workspace.of(StorageTypeEnum.HDFS)
+  lazy val remote: Workspace = Workspace.of(StorageType.HDFS)
 
   private[this] lazy val localWorkspace = local.WORKSPACE
 
@@ -52,7 +52,7 @@ object Workspace {
 
 }
 
-case class Workspace(storageType: StorageTypeEnum) {
+case class Workspace(storageType: StorageType) {
 
   private[this] def getConfigValue[T](option: InternalOption): T = {
     val s = SystemPropertyUtils.get(option.key)
@@ -68,11 +68,11 @@ case class Workspace(storageType: StorageTypeEnum) {
 
   lazy val WORKSPACE: String = {
     storageType match {
-      case StorageTypeEnum.LFS =>
+      case StorageType.LFS =>
         val path: String = getConfigValue[String](CommonConfig.STREAMPARK_WORKSPACE_LOCAL)
         require(path != null, "[StreamPark] streampark.workspace.local must not be null")
         path
-      case StorageTypeEnum.HDFS =>
+      case StorageType.HDFS =>
         val path: String = getConfigValue[String](CommonConfig.STREAMPARK_WORKSPACE_REMOTE)
         path match {
           case p if p.isEmpty =>

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.enums.ExecutionModeEnum
+import org.apache.streampark.common.enums.FlinkExecutionMode
 import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
@@ -124,7 +124,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       flinkConfig: Configuration): CancelResponse = {
     flinkConfig.safeSet(
       DeploymentOptions.TARGET,
-      ExecutionModeEnum.KUBERNETES_NATIVE_SESSION.getName)
+      FlinkExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
     super.doCancel(cancelRequest, flinkConfig)
   }
 
@@ -254,7 +254,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   override def doTriggerSavepoint(
       triggerSavepointRequest: TriggerSavepointRequest,
       flinkConfig: Configuration): SavepointResponse = {
-    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
+    flinkConfig.safeSet(
+      DeploymentOptions.TARGET,
+      FlinkExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
     super.doTriggerSavepoint(triggerSavepointRequest, flinkConfig)
   }
 }

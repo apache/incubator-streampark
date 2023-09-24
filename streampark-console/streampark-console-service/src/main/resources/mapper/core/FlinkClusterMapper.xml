@@ -25,7 +25,7 @@
         <result column="cluster_name" jdbcType="VARCHAR" property="clusterName"/>
         <result column="options" jdbcType="LONGVARCHAR" property="options"/>
         <result column="yarn_queue" jdbcType="VARCHAR" property="yarnQueue"/>
-        <result column="execution_mode" jdbcType="TINYINT" property="executionModeEnum"/>
+        <result column="execution_mode" jdbcType="TINYINT" property="executionMode"/>
         <result column="version_id" jdbcType="BIGINT" property="versionId"/>
         <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="service_account" jdbcType="VARCHAR" property="serviceAccount"/>
@@ -36,9 +36,9 @@
         <result column="k8s_rest_exposed_type" jdbcType="TINYINT" property="k8sRestExposedType"/>
         <result column="k8s_hadoop_integration" jdbcType="BOOLEAN" property="k8sHadoopIntegration"/>
         <result column="k8s_conf" jdbcType="VARCHAR" property="k8sConf"/>
-        <result column="resolve_order" jdbcType="INTEGER" property="resolveOrderEnum"/>
+        <result column="resolve_order" jdbcType="INTEGER" property="resolveOrder"/>
         <result column="exception" jdbcType="LONGVARCHAR" property="exception"/>
-        <result column="cluster_state" jdbcType="TINYINT" property="clusterStateEnum"/>
+        <result column="cluster_state" jdbcType="TINYINT" property="clusterState"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
         <result column="start_time" jdbcType="DATE" property="startTime"/>
         <result column="end_time" jdbcType="DATE" property="endTime"/>

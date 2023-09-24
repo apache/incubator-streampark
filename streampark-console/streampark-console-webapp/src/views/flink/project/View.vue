@@ -18,7 +18,7 @@
   <PageWrapper contentFullHeight contentBackground contentClass="px-20px">
     <a-card class="header" :bordered="false">
       <template #extra>
-        <a-radio-group v-model:value="queryParams.buildStateEnum">
+        <a-radio-group v-model:value="queryParams.buildState">
           <a-radio-button
             v-for="item in buttonList"
             @click="handleQuery(item.key)"
@@ -106,7 +106,7 @@
       const [registerLogModal, { openModal: openLogModal }] = useModal();
       const buttonList = reactive(statusList);
       const loading = ref(false);
-      const buildStateEnum = ref('');
+      const buildState = ref('');
       const searchValue = ref('');
       const pageInfo = reactive({
         currentPage: 1,
@@ -114,8 +114,8 @@
         total: 0,
       });
 
-      const queryParams = reactive<{ buildStateEnum: string; name?: string }>({
-        buildStateEnum: '',
+      const queryParams = reactive<{ buildState: string; name?: string }>({
+        buildState: '',
       });
 
       let projectDataSource = ref<Array<ProjectRecord>>([]);
@@ -146,7 +146,7 @@
 
       const handleQuery = function (val: string | undefined) {
         pageInfo.currentPage = 1;
-        queryParams.buildStateEnum = val!;
+        queryParams.buildState = val!;
         queryParams.name = searchValue.value;
         queryData();
       };
@@ -189,7 +189,7 @@
         t,
         searchValue,
         pageInfo,
-        buildStateEnum,
+        buildState,
         buttonList,
         handleQuery,
         queryParams,

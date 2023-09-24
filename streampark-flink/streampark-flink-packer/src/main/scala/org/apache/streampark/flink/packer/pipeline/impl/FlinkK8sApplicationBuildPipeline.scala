@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
-import org.apache.streampark.common.enums.DevelopmentModeEnum
+import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.common.util.ThreadUtils
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
@@ -91,8 +91,8 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       execStep(3) {
         val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
         val extJarLibs = request.developmentMode match {
-          case DevelopmentModeEnum.FLINK_SQL => request.dependencyInfo.extJarLibs
-          case DevelopmentModeEnum.CUSTOM_CODE => Set[String]()
+          case FlinkDevelopmentMode.FLINK_SQL => request.dependencyInfo.extJarLibs
+          case FlinkDevelopmentMode.CUSTOM_CODE => Set[String]()
         }
         val shadedJar =
           MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)

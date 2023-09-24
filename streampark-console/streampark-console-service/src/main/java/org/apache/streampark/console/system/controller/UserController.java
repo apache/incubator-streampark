@@ -77,7 +77,7 @@ public class UserController {
   @PostMapping("post")
   @RequiresPermissions("user:add")
   public RestResponse addUser(@Valid User user) throws Exception {
-    user.setLoginTypeEnum(LoginTypeEnum.PASSWORD);
+    user.setLoginType(LoginTypeEnum.PASSWORD);
     this.userService.createUser(user);
     return RestResponse.success();
   }

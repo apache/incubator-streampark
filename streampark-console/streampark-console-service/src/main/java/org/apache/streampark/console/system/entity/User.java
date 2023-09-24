@@ -63,9 +63,9 @@ public class User implements Serializable {
   @Email(message = "{email}")
   private String email;
 
-  private UserTypeEnum userTypeEnum;
+  private UserTypeEnum userType;
 
-  private LoginTypeEnum loginTypeEnum;
+  private LoginTypeEnum loginType;
 
   @NotBlank(message = "{required}")
   private String status;

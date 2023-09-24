@@ -121,7 +121,7 @@
   const loading = ref(false);
   const userId = ref('');
   const modelVisible = ref(false);
-  const loginTypeEnum = ref(LoginTypeEnum.PASSWORD);
+  const loginType = ref(LoginTypeEnum.PASSWORD);
   const enableSSO = ref(false);
   const enableLDAP = ref(false);
 
@@ -133,7 +133,7 @@
   const loginText = computed(() => {
     const localText = t('sys.login.loginButton');
     const ldapText = t('sys.login.ldapTip');
-    if (loginTypeEnum.value === LoginTypeEnum.PASSWORD) {
+    if (loginType.value === LoginTypeEnum.PASSWORD) {
       return { buttonText: localText, linkText: t('sys.login.ldapTip') };
     }
     return { buttonText: ldapText, linkText: t('sys.login.passwordTip') };
@@ -158,7 +158,7 @@
       {
         password: loginFormValue.password,
         username: loginFormValue.account,
-        loginTypeEnum: LoginTypeEnum[loginTypeEnum.value],
+        loginType: LoginTypeEnum[loginType.value],
       },
       'none',
     );
@@ -222,11 +222,11 @@
   }
 
   function changeLoginType() {
-    if (loginTypeEnum.value === LoginTypeEnum.PASSWORD) {
-      loginTypeEnum.value = LoginTypeEnum.LDAP;
+    if (loginType.value === LoginTypeEnum.PASSWORD) {
+      loginType.value = LoginTypeEnum.LDAP;
       return;
     }
-    loginTypeEnum.value = LoginTypeEnum.PASSWORD;
+    loginType.value = LoginTypeEnum.PASSWORD;
   }
 
   onMounted(() => {

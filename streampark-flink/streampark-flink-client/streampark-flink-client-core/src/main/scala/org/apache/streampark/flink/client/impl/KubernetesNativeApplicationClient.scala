@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.enums.ExecutionModeEnum
+import org.apache.streampark.common.enums.FlinkExecutionMode
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
@@ -94,14 +94,16 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       flinkConfig: Configuration): CancelResponse = {
     flinkConfig.safeSet(
       DeploymentOptions.TARGET,
-      ExecutionModeEnum.KUBERNETES_NATIVE_APPLICATION.getName)
+      FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
     super.doCancel(cancelRequest, flinkConfig)
   }
 
   override def doTriggerSavepoint(
       triggerSavepointRequest: TriggerSavepointRequest,
       flinkConf: Configuration): SavepointResponse = {
-    flinkConf.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+    flinkConf.safeSet(
+      DeploymentOptions.TARGET,
+      FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
     super.doTriggerSavepoint(triggerSavepointRequest, flinkConf)
   }
 }

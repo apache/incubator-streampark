@@ -17,35 +17,41 @@
 
 package org.apache.streampark.common.enums;
 
-import org.apache.commons.lang3.StringUtils;
+/** kubernetes.rest-service.exposed.type */
+public enum FlinkK8sRestExposedType {
 
-public enum StorageTypeEnum {
+  /** LoadBalancer */
+  LOAD_BALANCER("LoadBalancer", 0),
 
-  /** hdfs */
-  HDFS("hdfs"),
+  /** ClusterIP */
+  CLUSTER_IP("ClusterIP", 1),
 
-  /** local File system */
-  LFS("lfs");
+  /** NodePort */
+  NODE_PORT("NodePort", 2);
 
-  private final String type;
+  private final String name;
 
-  StorageTypeEnum(String type) {
+  private final Integer type;
+
+  FlinkK8sRestExposedType(String name, Integer type) {
+    this.name = name;
     this.type = type;
   }
 
-  public String getType() {
-    return type;
-  }
-
-  public static StorageTypeEnum of(String identifier) {
-    if (StringUtils.isBlank(identifier)) {
-      return LFS;
-    }
-    for (StorageTypeEnum type : values()) {
-      if (type.type.equals(identifier)) {
-        return type;
+  public static FlinkK8sRestExposedType of(Integer value) {
+    for (FlinkK8sRestExposedType order : values()) {
+      if (order.type.equals(value)) {
+        return order;
       }
     }
-    return LFS;
+    return null;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Integer getType() {
+    return type;
   }
 }

@@ -22,7 +22,7 @@
         <id column="id" jdbcType="INTEGER" property="id"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="git_credential" jdbcType="INTEGER" property="gitCredentialEnum"/>
+        <result column="git_credential" jdbcType="INTEGER" property="gitCredential"/>
         <result column="url" jdbcType="VARCHAR" property="url"/>
         <result column="repository" jdbcType="INTEGER" property="repository"/>
         <result column="branches" jdbcType="VARCHAR" property="branches"/>
@@ -34,7 +34,7 @@
         <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="last_build" jdbcType="TIMESTAMP" property="lastBuild"/>
-        <result column="build_state" jdbcType="INTEGER" property="buildStateEnum"/>
+        <result column="build_state" jdbcType="INTEGER" property="buildState"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
@@ -85,8 +85,8 @@
             <if test="project.name != null and project.name != ''">
                 and t.name like '%${project.name}%'
             </if>
-            <if test="project.buildStateEnum != null">
-                and t.build_state = #{project.buildStateEnum}
+            <if test="project.buildState != null">
+                and t.build_state = #{project.buildState}
             </if>
         </where>
     </select>

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.task
 
 import org.apache.streampark.common.conf.K8sFlinkConfig
-import org.apache.streampark.common.enums.{ClusterStateEnum, ExecutionModeEnum}
+import org.apache.streampark.common.enums.{ClusterState, FlinkExecutionMode}
 import org.apache.streampark.common.zio.{OptionTraversableOps, PrettyStringOps}
 import org.apache.streampark.common.zio.ZIOContainerSubscription.{ConcurrentMapExtension, RefMapExtension}
 import org.apache.streampark.common.zio.ZIOExt.{IterableZStreamConverter, OptionZIOOps, UIOOps, ZStreamOptionEffectOps}
@@ -69,10 +69,10 @@ class FlinkK8sObserverBroker @Autowired() (
   )
 
   private val alertClusterStateList = Array(
-    ClusterStateEnum.FAILED,
-    ClusterStateEnum.UNKNOWN,
-    ClusterStateEnum.LOST,
-    ClusterStateEnum.KILLED
+    ClusterState.FAILED,
+    ClusterState.UNKNOWN,
+    ClusterState.LOST,
+    ClusterState.KILLED
   )
 
   private lazy val allDaemonEffects: Array[UIO[Unit]] = Array(
@@ -113,7 +113,7 @@ class FlinkK8sObserverBroker @Autowired() (
     val fromApplicationRecords: UIO[Unit] = it
       .safeFindApplication(
         new LambdaQueryWrapper[Application]
-          .in(Application.SFunc.EXECUTION_MODE, ExecutionModeEnum.getKubernetesMode)
+          .in(Application.SFunc.EXECUTION_MODE, FlinkExecutionMode.getKubernetesMode)
       )(10)
       .map(apps => apps.map(app => applicationToTrackKey(app)).filterSome.toVector)
       .tap(keys => logInfo(s"Restore Flink K8s track-keys from Application records:\n${keys.prettyStr}"))
@@ -122,7 +122,7 @@ class FlinkK8sObserverBroker @Autowired() (
     val fromFlinkClusterRecords: UIO[Unit] = it
       .safeFindFlinkClusterRecord(
         new LambdaQueryWrapper[FlinkCluster]
-          .eq(FlinkCluster.SFunc.EXECUTION_MODE, ExecutionModeEnum.KUBERNETES_NATIVE_SESSION.getMode)
+          .eq(FlinkCluster.SFunc.EXECUTION_MODE, FlinkExecutionMode.KUBERNETES_NATIVE_SESSION.getMode)
       )(10)
       .map(clusters => clusters.map(e => TrackKey.cluster(e.getId, e.getK8sNamespace, e.getClusterId)))
       .tap(keys => logInfo(s"Restore Flink K8s track-keys from FlinkCluster records:\n${keys.prettyStr}"))

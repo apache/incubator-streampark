@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
@@ -100,7 +100,7 @@ public class FlinkK8sWatcherWrapper {
     queryWrapper
         .eq(Application::getTracking, 1)
         .ne(Application::getState, FlinkAppStateEnum.LOST.getValue())
-        .in(Application::getExecutionMode, ExecutionModeEnum.getKubernetesMode());
+        .in(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
 
     List<Application> k8sApplication = applicationManageService.list(queryWrapper);
     if (CollectionUtils.isEmpty(k8sApplication)) {
@@ -126,7 +126,7 @@ public class FlinkK8sWatcherWrapper {
 
     // covert Application to TrackId
     public static TrackId toTrackId(@Nonnull Application app) {
-      Enumeration.Value mode = FlinkK8sExecuteModeEnum.of(app.getExecutionModeEnum());
+      Enumeration.Value mode = FlinkK8sExecuteModeEnum.of(app.getFlinkExecutionMode());
       if (FlinkK8sExecuteModeEnum.APPLICATION() == mode) {
         return TrackId.onApplication(
             app.getK8sNamespace(),
@@ -153,6 +153,6 @@ public class FlinkK8sWatcherWrapper {
     if (application == null) {
       return false;
     }
-    return ExecutionModeEnum.isKubernetesMode(application.getExecutionMode());
+    return FlinkExecutionMode.isKubernetesMode(application.getExecutionMode());
   }
 }

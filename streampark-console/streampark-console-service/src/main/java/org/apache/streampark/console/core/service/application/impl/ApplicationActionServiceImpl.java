@@ -20,10 +20,10 @@ package org.apache.streampark.console.core.service.application.impl;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.DevelopmentModeEnum;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
-import org.apache.streampark.common.enums.ResolveOrderEnum;
-import org.apache.streampark.common.enums.RestoreModeEnum;
+import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkRestoreMode;
+import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
@@ -266,10 +266,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     String clusterId = null;
-    if (ExecutionModeEnum.isKubernetesMode(application.getExecutionMode())) {
+    if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       clusterId = application.getClusterId();
-    } else if (ExecutionModeEnum.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionModeEnum.YARN_SESSION == application.getExecutionModeEnum()) {
+    } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         ApiAlertException.throwIfNull(
             cluster,
@@ -284,7 +284,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     Map<String, Object> properties = new HashMap<>();
 
-    if (ExecutionModeEnum.isRemoteMode(application.getExecutionModeEnum())) {
+    if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
       FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
       ApiAlertException.throwIfNull(
           cluster,
@@ -301,7 +301,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         new CancelRequest(
             application.getId(),
             flinkEnv.getFlinkVersion(),
-            ExecutionModeEnum.of(application.getExecutionMode()),
+            FlinkExecutionMode.of(application.getExecutionMode()),
             properties,
             clusterId,
             application.getJobId(),
@@ -439,7 +439,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     String appConf = userJarAndAppConf.f1;
 
     BuildResult buildResult = buildPipeline.getBuildResult();
-    if (ExecutionModeEnum.YARN_APPLICATION == application.getExecutionModeEnum()) {
+    if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
       buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
     }
 
@@ -450,10 +450,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     SubmitRequest submitRequest =
         new SubmitRequest(
             flinkEnv.getFlinkVersion(),
-            ExecutionModeEnum.of(application.getExecutionMode()),
+            FlinkExecutionMode.of(application.getExecutionMode()),
             getProperties(application),
             flinkEnv.getFlinkConf(),
-            DevelopmentModeEnum.of(application.getJobType()),
+            FlinkDevelopmentMode.of(application.getJobType()),
             application.getId(),
             jobId,
             application.getJobName(),
@@ -462,7 +462,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             getSavePointed(appParam),
             appParam.getRestoreMode() == null
                 ? null
-                : RestoreModeEnum.of(appParam.getRestoreMode()),
+                : FlinkRestoreMode.of(appParam.getRestoreMode()),
             applicationArgs,
             buildResult,
             kubernetesSubmitParam,
@@ -540,7 +540,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         .whenComplete(
             (t, e) -> {
               if (!K8sFlinkConfig.isV2Enabled()
-                  && ExecutionModeEnum.isKubernetesApplicationMode(
+                  && FlinkExecutionMode.isKubernetesApplicationMode(
                       application.getExecutionMode())) {
                 String domainName = settingService.getIngressModeDefault();
                 if (StringUtils.isNotBlank(domainName)) {
@@ -574,7 +574,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   private Tuple2<String, String> getUserJarAndAppConf(FlinkEnv flinkEnv, Application application) {
-    ExecutionModeEnum executionModeEnum = application.getExecutionModeEnum();
+    FlinkExecutionMode executionModeEnum = application.getFlinkExecutionMode();
     ApplicationConfig applicationConfig = configService.getEffective(application.getId());
 
     ApiAlertException.throwIfNull(
@@ -595,7 +595,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 ? null
                 : String.format("yaml://%s", applicationConfig.getContent());
         // 3) client
-        if (ExecutionModeEnum.YARN_APPLICATION == executionModeEnum) {
+        if (FlinkExecutionMode.YARN_APPLICATION == executionModeEnum) {
           String clientPath = Workspace.remote().APP_CLIENT();
           flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
         }
@@ -649,7 +649,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           }
         }
 
-        if (ExecutionModeEnum.YARN_APPLICATION == executionModeEnum) {
+        if (FlinkExecutionMode.YARN_APPLICATION == executionModeEnum) {
           switch (application.getApplicationType()) {
             case STREAMPARK_FLINK:
               flinkUserJar =
@@ -682,7 +682,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   private Map<String, Object> getProperties(Application application) {
     Map<String, Object> properties = new HashMap<>(application.getOptionMap());
-    if (ExecutionModeEnum.isRemoteMode(application.getExecutionModeEnum())) {
+    if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
       FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
       ApiAlertException.throwIfNull(
           cluster,
@@ -693,8 +693,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       URI activeAddress = cluster.getRemoteURI();
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
-    } else if (ExecutionModeEnum.isYarnMode(application.getExecutionModeEnum())) {
-      if (ExecutionModeEnum.YARN_SESSION == application.getExecutionModeEnum()) {
+    } else if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
+      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         ApiAlertException.throwIfNull(
             cluster,
@@ -713,11 +713,11 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         Optional.ofNullable(yarnLabelExpr)
             .ifPresent(yLabel -> properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yLabel));
       }
-    } else if (ExecutionModeEnum.isKubernetesMode(application.getExecutionModeEnum())) {
+    } else if (FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode())) {
       properties.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
     }
 
-    if (ExecutionModeEnum.isKubernetesApplicationMode(application.getExecutionMode())) {
+    if (FlinkExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
       try {
         HadoopUtils.yarnClient();
         properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
@@ -733,9 +733,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     Map<String, String> dynamicProperties =
         PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties());
     properties.putAll(dynamicProperties);
-    ResolveOrderEnum resolveOrderEnum = ResolveOrderEnum.of(application.getResolveOrder());
-    if (resolveOrderEnum != null) {
-      properties.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrderEnum.getName());
+    ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
+    if (resolveOrder != null) {
+      properties.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
     }
 
     return properties;

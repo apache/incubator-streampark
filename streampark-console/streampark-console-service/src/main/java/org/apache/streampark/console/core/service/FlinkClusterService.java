@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.ClusterStateEnum;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.ClusterState;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 
@@ -49,7 +49,7 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   Boolean existsByFlinkEnvId(Long id);
 
-  List<FlinkCluster> getByExecutionModes(Collection<ExecutionModeEnum> executionModeEnums);
+  List<FlinkCluster> getByExecutionModes(Collection<FlinkExecutionMode> executionModeEnums);
 
-  void updateClusterState(Long id, ClusterStateEnum state);
+  void updateClusterState(Long id, ClusterState state);
 }

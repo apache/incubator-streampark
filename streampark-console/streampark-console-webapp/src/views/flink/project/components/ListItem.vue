@@ -58,9 +58,9 @@
         <p>{{ item.lastBuild || '--' }}</p>
       </li>
       <li class="list-content_item build_state">
-        <span>{{ t('flink.project.form.buildStateEnum') }}</span>
+        <span>{{ t('flink.project.form.buildState') }}</span>
         <p>
-          <a-tag :color="buildStateEnum.color" :class="tagClass">{{ buildStateEnum.label }}</a-tag>
+          <a-tag :color="buildState.color" :class="tagClass">{{ buildState.label }}</a-tag>
         </p>
       </li>
     </ul>
@@ -139,12 +139,12 @@
   const props = defineProps({
     item: { type: Object as PropType<ProjectRecord>, required: true },
   });
-  const needBuild = computed(() => props.item.buildStateEnum == BuildStateEnum.NEED_REBUILD);
-  const isBuilding = computed(() => props.item.buildStateEnum == BuildStateEnum.BUILDING);
-  const buildStateEnum = computed(() => {
-    return buildStateMap[props.item.buildStateEnum] || buildStateMap[BuildStateEnum.FAILED];
+  const needBuild = computed(() => props.item.buildState == BuildStateEnum.NEED_REBUILD);
+  const isBuilding = computed(() => props.item.buildState == BuildStateEnum.BUILDING);
+  const buildState = computed(() => {
+    return buildStateMap[props.item.buildState] || buildStateMap[BuildStateEnum.FAILED];
   });
-  const tagClass = computed(() => buildStateEnum.value.className || '');
+  const tagClass = computed(() => buildState.value.className || '');
   const svgName = computed(() => {
     return (
       {

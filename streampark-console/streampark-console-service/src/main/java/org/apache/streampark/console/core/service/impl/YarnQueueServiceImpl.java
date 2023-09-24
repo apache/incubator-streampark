@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -176,8 +176,8 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
    * @param queueLabel queueLabel expression.
    */
   @Override
-  public void checkQueueLabel(ExecutionModeEnum executionModeEnum, String queueLabel) {
-    if (ExecutionModeEnum.isYarnMode(executionModeEnum)) {
+  public void checkQueueLabel(FlinkExecutionMode executionModeEnum, String queueLabel) {
+    if (FlinkExecutionMode.isYarnMode(executionModeEnum)) {
       ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
     }
   }
@@ -217,7 +217,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public void checkNotReferencedByFlinkClusters(
       @Nonnull String queueLabel, @Nonnull String operation) {
     List<FlinkCluster> clustersReferenceYarnQueueLabel =
-        flinkClusterService.getByExecutionModes(Sets.newHashSet(ExecutionModeEnum.YARN_SESSION))
+        flinkClusterService.getByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
             .stream()
             .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
             .collect(Collectors.toList());
@@ -233,7 +233,8 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
         applicationManageService
             .getByTeamIdAndExecutionModes(
                 teamId,
-                Sets.newHashSet(ExecutionModeEnum.YARN_APPLICATION, ExecutionModeEnum.YARN_PER_JOB))
+                Sets.newHashSet(
+                    FlinkExecutionMode.YARN_APPLICATION, FlinkExecutionMode.YARN_PER_JOB))
             .stream()
             .filter(
                 application -> {

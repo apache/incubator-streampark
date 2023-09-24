@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HadoopConfigUtils;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
@@ -99,7 +99,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
     String port = String.valueOf(remoteURI.getPort());
     String clusterId = flinkCluster.getClusterId();
 
-    ExecutionModeEnum executionModeEnum = ExecutionModeEnum.of(flinkCluster.getExecutionMode());
+    FlinkExecutionMode executionModeEnum = FlinkExecutionMode.of(flinkCluster.getExecutionMode());
     if (executionModeEnum == null) {
       throw new IllegalArgumentException("executionMode is null");
     }

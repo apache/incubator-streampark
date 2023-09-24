@@ -107,7 +107,7 @@
             tooltip: t('system.user.table.reset'),
             ifShow: () =>
               (record.username !== 'admin' || userName.value === 'admin') &&
-              record.loginTypeEnum == LoginTypeEnum[LoginTypeEnum.PASSWORD],
+              record.loginType == LoginTypeEnum[LoginTypeEnum.PASSWORD],
             popConfirm: {
               title: t('system.user.table.resetTip'),
               confirm: handleReset.bind(null, record),

@@ -54,9 +54,9 @@ public class Resource implements Serializable {
   /** user id of creator */
   private Long creatorId;
 
-  private ResourceTypeEnum resourceTypeEnum;
+  private ResourceTypeEnum resourceType;
 
-  private EngineTypeEnum engineTypeEnum;
+  private EngineTypeEnum engineType;
 
   // for flink app
   private String mainClass;

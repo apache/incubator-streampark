@@ -18,7 +18,7 @@
 package org.apache.streampark.common.enums;
 
 /** @since 1.2.3 */
-public enum ClusterStateEnum {
+public enum ClusterState {
 
   /** The cluster was just created but not started */
   CREATED(0),
@@ -49,33 +49,33 @@ public enum ClusterStateEnum {
 
   private final Integer state;
 
-  ClusterStateEnum(Integer state) {
+  ClusterState(Integer state) {
     this.state = state;
   }
 
-  public static ClusterStateEnum of(Integer value) {
-    for (ClusterStateEnum clusterStateEnum : values()) {
-      if (clusterStateEnum.state.equals(value)) {
-        return clusterStateEnum;
+  public static ClusterState of(Integer value) {
+    for (ClusterState clusterState : values()) {
+      if (clusterState.state.equals(value)) {
+        return clusterState;
       }
     }
-    return ClusterStateEnum.UNKNOWN;
+    return ClusterState.UNKNOWN;
   }
 
-  public static ClusterStateEnum of(String name) {
-    for (ClusterStateEnum clusterStateEnum : values()) {
-      if (clusterStateEnum.name().equals(name)) {
-        return clusterStateEnum;
+  public static ClusterState of(String name) {
+    for (ClusterState clusterState : values()) {
+      if (clusterState.name().equals(name)) {
+        return clusterState;
       }
     }
-    return ClusterStateEnum.UNKNOWN;
+    return ClusterState.UNKNOWN;
   }
 
   public Integer getState() {
     return state;
   }
 
-  public static boolean isRunning(ClusterStateEnum state) {
+  public static boolean isRunning(ClusterState state) {
     return RUNNING.equals(state);
   }
 }

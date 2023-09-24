@@ -56,7 +56,7 @@ import java.util.Objects;
 @Slf4j
 @Component
 @Aspect
-public class StreamParkAspect {
+public class ConsoleAspect {
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
   @Autowired private CommonService commonService;
@@ -109,7 +109,7 @@ public class StreamParkAspect {
     User currentUser = commonService.getCurrentUser();
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
-    boolean isAdmin = currentUser.getUserTypeEnum() == UserTypeEnum.ADMIN;
+    boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
 
     if (!isAdmin) {
       PermissionTypeEnum permissionTypeEnum = permissionAction.type();

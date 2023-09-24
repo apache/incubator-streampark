@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.bean
 
 import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
-import org.apache.streampark.common.enums.ExecutionModeEnum
+import org.apache.streampark.common.enums.FlinkExecutionMode
 
 import javax.annotation.Nullable
 
@@ -28,7 +28,7 @@ import java.util.{Map => JavaMap}
 case class TriggerSavepointRequest(
     id: Long,
     flinkVersion: FlinkVersion,
-    executionMode: ExecutionModeEnum,
+    executionMode: FlinkExecutionMode,
     @Nullable properties: JavaMap[String, Any],
     clusterId: String,
     jobId: String,

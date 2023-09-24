@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
-import org.apache.streampark.common.enums.StorageTypeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
@@ -203,7 +203,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
           .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
       // try to delete yarn-application, and leave no trouble.
       String path =
-          Workspace.of(StorageTypeEnum.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+          Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
       if (HdfsOperator.exists(path)) {
         HdfsOperator.delete(path);
       }
@@ -319,7 +319,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (shouldHandleK8sName(appParam)) {
-      switch (appParam.getExecutionModeEnum()) {
+      switch (appParam.getFlinkExecutionMode()) {
         case KUBERNETES_NATIVE_APPLICATION:
           appParam.setK8sName(appParam.getClusterId());
           break;
@@ -346,7 +346,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   private boolean shouldHandleK8sName(Application app) {
     return K8sFlinkConfig.isV2Enabled()
-        && ExecutionModeEnum.isKubernetesMode(app.getExecutionMode());
+        && FlinkExecutionMode.isKubernetesMode(app.getExecutionMode());
   }
 
   private boolean existsByJobName(String jobName) {
@@ -370,7 +370,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     newApp.setJobName(jobName);
     newApp.setClusterId(
-        ExecutionModeEnum.isSessionMode(oldApp.getExecutionModeEnum())
+        FlinkExecutionMode.isSessionMode(oldApp.getFlinkExecutionMode())
             ? oldApp.getClusterId()
             : jobName);
     newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : oldApp.getArgs());
@@ -473,7 +473,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     // 2) k8s podTemplate changed.
-    if (application.getBuild() && ExecutionModeEnum.isKubernetesMode(appParam.getExecutionMode())) {
+    if (application.getBuild()
+        && FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
       if (ObjectUtils.trimNoEquals(
               application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
           || ObjectUtils.trimNoEquals(
@@ -498,8 +499,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     // 4) yarn application mode change
     if (!application.getBuild()) {
       if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
-        if (ExecutionModeEnum.YARN_APPLICATION == appParam.getExecutionModeEnum()
-            || ExecutionModeEnum.YARN_APPLICATION == application.getExecutionModeEnum()) {
+        if (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
+            || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
           application.setBuild(true);
         }
       }
@@ -534,7 +535,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
     application.setTags(appParam.getTags());
 
-    switch (appParam.getExecutionModeEnum()) {
+    switch (appParam.getFlinkExecutionMode()) {
       case YARN_APPLICATION:
       case YARN_PER_JOB:
       case KUBERNETES_NATIVE_APPLICATION:
@@ -550,7 +551,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (shouldHandleK8sName(appParam)) {
-      switch (appParam.getExecutionModeEnum()) {
+      switch (appParam.getFlinkExecutionMode()) {
         case KUBERNETES_NATIVE_APPLICATION:
           application.setK8sName(appParam.getClusterId());
           break;
@@ -676,7 +677,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public List<Application> getByTeamIdAndExecutionModes(
-      Long teamId, @Nonnull Collection<ExecutionModeEnum> executionModeEnums) {
+      Long teamId, @Nonnull Collection<FlinkExecutionMode> executionModeEnums) {
     return getBaseMapper()
         .selectList(
             new LambdaQueryWrapper<Application>()
@@ -684,7 +685,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                 .in(
                     Application::getExecutionMode,
                     executionModeEnums.stream()
-                        .map(ExecutionModeEnum::getMode)
+                        .map(FlinkExecutionMode::getMode)
                         .collect(Collectors.toSet())));
   }
 
@@ -780,7 +781,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
    */
   @VisibleForTesting
   public boolean validateQueueIfNeeded(Application appParam) {
-    yarnQueueService.checkQueueLabel(appParam.getExecutionModeEnum(), appParam.getYarnQueue());
+    yarnQueueService.checkQueueLabel(appParam.getFlinkExecutionMode(), appParam.getYarnQueue());
     if (!isYarnNotDefaultQueue(appParam)) {
       return true;
     }
@@ -796,13 +797,13 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
    */
   @VisibleForTesting
   public boolean validateQueueIfNeeded(Application oldApp, Application newApp) {
-    yarnQueueService.checkQueueLabel(newApp.getExecutionModeEnum(), newApp.getYarnQueue());
+    yarnQueueService.checkQueueLabel(newApp.getFlinkExecutionMode(), newApp.getYarnQueue());
     if (!isYarnNotDefaultQueue(newApp)) {
       return true;
     }
 
     oldApp.setYarnQueueByHotParams();
-    if (ExecutionModeEnum.isYarnPerJobOrAppMode(newApp.getExecutionModeEnum())
+    if (FlinkExecutionMode.isYarnPerJobOrAppMode(newApp.getFlinkExecutionMode())
         && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
       return true;
     }
@@ -818,7 +819,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
    *     (empty or default), return true, false else.
    */
   private boolean isYarnNotDefaultQueue(Application application) {
-    return ExecutionModeEnum.isYarnPerJobOrAppMode(application.getExecutionModeEnum())
+    return FlinkExecutionMode.isYarnPerJobOrAppMode(application.getFlinkExecutionMode())
         && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
   }
 }

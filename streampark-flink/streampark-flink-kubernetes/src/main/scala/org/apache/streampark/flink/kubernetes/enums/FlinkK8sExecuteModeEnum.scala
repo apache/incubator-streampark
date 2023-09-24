@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.enums
 
-import org.apache.streampark.common.enums.ExecutionModeEnum
+import org.apache.streampark.common.enums.FlinkExecutionMode
 
 /** execution mode of flink on kubernetes */
 object FlinkK8sExecuteModeEnum extends Enumeration {
@@ -25,18 +25,18 @@ object FlinkK8sExecuteModeEnum extends Enumeration {
   val SESSION: FlinkK8sExecuteModeEnum.Value = Value("kubernetes-session")
   val APPLICATION: FlinkK8sExecuteModeEnum.Value = Value("kubernetes-application")
 
-  def of(mode: ExecutionModeEnum): Value = {
+  def of(mode: FlinkExecutionMode): Value = {
     mode match {
-      case ExecutionModeEnum.KUBERNETES_NATIVE_SESSION => SESSION
-      case ExecutionModeEnum.KUBERNETES_NATIVE_APPLICATION => APPLICATION
+      case FlinkExecutionMode.KUBERNETES_NATIVE_SESSION => SESSION
+      case FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION => APPLICATION
       case _ => throw new IllegalStateException(s"Illegal K8sExecuteMode, ${mode.name}")
     }
   }
 
-  def toExecutionMode(mode: FlinkK8sExecuteModeEnum.Value): ExecutionModeEnum = {
+  def toExecutionMode(mode: FlinkK8sExecuteModeEnum.Value): FlinkExecutionMode = {
     mode match {
-      case SESSION => ExecutionModeEnum.KUBERNETES_NATIVE_SESSION
-      case APPLICATION => ExecutionModeEnum.KUBERNETES_NATIVE_APPLICATION
+      case SESSION => FlinkExecutionMode.KUBERNETES_NATIVE_SESSION
+      case APPLICATION => FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION
     }
   }
 

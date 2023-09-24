@@ -17,7 +17,7 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigConst.PARAM_PREFIX
-import org.apache.streampark.common.enums.FlinkSqlValidationFailedTypeEnum
+import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.Logger
 
 import enumeratum.EnumEntry
@@ -46,7 +46,7 @@ object SqlCommandParser extends Logger {
           validationCallback(
             FlinkSqlValidationResult(
               success = false,
-              failedType = FlinkSqlValidationFailedTypeEnum.VERIFY_FAILED,
+              failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
               exception = sqlEmptyError))
           null
         } else {
@@ -62,7 +62,7 @@ object SqlCommandParser extends Logger {
                 validationCallback(
                   FlinkSqlValidationResult(
                     success = false,
-                    failedType = FlinkSqlValidationFailedTypeEnum.UNSUPPORTED_SQL,
+                    failedType = FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
                     lineStart = segment.start,
                     lineEnd = segment.end,
                     exception = s"unsupported sql",
@@ -80,7 +80,7 @@ object SqlCommandParser extends Logger {
               validationCallback(
                 FlinkSqlValidationResult(
                   success = false,
-                  failedType = FlinkSqlValidationFailedTypeEnum.VERIFY_FAILED,
+                  failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
                   exception = "flink sql syntax error, no executable sql"))
               null
             } else {
@@ -407,7 +407,7 @@ case class SqlCommandCall(
 
 case class FlinkSqlValidationResult(
     success: JavaBool = true,
-    failedType: FlinkSqlValidationFailedTypeEnum = null,
+    failedType: FlinkSqlValidationFailedType = null,
     lineStart: Int = 0,
     lineEnd: Int = 0,
     errorLine: Int = 0,

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.enums;
 
-public enum ApplicationTypeEnum {
+public enum ApplicationType {
 
   /** StreamPark Flink */
   STREAMPARK_FLINK(1, "StreamPark Flink"),
@@ -34,7 +34,7 @@ public enum ApplicationTypeEnum {
   private final int type;
   private final String name;
 
-  ApplicationTypeEnum(int type, String name) {
+  ApplicationType(int type, String name) {
     this.type = type;
     this.name = name;
   }
@@ -47,8 +47,8 @@ public enum ApplicationTypeEnum {
     return name;
   }
 
-  public static ApplicationTypeEnum of(int type) {
-    for (ApplicationTypeEnum appType : ApplicationTypeEnum.values()) {
+  public static ApplicationType of(int type) {
+    for (ApplicationType appType : ApplicationType.values()) {
       if (appType.getType() == type) {
         return appType;
       }

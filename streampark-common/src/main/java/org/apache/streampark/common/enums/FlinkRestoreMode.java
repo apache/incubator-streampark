@@ -19,7 +19,7 @@ package org.apache.streampark.common.enums;
 
 import java.util.Objects;
 
-public enum RestoreModeEnum {
+public enum FlinkRestoreMode {
 
   /**
    * In this mode Flink claims ownership of the snapshot and essentially treats it like a
@@ -51,7 +51,7 @@ public enum RestoreModeEnum {
     return this.mode;
   }
 
-  RestoreModeEnum(int mode) {
+  FlinkRestoreMode(int mode) {
     this.mode = mode;
   }
 
@@ -59,10 +59,10 @@ public enum RestoreModeEnum {
     return this.toString();
   }
 
-  public static RestoreModeEnum of(Integer value) {
-    for (RestoreModeEnum restoreModeEnum : values()) {
-      if (Objects.equals(restoreModeEnum.mode, value)) {
-        return restoreModeEnum;
+  public static FlinkRestoreMode of(Integer value) {
+    for (FlinkRestoreMode flinkRestoreModeEnum : values()) {
+      if (Objects.equals(flinkRestoreModeEnum.mode, value)) {
+        return flinkRestoreModeEnum;
       }
     }
     return null;

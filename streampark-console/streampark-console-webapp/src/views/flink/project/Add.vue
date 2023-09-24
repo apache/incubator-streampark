@@ -40,7 +40,7 @@
     try {
       const res = await createProject({
         name: values.name,
-        gitCredentialEnum: values.gitCredentialEnum,
+        gitCredential: values.gitCredential,
         url: values.url,
         repository: values.repository,
         type: values.type,
