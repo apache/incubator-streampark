@@ -250,9 +250,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   }
 
   override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      triggerSavepointRequest: TriggerSavepointRequest,
       flinkConfig: Configuration): SavepointResponse = {
     flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
-    super.doTriggerSavepoint(request, flinkConfig)
+    super.doTriggerSavepoint(triggerSavepointRequest, flinkConfig)
   }
 }
