@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.ApplicationTypeEnum;
-import org.apache.streampark.common.enums.DevelopmentModeEnum;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.ApplicationType;
+import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Application;
@@ -94,17 +94,17 @@ class SavePointServiceTest extends SpringUnitTestBase {
     app.setId(appId);
 
     // Test for non-(StreamPark job Or FlinkSQL job)
-    app.setAppType(ApplicationTypeEnum.APACHE_FLINK.getType());
+    app.setAppType(ApplicationType.APACHE_FLINK.getType());
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
-    app.setAppType(ApplicationTypeEnum.STREAMPARK_FLINK.getType());
-    app.setJobType(DevelopmentModeEnum.CUSTOM_CODE.getMode());
+    app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
+    app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
 
     // Test for (StreamPark job Or FlinkSQL job) without application config.
-    app.setAppType(ApplicationTypeEnum.STREAMPARK_FLINK.getType());
+    app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
-    app.setAppType(ApplicationTypeEnum.STREAMPARK_FLINK.getType());
-    app.setJobType(DevelopmentModeEnum.CUSTOM_CODE.getMode());
+    app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
+    app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
 
     // Test for (StreamPark job Or FlinkSQL job) with application config just disabled checkpoint.
@@ -149,7 +149,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     application.setId(appId);
     application.setTeamId(teamId);
     application.setVersionId(idOfFlinkEnv);
-    application.setExecutionMode(ExecutionModeEnum.YARN_APPLICATION.getMode());
+    application.setExecutionMode(FlinkExecutionMode.YARN_APPLICATION.getMode());
     applicationManageService.save(application);
 
     FlinkEnv flinkEnv = new FlinkEnv();
@@ -169,7 +169,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     Long clusterId = 1L;
 
     // Test for it without cluster.
-    application.setExecutionMode(ExecutionModeEnum.REMOTE.getMode());
+    application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
     application.setFlinkClusterId(clusterId);
     assertThatThrownBy(() -> savePointServiceImpl.getSavepointFromDeployLayer(application))
         .isInstanceOf(NullPointerException.class);

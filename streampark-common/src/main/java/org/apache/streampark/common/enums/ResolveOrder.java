@@ -17,26 +17,38 @@
 
 package org.apache.streampark.common.enums;
 
-/** Flink consistency semantics */
-public enum SemanticEnum {
+/** classloader.resolve-order */
+public enum ResolveOrder {
 
-  /**
-   * Ensure that the counting results obtained after a fault are consistent with the correct values.
-   */
-  EXACTLY_ONCE,
+  /** parent-first */
+  PARENT_FIRST("parent-first", 0),
 
-  /** The program may calculate more after a malfunction, but it will never calculate less. */
-  AT_LEAST_ONCE,
+  /** child-first */
+  CHILD_FIRST("child-first", 1);
 
-  /** After the fault occurs, the counting results may be lost. */
-  NONE;
+  private final String name;
 
-  public static SemanticEnum of(String name) {
-    for (SemanticEnum semanticEnum : SemanticEnum.values()) {
-      if (name.equals(semanticEnum.name())) {
-        return semanticEnum;
+  private final Integer order;
+
+  ResolveOrder(String name, Integer order) {
+    this.name = name;
+    this.order = order;
+  }
+
+  public static ResolveOrder of(Integer value) {
+    for (ResolveOrder order : values()) {
+      if (order.order.equals(value)) {
+        return order;
       }
     }
     return null;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Integer getOrder() {
+    return order;
   }
 }

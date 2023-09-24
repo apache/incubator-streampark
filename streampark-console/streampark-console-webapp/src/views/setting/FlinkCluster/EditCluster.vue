@@ -107,11 +107,11 @@
       setFieldsValue({
         clusterName: cluster.clusterName,
         clusterId: cluster.clusterId,
-        executionModeEnum: cluster.executionModeEnum,
+        executionMode: cluster.executionMode,
         address: cluster.address,
         description: cluster.description,
         dynamicProperties: cluster.dynamicProperties,
-        resolveOrderEnum: cluster.resolveOrderEnum,
+        resolveOrder: cluster.resolveOrder,
         yarnQueue: cluster.yarnQueue,
         alertId: selectAlertId,
         versionId: cluster.versionId || null,

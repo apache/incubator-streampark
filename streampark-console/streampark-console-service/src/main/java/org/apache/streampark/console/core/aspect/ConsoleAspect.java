@@ -56,7 +56,7 @@ import java.util.Objects;
 @Slf4j
 @Component
 @Aspect
-public class StreamParkAspect {
+public class ConsoleAspect {
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
   @Autowired private CommonService commonService;

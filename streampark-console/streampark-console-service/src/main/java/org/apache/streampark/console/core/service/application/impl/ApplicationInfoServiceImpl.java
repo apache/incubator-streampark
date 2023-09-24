@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
@@ -73,7 +73,7 @@ import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.common.enums.StorageTypeEnum.LFS;
+import static org.apache.streampark.common.enums.StorageType.LFS;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
 
@@ -203,8 +203,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       envInitializer.checkFlinkEnv(application.getStorageType(), flinkEnv);
       envInitializer.storageInitialize(application.getStorageType());
 
-      if (ExecutionModeEnum.YARN_SESSION == application.getExecutionModeEnum()
-          || ExecutionModeEnum.REMOTE == application.getExecutionModeEnum()) {
+      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()
+          || FlinkExecutionMode.REMOTE == application.getFlinkExecutionMode()) {
         FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
         boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
         if (!conned) {
@@ -322,7 +322,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     Application application = getById(id);
     ApiAlertException.throwIfNull(
         application, String.format("The application id=%s can't be found.", id));
-    if (ExecutionModeEnum.isKubernetesMode(application.getExecutionModeEnum())) {
+    if (FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode())) {
       CompletableFuture<String> future =
           CompletableFuture.supplyAsync(
               () ->
@@ -399,12 +399,12 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       // has stopped status
       if (FlinkAppStateEnum.isEndState(app.getState())) {
         // check whether jobName exists on yarn
-        if (ExecutionModeEnum.isYarnMode(appParam.getExecutionMode())
+        if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
             && YarnUtils.isContains(appParam.getJobName())) {
           return AppExistsStateEnum.IN_YARN;
         }
         // check whether clusterId, namespace, jobId on kubernetes
-        else if (ExecutionModeEnum.isKubernetesMode(appParam.getExecutionMode())
+        else if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
             && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
           return AppExistsStateEnum.IN_KUBERNETES;
         }
@@ -415,12 +415,12 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       }
 
       // check whether jobName exists on yarn
-      if (ExecutionModeEnum.isYarnMode(appParam.getExecutionMode())
+      if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
           && YarnUtils.isContains(appParam.getJobName())) {
         return AppExistsStateEnum.IN_YARN;
       }
       // check whether clusterId, namespace, jobId on kubernetes
-      else if (ExecutionModeEnum.isKubernetesMode(appParam.getExecutionMode())
+      else if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
           && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
         return AppExistsStateEnum.IN_KUBERNETES;
       }

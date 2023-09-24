@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.task;
 
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -173,7 +173,7 @@ public class FlinkAppHttpWatcher {
             new LambdaQueryWrapper<Application>()
                 .eq(Application::getTracking, 1)
                 .ne(Application::getState, FlinkAppStateEnum.LOST.getValue())
-                .notIn(Application::getExecutionMode, ExecutionModeEnum.getKubernetesMode()));
+                .notIn(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode()));
     applications.forEach(
         (app) -> {
           WATCHING_APPS.put(app.getId(), app);
@@ -244,9 +244,9 @@ public class FlinkAppHttpWatcher {
   private void getStateFromFlink(Application application) throws Exception {
     JobsOverview jobsOverview = httpJobsOverview(application);
     Optional<JobsOverview.Job> optional;
-    ExecutionModeEnum execMode = application.getExecutionModeEnum();
-    if (ExecutionModeEnum.YARN_APPLICATION == execMode
-        || ExecutionModeEnum.YARN_PER_JOB == execMode) {
+    FlinkExecutionMode execMode = application.getFlinkExecutionMode();
+    if (FlinkExecutionMode.YARN_APPLICATION == execMode
+        || FlinkExecutionMode.YARN_PER_JOB == execMode) {
       optional =
           !jobsOverview.getJobs().isEmpty()
               ? jobsOverview.getJobs().stream()
@@ -319,7 +319,7 @@ public class FlinkAppHttpWatcher {
       // query the status from the yarn rest Api
       YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
       if (yarnAppInfo == null) {
-        if (ExecutionModeEnum.REMOTE != application.getExecutionModeEnum()) {
+        if (FlinkExecutionMode.REMOTE != application.getFlinkExecutionMode()) {
           throw new RuntimeException("FlinkAppHttpWatcher getStateFromYarn failed ");
         }
       } else {
@@ -356,7 +356,7 @@ public class FlinkAppHttpWatcher {
             }
           }
         } catch (Exception e) {
-          if (ExecutionModeEnum.REMOTE != application.getExecutionModeEnum()) {
+          if (FlinkExecutionMode.REMOTE != application.getFlinkExecutionMode()) {
             throw new RuntimeException("FlinkAppHttpWatcher getStateFromYarn error,", e);
           }
         }
@@ -662,8 +662,8 @@ public class FlinkAppHttpWatcher {
   private Overview httpOverview(Application application) throws IOException {
     String appId = application.getAppId();
     if (appId != null) {
-      if (ExecutionModeEnum.YARN_APPLICATION == application.getExecutionModeEnum()
-          || ExecutionModeEnum.YARN_PER_JOB == application.getExecutionModeEnum()) {
+      if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
+          || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode()) {
         String reqURL;
         if (StringUtils.isBlank(application.getJobManagerUrl())) {
           String format = "proxy/%s/overview";
@@ -680,8 +680,8 @@ public class FlinkAppHttpWatcher {
 
   private JobsOverview httpJobsOverview(Application application) throws Exception {
     final String flinkUrl = "jobs/overview";
-    ExecutionModeEnum execMode = application.getExecutionModeEnum();
-    if (ExecutionModeEnum.isYarnMode(execMode)) {
+    FlinkExecutionMode execMode = application.getFlinkExecutionMode();
+    if (FlinkExecutionMode.isYarnMode(execMode)) {
       String reqURL;
       if (StringUtils.isBlank(application.getJobManagerUrl())) {
         String format = "proxy/%s/" + flinkUrl;
@@ -693,7 +693,7 @@ public class FlinkAppHttpWatcher {
       return yarnRestRequest(reqURL, JobsOverview.class);
     }
 
-    if (application.getJobId() != null && ExecutionModeEnum.isRemoteMode(execMode)) {
+    if (application.getJobId() != null && FlinkExecutionMode.isRemoteMode(execMode)) {
       return httpRemoteCluster(
           application.getFlinkClusterId(),
           cluster -> {
@@ -714,8 +714,8 @@ public class FlinkAppHttpWatcher {
 
   private CheckPoints httpCheckpoints(Application application) throws Exception {
     final String flinkUrl = "jobs/%s/checkpoints";
-    ExecutionModeEnum execMode = application.getExecutionModeEnum();
-    if (ExecutionModeEnum.isYarnMode(execMode)) {
+    FlinkExecutionMode execMode = application.getFlinkExecutionMode();
+    if (FlinkExecutionMode.isYarnMode(execMode)) {
       String reqURL;
       if (StringUtils.isBlank(application.getJobManagerUrl())) {
         String format = "proxy/%s/" + flinkUrl;
@@ -727,7 +727,7 @@ public class FlinkAppHttpWatcher {
       return yarnRestRequest(reqURL, CheckPoints.class);
     }
 
-    if (application.getJobId() != null && ExecutionModeEnum.isRemoteMode(execMode)) {
+    if (application.getJobId() != null && FlinkExecutionMode.isRemoteMode(execMode)) {
       return httpRemoteCluster(
           application.getFlinkClusterId(),
           cluster -> {
@@ -811,7 +811,7 @@ public class FlinkAppHttpWatcher {
       log.info("application with id {} is probing, don't send alert", app.getId());
       return;
     }
-    switch (app.getExecutionModeEnum()) {
+    switch (app.getFlinkExecutionMode()) {
       case YARN_APPLICATION:
       case YARN_PER_JOB:
         alertService.alert(app.getAlertId(), AlertTemplate.of(app, appState));

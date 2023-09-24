@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.task;
 
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
@@ -129,9 +129,9 @@ public class FlinkK8sChangeEventListener {
   @Subscribe
   public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
     TrackId trackId = event.trackId();
-    ExecutionModeEnum mode = FlinkK8sExecuteModeEnum.toExecutionMode(trackId.executeMode());
+    FlinkExecutionMode mode = FlinkK8sExecuteModeEnum.toExecutionMode(trackId.executeMode());
     // discard session mode change
-    if (ExecutionModeEnum.KUBERNETES_NATIVE_SESSION == mode) {
+    if (FlinkExecutionMode.KUBERNETES_NATIVE_SESSION == mode) {
       return;
     }
 

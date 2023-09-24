@@ -96,7 +96,7 @@
   const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
 
   /* Form reset */
-  function handleReset(executionModeEnum?: string) {
+  function handleReset(executionMode?: string) {
     let selectAlertId = '';
     if (app.alertId) {
       selectAlertId = unref(alerts).filter((t) => t.id == app.alertId)[0]?.id;
@@ -109,7 +109,7 @@
         args: app.args || '',
         description: app.description,
         dynamicProperties: app.dynamicProperties,
-        resolveOrderEnum: app.resolveOrderEnum,
+        resolveOrder: app.resolveOrder,
         versionId: app.versionId || null,
         teamResource: handleTeamResource(app.teamResource),
         k8sRestExposedType: app.k8sRestExposedType,
@@ -122,15 +122,15 @@
           cpFailureAction: app.cpFailureAction,
         },
         clusterId: app.clusterId,
-        [app.executionModeEnum == ExecModeEnum.YARN_SESSION
+        [app.executionMode == ExecModeEnum.YARN_SESSION
           ? 'yarnSessionClusterId'
           : 'flinkClusterId']: app.flinkClusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
         ...resetParams,
       };
-      if (!executionModeEnum) {
-        Object.assign(defaultParams, { executionModeEnum: app.executionModeEnum });
+      if (!executionMode) {
+        Object.assign(defaultParams, { executionMode: app.executionMode });
       }
       setFieldsValue(defaultParams);
       app.args && programArgRef.value?.setContent(app.args);
@@ -249,10 +249,10 @@
 
   /* Send submission interface */
   async function handleUpdateApp(params: Recordable) {
-    if (params.executionModeEnum == ExecModeEnum.KUBERNETES_SESSION) {
+    if (params.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
       const cluster =
         unref(flinkClusters).filter((c) => {
-          return c.id == params.flinkClusterId && c.clusterStateEnum === ClusterStateEnum.RUNNING;
+          return c.id == params.flinkClusterId && c.clusterState === ClusterStateEnum.RUNNING;
         })[0] || null;
       if (cluster) {
         Object.assign(params, { clusterId: cluster.clusterId });
@@ -307,7 +307,7 @@
     setFieldsValue({
       jobType: res.jobType,
       appType: res.appType,
-      executionModeEnum: res.executionModeEnum,
+      executionMode: res.executionMode,
       flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
       dependency: '',
       module: res.module,

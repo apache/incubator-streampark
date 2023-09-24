@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.common.enums.ClusterStateEnum;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.ClusterState;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.core.entity.Application;
@@ -61,7 +61,7 @@ public class AlertTemplate implements Serializable {
     return new AlertTemplateBuilder()
         .setDuration(application.getStartTime(), application.getEndTime())
         .setJobName(application.getJobName())
-        .setLink(application.getExecutionModeEnum(), application.getAppId())
+        .setLink(application.getFlinkExecutionMode(), application.getAppId())
         .setStartTime(application.getStartTime())
         .setEndTime(application.getEndTime())
         .setRestart(application.isNeedRestartOnFailed(), application.getRestartCount())
@@ -74,12 +74,11 @@ public class AlertTemplate implements Serializable {
         .build();
   }
 
-  public static AlertTemplate of(
-      Application application, CheckPointStatusEnum checkPointStatusEnum) {
+  public static AlertTemplate of(Application application, CheckPointStatusEnum statusEnum) {
     return new AlertTemplateBuilder()
         .setDuration(application.getStartTime(), application.getEndTime())
         .setJobName(application.getJobName())
-        .setLink(application.getExecutionModeEnum(), application.getAppId())
+        .setLink(application.getFlinkExecutionMode(), application.getAppId())
         .setStartTime(application.getStartTime())
         .setType(2)
         .setCpFailureRateInterval(
@@ -91,18 +90,18 @@ public class AlertTemplate implements Serializable {
         .build();
   }
 
-  public static AlertTemplate of(FlinkCluster cluster, ClusterStateEnum clusterStateEnum) {
+  public static AlertTemplate of(FlinkCluster cluster, ClusterState clusterState) {
     return new AlertTemplateBuilder()
         .setDuration(cluster.getStartTime(), cluster.getEndTime())
         .setJobName(cluster.getClusterName())
-        .setLink(cluster.getExecutionModeEnum(), cluster.getClusterId())
+        .setLink(cluster.getFlinkExecutionModeEnum(), cluster.getClusterId())
         .setStartTime(cluster.getStartTime())
         .setEndTime(cluster.getEndTime())
         .setType(3)
-        .setTitle(String.format("Notify: %s %s", cluster.getClusterName(), clusterStateEnum.name()))
+        .setTitle(String.format("Notify: %s %s", cluster.getClusterName(), clusterState.name()))
         .setSubject(
-            String.format("StreamPark Alert: %s %s", cluster.getClusterName(), clusterStateEnum))
-        .setStatus(clusterStateEnum.name())
+            String.format("StreamPark Alert: %s %s", cluster.getClusterName(), clusterState))
+        .setStatus(clusterState.name())
         .setAllJobs(cluster.getAllJobs())
         .setAffectedJobs(cluster.getAffectedJobs())
         .build();
@@ -187,8 +186,8 @@ public class AlertTemplate implements Serializable {
       return this;
     }
 
-    public AlertTemplateBuilder setLink(ExecutionModeEnum mode, String appId) {
-      if (ExecutionModeEnum.isYarnMode(mode)) {
+    public AlertTemplateBuilder setLink(FlinkExecutionMode mode, String appId) {
+      if (FlinkExecutionMode.isYarnMode(mode)) {
         String format = "%s/proxy/%s/";
         String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
         alertTemplate.setLink(url);

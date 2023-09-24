@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ApplicationTypeEnum;
-import org.apache.streampark.common.enums.DevelopmentModeEnum;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.ApplicationType;
+import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FileUtils;
@@ -439,14 +439,14 @@ public class AppBuildPipeServiceImpl
       }
     }
 
-    ExecutionModeEnum executionModeEnum = app.getExecutionModeEnum();
+    FlinkExecutionMode executionModeEnum = app.getFlinkExecutionMode();
     String mainClass = ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
     switch (executionModeEnum) {
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
         String localWorkspace = app.getLocalAppHome().concat("/lib");
-        if (DevelopmentModeEnum.CUSTOM_CODE == app.getDevelopmentMode()
-            && ApplicationTypeEnum.APACHE_FLINK == app.getApplicationType()) {
+        if (FlinkDevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
+            && ApplicationType.APACHE_FLINK == app.getApplicationType()) {
           yarnProvidedPath = app.getAppHome();
           localWorkspace = app.getLocalAppHome();
         }
@@ -470,7 +470,7 @@ public class AppBuildPipeServiceImpl
                 mainClass,
                 flinkUserJar,
                 app.isCustomCodeJob(),
-                app.getExecutionModeEnum(),
+                app.getFlinkExecutionMode(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
                 getMergedDependencyInfo(app));
@@ -483,7 +483,7 @@ public class AppBuildPipeServiceImpl
                 app.getLocalAppHome(),
                 mainClass,
                 flinkUserJar,
-                app.getExecutionModeEnum(),
+                app.getFlinkExecutionMode(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
                 getMergedDependencyInfo(app),
@@ -499,7 +499,7 @@ public class AppBuildPipeServiceImpl
                 app.getLocalAppHome(),
                 mainClass,
                 flinkUserJar,
-                app.getExecutionModeEnum(),
+                app.getFlinkExecutionMode(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
                 getMergedDependencyInfo(app),
@@ -522,7 +522,7 @@ public class AppBuildPipeServiceImpl
         }
       default:
         throw new UnsupportedOperationException(
-            "Unsupported Building Application for ExecutionMode: " + app.getExecutionModeEnum());
+            "Unsupported Building Application for ExecutionMode: " + app.getFlinkExecutionMode());
     }
   }
 
@@ -544,7 +544,7 @@ public class AppBuildPipeServiceImpl
         return String.format("%s/%s", app.getAppHome(), app.getJar());
       case FLINK_SQL:
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
-        if (app.getExecutionModeEnum() == ExecutionModeEnum.YARN_APPLICATION) {
+        if (app.getFlinkExecutionMode() == FlinkExecutionMode.YARN_APPLICATION) {
           String clientPath = Workspace.remote().APP_CLIENT();
           return String.format("%s/%s", clientPath, sqlDistJar);
         }
@@ -635,7 +635,7 @@ public class AppBuildPipeServiceImpl
               resourceId -> {
                 Resource resource = resourceService.getById(resourceId);
 
-                if (resource.getResourceTypeEnum() != ResourceTypeEnum.GROUP) {
+                if (resource.getResourceType() != ResourceTypeEnum.GROUP) {
                   mergeDependency(application, mvnArtifacts, jarLibs, resource);
                 } else {
                   try {

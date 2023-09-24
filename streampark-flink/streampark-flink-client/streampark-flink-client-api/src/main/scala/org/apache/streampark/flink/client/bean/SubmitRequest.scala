@@ -38,17 +38,17 @@ import scala.util.Try
 
 case class SubmitRequest(
     flinkVersion: FlinkVersion,
-    executionMode: ExecutionModeEnum,
+    executionMode: FlinkExecutionMode,
     properties: JavaMap[String, Any],
     flinkYaml: String,
-    developmentMode: DevelopmentModeEnum,
+    developmentMode: FlinkDevelopmentMode,
     id: Long,
     jobId: String,
     appName: String,
     appConf: String,
-    applicationType: ApplicationTypeEnum,
+    applicationType: ApplicationType,
     savePoint: String,
-    restoreMode: RestoreModeEnum,
+    restoreMode: FlinkRestoreMode,
     args: String,
     @Nullable buildResult: BuildResult,
     @Nullable k8sSubmitParam: KubernetesSubmitParam,
@@ -59,8 +59,8 @@ case class SubmitRequest(
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case DevelopmentModeEnum.FLINK_SQL => ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS
-    case DevelopmentModeEnum.PYFLINK => ConfigConst.PYTHON_DRIVER_CLASS_NAME
+    case FlinkDevelopmentMode.FLINK_SQL => ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS
+    case FlinkDevelopmentMode.PYFLINK => ConfigConst.PYTHON_DRIVER_CLASS_NAME
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
@@ -82,7 +82,7 @@ case class SubmitRequest(
 
   lazy val userJarFile: File = {
     executionMode match {
-      case ExecutionModeEnum.KUBERNETES_NATIVE_APPLICATION => null
+      case FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION => null
       case _ =>
         checkBuildResult()
         new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
@@ -169,7 +169,7 @@ case class SubmitRequest(
   @throws[Exception]
   def checkBuildResult(): Unit = {
     executionMode match {
-      case ExecutionModeEnum.KUBERNETES_NATIVE_SESSION =>
+      case FlinkExecutionMode.KUBERNETES_NATIVE_SESSION =>
         if (buildResult == null) {
           throw new Exception(
             s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +

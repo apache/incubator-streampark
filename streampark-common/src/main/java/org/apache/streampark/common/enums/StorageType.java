@@ -17,38 +17,35 @@
 
 package org.apache.streampark.common.enums;
 
-/** classloader.resolve-order */
-public enum ResolveOrderEnum {
+import org.apache.commons.lang3.StringUtils;
 
-  /** parent-first */
-  PARENT_FIRST("parent-first", 0),
+public enum StorageType {
 
-  /** child-first */
-  CHILD_FIRST("child-first", 1);
+  /** hdfs */
+  HDFS("hdfs"),
 
-  private final String name;
+  /** local File system */
+  LFS("lfs");
 
-  private final Integer order;
+  private final String type;
 
-  ResolveOrderEnum(String name, Integer order) {
-    this.name = name;
-    this.order = order;
+  StorageType(String type) {
+    this.type = type;
   }
 
-  public static ResolveOrderEnum of(Integer value) {
-    for (ResolveOrderEnum order : values()) {
-      if (order.order.equals(value)) {
-        return order;
+  public String getType() {
+    return type;
+  }
+
+  public static StorageType of(String identifier) {
+    if (StringUtils.isBlank(identifier)) {
+      return LFS;
+    }
+    for (StorageType type : values()) {
+      if (type.type.equals(identifier)) {
+        return type;
       }
     }
-    return null;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public Integer getOrder() {
-    return order;
+    return LFS;
   }
 }

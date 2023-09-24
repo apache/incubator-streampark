@@ -17,36 +17,39 @@
 
 package org.apache.streampark.common.enums;
 
-public enum DevelopmentModeEnum {
+public enum FlinkSqlValidationFailedType {
 
-  /** custom code */
-  CUSTOM_CODE("Custom Code", 1),
+  /** Basic test failed (such as null, etc.) */
+  VERIFY_FAILED(1),
 
-  /** Flink SQL */
-  FLINK_SQL("Flink SQL", 2),
+  /** syntax error */
+  SYNTAX_ERROR(2),
 
-  /** Py flink */
-  PYFLINK("Python Flink", 3);
+  /** unsupported dialect */
+  UNSUPPORTED_DIALECT(3),
 
-  private final String name;
+  /** unsupported sql command */
+  UNSUPPORTED_SQL(4),
 
-  private final Integer mode;
+  /** Not at the end of ";" */
+  ENDS_WITH(5);
 
-  DevelopmentModeEnum(String name, Integer mode) {
-    this.name = name;
-    this.mode = mode;
+  private final int failedType;
+
+  FlinkSqlValidationFailedType(int failedType) {
+    this.failedType = failedType;
   }
 
-  public static DevelopmentModeEnum of(Integer value) {
-    for (DevelopmentModeEnum developmentModeEnum : values()) {
-      if (developmentModeEnum.mode.equals(value)) {
-        return developmentModeEnum;
+  public static FlinkSqlValidationFailedType of(Integer value) {
+    for (FlinkSqlValidationFailedType type : values()) {
+      if (type.failedType == value) {
+        return type;
       }
     }
     return null;
   }
 
-  public Integer getMode() {
-    return mode;
+  public int getFailedType() {
+    return failedType;
   }
 }

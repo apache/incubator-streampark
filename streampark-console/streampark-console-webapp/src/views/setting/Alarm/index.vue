@@ -50,7 +50,7 @@
   /* Get alert configuration */
   async function getAlertSetting() {
     const res = await fetchAlertSetting();
-    res.map((a) => (a.alertTypeTags = computeAlertType(a.alertTypeEnum)));
+    res.map((a) => (a.alertTypeTags = computeAlertType(a.alertType)));
     alerts.value = res;
   }
   const alertTypeMap = {
@@ -117,7 +117,7 @@
     openAlertModal(true, {
       alertId: item.id,
       alertName: item.alertName,
-      alertTypeEnum: item.alertTypeTags,
+      alertType: item.alertTypeTags,
       alertEmail: emailParams.contacts,
       alertDingURL: dingTalkParams.alertDingURL,
       dingtalkToken: dingTalkParams.token,
@@ -261,27 +261,27 @@
             </template>
 
             <AlertTypeInfo
-              :alertTypeEnum="String(AlertTypeEnum.MAIL)"
+              :alertType="String(AlertTypeEnum.MAIL)"
               :alertSource="item"
               v-if="item.alertTypeTags.includes(String(AlertTypeEnum.MAIL))"
             />
             <AlertTypeInfo
-              :alertTypeEnum="String(AlertTypeEnum.WECOM)"
+              :alertType="String(AlertTypeEnum.WECOM)"
               :alertSource="item"
               v-if="item.alertTypeTags.includes(String(AlertTypeEnum.WECOM))"
             />
             <AlertTypeInfo
-              :alertTypeEnum="String(AlertTypeEnum.DINGTALK)"
+              :alertType="String(AlertTypeEnum.DINGTALK)"
               :alertSource="item"
               v-if="item.alertTypeTags.includes(String(AlertTypeEnum.DINGTALK))"
             />
             <AlertTypeInfo
-              :alertTypeEnum="String(AlertTypeEnum.MESSAGE)"
+              :alertType="String(AlertTypeEnum.MESSAGE)"
               :alertSource="item"
               v-if="item.alertTypeTags.includes(String(AlertTypeEnum.MESSAGE))"
             />
             <AlertTypeInfo
-              :alertTypeEnum="String(AlertTypeEnum.LARK)"
+              :alertType="String(AlertTypeEnum.LARK)"
               :alertSource="item"
               v-if="item.alertTypeTags.includes(String(AlertTypeEnum.LARK))"
             />

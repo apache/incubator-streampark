@@ -131,13 +131,13 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
 
     ApiAlertException.throwIfTrue(
-        resource.getResourceTypeEnum() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
+        resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
         "Please upload jar for Flink_App resource");
 
     ApiAlertException.throwIfTrue(
         jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
 
-    if (resource.getResourceTypeEnum() != ResourceTypeEnum.CONNECTOR) {
+    if (resource.getResourceType() != ResourceTypeEnum.CONNECTOR) {
       ApiAlertException.throwIfNull(resource.getResourceName(), "The resourceName is required.");
     } else {
       String connector = resource.getConnector();
@@ -273,7 +273,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   @Override
   public RestResponse checkResource(Resource resourceParam) throws JsonProcessingException {
-    ResourceTypeEnum type = resourceParam.getResourceTypeEnum();
+    ResourceTypeEnum type = resourceParam.getResourceType();
     Map<String, Serializable> resp = new HashMap<>(0);
     resp.put("state", 0);
     switch (type) {
@@ -305,7 +305,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         FlinkConnector connectorResource;
 
         ApiAlertException.throwIfFalse(
-            ResourceTypeEnum.CONNECTOR == resourceParam.getResourceTypeEnum(),
+            ResourceTypeEnum.CONNECTOR == resourceParam.getResourceType(),
             "getConnectorId method error, resource not flink connector.");
 
         List<File> jars;

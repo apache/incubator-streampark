@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.bean
 
-import org.apache.streampark.common.enums.FlinkK8sRestExposedTypeEnum
+import org.apache.streampark.common.enums.FlinkK8sRestExposedType
 import org.apache.streampark.flink.kubernetes.v2.model.IngressDef
 
 import javax.annotation.Nullable
@@ -51,7 +51,7 @@ case class KubernetesSubmitParam(
     taskManagerEphemeralStorage: Option[String] = None,
     taskManagerPodTemplate: Option[String] = None,
     logConfiguration: JMap[String, String] = new util.HashMap[String, String](),
-    flinkRestExposedType: Option[FlinkK8sRestExposedTypeEnum] = None,
+    flinkRestExposedType: Option[FlinkK8sRestExposedType] = None,
     ingressDefinition: Option[IngressDef] = None
 )
 
@@ -72,7 +72,7 @@ object KubernetesSubmitParam {
       kubernetesName: String,
       kubernetesNamespace: String,
       baseImage: String,
-      @Nullable flinkRestExposedType: FlinkK8sRestExposedTypeEnum,
+      @Nullable flinkRestExposedType: FlinkK8sRestExposedType,
       @Nullable ingressDefinition: IngressDef): KubernetesSubmitParam =
     KubernetesSubmitParam(
       clusterId = clusterId,

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.SpringIntegrationTestBase;
 import org.apache.streampark.console.core.entity.Application;
@@ -102,7 +102,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
     FlinkCluster flinkCluster = new FlinkCluster();
     flinkCluster.setId(1L);
     flinkCluster.setAddress(cluster.getFlinkJobManagerUrl());
-    flinkCluster.setExecutionMode(ExecutionModeEnum.REMOTE.getMode());
+    flinkCluster.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
     flinkCluster.setClusterName("docker-Cluster-1.17.1");
     flinkCluster.setVersionId(1L);
     flinkCluster.setUserId(100000L);
@@ -114,7 +114,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
     application.setFlinkClusterId(1L);
     application.setSqlId(100000L);
     application.setVersionId(1L);
-    application.setExecutionMode(ExecutionModeEnum.REMOTE.getMode());
+    application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
 
     // Avoid exceptional error.
     application.setFlinkSql(

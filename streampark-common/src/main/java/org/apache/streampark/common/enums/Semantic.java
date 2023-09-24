@@ -17,41 +17,26 @@
 
 package org.apache.streampark.common.enums;
 
-/** kubernetes.rest-service.exposed.type */
-public enum FlinkK8sRestExposedTypeEnum {
+/** Flink consistency semantics */
+public enum Semantic {
 
-  /** LoadBalancer */
-  LOAD_BALANCER("LoadBalancer", 0),
+  /**
+   * Ensure that the counting results obtained after a fault are consistent with the correct values.
+   */
+  EXACTLY_ONCE,
 
-  /** ClusterIP */
-  CLUSTER_IP("ClusterIP", 1),
+  /** The program may calculate more after a malfunction, but it will never calculate less. */
+  AT_LEAST_ONCE,
 
-  /** NodePort */
-  NODE_PORT("NodePort", 2);
+  /** After the fault occurs, the counting results may be lost. */
+  NONE;
 
-  private final String name;
-
-  private final Integer type;
-
-  FlinkK8sRestExposedTypeEnum(String name, Integer type) {
-    this.name = name;
-    this.type = type;
-  }
-
-  public static FlinkK8sRestExposedTypeEnum of(Integer value) {
-    for (FlinkK8sRestExposedTypeEnum order : values()) {
-      if (order.type.equals(value)) {
-        return order;
+  public static Semantic of(String name) {
+    for (Semantic semantic : Semantic.values()) {
+      if (name.equals(semantic.name())) {
+        return semantic;
       }
     }
     return null;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public Integer getType() {
-    return type;
   }
 }

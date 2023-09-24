@@ -22,7 +22,7 @@
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="user_id" jdbcType="BIGINT" property="userId"/>
         <result column="alert_name" jdbcType="VARCHAR" property="alertName"/>
-        <result column="alert_type" jdbcType="INTEGER" property="alertTypeEnum"/>
+        <result column="alert_type" jdbcType="INTEGER" property="alertType"/>
         <result column="email_params" jdbcType="VARCHAR" property="emailParams"/>
         <result column="ding_talk_params" jdbcType="VARCHAR" property="dingTalkParams"/>
         <result column="we_com_params" jdbcType="VARCHAR" property="weComParams"/>

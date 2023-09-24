@@ -45,7 +45,7 @@ public class Effective {
   private Long targetId;
   private Date createTime;
 
-  private transient EffectiveTypeEnum effectiveTypeEnum;
+  private transient EffectiveTypeEnum effectiveType;
 
   public Effective() {}
 

@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.enums.ClusterStateEnum;
-import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.ClusterState;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -77,7 +77,7 @@ public class FlinkClusterWatcher {
   /** Watcher cluster lists */
   private static final Map<Long, FlinkCluster> WATCHER_CLUSTERS = new ConcurrentHashMap<>(8);
 
-  private static final Cache<Long, ClusterStateEnum> FAILED_STATES =
+  private static final Cache<Long, ClusterState> FAILED_STATES =
       Caffeine.newBuilder().expireAfterWrite(WATCHER_INTERVAL).build();
 
   private boolean immediateWatch = false;
@@ -99,9 +99,9 @@ public class FlinkClusterWatcher {
     List<FlinkCluster> flinkClusters =
         flinkClusterService.list(
             new LambdaQueryWrapper<FlinkCluster>()
-                .eq(FlinkCluster::getClusterState, ClusterStateEnum.RUNNING.getState())
+                .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getState())
                 // excluding flink clusters on kubernetes
-                .notIn(FlinkCluster::getExecutionMode, ExecutionModeEnum.getKubernetesMode()));
+                .notIn(FlinkCluster::getExecutionMode, FlinkExecutionMode.getKubernetesMode()));
     flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
   }
 
@@ -115,7 +115,7 @@ public class FlinkClusterWatcher {
           (aLong, flinkCluster) ->
               EXECUTOR.execute(
                   () -> {
-                    ClusterStateEnum state = getClusterState(flinkCluster);
+                    ClusterState state = getClusterState(flinkCluster);
                     switch (state) {
                       case FAILED:
                       case LOST:
@@ -132,7 +132,7 @@ public class FlinkClusterWatcher {
     }
   }
 
-  private void alert(FlinkCluster cluster, ClusterStateEnum state) {
+  private void alert(FlinkCluster cluster, ClusterState state) {
     if (cluster.getAlertId() != null) {
       cluster.setAllJobs(applicationInfoService.countByClusterId(cluster.getId()));
       cluster.setAffectedJobs(
@@ -150,13 +150,13 @@ public class FlinkClusterWatcher {
    * @param flinkCluster The FlinkCluster object representing the cluster.
    * @return The ClusterState object representing the state of the cluster.
    */
-  public ClusterStateEnum getClusterState(FlinkCluster flinkCluster) {
-    ClusterStateEnum state = FAILED_STATES.getIfPresent(flinkCluster.getId());
+  public ClusterState getClusterState(FlinkCluster flinkCluster) {
+    ClusterState state = FAILED_STATES.getIfPresent(flinkCluster.getId());
     if (state != null) {
       return state;
     }
     state = httpClusterState(flinkCluster);
-    if (ClusterStateEnum.isRunning(state)) {
+    if (ClusterState.isRunning(state)) {
       FAILED_STATES.invalidate(flinkCluster.getId());
     } else {
       immediateWatch = true;
@@ -171,7 +171,7 @@ public class FlinkClusterWatcher {
    * @param flinkCluster The FlinkCluster object representing the cluster.
    * @return The ClusterState object representing the state of the cluster.
    */
-  private ClusterStateEnum httpRemoteClusterState(FlinkCluster flinkCluster) {
+  private ClusterState httpRemoteClusterState(FlinkCluster flinkCluster) {
     return getStateFromFlinkRestApi(flinkCluster);
   }
 
@@ -181,9 +181,9 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    * @return
    */
-  private ClusterStateEnum httpYarnSessionClusterState(FlinkCluster flinkCluster) {
-    ClusterStateEnum state = getStateFromFlinkRestApi(flinkCluster);
-    if (ClusterStateEnum.LOST == state) {
+  private ClusterState httpYarnSessionClusterState(FlinkCluster flinkCluster) {
+    ClusterState state = getStateFromFlinkRestApi(flinkCluster);
+    if (ClusterState.LOST == state) {
       return getStateFromYarnRestApi(flinkCluster);
     }
     return state;
@@ -195,14 +195,14 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    * @return
    */
-  private ClusterStateEnum httpClusterState(FlinkCluster flinkCluster) {
-    switch (flinkCluster.getExecutionModeEnum()) {
+  private ClusterState httpClusterState(FlinkCluster flinkCluster) {
+    switch (flinkCluster.getFlinkExecutionModeEnum()) {
       case REMOTE:
         return httpRemoteClusterState(flinkCluster);
       case YARN_SESSION:
         return httpYarnSessionClusterState(flinkCluster);
       default:
-        return ClusterStateEnum.UNKNOWN;
+        return ClusterState.UNKNOWN;
     }
   }
 
@@ -212,7 +212,7 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    * @return
    */
-  private ClusterStateEnum getStateFromFlinkRestApi(FlinkCluster flinkCluster) {
+  private ClusterState getStateFromFlinkRestApi(FlinkCluster flinkCluster) {
     String address = flinkCluster.getAddress();
     String jobManagerUrl = flinkCluster.getJobManagerUrl();
     String flinkUrl =
@@ -225,11 +225,11 @@ public class FlinkClusterWatcher {
               flinkUrl,
               RequestConfig.custom().setConnectTimeout(5000, TimeUnit.MILLISECONDS).build());
       JacksonUtils.read(res, Overview.class);
-      return ClusterStateEnum.RUNNING;
+      return ClusterState.RUNNING;
     } catch (Exception ignored) {
       log.error("cluster id:{} get state from flink api failed", flinkCluster.getId());
     }
-    return ClusterStateEnum.LOST;
+    return ClusterState.LOST;
   }
 
   /**
@@ -238,12 +238,12 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    * @return
    */
-  private ClusterStateEnum getStateFromYarnRestApi(FlinkCluster flinkCluster) {
+  private ClusterState getStateFromYarnRestApi(FlinkCluster flinkCluster) {
     String yarnUrl = "ws/v1/cluster/apps/".concat(flinkCluster.getClusterId());
     try {
       String result = YarnUtils.restRequest(yarnUrl);
       if (null == result) {
-        return ClusterStateEnum.UNKNOWN;
+        return ClusterState.UNKNOWN;
       }
       YarnAppInfo yarnAppInfo = JacksonUtils.read(result, YarnAppInfo.class);
       YarnApplicationState status = HadoopUtils.toYarnState(yarnAppInfo.getApp().getState());
@@ -251,11 +251,11 @@ public class FlinkClusterWatcher {
         log.error(
             "cluster id:{} final application status convert failed, invalid string ",
             flinkCluster.getId());
-        return ClusterStateEnum.UNKNOWN;
+        return ClusterState.UNKNOWN;
       }
       return yarnStateConvertClusterState(status);
     } catch (Exception e) {
-      return ClusterStateEnum.LOST;
+      return ClusterState.LOST;
     }
   }
 
@@ -265,7 +265,7 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    */
   public static void addWatching(FlinkCluster flinkCluster) {
-    if (!ExecutionModeEnum.isKubernetesMode(flinkCluster.getExecutionModeEnum())
+    if (!FlinkExecutionMode.isKubernetesMode(flinkCluster.getFlinkExecutionModeEnum())
         && !WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
       log.info("add the cluster with id:{} to watcher cluster cache", flinkCluster.getId());
       WATCHER_CLUSTERS.put(flinkCluster.getId(), flinkCluster);
@@ -286,10 +286,10 @@ public class FlinkClusterWatcher {
    * @param state
    * @return
    */
-  private ClusterStateEnum yarnStateConvertClusterState(YarnApplicationState state) {
+  private ClusterState yarnStateConvertClusterState(YarnApplicationState state) {
     return state == YarnApplicationState.FINISHED
-        ? ClusterStateEnum.CANCELED
-        : ClusterStateEnum.of(state.toString());
+        ? ClusterState.CANCELED
+        : ClusterState.of(state.toString());
   }
 
   /**
@@ -298,7 +298,7 @@ public class FlinkClusterWatcher {
    * @return <code>false</code> if the connection of the cluster is invalid, <code>true</code> else.
    */
   public Boolean verifyClusterConnection(FlinkCluster flinkCluster) {
-    ClusterStateEnum clusterStateEnum = httpClusterState(flinkCluster);
-    return ClusterStateEnum.isRunning(clusterStateEnum);
+    ClusterState clusterStateEnum = httpClusterState(flinkCluster);
+    return ClusterState.isRunning(clusterStateEnum);
   }
 }

@@ -93,7 +93,7 @@
         required: true,
       },
       {
-        field: 'restoreModeEnum',
+        field: 'restoreMode',
         label: 'restore mode',
         component: 'Select',
         defaultValue: RestoreModeEnum.NO_CLAIM,
@@ -127,10 +127,10 @@
       const formValue = (await validate()) as Recordable;
       const savePointed = formValue.startSavePointed;
       const savePointPath = savePointed ? formValue['startSavePoint'] : null;
-      const restoreModeEnum = savePointed ? formValue['restoreModeEnum'] : null;
+      const restoreMode = savePointed ? formValue['restoreMode'] : null;
       const { data } = await fetchStart({
         id: receiveData.application.id,
-        restoreModeEnum,
+        restoreMode,
         savePointed,
         savePoint: savePointPath,
         allowNonRestored: formValue.allowNonRestoredState || false,

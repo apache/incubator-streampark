@@ -16,7 +16,7 @@
  */
 package org.apache.streampark.common.enums
 
-object TableModeEnum extends Enumeration {
-  type TableMode = Value
-  val BATCH, STREAMING = Value
+object ApiType extends Enumeration {
+  type ApiType = Value
+  val JAVA, SCALA = Value
 }

@@ -21,7 +21,7 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-public enum ExecutionModeEnum {
+public enum FlinkExecutionMode {
 
   /** Local mode */
   LOCAL(0, "local"),
@@ -48,24 +48,24 @@ public enum ExecutionModeEnum {
 
   private final String name;
 
-  ExecutionModeEnum(Integer mode, String name) {
+  FlinkExecutionMode(Integer mode, String name) {
     this.mode = mode;
     this.name = name;
   }
 
-  public static ExecutionModeEnum of(Integer value) {
-    for (ExecutionModeEnum executionModeEnum : values()) {
-      if (executionModeEnum.mode.equals(value)) {
-        return executionModeEnum;
+  public static FlinkExecutionMode of(Integer value) {
+    for (FlinkExecutionMode mode : values()) {
+      if (mode.mode.equals(value)) {
+        return mode;
       }
     }
     return null;
   }
 
-  public static ExecutionModeEnum of(String name) {
-    for (ExecutionModeEnum executionModeEnum : values()) {
-      if (executionModeEnum.name.equals(name)) {
-        return executionModeEnum;
+  public static FlinkExecutionMode of(String name) {
+    for (FlinkExecutionMode mode : values()) {
+      if (mode.name.equals(name)) {
+        return mode;
       }
     }
     return null;
@@ -79,17 +79,17 @@ public enum ExecutionModeEnum {
     return name;
   }
 
-  public static boolean isYarnMode(ExecutionModeEnum mode) {
+  public static boolean isYarnMode(FlinkExecutionMode mode) {
     return YARN_PER_JOB == mode || YARN_APPLICATION == mode || YARN_SESSION == mode;
   }
 
   // TODO: We'll inline this method back to the corresponding caller lines
   //  after dropping the yarn perjob mode.
-  public static boolean isYarnPerJobOrAppMode(ExecutionModeEnum mode) {
+  public static boolean isYarnPerJobOrAppMode(FlinkExecutionMode mode) {
     return YARN_PER_JOB == mode || YARN_APPLICATION == mode;
   }
 
-  public static boolean isYarnSessionMode(ExecutionModeEnum mode) {
+  public static boolean isYarnSessionMode(FlinkExecutionMode mode) {
     return YARN_SESSION == mode;
   }
 
@@ -101,7 +101,7 @@ public enum ExecutionModeEnum {
     return KUBERNETES_NATIVE_SESSION == of(value);
   }
 
-  public static boolean isKubernetesMode(ExecutionModeEnum mode) {
+  public static boolean isKubernetesMode(FlinkExecutionMode mode) {
     return KUBERNETES_NATIVE_SESSION == mode || KUBERNETES_NATIVE_APPLICATION == mode;
   }
 
@@ -118,7 +118,7 @@ public enum ExecutionModeEnum {
         KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
   }
 
-  public static boolean isSessionMode(ExecutionModeEnum mode) {
+  public static boolean isSessionMode(FlinkExecutionMode mode) {
     return KUBERNETES_NATIVE_SESSION == mode || YARN_SESSION == mode;
   }
 
@@ -126,7 +126,7 @@ public enum ExecutionModeEnum {
     return isRemoteMode(of(value));
   }
 
-  public static boolean isRemoteMode(ExecutionModeEnum mode) {
+  public static boolean isRemoteMode(FlinkExecutionMode mode) {
     return REMOTE == mode;
   }
 }
