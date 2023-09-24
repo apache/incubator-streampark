@@ -99,11 +99,11 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
   }
 
   override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      triggerSavepointRequest: TriggerSavepointRequest,
       flinkConf: Configuration): SavepointResponse = {
     flinkConf.safeSet(
       DeploymentOptions.TARGET,
       ExecutionModeEnum.KUBERNETES_NATIVE_APPLICATION.getName)
-    super.doTriggerSavepoint(request, flinkConf)
+    super.doTriggerSavepoint(triggerSavepointRequest, flinkConf)
   }
 }

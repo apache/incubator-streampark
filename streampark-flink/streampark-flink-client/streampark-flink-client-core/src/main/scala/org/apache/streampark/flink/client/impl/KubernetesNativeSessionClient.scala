@@ -26,7 +26,6 @@ import org.apache.streampark.flink.core.FlinkKubernetesClient
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
-
 import io.fabric8.kubernetes.api.model.{Config => _}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
@@ -252,11 +251,11 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   }
 
   override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      triggerSavepointRequest: TriggerSavepointRequest,
       flinkConfig: Configuration): SavepointResponse = {
     flinkConfig.safeSet(
       DeploymentOptions.TARGET,
       ExecutionModeEnum.KUBERNETES_NATIVE_SESSION.getName)
-    super.doTriggerSavepoint(request, flinkConfig)
+    super.doTriggerSavepoint(triggerSavepointRequest, flinkConfig)
   }
 }
