@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.console.core.enums.GitAuthorizedError;
-import org.apache.streampark.console.core.enums.GitCredential;
+import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
+import org.apache.streampark.console.core.enums.GitCredentialEnum;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ class ProjectTest {
   @BeforeEach
   void before() {
     project.setUrl("https://github.com/apache/incubator-streampark.git");
-    project.setGitCredential(GitCredential.HTTPS.getValue());
+    project.setGitCredential(GitCredentialEnum.HTTPS.getValue());
   }
 
   @Disabled("This test case can't be runnable due to external service is not available.")
@@ -48,7 +48,7 @@ class ProjectTest {
   @Disabled("This test case can't be runnable due to external service is not available.")
   @Test
   void testGitCheckAuth() {
-    GitAuthorizedError error = project.gitCheck();
+    GitAuthorizedErrorEnum error = project.gitCheck();
     log.error("{}", error);
   }
 }

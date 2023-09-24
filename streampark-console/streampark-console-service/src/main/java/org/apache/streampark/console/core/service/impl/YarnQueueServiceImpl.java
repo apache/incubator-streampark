@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.ExecutionModeEnum;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -172,12 +172,12 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
    * Only check the validation of queue-labelExpression when using yarn application or yarn-session
    * mode or yarn-perjob mode.
    *
-   * @param executionMode execution mode.
+   * @param executionModeEnum execution mode.
    * @param queueLabel queueLabel expression.
    */
   @Override
-  public void checkQueueLabel(ExecutionMode executionMode, String queueLabel) {
-    if (ExecutionMode.isYarnMode(executionMode)) {
+  public void checkQueueLabel(ExecutionModeEnum executionModeEnum, String queueLabel) {
+    if (ExecutionModeEnum.isYarnMode(executionModeEnum)) {
       ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
     }
   }
@@ -217,7 +217,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public void checkNotReferencedByFlinkClusters(
       @Nonnull String queueLabel, @Nonnull String operation) {
     List<FlinkCluster> clustersReferenceYarnQueueLabel =
-        flinkClusterService.getByExecutionModes(Sets.newHashSet(ExecutionMode.YARN_SESSION))
+        flinkClusterService.getByExecutionModes(Sets.newHashSet(ExecutionModeEnum.YARN_SESSION))
             .stream()
             .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
             .collect(Collectors.toList());
@@ -232,7 +232,8 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     List<Application> appsReferenceQueueLabel =
         applicationManageService
             .getByTeamIdAndExecutionModes(
-                teamId, Sets.newHashSet(ExecutionMode.YARN_APPLICATION, ExecutionMode.YARN_PER_JOB))
+                teamId,
+                Sets.newHashSet(ExecutionModeEnum.YARN_APPLICATION, ExecutionModeEnum.YARN_PER_JOB))
             .stream()
             .filter(
                 application -> {

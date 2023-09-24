@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.enums.ClusterState;
+import org.apache.streampark.common.enums.ClusterStateEnum;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.bean.ResponseResult;
@@ -93,7 +93,7 @@ public class FlinkClusterController {
   @Operation(summary = "Start flink cluster")
   @PostMapping("start")
   public RestResponse start(FlinkCluster cluster) {
-    flinkClusterService.updateClusterState(cluster.getId(), ClusterState.STARTING);
+    flinkClusterService.updateClusterState(cluster.getId(), ClusterStateEnum.STARTING);
     flinkClusterService.start(cluster);
     return RestResponse.success();
   }
@@ -102,7 +102,7 @@ public class FlinkClusterController {
   @PostMapping("shutdown")
   public RestResponse shutdown(FlinkCluster cluster) {
     if (flinkClusterService.allowShutdownCluster(cluster)) {
-      flinkClusterService.updateClusterState(cluster.getId(), ClusterState.CANCELLING);
+      flinkClusterService.updateClusterState(cluster.getId(), ClusterStateEnum.CANCELLING);
       flinkClusterService.shutdown(cluster);
     }
     return RestResponse.success();

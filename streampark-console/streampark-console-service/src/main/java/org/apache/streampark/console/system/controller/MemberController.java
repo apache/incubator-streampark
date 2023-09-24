@@ -20,7 +20,7 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.PermissionAction;
-import org.apache.streampark.console.core.enums.PermissionType;
+import org.apache.streampark.console.core.enums.PermissionTypeEnum;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -83,7 +83,7 @@ public class MemberController {
   }
 
   @Operation(summary = "Create member")
-  @PermissionAction(id = "#member.teamId", type = PermissionType.TEAM)
+  @PermissionAction(id = "#member.teamId", type = PermissionTypeEnum.TEAM)
   @PostMapping("post")
   @RequiresPermissions("member:add")
   public RestResponse create(@Valid Member member) {
@@ -92,7 +92,7 @@ public class MemberController {
   }
 
   @Operation(summary = "Delete member")
-  @PermissionAction(id = "#member.teamId", type = PermissionType.TEAM)
+  @PermissionAction(id = "#member.teamId", type = PermissionTypeEnum.TEAM)
   @DeleteMapping("delete")
   @RequiresPermissions("member:delete")
   public RestResponse delete(Member member) {
@@ -101,7 +101,7 @@ public class MemberController {
   }
 
   @Operation(summary = "Update member")
-  @PermissionAction(id = "#member.teamId", type = PermissionType.TEAM)
+  @PermissionAction(id = "#member.teamId", type = PermissionTypeEnum.TEAM)
   @PutMapping("update")
   @RequiresPermissions("member:update")
   public RestResponse update(Member member) {

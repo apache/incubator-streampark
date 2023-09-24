@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.console.core.entity.Effective;
-import org.apache.streampark.console.core.enums.EffectiveType;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.mapper.EffectiveMapper;
 import org.apache.streampark.console.core.service.EffectiveService;
 
@@ -39,25 +39,25 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
     implements EffectiveService {
 
   @Override
-  public void delete(Long appId, EffectiveType effectiveType) {
+  public void delete(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
     LambdaQueryWrapper<Effective> queryWrapper =
         new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
-            .eq(Effective::getTargetType, effectiveType.getType());
+            .eq(Effective::getTargetType, effectiveTypeEnum.getType());
     baseMapper.delete(queryWrapper);
   }
 
   @Override
-  public Effective get(Long appId, EffectiveType effectiveType) {
+  public Effective get(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
     LambdaQueryWrapper<Effective> queryWrapper =
         new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
-            .eq(Effective::getTargetType, effectiveType.getType());
+            .eq(Effective::getTargetType, effectiveTypeEnum.getType());
     return this.getOne(queryWrapper);
   }
 
   @Override
-  public void saveOrUpdate(Long appId, EffectiveType type, Long id) {
+  public void saveOrUpdate(Long appId, EffectiveTypeEnum type, Long id) {
     LambdaQueryWrapper<Effective> queryWrapper =
         new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)

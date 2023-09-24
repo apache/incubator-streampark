@@ -36,24 +36,24 @@ import scala.collection.JavaConverters._
 
 case class PipeSnapshot(
     appName: String,
-    pipeType: PipelineType,
-    pipeStatus: PipelineStatus,
+    pipeType: PipelineTypeEnum,
+    pipeStatus: PipelineStatusEnum,
     curStep: Int,
     allSteps: Int,
-    stepStatus: Map[Int, (PipelineStepStatus, Long)],
+    stepStatus: Map[Int, (PipelineStepStatusEnum, Long)],
     error: PipeError,
     emitTime: Long) {
 
   def percent(): Double = Utils.calPercent(curStep, allSteps)
 
-  def stepStatusAsJava: JavaMap[Integer, (PipelineStepStatus, JavaLong)] = {
+  def stepStatusAsJava: JavaMap[Integer, (PipelineStepStatusEnum, JavaLong)] = {
     stepStatus.toSeq
       .map(e => Integer.valueOf(e._1) -> (e._2._1 -> JavaLong.valueOf(e._2._2)))
       .toMap
       .asJava
   }
 
-  def pureStepStatusAsJava: JavaMap[Integer, PipelineStepStatus] = {
+  def pureStepStatusAsJava: JavaMap[Integer, PipelineStepStatusEnum] = {
     stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> e._2._1).toMap.asJava
   }
 

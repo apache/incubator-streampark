@@ -21,7 +21,7 @@ import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.core.entity.Project;
-import org.apache.streampark.console.core.enums.BuildState;
+import org.apache.streampark.console.core.enums.BuildStateEnum;
 
 import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +40,14 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
   final Project project;
 
-  final Consumer<BuildState> stateUpdateConsumer;
+  final Consumer<BuildStateEnum> stateUpdateConsumer;
 
   final Consumer<Logger> notifyReleaseConsumer;
 
   public ProjectBuildTask(
       String logPath,
       Project project,
-      Consumer<BuildState> stateUpdateConsumer,
+      Consumer<BuildStateEnum> stateUpdateConsumer,
       Consumer<Logger> notifyReleaseConsumer) {
     super(logPath, true);
     this.project = project;
@@ -62,23 +62,23 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     boolean cloneSuccess = cloneSourceCode(project);
     if (!cloneSuccess) {
       fileLogger.error("[StreamPark] clone or pull error.");
-      stateUpdateConsumer.accept(BuildState.FAILED);
+      stateUpdateConsumer.accept(BuildStateEnum.FAILED);
       return;
     }
     boolean build = projectBuild(project);
     if (!build) {
-      stateUpdateConsumer.accept(BuildState.FAILED);
+      stateUpdateConsumer.accept(BuildStateEnum.FAILED);
       fileLogger.error("build error, project name: {} ", project.getName());
       return;
     }
-    stateUpdateConsumer.accept(BuildState.SUCCESSFUL);
+    stateUpdateConsumer.accept(BuildStateEnum.SUCCESSFUL);
     this.deploy(project);
     notifyReleaseConsumer.accept(fileLogger);
   }
 
   @Override
   protected void processException(Throwable t) {
-    stateUpdateConsumer.accept(BuildState.FAILED);
+    stateUpdateConsumer.accept(BuildStateEnum.FAILED);
     fileLogger.error("Build error, project name: {}", project.getName(), t);
   }
 

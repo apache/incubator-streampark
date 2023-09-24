@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Message;
-import org.apache.streampark.console.core.enums.NoticeType;
+import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.service.MessageService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -45,8 +45,8 @@ public class MessageController {
   @Operation(summary = "List notices")
   @PostMapping("notice")
   public RestResponse notice(Integer type, RestRequest request) {
-    NoticeType noticeType = NoticeType.of(type);
-    IPage<Message> pages = messageService.getUnRead(noticeType, request);
+    NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(type);
+    IPage<Message> pages = messageService.getUnRead(noticeTypeEnum, request);
     return RestResponse.success(pages);
   }
 

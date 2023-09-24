@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.bean
 
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
-import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
+import org.apache.streampark.common.enums.{ExecutionModeEnum, FlinkK8sRestExposedTypeEnum}
 import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.commons.io.FileUtils
@@ -31,7 +31,7 @@ import java.util.{Map => JavaMap}
 
 case class DeployRequest(
     flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
+    executionMode: ExecutionModeEnum,
     properties: JavaMap[String, Any],
     clusterId: String,
     @Nullable k8sDeployParam: KubernetesDeployParam) {
@@ -69,4 +69,5 @@ case class KubernetesDeployParam(
     kubeConf: String = "~/.kube/config",
     serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
     flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
-    @Nullable flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.CLUSTER_IP)
+    @Nullable flinkRestExposedType: FlinkK8sRestExposedTypeEnum =
+      FlinkK8sRestExposedTypeEnum.CLUSTER_IP)

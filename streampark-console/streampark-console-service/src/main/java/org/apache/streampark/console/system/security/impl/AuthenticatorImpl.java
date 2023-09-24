@@ -19,8 +19,8 @@ package org.apache.streampark.console.system.security.impl;
 
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
-import org.apache.streampark.console.core.enums.LoginType;
-import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.enums.LoginTypeEnum;
+import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.UserService;
@@ -39,7 +39,7 @@ public class AuthenticatorImpl implements Authenticator {
 
   @Override
   public User authenticate(String username, String password, String loginType) throws Exception {
-    LoginType loginTypeEnum = LoginType.of(loginType);
+    LoginTypeEnum loginTypeEnum = LoginTypeEnum.of(loginType);
     if (loginTypeEnum == null) {
       throw new ApiAlertException(
           String.format("the login type [%s] is not supported.", loginType));
@@ -62,7 +62,7 @@ public class AuthenticatorImpl implements Authenticator {
     if (user == null) {
       throw new ApiAlertException(String.format("user [%s] does not exist", username));
     }
-    if (user.getLoginType() != LoginType.PASSWORD) {
+    if (user.getLoginTypeEnum() != LoginTypeEnum.PASSWORD) {
       throw new ApiAlertException(String.format("user [%s] can not login with PASSWORD", username));
     }
     String salt = user.getSalt();
@@ -82,35 +82,35 @@ public class AuthenticatorImpl implements Authenticator {
     User user = usersService.findByName(username);
 
     if (user != null) {
-      if (user.getLoginType() != LoginType.LDAP) {
+      if (user.getLoginTypeEnum() != LoginTypeEnum.LDAP) {
         throw new ApiAlertException(
-            String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
+            String.format("user [%s] can only sign in with %s", username, user.getLoginTypeEnum()));
       }
       return user;
     }
-    return this.newUserCreate(LoginType.LDAP, username);
+    return this.newUserCreate(LoginTypeEnum.LDAP, username);
   }
 
   private User ssoAuthenticate(String username) throws Exception {
     // check if user exist
     User user = usersService.findByName(username);
     if (user != null) {
-      if (user.getLoginType() != LoginType.SSO) {
+      if (user.getLoginTypeEnum() != LoginTypeEnum.SSO) {
         throw new ApiAlertException(
-            String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
+            String.format("user [%s] can only sign in with %s", username, user.getLoginTypeEnum()));
       }
       return user;
     }
-    return this.newUserCreate(LoginType.SSO, username);
+    return this.newUserCreate(LoginTypeEnum.SSO, username);
   }
 
-  private User newUserCreate(LoginType loginType, String username) throws Exception {
+  private User newUserCreate(LoginTypeEnum loginTypeEnum, String username) throws Exception {
     User newUser = new User();
     newUser.setCreateTime(new Date());
     newUser.setUsername(username);
     newUser.setNickName(username);
-    newUser.setLoginType(loginType);
-    newUser.setUserType(UserType.USER);
+    newUser.setLoginTypeEnum(loginTypeEnum);
+    newUser.setUserTypeEnum(UserTypeEnum.USER);
     newUser.setStatus(User.STATUS_VALID);
     newUser.setSex(User.SEX_UNKNOWN);
     usersService.createUser(newUser);

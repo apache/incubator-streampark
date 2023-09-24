@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.enums.ExecutionMode
+import org.apache.streampark.common.enums.ExecutionModeEnum
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
@@ -94,7 +94,7 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       flinkConfig: Configuration): CancelResponse = {
     flinkConfig.safeSet(
       DeploymentOptions.TARGET,
-      ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+      ExecutionModeEnum.KUBERNETES_NATIVE_APPLICATION.getName)
     super.doCancel(cancelRequest, flinkConfig)
   }
 

@@ -89,7 +89,7 @@
             availableSlot: x.availableSlot,
           },
         ];
-        if (x['optionState'] === OptionStateEnum.NONE) {
+        if (x['optionStateEnum'] === OptionStateEnum.NONE) {
           if (optionApps.starting.get(x.id)) {
             if (timestamp - optionApps.starting.get(x.id) > 2000 * 2) {
               optionApps.starting.delete(x.id);
@@ -149,7 +149,7 @@
     // Task is running, restarting, in savePoint
     if (
       [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(app.state) ||
-      app['optionState'] === OptionStateEnum.SAVEPOINTING
+      app['optionStateEnum'] === OptionStateEnum.SAVEPOINTING
     ) {
       // yarn-per-job|yarn-session|yarn-application
       handleView(app, unref(yarn));
@@ -209,7 +209,7 @@
             :class="{
               'cursor-pointer':
                 [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(record.state) ||
-                record['optionState'] === OptionStateEnum.SAVEPOINTING,
+                record['optionStateEnum'] === OptionStateEnum.SAVEPOINTING,
             }"
             @click="handleJobView(record)"
           >

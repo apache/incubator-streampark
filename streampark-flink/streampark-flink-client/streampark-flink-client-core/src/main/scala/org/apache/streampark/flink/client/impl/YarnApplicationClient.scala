@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.conf.{ConfigConst, Workspace}
-import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.enums.DevelopmentModeEnum
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util.{FileUtils, HdfsUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
@@ -69,7 +69,7 @@ object YarnApplicationClient extends YarnClientTrait {
         submitRequest.hdfsWorkspace.appPlugins
       )
       submitRequest.developmentMode match {
-        case DevelopmentMode.FLINK_SQL =>
+        case DevelopmentModeEnum.FLINK_SQL =>
           array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
           val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
           if (HdfsUtils.exists(jobLib)) {
@@ -95,7 +95,7 @@ object YarnApplicationClient extends YarnClientTrait {
       // yarn application Type
       .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
 
-    if (submitRequest.developmentMode == DevelopmentMode.PYFLINK) {
+    if (submitRequest.developmentMode == DevelopmentModeEnum.PYFLINK) {
       val pyVenv: String = workspace.APP_PYTHON_VENV
       if (!FsOperator.hdfs.exists(pyVenv)) {
         throw new RuntimeException(s"$pyVenv File does not exist")

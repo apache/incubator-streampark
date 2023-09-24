@@ -37,7 +37,7 @@
   const route = useRoute();
   const router = useRouter();
 
-  const buildState = ref<Nullable<number | string> | undefined>(null);
+  const buildStateEnum = ref<Nullable<number | string> | undefined>(null);
   if (!route.query.id) {
     router.go(-1);
   }
@@ -48,9 +48,9 @@
       projectResource.branches !== values.branches ||
       projectResource.pom !== values.pom
     ) {
-      buildState.value = BuildStateEnum.NEED_REBUILD;
+      buildStateEnum.value = BuildStateEnum.NEED_REBUILD;
     } else {
-      buildState.value = projectResource.buildState;
+      buildStateEnum.value = projectResource.buildStateEnum;
     }
   }
   /* Update project */
@@ -60,7 +60,7 @@
       const { data } = await updateProject({
         id: route.query.id,
         name: values.name,
-        gitCredential: values.gitCredential,
+        gitCredentialEnum: values.gitCredentialEnum,
         url: values.url,
         repository: values.repository,
         type: values.type,
@@ -71,7 +71,7 @@
         pom: values.pom,
         buildArgs: values.buildArgs,
         description: values.description,
-        buildState: buildState.value,
+        buildStateEnum: buildStateEnum.value,
       });
       if (data.data) {
         router.go(-1);

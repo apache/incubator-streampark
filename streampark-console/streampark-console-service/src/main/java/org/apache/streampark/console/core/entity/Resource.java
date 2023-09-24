@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.console.core.enums.EngineType;
-import org.apache.streampark.console.core.enums.ResourceType;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
+import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -54,9 +54,9 @@ public class Resource implements Serializable {
   /** user id of creator */
   private Long creatorId;
 
-  private ResourceType resourceType;
+  private ResourceTypeEnum resourceTypeEnum;
 
-  private EngineType engineType;
+  private EngineTypeEnum engineTypeEnum;
 
   // for flink app
   private String mainClass;
