@@ -73,8 +73,8 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
       throw new RuntimeException("The contentType or inputStream can not be null");
     }
     try {
-      return getMimeType(input).equals(MediaType.TEXT_PLAIN.toString())
-          && contentType.contains("text/x-python");
+      return contentType.contains("text/x-python")
+          && MediaType.TEXT_PLAIN.toString().equals(getMimeType(input));
     } catch (Exception e) {
       logger.warn("MimeType parse failed", e);
       return false;
