@@ -19,7 +19,7 @@ package org.apache.streampark.gateway.flink;
 
 import org.apache.streampark.gateway.ExecutionConfiguration;
 import org.apache.streampark.gateway.OperationHandle;
-import org.apache.streampark.gateway.OperationStatus;
+import org.apache.streampark.gateway.OperationStatusEnum;
 import org.apache.streampark.gateway.exception.SqlGatewayException;
 import org.apache.streampark.gateway.flink.client.dto.ExecuteStatementRequestBody;
 import org.apache.streampark.gateway.flink.client.dto.FetchResultsResponseBody;
@@ -34,7 +34,7 @@ import org.apache.streampark.gateway.flink.client.rest.v1.DefaultApi;
 import org.apache.streampark.gateway.results.Column;
 import org.apache.streampark.gateway.results.GatewayInfo;
 import org.apache.streampark.gateway.results.OperationInfo;
-import org.apache.streampark.gateway.results.ResultKind;
+import org.apache.streampark.gateway.results.ResultKindEnum;
 import org.apache.streampark.gateway.results.ResultQueryCondition;
 import org.apache.streampark.gateway.results.ResultSet;
 import org.apache.streampark.gateway.results.RowData;
@@ -146,7 +146,7 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
           defaultApi.getOperationStatus(
               UUID.fromString(sessionHandle.getIdentifier()),
               UUID.fromString(operationHandle.getIdentifier()));
-      return new OperationInfo(OperationStatus.valueOf(operationStatus.getStatus()), null);
+      return new OperationInfo(OperationStatusEnum.valueOf(operationStatus.getStatus()), null);
     } catch (ApiException e) {
       throw new SqlGatewayException("Flink native SqlGateWay closeOperation failed!", e);
     }
@@ -219,10 +219,10 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
 
       resultsData.forEach(row -> data.add(new RowData(row.getKind().getValue(), row.getFields())));
 
-      ResultKind resultKind =
+      ResultKindEnum resultKindEnum =
           columns.size() == 1 && columns.get(0).getName().equals("result")
-              ? ResultKind.SUCCESS
-              : ResultKind.SUCCESS_WITH_CONTENT;
+              ? ResultKindEnum.SUCCESS
+              : ResultKindEnum.SUCCESS_WITH_CONTENT;
 
       return new ResultSet(
           ResultSet.ResultType.valueOf(resultTypeStr),
@@ -231,7 +231,7 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
           data,
           true,
           null,
-          resultKind);
+          resultKindEnum);
     } catch (ApiException e) {
       throw new SqlGatewayException("Flink native SqlGateWay fetchResults failed!", e);
     }

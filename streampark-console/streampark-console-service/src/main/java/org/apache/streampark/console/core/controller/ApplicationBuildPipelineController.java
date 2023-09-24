@@ -23,10 +23,10 @@ import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.enums.PermissionType;
+import org.apache.streampark.console.core.enums.PermissionTypeEnum;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
-import org.apache.streampark.flink.packer.pipeline.PipelineType;
+import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -75,7 +75,7 @@ public class ApplicationBuildPipelineController {
         schema = @Schema(defaultValue = "false", implementation = boolean.class))
   })
   @ApiAccess
-  @PermissionAction(id = "#appId", type = PermissionType.APP)
+  @PermissionAction(id = "#appId", type = PermissionTypeEnum.APP)
   @PostMapping(value = "build")
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
@@ -103,7 +103,7 @@ public class ApplicationBuildPipelineController {
     details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
 
     if (pipeline.isPresent()
-        && PipelineType.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
+        && PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
       DockerResolvedSnapshot dockerProgress =
           appBuildPipeService.getDockerProgressDetailSnapshot(appId);
       details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));

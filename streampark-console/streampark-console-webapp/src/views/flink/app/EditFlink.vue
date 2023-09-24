@@ -73,7 +73,7 @@
   });
 
   /* Form reset */
-  function handleReset(executionMode?: string) {
+  function handleReset(executionModeEnum?: string) {
     nextTick(async () => {
       let selectAlertId: string | undefined;
       if (app.alertId) {
@@ -88,8 +88,8 @@
         jar: app.jar,
         description: app.description,
         dynamicProperties: app.dynamicProperties,
-        resolveOrder: app.resolveOrder,
-        executionMode: app.executionMode,
+        resolveOrderEnum: app.resolveOrderEnum,
+        executionModeEnum: app.executionModeEnum,
         yarnQueue: app.yarnQueue,
         restartSize: app.restartSize,
         checkPointFailure: {
@@ -100,7 +100,7 @@
         versionId: app.versionId || null,
         k8sRestExposedType: app.k8sRestExposedType,
         clusterId: app.clusterId,
-        [app.executionMode == ExecModeEnum.YARN_SESSION
+        [app.executionModeEnum == ExecModeEnum.YARN_SESSION
           ? 'yarnSessionClusterId'
           : 'flinkClusterId']: app.flinkClusterId,
         flinkImage: app.flinkImage,
@@ -110,8 +110,8 @@
         module: app.module,
         ...resetParams,
       };
-      if (!executionMode) {
-        Object.assign(defaultParams, { executionMode: app.executionMode });
+      if (!executionModeEnum) {
+        Object.assign(defaultParams, { executionModeEnum: app.executionModeEnum });
       }
       setFieldsValue(defaultParams);
       app.args && programArgRef.value?.setContent(app.args);

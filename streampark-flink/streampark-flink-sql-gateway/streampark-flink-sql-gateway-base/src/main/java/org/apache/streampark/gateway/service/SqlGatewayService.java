@@ -19,7 +19,7 @@ package org.apache.streampark.gateway.service;
 
 import org.apache.streampark.gateway.ExecutionConfiguration;
 import org.apache.streampark.gateway.OperationHandle;
-import org.apache.streampark.gateway.OperationStatus;
+import org.apache.streampark.gateway.OperationStatusEnum;
 import org.apache.streampark.gateway.exception.SqlGatewayException;
 import org.apache.streampark.gateway.results.Column;
 import org.apache.streampark.gateway.results.GatewayInfo;
@@ -113,7 +113,7 @@ public interface SqlGatewayService {
    * Get the result schema for the specified Operation.
    *
    * <p>Note: The result schema is available when the Operation is in the {@link
-   * OperationStatus#FINISHED}.
+   * OperationStatusEnum#FINISHED}.
    *
    * @param sessionHandle handle to identify the session.
    * @param operationHandle handle to identify the operation.

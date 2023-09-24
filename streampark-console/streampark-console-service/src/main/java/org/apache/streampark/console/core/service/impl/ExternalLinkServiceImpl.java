@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ExternalLink;
-import org.apache.streampark.console.core.enums.PlaceholderType;
+import org.apache.streampark.console.core.enums.PlaceholderTypeEnum;
 import org.apache.streampark.console.core.mapper.ExternalLinkMapper;
 import org.apache.streampark.console.core.service.ExternalLinkService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
@@ -86,9 +86,9 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
 
   private void renderLinkUrl(ExternalLink link, Application app) {
     HashMap<String, String> map = new HashMap();
-    map.put(PlaceholderType.JOB_ID.get(), app.getJobId());
-    map.put(PlaceholderType.JOB_NAME.get(), app.getJobName());
-    map.put(PlaceholderType.YARN_ID.get(), app.getAppId());
+    map.put(PlaceholderTypeEnum.JOB_ID.get(), app.getJobId());
+    map.put(PlaceholderTypeEnum.JOB_NAME.get(), app.getJobName());
+    map.put(PlaceholderTypeEnum.YARN_ID.get(), app.getAppId());
     PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("{", "}");
     link.setRenderedLinkUrl(
         propertyPlaceholderHelper.replacePlaceholders(link.getLinkUrl().trim(), map::get));

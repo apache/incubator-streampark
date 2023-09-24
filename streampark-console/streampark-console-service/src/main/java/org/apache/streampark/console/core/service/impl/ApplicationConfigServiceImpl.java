@@ -25,8 +25,8 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
-import org.apache.streampark.console.core.enums.ConfigFileType;
-import org.apache.streampark.console.core.enums.EffectiveType;
+import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.mapper.ApplicationConfigMapper;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.EffectiveService;
@@ -73,8 +73,8 @@ public class ApplicationConfigServiceImpl
     applicationConfig.setAppId(application.getId());
 
     if (application.getFormat() != null) {
-      ConfigFileType fileType = ConfigFileType.of(application.getFormat());
-      if (fileType == null || ConfigFileType.UNKNOWN == fileType) {
+      ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(application.getFormat());
+      if (fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType) {
         throw new ApiAlertException(
             "application' config error. must be (.properties|.yaml|.yml |.conf)");
       }
@@ -110,7 +110,7 @@ public class ApplicationConfigServiceImpl
       ApplicationConfig effectiveConfig = getEffective(application.getId());
       if (Utils.isEmpty(application.getConfig())) {
         if (effectiveConfig != null) {
-          effectiveService.delete(application.getId(), EffectiveType.CONFIG);
+          effectiveService.delete(application.getId(), EffectiveTypeEnum.CONFIG);
         }
       } else {
         // there was no configuration before, is a new configuration
@@ -180,7 +180,7 @@ public class ApplicationConfigServiceImpl
     LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
     updateWrapper.eq(ApplicationConfig::getAppId, appId).set(ApplicationConfig::getLatest, false);
     this.update(updateWrapper);
-    effectiveService.saveOrUpdate(appId, EffectiveType.CONFIG, configId);
+    effectiveService.saveOrUpdate(appId, EffectiveTypeEnum.CONFIG, configId);
   }
 
   @Override

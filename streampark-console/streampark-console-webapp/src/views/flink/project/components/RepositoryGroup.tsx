@@ -18,7 +18,7 @@ import { defineComponent, h } from 'vue';
 import type { PropType } from 'vue';
 import { Form, Input, Select, Tag } from 'ant-design-vue';
 export interface RepositoryProps {
-  gitCredential: string | number;
+  gitCredentialEnum: string | number;
   url: string;
 }
 import { useI18n } from '/@/hooks/web/useI18n';
@@ -61,10 +61,10 @@ export default defineComponent({
         <div>
           <Input.Group compact class="!flex custom-input-group">
             <Select
-              name="gitCredential"
+              name="gitCredentialEnum"
               style="width: 80px"
               placeholder={t('flink.project.form.gitCredentialPlaceholder')}
-              value={props.value?.gitCredential}
+              value={props.value?.gitCredentialEnum}
               onChange={(e: any) => handleProtocolChange(e)}
               options={options}
             />
@@ -82,10 +82,10 @@ export default defineComponent({
               <Tag color="#2db7f5" class="tag-note">
                 {t('flink.app.noteInfo.note')}
               </Tag>
-              {props.value?.gitCredential === 1 && (
+              {props.value?.gitCredentialEnum === 1 && (
                 <span>{t('flink.project.operationTips.httpsCredential')}</span>
               )}
-              {props.value?.gitCredential === 2 && (
+              {props.value?.gitCredentialEnum === 2 && (
                 <span>{t('flink.project.operationTips.sshCredential')}</span>
               )}
             </span>

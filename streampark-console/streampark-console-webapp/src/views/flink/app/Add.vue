@@ -96,7 +96,7 @@
   /* Initialize the form */
   async function handleInitForm() {
     const defaultValue = {
-      resolveOrder: 0,
+      resolveOrderEnum: 0,
       k8sRestExposedType: 0,
     };
     options.forEach((item) => {
@@ -137,18 +137,18 @@
 
   function handleCluster(values: Recordable) {
     let flinkClusterId =
-      values.executionMode == ExecModeEnum.YARN_SESSION
+      values.executionModeEnum == ExecModeEnum.YARN_SESSION
         ? values.yarnSessionClusterId
         : values.flinkClusterId;
     const cluster =
       unref(flinkClusters).filter((c) => {
         if (flinkClusterId) {
-          return c.id == flinkClusterId && c.clusterState === ClusterStateEnum.RUNNING;
+          return c.id == flinkClusterId && c.clusterStateEnum === ClusterStateEnum.RUNNING;
         }
       })[0] || null;
     if (cluster) {
       Object.assign(values, { flinkClusterId: cluster.id });
-      if (values.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
+      if (values.executionModeEnum == ExecModeEnum.KUBERNETES_SESSION) {
         Object.assign(values, { clusterId: cluster.clusterId });
       }
     }

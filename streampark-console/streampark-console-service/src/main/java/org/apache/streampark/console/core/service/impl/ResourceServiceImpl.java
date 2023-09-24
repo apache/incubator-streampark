@@ -35,7 +35,7 @@ import org.apache.streampark.console.core.bean.MavenPom;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.enums.ResourceType;
+import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ResourceMapper;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
@@ -131,13 +131,13 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
 
     ApiAlertException.throwIfTrue(
-        resource.getResourceType() == ResourceType.FLINK_APP && jars.isEmpty(),
+        resource.getResourceTypeEnum() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
         "Please upload jar for Flink_App resource");
 
     ApiAlertException.throwIfTrue(
         jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
 
-    if (resource.getResourceType() != ResourceType.CONNECTOR) {
+    if (resource.getResourceTypeEnum() != ResourceTypeEnum.CONNECTOR) {
       ApiAlertException.throwIfNull(resource.getResourceName(), "The resourceName is required.");
     } else {
       String connector = resource.getConnector();
@@ -273,7 +273,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   @Override
   public RestResponse checkResource(Resource resourceParam) throws JsonProcessingException {
-    ResourceType type = resourceParam.getResourceType();
+    ResourceTypeEnum type = resourceParam.getResourceTypeEnum();
     Map<String, Serializable> resp = new HashMap<>(0);
     resp.put("state", 0);
     switch (type) {
@@ -305,7 +305,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         FlinkConnector connectorResource;
 
         ApiAlertException.throwIfFalse(
-            ResourceType.CONNECTOR == resourceParam.getResourceType(),
+            ResourceTypeEnum.CONNECTOR == resourceParam.getResourceTypeEnum(),
             "getConnectorId method error, resource not flink connector.");
 
         List<File> jars;

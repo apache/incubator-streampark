@@ -18,10 +18,10 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.ConfigConst;
-import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
-import org.apache.streampark.common.enums.ResolveOrder;
+import org.apache.streampark.common.enums.ClusterStateEnum;
+import org.apache.streampark.common.enums.ExecutionModeEnum;
+import org.apache.streampark.common.enums.FlinkK8sRestExposedTypeEnum;
+import org.apache.streampark.common.enums.ResolveOrderEnum;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
@@ -118,16 +118,16 @@ public class FlinkCluster implements Serializable {
   private transient Integer affectedJobs = 0;
 
   @JsonIgnore
-  public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
-    return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
+  public FlinkK8sRestExposedTypeEnum getK8sRestExposedTypeEnum() {
+    return FlinkK8sRestExposedTypeEnum.of(this.k8sRestExposedType);
   }
 
-  public ExecutionMode getExecutionModeEnum() {
-    return ExecutionMode.of(this.executionMode);
+  public ExecutionModeEnum getExecutionModeEnum() {
+    return ExecutionModeEnum.of(this.executionMode);
   }
 
-  public ClusterState getClusterStateEnum() {
-    return ClusterState.of(this.clusterState);
+  public ClusterStateEnum getClusterStateEnum() {
+    return ClusterStateEnum.of(this.clusterState);
   }
 
   @JsonIgnore
@@ -137,7 +137,7 @@ public class FlinkCluster implements Serializable {
       return Collections.emptyMap();
     }
     Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
-    if (ExecutionMode.YARN_SESSION == getExecutionModeEnum()) {
+    if (ExecutionModeEnum.YARN_SESSION == getExecutionModeEnum()) {
       map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
       map.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
     }
@@ -181,9 +181,9 @@ public class FlinkCluster implements Serializable {
         PropertiesUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
     map.putAll(this.getOptionMap());
     map.putAll(dynamicProperties);
-    ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
-    if (resolveOrder != null) {
-      map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
+    ResolveOrderEnum resolveOrderEnum = ResolveOrderEnum.of(this.getResolveOrder());
+    if (resolveOrderEnum != null) {
+      map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrderEnum.getName());
     }
     return map;
   }
