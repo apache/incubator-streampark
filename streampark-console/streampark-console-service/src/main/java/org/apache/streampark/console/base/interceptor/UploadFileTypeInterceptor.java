@@ -68,24 +68,21 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
     return true;
   }
 
-  public boolean isPythonFileType(String contentType, InputStream input) {
+  private boolean isPythonFileType(String contentType, InputStream input) {
     if (StringUtils.isBlank(contentType) || input == null) {
       throw new RuntimeException("The contentType or inputStream can not be null");
     }
     try {
+      Metadata metadata = new Metadata();
+      AutoDetectParser parser = new AutoDetectParser();
+      parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
+      String mimeType = metadata.get(HttpHeaders.CONTENT_TYPE);  
       return contentType.contains("text/x-python")
-          && MediaType.TEXT_PLAIN.toString().equals(getMimeType(input));
+          && MediaType.TEXT_PLAIN.toString().equals(mimeType);
     } catch (Exception e) {
       logger.warn("MimeType parse failed", e);
       return false;
     }
-  }
-
-  public String getMimeType(InputStream stream) throws Exception {
-    Metadata metadata = new Metadata();
-    AutoDetectParser parser = new AutoDetectParser();
-    parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
-    return metadata.get(HttpHeaders.CONTENT_TYPE);
   }
 
   @Override
