@@ -17,8 +17,8 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
+import org.apache.streampark.common.enums.ApiTypeEnum
+import org.apache.streampark.common.enums.ApiTypeEnum.ApiType
 import org.apache.streampark.common.util._
 import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
@@ -36,13 +36,13 @@ private[flink] object FlinkStreamingInitializer {
 
   def initialize(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit)
       : (ParameterTool, StreamExecutionEnvironment) = {
-    val flinkInitializer = new FlinkStreamingInitializer(args, ApiType.scala)
+    val flinkInitializer = new FlinkStreamingInitializer(args, ApiTypeEnum.SCALA)
     flinkInitializer.streamEnvConfFunc = config
     (flinkInitializer.configuration.parameter, flinkInitializer.streamEnv)
   }
 
   def initialize(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
-    val flinkInitializer = new FlinkStreamingInitializer(args.args, ApiType.java)
+    val flinkInitializer = new FlinkStreamingInitializer(args.args, ApiTypeEnum.JAVA)
     flinkInitializer.javaStreamEnvConfFunc = args.conf
     (flinkInitializer.configuration.parameter, flinkInitializer.streamEnv)
   }
@@ -66,9 +66,9 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       JavaStreamEnv.getExecutionEnvironment(configuration.envConfig))
 
     apiType match {
-      case ApiType.java if javaStreamEnvConfFunc != null =>
+      case ApiTypeEnum.JAVA if javaStreamEnvConfFunc != null =>
         javaStreamEnvConfFunc.configuration(env.getJavaEnv, configuration.parameter)
-      case ApiType.scala if streamEnvConfFunc != null =>
+      case ApiTypeEnum.SCALA if streamEnvConfFunc != null =>
         streamEnvConfFunc(env, configuration.parameter)
       case _ =>
     }

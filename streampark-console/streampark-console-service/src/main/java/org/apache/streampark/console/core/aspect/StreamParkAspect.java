@@ -24,8 +24,8 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.enums.PermissionType;
-import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.enums.PermissionTypeEnum;
+import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
@@ -109,13 +109,13 @@ public class StreamParkAspect {
     User currentUser = commonService.getCurrentUser();
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
-    boolean isAdmin = currentUser.getUserType() == UserType.ADMIN;
+    boolean isAdmin = currentUser.getUserTypeEnum() == UserTypeEnum.ADMIN;
 
     if (!isAdmin) {
-      PermissionType permissionType = permissionAction.type();
+      PermissionTypeEnum permissionTypeEnum = permissionAction.type();
       Long paramId = getParamId(joinPoint, methodSignature, permissionAction.id());
 
-      switch (permissionType) {
+      switch (permissionTypeEnum) {
         case USER:
           ApiAlertException.throwIfTrue(
               !currentUser.getUserId().equals(paramId),
@@ -137,7 +137,7 @@ public class StreamParkAspect {
           break;
         default:
           throw new IllegalArgumentException(
-              String.format("Permission type %s is not supported.", permissionType));
+              String.format("Permission type %s is not supported.", permissionTypeEnum));
       }
     }
 

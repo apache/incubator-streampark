@@ -75,7 +75,7 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
     try {
       Metadata metadata = new Metadata();
       AutoDetectParser parser = new AutoDetectParser();
-      parser.parse(input, new DefaultHandler(), metadata, new ParseContext());
+      parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
       String mimeType = metadata.get(HttpHeaders.CONTENT_TYPE);
       return contentType.contains("text/x-python")
           && MediaType.TEXT_PLAIN.toString().equals(mimeType);

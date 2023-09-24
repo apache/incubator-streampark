@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.console.core.enums.FlinkAppState;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,7 +40,7 @@ public class AlertProbeMsg {
 
   private Integer cancelledJobs = 0;
 
-  public void compute(FlinkAppState state) {
+  public void compute(FlinkAppStateEnum state) {
     this.probeJobs++;
     switch (state) {
       case LOST:

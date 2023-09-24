@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.metrics.flink;
 
-import org.apache.streampark.console.core.enums.CheckPointStatus;
-import org.apache.streampark.console.core.enums.CheckPointType;
+import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
+import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -73,17 +73,17 @@ public class CheckPoints implements Serializable {
 
     private Boolean discarded;
 
-    public CheckPointStatus getCheckPointStatus() {
-      return CheckPointStatus.valueOf(this.status);
+    public CheckPointStatusEnum getCheckPointStatus() {
+      return CheckPointStatusEnum.valueOf(this.status);
     }
 
-    public CheckPointType getCheckPointType() {
+    public CheckPointTypeEnum getCheckPointType() {
       if ("CHECKPOINT".equals(this.checkpointType)) {
-        return CheckPointType.CHECKPOINT;
+        return CheckPointTypeEnum.CHECKPOINT;
       } else if ("SAVEPOINT".equals(this.checkpointType)) {
-        return CheckPointType.SAVEPOINT;
+        return CheckPointTypeEnum.SAVEPOINT;
       }
-      return CheckPointType.SYNC_SAVEPOINT;
+      return CheckPointTypeEnum.SYNC_SAVEPOINT;
     }
 
     public String getPath() {

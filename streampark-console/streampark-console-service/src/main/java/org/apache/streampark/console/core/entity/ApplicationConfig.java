@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.console.core.enums.ConfigFileType;
+import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -75,7 +75,7 @@ public class ApplicationConfig {
   }
 
   public Map<String, String> readConfig() {
-    ConfigFileType fileType = ConfigFileType.of(this.format);
+    ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(this.format);
     Map<String, String> configs = null;
     if (fileType != null) {
       switch (fileType) {

@@ -19,7 +19,7 @@ package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, RestoreMode}
+import org.apache.streampark.common.enums.{ApplicationTypeEnum, DevelopmentModeEnum, ExecutionModeEnum, RestoreModeEnum}
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util.{DeflaterUtils, FileUtils, Logger, SystemPropertyUtils}
 import org.apache.streampark.flink.client.bean._
@@ -93,7 +93,7 @@ trait FlinkClientTrait extends Logger {
     val (commandLine, flinkConfig) = getCommandLineAndFlinkConfig(submitRequest)
 
     submitRequest.developmentMode match {
-      case DevelopmentMode.PYFLINK =>
+      case DevelopmentModeEnum.PYFLINK =>
         val flinkOptPath: String = System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR)
         if (StringUtils.isBlank(flinkOptPath)) {
           logWarn(s"Get environment variable ${ConfigConstants.ENV_FLINK_OPT_DIR} fail")
@@ -140,9 +140,9 @@ trait FlinkClientTrait extends Logger {
         submitRequest.allowNonRestoredState)
       if (
         submitRequest.flinkVersion.checkVersion(
-          RestoreMode.SINCE_FLINK_VERSION) && submitRequest.restoreMode != null
+          RestoreModeEnum.SINCE_FLINK_VERSION) && submitRequest.restoreMode != null
       ) {
-        flinkConfig.setString(RestoreMode.RESTORE_MODE, submitRequest.restoreMode.getName);
+        flinkConfig.setString(RestoreModeEnum.RESTORE_MODE, submitRequest.restoreMode.getName);
       }
     }
 
@@ -236,7 +236,7 @@ trait FlinkClientTrait extends Logger {
   private[client] def getJobGraph(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): (PackagedProgram, JobGraph) = {
-    if (submitRequest.developmentMode == DevelopmentMode.PYFLINK) {
+    if (submitRequest.developmentMode == DevelopmentModeEnum.PYFLINK) {
       val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
       if (!FsOperator.lfs.exists(pythonVenv)) {
         throw new RuntimeException(s"$pythonVenv File does not exist")
@@ -487,14 +487,14 @@ trait FlinkClientTrait extends Logger {
       }
     }
 
-    if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
+    if (submitRequest.applicationType == ApplicationTypeEnum.STREAMPARK_FLINK) {
 
       programArgs += PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml
       programArgs += PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
       programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
 
       submitRequest.developmentMode match {
-        case DevelopmentMode.FLINK_SQL =>
+        case DevelopmentModeEnum.FLINK_SQL =>
           programArgs += PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
             programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
@@ -514,8 +514,8 @@ trait FlinkClientTrait extends Logger {
     }
 
     if (
-      submitRequest.developmentMode == DevelopmentMode.PYFLINK
-      && submitRequest.executionMode != ExecutionMode.YARN_APPLICATION
+      submitRequest.developmentMode == DevelopmentModeEnum.PYFLINK
+      && submitRequest.executionMode != ExecutionModeEnum.YARN_APPLICATION
     ) {
       // python file
       programArgs.add("-py")
@@ -601,7 +601,7 @@ trait FlinkClientTrait extends Logger {
             .key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
             .stringType()
             .defaultValue {
-              if (request.executionMode == ExecutionMode.YARN_APPLICATION) {
+              if (request.executionMode == ExecutionModeEnum.YARN_APPLICATION) {
                 Workspace.remote.APP_SAVEPOINTS
               } else null
             }

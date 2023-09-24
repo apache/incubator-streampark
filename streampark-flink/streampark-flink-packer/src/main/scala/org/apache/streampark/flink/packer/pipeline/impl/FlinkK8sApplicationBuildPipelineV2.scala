@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
-import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.enums.DevelopmentModeEnum
 import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
@@ -30,7 +30,7 @@ import scala.language.postfixOps
 class FlinkK8sApplicationBuildPipelineV2(request: FlinkK8sApplicationBuildRequest)
   extends BuildPipeline {
 
-  override def pipeType: PipelineType = PipelineType.FLINK_K8S_APPLICATION_V2
+  override def pipeType: PipelineTypeEnum = PipelineTypeEnum.FLINK_K8S_APPLICATION_V2
 
   @throws[Throwable]
   override protected def buildProcess(): K8sAppModeBuildResponse = {
@@ -51,8 +51,8 @@ class FlinkK8sApplicationBuildPipelineV2(request: FlinkK8sApplicationBuildReques
       execStep(2) {
         val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
         val extJarLibs = request.developmentMode match {
-          case DevelopmentMode.FLINK_SQL => request.dependencyInfo.extJarLibs
-          case DevelopmentMode.CUSTOM_CODE => Set.empty[String]
+          case DevelopmentModeEnum.FLINK_SQL => request.dependencyInfo.extJarLibs
+          case DevelopmentModeEnum.CUSTOM_CODE => Set.empty[String]
           case _ => Set.empty[String]
         }
         val shadedJar =

@@ -17,18 +17,18 @@
 
 package org.apache.streampark.console.core.task;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.ExecutionModeEnum;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.OptionState;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobStateEnum;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum;
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent;
@@ -52,8 +52,8 @@ import java.util.concurrent.TimeUnit;
 
 import scala.Enumeration;
 
-import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.fromK8sFlinkJobState;
-import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
+import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.Bridge.fromK8sFlinkJobState;
+import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.Bridge.toK8sFlinkJobState;
 
 /**
  * Event Listener for K8sFlinkTrackMonitor。
@@ -104,11 +104,11 @@ public class FlinkK8sChangeEventListener {
     applicationInfoService.persistMetrics(app);
 
     // email alerts when necessary
-    FlinkAppState state = app.getStateEnum();
-    if (FlinkAppState.FAILED == state
-        || FlinkAppState.LOST == state
-        || FlinkAppState.RESTARTING == state
-        || FlinkAppState.FINISHED == state) {
+    FlinkAppStateEnum state = app.getStateEnum();
+    if (FlinkAppStateEnum.FAILED == state
+        || FlinkAppStateEnum.LOST == state
+        || FlinkAppStateEnum.RESTARTING == state
+        || FlinkAppStateEnum.FINISHED == state) {
       executor.execute(
           () -> {
             if (app.getProbing()) {
@@ -129,9 +129,9 @@ public class FlinkK8sChangeEventListener {
   @Subscribe
   public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
     TrackId trackId = event.trackId();
-    ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.executeMode());
+    ExecutionModeEnum mode = FlinkK8sExecuteModeEnum.toExecutionMode(trackId.executeMode());
     // discard session mode change
-    if (ExecutionMode.KUBERNETES_NATIVE_SESSION == mode) {
+    if (ExecutionModeEnum.KUBERNETES_NATIVE_SESSION == mode) {
       return;
     }
 
@@ -184,7 +184,7 @@ public class FlinkK8sChangeEventListener {
     long endTime = Math.max(jobStatus.jobEndTime(), preEndTime);
     long duration = jobStatus.duration();
 
-    if (FlinkJobState.isEndState(state)) {
+    if (FlinkJobStateEnum.isEndState(state)) {
       if (endTime < startTime) {
         endTime = System.currentTimeMillis();
       }
@@ -202,6 +202,6 @@ public class FlinkK8sChangeEventListener {
     app.setDuration(duration > 0 ? duration : 0);
     // when a flink job status change event can be received, it means
     // that the operation command sent by streampark has been completed.
-    app.setOptionState(OptionState.NONE.getValue());
+    app.setOptionState(OptionStateEnum.NONE.getValue());
   }
 }
