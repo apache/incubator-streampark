@@ -143,7 +143,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             .orElseThrow(
                 () -> new ApiAlertException(String.format("The userId [%s] not found.", userId)));
     // Admin has the permission for all teams.
-    if (UserTypeEnum.ADMIN == user.getUserTypeEnum()) {
+    if (UserTypeEnum.ADMIN == user.getUserType()) {
       return this.list();
     }
     return baseMapper.findUserTeams(userId);

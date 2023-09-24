@@ -109,7 +109,7 @@ public class ConsoleAspect {
     User currentUser = commonService.getCurrentUser();
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
-    boolean isAdmin = currentUser.getUserTypeEnum() == UserTypeEnum.ADMIN;
+    boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
 
     if (!isAdmin) {
       PermissionTypeEnum permissionTypeEnum = permissionAction.type();

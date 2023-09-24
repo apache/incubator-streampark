@@ -52,7 +52,7 @@ class UserServiceTest extends SpringUnitTestBase {
     user.setUsername("test");
     user.setNickName("test");
     user.setPassword("test");
-    user.setUserTypeEnum(UserTypeEnum.USER);
+    user.setUserType(UserTypeEnum.USER);
     user.setStatus(User.STATUS_VALID);
     userService.createUser(user);
     // lock user
@@ -95,7 +95,7 @@ class UserServiceTest extends SpringUnitTestBase {
     user.setUsername("test");
     user.setNickName("test");
     user.setPassword("test");
-    user.setUserTypeEnum(UserTypeEnum.USER);
+    user.setUserType(UserTypeEnum.USER);
     user.setStatus(User.STATUS_VALID);
     userService.save(user);
 
@@ -116,7 +116,7 @@ class UserServiceTest extends SpringUnitTestBase {
     targetUser.setUsername("test0");
     targetUser.setNickName("test0");
     targetUser.setPassword("test0");
-    targetUser.setUserTypeEnum(UserTypeEnum.USER);
+    targetUser.setUserType(UserTypeEnum.USER);
     targetUser.setStatus(User.STATUS_VALID);
     userService.save(targetUser);
 

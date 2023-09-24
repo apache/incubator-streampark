@@ -129,7 +129,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Transactional(rollbackFor = Exception.class)
   public RestResponse updateUser(User user) {
     User existsUser = getById(user.getUserId());
-    user.setLoginTypeEnum(null);
+    user.setLoginType(null);
     user.setPassword(null);
     user.setModifyTime(new Date());
     if (needTransferResource(existsUser, user)) {
@@ -154,7 +154,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     User user = getById(userParam.getUserId());
     ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
     ApiAlertException.throwIfFalse(
-        user.getLoginTypeEnum() == LoginTypeEnum.PASSWORD,
+        user.getLoginType() == LoginTypeEnum.PASSWORD,
         "Can only update password for user who sign in with PASSWORD");
 
     String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());

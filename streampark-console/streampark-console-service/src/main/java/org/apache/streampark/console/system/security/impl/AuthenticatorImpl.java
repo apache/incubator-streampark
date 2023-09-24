@@ -62,7 +62,7 @@ public class AuthenticatorImpl implements Authenticator {
     if (user == null) {
       throw new ApiAlertException(String.format("user [%s] does not exist", username));
     }
-    if (user.getLoginTypeEnum() != LoginTypeEnum.PASSWORD) {
+    if (user.getLoginType() != LoginTypeEnum.PASSWORD) {
       throw new ApiAlertException(String.format("user [%s] can not login with PASSWORD", username));
     }
     String salt = user.getSalt();
@@ -82,9 +82,9 @@ public class AuthenticatorImpl implements Authenticator {
     User user = usersService.findByName(username);
 
     if (user != null) {
-      if (user.getLoginTypeEnum() != LoginTypeEnum.LDAP) {
+      if (user.getLoginType() != LoginTypeEnum.LDAP) {
         throw new ApiAlertException(
-            String.format("user [%s] can only sign in with %s", username, user.getLoginTypeEnum()));
+            String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
       }
       return user;
     }
@@ -95,9 +95,9 @@ public class AuthenticatorImpl implements Authenticator {
     // check if user exist
     User user = usersService.findByName(username);
     if (user != null) {
-      if (user.getLoginTypeEnum() != LoginTypeEnum.SSO) {
+      if (user.getLoginType() != LoginTypeEnum.SSO) {
         throw new ApiAlertException(
-            String.format("user [%s] can only sign in with %s", username, user.getLoginTypeEnum()));
+            String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
       }
       return user;
     }
@@ -109,8 +109,8 @@ public class AuthenticatorImpl implements Authenticator {
     newUser.setCreateTime(new Date());
     newUser.setUsername(username);
     newUser.setNickName(username);
-    newUser.setLoginTypeEnum(loginTypeEnum);
-    newUser.setUserTypeEnum(UserTypeEnum.USER);
+    newUser.setLoginType(loginTypeEnum);
+    newUser.setUserType(UserTypeEnum.USER);
     newUser.setStatus(User.STATUS_VALID);
     newUser.setSex(User.SEX_UNKNOWN);
     usersService.createUser(newUser);
