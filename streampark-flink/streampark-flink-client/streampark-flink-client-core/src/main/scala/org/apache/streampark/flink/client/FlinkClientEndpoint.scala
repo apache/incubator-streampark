@@ -18,15 +18,15 @@
 package org.apache.streampark.flink.client
 
 import org.apache.streampark.common.conf.K8sFlinkConfig
-import org.apache.streampark.common.enums.ExecutionMode
-import org.apache.streampark.common.enums.ExecutionMode._
+import org.apache.streampark.common.enums.ExecutionModeEnum
+import org.apache.streampark.common.enums.ExecutionModeEnum._
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.impl._
 
 object FlinkClientEndpoint {
 
-  private[this] val clients: Map[ExecutionMode, FlinkClientTrait] = Map(
+  private[this] val clients: Map[ExecutionModeEnum, FlinkClientTrait] = Map(
     LOCAL -> LocalClient,
     REMOTE -> RemoteClient,
     YARN_APPLICATION -> YarnApplicationClient,

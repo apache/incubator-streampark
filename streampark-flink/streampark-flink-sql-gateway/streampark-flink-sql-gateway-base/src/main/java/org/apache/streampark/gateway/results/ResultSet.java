@@ -66,7 +66,7 @@ public class ResultSet implements Serializable {
   @Nullable private final JobID jobID;
 
   /** Gets the result kind of the result. */
-  private final ResultKind resultKind;
+  private final ResultKindEnum resultKindEnum;
 
   public ResultSet(
       ResultType resultType,
@@ -75,14 +75,14 @@ public class ResultSet implements Serializable {
       List<RowData> data,
       boolean isQueryResult,
       @Nullable JobID jobID,
-      ResultKind resultKind) {
+      ResultKindEnum resultKindEnum) {
     this.resultType = resultType;
     this.nextToken = nextToken;
     this.columns = columns;
     this.data = data;
     this.isQueryResult = isQueryResult;
     this.jobID = jobID;
-    this.resultKind = resultKind;
+    this.resultKindEnum = resultKindEnum;
   }
 
   public ResultType getResultType() {
@@ -111,8 +111,8 @@ public class ResultSet implements Serializable {
     return jobID;
   }
 
-  public ResultKind getResultKind() {
-    return resultKind;
+  public ResultKindEnum getResultKind() {
+    return resultKindEnum;
   }
 
   @Override
@@ -130,12 +130,12 @@ public class ResultSet implements Serializable {
         && Objects.equals(columns, resultSet.columns)
         && Objects.equals(data, resultSet.data)
         && Objects.equals(jobID, resultSet.jobID)
-        && resultKind == resultSet.resultKind;
+        && resultKindEnum == resultSet.resultKindEnum;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(resultType, nextToken, columns, data, isQueryResult, jobID, resultKind);
+    return Objects.hash(resultType, nextToken, columns, data, isQueryResult, jobID, resultKindEnum);
   }
 
   @Override
@@ -154,7 +154,7 @@ public class ResultSet implements Serializable {
         + ", jobID="
         + jobID
         + ", resultKind="
-        + resultKind
+        + resultKindEnum
         + '}';
   }
 

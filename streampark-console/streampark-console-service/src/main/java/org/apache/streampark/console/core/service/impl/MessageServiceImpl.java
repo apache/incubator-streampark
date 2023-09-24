@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Message;
-import org.apache.streampark.console.core.enums.NoticeType;
+import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.mapper.MessageMapper;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.websocket.WebSocketEndpoint;
@@ -47,13 +47,13 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
   }
 
   @Override
-  public IPage<Message> getUnRead(NoticeType noticeType, RestRequest request) {
+  public IPage<Message> getUnRead(NoticeTypeEnum noticeTypeEnum, RestRequest request) {
     Page<Message> page = new MybatisPager<Message>().getDefaultPage(request);
     LambdaQueryWrapper<Message> queryWrapper =
         new LambdaQueryWrapper<Message>()
             .eq(Message::getIsRead, false)
             .orderByDesc(Message::getCreateTime)
-            .eq(Message::getType, noticeType.get());
+            .eq(Message::getType, noticeTypeEnum.get());
     return this.baseMapper.selectPage(page, queryWrapper);
   }
 }

@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.application;
 
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.enums.AppExistsState;
+import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -140,7 +140,7 @@ public interface ApplicationInfoService extends IService<Application> {
    * @param appParam The application to check for existence.
    * @return AppExistsState indicating the existence state of the application.
    */
-  AppExistsState checkExists(Application appParam);
+  AppExistsStateEnum checkExists(Application appParam);
 
   /**
    * Persists the metrics of the given application.

@@ -22,7 +22,7 @@ import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.InternalOption;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.StorageType;
+import org.apache.streampark.common.enums.StorageTypeEnum;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.common.util.Utils;
@@ -53,7 +53,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.apache.streampark.common.enums.StorageType.LFS;
+import static org.apache.streampark.common.enums.StorageTypeEnum.LFS;
 
 @Order(1)
 @Slf4j
@@ -64,7 +64,7 @@ public class EnvInitializer implements ApplicationRunner {
 
   @Autowired private SettingService settingService;
 
-  private final Set<StorageType> initialized = new HashSet<>(2);
+  private final Set<StorageTypeEnum> initialized = new HashSet<>(2);
 
   private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
@@ -126,17 +126,17 @@ public class EnvInitializer implements ApplicationRunner {
     SystemPropertyUtils.set(key, value);
   }
 
-  public synchronized void storageInitialize(StorageType storageType) {
+  public synchronized void storageInitialize(StorageTypeEnum storageTypeEnum) {
 
-    if (initialized.contains(storageType)) {
+    if (initialized.contains(storageTypeEnum)) {
       return;
     }
 
-    FsOperator fsOperator = FsOperator.of(storageType);
-    Workspace workspace = Workspace.of(storageType);
+    FsOperator fsOperator = FsOperator.of(storageTypeEnum);
+    Workspace workspace = Workspace.of(storageTypeEnum);
 
     // 1. prepare workspace dir
-    if (LFS == storageType) {
+    if (LFS == storageTypeEnum) {
       fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
     }
     Arrays.asList(
@@ -198,18 +198,18 @@ public class EnvInitializer implements ApplicationRunner {
       FsOperator.lfs().mkdirs(localMavenRepo);
     }
 
-    initialized.add(storageType);
+    initialized.add(storageTypeEnum);
   }
 
-  public void checkFlinkEnv(StorageType storageType, FlinkEnv flinkEnv) throws IOException {
+  public void checkFlinkEnv(StorageTypeEnum storageTypeEnum, FlinkEnv flinkEnv) throws IOException {
     String flinkLocalHome = flinkEnv.getFlinkHome();
     if (flinkLocalHome == null) {
       throw new ExceptionInInitializerError(
           "[StreamPark] FLINK_HOME is undefined,Make sure that Flink is installed.");
     }
-    Workspace workspace = Workspace.of(storageType);
+    Workspace workspace = Workspace.of(storageTypeEnum);
     String appFlink = workspace.APP_FLINK();
-    FsOperator fsOperator = FsOperator.of(storageType);
+    FsOperator fsOperator = FsOperator.of(storageTypeEnum);
     if (!fsOperator.exists(appFlink)) {
       log.info("checkFlinkEnv, now mkdir [{}] starting ...", appFlink);
       fsOperator.mkdirs(appFlink);

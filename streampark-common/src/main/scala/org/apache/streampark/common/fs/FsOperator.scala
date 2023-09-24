@@ -17,18 +17,18 @@
 
 package org.apache.streampark.common.fs
 
-import org.apache.streampark.common.enums.StorageType
+import org.apache.streampark.common.enums.StorageTypeEnum
 
 object FsOperator {
 
-  lazy val lfs: FsOperator = FsOperator.of(StorageType.LFS)
+  lazy val lfs: FsOperator = FsOperator.of(StorageTypeEnum.LFS)
 
-  lazy val hdfs: FsOperator = FsOperator.of(StorageType.HDFS)
+  lazy val hdfs: FsOperator = FsOperator.of(StorageTypeEnum.HDFS)
 
-  def of(storageType: StorageType): FsOperator = {
+  def of(storageType: StorageTypeEnum): FsOperator = {
     storageType match {
-      case StorageType.HDFS => HdfsOperator
-      case StorageType.LFS => LfsOperator
+      case StorageTypeEnum.HDFS => HdfsOperator
+      case StorageTypeEnum.LFS => LfsOperator
       case _ => throw new UnsupportedOperationException(s"Unsupported storageType:$storageType")
     }
   }

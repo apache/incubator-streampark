@@ -19,12 +19,12 @@
   import { Descriptions, Tag } from 'ant-design-vue';
   import { computed, toRefs } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { alertTypes } from '../index.data';
+  import { alertTypeEnums } from '../index.data';
   import { useI18n } from '/@/hooks/web/useI18n';
 
   const { t } = useI18n();
   const props = defineProps({
-    alertType: {
+    alertTypeEnum: {
       type: String,
       validator: (v: string) => ['1', '2', '4', '8', '16'].includes(v),
       required: true,
@@ -34,7 +34,7 @@
       required: true,
     },
   });
-  const { alertType, alertSource } = toRefs(props);
+  const { alertTypeEnum, alertSource } = toRefs(props);
   const DescriptionsItem = Descriptions.Item;
 
   const emailInfo = computed(() => {
@@ -57,19 +57,19 @@
 <template>
   <div class="mt-10px border-dot text-16px cursor-pointer flex items-center">
     <div class="flex items-center">
-      <SvgIcon :name="alertTypes[alertType].icon" :size="20" class="!align-middle" />
+      <SvgIcon :name="alertTypeEnums[alertTypeEnum].icon" :size="20" class="!align-middle" />
       <span class="pl-10px">
-        {{ alertTypes[alertType].name }}
+        {{ alertTypeEnums[alertTypeEnum].name }}
       </span>
     </div>
   </div>
   <Descriptions size="small" :column="1" class="pl-15px mt-10px">
-    <template v-if="alertType === '1'">
+    <template v-if="alertTypeEnum === '1'">
       <DescriptionsItem :label="t('setting.alarm.alertEmail')">
         <span class="text-blue-500">{{ emailInfo.contacts || '' }}</span>
       </DescriptionsItem>
     </template>
-    <template v-else-if="alertType === '2'">
+    <template v-else-if="alertTypeEnum === '2'">
       <DescriptionsItem :label="t('setting.alarm.dingTalkUser')">
         {{ dingTalk.contacts || '' }}
       </DescriptionsItem>
@@ -79,12 +79,12 @@
         </Tag>
       </DescriptionsItem>
     </template>
-    <template v-else-if="alertType === '4'">
+    <template v-else-if="alertTypeEnum === '4'">
       <DescriptionsItem :label="t('setting.alarm.weChattoken')">
         {{ desensitization(weChat.token || '') }}
       </DescriptionsItem>
     </template>
-    <template v-else-if="alertType === '16'">
+    <template v-else-if="alertTypeEnum === '16'">
       <DescriptionsItem :label="t('setting.alarm.larkIsAtAll')">
         <Tag :color="lark.isAtAll ? 'green' : 'red'" class="!leading-20px">
           {{ lark.isAtAll }}

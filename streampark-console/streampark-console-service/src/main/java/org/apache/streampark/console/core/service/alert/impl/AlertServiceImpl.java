@@ -22,7 +22,7 @@ import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.AlertConfig;
-import org.apache.streampark.console.core.enums.AlertType;
+import org.apache.streampark.console.core.enums.AlertTypeEnum;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
@@ -52,18 +52,18 @@ public class AlertServiceImpl implements AlertService {
     AlertConfig alertConfig = alertConfigService.getById(alertConfigId);
     try {
       AlertConfigParams params = AlertConfigParams.of(alertConfig);
-      List<AlertType> alertTypes = AlertType.decode(params.getAlertType());
-      if (CollectionUtils.isEmpty(alertTypes)) {
+      List<AlertTypeEnum> alertTypeEnums = AlertTypeEnum.decode(params.getAlertType());
+      if (CollectionUtils.isEmpty(alertTypeEnums)) {
         return true;
       }
       // No use thread pool, ensure that the alarm can be sent successfully
       Tuple2<Boolean, AlertException> reduce =
-          alertTypes.stream()
+          alertTypeEnums.stream()
               .map(
-                  alertType -> {
+                  alertTypeEnum -> {
                     try {
                       boolean alertRes =
-                          SpringContextUtils.getBean(alertType.getClazz())
+                          SpringContextUtils.getBean(alertTypeEnum.getClazz())
                               .doAlert(params, alertTemplate);
                       return new Tuple2<Boolean, AlertException>(alertRes, null);
                     } catch (AlertException e) {

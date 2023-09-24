@@ -27,7 +27,7 @@ import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.bean.AlertWeComParams;
 import org.apache.streampark.console.core.bean.EmailConfig;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.enums.FlinkAppState;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
 import org.apache.streampark.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
 import org.apache.streampark.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
@@ -169,7 +169,7 @@ class AlertServiceTest {
     application.setCpFailureRateInterval(30);
     application.setCpMaxFailureInterval(5);
 
-    FlinkAppState appState = FlinkAppState.FAILED;
+    FlinkAppStateEnum appState = FlinkAppStateEnum.FAILED;
 
     try {
       AlertTemplate mail = getAlertBaseInfo(application);

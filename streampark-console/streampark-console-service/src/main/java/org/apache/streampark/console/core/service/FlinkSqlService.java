@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
-import org.apache.streampark.console.core.enums.CandidateType;
+import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -32,7 +32,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
   void create(FlinkSql flinkSql);
 
-  void setCandidate(CandidateType candidateType, Long appId, Long sqlId);
+  void setCandidate(CandidateTypeEnum candidateTypeEnum, Long appId, Long sqlId);
 
   FlinkSql getEffective(Long appId, boolean decode);
 
@@ -40,7 +40,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
   List<FlinkSql> history(Application application);
 
-  FlinkSql getCandidate(Long appId, CandidateType type);
+  FlinkSql getCandidate(Long appId, CandidateTypeEnum type);
 
   void toEffective(Long appId, Long sqlId);
 

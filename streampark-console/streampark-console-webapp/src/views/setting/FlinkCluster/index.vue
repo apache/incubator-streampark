@@ -59,7 +59,7 @@
   const clusters = ref<FlinkCluster[]>([]);
   const loading = ref(false);
   function handleIsStart(item) {
-    return item.clusterState === ClusterStateEnum.RUNNING;
+    return item.clusterStateEnum === ClusterStateEnum.RUNNING;
   }
 
   /* Go to edit cluster */
@@ -158,7 +158,7 @@
           </ListItemMeta>
           <div class="list-content" style="width: 10%">
             <div class="list-content-item">
-              <span>{{ t('setting.flinkCluster.form.executionMode') }}</span>
+              <span>{{ t('setting.flinkCluster.form.executionModeEnum') }}</span>
               <p style="margin-top: 10px">
                 {{ item.executionModeEnum.toLowerCase() }}
               </p>
@@ -168,8 +168,8 @@
             class="list-content"
             style="width: 40%"
             v-if="
-              item.executionMode === ExecModeEnum.REMOTE ||
-              item.executionMode === ExecModeEnum.YARN_SESSION
+              item.executionModeEnum === ExecModeEnum.REMOTE ||
+              item.executionModeEnum === ExecModeEnum.YARN_SESSION
             "
           >
             <div class="list-content-item">
@@ -185,14 +185,14 @@
             class="list-content"
             style="width: 10%"
             v-if="
-              item.executionMode === ExecModeEnum.REMOTE ||
-              item.executionMode === ExecModeEnum.YARN_SESSION
+              item.executionModeEnum === ExecModeEnum.REMOTE ||
+              item.executionModeEnum === ExecModeEnum.YARN_SESSION
             "
           >
             <div class="list-content-item">
               <span>{{ t('setting.flinkCluster.form.runState') }}</span>
               <p style="margin-top: 10px">
-                <State :data="{ clusterState: item.clusterState }" />
+                <State :data="{ clusterStateEnum: item.clusterStateEnum }" />
               </p>
             </div>
           </div>
@@ -212,7 +212,7 @@
             <template v-if="handleIsStart(item)">
               <Tooltip :title="t('setting.flinkCluster.stop')">
                 <a-button
-                  :disabled="item.executionMode === ExecModeEnum.REMOTE"
+                  :disabled="item.executionModeEnum === ExecModeEnum.REMOTE"
                   v-auth="'cluster:create'"
                   @click="handleShutdownCluster(item)"
                   shape="circle"
@@ -227,7 +227,7 @@
             <template v-else>
               <Tooltip :title="t('setting.flinkCluster.start')">
                 <a-button
-                  :disabled="item.executionMode === ExecModeEnum.REMOTE"
+                  :disabled="item.executionModeEnum === ExecModeEnum.REMOTE"
                   v-auth="'cluster:create'"
                   @click="handleDeployCluster(item)"
                   shape="circle"

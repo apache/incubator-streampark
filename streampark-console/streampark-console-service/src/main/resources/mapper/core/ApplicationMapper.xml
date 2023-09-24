@@ -37,7 +37,7 @@
         <result column="app_type" jdbcType="INTEGER" property="appType"/>
         <result column="job_type" jdbcType="INTEGER" property="jobType"/>
         <result column="resource_from" jdbcType="INTEGER" property="resourceFrom"/>
-        <result column="execution_mode" jdbcType="INTEGER" property="executionMode"/>
+        <result column="execution_mode" jdbcType="INTEGER" property="executionModeEnum"/>
         <result column="tracking" jdbcType="INTEGER" property="tracking"/>
         <result column="jar" jdbcType="VARCHAR" property="jar"/>
         <result column="jar_check_sum" jdbcType="VARCHAR" property="jarCheckSum"/>
@@ -56,14 +56,14 @@
         <result column="restart_count" jdbcType="INTEGER" property="restartCount"/>
         <result column="release" jdbcType="INTEGER" property="release"/>
         <result column="build" jdbcType="BOOLEAN" property="build"/>
-        <result column="resolve_order" jdbcType="INTEGER" property="resolveOrder"/>
+        <result column="resolve_order" jdbcType="INTEGER" property="resolveOrderEnum"/>
         <result column="total_tm" jdbcType="INTEGER" property="totalTM"/>
         <result column="total_slot" jdbcType="INTEGER" property="totalSlot"/>
         <result column="available_slot" jdbcType="INTEGER" property="availableSlot"/>
         <result column="total_task" jdbcType="INTEGER" property="totalTask"/>
         <result column="jm_memory" jdbcType="INTEGER" property="jmMemory"/>
         <result column="tm_memory" jdbcType="INTEGER" property="tmMemory"/>
-        <result column="option_state" jdbcType="INTEGER" property="optionState"/>
+        <result column="option_state" jdbcType="INTEGER" property="optionStateEnum"/>
         <result column="alert_id" jdbcType="BIGINT" property="alertId"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
@@ -146,8 +146,8 @@
                     #{item}
                 </foreach>
             </if>
-            <if test="application.executionMode != null and application.executionMode != ''">
-                and t.execution_mode = #{application.executionMode}
+            <if test="application.executionModeEnum != null and application.executionModeEnum != ''">
+                and t.execution_mode = #{application.executionModeEnum}
             </if>
             <if test="application.jobName != null and application.jobName != ''">
                 and t.job_name like '%${application.jobName}%'
@@ -193,8 +193,8 @@
             <if test="application.tracking != null">
                 tracking=#{application.tracking},
             </if>
-            <if test="application.optionState != null">
-                option_state=#{application.optionState},
+            <if test="application.optionStateEnum != null">
+                option_state=#{application.optionStateEnum},
             </if>
             <if test="application.startTime != null">
                 start_time=#{application.startTime},
@@ -304,7 +304,7 @@
             select cluster_id, max(create_time) as ct
             from t_flink_app
             where cluster_id is not null
-            and execution_mode = #{executionMode}
+            and execution_mode = #{executionModeEnum}
             group by cluster_id
             order by ct desc
         ) as ci
