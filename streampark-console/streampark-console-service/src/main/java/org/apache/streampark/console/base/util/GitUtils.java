@@ -21,7 +21,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.core.entity.Project;
-import org.apache.streampark.console.core.enums.GitCredential;
+import org.apache.streampark.console.core.enums.GitCredentialEnum;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -83,8 +83,8 @@ public class GitUtils {
   }
 
   private static void setCredentials(TransportCommand<?, ?> transportCommand, Project project) {
-    GitCredential gitCredential = GitCredential.of(project.getGitCredential());
-    switch (gitCredential) {
+    GitCredentialEnum gitCredentialEnum = GitCredentialEnum.of(project.getGitCredential());
+    switch (gitCredentialEnum) {
       case HTTPS:
         if (!StringUtils.isAllBlank(project.getUserName(), project.getPassword())) {
           UsernamePasswordCredentialsProvider credentialsProvider =

@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
@@ -34,11 +34,11 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.enums.CandidateType;
+import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
-import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.OptionState;
-import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.OptionStateEnum;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -57,7 +57,7 @@ import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
-import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
+import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -220,12 +220,12 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
     if (CommonUtils.notEmpty(appParam.getStateArray())) {
       if (Arrays.stream(appParam.getStateArray())
-          .anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
+          .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
         Integer[] newArray =
             CommonUtils.arrayInsertIndex(
                 appParam.getStateArray(),
                 appParam.getStateArray().length,
-                FlinkAppState.POS_TERMINATED.getValue());
+                FlinkAppStateEnum.POS_TERMINATED.getValue());
         appParam.setStateArray(newArray);
       }
     }
@@ -234,7 +234,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     long now = System.currentTimeMillis();
 
     List<Long> appIds = records.stream().map(Application::getId).collect(Collectors.toList());
-    Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
+    Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
 
     List<Application> newRecords =
         records.stream()
@@ -260,12 +260,12 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                       new AppControl()
                           .setAllowBuild(
                               record.getBuildStatus() == null
-                                  || !PipelineStatus.running
+                                  || !PipelineStatusEnum.running
                                       .getCode()
                                       .equals(record.getBuildStatus()))
                           .setAllowStart(
                               !record.shouldTracking()
-                                  && PipelineStatus.success
+                                  && PipelineStatusEnum.success
                                       .getCode()
                                       .equals(record.getBuildStatus()))
                           .setAllowStop(record.isRunning());
@@ -292,9 +292,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
     appParam.setUserId(commonService.getUserId());
-    appParam.setState(FlinkAppState.ADDED.getValue());
-    appParam.setRelease(ReleaseState.NEED_RELEASE.get());
-    appParam.setOptionState(OptionState.NONE.getValue());
+    appParam.setState(FlinkAppStateEnum.ADDED.getValue());
+    appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
+    appParam.setOptionState(OptionStateEnum.NONE.getValue());
     appParam.setCreateTime(new Date());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
 
@@ -319,7 +319,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (shouldHandleK8sName(appParam)) {
-      switch (appParam.getExecutionModeEnum()) {
+      switch (appParam.getFlinkExecutionMode()) {
         case KUBERNETES_NATIVE_APPLICATION:
           appParam.setK8sName(appParam.getClusterId());
           break;
@@ -345,7 +345,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   private boolean shouldHandleK8sName(Application app) {
-    return K8sFlinkConfig.isV2Enabled() && ExecutionMode.isKubernetesMode(app.getExecutionMode());
+    return K8sFlinkConfig.isV2Enabled()
+        && FlinkExecutionMode.isKubernetesMode(app.getExecutionMode());
   }
 
   private boolean existsByJobName(String jobName) {
@@ -369,7 +370,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     newApp.setJobName(jobName);
     newApp.setClusterId(
-        ExecutionMode.isSessionMode(oldApp.getExecutionModeEnum())
+        FlinkExecutionMode.isSessionMode(oldApp.getFlinkExecutionMode())
             ? oldApp.getClusterId()
             : jobName);
     newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : oldApp.getArgs());
@@ -400,9 +401,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     newApp.setProjectId(oldApp.getProjectId());
     newApp.setModule(oldApp.getModule());
     newApp.setUserId(commonService.getUserId());
-    newApp.setState(FlinkAppState.ADDED.getValue());
-    newApp.setRelease(ReleaseState.NEED_RELEASE.get());
-    newApp.setOptionState(OptionState.NONE.getValue());
+    newApp.setState(FlinkAppStateEnum.ADDED.getValue());
+    newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
+    newApp.setOptionState(OptionStateEnum.NONE.getValue());
     newApp.setCreateTime(new Date());
     newApp.setHotParams(oldApp.getHotParams());
 
@@ -449,7 +450,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         success,
         String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
 
-    application.setRelease(ReleaseState.NEED_RELEASE.get());
+    application.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
 
     // 1) jar job jar file changed
     if (application.isUploadJob()) {
@@ -472,7 +473,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     // 2) k8s podTemplate changed.
-    if (application.getBuild() && ExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
+    if (application.getBuild()
+        && FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
       if (ObjectUtils.trimNoEquals(
               application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
           || ObjectUtils.trimNoEquals(
@@ -497,8 +499,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     // 4) yarn application mode change
     if (!application.getBuild()) {
       if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
-        if (ExecutionMode.YARN_APPLICATION == appParam.getExecutionModeEnum()
-            || ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()) {
+        if (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
+            || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
           application.setBuild(true);
         }
       }
@@ -533,7 +535,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
     application.setTags(appParam.getTags());
 
-    switch (appParam.getExecutionModeEnum()) {
+    switch (appParam.getFlinkExecutionMode()) {
       case YARN_APPLICATION:
       case YARN_PER_JOB:
       case KUBERNETES_NATIVE_APPLICATION:
@@ -549,7 +551,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (shouldHandleK8sName(appParam)) {
-      switch (appParam.getExecutionModeEnum()) {
+      switch (appParam.getFlinkExecutionMode()) {
         case KUBERNETES_NATIVE_APPLICATION:
           application.setK8sName(appParam.getClusterId());
           break;
@@ -590,7 +592,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   private void updateFlinkSqlJob(Application application, Application appParam) {
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
     if (effectiveFlinkSql == null) {
-      effectiveFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+      effectiveFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
       flinkSqlService.removeById(effectiveFlinkSql.getId());
       FlinkSql sql = new FlinkSql(appParam);
       flinkSqlService.create(sql);
@@ -613,7 +615,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       // if has been changed
       if (changeTypeEnum.hasChanged()) {
         // check if there is a candidate version for the newly added record
-        FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+        FlinkSql newFlinkSql =
+            flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
         // If the candidate version of the new record exists, it will be deleted directly,
         // and only one candidate version will be retained. If the new candidate version is not
         // effective,
@@ -624,7 +627,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
           flinkSqlService.removeById(newFlinkSql.getId());
         }
         FlinkSql historyFlinkSql =
-            flinkSqlService.getCandidate(application.getId(), CandidateType.HISTORY);
+            flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
         // remove candidate flags that already exist but are set as candidates
         if (historyFlinkSql != null) {
           flinkSqlService.cleanCandidate(historyFlinkSql.getId());
@@ -639,9 +642,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
         if (versionChanged) {
           // sql and dependency not changed, but version changed, means that rollback to the version
-          CandidateType type = CandidateType.HISTORY;
+          CandidateTypeEnum type = CandidateTypeEnum.HISTORY;
           flinkSqlService.setCandidate(type, appParam.getId(), appParam.getSqlId());
-          application.setRelease(ReleaseState.NEED_ROLLBACK.get());
+          application.setRelease(ReleaseStateEnum.NEED_ROLLBACK.get());
           application.setBuild(true);
         }
       }
@@ -674,15 +677,15 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public List<Application> getByTeamIdAndExecutionModes(
-      Long teamId, @Nonnull Collection<ExecutionMode> executionModes) {
+      Long teamId, @Nonnull Collection<FlinkExecutionMode> executionModeEnums) {
     return getBaseMapper()
         .selectList(
             new LambdaQueryWrapper<Application>()
                 .eq((SFunction<Application, Long>) Application::getTeamId, teamId)
                 .in(
                     Application::getExecutionMode,
-                    executionModes.stream()
-                        .map(ExecutionMode::getMode)
+                    executionModeEnums.stream()
+                        .map(FlinkExecutionMode::getMode)
                         .collect(Collectors.toSet())));
   }
 
@@ -697,16 +700,17 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
       updateWrapper.eq(Application::getId, appParam.getId());
       if (appParam.isRunning()) {
-        updateWrapper.set(Application::getRelease, ReleaseState.NEED_RESTART.get());
+        updateWrapper.set(Application::getRelease, ReleaseStateEnum.NEED_RESTART.get());
       } else {
-        updateWrapper.set(Application::getRelease, ReleaseState.DONE.get());
-        updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
+        updateWrapper.set(Application::getRelease, ReleaseStateEnum.DONE.get());
+        updateWrapper.set(Application::getOptionState, OptionStateEnum.NONE.getValue());
       }
       this.update(updateWrapper);
 
       // backup
       if (appParam.isFlinkSqlJob()) {
-        FlinkSql newFlinkSql = flinkSqlService.getCandidate(appParam.getId(), CandidateType.NEW);
+        FlinkSql newFlinkSql =
+            flinkSqlService.getCandidate(appParam.getId(), CandidateTypeEnum.NEW);
         if (!appParam.isNeedRollback() && newFlinkSql != null) {
           backUpService.backup(appParam, newFlinkSql);
         }
@@ -724,7 +728,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public void clean(Application appParam) {
-    appParam.setRelease(ReleaseState.DONE.get());
+    appParam.setRelease(ReleaseStateEnum.DONE.get());
     this.updateRelease(appParam);
   }
 
@@ -739,7 +743,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     if (application.isFlinkSqlJob()) {
       FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
       if (flinkSql == null) {
-        flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+        flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
         flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
       }
       flinkSql.setToApplication(application);
@@ -777,7 +781,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
    */
   @VisibleForTesting
   public boolean validateQueueIfNeeded(Application appParam) {
-    yarnQueueService.checkQueueLabel(appParam.getExecutionModeEnum(), appParam.getYarnQueue());
+    yarnQueueService.checkQueueLabel(appParam.getFlinkExecutionMode(), appParam.getYarnQueue());
     if (!isYarnNotDefaultQueue(appParam)) {
       return true;
     }
@@ -793,13 +797,13 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
    */
   @VisibleForTesting
   public boolean validateQueueIfNeeded(Application oldApp, Application newApp) {
-    yarnQueueService.checkQueueLabel(newApp.getExecutionModeEnum(), newApp.getYarnQueue());
+    yarnQueueService.checkQueueLabel(newApp.getFlinkExecutionMode(), newApp.getYarnQueue());
     if (!isYarnNotDefaultQueue(newApp)) {
       return true;
     }
 
     oldApp.setYarnQueueByHotParams();
-    if (ExecutionMode.isYarnPerJobOrAppMode(newApp.getExecutionModeEnum())
+    if (FlinkExecutionMode.isYarnPerJobOrAppMode(newApp.getFlinkExecutionMode())
         && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
       return true;
     }
@@ -815,7 +819,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
    *     (empty or default), return true, false else.
    */
   private boolean isYarnNotDefaultQueue(Application application) {
-    return ExecutionMode.isYarnPerJobOrAppMode(application.getExecutionModeEnum())
+    return FlinkExecutionMode.isYarnPerJobOrAppMode(application.getFlinkExecutionMode())
         && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
   }
 }

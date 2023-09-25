@@ -22,7 +22,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.entity.Project;
-import org.apache.streampark.console.core.enums.GitAuthorizedError;
+import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 import org.apache.streampark.console.core.service.ProjectService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -120,7 +120,7 @@ public class ProjectController {
   @Operation(summary = "Authenticate git project")
   @PostMapping("gitcheck")
   public RestResponse gitCheck(Project project) {
-    GitAuthorizedError error = project.gitCheck();
+    GitAuthorizedErrorEnum error = project.gitCheck();
     return RestResponse.success().data(error.getType());
   }
 

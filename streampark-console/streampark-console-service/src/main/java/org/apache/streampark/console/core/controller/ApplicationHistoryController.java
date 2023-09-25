@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 
@@ -65,7 +65,7 @@ public class ApplicationHistoryController {
   @RequiresPermissions("app:create")
   public RestResponse listSessionClusterId(int executionMode) {
     List<String> clusterIds;
-    switch (ExecutionMode.of(executionMode)) {
+    switch (FlinkExecutionMode.of(executionMode)) {
       case KUBERNETES_NATIVE_SESSION:
       case YARN_SESSION:
       case REMOTE:

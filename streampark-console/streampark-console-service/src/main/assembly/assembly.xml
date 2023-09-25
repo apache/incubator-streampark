@@ -21,7 +21,7 @@
         <format>tar.gz</format>
     </formats>
     <includeBaseDirectory>true</includeBaseDirectory>
-    <baseDirectory>apache-streampark_${scala.binary.version}-${project.version}-incubating-bin</baseDirectory>
+    <baseDirectory>apache-streampark-${project.version}-incubating-bin</baseDirectory>
 
     <dependencySets>
         <dependencySet>

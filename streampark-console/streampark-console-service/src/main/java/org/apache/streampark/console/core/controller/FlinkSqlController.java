@@ -68,7 +68,7 @@ public class FlinkSqlController {
           RestResponse.success()
               .data(false)
               .message(exception)
-              .put("type", flinkSqlValidationResult.failedType().getValue())
+              .put("type", flinkSqlValidationResult.failedType().getFailedType())
               .put("start", flinkSqlValidationResult.lineStart())
               .put("end", flinkSqlValidationResult.lineEnd());
 

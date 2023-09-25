@@ -18,15 +18,15 @@
 package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.enums.FlinkAppState;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobStateEnum;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 import scala.Enumeration;
 
-import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
+import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.Bridge.toK8sFlinkJobState;
 
 /**
  * Flink K8s Tracking Monitor Wrapper.
@@ -99,8 +99,8 @@ public class FlinkK8sWatcherWrapper {
     final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
     queryWrapper
         .eq(Application::getTracking, 1)
-        .ne(Application::getState, FlinkAppState.LOST.getValue())
-        .in(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
+        .ne(Application::getState, FlinkAppStateEnum.LOST.getValue())
+        .in(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
 
     List<Application> k8sApplication = applicationManageService.list(queryWrapper);
     if (CollectionUtils.isEmpty(k8sApplication)) {
@@ -116,7 +116,7 @@ public class FlinkK8sWatcherWrapper {
     }
     // filter out the application that should be tracking
     return k8sApplication.stream()
-        .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getStateEnum())))
+        .filter(app -> !FlinkJobStateEnum.isEndState(toK8sFlinkJobState(app.getStateEnum())))
         .map(Bridge::toTrackId)
         .collect(Collectors.toList());
   }
@@ -126,15 +126,15 @@ public class FlinkK8sWatcherWrapper {
 
     // covert Application to TrackId
     public static TrackId toTrackId(@Nonnull Application app) {
-      Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
-      if (FlinkK8sExecuteMode.APPLICATION() == mode) {
+      Enumeration.Value mode = FlinkK8sExecuteModeEnum.of(app.getFlinkExecutionMode());
+      if (FlinkK8sExecuteModeEnum.APPLICATION() == mode) {
         return TrackId.onApplication(
             app.getK8sNamespace(),
             app.getClusterId(),
             app.getId(),
             app.getJobId(),
             app.getTeamId().toString());
-      } else if (FlinkK8sExecuteMode.SESSION() == mode) {
+      } else if (FlinkK8sExecuteModeEnum.SESSION() == mode) {
         return TrackId.onSession(
             app.getK8sNamespace(),
             app.getClusterId(),
@@ -153,6 +153,6 @@ public class FlinkK8sWatcherWrapper {
     if (application == null) {
       return false;
     }
-    return ExecutionMode.isKubernetesMode(application.getExecutionMode());
+    return FlinkExecutionMode.isKubernetesMode(application.getExecutionMode());
   }
 }

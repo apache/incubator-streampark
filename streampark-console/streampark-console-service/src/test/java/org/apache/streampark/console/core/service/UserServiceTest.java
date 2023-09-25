@@ -21,9 +21,9 @@ import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.enums.EngineType;
-import org.apache.streampark.console.core.enums.ResourceType;
-import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
+import org.apache.streampark.console.core.enums.ResourceTypeEnum;
+import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.entity.User;
@@ -52,7 +52,7 @@ class UserServiceTest extends SpringUnitTestBase {
     user.setUsername("test");
     user.setNickName("test");
     user.setPassword("test");
-    user.setUserType(UserType.USER);
+    user.setUserType(UserTypeEnum.USER);
     user.setStatus(User.STATUS_VALID);
     userService.createUser(user);
     // lock user
@@ -74,8 +74,8 @@ class UserServiceTest extends SpringUnitTestBase {
 
     Resource resource = new Resource();
     resource.setResourceName("test");
-    resource.setResourceType(ResourceType.FLINK_APP);
-    resource.setEngineType(EngineType.FLINK);
+    resource.setResourceType(ResourceTypeEnum.FLINK_APP);
+    resource.setEngineType(EngineTypeEnum.FLINK);
     resource.setTeamId(1L);
     resource.setCreatorId(user.getUserId());
     resourceService.save(resource);
@@ -95,14 +95,14 @@ class UserServiceTest extends SpringUnitTestBase {
     user.setUsername("test");
     user.setNickName("test");
     user.setPassword("test");
-    user.setUserType(UserType.USER);
+    user.setUserType(UserTypeEnum.USER);
     user.setStatus(User.STATUS_VALID);
     userService.save(user);
 
     Resource resource = new Resource();
     resource.setResourceName("test");
-    resource.setResourceType(ResourceType.FLINK_APP);
-    resource.setEngineType(EngineType.FLINK);
+    resource.setResourceType(ResourceTypeEnum.FLINK_APP);
+    resource.setEngineType(EngineTypeEnum.FLINK);
     resource.setTeamId(1L);
     resource.setCreatorId(user.getUserId());
     resourceService.save(resource);
@@ -116,7 +116,7 @@ class UserServiceTest extends SpringUnitTestBase {
     targetUser.setUsername("test0");
     targetUser.setNickName("test0");
     targetUser.setPassword("test0");
-    targetUser.setUserType(UserType.USER);
+    targetUser.setUserType(UserTypeEnum.USER);
     targetUser.setStatus(User.STATUS_VALID);
     userService.save(targetUser);
 

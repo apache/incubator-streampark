@@ -36,13 +36,13 @@ private[flink] object FlinkStreamingInitializer {
 
   def initialize(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit)
       : (ParameterTool, StreamExecutionEnvironment) = {
-    val flinkInitializer = new FlinkStreamingInitializer(args, ApiType.scala)
+    val flinkInitializer = new FlinkStreamingInitializer(args, ApiType.SCALA)
     flinkInitializer.streamEnvConfFunc = config
     (flinkInitializer.configuration.parameter, flinkInitializer.streamEnv)
   }
 
   def initialize(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
-    val flinkInitializer = new FlinkStreamingInitializer(args.args, ApiType.java)
+    val flinkInitializer = new FlinkStreamingInitializer(args.args, ApiType.JAVA)
     flinkInitializer.javaStreamEnvConfFunc = args.conf
     (flinkInitializer.configuration.parameter, flinkInitializer.streamEnv)
   }
@@ -66,9 +66,9 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       JavaStreamEnv.getExecutionEnvironment(configuration.envConfig))
 
     apiType match {
-      case ApiType.java if javaStreamEnvConfFunc != null =>
+      case ApiType.JAVA if javaStreamEnvConfFunc != null =>
         javaStreamEnvConfFunc.configuration(env.getJavaEnv, configuration.parameter)
-      case ApiType.scala if streamEnvConfFunc != null =>
+      case ApiType.SCALA if streamEnvConfFunc != null =>
         streamEnvConfFunc(env, configuration.parameter)
       case _ =>
     }

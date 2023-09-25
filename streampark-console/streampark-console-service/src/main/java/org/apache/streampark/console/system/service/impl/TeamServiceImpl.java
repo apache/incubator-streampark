@@ -19,7 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.VariableService;
@@ -143,7 +143,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             .orElseThrow(
                 () -> new ApiAlertException(String.format("The userId [%s] not found.", userId)));
     // Admin has the permission for all teams.
-    if (UserType.ADMIN == user.getUserType()) {
+    if (UserTypeEnum.ADMIN == user.getUserType()) {
       return this.list();
     }
     return baseMapper.findUserTeams(userId);

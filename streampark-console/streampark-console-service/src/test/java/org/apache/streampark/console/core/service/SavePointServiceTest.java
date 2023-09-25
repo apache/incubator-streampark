@@ -18,16 +18,16 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.DevelopmentMode;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.Effective;
 import org.apache.streampark.console.core.entity.FlinkEnv;
-import org.apache.streampark.console.core.enums.ConfigFileType;
-import org.apache.streampark.console.core.enums.EffectiveType;
+import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.SavePointServiceImpl;
 
@@ -97,14 +97,14 @@ class SavePointServiceTest extends SpringUnitTestBase {
     app.setAppType(ApplicationType.APACHE_FLINK.getType());
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
     app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
-    app.setJobType(DevelopmentMode.CUSTOM_CODE.getValue());
+    app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
 
     // Test for (StreamPark job Or FlinkSQL job) without application config.
     app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
     app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
-    app.setJobType(DevelopmentMode.CUSTOM_CODE.getValue());
+    app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
 
     // Test for (StreamPark job Or FlinkSQL job) with application config just disabled checkpoint.
@@ -112,7 +112,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     appCfg.setId(appCfgId);
     appCfg.setAppId(appId);
     appCfg.setContent("state.savepoints.dir=hdfs:///test");
-    appCfg.setFormat(ConfigFileType.PROPERTIES.getValue());
+    appCfg.setFormat(ConfigFileTypeEnum.PROPERTIES.getValue());
     configService.save(appCfg);
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
 
@@ -133,7 +133,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     Effective effective = new Effective();
     effective.setTargetId(appCfg.getId());
     effective.setAppId(appId);
-    effective.setTargetType(EffectiveType.CONFIG.getType());
+    effective.setTargetType(EffectiveTypeEnum.CONFIG.getType());
     effectiveService.save(effective);
     assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app))
         .isEqualTo("hdfs:///test");
@@ -149,7 +149,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     application.setId(appId);
     application.setTeamId(teamId);
     application.setVersionId(idOfFlinkEnv);
-    application.setExecutionMode(ExecutionMode.YARN_APPLICATION.getMode());
+    application.setExecutionMode(FlinkExecutionMode.YARN_APPLICATION.getMode());
     applicationManageService.save(application);
 
     FlinkEnv flinkEnv = new FlinkEnv();
@@ -169,7 +169,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     Long clusterId = 1L;
 
     // Test for it without cluster.
-    application.setExecutionMode(ExecutionMode.REMOTE.getMode());
+    application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
     application.setFlinkClusterId(clusterId);
     assertThatThrownBy(() -> savePointServiceImpl.getSavepointFromDeployLayer(application))
         .isInstanceOf(NullPointerException.class);

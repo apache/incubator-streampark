@@ -31,7 +31,7 @@ import scala.util.{Failure, Success, Try}
 trait BuildPipelineProcess {
 
   /** the type of pipeline */
-  def pipeType: PipelineType
+  def pipeType: PipelineTypeEnum
 
   /**
    * the actual build process. the effective steps progress should be implemented in multiple
@@ -48,13 +48,13 @@ trait BuildPipelineProcess {
 trait BuildPipelineExpose {
 
   /** get current state of the pipeline instance */
-  def getPipeStatus: PipelineStatus
+  def getPipeStatus: PipelineStatusEnum
 
   /** get error of pipeline instance */
   def getError: PipeError
 
   /** get all of the steps status StepSeq -> (PipeStepStatus -> status update timestamp) */
-  def getStepsStatus: Map[Int, (PipelineStepStatus, Long)]
+  def getStepsStatus: Map[Int, (PipelineStepStatusEnum, Long)]
 
   /** get current build step index */
   def getCurStep: Int
@@ -71,16 +71,16 @@ trait BuildPipelineExpose {
 /** Building pipeline trait. */
 trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with Logger {
 
-  protected var pipeStatus: PipelineStatus = PipelineStatus.pending
+  protected var pipeStatus: PipelineStatusEnum = PipelineStatusEnum.pending
 
   protected var error: PipeError = PipeError.empty()
 
   protected var curStep: Int = 0
 
-  protected val stepsStatus: mutable.Map[Int, (PipelineStepStatus, Long)] =
+  protected val stepsStatus: mutable.Map[Int, (PipelineStepStatusEnum, Long)] =
     mutable.Map(
       pipeType.getSteps.asScala
-        .map(e => e._1.toInt -> (PipelineStepStatus.waiting -> System.currentTimeMillis))
+        .map(e => e._1.toInt -> (PipelineStepStatusEnum.waiting -> System.currentTimeMillis))
         .toSeq: _*)
 
   /** use to identify the log record that belongs to which pipeline instance */
@@ -96,19 +96,19 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
   protected def execStep[R](seq: Int)(process: => R): Option[R] = {
     Try {
       curStep = seq
-      stepsStatus(seq) = PipelineStepStatus.running -> System.currentTimeMillis
+      stepsStatus(seq) = PipelineStepStatusEnum.running -> System.currentTimeMillis
       logInfo(s"building pipeline step[$seq/$allSteps] running => ${pipeType.getSteps.get(seq)}")
       watcher.onStepStateChange(snapshot)
       process
     } match {
       case Success(result) =>
-        stepsStatus(seq) = PipelineStepStatus.success -> System.currentTimeMillis
+        stepsStatus(seq) = PipelineStepStatusEnum.success -> System.currentTimeMillis
         logInfo(s"building pipeline step[$seq/$allSteps] success")
         watcher.onStepStateChange(snapshot)
         Some(result)
       case Failure(cause) =>
-        stepsStatus(seq) = PipelineStepStatus.failure -> System.currentTimeMillis
-        pipeStatus = PipelineStatus.failure
+        stepsStatus(seq) = PipelineStepStatusEnum.failure -> System.currentTimeMillis
+        pipeStatus = PipelineStatusEnum.failure
         error = PipeError.of(cause.getMessage, cause)
         logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")
         watcher.onStepStateChange(snapshot)
@@ -118,14 +118,14 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   protected def skipStep(step: Int): Unit = {
     curStep = step
-    stepsStatus(step) = PipelineStepStatus.skipped -> System.currentTimeMillis
+    stepsStatus(step) = PipelineStepStatusEnum.skipped -> System.currentTimeMillis
     logInfo(s"building pipeline step[$step/$allSteps] skipped => ${pipeType.getSteps.get(step)}")
     watcher.onStepStateChange(snapshot)
   }
 
   /** Launch the building pipeline. */
   override def launch(): BuildResult = {
-    pipeStatus = PipelineStatus.running
+    pipeStatus = PipelineStatusEnum.running
     Try {
       watcher.onStart(snapshot)
       logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
@@ -136,12 +136,12 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
         .get(20, TimeUnit.MINUTES)
     } match {
       case Success(result) =>
-        pipeStatus = PipelineStatus.success
+        pipeStatus = PipelineStatusEnum.success
         logInfo(s"building pipeline has finished successfully.")
         watcher.onFinish(snapshot, result)
         result
       case Failure(cause) =>
-        pipeStatus = PipelineStatus.failure
+        pipeStatus = PipelineStatusEnum.failure
         error = PipeError.of(cause.getMessage, cause)
         // log and print error trace stack
         logError(s"building pipeline has failed.", cause)
@@ -151,11 +151,11 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     }
   }
 
-  override def getPipeStatus: PipelineStatus = pipeStatus
+  override def getPipeStatus: PipelineStatusEnum = pipeStatus
 
   override def getError: PipeError = error.copy()
 
-  override def getStepsStatus: Map[Int, (PipelineStepStatus, Long)] = stepsStatus.toMap
+  override def getStepsStatus: Map[Int, (PipelineStepStatusEnum, Long)] = stepsStatus.toMap
 
   override def getCurStep: Int = curStep
 

@@ -22,24 +22,24 @@ import java.util.Objects;
 
 /** Condition of result query. */
 public class ResultQueryCondition implements Serializable {
-  public FetchOrientation orientation;
+  public FetchOrientationEnum orientation;
 
   public long token;
   public int maxRows;
 
   public ResultQueryCondition() {}
 
-  public ResultQueryCondition(FetchOrientation orientation, long token, int maxRows) {
+  public ResultQueryCondition(FetchOrientationEnum orientation, long token, int maxRows) {
     this.orientation = orientation;
     this.token = token;
     this.maxRows = maxRows;
   }
 
-  public FetchOrientation getOrientation() {
+  public FetchOrientationEnum getOrientation() {
     return orientation;
   }
 
-  public void setOrientation(FetchOrientation orientation) {
+  public void setOrientation(FetchOrientationEnum orientation) {
     this.orientation = orientation;
   }
 

@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
@@ -36,6 +36,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -121,8 +122,8 @@ public class FlinkCluster implements Serializable {
     return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
   }
 
-  public ExecutionMode getExecutionModeEnum() {
-    return ExecutionMode.of(this.executionMode);
+  public FlinkExecutionMode getFlinkExecutionModeEnum() {
+    return FlinkExecutionMode.of(this.executionMode);
   }
 
   public ClusterState getClusterStateEnum() {
@@ -136,7 +137,7 @@ public class FlinkCluster implements Serializable {
       return Collections.emptyMap();
     }
     Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
-    if (ExecutionMode.YARN_SESSION == getExecutionModeEnum()) {
+    if (FlinkExecutionMode.YARN_SESSION == getFlinkExecutionModeEnum()) {
       map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
       map.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
     }
@@ -185,5 +186,17 @@ public class FlinkCluster implements Serializable {
       map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
     }
     return map;
+  }
+
+  public static class SFunc {
+    public static final SFunction<FlinkCluster, Long> ID = FlinkCluster::getId;
+    public static final SFunction<FlinkCluster, String> ADDRESS = FlinkCluster::getAddress;
+    public static final SFunction<FlinkCluster, String> JOB_MANAGER_URL =
+        FlinkCluster::getJobManagerUrl;
+    public static final SFunction<FlinkCluster, Integer> CLUSTER_STATE =
+        FlinkCluster::getClusterState;
+    public static final SFunction<FlinkCluster, Integer> EXECUTION_MODE =
+        FlinkCluster::getExecutionMode;
+    public static final SFunction<FlinkCluster, String> EXCEPTION = FlinkCluster::getException;
   }
 }

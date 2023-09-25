@@ -442,6 +442,13 @@
             <artifactId>log4j-over-slf4j</artifactId>
         </dependency>
 
+        <!--tika -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>1.20</version>
+        </dependency>
+
         <!-- logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>

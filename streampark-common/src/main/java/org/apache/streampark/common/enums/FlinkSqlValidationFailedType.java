@@ -18,33 +18,38 @@
 package org.apache.streampark.common.enums;
 
 public enum FlinkSqlValidationFailedType {
+
   /** Basic test failed (such as null, etc.) */
   VERIFY_FAILED(1),
+
   /** syntax error */
   SYNTAX_ERROR(2),
+
   /** unsupported dialect */
   UNSUPPORTED_DIALECT(3),
+
   /** unsupported sql command */
   UNSUPPORTED_SQL(4),
+
   /** Not at the end of ";" */
   ENDS_WITH(5);
 
-  private final int value;
+  private final int failedType;
 
-  FlinkSqlValidationFailedType(int value) {
-    this.value = value;
+  FlinkSqlValidationFailedType(int failedType) {
+    this.failedType = failedType;
   }
 
   public static FlinkSqlValidationFailedType of(Integer value) {
     for (FlinkSqlValidationFailedType type : values()) {
-      if (type.value == value) {
+      if (type.failedType == value) {
         return type;
       }
     }
     return null;
   }
 
-  public int getValue() {
-    return value;
+  public int getFailedType() {
+    return failedType;
   }
 }

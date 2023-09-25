@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.task
 import org.apache.streampark.console.core.entity.{Application, FlinkCluster}
 import org.apache.streampark.console.core.service.FlinkClusterService
 import org.apache.streampark.console.core.service.application.ApplicationInfoService
-import org.apache.streampark.console.core.utils.MybatisScalaExt.LambdaUpdateOps
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
@@ -46,7 +45,7 @@ trait FlinkK8sObserverBrokerSidecar {
   // Update Application record by appId into persistent storage.
   protected def safeUpdateApplicationRecord(appId: Long)(update: LambdaUpdateWrapper[Application]): UIO[Unit] = {
     ZIO
-      .attemptBlocking(applicationInfoService.update(null, update.typedEq(_.getId, appId)))
+      .attemptBlocking(applicationInfoService.update(null, update.eq(Application.SFunc.ID, appId)))
       .retryN(2)
       .tapError(err => logError(s"Fail to update Application record: ${err.getMessage}"))
       .ignore
@@ -63,7 +62,7 @@ trait FlinkK8sObserverBrokerSidecar {
   // Update FlinkCluster record by id into persistent storage.
   protected def safeUpdateFlinkClusterRecord(id: Long)(update: LambdaUpdateWrapper[FlinkCluster]): UIO[Unit] = {
     ZIO
-      .attemptBlocking(flinkClusterService.update(null, update.typedEq(_.getId, id)))
+      .attemptBlocking(flinkClusterService.update(null, update.eq(FlinkCluster.SFunc.ID, id)))
       .retryN(3)
       .tapError(err => logError(s"Fail to update FlinkCluster record: ${err.getMessage}"))
       .ignore

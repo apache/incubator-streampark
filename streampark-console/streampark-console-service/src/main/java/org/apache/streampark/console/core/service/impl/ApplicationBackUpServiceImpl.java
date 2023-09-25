@@ -26,8 +26,8 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
-import org.apache.streampark.console.core.enums.EffectiveType;
-import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ApplicationBackUpMapper;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
@@ -103,11 +103,12 @@ public class ApplicationBackUpServiceImpl
       // rollback to back up config
       configService.setLatestOrEffective(true, bakParam.getId(), bakParam.getAppId());
     } else {
-      effectiveService.saveOrUpdate(bakParam.getAppId(), EffectiveType.CONFIG, bakParam.getId());
+      effectiveService.saveOrUpdate(
+          bakParam.getAppId(), EffectiveTypeEnum.CONFIG, bakParam.getId());
       // if flink sql task, will be rollback sql and dependencies
       if (application.isFlinkSqlJob()) {
         effectiveService.saveOrUpdate(
-            bakParam.getAppId(), EffectiveType.FLINKSQL, bakParam.getSqlId());
+            bakParam.getAppId(), EffectiveTypeEnum.FLINKSQL, bakParam.getSqlId());
       }
     }
 
@@ -123,7 +124,7 @@ public class ApplicationBackUpServiceImpl
         new UpdateWrapper<Application>()
             .lambda()
             .eq(Application::getId, application.getId())
-            .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
+            .set(Application::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
   }
 
   @Override
@@ -165,29 +166,16 @@ public class ApplicationBackUpServiceImpl
 
   @Override
   public void rollbackFlinkSql(Application appParam, FlinkSql flinkSqlParam) {
-    ApplicationBackUp backUp = getFlinkSqlBackup(appParam.getId(), flinkSqlParam.getId());
+    LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
+        new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, appParam.getId())
+            .eq(ApplicationBackUp::getSqlId, flinkSqlParam.getId());
+    ApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
     ApiAlertException.throwIfNull(
         backUp, "Application backup can't be null. Rollback flink sql failed.");
     // rollback config and sql
-    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
-    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-  }
-
-  @Override
-  public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
-    LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-        new LambdaQueryWrapper<ApplicationBackUp>()
-            .eq(ApplicationBackUp::getAppId, appId)
-            .eq(ApplicationBackUp::getSqlId, sqlId);
-    return baseMapper.selectCount(queryWrapper) > 0;
-  }
-
-  private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
-    LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-        new LambdaQueryWrapper<ApplicationBackUp>()
-            .eq(ApplicationBackUp::getAppId, appId)
-            .eq(ApplicationBackUp::getSqlId, sqlId);
-    return baseMapper.selectOne(queryWrapper);
+    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.CONFIG, backUp.getId());
+    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.FLINKSQL, backUp.getSqlId());
   }
 
   @Override

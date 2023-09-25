@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
-import org.apache.streampark.common.enums.DevelopmentMode
+import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.common.util.ThreadUtils
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
@@ -42,7 +42,7 @@ import scala.language.postfixOps
 class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
   extends BuildPipeline {
 
-  override def pipeType: PipelineType = PipelineType.FLINK_NATIVE_K8S_APPLICATION
+  override def pipeType: PipelineTypeEnum = PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION
 
   private var dockerProcessWatcher: DockerProgressWatcher = new SilentDockerProgressWatcher
 
@@ -91,8 +91,8 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       execStep(3) {
         val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
         val extJarLibs = request.developmentMode match {
-          case DevelopmentMode.FLINK_SQL => request.dependencyInfo.extJarLibs
-          case DevelopmentMode.CUSTOM_CODE => Set[String]()
+          case FlinkDevelopmentMode.FLINK_SQL => request.dependencyInfo.extJarLibs
+          case FlinkDevelopmentMode.CUSTOM_CODE => Set[String]()
         }
         val shadedJar =
           MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)

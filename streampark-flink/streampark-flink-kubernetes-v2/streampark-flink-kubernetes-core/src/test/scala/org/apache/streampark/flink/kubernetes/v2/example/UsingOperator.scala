@@ -95,6 +95,27 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
     } yield ()
   }
 
+  "Deploy a simple Flink application job with flinkConfiguration to Kubernetes" in unsafeRun {
+    val spec = FlinkDeploymentDef(
+      name = "basic-appjob",
+      namespace = "fdev",
+      image = "flink:1.16",
+      flinkVersion = FlinkVersion.V1_16,
+      flinkConfiguration = Map("taskmanager.numberOfTaskSlots" -> "2"),
+      jobManager = JobManagerDef(cpu = 1, memory = "1024m", "2G"),
+      taskManager = TaskManagerDef(cpu = 1, memory = "1024m", "2G"),
+      job = JobDef(
+        jarURI = "local:///opt/flink/examples/streaming/StateMachineExample.jar",
+        parallelism = 1
+      )
+    )
+    for {
+      _ <- FlinkK8sOperator.deployApplicationJob(114514, spec)
+      // subscribe job status
+      _ <- FlinkK8sObserver.evaluatedJobSnaps.flatSubscribeValues().debugPretty.runDrain
+    } yield ()
+  }
+
   "Deploy an application mode job with additional jar resources such as third-party dependencies pr udf" in unsafeRun {
     val spec = FlinkDeploymentDef(
       name = "appjob-with-extra-jar",
