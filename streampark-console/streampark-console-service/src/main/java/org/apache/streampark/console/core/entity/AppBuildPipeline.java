@@ -23,9 +23,9 @@ import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.PipeError;
 import org.apache.streampark.flink.packer.pipeline.PipeSnapshot;
-import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
-import org.apache.streampark.flink.packer.pipeline.PipelineStepStatus;
-import org.apache.streampark.flink.packer.pipeline.PipelineType;
+import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
+import org.apache.streampark.flink.packer.pipeline.PipelineStepStatusEnum;
+import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -96,37 +96,37 @@ public class AppBuildPipeline {
 
   @Nonnull
   @JsonIgnore
-  public PipelineType getPipeType() {
-    return PipelineType.of(pipeTypeCode);
+  public PipelineTypeEnum getPipeType() {
+    return PipelineTypeEnum.of(pipeTypeCode);
   }
 
   @JsonIgnore
-  public AppBuildPipeline setPipeType(@Nonnull PipelineType pipeType) {
+  public AppBuildPipeline setPipeType(@Nonnull PipelineTypeEnum pipeType) {
     this.pipeTypeCode = pipeType.getCode();
     return this;
   }
 
   @Nonnull
   @JsonIgnore
-  public PipelineStatus getPipelineStatus() {
-    return PipelineStatus.of(pipeStatusCode);
+  public PipelineStatusEnum getPipelineStatus() {
+    return PipelineStatusEnum.of(pipeStatusCode);
   }
 
   @JsonIgnore
-  public AppBuildPipeline setPipeStatus(@Nonnull PipelineStatus pipeStatus) {
+  public AppBuildPipeline setPipeStatus(@Nonnull PipelineStatusEnum pipeStatus) {
     this.pipeStatusCode = pipeStatus.getCode();
     return this;
   }
 
   @Nonnull
   @JsonIgnore
-  public Map<Integer, PipelineStepStatus> getStepStatus() {
+  public Map<Integer, PipelineStepStatusEnum> getStepStatus() {
     if (StringUtils.isBlank(stepStatusJson)) {
       return Collections.emptyMap();
     }
     try {
       return JacksonUtils.read(
-          stepStatusJson, new TypeReference<HashMap<Integer, PipelineStepStatus>>() {});
+          stepStatusJson, new TypeReference<HashMap<Integer, PipelineStepStatusEnum>>() {});
     } catch (JsonProcessingException e) {
       log.error(
           "json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
@@ -135,7 +135,7 @@ public class AppBuildPipeline {
   }
 
   @JsonIgnore
-  public AppBuildPipeline setStepStatus(@Nonnull Map<Integer, PipelineStepStatus> stepStatus) {
+  public AppBuildPipeline setStepStatus(@Nonnull Map<Integer, PipelineStepStatusEnum> stepStatus) {
     try {
       this.stepStatusJson = JacksonUtils.write(stepStatus);
     } catch (JsonProcessingException e) {
@@ -235,7 +235,7 @@ public class AppBuildPipeline {
   @Nullable
   @JsonIgnore
   public <R extends BuildResult> R getBuildResult() {
-    PipelineType pipeType = getPipeType();
+    PipelineTypeEnum pipeType = getPipeType();
     if (pipeType.isUnknown() || buildResultJson == null) {
       return null;
     }
@@ -292,7 +292,7 @@ public class AppBuildPipeline {
     public static View of(@Nonnull AppBuildPipeline pipe) {
       // combine step info
       Map<Integer, String> stepDesc = pipe.getPipeType().getSteps();
-      Map<Integer, PipelineStepStatus> stepStatus = pipe.getStepStatus();
+      Map<Integer, PipelineStepStatusEnum> stepStatus = pipe.getStepStatus();
       Map<Integer, Long> stepTs = pipe.getStepStatusTimestamp();
       List<Step> steps = new ArrayList<>(stepDesc.size());
       for (int i = 1; i <= pipe.getPipeType().getSteps().size(); i++) {
@@ -300,7 +300,7 @@ public class AppBuildPipeline {
             new Step()
                 .setSeq(i)
                 .setDesc(stepDesc.getOrDefault(i, "unknown step"))
-                .setStatus(stepStatus.getOrDefault(i, PipelineStepStatus.unknown).getCode());
+                .setStatus(stepStatus.getOrDefault(i, PipelineStepStatusEnum.unknown).getCode());
         Long st = stepTs.get(i);
         if (st != null) {
           step.setTs(new Date(st));

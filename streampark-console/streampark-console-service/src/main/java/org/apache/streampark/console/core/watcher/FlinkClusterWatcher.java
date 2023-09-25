@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.watcher;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -101,7 +101,7 @@ public class FlinkClusterWatcher {
             new LambdaQueryWrapper<FlinkCluster>()
                 .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getState())
                 // excluding flink clusters on kubernetes
-                .notIn(FlinkCluster::getExecutionMode, ExecutionMode.getKubernetesMode()));
+                .notIn(FlinkCluster::getExecutionMode, FlinkExecutionMode.getKubernetesMode()));
     flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
   }
 
@@ -196,7 +196,7 @@ public class FlinkClusterWatcher {
    * @return
    */
   private ClusterState httpClusterState(FlinkCluster flinkCluster) {
-    switch (flinkCluster.getExecutionModeEnum()) {
+    switch (flinkCluster.getFlinkExecutionModeEnum()) {
       case REMOTE:
         return httpRemoteClusterState(flinkCluster);
       case YARN_SESSION:
@@ -265,7 +265,7 @@ public class FlinkClusterWatcher {
    * @param flinkCluster
    */
   public static void addWatching(FlinkCluster flinkCluster) {
-    if (!ExecutionMode.isKubernetesMode(flinkCluster.getExecutionModeEnum())
+    if (!FlinkExecutionMode.isKubernetesMode(flinkCluster.getFlinkExecutionModeEnum())
         && !WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
       log.info("add the cluster with id:{} to watcher cluster cache", flinkCluster.getId());
       WATCHER_CLUSTERS.put(flinkCluster.getId(), flinkCluster);
@@ -298,7 +298,7 @@ public class FlinkClusterWatcher {
    * @return <code>false</code> if the connection of the cluster is invalid, <code>true</code> else.
    */
   public Boolean verifyClusterConnection(FlinkCluster flinkCluster) {
-    ClusterState clusterState = httpClusterState(flinkCluster);
-    return ClusterState.isRunning(clusterState);
+    ClusterState clusterStateEnum = httpClusterState(flinkCluster);
+    return ClusterState.isRunning(clusterStateEnum);
   }
 }

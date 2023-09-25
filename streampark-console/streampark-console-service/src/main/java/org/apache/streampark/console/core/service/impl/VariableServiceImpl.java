@@ -24,7 +24,7 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Variable;
-import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.VariableMapper;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
@@ -142,7 +142,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
               .in(
                   Application::getId,
                   applications.stream().map(Application::getId).collect(Collectors.toList()))
-              .set(Application::getRelease, ReleaseState.NEED_RESTART.get()));
+              .set(Application::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
     }
   }
 

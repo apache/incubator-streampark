@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HadoopConfigUtils;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
@@ -27,7 +27,7 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
 import org.apache.streampark.console.core.service.SqlWorkBenchService;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum;
 import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.factories.FactoryUtil;
@@ -54,10 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import static org.apache.streampark.common.enums.ExecutionMode.KUBERNETES_NATIVE_SESSION;
-import static org.apache.streampark.common.enums.ExecutionMode.REMOTE;
-import static org.apache.streampark.common.enums.ExecutionMode.YARN_SESSION;
 
 @Slf4j
 @Service
@@ -103,13 +99,13 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
     String port = String.valueOf(remoteURI.getPort());
     String clusterId = flinkCluster.getClusterId();
 
-    ExecutionMode executionMode = ExecutionMode.of(flinkCluster.getExecutionMode());
-    if (executionMode == null) {
+    FlinkExecutionMode executionModeEnum = FlinkExecutionMode.of(flinkCluster.getExecutionMode());
+    if (executionModeEnum == null) {
       throw new IllegalArgumentException("executionMode is null");
     }
 
-    streamParkConf.put("execution.target", executionMode.getName());
-    switch (Objects.requireNonNull(executionMode)) {
+    streamParkConf.put("execution.target", executionModeEnum.getName());
+    switch (Objects.requireNonNull(executionModeEnum)) {
       case REMOTE:
         streamParkConf.put("rest.address", host);
         streamParkConf.put("rest.port", port);
@@ -125,7 +121,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
         try (ClusterClient<?> clusterClient =
             (ClusterClient<?>)
                 KubernetesRetriever.newFinkClusterClient(
-                    clusterId, k8sNamespace, FlinkK8sExecuteMode.of(executionMode))) {
+                    clusterId, k8sNamespace, FlinkK8sExecuteModeEnum.of(executionModeEnum))) {
           restAddress = IngressController.ingressUrlAddress(k8sNamespace, clusterId, clusterClient);
         } catch (Exception e) {
           throw new IllegalArgumentException("get k8s rest address error", e);
@@ -137,7 +133,7 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
         streamParkConf.put("rest.address", restAddress);
         break;
       default:
-        throw new IllegalArgumentException("Unsupported execution mode: " + executionMode);
+        throw new IllegalArgumentException("Unsupported execution mode: " + executionModeEnum);
     }
 
     return sqlGateWayService.openSession(

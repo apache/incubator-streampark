@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.watcher;
 import org.apache.streampark.console.core.bean.AlertProbeMsg;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.enums.FlinkAppState;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
@@ -39,7 +39,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.core.enums.FlinkAppState.LOST;
+import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.LOST;
 import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
 import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
@@ -95,7 +95,7 @@ public class FlinkAppLostWatcher {
     isProbing.set(true);
     probeApplication =
         probeApplication.stream()
-            .filter(application -> FlinkAppState.isLost(application.getState()))
+            .filter(application -> FlinkAppStateEnum.isLost(application.getState()))
             .collect(Collectors.toList());
     updateState(probeApplication);
     probeApplication.stream().forEach(this::monitorApplication);
@@ -103,10 +103,10 @@ public class FlinkAppLostWatcher {
 
   private void updateState(List<Application> applications) {
     applications.stream()
-        .filter(application -> FlinkAppState.isLost(application.getState()))
+        .filter(application -> FlinkAppStateEnum.isLost(application.getState()))
         .forEach(
             application -> {
-              application.setState(FlinkAppState.PROBING.getValue());
+              application.setState(FlinkAppStateEnum.PROBING.getValue());
               application.setProbing(true);
             });
     applicationManageService.updateBatchById(applications);

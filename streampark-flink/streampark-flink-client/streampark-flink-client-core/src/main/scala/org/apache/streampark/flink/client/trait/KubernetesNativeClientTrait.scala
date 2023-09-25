@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
+import org.apache.streampark.common.enums.{FlinkExecutionMode, FlinkK8sRestExposedType}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
@@ -48,7 +48,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
         covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType.get))
 
     if (submitRequest.buildResult != null) {
-      if (submitRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+      if (submitRequest.executionMode == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
         val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
         buildResult.podTemplatePaths.foreach(
           p => {

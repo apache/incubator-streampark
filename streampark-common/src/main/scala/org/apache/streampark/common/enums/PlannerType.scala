@@ -18,5 +18,5 @@ package org.apache.streampark.common.enums
 
 object PlannerType extends Enumeration {
   type PlannerType = Value
-  val blink, old, any = Value
+  val BLINK, OLD, ANY = Value
 }

@@ -18,5 +18,5 @@ package org.apache.streampark.common.enums
 
 object TableMode extends Enumeration {
   type TableMode = Value
-  val batch, streaming = Value
+  val BATCH, STREAMING = Value
 }

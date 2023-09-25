@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.bean
 
 import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
-import org.apache.streampark.common.enums.ExecutionMode
+import org.apache.streampark.common.enums.FlinkExecutionMode
 
 import javax.annotation.Nullable
 
@@ -28,7 +28,7 @@ trait SavepointRequestTrait {
 
   val flinkVersion: FlinkVersion
 
-  val executionMode: ExecutionMode
+  val executionMode: FlinkExecutionMode
 
   val clusterId: String
 

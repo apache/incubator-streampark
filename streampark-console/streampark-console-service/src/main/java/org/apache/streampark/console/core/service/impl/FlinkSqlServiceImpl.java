@@ -26,8 +26,8 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
-import org.apache.streampark.console.core.enums.CandidateType;
-import org.apache.streampark.console.core.enums.EffectiveType;
+import org.apache.streampark.console.core.enums.CandidateTypeEnum;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.mapper.FlinkSqlMapper;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.EffectiveService;
@@ -102,20 +102,20 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     String sql = DeflaterUtils.zipString(flinkSql.getSql());
     flinkSql.setSql(sql);
     this.save(flinkSql);
-    this.setCandidate(CandidateType.NEW, flinkSql.getAppId(), flinkSql.getId());
+    this.setCandidate(CandidateTypeEnum.NEW, flinkSql.getAppId(), flinkSql.getId());
   }
 
   @Override
-  public void setCandidate(CandidateType candidateType, Long appId, Long sqlId) {
+  public void setCandidate(CandidateTypeEnum candidateTypeEnum, Long appId, Long sqlId) {
     this.update(
         new LambdaUpdateWrapper<FlinkSql>()
             .eq(FlinkSql::getAppId, appId)
-            .set(FlinkSql::getCandidate, CandidateType.NONE.get()));
+            .set(FlinkSql::getCandidate, CandidateTypeEnum.NONE.get()));
 
     this.update(
         new LambdaUpdateWrapper<FlinkSql>()
             .eq(FlinkSql::getId, sqlId)
-            .set(FlinkSql::getCandidate, candidateType.get()));
+            .set(FlinkSql::getCandidate, candidateTypeEnum.get()));
   }
 
   @Override
@@ -139,20 +139,20 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  public FlinkSql getCandidate(Long appId, CandidateType candidateType) {
+  public FlinkSql getCandidate(Long appId, CandidateTypeEnum candidateTypeEnum) {
     LambdaQueryWrapper<FlinkSql> queryWrapper =
         new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
-    if (candidateType == null) {
-      queryWrapper.gt(FlinkSql::getCandidate, CandidateType.NONE.get());
+    if (candidateTypeEnum == null) {
+      queryWrapper.gt(FlinkSql::getCandidate, CandidateTypeEnum.NONE.get());
     } else {
-      queryWrapper.eq(FlinkSql::getCandidate, candidateType.get());
+      queryWrapper.eq(FlinkSql::getCandidate, candidateTypeEnum.get());
     }
     return baseMapper.selectOne(queryWrapper);
   }
 
   @Override
   public void toEffective(Long appId, Long sqlId) {
-    effectiveService.saveOrUpdate(appId, EffectiveType.FLINKSQL, sqlId);
+    effectiveService.saveOrUpdate(appId, EffectiveTypeEnum.FLINKSQL, sqlId);
   }
 
   @Override
@@ -160,7 +160,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     this.update(
         new LambdaUpdateWrapper<FlinkSql>()
             .eq(FlinkSql::getId, id)
-            .set(FlinkSql::getCandidate, CandidateType.NONE.get()));
+            .set(FlinkSql::getCandidate, CandidateTypeEnum.NONE.get()));
   }
 
   @Override
@@ -173,7 +173,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
   public void rollback(Application application) {
-    FlinkSql sql = getCandidate(application.getId(), CandidateType.HISTORY);
+    FlinkSql sql = getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
     Utils.notNull(sql);
     try {
       // check and backup current job

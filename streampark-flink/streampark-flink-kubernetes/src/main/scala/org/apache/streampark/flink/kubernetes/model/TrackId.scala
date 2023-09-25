@@ -19,13 +19,13 @@ package org.apache.streampark.flink.kubernetes.model
 
 import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
 
 import scala.util.Try
 
 /** tracking identifier for flink on kubernetes */
 case class TrackId(
-    executeMode: FlinkK8sExecuteMode.Value,
+    executeMode: FlinkK8sExecuteModeEnum.Value,
     namespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
     clusterId: String,
     appId: Long,
@@ -34,9 +34,9 @@ case class TrackId(
 
   def isLegal: Boolean = {
     executeMode match {
-      case FlinkK8sExecuteMode.APPLICATION =>
+      case FlinkK8sExecuteModeEnum.APPLICATION =>
         Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
-      case FlinkK8sExecuteMode.SESSION =>
+      case FlinkK8sExecuteModeEnum.SESSION =>
         Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false) && Try(
           jobId.nonEmpty).getOrElse(false)
       case _ => false
@@ -74,7 +74,7 @@ object TrackId {
       appId: Long,
       jobId: String,
       groupId: String): TrackId = {
-    this(FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId, groupId)
+    this(FlinkK8sExecuteModeEnum.SESSION, namespace, clusterId, appId, jobId, groupId)
   }
 
   def onApplication(
@@ -83,6 +83,6 @@ object TrackId {
       appId: Long,
       jobId: String = null,
       groupId: String): TrackId = {
-    this(FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId, groupId)
+    this(FlinkK8sExecuteModeEnum.APPLICATION, namespace, clusterId, appId, jobId, groupId)
   }
 }

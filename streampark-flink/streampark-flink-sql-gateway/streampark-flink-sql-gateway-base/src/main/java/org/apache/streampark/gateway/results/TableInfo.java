@@ -23,19 +23,19 @@ import java.util.Objects;
 /** Information of the table or view. */
 public class TableInfo implements Serializable {
   private final ObjectIdentifier identifier;
-  private final TableKind tableKind;
+  private final TableKindEnum tableKindEnum;
 
-  public TableInfo(ObjectIdentifier identifier, TableKind tableKind) {
+  public TableInfo(ObjectIdentifier identifier, TableKindEnum tableKindEnum) {
     this.identifier = identifier;
-    this.tableKind = tableKind;
+    this.tableKindEnum = tableKindEnum;
   }
 
   public ObjectIdentifier getIdentifier() {
     return identifier;
   }
 
-  public TableKind getTableKind() {
-    return tableKind;
+  public TableKindEnum getTableKind() {
+    return tableKindEnum;
   }
 
   @Override
@@ -47,16 +47,17 @@ public class TableInfo implements Serializable {
       return false;
     }
     TableInfo tableInfo = (TableInfo) o;
-    return Objects.equals(identifier, tableInfo.identifier) && tableKind == tableInfo.tableKind;
+    return Objects.equals(identifier, tableInfo.identifier)
+        && tableKindEnum == tableInfo.tableKindEnum;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(identifier, tableKind);
+    return Objects.hash(identifier, tableKindEnum);
   }
 
   @Override
   public String toString() {
-    return "TableInfo{" + "identifier=" + identifier + ", tableKind=" + tableKind + '}';
+    return "TableInfo{" + "identifier=" + identifier + ", tableKind=" + tableKindEnum + '}';
   }
 }
