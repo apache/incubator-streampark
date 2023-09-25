@@ -32,48 +32,52 @@ import java.util.LinkedHashMap;
 @Configuration
 public class ShiroConfig {
 
+  private static final String ANON = "anon";
+
+  private static final String JWT = "jwt";
+
   @Bean
   public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
     ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
     shiroFilterFactoryBean.setSecurityManager(securityManager);
 
     LinkedHashMap<String, Filter> filters = new LinkedHashMap<>();
-    filters.put("jwt", new JWTFilter());
+    filters.put(JWT, new JWTFilter());
     shiroFilterFactoryBean.setFilters(filters);
 
     LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
-    filterChainDefinitionMap.put("/actuator/**", "anon");
+    filterChainDefinitionMap.put("/actuator/**", ANON);
 
-    filterChainDefinitionMap.put("/doc.html", "anon");
-    filterChainDefinitionMap.put("/swagger-ui.html", "anon");
-    filterChainDefinitionMap.put("/swagger-ui/**", "anon");
-    filterChainDefinitionMap.put("/swagger-resources/**", "anon");
-    filterChainDefinitionMap.put("/v3/api-docs/**", "anon");
-    filterChainDefinitionMap.put("/webjars/**", "anon");
+    filterChainDefinitionMap.put("/doc.html", ANON);
+    filterChainDefinitionMap.put("/swagger-ui.html", ANON);
+    filterChainDefinitionMap.put("/swagger-ui/**", ANON);
+    filterChainDefinitionMap.put("/swagger-resources/**", ANON);
+    filterChainDefinitionMap.put("/v3/api-docs/**", ANON);
+    filterChainDefinitionMap.put("/webjars/**", ANON);
 
-    filterChainDefinitionMap.put("/passport/**", "anon");
-    filterChainDefinitionMap.put("/systemName", "anon");
-    filterChainDefinitionMap.put("/member/teams", "anon");
-    filterChainDefinitionMap.put("/user/check/**", "anon");
-    filterChainDefinitionMap.put("/user/initTeam", "anon");
-    filterChainDefinitionMap.put("/websocket/**", "anon");
-    filterChainDefinitionMap.put("/metrics/**", "anon");
+    filterChainDefinitionMap.put("/passport/**", ANON);
+    filterChainDefinitionMap.put("/systemName", ANON);
+    filterChainDefinitionMap.put("/member/teams", ANON);
+    filterChainDefinitionMap.put("/user/check/**", ANON);
+    filterChainDefinitionMap.put("/user/initTeam", ANON);
+    filterChainDefinitionMap.put("/websocket/**", ANON);
+    filterChainDefinitionMap.put("/metrics/**", ANON);
 
-    filterChainDefinitionMap.put("/index.html", "anon");
-    filterChainDefinitionMap.put("/assets/**", "anon");
-    filterChainDefinitionMap.put("/resource/**/**", "anon");
-    filterChainDefinitionMap.put("/css/**", "anon");
-    filterChainDefinitionMap.put("/fonts/**", "anon");
-    filterChainDefinitionMap.put("/img/**", "anon");
-    filterChainDefinitionMap.put("/js/**", "anon");
-    filterChainDefinitionMap.put("/loading/**", "anon");
-    filterChainDefinitionMap.put("/*.js", "anon");
-    filterChainDefinitionMap.put("/*.png", "anon");
-    filterChainDefinitionMap.put("/*.jpg", "anon");
-    filterChainDefinitionMap.put("/*.less", "anon");
-    filterChainDefinitionMap.put("/*.ico", "anon");
-    filterChainDefinitionMap.put("/", "anon");
-    filterChainDefinitionMap.put("/**", "jwt");
+    filterChainDefinitionMap.put("/index.html", ANON);
+    filterChainDefinitionMap.put("/assets/**", ANON);
+    filterChainDefinitionMap.put("/resource/**/**", ANON);
+    filterChainDefinitionMap.put("/css/**", ANON);
+    filterChainDefinitionMap.put("/fonts/**", ANON);
+    filterChainDefinitionMap.put("/img/**", ANON);
+    filterChainDefinitionMap.put("/js/**", ANON);
+    filterChainDefinitionMap.put("/loading/**", ANON);
+    filterChainDefinitionMap.put("/*.js", ANON);
+    filterChainDefinitionMap.put("/*.png", ANON);
+    filterChainDefinitionMap.put("/*.jpg", ANON);
+    filterChainDefinitionMap.put("/*.less", ANON);
+    filterChainDefinitionMap.put("/*.ico", ANON);
+    filterChainDefinitionMap.put("/", ANON);
+    filterChainDefinitionMap.put("/**", JWT);
 
     shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 
