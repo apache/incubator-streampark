@@ -53,9 +53,9 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
-import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
@@ -89,8 +89,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
+import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
+import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service

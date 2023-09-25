@@ -60,7 +60,7 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;

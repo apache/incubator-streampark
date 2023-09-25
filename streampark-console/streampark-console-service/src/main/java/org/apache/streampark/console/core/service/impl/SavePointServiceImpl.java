@@ -44,7 +44,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
