@@ -84,10 +84,6 @@ object FlinkClientEndpoint {
         if (K8sFlinkConfig.isV2Enabled) KubernetesSessionClientV2.shutdown(request)
         else KubernetesNativeSessionClient.shutdown(request)
       }
-      case KUBERNETES_NATIVE_APPLICATION => {
-        case K8sFlinkConfig.isV2Enabled => KubernetesApplicationClientV2.shutdown(request)
-        case _ =>
-      }
       case _ =>
         throw new UnsupportedOperationException(
           s"Unsupported ${request.executionMode} shutdown cluster ")
