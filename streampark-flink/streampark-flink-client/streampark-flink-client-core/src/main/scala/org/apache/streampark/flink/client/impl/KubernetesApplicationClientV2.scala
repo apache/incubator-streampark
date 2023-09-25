@@ -24,13 +24,13 @@ import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, JobManagerDef, TaskManagerDef}
 import org.apache.streampark.flink.kubernetes.v2.operator.FlinkK8sOperator
 import org.apache.streampark.flink.packer.pipeline.K8sAppModeBuildResponse
-
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 import org.apache.flink.v1beta1.FlinkDeploymentSpec.FlinkVersion
+import org.apache.streampark.flink.client.impl.KubernetesSessionClientV2.{logError, logInfo}
 
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.mapAsScalaMapConverter
@@ -239,6 +239,23 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
         extJarPaths = Array.empty,
         ingress = ingress
       ))
+  }
+
+  @throws[Throwable]
+  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
+    val name = shutDownRequest.clusterId
+    val namespace = shutDownRequest.kubernetesDeployParam.kubernetesNamespace
+
+    def richMsg: String => String = s"[flink-shutdown][clusterId=$name][namespace=$namespace] " + _
+
+    FlinkK8sOperator.k8sCrOpr.deleteSessionJob(namespace, name).runIOAsTry match {
+      case Success(_) =>
+        logInfo(richMsg("Shutdown Flink Applicaition successfully."))
+        ShutDownResponse()
+      case Failure(err) =>
+        logError(richMsg(s"Fail to shutdown Flink Application"), err)
+        throw err
+    }
   }
 
 }
