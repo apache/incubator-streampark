@@ -85,8 +85,8 @@ object FlinkClientEndpoint {
         else KubernetesNativeSessionClient.shutdown(request)
       }
       case KUBERNETES_NATIVE_APPLICATION => {
-        if (K8sFlinkConfig.isV2Enabled) KubernetesApplicationClientV2.shutdown(request)
-        else _
+        case K8sFlinkConfig.isV2Enabled => KubernetesApplicationClientV2.shutdown(request)
+        case _ =>
       }
       case _ =>
         throw new UnsupportedOperationException(

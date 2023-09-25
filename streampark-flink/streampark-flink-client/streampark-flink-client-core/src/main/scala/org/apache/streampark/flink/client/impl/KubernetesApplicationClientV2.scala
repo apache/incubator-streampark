@@ -249,7 +249,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
 
     def richMsg: String => String = s"[flink-shutdown][clusterId=$name][namespace=$namespace] " + _
 
-    FlinkK8sOperator.k8sCrOpr.deleteSessionJob(namespace, name).runIOAsTry match {
+    FlinkK8sOperator.k8sCrOpr.deleteDeployment(namespace, name).runIOAsTry match {
       case Success(_) =>
         logInfo(richMsg("Shutdown Flink Applicaition successfully."))
         ShutDownResponse()
