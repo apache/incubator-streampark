@@ -42,6 +42,10 @@ public class JWTUtil {
   private static final Algorithm algorithm =
       Algorithm.HMAC256(RandomStringUtils.randomAlphanumeric(256));
 
+  private static final String USER_NAME = "userName";
+
+  private static final String USER_ID = "userId";
+
   /**
    * verify token
    *
@@ -50,7 +54,7 @@ public class JWTUtil {
    */
   public static boolean verify(String token, String username) {
     try {
-      JWTVerifier verifier = JWT.require(algorithm).withClaim("userName", username).build();
+      JWTVerifier verifier = JWT.require(algorithm).withClaim(USER_NAME, username).build();
       verifier.verify(token);
       return true;
     } catch (TokenExpiredException e) {
@@ -65,7 +69,7 @@ public class JWTUtil {
   public static String getUserName(String token) {
     try {
       DecodedJWT jwt = JWT.decode(token);
-      return jwt.getClaim("userName").asString();
+      return jwt.getClaim(USER_NAME).asString();
     } catch (JWTDecodeException e) {
       log.error("error：{}", e.getMessage());
       return null;
@@ -75,7 +79,7 @@ public class JWTUtil {
   public static Long getUserId(String token) {
     try {
       DecodedJWT jwt = JWT.decode(token);
-      return jwt.getClaim("userId").asLong();
+      return jwt.getClaim(USER_ID).asLong();
     } catch (JWTDecodeException e) {
       log.error("error：{}", e.getMessage());
       return null;
@@ -105,8 +109,8 @@ public class JWTUtil {
     try {
       Date date = new Date(expireTime);
       return JWT.create()
-          .withClaim("userId", userId)
-          .withClaim("userName", userName)
+          .withClaim(USER_ID, userId)
+          .withClaim(USER_NAME, userName)
           .withExpiresAt(date)
           .sign(algorithm);
     } catch (Exception e) {
