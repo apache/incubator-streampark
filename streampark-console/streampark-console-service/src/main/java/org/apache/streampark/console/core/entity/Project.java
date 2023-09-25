@@ -118,7 +118,7 @@ public class Project implements Serializable {
     if (sourcePath.isFile()) {
       throw new IllegalArgumentException("[StreamPark] sourcePath must be directory");
     }
-    String branches =  StringUtils.isBlank(this.getBranches()) ? "main" : this.getBranches();
+    String branches = StringUtils.isBlank(this.getBranches()) ? "main" : this.getBranches();
     String rootName = url.replaceAll(".*/|\\.git|\\.svn", "");
     String fullName = rootName.concat("-").concat(branches);
     String path = String.format("%s/%s/%s", sourcePath.getAbsolutePath(), getName(), fullName);

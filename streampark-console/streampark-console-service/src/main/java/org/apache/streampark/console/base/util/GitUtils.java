@@ -17,12 +17,12 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitCredentialEnum;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jcraft.jsch.JSch;
@@ -69,8 +69,8 @@ public class GitUtils {
     setCredentials(command, project);
     Collection<Ref> refList = command.call();
     List<String> branchList = new ArrayList<>(4);
-    if (CollectionUtils.isEmpty(refList)){
-        return branchList;
+    if (CollectionUtils.isEmpty(refList)) {
+      return branchList;
     }
     for (Ref ref : refList) {
       String refName = ref.getName();
