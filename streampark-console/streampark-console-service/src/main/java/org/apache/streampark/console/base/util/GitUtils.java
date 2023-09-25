@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitCredentialEnum;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jcraft.jsch.JSch;
@@ -54,7 +55,7 @@ public class GitUtils {
     CloneCommand cloneCommand =
         Git.cloneRepository().setURI(project.getUrl()).setDirectory(project.getAppSource());
 
-    if (project.getBranches() != null) {
+    if (StringUtils.isNotBlank(project.getBranches())) {
       cloneCommand.setBranch(Constants.R_HEADS + project.getBranches());
       cloneCommand.setBranchesToClone(
           Collections.singletonList(Constants.R_HEADS + project.getBranches()));
@@ -68,6 +69,9 @@ public class GitUtils {
     setCredentials(command, project);
     Collection<Ref> refList = command.call();
     List<String> branchList = new ArrayList<>(4);
+    if (CollectionUtils.isEmpty(refList)) {
+      return branchList;
+    }
     for (Ref ref : refList) {
       String refName = ref.getName();
       if (refName.startsWith(Constants.R_HEADS)) {
