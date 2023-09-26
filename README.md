@@ -62,11 +62,7 @@
 
 ## 🔨 How to Build
 
-```shell
-git clone git@github.com:apache/incubator-streampark.git
-cd incubator-streampark
-./build.sh
-```
+See how to [Local Development and Debugging]([Local Development and Debugging | Apache StreamPark (incubating)](https://streampark.apache.org/docs/user-guide/local development and debugging/))
 
 ## 🧑‍💻 Downloads
 
