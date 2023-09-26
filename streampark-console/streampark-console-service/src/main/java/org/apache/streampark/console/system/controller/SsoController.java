@@ -65,25 +65,30 @@ public class SsoController {
   @GetMapping("token")
   @ResponseBody
   public RestResponse token() throws Exception {
-    if (!ssoEnable) {
-      throw new ApiAlertException(
-          "Single Sign On (SSO) is not available, please contact the administrator to enable");
-    }
-    // Based on User Profile from Shiro and build Pac4jPrincipal
+
+    // Check SSO enable status
+    ApiAlertException.throwIfFalse(
+        ssoEnable,
+        "Single Sign On (SSO) is not available, please contact the administrator to enable");
+
     Subject subject = SecurityUtils.getSubject();
     PrincipalCollection principals = subject.getPrincipals();
     Pac4jPrincipal principal = principals.oneByType(Pac4jPrincipal.class);
+
     List<CommonProfile> profiles = null;
+
     if (principal != null) {
       profiles = principal.getProfiles();
     }
+
     principal = new Pac4jPrincipal(profiles, principalNameAttribute);
-    if (principal.getName() == null) {
-      log.error("Please configure correct principalNameAttribute from UserProfile: " + principal);
-      throw new ApiAlertException("Please configure the correct Principal Name Attribute");
-    }
+
+    // Check Principal name
+    ApiAlertException.throwIfNull(
+        principal.getName(), "Please configure the correct Principal Name Attribute");
 
     User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
+
     return userService.getLoginUserInfo(user);
   }
 }

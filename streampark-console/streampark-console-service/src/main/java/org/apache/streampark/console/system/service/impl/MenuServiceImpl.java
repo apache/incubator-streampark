@@ -126,7 +126,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  @Transactional(rollbackFor = Exception.class)
   public void createMenu(Menu menu) {
     menu.setCreateTime(new Date());
     setMenu(menu);
@@ -134,7 +133,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  @Transactional(rollbackFor = Exception.class)
   public void updateMenu(Menu menu) throws Exception {
     menu.setModifyTime(new Date());
     setMenu(menu);
@@ -142,7 +140,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  @Transactional(rollbackFor = Exception.class)
   public void deleteMenus(String[] menuIds) throws Exception {
     // Find users associated with these menus/buttons
     this.roleMenuServie.deleteByMenuId(menuIds);

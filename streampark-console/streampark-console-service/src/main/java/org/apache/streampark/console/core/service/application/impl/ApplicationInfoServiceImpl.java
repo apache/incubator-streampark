@@ -322,44 +322,43 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     Application application = getById(id);
     ApiAlertException.throwIfNull(
         application, String.format("The application id=%s can't be found.", id));
-    if (FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode())) {
-      CompletableFuture<String> future =
-          CompletableFuture.supplyAsync(
-              () ->
-                  KubernetesDeploymentHelper.watchDeploymentLog(
-                      application.getK8sNamespace(),
-                      application.getJobName(),
-                      application.getJobId()));
+    ApiAlertException.throwIfFalse(
+        FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode()),
+        "Job executionMode must be kubernetes-session|kubernetes-application.");
 
-      return future
-          .exceptionally(
-              e -> {
-                String errorLog =
-                    String.format(
-                        "%s/%s_err.log",
-                        WebUtils.getAppTempDir().getAbsolutePath(), application.getJobId());
-                File file = new File(errorLog);
-                if (file.exists() && file.isFile()) {
-                  return file.getAbsolutePath();
-                }
-                return null;
-              })
-          .thenApply(
-              path -> {
-                if (!future.isDone()) {
-                  future.cancel(true);
-                }
-                if (org.apache.streampark.common.util.FileUtils.exists(path)) {
-                  return org.apache.streampark.common.util.FileUtils.tailOf(path, offset, limit);
-                }
-                return null;
-              })
-          .toCompletableFuture()
-          .get(5, TimeUnit.SECONDS);
-    } else {
-      throw new ApiAlertException(
-          "Job executionMode must be kubernetes-session|kubernetes-application.");
-    }
+    CompletableFuture<String> future =
+        CompletableFuture.supplyAsync(
+            () ->
+                KubernetesDeploymentHelper.watchDeploymentLog(
+                    application.getK8sNamespace(),
+                    application.getJobName(),
+                    application.getJobId()));
+
+    return future
+        .exceptionally(
+            e -> {
+              String errorLog =
+                  String.format(
+                      "%s/%s_err.log",
+                      WebUtils.getAppTempDir().getAbsolutePath(), application.getJobId());
+              File file = new File(errorLog);
+              if (file.exists() && file.isFile()) {
+                return file.getAbsolutePath();
+              }
+              return null;
+            })
+        .thenApply(
+            path -> {
+              if (!future.isDone()) {
+                future.cancel(true);
+              }
+              if (org.apache.streampark.common.util.FileUtils.exists(path)) {
+                return org.apache.streampark.common.util.FileUtils.tailOf(path, offset, limit);
+              }
+              return null;
+            })
+        .toCompletableFuture()
+        .get(5, TimeUnit.SECONDS);
   }
 
   @Override

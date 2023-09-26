@@ -197,7 +197,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  @Transactional(rollbackFor = Exception.class)
   public Boolean delete(Long id, Application application) throws InternalException {
     SavePoint savePoint = getById(id);
     try {

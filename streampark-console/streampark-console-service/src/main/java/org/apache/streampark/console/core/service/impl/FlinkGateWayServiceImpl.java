@@ -45,9 +45,9 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
 
   private void preHandleGatewayInfo(FlinkGateWay flinkGateWay) {
     // validate gateway name
-    if (existsByGatewayName(flinkGateWay.getGatewayName())) {
-      throw new ApiAlertException("gateway name already exists");
-    }
+    ApiAlertException.throwIfTrue(
+        existsByGatewayName(flinkGateWay.getGatewayName()), "gateway name already exists");
+
     // validate gateway address and set gateway type
     flinkGateWay.setGatewayType(getGatewayVersion(flinkGateWay.getAddress()));
   }
