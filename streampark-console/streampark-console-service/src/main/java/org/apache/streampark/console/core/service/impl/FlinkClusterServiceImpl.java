@@ -421,6 +421,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             flinkCluster.getFlinkExecutionModeEnum(),
             flinkCluster.getProperties(),
             clusterId,
+            flinkCluster.getId(),
             getKubernetesDeployDesc(flinkCluster, "shutdown"));
     Future<ShutDownResponse> future =
         executorService.submit(() -> FlinkClient.shutdown(stopRequest));
