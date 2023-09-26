@@ -62,7 +62,7 @@
 
 ## 🔨 How to Build
 
-See how to [Local Development and Debugging]([Local Development and Debugging | Apache StreamPark (incubating)](https://streampark.apache.org/docs/user-guide/local development and debugging/))
+See how to [Local Development and Debugging](https://streampark.apache.org/docs/user-guide/local development and debugging/)
 
 ## 🧑‍💻 Downloads
 
