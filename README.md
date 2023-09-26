@@ -62,8 +62,7 @@
 
 ## 🔨 How to Build
 
-See how to [Local Development and Debugging](https://streampark.apache.org/docs/user-guide/local development and debugging/)
-
+See how to [Complie and Debug](https://streampark.apache.org/docs/user-guide/local%20development%20and%20debugging)
 ## 🧑‍💻 Downloads
 
 Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)
