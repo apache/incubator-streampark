@@ -95,8 +95,6 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   @Autowired private CommonService commonService;
   @Autowired private FlinkSqlService flinkSqlService;
 
-  public ResourceServiceImpl() {}
-
   @Override
   public IPage<Resource> page(Resource resource, RestRequest restRequest) {
     if (resource.getTeamId() == null) {

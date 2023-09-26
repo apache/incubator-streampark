@@ -154,7 +154,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public Boolean delete(Application appParam) {
 
     Application application = getById(appParam.getId());
@@ -287,7 +286,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @SneakyThrows
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean create(Application appParam) {
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
@@ -357,7 +355,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   @SuppressWarnings("checkstyle:WhitespaceAround")
   @Override
   @SneakyThrows
-  @Transactional(rollbackFor = {Exception.class})
   public Long copy(Application appParam) {
     boolean existsByJobName = this.existsByJobName(appParam.getJobName());
     ApiAlertException.throwIfFalse(
@@ -441,7 +438,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean update(Application appParam) {
     Application application = getById(appParam.getId());
 
