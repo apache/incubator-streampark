@@ -41,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -95,7 +96,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   @Override
   public Member findByUserName(Long teamId, String userName) {
     User user = userService.findByName(userName);
-    if (user == null) {
+    if (Objects.isNull(user)) {
       return null;
     }
     return findByUserId(teamId, user.getUserId());

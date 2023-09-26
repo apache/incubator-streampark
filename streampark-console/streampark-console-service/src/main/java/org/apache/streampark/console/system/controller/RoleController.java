@@ -42,6 +42,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Tag(name = "ROLE_TAG")
@@ -66,7 +67,7 @@ public class RoleController {
   @PostMapping("check/name")
   public RestResponse checkRoleName(@NotBlank(message = "{required}") String roleName) {
     Role result = this.roleService.findByName(roleName);
-    return RestResponse.success(result == null);
+    return RestResponse.success(Objects.isNull(result));
   }
 
   @Operation(summary = "List role menus")

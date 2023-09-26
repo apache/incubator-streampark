@@ -24,6 +24,7 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.UserService;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Controller
@@ -74,11 +76,11 @@ public class SsoController {
     PrincipalCollection principals = subject.getPrincipals();
     Pac4jPrincipal principal = principals.oneByType(Pac4jPrincipal.class);
     List<CommonProfile> profiles = null;
-    if (principal != null) {
+    if (Objects.nonNull(principal)) {
       profiles = principal.getProfiles();
     }
     principal = new Pac4jPrincipal(profiles, principalNameAttribute);
-    if (principal.getName() == null) {
+    if (StringUtils.isBlank(principal.getName())) {
       log.error("Please configure correct principalNameAttribute from UserProfile: " + principal);
       throw new ApiAlertException("Please configure the correct Principal Name Attribute");
     }

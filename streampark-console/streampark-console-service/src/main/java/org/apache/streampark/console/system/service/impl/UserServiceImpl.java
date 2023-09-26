@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -193,7 +194,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public List<User> getNoTokenUser() {
     List<User> users = this.baseMapper.getNoTokenUser();
-    if (!users.isEmpty()) {
+    if (CollectionUtils.isNotEmpty(users)) {
       users.forEach(User::dataMasking);
     }
     return users;
@@ -224,7 +225,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   public void fillInTeam(User user) {
-    if (user.getLastTeamId() == null) {
+    if (Objects.isNull(user.getLastTeamId())) {
       List<Team> teams = memberService.findUserTeams(user.getUserId());
       if (CollectionUtils.isEmpty(teams)) {
         throw new ApiAlertException(
@@ -254,7 +255,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     Map<String, Object> userInfo = new HashMap<>(8);
 
     // 1) token & expire
-    if (token != null) {
+    if (Objects.nonNull(token)) {
       userInfo.put("token", token.getToken());
       userInfo.put("expire", token.getExpireAt());
     }
@@ -279,7 +280,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   public RestResponse getLoginUserInfo(User user) {
-    if (user == null) {
+    if (Objects.isNull(user)) {
       return RestResponse.success().put(RestResponse.CODE_KEY, 0);
     }
 
@@ -290,7 +291,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     fillInTeam(user);
 
     // no team.
-    if (user.getLastTeamId() == null) {
+    if (Objects.isNull(user.getLastTeamId())) {
       return RestResponse.success()
           .data(user.getUserId())
           .put(RestResponse.CODE_KEY, ResponseCode.CODE_FORBIDDEN);
