@@ -18,13 +18,13 @@
 package org.apache.streampark.console.core.bean;
 
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
-import org.apache.streampark.console.core.enums.CheckPointStatus;
-import org.apache.streampark.console.core.enums.FlinkAppState;
+import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 
 import lombok.Data;
 
@@ -57,11 +57,11 @@ public class AlertTemplate implements Serializable {
   private Integer lostJobs;
   private Integer cancelledJobs;
 
-  public static AlertTemplate of(Application application, FlinkAppState appState) {
+  public static AlertTemplate of(Application application, FlinkAppStateEnum appState) {
     return new AlertTemplateBuilder()
         .setDuration(application.getStartTime(), application.getEndTime())
         .setJobName(application.getJobName())
-        .setLink(application.getExecutionModeEnum(), application.getAppId())
+        .setLink(application.getFlinkExecutionMode(), application.getAppId())
         .setStartTime(application.getStartTime())
         .setEndTime(application.getEndTime())
         .setRestart(application.isNeedRestartOnFailed(), application.getRestartCount())
@@ -74,11 +74,11 @@ public class AlertTemplate implements Serializable {
         .build();
   }
 
-  public static AlertTemplate of(Application application, CheckPointStatus checkPointStatus) {
+  public static AlertTemplate of(Application application, CheckPointStatusEnum statusEnum) {
     return new AlertTemplateBuilder()
         .setDuration(application.getStartTime(), application.getEndTime())
         .setJobName(application.getJobName())
-        .setLink(application.getExecutionModeEnum(), application.getAppId())
+        .setLink(application.getFlinkExecutionMode(), application.getAppId())
         .setStartTime(application.getStartTime())
         .setType(2)
         .setCpFailureRateInterval(
@@ -94,7 +94,7 @@ public class AlertTemplate implements Serializable {
     return new AlertTemplateBuilder()
         .setDuration(cluster.getStartTime(), cluster.getEndTime())
         .setJobName(cluster.getClusterName())
-        .setLink(cluster.getExecutionModeEnum(), cluster.getClusterId())
+        .setLink(cluster.getFlinkExecutionModeEnum(), cluster.getClusterId())
         .setStartTime(cluster.getStartTime())
         .setEndTime(cluster.getEndTime())
         .setType(3)
@@ -186,8 +186,8 @@ public class AlertTemplate implements Serializable {
       return this;
     }
 
-    public AlertTemplateBuilder setLink(ExecutionMode mode, String appId) {
-      if (ExecutionMode.isYarnMode(mode)) {
+    public AlertTemplateBuilder setLink(FlinkExecutionMode mode, String appId) {
+      if (FlinkExecutionMode.isYarnMode(mode)) {
         String format = "%s/proxy/%s/";
         String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
         alertTemplate.setLink(url);

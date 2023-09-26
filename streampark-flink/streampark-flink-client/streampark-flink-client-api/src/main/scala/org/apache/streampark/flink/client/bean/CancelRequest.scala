@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.bean
 
 import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
-import org.apache.streampark.common.enums.ExecutionMode
+import org.apache.streampark.common.enums.FlinkExecutionMode
 
 import javax.annotation.Nullable
 
@@ -27,7 +27,7 @@ import java.util.{Map => JavaMap}
 case class CancelRequest(
     id: Long,
     flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
+    executionMode: FlinkExecutionMode,
     @Nullable properties: JavaMap[String, Any],
     clusterId: String,
     jobId: String,

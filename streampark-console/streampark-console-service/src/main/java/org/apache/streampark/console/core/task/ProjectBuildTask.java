@@ -21,11 +21,13 @@ import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.core.entity.Project;
-import org.apache.streampark.console.core.enums.BuildState;
+import org.apache.streampark.console.core.enums.BuildStateEnum;
+import org.apache.streampark.console.core.enums.GitCredentialEnum;
 
 import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.lib.StoredConfig;
 
 import java.io.File;
@@ -40,14 +42,14 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
   final Project project;
 
-  final Consumer<BuildState> stateUpdateConsumer;
+  final Consumer<BuildStateEnum> stateUpdateConsumer;
 
   final Consumer<Logger> notifyReleaseConsumer;
 
   public ProjectBuildTask(
       String logPath,
       Project project,
-      Consumer<BuildState> stateUpdateConsumer,
+      Consumer<BuildStateEnum> stateUpdateConsumer,
       Consumer<Logger> notifyReleaseConsumer) {
     super(logPath, true);
     this.project = project;
@@ -62,23 +64,23 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     boolean cloneSuccess = cloneSourceCode(project);
     if (!cloneSuccess) {
       fileLogger.error("[StreamPark] clone or pull error.");
-      stateUpdateConsumer.accept(BuildState.FAILED);
+      stateUpdateConsumer.accept(BuildStateEnum.FAILED);
       return;
     }
     boolean build = projectBuild(project);
     if (!build) {
-      stateUpdateConsumer.accept(BuildState.FAILED);
+      stateUpdateConsumer.accept(BuildStateEnum.FAILED);
       fileLogger.error("build error, project name: {} ", project.getName());
       return;
     }
-    stateUpdateConsumer.accept(BuildState.SUCCESSFUL);
+    stateUpdateConsumer.accept(BuildStateEnum.SUCCESSFUL);
     this.deploy(project);
     notifyReleaseConsumer.accept(fileLogger);
   }
 
   @Override
   protected void processException(Throwable t) {
-    stateUpdateConsumer.accept(BuildState.FAILED);
+    stateUpdateConsumer.accept(BuildStateEnum.FAILED);
     fileLogger.error("Build error, project name: {}", project.getName(), t);
   }
 
@@ -103,9 +105,24 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       git.close();
       return true;
     } catch (Exception e) {
+      if (e instanceof InvalidRemoteException) {
+        GitCredentialEnum gitCredential = GitCredentialEnum.of(project.getGitCredential());
+        if (gitCredential == GitCredentialEnum.HTTPS) {
+          project.setGitCredential(GitCredentialEnum.SSH.getValue());
+          String url =
+              project
+                  .getUrl()
+                  .replaceAll(
+                      "(https://|http://)(.*?)/(.*?)/(.*?)(\\.git|)\\s*$", "git@$2:$3/$4.git");
+          project.setUrl(url);
+          fileLogger.info(
+              "clone project by https(http) failed, Now try to clone project by ssh...");
+          return cloneSourceCode(project);
+        }
+      }
       fileLogger.error(
           String.format(
-              "[StreamPark] project [%s] branch [%s] git clone failure, err: %s",
+              "[StreamPark] project [%s] branch [%s] git clone failed, err: %s",
               project.getName(), project.getBranches(), e));
       fileLogger.error(String.format("project %s clone error ", project.getName()), e);
       return false;

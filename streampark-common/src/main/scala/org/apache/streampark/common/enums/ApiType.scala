@@ -18,5 +18,5 @@ package org.apache.streampark.common.enums
 
 object ApiType extends Enumeration {
   type ApiType = Value
-  val java, scala = Value
+  val JAVA, SCALA = Value
 }

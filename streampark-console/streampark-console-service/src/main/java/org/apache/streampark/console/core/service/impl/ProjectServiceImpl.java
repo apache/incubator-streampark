@@ -32,14 +32,14 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
-import org.apache.streampark.console.core.enums.BuildState;
-import org.apache.streampark.console.core.enums.GitCredential;
-import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.BuildStateEnum;
+import org.apache.streampark.console.core.enums.GitCredentialEnum;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
 import org.apache.flink.configuration.MemorySize;
 
@@ -122,7 +122,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         project.getTeamId().equals(projectParam.getTeamId()),
         "TeamId can't be changed, update project failed.");
     ApiAlertException.throwIfFalse(
-        !project.getBuildState().equals(BuildState.BUILDING.get()),
+        !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
         "The project is being built, update project failed.");
     project.setName(projectParam.getName());
     project.setUrl(projectParam.getUrl());
@@ -134,21 +134,21 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     project.setPom(projectParam.getPom());
     project.setDescription(projectParam.getDescription());
     project.setBuildArgs(projectParam.getBuildArgs());
-    if (GitCredential.isSSH(project.getGitCredential())) {
+    if (GitCredentialEnum.isSSH(project.getGitCredential())) {
       project.setUserName(null);
     } else {
       project.setPrvkeyPath(null);
     }
     if (projectParam.getBuildState() != null) {
       project.setBuildState(projectParam.getBuildState());
-      if (BuildState.NEED_REBUILD == BuildState.of(projectParam.getBuildState())) {
+      if (BuildStateEnum.NEED_REBUILD == BuildStateEnum.of(projectParam.getBuildState())) {
         List<Application> applications = getApplications(project);
         // Update deployment status
         applications.forEach(
             (app) -> {
               log.info(
                   "update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-              app.setRelease(ReleaseState.NEED_CHECK.get());
+              app.setRelease(ReleaseStateEnum.NEED_CHECK.get());
               applicationManageService.updateRelease(app);
             });
       }
@@ -196,15 +196,15 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public void build(Long id) throws Exception {
     Project project = getById(id);
-    this.baseMapper.updateBuildState(project.getId(), BuildState.BUILDING.get());
+    this.baseMapper.updateBuildState(project.getId(), BuildStateEnum.BUILDING.get());
     String logPath = getBuildLogPath(id);
     ProjectBuildTask projectBuildTask =
         new ProjectBuildTask(
             logPath,
             project,
-            buildState -> {
-              baseMapper.updateBuildState(id, buildState.get());
-              if (buildState == BuildState.SUCCESSFUL) {
+            buildStateEnum -> {
+              baseMapper.updateBuildState(id, buildStateEnum.get());
+              if (buildStateEnum == BuildStateEnum.SUCCESSFUL) {
                 baseMapper.updateBuildTime(id);
               }
               flinkAppHttpWatcher.init();
@@ -218,7 +218,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         "update deploy by project: {}, appName:{}",
                         project.getName(),
                         app.getJobName());
-                    app.setRelease(ReleaseState.NEED_RELEASE.get());
+                    app.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
                     app.setBuild(true);
                     this.applicationManageService.updateRelease(app);
                   });
@@ -235,7 +235,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     Project project = getById(id);
     Utils.notNull(project);
 
-    if (BuildState.SUCCESSFUL != BuildState.of(project.getBuildState())
+    if (BuildStateEnum.SUCCESSFUL != BuildStateEnum.of(project.getBuildState())
         || !project.getDistHome().exists()) {
       return Collections.emptyList();
     }

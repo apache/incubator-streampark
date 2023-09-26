@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.Message;
-import org.apache.streampark.console.core.enums.NoticeType;
+import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -28,5 +28,5 @@ public interface MessageService extends IService<Message> {
 
   void push(Message message);
 
-  IPage<Message> getUnRead(NoticeType noticeType, RestRequest request);
+  IPage<Message> getUnRead(NoticeTypeEnum noticeTypeEnum, RestRequest request);
 }

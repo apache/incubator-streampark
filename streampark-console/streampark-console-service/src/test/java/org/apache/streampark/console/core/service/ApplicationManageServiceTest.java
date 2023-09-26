@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.YarnQueue;
@@ -111,7 +111,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
     YarnQueue yarnQueue = mockYarnQueue(targetTeamId, queueLabel);
     yarnQueueService.save(yarnQueue);
     Application application =
-        mockYarnModeJobApp(targetTeamId, "app1", queueLabel, ExecutionMode.YARN_APPLICATION);
+        mockYarnModeJobApp(targetTeamId, "app1", queueLabel, FlinkExecutionMode.YARN_APPLICATION);
     assertThat(applicationServiceImpl.validateQueueIfNeeded(application)).isTrue();
 
     // Test application without available queue
@@ -127,9 +127,9 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
 
     // Test update for both versions in yarn-app or per-job with same yarn queue
     Application app1 =
-        mockYarnModeJobApp(teamId2, appName, queueLabel1, ExecutionMode.YARN_APPLICATION);
+        mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_APPLICATION);
     Application app2 =
-        mockYarnModeJobApp(teamId2, appName, queueLabel1, ExecutionMode.YARN_PER_JOB);
+        mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_PER_JOB);
     assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isTrue();
 
     // Test available queue
@@ -141,7 +141,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
     assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isTrue();
 
     // Test non-existed queue
-    app1.setExecutionMode(ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getMode());
+    app1.setExecutionMode(FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getMode());
     app2.setYarnQueue(nonExistedQueue);
     assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isFalse();
   }

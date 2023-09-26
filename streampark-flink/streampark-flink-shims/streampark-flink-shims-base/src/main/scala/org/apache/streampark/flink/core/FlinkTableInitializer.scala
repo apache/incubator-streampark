@@ -40,13 +40,13 @@ private[flink] object FlinkTableInitializer {
   def initialize(
       args: Array[String],
       config: (TableConfig, ParameterTool) => Unit): (ParameterTool, TableEnvironment) = {
-    val flinkInitializer = new FlinkTableInitializer(args, ApiType.scala)
+    val flinkInitializer = new FlinkTableInitializer(args, ApiType.SCALA)
     flinkInitializer.tableConfFunc = config
     (flinkInitializer.configuration.parameter, flinkInitializer.tableEnv)
   }
 
   def initialize(args: TableEnvConfig): (ParameterTool, TableEnvironment) = {
-    val flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
+    val flinkInitializer = new FlinkTableInitializer(args.args, ApiType.JAVA)
     flinkInitializer.javaTableEnvConfFunc = args.conf
     (flinkInitializer.configuration.parameter, flinkInitializer.tableEnv)
   }
@@ -57,7 +57,7 @@ private[flink] object FlinkTableInitializer {
       configTable: (TableConfig, ParameterTool) => Unit)
       : (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
 
-    val flinkInitializer = new FlinkTableInitializer(args, ApiType.scala)
+    val flinkInitializer = new FlinkTableInitializer(args, ApiType.SCALA)
     flinkInitializer.streamEnvConfFunc = configStream
     flinkInitializer.tableConfFunc = configTable
     (
@@ -68,7 +68,7 @@ private[flink] object FlinkTableInitializer {
 
   def initialize(args: StreamTableEnvConfig)
       : (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
-    val flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
+    val flinkInitializer = new FlinkTableInitializer(args.args, ApiType.JAVA)
     flinkInitializer.javaStreamEnvConfFunc = args.streamConfig
     flinkInitializer.javaTableEnvConfFunc = args.tableConfig
     (
@@ -87,8 +87,8 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     val builder = EnvironmentSettings.newInstance()
 
     Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER)))
-      .getOrElse(PlannerType.blink) match {
-      case PlannerType.blink =>
+      .getOrElse(PlannerType.BLINK) match {
+      case PlannerType.BLINK =>
         val useBlinkPlanner =
           Try(builder.getClass.getDeclaredMethod("useBlinkPlanner")).getOrElse(null)
         if (useBlinkPlanner == null) {
@@ -98,7 +98,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           useBlinkPlanner.invoke(builder)
           logInfo("blinkPlanner will be use.")
         }
-      case PlannerType.old =>
+      case PlannerType.OLD =>
         val useOldPlanner = Try(builder.getClass.getDeclaredMethod("useOldPlanner")).getOrElse(null)
         if (useOldPlanner == null) {
           logWarn("useOldPlanner deprecated")
@@ -107,7 +107,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           useOldPlanner.invoke(builder)
           logInfo("useOldPlanner will be use.")
         }
-      case PlannerType.any =>
+      case PlannerType.ANY =>
         val useAnyPlanner = Try(builder.getClass.getDeclaredMethod("useAnyPlanner")).getOrElse(null)
         if (useAnyPlanner == null) {
           logWarn("useAnyPlanner deprecated")
@@ -142,9 +142,9 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     envSettings.inBatchMode()
     val tableEnv = TableEnvironment.create(envSettings.build()).setAppName
     apiType match {
-      case ApiType.java if javaTableEnvConfFunc != null =>
+      case ApiType.JAVA if javaTableEnvConfFunc != null =>
         javaTableEnvConfFunc.configuration(tableEnv.getConfig, parameter)
-      case ApiType.scala if tableConfFunc != null =>
+      case ApiType.SCALA if tableConfFunc != null =>
         tableConfFunc(tableEnv.getConfig, parameter)
       case _ =>
     }
@@ -164,9 +164,9 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     }
     val streamTableEnv = StreamTableEnvironment.create(streamEnv, setting).setAppName
     apiType match {
-      case ApiType.java if javaTableEnvConfFunc != null =>
+      case ApiType.JAVA if javaTableEnvConfFunc != null =>
         javaTableEnvConfFunc.configuration(streamTableEnv.getConfig, parameter)
-      case ApiType.scala if tableConfFunc != null =>
+      case ApiType.SCALA if tableConfFunc != null =>
         tableConfFunc(streamTableEnv.getConfig, parameter)
       case _ =>
     }

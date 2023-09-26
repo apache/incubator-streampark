@@ -17,7 +17,7 @@
 
 package org.apache.streampark.gateway.results;
 
-import org.apache.streampark.gateway.OperationStatus;
+import org.apache.streampark.gateway.OperationStatusEnum;
 
 import javax.annotation.Nullable;
 
@@ -27,15 +27,15 @@ import java.util.Objects;
 /** Information of the {@code Operation}. */
 public class OperationInfo implements Serializable {
 
-  private final OperationStatus status;
+  private final OperationStatusEnum status;
   @Nullable private final Exception exception;
 
-  public OperationInfo(OperationStatus status, @Nullable Exception exception) {
+  public OperationInfo(OperationStatusEnum status, @Nullable Exception exception) {
     this.status = status;
     this.exception = exception;
   }
 
-  public OperationStatus getStatus() {
+  public OperationStatusEnum getStatus() {
     return status;
   }
 

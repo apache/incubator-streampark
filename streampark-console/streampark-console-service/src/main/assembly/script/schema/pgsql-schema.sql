@@ -571,6 +571,7 @@ comment on column "public"."t_team"."id" is 'team id';
 comment on column "public"."t_team"."team_name" is 'team name';
 comment on column "public"."t_team"."create_time" is 'creation time';
 comment on column "public"."t_team"."modify_time" is 'modify time';
+alter table "public"."t_team" add constraint "t_team_pkey" primary key ("id");
 create index "un_team_name" on "public"."t_team" using btree (
   "team_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
 );

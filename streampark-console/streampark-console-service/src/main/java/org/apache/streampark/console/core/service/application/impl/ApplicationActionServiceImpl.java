@@ -20,10 +20,10 @@ package org.apache.streampark.console.core.service.application.impl;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.DevelopmentMode;
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkRestoreMode;
 import org.apache.streampark.common.enums.ResolveOrder;
-import org.apache.streampark.common.enums.RestoreMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
@@ -43,12 +43,12 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SavePoint;
-import org.apache.streampark.console.core.enums.CheckPointType;
-import org.apache.streampark.console.core.enums.ConfigFileType;
-import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.Operation;
-import org.apache.streampark.console.core.enums.OptionState;
-import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
+import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.OperationEnum;
+import org.apache.streampark.console.core.enums.OptionStateEnum;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -65,8 +65,8 @@ import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -113,8 +113,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
+import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
+import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service
@@ -186,12 +186,12 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
     updateWrapper.eq(Application::getId, application.getId());
     if (application.isFlinkSqlJob()) {
-      updateWrapper.set(Application::getRelease, ReleaseState.FAILED.get());
+      updateWrapper.set(Application::getRelease, ReleaseStateEnum.FAILED.get());
     } else {
-      updateWrapper.set(Application::getRelease, ReleaseState.NEED_RELEASE.get());
+      updateWrapper.set(Application::getRelease, ReleaseStateEnum.NEED_RELEASE.get());
     }
     if (!application.isRunning()) {
-      updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
+      updateWrapper.set(Application::getState, FlinkAppStateEnum.REVOKED.getValue());
     }
     baseMapper.update(null, updateWrapper);
   }
@@ -228,12 +228,12 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public void cancel(Application appParam) throws Exception {
-    FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
+    FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.CANCELLING);
     Application application = getById(appParam.getId());
-    application.setState(FlinkAppState.CANCELLING.getValue());
+    application.setState(FlinkAppStateEnum.CANCELLING.getValue());
 
     ApplicationLog applicationLog = new ApplicationLog();
-    applicationLog.setOptionName(Operation.CANCEL.getValue());
+    applicationLog.setOptionName(OperationEnum.CANCEL.getValue());
     applicationLog.setAppId(application.getId());
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
@@ -241,9 +241,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     if (appParam.getSavePointed()) {
       FlinkAppHttpWatcher.addSavepoint(application.getId());
-      application.setOptionState(OptionState.SAVEPOINTING.getValue());
+      application.setOptionState(OptionStateEnum.SAVEPOINTING.getValue());
     } else {
-      application.setOptionState(OptionState.CANCELLING.getValue());
+      application.setOptionState(OptionStateEnum.CANCELLING.getValue());
     }
 
     application.setOptionTime(new Date());
@@ -266,10 +266,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     String clusterId = null;
-    if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+    if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       clusterId = application.getClusterId();
-    } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
+    } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         ApiAlertException.throwIfNull(
             cluster,
@@ -284,7 +284,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     Map<String, Object> properties = new HashMap<>();
 
-    if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+    if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
       FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
       ApiAlertException.throwIfNull(
           cluster,
@@ -301,7 +301,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         new CancelRequest(
             application.getId(),
             flinkEnv.getFlinkVersion(),
-            ExecutionMode.of(application.getExecutionMode()),
+            FlinkExecutionMode.of(application.getExecutionMode()),
             properties,
             clusterId,
             application.getJobId(),
@@ -330,7 +330,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 savePoint.setPath(savePointDir);
                 savePoint.setAppId(application.getId());
                 savePoint.setLatest(true);
-                savePoint.setType(CheckPointType.SAVEPOINT.get());
+                savePoint.setType(CheckPointTypeEnum.SAVEPOINT.get());
                 savePoint.setCreateTime(new Date());
                 savePoint.setTriggerTime(triggerTime);
                 savePointService.save(savePoint);
@@ -344,8 +344,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 updateToStopped(application);
               } else {
                 log.error("stop flink job fail.", e);
-                application.setOptionState(OptionState.NONE.getValue());
-                application.setState(FlinkAppState.FAILED.getValue());
+                application.setOptionState(OptionStateEnum.NONE.getValue());
+                application.setState(FlinkAppStateEnum.FAILED.getValue());
                 updateById(application);
 
                 if (appParam.getSavePointed()) {
@@ -407,7 +407,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     String jobId = new JobID().toHexString();
     ApplicationLog applicationLog = new ApplicationLog();
-    applicationLog.setOptionName(Operation.START.getValue());
+    applicationLog.setOptionName(OperationEnum.START.getValue());
     applicationLog.setAppId(application.getId());
     applicationLog.setOptionTime(new Date());
 
@@ -439,7 +439,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     String appConf = userJarAndAppConf.f1;
 
     BuildResult buildResult = buildPipeline.getBuildResult();
-    if (ExecutionMode.YARN_APPLICATION == application.getExecutionModeEnum()) {
+    if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
       buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
     }
 
@@ -450,17 +450,19 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     SubmitRequest submitRequest =
         new SubmitRequest(
             flinkEnv.getFlinkVersion(),
-            ExecutionMode.of(application.getExecutionMode()),
+            FlinkExecutionMode.of(application.getExecutionMode()),
             getProperties(application),
             flinkEnv.getFlinkConf(),
-            DevelopmentMode.of(application.getJobType()),
+            FlinkDevelopmentMode.of(application.getJobType()),
             application.getId(),
             jobId,
             application.getJobName(),
             appConf,
             application.getApplicationType(),
             getSavePointed(appParam),
-            appParam.getRestoreMode() == null ? null : RestoreMode.of(appParam.getRestoreMode()),
+            appParam.getRestoreMode() == null
+                ? null
+                : FlinkRestoreMode.of(appParam.getRestoreMode()),
             applicationArgs,
             buildResult,
             kubernetesSubmitParam,
@@ -501,7 +503,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
               application.setStartTime(new Date());
               application.setEndTime(null);
               if (isKubernetesApp(application)) {
-                application.setRelease(ReleaseState.DONE.get());
+                application.setRelease(ReleaseStateEnum.DONE.get());
               }
               updateById(application);
 
@@ -509,7 +511,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
               if (isKubernetesApp(application)) {
                 k8SFlinkTrackMonitor.doWatching(toTrackId(application));
               } else {
-                FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
+                FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.STARTING);
                 FlinkAppHttpWatcher.doWatching(application);
               }
 
@@ -525,8 +527,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 applicationLog.setException(exception);
                 applicationLog.setSuccess(false);
                 Application app = getById(appParam.getId());
-                app.setState(FlinkAppState.FAILED.getValue());
-                app.setOptionState(OptionState.NONE.getValue());
+                app.setState(FlinkAppStateEnum.FAILED.getValue());
+                app.setOptionState(OptionStateEnum.NONE.getValue());
                 updateById(app);
                 if (isKubernetesApp(app)) {
                   k8SFlinkTrackMonitor.unWatching(toTrackId(app));
@@ -538,7 +540,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         .whenComplete(
             (t, e) -> {
               if (!K8sFlinkConfig.isV2Enabled()
-                  && ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+                  && FlinkExecutionMode.isKubernetesApplicationMode(
+                      application.getExecutionMode())) {
                 String domainName = settingService.getIngressModeDefault();
                 if (StringUtils.isNotBlank(domainName)) {
                   try {
@@ -551,8 +554,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                     applicationLog.setException(e.getMessage());
                     applicationLog.setSuccess(false);
                     applicationLogService.save(applicationLog);
-                    application.setState(FlinkAppState.FAILED.getValue());
-                    application.setOptionState(OptionState.NONE.getValue());
+                    application.setState(FlinkAppStateEnum.FAILED.getValue());
+                    application.setOptionState(OptionStateEnum.NONE.getValue());
                     updateById(application);
                     return;
                   }
@@ -565,17 +568,17 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   private void starting(Application application) {
-    application.setState(FlinkAppState.STARTING.getValue());
+    application.setState(FlinkAppStateEnum.STARTING.getValue());
     application.setOptionTime(new Date());
     updateById(application);
   }
 
   private Tuple2<String, String> getUserJarAndAppConf(FlinkEnv flinkEnv, Application application) {
-    ExecutionMode executionMode = application.getExecutionModeEnum();
+    FlinkExecutionMode executionModeEnum = application.getFlinkExecutionMode();
     ApplicationConfig applicationConfig = configService.getEffective(application.getId());
 
     ApiAlertException.throwIfNull(
-        executionMode, "ExecutionMode can't be null, start application failed.");
+        executionModeEnum, "ExecutionMode can't be null, start application failed.");
 
     String flinkUserJar = null;
     String appConf = null;
@@ -592,7 +595,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 ? null
                 : String.format("yaml://%s", applicationConfig.getContent());
         // 3) client
-        if (ExecutionMode.YARN_APPLICATION == executionMode) {
+        if (FlinkExecutionMode.YARN_APPLICATION == executionModeEnum) {
           String clientPath = Workspace.remote().APP_CLIENT();
           flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
         }
@@ -624,8 +627,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         } else {
           switch (application.getApplicationType()) {
             case STREAMPARK_FLINK:
-              ConfigFileType fileType = ConfigFileType.of(applicationConfig.getFormat());
-              if (fileType != null && ConfigFileType.UNKNOWN != fileType) {
+              ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(applicationConfig.getFormat());
+              if (fileType != null && ConfigFileTypeEnum.UNKNOWN != fileType) {
                 appConf =
                     String.format(
                         "%s://%s", fileType.getTypeName(), applicationConfig.getContent());
@@ -646,7 +649,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           }
         }
 
-        if (ExecutionMode.YARN_APPLICATION == executionMode) {
+        if (FlinkExecutionMode.YARN_APPLICATION == executionModeEnum) {
           switch (application.getApplicationType()) {
             case STREAMPARK_FLINK:
               flinkUserJar =
@@ -679,7 +682,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   private Map<String, Object> getProperties(Application application) {
     Map<String, Object> properties = new HashMap<>(application.getOptionMap());
-    if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+    if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
       FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
       ApiAlertException.throwIfNull(
           cluster,
@@ -690,8 +693,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       URI activeAddress = cluster.getRemoteURI();
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
-    } else if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
-      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
+    } else if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
+      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         ApiAlertException.throwIfNull(
             cluster,
@@ -710,11 +713,11 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         Optional.ofNullable(yarnLabelExpr)
             .ifPresent(yLabel -> properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yLabel));
       }
-    } else if (ExecutionMode.isKubernetesMode(application.getExecutionModeEnum())) {
+    } else if (FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode())) {
       properties.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
     }
 
-    if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+    if (FlinkExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
       try {
         HadoopUtils.yarnClient();
         properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
@@ -740,8 +743,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   private void updateToStopped(Application app) {
     Application application = getById(app);
-    application.setOptionState(OptionState.NONE.getValue());
-    application.setState(FlinkAppState.CANCELED.getValue());
+    application.setOptionState(OptionStateEnum.NONE.getValue());
+    application.setState(FlinkAppStateEnum.CANCELED.getValue());
     application.setOptionTime(new Date());
     updateById(application);
     savePointService.expire(application.getId());

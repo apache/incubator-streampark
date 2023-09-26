@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -34,9 +34,9 @@ import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.SavePoint;
-import org.apache.streampark.console.core.enums.CheckPointType;
-import org.apache.streampark.console.core.enums.Operation;
-import org.apache.streampark.console.core.enums.OptionState;
+import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
+import org.apache.streampark.console.core.enums.OperationEnum;
+import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.mapper.SavePointMapper;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
@@ -44,7 +44,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
@@ -84,7 +84,7 @@ import java.util.concurrent.TimeoutException;
 import static org.apache.flink.configuration.CheckpointingOptions.MAX_RETAINED_CHECKPOINTS;
 import static org.apache.flink.configuration.CheckpointingOptions.SAVEPOINT_DIRECTORY;
 import static org.apache.streampark.common.util.PropertiesUtils.extractDynamicPropertiesAsJava;
-import static org.apache.streampark.console.core.enums.CheckPointType.CHECKPOINT;
+import static org.apache.streampark.console.core.enums.CheckPointTypeEnum.CHECKPOINT;
 
 @Slf4j
 @Service
@@ -171,7 +171,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     Application application = applicationManageService.getById(appId);
 
     ApplicationLog applicationLog = new ApplicationLog();
-    applicationLog.setOptionName(Operation.SAVEPOINT.getValue());
+    applicationLog.setOptionName(OperationEnum.SAVEPOINT.getValue());
     applicationLog.setAppId(application.getId());
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
@@ -179,7 +179,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     FlinkAppHttpWatcher.addSavepoint(application.getId());
 
-    application.setOptionState(OptionState.SAVEPOINTING.getValue());
+    application.setOptionState(OptionStateEnum.SAVEPOINTING.getValue());
     application.setOptionTime(new Date());
     this.applicationManageService.updateById(application);
     flinkAppHttpWatcher.init();
@@ -264,7 +264,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         .whenComplete(
             (t, e) -> {
               applicationLogService.save(applicationLog);
-              application.setOptionState(OptionState.NONE.getValue());
+              application.setOptionState(OptionStateEnum.NONE.getValue());
               application.setOptionTime(new Date());
               applicationManageService.update(application);
               flinkAppHttpWatcher.init();
@@ -290,7 +290,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   private Map<String, Object> tryGetRestProps(Application application, FlinkCluster cluster) {
     Map<String, Object> properties = new HashMap<>();
 
-    if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+    if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
       Utils.notNull(
           cluster,
           String.format(
@@ -304,10 +304,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   private String getClusterId(Application application, FlinkCluster cluster) {
-    if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+    if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       return application.getClusterId();
-    } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION == application.getExecutionModeEnum()) {
+    } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
         Utils.notNull(
             cluster,
             String.format(
@@ -368,7 +368,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   public String getSavepointFromDeployLayer(Application application)
       throws JsonProcessingException {
     // At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound flink
-    if (!ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+    if (!FlinkExecutionMode.isRemoteMode(application.getExecutionMode())) {
       FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
       return flinkEnv.convertFlinkYamlAsMap().get(SAVEPOINT_DIRECTORY.key());
     }
@@ -446,7 +446,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     int cpThreshold =
         tryGetChkNumRetainedFromDynamicProps(application.getDynamicProperties())
             .orElse(getChkNumRetainedFromFlinkEnv(flinkEnv, application));
-    cpThreshold = CHECKPOINT == CheckPointType.of(entity.getType()) ? cpThreshold - 1 : cpThreshold;
+    cpThreshold =
+        CHECKPOINT == CheckPointTypeEnum.of(entity.getType()) ? cpThreshold - 1 : cpThreshold;
 
     if (cpThreshold == 0) {
       LambdaQueryWrapper<SavePoint> queryWrapper =
@@ -495,7 +496,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     return new TriggerSavepointRequest(
         application.getId(),
         flinkEnv.getFlinkVersion(),
-        application.getExecutionModeEnum(),
+        application.getFlinkExecutionMode(),
         properties,
         clusterId,
         application.getJobId(),

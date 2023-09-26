@@ -433,6 +433,7 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://mvnrepository.com/artifact/org.apache.shiro/shiro-web/1.10.0 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-el/9.0.65 Apache-2.0
     https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper/3.4.6 Apache-2.0
+    https://mvnrepository.com/artifact/org.apache.tika/tika-core/1.20 Apache-2.0
     https://mvnrepository.com/artifact/org.asynchttpclient/async-http-client/2.12.3 Apache-2.0
     https://mvnrepository.com/artifact/org.asynchttpclient/async-http-client-netty-utils/2.12.3 Apache-2.0
     https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-core-asl/1.9.13 Apache-2.0

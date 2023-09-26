@@ -17,19 +17,19 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.SpringIntegrationTestBase;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
-import org.apache.streampark.console.core.enums.FlinkAppState;
-import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.FlinkClusterServiceImpl;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.testcontainer.flink.FlinkStandaloneSessionCluster;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -45,7 +45,7 @@ import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.streampark.console.core.task.FlinkAppHttpWatcher.WATCHING_INTERVAL;
+import static org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher.WATCHING_INTERVAL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -102,7 +102,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
     FlinkCluster flinkCluster = new FlinkCluster();
     flinkCluster.setId(1L);
     flinkCluster.setAddress(cluster.getFlinkJobManagerUrl());
-    flinkCluster.setExecutionMode(ExecutionMode.REMOTE.getMode());
+    flinkCluster.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
     flinkCluster.setClusterName("docker-Cluster-1.17.1");
     flinkCluster.setVersionId(1L);
     flinkCluster.setUserId(100000L);
@@ -114,7 +114,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
     application.setFlinkClusterId(1L);
     application.setSqlId(100000L);
     application.setVersionId(1L);
-    application.setExecutionMode(ExecutionMode.REMOTE.getMode());
+    application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
 
     // Avoid exceptional error.
     application.setFlinkSql(
@@ -132,7 +132,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
             () -> {
               while (true) {
                 Application app = applicationManageService.getById(100000L);
-                if (app != null && app.getReleaseState() == ReleaseState.DONE) {
+                if (app != null && app.getReleaseState() == ReleaseStateEnum.DONE) {
                   break;
                 }
               }
@@ -146,7 +146,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
             () -> {
               while (true) {
                 if (flinkAppHttpWatcher.tryQueryFlinkAppState(application.getId())
-                    == FlinkAppState.RUNNING) {
+                    == FlinkAppStateEnum.RUNNING) {
                   break;
                 }
               }

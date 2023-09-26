@@ -55,7 +55,7 @@ public class ApplicationBackUp {
     this.configId = application.getConfigId();
     this.description = application.getBackUpDescription();
     this.createTime = new Date();
-    switch (application.getExecutionModeEnum()) {
+    switch (application.getFlinkExecutionMode()) {
       case KUBERNETES_NATIVE_APPLICATION:
       case KUBERNETES_NATIVE_SESSION:
       case YARN_PER_JOB:
@@ -75,7 +75,7 @@ public class ApplicationBackUp {
         break;
       default:
         throw new UnsupportedOperationException(
-            "unsupported executionMode ".concat(application.getExecutionModeEnum().getName()));
+            "unsupported executionMode ".concat(application.getFlinkExecutionMode().getName()));
     }
   }
 }
