@@ -30,6 +30,7 @@ import org.apache.streampark.console.core.service.alert.AlertService
 import org.apache.streampark.console.core.service.application.ApplicationInfoService
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter.{applicationToTrackKey, clusterMetricsToFlinkMetricCV, flinkClusterToClusterKey, k8sDeployStateToClusterState}
+import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV
 import org.apache.streampark.flink.kubernetes.v2.model._
 import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.{ApplicationJobKey, ClusterKey}

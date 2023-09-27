@@ -29,7 +29,7 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.FlinkClusterServiceImpl;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.testcontainer.flink.FlinkStandaloneSessionCluster;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -45,7 +45,7 @@ import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.streampark.console.core.task.FlinkAppHttpWatcher.WATCHING_INTERVAL;
+import static org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher.WATCHING_INTERVAL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

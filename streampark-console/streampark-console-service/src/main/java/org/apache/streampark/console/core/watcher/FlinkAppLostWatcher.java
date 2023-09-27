@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.task;
+package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.console.core.bean.AlertProbeMsg;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -40,8 +40,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.LOST;
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
+import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
+import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 /** This implementation is currently used for probe on yarn,remote,K8s mode */
 @Slf4j

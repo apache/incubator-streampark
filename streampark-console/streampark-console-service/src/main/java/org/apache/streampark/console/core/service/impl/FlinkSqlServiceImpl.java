@@ -95,7 +95,6 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public void create(FlinkSql flinkSql) {
     Integer version = this.baseMapper.getLatestVersion(flinkSql.getAppId());
     flinkSql.setVersion(version == null ? 1 : version + 1);

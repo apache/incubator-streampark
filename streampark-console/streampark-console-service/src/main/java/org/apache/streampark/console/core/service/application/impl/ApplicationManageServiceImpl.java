@@ -53,9 +53,9 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
-import org.apache.streampark.console.core.task.FlinkK8sObserverStub;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
@@ -89,8 +89,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
+import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
+import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service
@@ -154,7 +154,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public Boolean delete(Application appParam) {
 
     Application application = getById(appParam.getId());
@@ -287,7 +286,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @SneakyThrows
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean create(Application appParam) {
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
@@ -357,7 +355,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   @SuppressWarnings("checkstyle:WhitespaceAround")
   @Override
   @SneakyThrows
-  @Transactional(rollbackFor = {Exception.class})
   public Long copy(Application appParam) {
     boolean existsByJobName = this.existsByJobName(appParam.getJobName());
     ApiAlertException.throwIfFalse(
@@ -441,7 +438,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean update(Application appParam) {
     Application application = getById(appParam.getId());
 

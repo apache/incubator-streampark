@@ -38,8 +38,8 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
+import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
 import org.apache.flink.configuration.MemorySize;
 
@@ -114,7 +114,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean update(Project projectParam) {
     Project project = getById(projectParam.getId());
     Utils.notNull(project);
@@ -158,7 +157,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean delete(Long id) {
     Project project = getById(id);
     Utils.notNull(project);

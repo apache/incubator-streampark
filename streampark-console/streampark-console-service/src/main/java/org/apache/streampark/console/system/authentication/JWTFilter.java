@@ -53,8 +53,8 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
         StringUtils.splitByWholeSeparatorPreserveAllTokens(
             properties.getAnonUrl(), StringPool.COMMA);
 
-    for (String u : anonUrl) {
-      if (pathMatcher.match(u.trim(), httpServletRequest.getRequestURI())) {
+    for (String url : anonUrl) {
+      if (pathMatcher.match(url.trim(), httpServletRequest.getRequestURI())) {
         return true;
       }
     }
@@ -69,7 +69,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
   protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
     HttpServletRequest req = (HttpServletRequest) request;
     String token = req.getHeader(TOKEN);
-    return token != null;
+    return StringUtils.isNotBlank(token);
   }
 
   @Override
