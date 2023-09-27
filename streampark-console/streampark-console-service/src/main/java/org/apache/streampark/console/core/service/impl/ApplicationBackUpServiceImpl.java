@@ -71,7 +71,6 @@ public class ApplicationBackUpServiceImpl
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public void rollback(ApplicationBackUp bakParam) {
 
     Application application = applicationManageService.getById(bakParam.getAppId());
@@ -192,7 +191,6 @@ public class ApplicationBackUpServiceImpl
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public void backup(Application appParam, FlinkSql flinkSqlParam) {
     // basic configuration file backup
     String appHome =

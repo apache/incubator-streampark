@@ -114,7 +114,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean update(Project projectParam) {
     Project project = getById(projectParam.getId());
     Utils.notNull(project);
@@ -158,7 +157,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean delete(Long id) {
     Project project = getById(id);
     Utils.notNull(project);
