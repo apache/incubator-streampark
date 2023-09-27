@@ -160,12 +160,12 @@ trait KubernetesClientV2Trait extends FlinkClientTrait {
       }
       .runIOAsTry match {
       case Success(rsp) =>
-        logInfo(richMsg("Trigger flink job successfully."))
+        logInfo(richMsg("Trigger flink job savepoint successfully."))
         rsp
       case Failure(err) =>
         logError(
           richMsg(
-            s"Trigger flink job fail in ${triggerSavepointRequest.executionMode.getName}_V2 mode!"),
+            s"Trigger flink job savepoint failed in ${triggerSavepointRequest.executionMode.getName}_V2 mode!"),
           err)
         throw err
     }
