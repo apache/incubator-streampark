@@ -98,8 +98,8 @@ public class AuthenticatorImpl implements Authenticator {
     User user = usersService.findByName(username);
 
     if (user != null) {
-      ApiAlertException.throwIfFalse(
-          user.getLoginType() == LoginTypeEnum.SSO,
+      ApiAlertException.throwIfTrue(
+          user.getLoginType() != LoginTypeEnum.SSO,
           String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
       return user;
     }
