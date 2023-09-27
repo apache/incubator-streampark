@@ -33,8 +33,10 @@ import lombok.Data;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 @Data
 @TableName("t_flink_env")
@@ -73,7 +75,7 @@ public class FlinkEnv implements Serializable {
   public void doSetFlinkConf() throws ApiDetailException {
     try {
       File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
-      String flinkConf = FileUtils.readFileToString(yaml);
+      String flinkConf = FileUtils.readFileToString(yaml, StandardCharsets.UTF_8);
       this.flinkConf = DeflaterUtils.zipString(flinkConf);
     } catch (Exception e) {
       throw new ApiDetailException(e);
@@ -98,7 +100,7 @@ public class FlinkEnv implements Serializable {
 
   @JsonIgnore
   public FlinkVersion getFlinkVersion() {
-    if (this.flinkVersion == null) {
+    if (Objects.isNull(this.flinkVersion)) {
       this.flinkVersion = new FlinkVersion(this.flinkHome);
     }
     return this.flinkVersion;

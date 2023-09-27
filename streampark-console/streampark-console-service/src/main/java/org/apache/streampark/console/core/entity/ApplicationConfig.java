@@ -22,6 +22,8 @@ import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 
+import org.apache.commons.collections.MapUtils;
+
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -34,6 +36,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -77,7 +80,7 @@ public class ApplicationConfig {
   public Map<String, String> readConfig() {
     ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(this.format);
     Map<String, String> configs = null;
-    if (fileType != null) {
+    if (Objects.nonNull(fileType)) {
       switch (fileType) {
         case YAML:
           configs = PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
@@ -95,7 +98,7 @@ public class ApplicationConfig {
       }
     }
 
-    if (configs != null && !configs.isEmpty()) {
+    if (MapUtils.isNotEmpty(configs)) {
       return configs.entrySet().stream()
           .collect(
               Collectors.toMap(
