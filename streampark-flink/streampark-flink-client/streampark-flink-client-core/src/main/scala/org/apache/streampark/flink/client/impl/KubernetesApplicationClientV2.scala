@@ -18,11 +18,12 @@
 package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.common.zio.ZIOExt.IOOps
+import org.apache.streampark.common.zio.ZIOExt.{IOOps, OptionZIOOps}
 import org.apache.streampark.flink.client.`trait`.KubernetesClientV2Trait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.impl.KubernetesSessionClientV2.{logError, logInfo}
 import org.apache.streampark.flink.kubernetes.v2.model.{FlinkDeploymentDef, JobManagerDef, TaskManagerDef}
+import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 import org.apache.streampark.flink.kubernetes.v2.operator.FlinkK8sOperator
 import org.apache.streampark.flink.packer.pipeline.K8sAppModeBuildResponse
 
@@ -39,6 +40,7 @@ import scala.util.{Failure, Success, Try}
 
 /** Flink K8s application mode task operation client via Flink K8s Operator */
 object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger {
+  private val observer = FlinkK8sObserver
 
   @throws[Throwable]
   override def doSubmit(
@@ -252,6 +254,9 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
     FlinkK8sOperator.k8sCrOpr.deleteDeployment(namespace, name).runIOAsTry match {
       case Success(_) =>
         logInfo(richMsg("Shutdown Flink Applicaition successfully."))
+        observer.trackedKeys
+          .find(_.id == shutDownRequest.id)
+          .someOrUnitZIO(key => observer.untrack(key))
         ShutDownResponse()
       case Failure(err) =>
         logError(richMsg(s"Fail to shutdown Flink Application"), err)
