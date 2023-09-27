@@ -253,10 +253,10 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
 
     FlinkK8sOperator.k8sCrOpr.deleteDeployment(namespace, name).runIOAsTry match {
       case Success(_) =>
-        logInfo(richMsg("Shutdown Flink Applicaition successfully."))
         observer.trackedKeys
           .find(_.id == shutDownRequest.id)
           .someOrUnitZIO(key => observer.untrack(key))
+        logInfo(richMsg("Shutdown Flink Applicaition successfully."))
         ShutDownResponse()
       case Failure(err) =>
         logError(richMsg(s"Fail to shutdown Flink Application"), err)
