@@ -27,7 +27,6 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.ApplicationLog;
@@ -201,7 +200,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   public Boolean delete(Long id, Application application) throws InternalException {
     SavePoint savePoint = getById(id);
     try {
-      if (CommonUtils.notEmpty(savePoint.getPath())) {
+      if (StringUtils.isNotEmpty(savePoint.getPath())) {
         application.getFsOperator().delete(savePoint.getPath());
       }
       return removeById(id);
