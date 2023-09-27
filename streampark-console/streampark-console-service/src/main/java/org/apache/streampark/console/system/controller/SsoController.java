@@ -67,8 +67,8 @@ public class SsoController {
   public RestResponse token() throws Exception {
 
     // Check SSO enable status
-    ApiAlertException.throwIfFalse(
-        ssoEnable,
+    ApiAlertException.throwIfTrue(
+        !ssoEnable,
         "Single Sign On (SSO) is not available, please contact the administrator to enable");
 
     Subject subject = SecurityUtils.getSubject();
