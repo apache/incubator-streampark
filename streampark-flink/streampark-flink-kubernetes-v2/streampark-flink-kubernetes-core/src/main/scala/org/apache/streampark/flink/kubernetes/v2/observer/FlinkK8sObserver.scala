@@ -116,6 +116,14 @@ object FlinkK8sObserver extends FlinkK8sObserverTrait {
   /** Start tracking resources. */
   override def track(key: TrackKey): UIO[Unit] = {
 
+    def trackApplicationJob(ns: String, name: String): UIO[Unit] = {
+      for {
+        _ <- deployCrObserver.watch(ns, name)
+        _ <- restSvcEndpointObserver.watch(ns, name)
+        _ <- clusterObserver.watch(ns, name)
+      } yield ()
+    }
+
     def trackCluster(ns: String, name: String): UIO[Unit] = {
       for {
         _ <- deployCrObserver.watch(ns, name)
@@ -131,7 +139,7 @@ object FlinkK8sObserver extends FlinkK8sObserverTrait {
 
     for {
       _ <- key match {
-             case ApplicationJobKey(_, ns, name)                     => trackCluster(ns, name)
+             case ApplicationJobKey(_, ns, name)                     => trackApplicationJob(ns, name)
              case SessionJobKey(_, ns, name, clusterName)            => trackSessionJob(ns, name, clusterName)
              case UnmanagedSessionJobKey(_, clusterNs, clusterId, _) => trackCluster(clusterNs, clusterId)
              case ClusterKey(_, ns, name)                            => trackCluster(ns, name)
