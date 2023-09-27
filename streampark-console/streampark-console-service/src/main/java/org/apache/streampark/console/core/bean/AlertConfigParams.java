@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Schema(name = "AlertConfig")
 @Data
@@ -66,7 +67,7 @@ public class AlertConfigParams implements Serializable {
   private AlertLarkParams larkParams;
 
   public static AlertConfigParams of(AlertConfig config) {
-    if (config == null) {
+    if (Objects.isNull(config)) {
       return null;
     }
     AlertConfigParams params = new AlertConfigParams();

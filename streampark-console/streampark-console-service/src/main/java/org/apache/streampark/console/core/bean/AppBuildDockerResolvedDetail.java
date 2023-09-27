@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /** View for DockerResolveProgress */
@@ -43,7 +44,7 @@ public class AppBuildDockerResolvedDetail {
 
   public static AppBuildDockerResolvedDetail of(@Nullable DockerResolvedSnapshot snapshot) {
     AppBuildDockerResolvedDetail detail = new AppBuildDockerResolvedDetail();
-    if (snapshot == null) {
+    if (Objects.isNull(snapshot)) {
       return detail;
     }
     return detail
@@ -59,7 +60,7 @@ public class AppBuildDockerResolvedDetail {
     private Date st;
 
     public static ImagePull of(DockerPullSnapshot snapshot) {
-      if (snapshot == null) {
+      if (Objects.isNull(snapshot)) {
         return null;
       }
       return new ImagePull()
@@ -86,7 +87,7 @@ public class AppBuildDockerResolvedDetail {
     private Date st;
 
     public static ImageBuild of(DockerBuildSnapshot snapshot) {
-      if (snapshot == null) {
+      if (Objects.isNull(snapshot)) {
         return null;
       }
       return new ImageBuild()
@@ -105,7 +106,7 @@ public class AppBuildDockerResolvedDetail {
     private Date st;
 
     public static ImagePush of(DockerPushSnapshot snapshot) {
-      if (snapshot == null) {
+      if (Objects.isNull(snapshot)) {
         return null;
       }
       return new ImagePush()
