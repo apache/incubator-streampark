@@ -378,17 +378,15 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     // 1) check application
     final Application application = getById(appParam.getId());
     Utils.notNull(application);
-    if (!application.isCanBeStart()) {
-      throw new ApiAlertException("[StreamPark] The application cannot be started repeatedly.");
-    }
+    ApiAlertException.throwIfTrue(
+        !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
 
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
     Utils.notNull(buildPipeline);
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
-    if (flinkEnv == null) {
-      throw new ApiAlertException("[StreamPark] can no found flink version");
-    }
+
+    ApiAlertException.throwIfNull(flinkEnv, "[StreamPark] can no found flink version");
 
     // if manually started, clear the restart flag
     if (!auto) {
