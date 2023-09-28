@@ -73,10 +73,9 @@ public class LdapService {
    * @return user email
    */
   public String ldapLogin(String userId, String userPwd) {
-    if (!enable) {
-      throw new ApiAlertException(
-          "ldap is not enabled, Please check the configuration: ldap.enable");
-    }
+
+    ApiAlertException.throwIfFalse(
+        enable, "ldap is not enabled, Please check the configuration: ldap.enable");
 
     if (ldapEnv == null) {
       ldapEnv = new Properties();

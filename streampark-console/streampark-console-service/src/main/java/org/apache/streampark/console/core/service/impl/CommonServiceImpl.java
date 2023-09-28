@@ -25,7 +25,6 @@ import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,14 +69,15 @@ public class CommonServiceImpl implements CommonService {
                       x.matches(
                           "streampark-flink-sqlclient_" + flinkEnv.getScalaVersion() + "-.*\\.jar"))
               .collect(Collectors.toList());
-      if (CollectionUtils.isEmpty(jars)) {
-        throw new ApiAlertException(
-            "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
-      }
-      if (jars.size() > 1) {
-        throw new ApiAlertException(
-            "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
-      }
+
+      ApiAlertException.throwIfTrue(
+          jars.isEmpty(),
+          "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
+
+      ApiAlertException.throwIfTrue(
+          jars.size() > 1,
+          "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
+
       sqlClientJar = jars.get(0);
     }
     return sqlClientJar;

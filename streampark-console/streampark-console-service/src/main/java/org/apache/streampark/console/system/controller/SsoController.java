@@ -24,7 +24,6 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.UserService;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -66,25 +65,30 @@ public class SsoController {
   @GetMapping("token")
   @ResponseBody
   public RestResponse token() throws Exception {
-    if (!ssoEnable) {
-      throw new ApiAlertException(
-          "Single Sign On (SSO) is not available, please contact the administrator to enable");
-    }
-    // Based on User Profile from Shiro and build Pac4jPrincipal
+
+    // Check SSO enable status
+    ApiAlertException.throwIfTrue(
+        !ssoEnable,
+        "Single Sign On (SSO) is not available, please contact the administrator to enable");
+
     Subject subject = SecurityUtils.getSubject();
     PrincipalCollection principals = subject.getPrincipals();
     Pac4jPrincipal principal = principals.oneByType(Pac4jPrincipal.class);
+
     List<CommonProfile> profiles = null;
+
     if (principal != null) {
       profiles = principal.getProfiles();
     }
+
     principal = new Pac4jPrincipal(profiles, principalNameAttribute);
-    if (StringUtils.isBlank(principal.getName())) {
-      log.error("Please configure correct principalNameAttribute from UserProfile: " + principal);
-      throw new ApiAlertException("Please configure the correct Principal Name Attribute");
-    }
+
+    // Check Principal name
+    ApiAlertException.throwIfNull(
+        principal.getName(), "Please configure the correct Principal Name Attribute");
 
     User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
+
     return userService.getLoginUserInfo(user);
   }
 }

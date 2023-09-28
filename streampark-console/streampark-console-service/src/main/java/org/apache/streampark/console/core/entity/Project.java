@@ -21,8 +21,8 @@ import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
-import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
@@ -185,14 +185,15 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getMavenArgs() {
     String mvn = "mvn";
+    boolean windows = Utils.isWindows();
     try {
-      if (CommonUtils.isWindows()) {
+      if (windows) {
         CommandUtils.execute("mvn.cmd --version");
       } else {
         CommandUtils.execute("mvn --version");
       }
     } catch (Exception e) {
-      if (CommonUtils.isWindows()) {
+      if (windows) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw");
@@ -216,7 +217,7 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getMavenWorkHome() {
     String buildHome = this.getAppSource().getAbsolutePath();
-    if (CommonUtils.notEmpty(this.getPom())) {
+    if (StringUtils.isNotEmpty(this.getPom())) {
       buildHome =
           new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
     }
