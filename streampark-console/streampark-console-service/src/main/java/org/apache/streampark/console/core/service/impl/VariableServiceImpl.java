@@ -72,21 +72,20 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Autowired private CommonService commonService;
 
   @Override
-  @Transactional(rollbackFor = Exception.class)
   public void createVariable(Variable variable) {
-    if (this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null) {
-      throw new ApiAlertException("Sorry, the variable code already exists.");
-    }
+
+    ApiAlertException.throwIfTrue(
+        this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null,
+        "Sorry, the variable code already exists.");
+
     variable.setCreatorId(commonService.getUserId());
     this.save(variable);
   }
 
   @Override
-  @Transactional(rollbackFor = Exception.class)
   public void deleteVariable(Variable variable) {
-    if (isDependByApplications(variable)) {
-      throw new ApiAlertException("Sorry, the variable is actually used.");
-    }
+    ApiAlertException.throwIfTrue(
+        isDependByApplications(variable), "Sorry, the variable is actually used.");
     this.removeById(variable);
   }
 
@@ -120,16 +119,12 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   public void updateVariable(Variable variable) {
     // region update variable
-    if (variable.getId() == null) {
-      throw new ApiAlertException("Sorry, the variable id cannot be null.");
-    }
+    ApiAlertException.throwIfNull(variable.getId(), "Sorry, the variable id cannot be null.");
     Variable findVariable = this.baseMapper.selectById(variable.getId());
-    if (findVariable == null) {
-      throw new ApiAlertException("Sorry, the variable does not exist.");
-    }
-    if (!findVariable.getVariableCode().equals(variable.getVariableCode())) {
-      throw new ApiAlertException("Sorry, the variable code cannot be updated.");
-    }
+    ApiAlertException.throwIfNull(findVariable, "Sorry, the variable does not exist.");
+    ApiAlertException.throwIfFalse(
+        findVariable.getVariableCode().equals(variable.getVariableCode()),
+        "Sorry, the variable code cannot be updated.");
     this.baseMapper.updateById(variable);
     // endregion
 

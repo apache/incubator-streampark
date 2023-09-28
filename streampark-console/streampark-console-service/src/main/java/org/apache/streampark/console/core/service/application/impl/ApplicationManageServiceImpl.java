@@ -26,7 +26,6 @@ import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
@@ -59,6 +58,7 @@ import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -217,13 +217,14 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       return null;
     }
     Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
-    if (CommonUtils.notEmpty(appParam.getStateArray())) {
+
+    if (ArrayUtils.isNotEmpty(appParam.getStateArray())) {
       if (Arrays.stream(appParam.getStateArray())
           .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
         Integer[] newArray =
-            CommonUtils.arrayInsertIndex(
-                appParam.getStateArray(),
+            ArrayUtils.insert(
                 appParam.getStateArray().length,
+                appParam.getStateArray(),
                 FlinkAppStateEnum.POS_TERMINATED.getValue());
         appParam.setStateArray(newArray);
       }
