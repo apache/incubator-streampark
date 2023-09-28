@@ -28,6 +28,7 @@ import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.RoleMenuServie;
 import org.apache.streampark.console.system.service.RoleService;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -89,7 +90,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                         String.format("Role id [%s] not found. Delete role failed.", roleId)));
     List<Long> userIdsByRoleId = memberService.findUserIdsByRoleId(roleId);
     ApiAlertException.throwIfFalse(
-        userIdsByRoleId == null || userIdsByRoleId.isEmpty(),
+        CollectionUtils.isEmpty(userIdsByRoleId),
         String.format(
             "There are some users of role %s, delete role failed, please unbind it first.",
             role.getRoleName()));
