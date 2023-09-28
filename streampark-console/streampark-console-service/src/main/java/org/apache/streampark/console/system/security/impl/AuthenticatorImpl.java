@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Objects;
 
 @Component
 public class AuthenticatorImpl implements Authenticator {
@@ -41,7 +40,7 @@ public class AuthenticatorImpl implements Authenticator {
   @Override
   public User authenticate(String username, String password, String loginType) throws Exception {
     LoginTypeEnum loginTypeEnum = LoginTypeEnum.of(loginType);
-    if (Objects.isNull(loginTypeEnum)) {
+    if (loginTypeEnum == null) {
       throw new ApiAlertException(
           String.format("the login type [%s] is not supported.", loginType));
     }
@@ -60,7 +59,7 @@ public class AuthenticatorImpl implements Authenticator {
 
   private User passwordAuthenticate(String username, String password) {
     User user = usersService.findByName(username);
-    if (Objects.isNull(user)) {
+    if (user == null) {
       throw new ApiAlertException(String.format("user [%s] does not exist", username));
     }
     if (user.getLoginType() != LoginTypeEnum.PASSWORD) {

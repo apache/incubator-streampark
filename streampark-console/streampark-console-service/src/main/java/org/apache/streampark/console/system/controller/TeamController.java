@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
-import java.util.Objects;
-
 @Tag(name = "TEAM_TAG")
 @Slf4j
 @Validated
@@ -61,7 +59,7 @@ public class TeamController {
   @PostMapping("check/name")
   public RestResponse checkTeamName(@NotBlank(message = "{required}") String teamName) {
     Team result = this.teamService.findByName(teamName);
-    return RestResponse.success(Objects.isNull(result));
+    return RestResponse.success(result == null);
   }
 
   @Operation(summary = "Create team")

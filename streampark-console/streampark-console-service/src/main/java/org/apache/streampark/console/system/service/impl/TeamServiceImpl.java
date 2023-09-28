@@ -43,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -82,7 +81,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   public void createTeam(Team team) {
     Team existedTeam = findByName(team.getTeamName());
     ApiAlertException.throwIfFalse(
-        Objects.isNull(existedTeam),
+        existedTeam == null,
         String.format(
             "Team name [%s] exists already. Create team failed. Please rename and try again.",
             team.getTeamName()));
@@ -97,7 +96,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     log.info("{} Proceed delete team[Id={}]", commonService.getCurrentUser().getUsername(), teamId);
     Team team = this.getById(teamId);
     // TODO The AssertUtils.checkApiAlert can simplify the exception.
-    if (Objects.isNull(team)) {
+    if (team == null) {
       throw new ApiAlertException(String.format("The team[Id=%s] doesn't exists.", teamId));
     }
     if (applicationInfoService.existsByTeamId(teamId)) {

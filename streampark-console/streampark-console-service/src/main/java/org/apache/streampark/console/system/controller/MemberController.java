@@ -44,7 +44,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 import java.util.List;
-import java.util.Objects;
 
 @Tag(name = "MEMBER_TAG")
 @Slf4j
@@ -80,7 +79,7 @@ public class MemberController {
   @PostMapping("check/user")
   public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
     Member result = this.memberService.findByUserName(teamId, userName);
-    return RestResponse.success(Objects.isNull(result));
+    return RestResponse.success(result == null);
   }
 
   @Operation(summary = "Create member")

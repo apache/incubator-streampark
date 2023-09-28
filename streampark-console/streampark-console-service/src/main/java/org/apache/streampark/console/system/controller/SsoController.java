@@ -41,7 +41,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Controller
@@ -76,7 +75,7 @@ public class SsoController {
     PrincipalCollection principals = subject.getPrincipals();
     Pac4jPrincipal principal = principals.oneByType(Pac4jPrincipal.class);
     List<CommonProfile> profiles = null;
-    if (Objects.nonNull(principal)) {
+    if (principal != null) {
       profiles = principal.getProfiles();
     }
     principal = new Pac4jPrincipal(profiles, principalNameAttribute);

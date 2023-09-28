@@ -49,7 +49,6 @@ import javax.validation.constraints.NotBlank;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Tag(name = "USER_TAG")
 @Slf4j
@@ -108,7 +107,7 @@ public class UserController {
   @Operation(summary = "Check the username")
   @PostMapping("check/name")
   public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
-    boolean result = Objects.isNull(this.userService.findByName(username));
+    boolean result = this.userService.findByName(username) == null;
     return RestResponse.success(result);
   }
 
@@ -133,7 +132,7 @@ public class UserController {
   @PostMapping("initTeam")
   public RestResponse initTeam(Long teamId, Long userId) {
     Team team = teamService.getById(teamId);
-    if (Objects.isNull(team)) {
+    if (team == null) {
       return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "teamId is invalid");
     }
     userService.setLastTeam(teamId, userId);
@@ -144,7 +143,7 @@ public class UserController {
   @PostMapping("setTeam")
   public RestResponse setTeam(Long teamId) {
     Team team = teamService.getById(teamId);
-    if (Objects.isNull(team)) {
+    if (team == null) {
       return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
     }
     User user = commonService.getCurrentUser();

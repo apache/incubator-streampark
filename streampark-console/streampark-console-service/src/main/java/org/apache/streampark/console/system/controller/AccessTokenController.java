@@ -45,8 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import java.util.Objects;
-
 @Tag(name = "ACCESS_TOKEN_TAG")
 @RestController
 @RequestMapping("token")
@@ -91,9 +89,9 @@ public class AccessTokenController {
   public RestResponse verifyToken() {
     Long userId = commonService.getUserId();
     RestResponse restResponse = RestResponse.success();
-    if (Objects.nonNull(userId)) {
+    if (userId != null) {
       AccessToken accessToken = accessTokenService.getByUserId(userId);
-      if (Objects.isNull(accessToken)) {
+      if (accessToken == null) {
         restResponse.data(AccessTokenStateEnum.NULL.get());
       } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getFinalStatus())) {
         restResponse.data(AccessTokenStateEnum.INVALID.get());
