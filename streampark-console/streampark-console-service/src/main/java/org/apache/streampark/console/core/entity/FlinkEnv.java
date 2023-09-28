@@ -36,7 +36,6 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 
 @Data
 @TableName("t_flink_env")
@@ -100,7 +99,7 @@ public class FlinkEnv implements Serializable {
 
   @JsonIgnore
   public FlinkVersion getFlinkVersion() {
-    if (Objects.isNull(this.flinkVersion)) {
+    if (this.flinkVersion == null) {
       this.flinkVersion = new FlinkVersion(this.flinkHome);
     }
     return this.flinkVersion;

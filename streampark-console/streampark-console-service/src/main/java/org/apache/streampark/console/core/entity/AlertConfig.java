@@ -30,7 +30,6 @@ import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
 
 @Data
 @TableName("t_alert_config")
@@ -70,7 +69,7 @@ public class AlertConfig implements Serializable {
   private Date modifyTime;
 
   public static AlertConfig of(AlertConfigParams params) {
-    if (Objects.isNull(params)) {
+    if (params == null) {
       return null;
     }
     AlertConfig alertConfig = new AlertConfig();
@@ -83,19 +82,19 @@ public class AlertConfig implements Serializable {
         "httpCallbackParams",
         "larkParams");
     try {
-      if (Objects.nonNull(params.getEmailParams())) {
+      if (params.getEmailParams() != null) {
         alertConfig.setEmailParams(JacksonUtils.write(params.getEmailParams()));
       }
-      if (Objects.nonNull(params.getDingTalkParams())) {
+      if (params.getDingTalkParams() != null) {
         alertConfig.setDingTalkParams(JacksonUtils.write(params.getDingTalkParams()));
       }
-      if (Objects.nonNull(params.getWeComParams())) {
+      if (params.getWeComParams() != null) {
         alertConfig.setWeComParams(JacksonUtils.write(params.getWeComParams()));
       }
-      if (Objects.nonNull(params.getHttpCallbackParams())) {
+      if (params.getHttpCallbackParams() != null) {
         alertConfig.setHttpCallbackParams(JacksonUtils.write(params.getHttpCallbackParams()));
       }
-      if (Objects.nonNull(params.getLarkParams())) {
+      if (params.getLarkParams() != null) {
         alertConfig.setLarkParams(JacksonUtils.write(params.getLarkParams()));
       }
     } catch (JsonProcessingException e) {

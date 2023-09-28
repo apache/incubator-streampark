@@ -363,9 +363,9 @@ public class Application implements Serializable {
   }
 
   public boolean cpFailedTrigger() {
-    return Objects.nonNull(this.cpMaxFailureInterval)
-        && Objects.nonNull(this.cpFailureRateInterval)
-        && Objects.nonNull(this.cpFailureAction);
+    return this.cpMaxFailureInterval != null
+        && this.cpFailureRateInterval != null
+        && this.cpFailureAction != null;
   }
 
   public boolean eqFlinkJob(Application other) {

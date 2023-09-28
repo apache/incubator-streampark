@@ -36,7 +36,6 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -80,7 +79,7 @@ public class ApplicationConfig {
   public Map<String, String> readConfig() {
     ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(this.format);
     Map<String, String> configs = null;
-    if (Objects.nonNull(fileType)) {
+    if (fileType != null) {
       switch (fileType) {
         case YAML:
           configs = PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));

@@ -50,7 +50,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Data
@@ -183,7 +182,7 @@ public class FlinkCluster implements Serializable {
     map.putAll(this.getOptionMap());
     map.putAll(dynamicProperties);
     ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
-    if (Objects.nonNull(resolveOrder)) {
+    if (resolveOrder != null) {
       map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
     }
     return map;

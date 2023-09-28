@@ -30,7 +30,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
 import java.util.TimeZone;
 
 @Data
@@ -184,9 +183,9 @@ public class AlertTemplate implements Serializable {
 
     public AlertTemplateBuilder setDuration(Date start, Date end) {
       long duration;
-      if (Objects.isNull(start) && Objects.isNull(end)) {
+      if (start == null && end == null) {
         duration = 0L;
-      } else if (Objects.isNull(end)) {
+      } else if (end == null) {
         duration = System.currentTimeMillis() - start.getTime();
       } else {
         duration = end.getTime() - start.getTime();
