@@ -73,10 +73,10 @@ public class ApplicationConfigServiceImpl
 
     if (application.getFormat() != null) {
       ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(application.getFormat());
-      if (fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType) {
-        throw new ApiAlertException(
-            "application' config error. must be (.properties|.yaml|.yml |.conf)");
-      }
+      ApiAlertException.throwIfTrue(
+          fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType,
+          "application' config error. must be (.properties|.yaml|.yml |.conf)");
+
       applicationConfig.setFormat(fileType.getValue());
     }
 

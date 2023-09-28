@@ -404,7 +404,6 @@ public class AppBuildPipeServiceImpl
    *
    * @param appId application id
    * @param forceBuild forced start pipeline or not
-   * @return
    */
   private void checkBuildEnv(Long appId, boolean forceBuild) {
     Application app = applicationManageService.getById(appId);
@@ -421,10 +420,9 @@ public class AppBuildPipeServiceImpl
         envOk, "Check flink env failed, please check the flink version of this job");
 
     // 3) Whether the application can currently start a new building progress
-    if (!forceBuild && !allowToBuildNow(appId)) {
-      throw new ApiAlertException(
-          "The job is invalid, or the job cannot be built while it is running");
-    }
+    ApiAlertException.throwIfTrue(
+        !forceBuild && !allowToBuildNow(appId),
+        "The job is invalid, or the job cannot be built while it is running");
   }
 
   /** create building pipeline instance */
