@@ -22,6 +22,8 @@ import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 
+import org.apache.commons.collections.MapUtils;
+
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -95,7 +97,7 @@ public class ApplicationConfig {
       }
     }
 
-    if (configs != null && !configs.isEmpty()) {
+    if (MapUtils.isNotEmpty(configs)) {
       return configs.entrySet().stream()
           .collect(
               Collectors.toMap(
