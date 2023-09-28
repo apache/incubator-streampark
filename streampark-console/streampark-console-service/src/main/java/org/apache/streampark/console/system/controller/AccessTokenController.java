@@ -99,7 +99,7 @@ public class AccessTokenController {
         restResponse.data(AccessTokenStateEnum.OK.get());
       }
     } else {
-      restResponse.data(AccessTokenStateEnum.NULL.get());
+      restResponse.data(AccessTokenStateEnum.INVALID.get());
     }
     return restResponse;
   }
