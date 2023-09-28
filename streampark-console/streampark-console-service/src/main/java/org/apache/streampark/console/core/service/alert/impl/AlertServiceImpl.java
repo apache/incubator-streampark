@@ -34,7 +34,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -46,7 +45,7 @@ public class AlertServiceImpl implements AlertService {
   @Override
   public boolean alert(Long alertConfigId, AlertTemplate alertTemplate) {
 
-    if (Objects.isNull(alertConfigId)) {
+    if (alertConfigId == null) {
       log.warn("alertConfigId is null");
       return false;
     }

@@ -33,7 +33,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -54,7 +53,7 @@ public class Dependency {
   }
 
   public boolean equals(Dependency other) {
-    if (Objects.isNull(other)) {
+    if (other == null) {
       return false;
     }
     if (this.isEmpty() && other.isEmpty()) {

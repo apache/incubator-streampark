@@ -30,7 +30,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
 import java.util.TimeZone;
 
 @Data
@@ -58,12 +57,6 @@ public class AlertTemplate implements Serializable {
   private Integer lostJobs;
   private Integer cancelledJobs;
 
-  private static final String ALERT_SUBJECT_PREFIX = "StreamPark Alert:";
-
-  private static final String ALERT_TITLE_PREFIX = "Notify:";
-
-  private static final String PROBE = "PROBE";
-
   public static AlertTemplate of(Application application, FlinkAppStateEnum appState) {
     return new AlertTemplateBuilder()
         .setDuration(application.getStartTime(), application.getEndTime())
@@ -75,11 +68,8 @@ public class AlertTemplate implements Serializable {
         .setRestartIndex(application.getRestartCount())
         .setTotalRestart(application.getRestartSize())
         .setType(1)
-        .setTitle(
-            String.format(
-                "%s %s %s", ALERT_TITLE_PREFIX, application.getJobName(), appState.name()))
-        .setSubject(
-            String.format("%s %s %s", ALERT_SUBJECT_PREFIX, application.getJobName(), appState))
+        .setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()))
+        .setSubject(String.format("StreamPark Alert: %s %s", application.getJobName(), appState))
         .setStatus(appState.name())
         .build();
   }
@@ -94,11 +84,9 @@ public class AlertTemplate implements Serializable {
         .setCpFailureRateInterval(
             DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60))
         .setCpMaxFailureInterval(application.getCpMaxFailureInterval())
-        .setTitle(
-            String.format("%s %s checkpoint FAILED", ALERT_TITLE_PREFIX, application.getJobName()))
+        .setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()))
         .setSubject(
-            String.format(
-                "%s %s, checkPoint is Failed", ALERT_SUBJECT_PREFIX, application.getJobName()))
+            String.format("StreamPark Alert: %s, checkPoint is Failed", application.getJobName()))
         .build();
   }
 
@@ -110,11 +98,9 @@ public class AlertTemplate implements Serializable {
         .setStartTime(cluster.getStartTime())
         .setEndTime(cluster.getEndTime())
         .setType(3)
-        .setTitle(
-            String.format(
-                "%s %s %s", ALERT_TITLE_PREFIX, cluster.getClusterName(), clusterState.name()))
+        .setTitle(String.format("Notify: %s %s", cluster.getClusterName(), clusterState.name()))
         .setSubject(
-            String.format("%s %s %s", ALERT_SUBJECT_PREFIX, cluster.getClusterName(), clusterState))
+            String.format("StreamPark Alert: %s %s", cluster.getClusterName(), clusterState))
         .setStatus(clusterState.name())
         .setAllJobs(cluster.getAllJobs())
         .setAffectedJobs(cluster.getAffectedJobs())
@@ -129,8 +115,8 @@ public class AlertTemplate implements Serializable {
         .setFailedJobs(alertProbeMsg.getFailedJobs())
         .setLostJobs(alertProbeMsg.getLostJobs())
         .setCancelledJobs(alertProbeMsg.getCancelledJobs())
-        .setSubject(String.format("%s %s", ALERT_SUBJECT_PREFIX, PROBE))
-        .setTitle(PROBE)
+        .setSubject("StreamPark Alert: PROBE")
+        .setTitle("PROBE")
         .build();
   }
 
@@ -184,9 +170,9 @@ public class AlertTemplate implements Serializable {
 
     public AlertTemplateBuilder setDuration(Date start, Date end) {
       long duration;
-      if (Objects.isNull(start) && Objects.isNull(end)) {
+      if (start == null && end == null) {
         duration = 0L;
-      } else if (Objects.isNull(end)) {
+      } else if (end == null) {
         duration = System.currentTimeMillis() - start.getTime();
       } else {
         duration = end.getTime() - start.getTime();

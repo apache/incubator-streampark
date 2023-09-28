@@ -39,7 +39,6 @@ import javax.annotation.Nullable;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -99,7 +98,7 @@ public class FlinkCheckpointProcessor {
       }
     } else if (shouldProcessFailedTrigger(checkPoint, application.cpFailedTrigger(), status)) {
       Counter counter = checkPointFailedCache.get(appId);
-      if (Objects.isNull(counter)) {
+      if (counter == null) {
         checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
       } else {
         long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
@@ -108,7 +107,7 @@ public class FlinkCheckpointProcessor {
           checkPointFailedCache.remove(appId);
           FailoverStrategyEnum failoverStrategyEnum =
               FailoverStrategyEnum.of(application.getCpFailureAction());
-          if (Objects.isNull(failoverStrategyEnum)) {
+          if (failoverStrategyEnum == null) {
             throw new IllegalArgumentException(
                 "Unexpected cpFailureAction: " + application.getCpFailureAction());
           }
