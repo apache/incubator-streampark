@@ -38,15 +38,11 @@ object DataStreamExt {
   class DataStream[T: TypeInformation](dataStream: DStream[T]) {
 
     def sideOut(fun: (T, ProcFunc[T, T]#Context) => Unit): DStream[T] =
-      dataStream.process(new ProcFunc[T, T] {
-        override def processElement(
-            value: T,
-            ctx: ProcFunc[T, T]#Context,
-            out: Collector[T]): Unit = {
+      dataStream.process(
+        (value: T, ctx: ProcFunc[T, T]#Context, out: Collector[T]) => {
           fun(value, ctx)
           out.collect(value)
-        }
-      })
+        })
 
     def sideGet[R: TypeInformation](sideTag: String): DStream[R] =
       dataStream.getSideOutput(new OutputTag[R](sideTag))
