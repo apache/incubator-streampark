@@ -22,14 +22,14 @@
 have_tty=0
 # shellcheck disable=SC2006
 if [[ "`tty`" != "not a tty" ]]; then
-    have_tty=1
+  have_tty=1
 fi
 
 # Bugzilla 37848: When no TTY is available, don't output to console
 have_tty=0
 # shellcheck disable=SC2006
 if [[ "`tty`" != "not a tty" ]]; then
-    have_tty=1
+  have_tty=1
 fi
 
  # Only use colors if connected to a terminal
@@ -52,24 +52,24 @@ else
 fi
 
 echo_r () {
-    # Color red: Error, Failed
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $RED $RESET
+  # Color red: Error, Failed
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $RED $RESET
 }
 
 echo_y () {
-    # Color yellow: Warning
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $YELLOW $RESET
+  # Color yellow: Warning
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $YELLOW $RESET
 }
 
 echo_g () {
-    # Color green: Success
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $GREEN $RESET
+  # Color green: Success
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $GREEN $RESET
 }
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -176,32 +176,29 @@ build() {
     echo_g "Apache StreamPark, building..."
     "$PRG_DIR/mvnw" -Pshaded,webapp,dist -DskipTests clean install
     if [ $? -eq 0 ]; then
-       printf '\n'
-       echo_g """StreamPark project build successful!
-       dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
+      printf '\n'
+      echo_g """StreamPark project build successful!
+      dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
     else
-        javaSource="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.java"
-        javaClass="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.class"
-        wrapperJarPath="$PRG_DIR/.mvn/wrapper/maven-wrapper.jar"
-        # For Cygwin, switch paths to Windows format before running javac
-        if $cygwin; then
-          javaSource=$(cygpath --path --windows "$javaSource")
-          javaClass=$(cygpath --path --windows "$javaClass")
+      javaSource="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.java"
+      javaClass="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.class"
+      wrapperJarPath="$PRG_DIR/.mvn/wrapper/maven-wrapper.jar"
+      # For Cygwin, switch paths to Windows format before running javac
+      if $cygwin; then
+        javaSource=$(cygpath --path --windows "$javaSource")
+        javaClass=$(cygpath --path --windows "$javaClass")
+      fi
+      if [ -e "$javaSource" ]; then
+        [ ! -e "$javaClass" ] && ("$JAVA_HOME/bin/javac" "$javaSource")
+        if [ -e "$javaClass" ]; then
+          ("$JAVA_HOME/bin/java" -cp "$PRG_DIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath")
+          if [ $? -eq 1 ]; then
+            echo_r "Error: $wrapperJarPath is invalid. retry download it and build project again..."
+            rm -f $wrapperJarPath
+            build
+          fi
         fi
-        if [ -e "$javaSource" ]; then
-            [ ! -e "$javaClass" ] && ("$JAVA_HOME/bin/javac" "$javaSource")
-            if [ -e "$javaClass" ]; then
-                echo_g "Check maven-wrapper starting..."
-                ("$JAVA_HOME/bin/java" -cp "$PRG_DIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath")
-                if [ $? -eq 0 ]; then
-                  echo_r ""
-                else
-                  echo_y "Error: $wrapperJarPath is invalid. retry download it and build project again..."
-                  rm -f $wrapperJarPath
-                  build
-                fi
-            fi
-        fi
+      fi
     fi
   else
     echo_r "permission denied: $PRG_DIR/mvnw, please check."
