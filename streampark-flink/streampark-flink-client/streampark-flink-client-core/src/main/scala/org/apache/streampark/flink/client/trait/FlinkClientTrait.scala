@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.conf.{ConfigConst, Workspace}
+import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder, Workspace}
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.enums.{ApplicationType, FlinkDevelopmentMode, FlinkExecutionMode, FlinkRestoreMode}
 import org.apache.streampark.common.fs.FsOperator
@@ -154,6 +154,27 @@ trait FlinkClientTrait extends Logger {
             case Some(p) => flinkConfig.set(p, x._2.toString)
             case _ =>
           })
+    }
+
+    // set prometheus
+    val enablePrometheus: Boolean =
+      InternalConfigHolder.get(CommonConfig.STREAMPARK_PROMETHEUS_ENABLE)
+    val promgatewayHostUrl: String =
+      InternalConfigHolder.get(CommonConfig.STREAMPARK_PROMGATEWAY_HOST_URL)
+
+    if (
+      submitRequest.executionMode == FlinkExecutionMode.YARN_APPLICATION && enablePrometheus && StringUtils
+        .isNotBlank(promgatewayHostUrl)
+    ) {
+      flinkConfig.setString(
+        "metrics.reporter.promgateway.factory.class",
+        "org.apache.flink.metrics.prometheus.PrometheusPushGatewayReporterFactory")
+      flinkConfig.setString("metrics.reporter.promgateway.hostUrl", promgatewayHostUrl)
+      flinkConfig.setString("metrics.reporter.promgateway.jobName", submitRequest.appName)
+      flinkConfig.setString("metrics.reporter.promgateway.randomJobNameSuffix", "true")
+      flinkConfig.setString("metrics.reporter.promgateway.deleteOnShutdown", "false")
+      flinkConfig.setString("metrics.reporter.promgateway.groupingKey", "k1=v1;k2=v2")
+      flinkConfig.setString("metrics.reporter.promgateway.interval", "10 SECONDS")
     }
 
     setConfig(submitRequest, flinkConfig)

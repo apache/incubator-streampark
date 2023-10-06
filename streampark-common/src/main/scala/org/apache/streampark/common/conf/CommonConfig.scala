@@ -118,4 +118,17 @@ object CommonConfig {
     description = "Use the database type"
   )
 
+  val STREAMPARK_PROMETHEUS_ENABLE: InternalOption = InternalOption(
+    key = "streampark.prometheus.enable",
+    defaultValue = false,
+    classType = classOf[Boolean],
+    description = "Enable prometheus"
+  )
+
+  val STREAMPARK_PROMGATEWAY_HOST_URL: InternalOption = InternalOption(
+    key = "streampark.promgateway.hostUrl",
+    defaultValue = "http://localhost:9091",
+    classType = classOf[String],
+    description = "Promgateway hostUrl"
+  )
 }
