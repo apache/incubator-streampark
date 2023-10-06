@@ -67,8 +67,7 @@ git clone git@github.com:apache/incubator-streampark.git
 cd incubator-streampark
 ./build.sh
 ```
-🗄️Deatils:how to [Local Development and Debugging](https://streampark.apache.org/docs/user-guide/local%20development%20and%20debugging)
-
+🗄 Deatils:how to [Development](https://streampark.apache.org/docs/user-guide/development)
 ## 🧑‍💻 Downloads
 
 Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)

@@ -15,12 +15,27 @@
  * limitations under the License.
  */
 
-use streampark;
+package org.apache.streampark.console;
 
-set names utf8mb4;
-set foreign_key_checks = 0;
+import java.util.jar.JarFile;
 
-alter table `t_flink_app`
-    add column `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
-    -- modify_time change with duration #3188
-    modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
+public class MavenWrapperChecker {
+
+  private static final boolean VERBOSE = Boolean.parseBoolean(System.getenv("MVNW_VERBOSE"));
+
+  public static void main(String[] args) {
+    String wrapperJar = args[0];
+    log("maven-wrapper file checking: " + wrapperJar);
+    try (JarFile ignored = new JarFile(wrapperJar, true)) {
+      System.exit(0);
+    } catch (Exception e) {
+      System.exit(1);
+    }
+  }
+
+  private static void log(String msg) {
+    if (VERBOSE) {
+      System.out.println(msg);
+    }
+  }
+}
