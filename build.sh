@@ -180,9 +180,8 @@ build() {
        echo_g """StreamPark project build successful!
        dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
     else
-        echo_g "Check maven-wrapper starting..."
-        javaSource="$PRG_DIR/.mvn/wrapper/MavenWrapperChecker.java"
-        javaClass="$PRG_DIR/.mvn/wrapper/MavenWrapperChecker.class"
+        javaSource="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.java"
+        javaClass="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.class"
         wrapperJarPath="$PRG_DIR/.mvn/wrapper/maven-wrapper.jar"
         # For Cygwin, switch paths to Windows format before running javac
         if $cygwin; then
@@ -190,17 +189,15 @@ build() {
           javaClass=$(cygpath --path --windows "$javaClass")
         fi
         if [ -e "$javaSource" ]; then
-            if [ ! -e "$javaClass" ]; then
-                echo_g " - Compiling MavenWrapperChecker.java ..."
-                ("$JAVA_HOME/bin/javac" "$javaSource")
-            fi
+            [ ! -e "$javaClass" ] && ("$JAVA_HOME/bin/javac" "$javaSource")
             if [ -e "$javaClass" ]; then
-                echo_y " - Running MavenWrapperChecker.java ..."
-                "$JAVA_HOME/bin/java" -cp "$PRG_DIR/.mvn/wrapper" MavenWrapperChecker "$wrapperJarPath"
-                if [ $? -eq 1 ]; then
-                  echo_y " $wrapperJarPath is invalid. now remove maven-wrapper..."
+                echo_g "Check maven-wrapper starting..."
+                ("$JAVA_HOME/bin/java" -cp "$PRG_DIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath")
+                if [ $? -eq 0 ]; then
+                  echo_r ""
+                else
+                  echo_y "Error: $wrapperJarPath is invalid. retry download it and build project again..."
                   rm -f $wrapperJarPath
-                  echo_y " build project again..."
                   build
                 fi
             fi
