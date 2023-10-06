@@ -53,19 +53,19 @@ object PropertiesUtils extends Logger {
     buffer.toString()
   }
 
-  private[this] def eachAppendYamlItem(
-      prefix: String,
+  private[this] def eachYamlItem(
       k: String,
       v: Any,
-      proper: collection.mutable.Map[String, String]): Map[String, String] = {
+      prefix: String = "",
+      proper: MutableMap[String, String] = MutableMap[String, String]()): Map[String, String] = {
     v match {
       case map: JavaLinkedMap[String, Any] =>
         map
           .flatMap(
             x => {
               prefix match {
-                case "" => eachAppendYamlItem(k, x._1, x._2, proper)
-                case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
+                case "" => eachYamlItem(x._1, x._2, k, proper)
+                case other => eachYamlItem(x._1, x._2, s"$other.$k", proper)
               }
             })
           .toMap
@@ -84,11 +84,10 @@ object PropertiesUtils extends Logger {
 
   def fromYamlText(text: String): Map[String, String] = {
     try {
-      val map = MutableMap[String, String]()
       new Yaml()
         .load(text)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .flatMap(x => eachYamlItem(x._1, x._2))
         .toMap
     } catch {
       case e: IOException =>
@@ -148,11 +147,10 @@ object PropertiesUtils extends Logger {
       inputStream != null,
       s"[StreamPark] fromYamlFile: Properties inputStream  must not be null")
     try {
-      val map = MutableMap[String, String]()
       new Yaml()
         .load(inputStream)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .flatMap(x => eachYamlItem(x._1, x._2))
         .toMap
     } catch {
       case e: IOException =>
