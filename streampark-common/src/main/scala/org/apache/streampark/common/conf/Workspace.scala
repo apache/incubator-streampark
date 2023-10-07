@@ -102,7 +102,9 @@ case class Workspace(storageType: StorageType) {
 
   lazy val APP_UPLOADS = s"$WORKSPACE/uploads"
 
-  lazy val APP_PYTHON_VENV = s"$WORKSPACE/python/venv.zip"
+  lazy val APP_PYTHON = s"$WORKSPACE/python"
+
+  lazy val APP_PYTHON_VENV = s"$APP_PYTHON/venv.zip"
 
   lazy val APP_WORKSPACE = s"$WORKSPACE/workspace"
 

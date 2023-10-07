@@ -37,6 +37,7 @@ import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
@@ -282,7 +283,8 @@ public class Application implements Serializable {
     }
 
     Map<String, Object> hotParamsMap = this.getHotParamsMap();
-    if (!hotParamsMap.isEmpty() && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
+    if (MapUtils.isNotEmpty(hotParamsMap)
+        && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
       String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
       String labelExpr =
           Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
@@ -541,7 +543,7 @@ public class Application implements Serializable {
   @SneakyThrows
   @SuppressWarnings("unchecked")
   public Map<String, Object> getHotParamsMap() {
-    if (this.hotParams != null) {
+    if (StringUtils.isNotBlank(this.hotParams)) {
       Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
       map.entrySet().removeIf(entry -> entry.getValue() == null);
       return map;
@@ -564,7 +566,7 @@ public class Application implements Serializable {
     if (needFillYarnQueueLabel(executionModeEnum)) {
       hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
     }
-    if (!hotParams.isEmpty()) {
+    if (MapUtils.isNotEmpty(hotParams)) {
       this.setHotParams(JacksonUtils.write(hotParams));
     }
   }

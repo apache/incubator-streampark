@@ -62,8 +62,12 @@
 
 ## 🔨 How to Build
 
-See how to [Local Development and Debugging]([Local Development and Debugging | Apache StreamPark (incubating)](https://streampark.apache.org/docs/user-guide/local development and debugging/))
-
+```shell
+git clone git@github.com:apache/incubator-streampark.git
+cd incubator-streampark
+./build.sh
+```
+🗄 Deatils:how to [Development](https://streampark.apache.org/docs/user-guide/development)
 ## 🧑‍💻 Downloads
 
 Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)

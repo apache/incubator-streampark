@@ -64,7 +64,6 @@ public class ApplicationConfigServiceImpl
   @Autowired private EffectiveService effectiveService;
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public synchronized void create(Application application, Boolean latest) {
     String decode = new String(Base64.getDecoder().decode(application.getConfig()));
     String config = DeflaterUtils.zipString(decode.trim());
@@ -74,10 +73,10 @@ public class ApplicationConfigServiceImpl
 
     if (application.getFormat() != null) {
       ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(application.getFormat());
-      if (fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType) {
-        throw new ApiAlertException(
-            "application' config error. must be (.properties|.yaml|.yml |.conf)");
-      }
+      ApiAlertException.throwIfTrue(
+          fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType,
+          "application' config error. must be (.properties|.yaml|.yml |.conf)");
+
       applicationConfig.setFormat(fileType.getValue());
     }
 
@@ -89,7 +88,6 @@ public class ApplicationConfigServiceImpl
     this.setLatestOrEffective(latest, applicationConfig.getId(), application.getId());
   }
 
-  @Transactional(rollbackFor = {Exception.class})
   public void setLatest(Long appId, Long configId) {
     LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
     updateWrapper.set(ApplicationConfig::getLatest, false).eq(ApplicationConfig::getAppId, appId);
@@ -101,7 +99,6 @@ public class ApplicationConfigServiceImpl
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public synchronized void update(Application application, Boolean latest) {
     // flink sql job
     ApplicationConfig latestConfig = getLatest(application.getId());
@@ -189,7 +186,6 @@ public class ApplicationConfigServiceImpl
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public ApplicationConfig getEffective(Long appId) {
     return baseMapper.getEffective(appId);
   }

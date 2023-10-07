@@ -15,19 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.client.bean
+package org.apache.streampark.console;
 
-import org.apache.streampark.common.conf.FlinkVersion
-import org.apache.streampark.common.enums.FlinkExecutionMode
+import java.util.jar.JarFile;
 
-import javax.annotation.Nullable
+public class MavenWrapperChecker {
 
-import java.util.{Map => JavaMap}
+  private static final boolean VERBOSE = Boolean.parseBoolean(System.getenv("MVNW_VERBOSE"));
 
-case class ShutDownRequest(
-    flinkVersion: FlinkVersion,
-    executionMode: FlinkExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
-    id: Long,
-    @Nullable kubernetesDeployParam: KubernetesDeployParam)
+  public static void main(String[] args) {
+    String wrapperJar = args[0];
+    log("maven-wrapper file checking: " + wrapperJar);
+    try (JarFile ignored = new JarFile(wrapperJar, true)) {
+      System.exit(0);
+    } catch (Exception e) {
+      System.exit(1);
+    }
+  }
+
+  private static void log(String msg) {
+    if (VERBOSE) {
+      System.out.println(msg);
+    }
+  }
+}

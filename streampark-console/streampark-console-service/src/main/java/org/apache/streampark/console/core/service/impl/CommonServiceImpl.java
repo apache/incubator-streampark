@@ -69,14 +69,15 @@ public class CommonServiceImpl implements CommonService {
                       x.matches(
                           "streampark-flink-sqlclient_" + flinkEnv.getScalaVersion() + "-.*\\.jar"))
               .collect(Collectors.toList());
-      if (jars.isEmpty()) {
-        throw new ApiAlertException(
-            "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
-      }
-      if (jars.size() > 1) {
-        throw new ApiAlertException(
-            "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
-      }
+
+      ApiAlertException.throwIfTrue(
+          jars.isEmpty(),
+          "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
+
+      ApiAlertException.throwIfTrue(
+          jars.size() > 1,
+          "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
+
       sqlClientJar = jars.get(0);
     }
     return sqlClientJar;

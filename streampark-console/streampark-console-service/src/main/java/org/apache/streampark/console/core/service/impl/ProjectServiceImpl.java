@@ -100,21 +100,20 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         new LambdaQueryWrapper<Project>().eq(Project::getName, project.getName());
     long count = count(queryWrapper);
     RestResponse response = RestResponse.success();
-    if (count == 0) {
-      project.setCreateTime(new Date());
-      boolean status = save(project);
-      if (status) {
-        return response.message("Add project successfully").data(true);
-      } else {
-        return response.message("Add project failed").data(false);
-      }
+
+    ApiAlertException.throwIfTrue(count > 0, "project name already exists, add project failed");
+
+    project.setCreateTime(new Date());
+    boolean status = save(project);
+
+    if (status) {
+      return response.message("Add project successfully").data(true);
     } else {
-      throw new ApiAlertException("project name already exists,add project failed");
+      return response.message("Add project failed").data(false);
     }
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean update(Project projectParam) {
     Project project = getById(projectParam.getId());
     Utils.notNull(project);
@@ -158,7 +157,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  @Transactional(rollbackFor = {Exception.class})
   public boolean delete(Long id) {
     Project project = getById(id);
     Utils.notNull(project);
