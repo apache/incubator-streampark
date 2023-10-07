@@ -43,7 +43,13 @@ class ChildFirstClassLoader(
   ClassLoader.registerAsParallelCapable()
 
   def this(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern) {
-    this(urls, parent, flinkResourcePattern, (_: Throwable) => {})
+    this(
+      urls,
+      parent,
+      flinkResourcePattern,
+      new Consumer[Throwable] {
+        override def accept(t: Throwable): Unit = {}
+      })
   }
 
   private val FLINK_PATTERN =
