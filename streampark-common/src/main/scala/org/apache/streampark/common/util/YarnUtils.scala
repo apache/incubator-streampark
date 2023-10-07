@@ -260,43 +260,51 @@ object YarnUtils extends Logger {
   def restRequest(url: String): String = {
     if (url == null) return null
 
-    def request(reqUrl: String): String = {
-      logDebug("request url is " + reqUrl)
-      val config = RequestConfig.custom.setConnectTimeout(5000).build
-      if (hasYarnHttpKerberosAuth) {
-        HadoopUtils
-          .getUgi()
-          .doAs(new PrivilegedExceptionAction[String] {
-            override def run(): String = {
-              Try(HttpClientUtils.httpAuthGetRequest(reqUrl, config)) match {
-                case Success(v) => v
-                case Failure(e) =>
-                  logError("yarnUtils authRestRequest error, detail: ", e)
-                  null
-              }
-            }
-          })
-      } else {
-        val url = if (hasYarnHttpSampleAuth) {
-          s"$reqUrl?user.name=${HadoopUtils.hadoopUserName}"
-        } else reqUrl
-        Try(HttpClientUtils.httpGetRequest(url, config)) match {
+    url match {
+      case u if u.matches("^http(|s)://.*") =>
+        Try(request(url)) match {
           case Success(v) => v
           case Failure(e) =>
-            logError("yarnUtils restRequest error, detail: ", e)
+            if (hasYarnHttpKerberosAuth) {
+              logError(s"yarnUtils authRestRequest error, url: $u, detail: $e")
+            } else {
+              logError(s"yarnUtils restRequest error, url: $u, detail: $e")
+            }
             null
         }
-      }
-    }
-
-    url match {
-      case u if u.matches("^http(|s)://.*") => request(url)
       case _ =>
-        val resp = request(s"${getRMWebAppURL()}/$url")
-        if (resp != null) resp;
-        else {
-          request(s"${getRMWebAppURL(true)}/$url")
+        Try(request(s"${getRMWebAppURL()}/$url")) match {
+          case Success(v) => v
+          case Failure(_) =>
+            Utils.retry[String](5) {
+              request(s"${getRMWebAppURL(true)}/$url")
+            } match {
+              case Success(v) => v
+              case Failure(e) =>
+                logError(s"yarnUtils restRequest retry 5 times all failed. detail: $e")
+                null
+            }
         }
+    }
+  }
+
+  private[this] def request(reqUrl: String): String = {
+    val config = RequestConfig.custom.setConnectTimeout(5000).build
+    if (hasYarnHttpKerberosAuth) {
+      HadoopUtils
+        .getUgi()
+        .doAs(new PrivilegedExceptionAction[String] {
+          override def run(): String = {
+            HttpClientUtils.httpAuthGetRequest(reqUrl, config)
+          }
+        })
+    } else {
+      val url =
+        if (!hasYarnHttpSampleAuth) reqUrl
+        else {
+          s"$reqUrl?user.name=${HadoopUtils.hadoopUserName}"
+        }
+      HttpClientUtils.httpGetRequest(url, config)
     }
   }
 
