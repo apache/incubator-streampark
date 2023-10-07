@@ -37,6 +37,7 @@ import org.springframework.util.PropertyPlaceholderHelper;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -85,7 +86,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   }
 
   private void renderLinkUrl(ExternalLink link, Application app) {
-    HashMap<String, String> map = new HashMap();
+    Map<String, String> map = new HashMap<>();
     map.put(PlaceholderTypeEnum.JOB_ID.get(), app.getJobId());
     map.put(PlaceholderTypeEnum.JOB_NAME.get(), app.getJobName());
     map.put(PlaceholderTypeEnum.YARN_ID.get(), app.getAppId());

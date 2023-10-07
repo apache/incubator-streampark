@@ -148,7 +148,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  public ArrayList<VueRouter<Menu>> getUserRouters(Long userId, Long teamId) {
+  public List<VueRouter<Menu>> getUserRouters(Long userId, Long teamId) {
     List<VueRouter<Menu>> routes = new ArrayList<>();
     // The query type is the menu type
     List<Menu> menus = this.findUserMenus(userId, teamId);
