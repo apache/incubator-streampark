@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "MENU_TAG")
@@ -55,7 +55,7 @@ public class MenuController {
   @PostMapping("router")
   public RestResponse getUserRouters(Long teamId) {
     // TODO The teamId is required, get routers should be called after choose teamId.
-    ArrayList<VueRouter<Menu>> routers =
+    List<VueRouter<Menu>> routers =
         this.menuService.getUserRouters(commonService.getUserId(), teamId);
     return RestResponse.success(routers);
   }
