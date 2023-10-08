@@ -26,7 +26,7 @@
 <script lang="ts" setup name="FlinkClusterSetting">
   import { onMounted, ref } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { List, Popconfirm, Tooltip, Card } from 'ant-design-vue';
+  import { List, Popconfirm, Tooltip, Card, Tag } from 'ant-design-vue';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import {
     PauseCircleOutlined,
@@ -160,7 +160,13 @@
             <div class="list-content-item">
               <span>{{ t('setting.flinkCluster.form.executionMode') }}</span>
               <p style="margin-top: 10px">
-                {{ item.executionModeEnum.toLowerCase() }}
+                <Tag v-if="item.executionMode === ExecModeEnum.REMOTE" color="#2db7f5">REMOTE</Tag>
+                <Tag v-if="item.executionMode === ExecModeEnum.YARN_SESSION" color="#87d068"
+                  >YARN SESSION</Tag
+                >
+                <Tag v-if="item.executionMode === ExecModeEnum.KUBERNETES_SESSION" color="#108ee9"
+                  >KUBERNETES SESSION</Tag
+                >
               </p>
             </div>
           </div>
