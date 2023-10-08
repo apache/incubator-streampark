@@ -238,6 +238,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
     applicationLog.setYarnAppId(application.getClusterId());
+    applicationLog.setUserId(commonService.getUserId());
 
     if (appParam.getSavePointed()) {
       FlinkAppHttpWatcher.addSavepoint(application.getId());
@@ -407,6 +408,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     applicationLog.setOptionName(OperationEnum.START.getValue());
     applicationLog.setAppId(application.getId());
     applicationLog.setOptionTime(new Date());
+    applicationLog.setUserId(commonService.getUserId());
 
     // set the latest to Effective, (it will only become the current effective at this time)
     applicationManageService.toEffective(application);

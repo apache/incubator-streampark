@@ -155,6 +155,7 @@ create table if not exists `t_flink_log` (
   `exception` text ,
   `option_time` datetime default null,
   `option_name` tinyint default null,
+  `user_id` bigint default null comment 'operator user id',
   primary key(`id`)
 );
 

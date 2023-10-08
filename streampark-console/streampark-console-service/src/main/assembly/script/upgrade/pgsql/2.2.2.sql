@@ -17,3 +17,8 @@
 
 alter table "public"."t_flink_app"
     add column "k8s_name" varchar(63) collate "pg_catalog"."default";
+
+alter table "public"."t_flink_log"
+    add column "user_id" int8 collate "pg_catalog"."default";
+
+comment on column "public"."t_flink_log"."user_id" is 'operator user id';
