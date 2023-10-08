@@ -40,7 +40,7 @@
     :collapsedShowTitle="collapsedShowTitle"
   >
     <template #title>
-      <span>
+      <span class="menu-down-svg">
         <SvgIcon v-if="item.path === '/system'" name="management" size="20" />
         <SvgIcon v-if="item.path === '/flink'" name="flink3" size="20" />
         <SvgIcon v-if="item.path === '/setting'" name="settings" size="20" />
@@ -64,7 +64,6 @@
 
   import { defineComponent, computed } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import Icon from '/@/components/Icon/index';
 
   import MenuItem from './components/MenuItem.vue';
   import SubMenu from './components/SubMenuItem.vue';
