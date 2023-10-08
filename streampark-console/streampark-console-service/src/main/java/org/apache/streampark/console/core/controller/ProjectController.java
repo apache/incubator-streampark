@@ -46,7 +46,7 @@ import java.util.Map;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/project")
+@RequestMapping("project")
 public class ProjectController {
 
   @Autowired private ProjectService projectService;

@@ -16,7 +16,7 @@
  */
 export default {
   menu: {
-    system: '系统管理',
+    system: '系统',
     userManagement: '用户管理',
     roleManagement: '角色管理',
     menuManagement: '菜单管理',
@@ -27,14 +27,14 @@ export default {
     application: '作业管理',
     variable: '变量管理',
     resource: '资源管理',
-    setting: '设置中心',
+    setting: '设置',
   },
   flink: {
     flinkHome: 'Flink版本',
     flinkCluster: '集群',
   },
   setting: {
-    system: '系统设置',
+    system: '环境设置',
     alarm: '告警设置',
     externalLink: '扩展链接',
     yarnQueue: 'Yarn 队列',

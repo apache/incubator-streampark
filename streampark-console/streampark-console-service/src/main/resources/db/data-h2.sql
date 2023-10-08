@@ -46,10 +46,10 @@ insert into `t_flink_sql` values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94
 -- Records of t_menu
 -- ----------------------------
 insert into `t_menu` values (110000, 0, 'menu.system', '/system', 'PageView', null, 'desktop', '0', 1, 1, now(), now());
-insert into `t_menu` values (120000, 0, 'Apache Flink', '/flink', 'PageView', null, null, '0', 1, 3, now(), now());
-insert into `t_menu` values (130000, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', 1, 5, now(), now());
-insert into `t_menu` values (140000, 0, 'menu.project', '/project', 'project/View', null, 'github', '0', 1, 2, now(), now());
-insert into `t_menu` values (150000, 0, 'Apache Spark', '/spark', 'PageView', null, null, '0', 1, 4, now(), now());
+insert into `t_menu` values (120000, 0, 'Apache Flink', '/flink', 'PageView', null, null, '0', 1, 4, now(), now());
+insert into `t_menu` values (130000, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', 1, 2, now(), now());
+insert into `t_menu` values (140000, 0, 'menu.project', '/project', 'project/View', null, 'github', '0', 1, 3, now(), now());
+insert into `t_menu` values (150000, 0, 'Apache Spark', '/spark', 'PageView', null, null, '0', 1, 5, now(), now());
 insert into `t_menu` values (110100, 110000, 'menu.userManagement', '/system/user', 'system/user/User', null, null, '0', 1, 1, now(), now());
 insert into `t_menu` values (110200, 110000, 'menu.roleManagement', '/system/role', 'system/role/Role', null, null, '0', 1, 2, now(), now());
 insert into `t_menu` values (110300, 110000, 'menu.menuManagement', '/system/menu', 'system/menu/Menu', 'menu:view', null, '0', 1, 3, now(), now());

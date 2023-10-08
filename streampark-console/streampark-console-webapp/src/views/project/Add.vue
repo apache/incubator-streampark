@@ -24,7 +24,7 @@
   import { defineComponent } from 'vue';
   import { useRouter } from 'vue-router';
   import { useProject } from './useProject';
-  import { createProject } from '/@/api/flink/project';
+  import { createProject } from '/@/api/project';
   import { BasicForm } from '/@/components/Form';
   import { PageWrapper } from '/@/components/Page';
   import { useI18n } from '/@/hooks/web/useI18n';

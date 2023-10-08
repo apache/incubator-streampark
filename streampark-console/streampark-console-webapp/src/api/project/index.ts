@@ -15,28 +15,28 @@
  * limitations under the License.
  */
 import { defHttp } from '/@/utils/http/axios';
-import { ProjectModel } from '/@/api/flink/project/model/projectModel';
+import { ProjectModel } from './model/projectModel';
 import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
 
 enum Api {
-  BRANCHES = '/flink/project/branches',
-  GIT_CHECK = '/flink/project/gitcheck',
-  EXISTS = '/flink/project/exists',
-  CREATE = '/flink/project/create',
-  GET = '/flink/project/get',
-  UPDATE = '/flink/project/update',
-  COPY = '/flink/project/copy',
-  BUILD = '/flink/project/build',
-  BUILD_LOG = '/flink/project/buildlog',
-  CLOSE_BUILD = '/flink/project/closebuild',
-  LIST = '/flink/project/list',
-  FILE_LIST = '/flink/project/filelist',
-  MODULES = '/flink/project/modules',
-  LIST_CONF = '/flink/project/listconf',
-  JARS = '/flink/project/jars',
-  DELETE = '/flink/project/delete',
-  SELECT = '/flink/project/select',
+  BRANCHES = '/project/branches',
+  GIT_CHECK = '/project/gitcheck',
+  EXISTS = '/project/exists',
+  CREATE = '/project/create',
+  GET = '/project/get',
+  UPDATE = '/project/update',
+  COPY = '/project/copy',
+  BUILD = '/project/build',
+  BUILD_LOG = '/project/buildlog',
+  CLOSE_BUILD = '/project/closebuild',
+  LIST = '/project/list',
+  FILE_LIST = '/project/filelist',
+  MODULES = '/project/modules',
+  LIST_CONF = '/project/listconf',
+  JARS = '/project/jars',
+  DELETE = '/project/delete',
+  SELECT = '/project/select',
 }
 
 export function getList(data?: Recordable): Promise<ProjectModel> {

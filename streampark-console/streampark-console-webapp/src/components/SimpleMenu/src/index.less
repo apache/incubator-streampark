@@ -16,9 +16,13 @@
  */
 @simple-prefix-cls: ~'@{namespace}-simple-menu';
 @prefix-cls: ~'@{namespace}-menu';
+@icon-prefix-cls: ~'@{namespace}-svg-icon';
+
+.@{icon-prefix-cls} {
+  vertical-align: -0.25rem !important;
+}
 
 .@{prefix-cls} {
-  margin-top: 4px;
   &-dark&-vertical .@{simple-prefix-cls}__parent {
     background-color: @sider-dark-bg-color;
     > .@{prefix-cls}-submenu-title {

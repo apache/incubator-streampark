@@ -73,8 +73,8 @@
   import { PageWrapper } from '/@/components/Page';
   import { statusList } from './project.data';
   import { RadioGroup, Radio, Input, Card, List, Spin, Pagination } from 'ant-design-vue';
-  import { getList } from '/@/api/flink/project';
-  import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
+  import { getList } from '/@/api/project';
+  import { ProjectRecord } from '/@/api/project/model/projectModel';
   import ListItem from './components/ListItem.vue';
   import Icon from '/@/components/Icon/src/Icon.vue';
   import { useGo } from '/@/hooks/web/usePage';

@@ -17,11 +17,11 @@
 import { FormSchema } from '/@/components/Table';
 import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, nextTick, reactive, ref, unref } from 'vue';
-import { fetchBranches, getDetail, gitCheck, isExist } from '/@/api/flink/project';
+import { fetchBranches, getDetail, gitCheck, isExist } from '/@/api/project';
 import { useForm } from '/@/components/Form';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useRoute } from 'vue-router';
-import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
+import { ProjectRecord } from '/@/api/project/model/projectModel';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { GitCredentialEnum, ProjectTypeEnum, CVSTypeEnum } from '/@/enums/projectEnum';
 import RepositoryGroup from './components/RepositoryGroup';
@@ -30,7 +30,7 @@ import { Form } from 'ant-design-vue';
 const { t } = useI18n();
 
 export const filterOption = (input: string, options: Recordable) => {
-    return options.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+  return options.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
 };
 
 export const useProject = () => {

@@ -123,10 +123,10 @@
   } from '@ant-design/icons-vue';
   import { buildStateMap } from '../project.data';
   import { computed } from 'vue';
-  import { buildProject, deleteProject } from '/@/api/flink/project';
+  import { buildProject, deleteProject } from '/@/api/project';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useGo } from '/@/hooks/web/usePage';
-  import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
+  import { ProjectRecord } from '/@/api/project/model/projectModel';
   import { BuildStateEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { ProjectTypeEnum } from '/@/enums/projectEnum';

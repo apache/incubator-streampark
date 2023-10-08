@@ -34,8 +34,8 @@ export default {
     flinkCluster: 'Clusters',
   },
   setting: {
-    system: 'Environment Settings',
-    alarm: 'Alarm Settings',
+    system: 'Environments',
+    alarm: 'Alarms',
     externalLink: 'External Link',
     yarnQueue: 'Yarn Queue',
     flinkGateway: 'FLink Gateway',
