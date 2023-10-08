@@ -43,7 +43,7 @@ import {
   fetchK8sNamespaces,
   fetchSessionClusterIds,
 } from '/@/api/flink/app/flinkHistory';
-import { fetchSelect } from '/@/api/flink/project';
+import { fetchSelect } from '/@/api/project';
 import { fetchAlertSetting } from '/@/api/flink/setting/alert';
 import { fetchFlinkCluster } from '/@/api/flink/setting/flinkCluster';
 import { fetchFlinkEnv, fetchListFlinkEnv } from '/@/api/flink/setting/flinkEnv';

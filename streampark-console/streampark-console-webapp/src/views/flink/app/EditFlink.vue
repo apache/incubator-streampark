@@ -27,7 +27,7 @@
   import { fetchMain, fetchUpload, fetchUpdate } from '/@/api/flink/app/app';
   import { handleSubmitParams } from './utils';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
-  import { fetchListJars } from '/@/api/flink/project';
+  import { fetchListJars } from '/@/api/project';
   import { useEditFlinkSchema } from './hooks/useEditFlinkSchema';
   import { useEdit } from './hooks/useEdit';
   import { useMessage } from '/@/hooks/web/useMessage';
