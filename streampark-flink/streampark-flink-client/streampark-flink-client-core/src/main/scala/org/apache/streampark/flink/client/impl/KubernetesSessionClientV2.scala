@@ -21,22 +21,23 @@ import org.apache.streampark.common.zio.ZIOExt.{IOOps, OptionZIOOps}
 import org.apache.streampark.flink.client.`trait`.KubernetesClientV2Trait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.kubernetes.v2.model.FlinkSessionJobDef
+import org.apache.streampark.flink.kubernetes.v2.model.TrackKey.ClusterKey
 import org.apache.streampark.flink.kubernetes.v2.observer.FlinkK8sObserver
 import org.apache.streampark.flink.kubernetes.v2.operator.FlinkK8sOperator
+import org.apache.streampark.flink.kubernetes.v2.operator.OprError.{FlinkResourceNotFound, UnsupportedAction}
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
+import zio.ZIO
 
 import scala.jdk.CollectionConverters.mapAsScalaMapConverter
 import scala.util.{Failure, Success}
 
 /** Flink K8s session mode app operation client via Flink K8s Operator */
 object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
-  private val observer = FlinkK8sObserver
-
   @throws[Throwable]
   override def doSubmit(
       submitRequest: SubmitRequest,
@@ -126,16 +127,20 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
     val namespace = shutDownRequest.kubernetesDeployParam.kubernetesNamespace
     def richMsg: String => String = s"[flink-shutdown][clusterId=$name][namespace=$namespace] " + _
 
-    FlinkK8sOperator.k8sCrOpr.deleteSessionJob(namespace, name).runIOAsTry match {
-      case Success(_) =>
-        observer.trackedKeys
-          .find(_.id == shutDownRequest.id)
-          .someOrUnitZIO(key => observer.untrack(key))
-        logInfo(richMsg("Shutdown Flink cluster successfully."))
-        ShutDownResponse()
-      case Failure(err) =>
-        logError(richMsg(s"Fail to shutdown Flink cluster"), err)
-        throw err
+    FlinkK8sObserver.trackedKeys
+      .find {
+        case ClusterKey(_, ns, n) => ns == namespace && n == name
+        case _ => false
+      }
+      .someOrUnitZIO(key => FlinkK8sOperator.delete(key.id))
+      .catchSome {
+        case _: FlinkResourceNotFound => ZIO.unit
+        case _: UnsupportedAction => ZIO.unit
+      }
+      .as(ShutDownResponse())
+      .runIOAsTry match {
+      case Success(result) => logInfo(richMsg("Shutdown Flink cluster successfully.")); result
+      case Failure(err) => logError(richMsg(s"Fail to shutdown Flink cluster"), err); throw err
     }
   }
 
