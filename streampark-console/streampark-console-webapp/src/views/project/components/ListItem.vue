@@ -172,7 +172,7 @@
   }
 
   const handleEdit = function () {
-    go(`/flink/project/edit?id=${props.item.id}`);
+    go(`/project/edit?id=${props.item.id}`);
   };
 
   async function handleDelete() {

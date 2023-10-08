@@ -21,7 +21,7 @@
 </script>
 <script setup lang="ts" name="BuildLogModal">
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { useLog } from '../../app/hooks/useLog';
+  import { useLog } from '/@/hooks/web/useLog';
   import { buildLog } from '/@/api/flink/project';
   import { reactive, ref, unref } from 'vue';
   import { BasicModal, useModalInner } from '/@/components/Modal';

@@ -17,7 +17,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { useLog } from '../../hooks/useLog';
+  import { useLog } from '/@/hooks/web/useLog';
   export default defineComponent({
     name: 'LogModal',
   });

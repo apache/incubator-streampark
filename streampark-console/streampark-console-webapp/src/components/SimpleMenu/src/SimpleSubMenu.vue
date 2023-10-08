@@ -21,7 +21,8 @@
     v-bind="$props"
     :class="getLevelClass"
   >
-    <Icon v-if="getIcon" :icon="getIcon" :size="20" />
+    <SvgIcon v-if="item.path === '/project'" name="app" size="25" />
+    <SvgIcon v-if="item.path === '/spark'" name="spark" size="30" />
     <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-1 collapse-title">
       {{ getI18nName }}
     </div>
@@ -42,7 +43,6 @@
       <span>
         <SvgIcon v-if="item.path === '/system'" name="management" size="25" />
         <SvgIcon v-if="item.path === '/flink'" name="flink3" size="25" />
-        <SvgIcon v-if="item.path === '/spark'" name="spark" size="25" />
         <SvgIcon v-if="item.path === '/setting'" name="settings" size="25" />
       </span>
       <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-2 collapse-title">

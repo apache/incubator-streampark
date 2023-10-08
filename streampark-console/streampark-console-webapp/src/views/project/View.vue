@@ -121,7 +121,7 @@
       let projectDataSource = ref<Array<ProjectRecord>>([]);
 
       function onAdd() {
-        go(`/flink/project/add`);
+        go(`/project/add`);
       }
 
       function handleSearch(value: string) {

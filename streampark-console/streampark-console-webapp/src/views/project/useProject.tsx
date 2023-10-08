@@ -22,13 +22,17 @@ import { useForm } from '/@/components/Form';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
-import { filterOption } from '../app/utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { GitCredentialEnum, ProjectTypeEnum, CVSTypeEnum } from '/@/enums/projectEnum';
 import RepositoryGroup from './components/RepositoryGroup';
 import { Form } from 'ant-design-vue';
 
 const { t } = useI18n();
+
+export const filterOption = (input: string, options: Recordable) => {
+    return options.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+};
+
 export const useProject = () => {
   const route = useRoute();
   const { createMessage, createErrorSwal } = useMessage();
