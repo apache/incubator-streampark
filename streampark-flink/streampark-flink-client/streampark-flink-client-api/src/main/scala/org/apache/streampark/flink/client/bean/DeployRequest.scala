@@ -34,6 +34,7 @@ case class DeployRequest(
     executionMode: FlinkExecutionMode,
     properties: JavaMap[String, Any],
     clusterId: String,
+    id: Long,
     @Nullable k8sDeployParam: KubernetesDeployParam) {
 
   private[client] lazy val hdfsWorkspace = {
