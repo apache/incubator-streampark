@@ -184,6 +184,7 @@ public class AppBuildPipeServiceImpl
     applicationLog.setOptionName(RELEASE.getValue());
     applicationLog.setAppId(app.getId());
     applicationLog.setOptionTime(new Date());
+    applicationLog.setUserId(commonService.getUserId());
 
     // check if you need to go through the build process (if the jar and pom have changed,
     // you need to go through the build process, if other common parameters are modified,
