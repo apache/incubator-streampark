@@ -48,13 +48,13 @@ public class FlinkStandaloneSessionCluster implements Startable {
   public static final Network NETWORK = Network.newNetwork();
 
   public static final String JM_RPC_ADDR_KEY = "jobmanager.rpc.address";
-  public static final String SLOT_CONF_KEY = "taskmanager.numberOfTaskSlots";
-  public static final String SLOT_CONF_FORMAT = String.format("%s: %%s", SLOT_CONF_KEY);
+  public static final String TM_SLOT_NUM_KEY = "taskmanager.numberOfTaskSlots";
+  public static final String SLOT_CONF_FORMAT = String.format("%s: %%s", TM_SLOT_NUM_KEY);
 
   public static final int BLOB_SERVER_PORT = 6123;
   public static final int WEB_PORT = 8081;
 
-  private String yamlConfStr = String.format("%s: %s", JM_RPC_ADDR_KEY, JOBMANAGER.getName());
+  private String yamlConfContent = String.format("%s: %s", JM_RPC_ADDR_KEY, JOBMANAGER.getName());
 
   private final FlinkContainer jobManagerContainer;
 
@@ -64,17 +64,17 @@ public class FlinkStandaloneSessionCluster implements Startable {
       DockerImageName dockerImageName,
       int taskManagerNum,
       int slotsNumPerTm,
-      @Nullable String yamlConfStr,
+      @Nullable String yamlConfContent,
       Slf4jLogConsumer slf4jLogConsumer) {
 
-    renderJmRpcConfIfNeeded(yamlConfStr);
+    renderJmRpcConfIfNeeded(yamlConfContent);
 
     renderSlotNumIfNeeded(slotsNumPerTm);
 
     // Set for JM.
     this.jobManagerContainer =
         new FlinkContainer(
-            dockerImageName, JOBMANAGER, NETWORK, this.yamlConfStr, slf4jLogConsumer);
+            dockerImageName, JOBMANAGER, NETWORK, this.yamlConfContent, slf4jLogConsumer);
     this.jobManagerContainer.addExposedPort(BLOB_SERVER_PORT);
     this.jobManagerContainer.addExposedPort(WEB_PORT);
 
@@ -88,7 +88,7 @@ public class FlinkStandaloneSessionCluster implements Startable {
     for (int i = 0; i < taskManagerNum; i++) {
       FlinkContainer taskManager =
           new FlinkContainer(
-              dockerImageName, TASKMANAGER, NETWORK, this.yamlConfStr, slf4jLogConsumer);
+              dockerImageName, TASKMANAGER, NETWORK, this.yamlConfContent, slf4jLogConsumer);
       this.taskManagerContainers.add(taskManager);
     }
   }
@@ -119,20 +119,20 @@ public class FlinkStandaloneSessionCluster implements Startable {
   }
 
   private void renderSlotNumIfNeeded(int slotsNumPerTm) {
-    if (!this.yamlConfStr.contains(SLOT_CONF_KEY)) {
-      this.yamlConfStr =
+    if (!this.yamlConfContent.contains(TM_SLOT_NUM_KEY)) {
+      this.yamlConfContent =
           String.format(
-              "%s\n%s\n", this.yamlConfStr, String.format(SLOT_CONF_FORMAT, slotsNumPerTm));
+              "%s\n%s\n", this.yamlConfContent, String.format(SLOT_CONF_FORMAT, slotsNumPerTm));
     }
   }
 
   private void renderJmRpcConfIfNeeded(@Nullable String yamlConfStr) {
-    this.yamlConfStr =
+    this.yamlConfContent =
         yamlConfStr == null
-            ? this.yamlConfStr
+            ? this.yamlConfContent
             : (yamlConfStr.contains(JM_RPC_ADDR_KEY)
                 ? yamlConfStr
-                : String.format("%s\n%s\n", this.yamlConfStr, yamlConfStr));
+                : String.format("%s\n%s\n", this.yamlConfContent, yamlConfStr));
   }
 
   public static class Builder {
@@ -141,7 +141,7 @@ public class FlinkStandaloneSessionCluster implements Startable {
         DockerImageName.parse("apache/flink:1.17.1-scala_2.12");
     private int taskManagerNum = 1;
     private int slotsNumPerTm = 8;
-    private @Nullable String yamlConfStr;
+    private @Nullable String yamlConfContent;
     private Slf4jLogConsumer slf4jLogConsumer = new Slf4jLogConsumer(LOG, false);
 
     private Builder() {}
@@ -163,8 +163,8 @@ public class FlinkStandaloneSessionCluster implements Startable {
       return this;
     }
 
-    public Builder yamlConfStr(@Nullable String yamlConfStr) {
-      this.yamlConfStr = yamlConfStr;
+    public Builder yamlConfContent(@Nullable String yamlConfContent) {
+      this.yamlConfContent = yamlConfContent;
       return this;
     }
 
@@ -175,7 +175,7 @@ public class FlinkStandaloneSessionCluster implements Startable {
 
     public FlinkStandaloneSessionCluster build() {
       return new FlinkStandaloneSessionCluster(
-          dockerImageName, taskManagerNum, slotsNumPerTm, yamlConfStr, slf4jLogConsumer);
+          dockerImageName, taskManagerNum, slotsNumPerTm, yamlConfContent, slf4jLogConsumer);
     }
   }
 

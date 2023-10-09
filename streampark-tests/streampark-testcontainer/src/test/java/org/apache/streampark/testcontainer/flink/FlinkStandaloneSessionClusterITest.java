@@ -33,22 +33,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** Test for flink standalone session cluster env available. */
 class FlinkStandaloneSessionClusterITest {
 
-  private final FlinkStandaloneSessionCluster cluster =
+  private final FlinkStandaloneSessionCluster flinkStandaloneSessionCluster =
       FlinkStandaloneSessionCluster.builder().build();
 
   @BeforeEach
   void up() {
-    cluster.start();
+    flinkStandaloneSessionCluster.start();
   }
 
   @AfterEach
   void down() {
-    cluster.stop();
+    flinkStandaloneSessionCluster.stop();
   }
 
   @Test
   void testRestApiAvailable() throws IOException {
-    String url = String.format("%s/%s", cluster.getFlinkJobManagerUrl(), "config");
+    String url =
+        String.format("%s/%s", flinkStandaloneSessionCluster.getFlinkJobManagerUrl(), "config");
     CloseableHttpClient httpClient = HttpClients.createDefault();
     CloseableHttpResponse response = httpClient.execute(new HttpGet(url));
     assertThat(response.getCode()).isEqualTo(200);

@@ -33,7 +33,7 @@ import static org.apache.streampark.testcontainer.flink.FlinkComponent.TASKMANAG
 
 class FlinkContainer extends GenericContainer<FlinkContainer> {
 
-  public static final AtomicInteger TM_COUNT = new AtomicInteger(0);
+  public static final AtomicInteger TM_INDEX_SUFFIX = new AtomicInteger(0);
 
   public static final String FLINK_PROPS_KEY = "FLINK_PROPERTIES";
 
@@ -43,7 +43,7 @@ class FlinkContainer extends GenericContainer<FlinkContainer> {
       @Nonnull DockerImageName dockerImageName,
       @Nonnull FlinkComponent component,
       @Nonnull Network network,
-      @Nonnull String yamlPropStr,
+      @Nonnull String yamlPropContent,
       @Nullable Slf4jLogConsumer slf4jLogConsumer) {
     super(dockerImageName);
     this.component = component;
@@ -51,7 +51,7 @@ class FlinkContainer extends GenericContainer<FlinkContainer> {
     this.withCreateContainerCmdModifier(
         createContainerCmd -> createContainerCmd.withName(getFlinkContainerName()));
     this.withNetwork(network);
-    this.withEnv(FLINK_PROPS_KEY, yamlPropStr);
+    this.withEnv(FLINK_PROPS_KEY, yamlPropContent);
     Optional.ofNullable(slf4jLogConsumer).ifPresent(this::withLogConsumer);
   }
 
@@ -59,6 +59,6 @@ class FlinkContainer extends GenericContainer<FlinkContainer> {
     if (component == JOBMANAGER) {
       return JOBMANAGER.getName();
     }
-    return String.format("%s_%s", TASKMANAGER.getName(), TM_COUNT.incrementAndGet());
+    return String.format("%s_%s", TASKMANAGER.getName(), TM_INDEX_SUFFIX.incrementAndGet());
   }
 }
