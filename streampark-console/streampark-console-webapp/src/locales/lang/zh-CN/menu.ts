@@ -16,18 +16,18 @@
  */
 export default {
   menu: {
-    system: '系统',
+    system: '系统管理',
     userManagement: '用户管理',
     roleManagement: '角色管理',
     menuManagement: '菜单管理',
     tokenManagement: 'Token 管理',
     teamManagement: '团队管理',
     memberManagement: '成员管理',
-    project: '项目',
+    project: '项目管理',
     application: '作业管理',
     variable: '变量管理',
     resource: '资源管理',
-    setting: '设置',
+    setting: '设置中心',
   },
   flink: {
     flinkHome: 'Flink版本',

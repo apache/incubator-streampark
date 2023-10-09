@@ -21,8 +21,9 @@
     v-bind="$props"
     :class="[getLevelClass, theme]"
   >
-    <SvgIcon v-if="item.path === '/project'" name="app" size="20" class="mr-2" />
+    <SvgIcon v-if="item.path === '/project'" name="app" size="25" class="mr-2" />
     <SvgIcon v-if="item.path === '/spark'" name="spark" size="25" class="mr-2" />
+    <SvgIcon v-if="item.path === '/variable'" name="variable" size="25" class="mr-2" />
     <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-1 collapse-title">
       {{ getI18nName }}
     </div>
@@ -41,9 +42,9 @@
   >
     <template #title>
       <span class="menu-down-svg">
-        <SvgIcon v-if="item.path === '/system'" name="management" size="20" />
-        <SvgIcon v-if="item.path === '/flink'" name="flink3" size="20" />
-        <SvgIcon v-if="item.path === '/setting'" name="settings" size="20" />
+        <SvgIcon v-if="item.path === '/system'" name="management" size="25" />
+        <SvgIcon v-if="item.path === '/flink'" name="flink3" size="25" />
+        <SvgIcon v-if="item.path === '/setting'" name="settings" size="25" />
       </span>
       <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-2 collapse-title">
         {{ getI18nName }}
