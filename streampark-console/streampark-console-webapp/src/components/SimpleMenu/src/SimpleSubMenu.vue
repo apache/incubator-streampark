@@ -24,6 +24,7 @@
     <SvgIcon v-if="item.path === '/project'" name="app" size="25" class="mr-2" />
     <SvgIcon v-if="item.path === '/spark'" name="spark" size="25" class="mr-2" />
     <SvgIcon v-if="item.path === '/variable'" name="variable" size="25" class="mr-2" />
+    <SvgIcon v-if="item.path === '/resource'" name="resource" size="25" class="mr-2" />
     <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-1 collapse-title">
       {{ getI18nName }}
     </div>
