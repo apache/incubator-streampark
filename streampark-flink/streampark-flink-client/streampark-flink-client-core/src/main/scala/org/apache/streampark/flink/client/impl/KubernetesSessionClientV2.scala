@@ -35,6 +35,7 @@ import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 import org.apache.flink.v1beta1.FlinkDeploymentSpec.FlinkVersion
 import zio.ZIO
 
+import scala.collection.convert.ImplicitConversions.`map AsScala`
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.mapAsScalaMapConverter
 import scala.util.{Failure, Success, Try}
@@ -125,7 +126,20 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
 
   @throws[Throwable]
   def deploy(deployRequest: DeployRequest): DeployResponse = {
-
+    logInfo(
+      s"""
+         |--------------------------------------- kubernetes session start ---------------------------------------
+         |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
+         |    flinkVersion     : ${deployRequest.flinkVersion.version}
+         |    execMode         : ${deployRequest.executionMode.name()}
+         |    clusterId        : ${deployRequest.clusterId}
+         |    namespace        : ${deployRequest.k8sDeployParam.kubernetesNamespace}
+         |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
+         |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
+         |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
+         |    properties       : ${deployRequest.properties.mkString(" ")}
+         |-------------------------------------------------------------------------------------------
+         |""".stripMargin)
     val richMsg: String => String = s"[flink-submit][appId=${deployRequest.id}] " + _
 
     val flinkConfig =

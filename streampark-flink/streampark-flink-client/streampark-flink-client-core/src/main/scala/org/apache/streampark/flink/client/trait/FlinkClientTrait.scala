@@ -209,7 +209,7 @@ trait FlinkClientTrait extends Logger {
 
   @throws[Exception]
   def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      savepointRequest: TriggerSavepointRequest,
       flinkConf: Configuration): SavepointResponse
 
   @throws[Exception]
