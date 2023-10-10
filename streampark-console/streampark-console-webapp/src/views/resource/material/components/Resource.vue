@@ -31,7 +31,7 @@
   import { fetchUpload } from '/@/api/flink/resource';
 
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
-  import { ResourceTypeEnum } from '/@/views/resource/resource.data';
+  import { ResourceTypeEnum } from '/@/views/resource/material/material.data';
 
   interface DependencyType {
     artifactId: string;

@@ -23,15 +23,18 @@ export default {
     tokenManagement: 'Token 管理',
     teamManagement: '团队管理',
     memberManagement: '成员管理',
-    project: '项目管理',
     application: '作业管理',
-    variable: '变量管理',
-    resource: '资源管理',
+    resource: '资源中心',
     setting: '设置中心',
+  },
+  resource: {
+    project: '项目管理',
+    material: '资源上传',
+    variable: '变量管理',
   },
   flink: {
     flinkHome: 'Flink版本',
-    flinkCluster: '集群',
+    flinkCluster: '集群管理',
   },
   setting: {
     system: '环境设置',

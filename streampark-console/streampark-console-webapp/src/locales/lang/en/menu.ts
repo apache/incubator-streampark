@@ -25,9 +25,13 @@ export default {
     memberManagement: 'Member Management',
     project: 'Projects',
     application: 'Applications',
-    variable: 'Variables',
     resource: 'Resources',
     setting: 'Settings',
+  },
+  resource: {
+    project: 'Projects',
+    material: 'Materials',
+    variable: 'Variable',
   },
   flink: {
     flinkHome: 'Flink Home',

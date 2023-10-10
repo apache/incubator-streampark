@@ -111,12 +111,11 @@
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
   import ResourceDrawer from './components/ResourceDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { columns, searchFormSchema } from './resource.data';
+  import { columns, searchFormSchema, EngineTypeEnum, ResourceTypeEnum } from './material.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { fetchResourceDelete, fetchResourceList, fetchTeamResource } from '/@/api/flink/resource';
-  import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/resource/resource.data';
   import { Tag } from 'ant-design-vue';
   import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
 
