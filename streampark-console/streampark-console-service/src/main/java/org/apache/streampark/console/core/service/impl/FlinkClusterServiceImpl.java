@@ -438,7 +438,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             flinkCluster.getClusterId(),
             flinkCluster.getId(),
             getKubernetesDeployDesc(flinkCluster, "start"));
-    log.info("Deploy cluster request " + deployRequest);
+    log.info("Deploy cluster request {}", deployRequest);
     Future<DeployResponse> future = executorService.submit(() -> FlinkClient.deploy(deployRequest));
     return future.get(60, TimeUnit.SECONDS);
   }

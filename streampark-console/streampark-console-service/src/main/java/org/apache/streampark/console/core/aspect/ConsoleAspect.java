@@ -73,7 +73,9 @@ public class ConsoleAspect {
   @Around(value = "apiAccess()")
   public RestResponse apiAccess(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    log.debug("restResponse aspect, method:{}", methodSignature.getName());
+    if (log.isDebugEnabled()) {
+      log.debug("restResponse aspect, method:{}", methodSignature.getName());
+    }
     Boolean isApi =
         (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
     if (Objects.nonNull(isApi) && isApi) {
@@ -91,7 +93,9 @@ public class ConsoleAspect {
   @Around("appUpdated()")
   public Object appUpdated(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    log.debug("appUpdated aspect, method:{}", methodSignature.getName());
+    if (log.isDebugEnabled()) {
+      log.debug("appUpdated aspect, method:{}", methodSignature.getName());
+    }
     Object target = joinPoint.proceed();
     flinkAppHttpWatcher.init();
     return target;
