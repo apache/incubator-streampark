@@ -45,14 +45,14 @@
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import Resource from '/@/views/flink/resource/components/Resource.vue';
+  import Resource from '/@/views/resource/components/Resource.vue';
   import { fetchAddResource, fetchUpdateResource, checkResource } from '/@/api/flink/resource';
-  import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
+  import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/resource/resource.data';
   import {
     renderEngineType,
     renderResourceType,
     renderStreamParkResourceGroup,
-  } from '/@/views/flink/resource/useResourceRender';
+  } from '/@/views/resource/useResourceRender';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { exceptionPropWidth } from '/@/utils';
 
