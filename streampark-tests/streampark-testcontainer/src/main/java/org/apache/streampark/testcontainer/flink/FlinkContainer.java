@@ -55,6 +55,7 @@ class FlinkContainer extends GenericContainer<FlinkContainer> {
     Optional.ofNullable(slf4jLogConsumer).ifPresent(this::withLogConsumer);
   }
 
+  @Nonnull
   protected String getFlinkContainerName() {
     if (component == JOBMANAGER) {
       return JOBMANAGER.getName();
