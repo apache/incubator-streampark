@@ -47,7 +47,9 @@ public class WebSocketEndpoint {
 
   @OnOpen
   public void onOpen(Session session, @PathParam("id") String id) {
-    log.debug("websocket onOpen....");
+    if (log.isDebugEnabled()) {
+      log.debug("websocket onOpen....");
+    }
     this.id = id;
     this.session = session;
     SOCKET_SESSIONS.put(id, session);
@@ -55,7 +57,9 @@ public class WebSocketEndpoint {
 
   @OnClose
   public void onClose() throws IOException {
-    log.debug("websocket onClose....");
+    if (log.isDebugEnabled()) {
+      log.debug("websocket onClose....");
+    }
     this.session.close();
     SOCKET_SESSIONS.remove(this.id);
   }
