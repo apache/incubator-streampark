@@ -129,15 +129,16 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
 
   @throws[Exception]
   override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      savepointRequest: TriggerSavepointRequest,
       flinkConfig: Configuration): SavepointResponse = {
     executeClientAction(
-      request,
+      savepointRequest,
       flinkConfig,
       (jobId, clusterClient) => {
-        val actionResult = super.triggerSavepoint(request, jobId, clusterClient)
+        val actionResult = super.triggerSavepoint(savepointRequest, jobId, clusterClient)
         SavepointResponse(actionResult)
-      })
+      }
+    )
   }
 
   // noinspection DuplicatedCode
