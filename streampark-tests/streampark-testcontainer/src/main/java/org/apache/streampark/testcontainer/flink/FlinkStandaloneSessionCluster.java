@@ -37,9 +37,9 @@ import static org.apache.streampark.testcontainer.flink.FlinkComponent.JOBMANAGE
 import static org.apache.streampark.testcontainer.flink.FlinkComponent.TASKMANAGER;
 
 /**
- * Class to start a couple of flink 1-jobmanager & n-taskmanagers. The priority of flinkYamlConfStr
- * is the highest. But: The 'jobmanager.rpc.address' is always 'jobmanager'. The 'rest.port' always
- * is 8081.
+ * Class to start a couple of flink 1-jobmanager & n-taskmanagers. The priority of
+ * flinkYamlConfContent is the highest. But: The 'jobmanager.rpc.address' is always 'jobmanager'.
+ * The 'rest.port' always is 8081.
  */
 public class FlinkStandaloneSessionCluster implements Startable {
 
@@ -135,6 +135,7 @@ public class FlinkStandaloneSessionCluster implements Startable {
                 : String.format("%s\n%s\n", this.yamlConfContent, yamlConfStr));
   }
 
+  /** A tool class to create a flink standalone session cluster quickly. */
   public static class Builder {
 
     private DockerImageName dockerImageName =
