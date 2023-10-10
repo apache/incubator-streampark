@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -84,7 +86,7 @@ public class Resource implements Serializable {
   private transient String connector;
 
   public void setResourcePath(String resourcePath) {
-    if (resourcePath == null) {
+    if (StringUtils.isBlank(resourcePath)) {
       throw new IllegalArgumentException("resource path cannot be null.");
     }
     String[] namePath = resourcePath.split(":");
@@ -95,14 +97,14 @@ public class Resource implements Serializable {
   }
 
   public String getFileName() {
-    if (this.resourcePath == null) {
+    if (StringUtils.isBlank(this.resourcePath)) {
       return null;
     }
     return resourcePath.split(":")[0];
   }
 
   public String getFilePath() {
-    if (this.resourcePath == null) {
+    if (StringUtils.isBlank(this.resourcePath)) {
       return null;
     }
     return resourcePath.split(":")[1];

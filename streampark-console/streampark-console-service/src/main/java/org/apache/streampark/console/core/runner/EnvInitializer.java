@@ -32,6 +32,8 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.flink.kubernetes.v2.fs.EmbeddedFileServer;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +85,7 @@ public class EnvInitializer implements ApplicationRunner {
     }
 
     String appHome = WebUtils.getAppHome();
-    if (appHome == null) {
+    if (StringUtils.isBlank(appHome)) {
       throw new ExceptionInInitializerError(
           String.format(
               "[StreamPark] System initialization check failed,"
@@ -144,6 +146,7 @@ public class EnvInitializer implements ApplicationRunner {
             workspace.APP_WORKSPACE(),
             workspace.APP_BACKUPS(),
             workspace.APP_SAVEPOINTS(),
+            workspace.APP_PYTHON(),
             workspace.APP_JARS())
         .forEach(fsOperator::mkdirsIfNotExists);
 
@@ -203,7 +206,7 @@ public class EnvInitializer implements ApplicationRunner {
 
   public void checkFlinkEnv(StorageType storageType, FlinkEnv flinkEnv) throws IOException {
     String flinkLocalHome = flinkEnv.getFlinkHome();
-    if (flinkLocalHome == null) {
+    if (StringUtils.isBlank(flinkLocalHome)) {
       throw new ExceptionInInitializerError(
           "[StreamPark] FLINK_HOME is undefined,Make sure that Flink is installed.");
     }

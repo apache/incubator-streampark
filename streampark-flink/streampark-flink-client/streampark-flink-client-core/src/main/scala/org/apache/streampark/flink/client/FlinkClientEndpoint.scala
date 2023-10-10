@@ -80,10 +80,18 @@ object FlinkClientEndpoint {
   def shutdown(request: ShutDownRequest): ShutDownResponse = {
     request.executionMode match {
       case YARN_SESSION => YarnSessionClient.shutdown(request)
-      case KUBERNETES_NATIVE_SESSION => {
-        if (K8sFlinkConfig.isV2Enabled) KubernetesSessionClientV2.shutdown(request)
-        else KubernetesNativeSessionClient.shutdown(request)
-      }
+      case KUBERNETES_NATIVE_SESSION =>
+        K8sFlinkConfig.isV2Enabled match {
+          case true => KubernetesSessionClientV2.shutdown(request)
+          case _ => KubernetesNativeSessionClient.shutdown(request)
+        }
+      case KUBERNETES_NATIVE_APPLICATION =>
+        K8sFlinkConfig.isV2Enabled match {
+          case true => KubernetesApplicationClientV2.shutdown(request)
+          case _ =>
+            throw new UnsupportedOperationException(
+              s"Unsupported ${request.executionMode} shutdown application ")
+        }
       case _ =>
         throw new UnsupportedOperationException(
           s"Unsupported ${request.executionMode} shutdown cluster ")

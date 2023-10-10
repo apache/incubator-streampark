@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -65,7 +66,7 @@ public class Dependency {
     }
     File localJar = WebUtils.getAppTempDir();
     File localUploads = new File(Workspace.local().APP_UPLOADS());
-    HashSet<String> otherJars = new HashSet<>(other.jar);
+    Set<String> otherJars = new HashSet<>(other.jar);
     for (String jarName : jar) {
       if (!otherJars.contains(jarName)
           || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {

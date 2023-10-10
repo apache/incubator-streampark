@@ -103,6 +103,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
+  @Autowired private CommonServiceImpl commonService;
+
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,
@@ -175,6 +177,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
     applicationLog.setYarnAppId(application.getClusterId());
+    applicationLog.setUserId(commonService.getUserId());
 
     FlinkAppHttpWatcher.addSavepoint(application.getId());
 

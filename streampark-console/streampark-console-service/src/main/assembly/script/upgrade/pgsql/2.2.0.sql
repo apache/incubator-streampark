@@ -19,25 +19,25 @@
 -- Table of t_resource
 -- ----------------------------
 create sequence "public"."streampark_t_resource_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
 create table "public"."t_resource" (
-                                       "id" int8 not null default nextval('streampark_t_resource_id_seq'::regclass),
-                                       "resource_name" varchar(128) collate "pg_catalog"."default" not null,
-                                       "resource_type" int4,
-                                       "resource_path" varchar(255) default null,
-                                       "resource" text collate "pg_catalog"."default",
-                                       "engine_type" int4,
-                                       "main_class" varchar(255) collate "pg_catalog"."default",
-                                       "description" text collate "pg_catalog"."default" default null,
-                                       "creator_id" int8  not null,
-                                       "connector_required_options" text default null,
-                                       "connector_optional_options" text default null,
-                                       "team_id" int8  not null,
-                                       "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-                                       "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
-)
-;
+"id" int8 not null default nextval('streampark_t_resource_id_seq'::regclass),
+"resource_name" varchar(128) collate "pg_catalog"."default" not null,
+"resource_type" int4,
+"resource_path" varchar(255) default null,
+"resource" text collate "pg_catalog"."default",
+"engine_type" int4,
+"main_class" varchar(255) collate "pg_catalog"."default",
+"description" text collate "pg_catalog"."default" default null,
+"creator_id" int8  not null,
+"connector_required_options" text default null,
+"connector_optional_options" text default null,
+"team_id" int8  not null,
+"create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+"modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+);
+
 comment on column "public"."t_resource"."id" is 'Resource id';
 comment on column "public"."t_resource"."resource_name" is 'Resource name';
 comment on column "public"."t_resource"."resource_type" is '0:app 1:common 2:connector 3:format 4:udf';
@@ -52,21 +52,21 @@ comment on column "public"."t_resource"."modify_time" is 'modify time';
 
 alter table "public"."t_resource" add constraint "t_resource_pkey" primary key ("id");
 create index "un_team_dname_inx" on "public"."t_resource" using btree (
-    "team_id" "pg_catalog"."int8_ops" asc nulls last,
-    "resource_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
-    );
+"team_id" "pg_catalog"."int8_ops" asc nulls last,
+"resource_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
+);
 
 alter table "public"."t_flink_sql"
-    add column "team_resource" varchar(64) default null;
+add column "team_resource" varchar(64) default null;
 
 alter table "public"."t_flink_app"
-    add column "probing" boolean default false;
+add column "probing" boolean default false;
 
 alter table "public"."t_flink_cluster"
-    add column "job_manager_url" varchar(150) collate "pg_catalog"."default",
-    add column "start_time" timestamp(6) collate "pg_catalog"."default",
-    add column "end_time" timestamp(6) collate "pg_catalog"."default",
-    add column "alert_id" int8 collate "pg_catalog"."default";
+add column "job_manager_url" varchar(150) collate "pg_catalog"."default",
+add column "start_time" timestamp(6) collate "pg_catalog"."default",
+add column "end_time" timestamp(6) collate "pg_catalog"."default",
+add column "alert_id" int8 collate "pg_catalog"."default";
 
 insert into "public"."t_menu" values (120400, 120000, 'menu.resource', '/flink/resource', 'flink/resource/View', null, 'apartment', '0', '1', 3, now(), now());
 insert into "public"."t_menu" values (110401, 110400, 'add', null, null, 'token:add', null, '1', '1', null, now(), now());
@@ -91,16 +91,16 @@ comment on column "public"."t_user"."login_type" is 'login type 0:password 1:lda
 -- Table of t_flink_gateway
 -- ----------------------------
 create sequence "public"."streampark_t_flink_gateway_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
 create table "public"."t_flink_gateway" (
-                                            "id" int8 not null default nextval('streampark_t_resource_id_seq'::regclass),
-                                            "gateway_name" varchar(128) collate "pg_catalog"."default" not null,
-                                            "description" text collate "pg_catalog"."default" default null,
-                                            "gateway_type" int4,
-                                            "address" varchar(150) collate "pg_catalog"."default",
-                                            "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-                                            "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+"id" int8 not null default nextval('streampark_t_resource_id_seq'::regclass),
+"gateway_name" varchar(128) collate "pg_catalog"."default" not null,
+"description" text collate "pg_catalog"."default" default null,
+"gateway_type" int4,
+"address" varchar(150) collate "pg_catalog"."default",
+"create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+"modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 );
 comment on column "public"."t_flink_gateway"."id" is 'The id of the gateway';
 comment on column "public"."t_flink_gateway"."gateway_name" is 'The name of the gateway';

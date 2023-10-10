@@ -22,7 +22,6 @@ import org.apache.streampark.console.system.entity.Menu;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -52,5 +51,5 @@ public interface MenuService extends IService<Menu> {
    */
   void deleteMenus(String[] menuIds) throws Exception;
 
-  ArrayList<VueRouter<Menu>> getUserRouters(Long userId, Long teamId);
+  List<VueRouter<Menu>> getUserRouters(Long userId, Long teamId);
 }
