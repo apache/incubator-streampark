@@ -19,8 +19,10 @@ package org.apache.streampark.testcontainer.flink;
 
 import javax.annotation.Nonnull;
 
+/** The enum is used to represent the type of the flink component. */
 enum FlinkComponent {
   JOBMANAGER("jobmanager"),
+
   TASKMANAGER("taskmanager");
 
   private final String name;
