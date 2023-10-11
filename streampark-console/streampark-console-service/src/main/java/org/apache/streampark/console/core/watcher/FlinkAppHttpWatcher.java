@@ -307,12 +307,21 @@ public class FlinkAppHttpWatcher {
 
     if (flag != null) {
       log.info("FlinkAppHttpWatcher previous state: canceling.");
+      YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
+      String state = yarnAppInfo.getApp().getFinalStatus();
+      FlinkAppStateEnum flinkAppStateEnum = FlinkAppStateEnum.of(state);
+
+      if (FlinkAppStateEnum.CANCELLING == flinkAppStateEnum) {
+          return;
+      }
+
       if (stopFromEnum.isNone()) {
         log.error(
             "FlinkAppHttpWatcher query previous state was canceling and stopFrom NotFound,savePoint expired!");
         savePointService.expire(application.getId());
+        doAlert(application, flinkAppStateEnum);
       }
-      application.setState(FlinkAppStateEnum.CANCELED.getValue());
+      application.setState(flinkAppStateEnum.getValue());
       cleanSavepoint(application);
       cleanOptioning(optionStateEnum, application.getId());
       doPersistMetrics(application, true);
