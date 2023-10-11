@@ -46,19 +46,15 @@ public class FlinkStandaloneSessionCluster implements Startable {
 
   public static final Logger LOG = LoggerFactory.getLogger(FlinkStandaloneSessionCluster.class);
 
-  public static final Network NETWORK = Network.newNetwork();
-
-  public static final String JM_RPC_ADDR_KEY = "jobmanager.rpc.address";
-  public static final String TM_SLOT_NUM_KEY = "taskmanager.numberOfTaskSlots";
-  public static final String SLOT_CONF_FORMAT = String.format("%s: %%s", TM_SLOT_NUM_KEY);
-
-  public static final int BLOB_SERVER_PORT = 6123;
-  public static final int WEB_PORT = 8081;
+  private static final int BLOB_SERVER_PORT = 6123;
+  private static final int WEB_PORT = 8081;
+  private static final Network NETWORK = Network.newNetwork();
+  private static final String JM_RPC_ADDR_KEY = "jobmanager.rpc.address";
+  private static final String TM_SLOT_NUM_KEY = "taskmanager.numberOfTaskSlots";
+  private static final String SLOT_CONF_FORMAT = String.format("%s: %%s", TM_SLOT_NUM_KEY);
 
   private String yamlConfContent = String.format("%s: %s", JM_RPC_ADDR_KEY, JOBMANAGER.getName());
-
   private final FlinkContainer jobManagerContainer;
-
   private final List<FlinkContainer> taskManagerContainers = new ArrayList<>();
 
   private FlinkStandaloneSessionCluster(
