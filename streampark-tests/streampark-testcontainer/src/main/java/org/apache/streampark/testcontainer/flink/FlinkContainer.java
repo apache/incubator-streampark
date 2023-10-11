@@ -33,8 +33,8 @@ import static org.apache.streampark.testcontainer.flink.FlinkComponent.TASKMANAG
 
 class FlinkContainer extends GenericContainer<FlinkContainer> {
 
-  public static final String FLINK_PROPS_KEY = "FLINK_PROPERTIES";
-  public static final AtomicInteger TM_INDEX_SUFFIX = new AtomicInteger(0);
+  private static final String FLINK_PROPS_KEY = "FLINK_PROPERTIES";
+  private static final AtomicInteger TM_INDEX_SUFFIX = new AtomicInteger(0);
 
   private final @Nonnull FlinkComponent component;
 
