@@ -27,6 +27,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.utility.DockerImageName;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import java.time.Duration;
@@ -93,6 +94,7 @@ public class FlinkStandaloneSessionCluster implements Startable {
     }
   }
 
+  @Nonnull
   public String getFlinkJobManagerUrl() {
     return String.format(
         "http://%s:%s", jobManagerContainer.getHost(), jobManagerContainer.getMappedPort(WEB_PORT));
