@@ -128,7 +128,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
   def deploy(deployRequest: DeployRequest): DeployResponse = {
     logInfo(
       s"""
-         |--------------------------------------- kubernetes cluster start --------------------------
+         |--------------------------------------- kubernetes cluster start ---------------------------------------
          |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
@@ -138,7 +138,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
          |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
          |    properties       : ${deployRequest.properties.mkString(" ")}
-         |-------------------------------------------------------------------------------------------
+         |------------------------------------------------------------------ --------------------------------------
          |""".stripMargin)
     val richMsg: String => String = s"[flink-submit][appId=${deployRequest.id}] " + _
 
