@@ -309,27 +309,26 @@ public class FlinkAppHttpWatcher {
       log.info("FlinkAppHttpWatcher previous state: canceling.");
       FlinkAppStateEnum flinkAppStateEnum = FlinkAppStateEnum.CANCELED;
       try {
-          YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
-          if (yarnAppInfo != null) {
-              String state = yarnAppInfo.getApp().getFinalStatus();
-              flinkAppStateEnum = FlinkAppStateEnum.of(state);
-          }
+        YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
+        if (yarnAppInfo != null) {
+          String state = yarnAppInfo.getApp().getFinalStatus();
+          flinkAppStateEnum = FlinkAppStateEnum.of(state);
+        }
       } finally {
-          if (stopFromEnum.isNone()) {
-              log.error(
-                  "FlinkAppHttpWatcher query previous state was canceling and stopFrom NotFound,savePoint expired!");
-              savePointService.expire(application.getId());
-              if (flinkAppStateEnum == FlinkAppStateEnum.KILLED
-                  || flinkAppStateEnum == FlinkAppStateEnum.FAILED) {
-                  doAlert(application, flinkAppStateEnum);
-              }
+        if (stopFromEnum.isNone()) {
+          log.error(
+              "FlinkAppHttpWatcher query previous state was canceling and stopFrom NotFound,savePoint expired!");
+          savePointService.expire(application.getId());
+          if (flinkAppStateEnum == FlinkAppStateEnum.KILLED
+              || flinkAppStateEnum == FlinkAppStateEnum.FAILED) {
+            doAlert(application, flinkAppStateEnum);
           }
-          application.setState(flinkAppStateEnum.getValue());
-          cleanSavepoint(application);
-          cleanOptioning(optionStateEnum, application.getId());
-          doPersistMetrics(application, true);
+        }
+        application.setState(flinkAppStateEnum.getValue());
+        cleanSavepoint(application);
+        cleanOptioning(optionStateEnum, application.getId());
+        doPersistMetrics(application, true);
       }
-
 
     } else {
       // query the status from the yarn rest Api
