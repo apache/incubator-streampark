@@ -505,26 +505,23 @@ public class FlinkRESTAPIWatcher {
       try {
         YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
         if (yarnAppInfo != null) {
-            String state = yarnAppInfo.getApp().getFinalStatus();
-            flinkAppState = FlinkAppState.of(state);
+          String state = yarnAppInfo.getApp().getFinalStatus();
+          flinkAppState = FlinkAppState.of(state);
         }
       } finally {
         if (StopFrom.NONE.equals(stopFrom)) {
-            log.error(
-                "FlinkRESTAPIWatcher query previous state was canceling and stopFrom NotFound,savePoint expired!");
-            savePointService.expire(application.getId());
-            if (flinkAppState == FlinkAppState.KILLED
-                || flinkAppState == FlinkAppState.FAILED
-            ) {
-                alertService.alert(application, flinkAppState);
-            }
+          log.error(
+              "FlinkRESTAPIWatcher query previous state was canceling and stopFrom NotFound,savePoint expired!");
+          savePointService.expire(application.getId());
+          if (flinkAppState == FlinkAppState.KILLED || flinkAppState == FlinkAppState.FAILED) {
+            alertService.alert(application, flinkAppState);
+          }
         }
         application.setState(flinkAppState.getValue());
         cleanSavepoint(application);
         cleanOptioning(optionState, application.getId());
         doPersistMetrics(application, true);
       }
-
 
     } else {
       // query the status from the yarn rest Api
