@@ -140,7 +140,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
          |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
-         |    properties       : ${deployRequest.properties.mkString(" ")}
+         |    properties       : ${deployRequest.properties.mkString(",")}
          |------------------------------------------------------------------ --------------------------------------
          |""".stripMargin)
     var clusterDescriptor: KubernetesClusterDescriptor = null
