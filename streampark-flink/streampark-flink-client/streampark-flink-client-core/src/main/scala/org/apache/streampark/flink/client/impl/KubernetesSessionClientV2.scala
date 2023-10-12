@@ -128,7 +128,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
   def deploy(deployRequest: DeployRequest): DeployResponse = {
     logInfo(
       s"""
-         |--------------------------------------- kubernetes session start ---------------------------------------
+         |--------------------------------------- kubernetes cluster start --------------------------
          |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}

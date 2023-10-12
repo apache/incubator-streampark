@@ -72,7 +72,7 @@ trait FlinkClientTrait extends Logger {
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
       s"""
-         |--------------------------------------- flink job start ---------------------------------------
+         |--------------------------------------- flink job start -----------------------------------
          |    userFlinkHome    : ${submitRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${submitRequest.flinkVersion.version}
          |    appName          : ${submitRequest.appName}

@@ -131,7 +131,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   def deploy(deployRequest: DeployRequest): DeployResponse = {
     logInfo(
       s"""
-         |--------------------------------------- kubernetes session start ---------------------------------------
+         |--------------------------------------- kubernetes cluster start ---------------------------------------
          |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
@@ -141,7 +141,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
          |    properties       : ${deployRequest.properties.mkString(" ")}
-         |-------------------------------------------------------------------------------------------
+         |------------------------------------------------------------------ ---------------------------------------
          |""".stripMargin)
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
