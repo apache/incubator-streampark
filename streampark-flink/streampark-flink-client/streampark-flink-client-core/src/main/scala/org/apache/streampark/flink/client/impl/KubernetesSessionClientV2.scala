@@ -138,7 +138,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
          |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
          |    properties       : ${deployRequest.properties.mkString(",")}
-         |------------------------------------------------------------------ --------------------------------------
+         |--------------------------------------------------------------------------------------------------------
          |""".stripMargin)
     val richMsg: String => String = s"[flink-submit][appId=${deployRequest.id}] " + _
 

@@ -141,7 +141,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
          |    properties       : ${deployRequest.properties.mkString(",")}
-         |------------------------------------------------------------------ --------------------------------------
+         |--------------------------------------------------------------------------------------------------------
          |""".stripMargin)
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
