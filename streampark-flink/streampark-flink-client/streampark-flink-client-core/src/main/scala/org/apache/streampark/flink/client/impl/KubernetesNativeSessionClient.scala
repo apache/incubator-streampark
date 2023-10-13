@@ -237,7 +237,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
           .isPresent
       ) {
         kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
-        ShutDownResponse()
+        ShutDownResponse(shutDownRequest.clusterId)
       } else {
         null
       }
