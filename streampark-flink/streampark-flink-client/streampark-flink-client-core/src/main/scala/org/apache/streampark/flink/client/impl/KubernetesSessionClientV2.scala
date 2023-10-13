@@ -182,7 +182,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
         case _: FlinkResourceNotFound => ZIO.unit
         case _: UnsupportedAction => ZIO.unit
       }
-      .as(ShutDownResponse())
+      .as(ShutDownResponse(name))
       .runIOAsTry match {
       case Success(result) => logInfo(richMsg("Shutdown Flink cluster successfully.")); result
       case Failure(err) => logError(richMsg(s"Fail to shutdown Flink cluster"), err); throw err
