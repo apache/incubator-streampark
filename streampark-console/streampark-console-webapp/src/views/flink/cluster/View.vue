@@ -64,7 +64,7 @@
 
   /* Go to edit cluster */
   function handleEditCluster(item: FlinkCluster) {
-    go(`/setting/edit_cluster?clusterId=${item.id}`);
+    go(`/flink/edit_cluster?clusterId=${item.id}`);
   }
   /* deploy */
   async function handleDeployCluster(item: FlinkCluster) {
@@ -139,7 +139,7 @@
         <a-button
           type="dashed"
           style="width: 100%; margin-top: 20px"
-          @click="go('/setting/add_cluster')"
+          @click="go('/flink/add_cluster')"
         >
           <PlusOutlined />
           {{ t('common.add') }}

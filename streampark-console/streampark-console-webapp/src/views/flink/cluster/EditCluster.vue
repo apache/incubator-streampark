@@ -34,7 +34,7 @@
   import { useClusterSetting } from './useClusterSetting';
   import { nextTick, onMounted, reactive } from 'vue';
   import { useRoute } from 'vue-router';
-  import { useEdit } from '../../flink/app/hooks/useEdit';
+  import { useEdit } from '../app/hooks/useEdit';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAlertSetting } from '/@/api/flink/setting/alert';
   import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
