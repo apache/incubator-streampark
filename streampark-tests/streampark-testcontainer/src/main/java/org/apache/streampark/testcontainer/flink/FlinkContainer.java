@@ -31,11 +31,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.streampark.testcontainer.flink.FlinkComponent.JOBMANAGER;
 import static org.apache.streampark.testcontainer.flink.FlinkComponent.TASKMANAGER;
 
+/**
+ * The Flink container class. It would be created as a flink jobmanager container or a taskmanaager
+ * container. Note: It's an internal class to construct a flink session cluster.
+ */
 class FlinkContainer extends GenericContainer<FlinkContainer> {
 
-  public static final AtomicInteger TM_COUNT = new AtomicInteger(0);
-
-  public static final String FLINK_PROPS_KEY = "FLINK_PROPERTIES";
+  private static final String FLINK_PROPS_KEY = "FLINK_PROPERTIES";
+  private static final AtomicInteger TM_INDEX_SUFFIX = new AtomicInteger(0);
 
   private final @Nonnull FlinkComponent component;
 
@@ -43,7 +46,7 @@ class FlinkContainer extends GenericContainer<FlinkContainer> {
       @Nonnull DockerImageName dockerImageName,
       @Nonnull FlinkComponent component,
       @Nonnull Network network,
-      @Nonnull String yamlPropStr,
+      @Nonnull String yamlPropContent,
       @Nullable Slf4jLogConsumer slf4jLogConsumer) {
     super(dockerImageName);
     this.component = component;
@@ -51,14 +54,15 @@ class FlinkContainer extends GenericContainer<FlinkContainer> {
     this.withCreateContainerCmdModifier(
         createContainerCmd -> createContainerCmd.withName(getFlinkContainerName()));
     this.withNetwork(network);
-    this.withEnv(FLINK_PROPS_KEY, yamlPropStr);
+    this.withEnv(FLINK_PROPS_KEY, yamlPropContent);
     Optional.ofNullable(slf4jLogConsumer).ifPresent(this::withLogConsumer);
   }
 
+  @Nonnull
   protected String getFlinkContainerName() {
     if (component == JOBMANAGER) {
       return JOBMANAGER.getName();
     }
-    return String.format("%s_%s", TASKMANAGER.getName(), TM_COUNT.incrementAndGet());
+    return String.format("%s_%s", TASKMANAGER.getName(), TM_INDEX_SUFFIX.incrementAndGet());
   }
 }

@@ -42,51 +42,65 @@ object FlinkClientEndpoint {
     }
   )
 
-  def submit(request: SubmitRequest): SubmitResponse = {
-    clients.get(request.executionMode) match {
-      case Some(client) => client.submit(request)
-      case _ =>
-        throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} submit ")
-    }
-  }
-
-  def cancel(request: CancelRequest): CancelResponse = {
-    clients.get(request.executionMode) match {
-      case Some(client) => client.cancel(request)
-      case _ =>
-        throw new UnsupportedOperationException(s"Unsupported ${request.executionMode} cancel ")
-    }
-  }
-
-  def triggerSavepoint(request: TriggerSavepointRequest): SavepointResponse = {
-    clients.get(request.executionMode) match {
-      case Some(client) => client.triggerSavepoint(request)
+  def submit(submitRequest: SubmitRequest): SubmitResponse = {
+    clients.get(submitRequest.executionMode) match {
+      case Some(client) => client.submit(submitRequest)
       case _ =>
         throw new UnsupportedOperationException(
-          s"Unsupported ${request.executionMode} triggerSavepoint ")
+          s"Unsupported ${submitRequest.executionMode} submit ")
     }
   }
 
-  def deploy(request: DeployRequest): DeployResponse = {
-    request.executionMode match {
-      case YARN_SESSION => YarnSessionClient.deploy(request)
-      case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.deploy(request)
+  def cancel(cancelRequest: CancelRequest): CancelResponse = {
+    clients.get(cancelRequest.executionMode) match {
+      case Some(client) => client.cancel(cancelRequest)
       case _ =>
         throw new UnsupportedOperationException(
-          s"Unsupported ${request.executionMode} deploy cluster ")
+          s"Unsupported ${cancelRequest.executionMode} cancel ")
     }
   }
 
-  def shutdown(request: ShutDownRequest): ShutDownResponse = {
-    request.executionMode match {
-      case YARN_SESSION => YarnSessionClient.shutdown(request)
-      case KUBERNETES_NATIVE_SESSION => {
-        if (K8sFlinkConfig.isV2Enabled) KubernetesSessionClientV2.shutdown(request)
-        else KubernetesNativeSessionClient.shutdown(request)
-      }
+  def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {
+    clients.get(savepointRequest.executionMode) match {
+      case Some(client) => client.triggerSavepoint(savepointRequest)
       case _ =>
         throw new UnsupportedOperationException(
-          s"Unsupported ${request.executionMode} shutdown cluster ")
+          s"Unsupported ${savepointRequest.executionMode} triggerSavepoint ")
+    }
+  }
+
+  def deploy(deployRequest: DeployRequest): DeployResponse = {
+    deployRequest.executionMode match {
+      case YARN_SESSION => YarnSessionClient.deploy(deployRequest)
+      case KUBERNETES_NATIVE_SESSION =>
+        K8sFlinkConfig.isV2Enabled match {
+          case true => KubernetesSessionClientV2.deploy(deployRequest)
+          case _ => KubernetesNativeSessionClient.deploy(deployRequest)
+        }
+      case _ =>
+        throw new UnsupportedOperationException(
+          s"Unsupported ${deployRequest.executionMode} deploy cluster ")
+    }
+  }
+
+  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
+    shutDownRequest.executionMode match {
+      case YARN_SESSION => YarnSessionClient.shutdown(shutDownRequest)
+      case KUBERNETES_NATIVE_SESSION =>
+        K8sFlinkConfig.isV2Enabled match {
+          case true => KubernetesSessionClientV2.shutdown(shutDownRequest)
+          case _ => KubernetesNativeSessionClient.shutdown(shutDownRequest)
+        }
+      case KUBERNETES_NATIVE_APPLICATION =>
+        K8sFlinkConfig.isV2Enabled match {
+          case true => KubernetesApplicationClientV2.shutdown(shutDownRequest)
+          case _ =>
+            throw new UnsupportedOperationException(
+              s"Unsupported ${shutDownRequest.executionMode} shutdown application ")
+        }
+      case _ =>
+        throw new UnsupportedOperationException(
+          s"Unsupported ${shutDownRequest.executionMode} shutdown cluster ")
     }
   }
 

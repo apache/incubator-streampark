@@ -36,6 +36,4 @@ export interface FlinkCluster {
   exception?: any;
   clusterState: number;
   createTime: string;
-  executionModeEnum: string;
-  clusterStateEnum: string;
 }

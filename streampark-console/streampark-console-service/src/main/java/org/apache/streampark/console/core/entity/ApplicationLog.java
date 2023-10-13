@@ -44,7 +44,8 @@ public class ApplicationLog {
   private Integer optionName;
   /** option time */
   private Date optionTime;
-
   /** exception at the start */
   private String exception;
+  /** The user who operates the application */
+  private Long userId;
 }

@@ -24,3 +24,6 @@ alter table `t_flink_app`
     add column `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
     -- modify_time change with duration #3188
     modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
+
+alter table `t_flink_log`
+    add column `user_id` bigint default null comment 'operator user id';

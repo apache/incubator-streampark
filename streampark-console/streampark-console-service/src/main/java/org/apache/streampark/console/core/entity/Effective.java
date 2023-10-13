@@ -46,13 +46,4 @@ public class Effective {
   private Date createTime;
 
   private transient EffectiveTypeEnum effectiveType;
-
-  public Effective() {}
-
-  public Effective(Long appId, EffectiveTypeEnum type, Long targetId) {
-    this.appId = appId;
-    this.targetType = type.getType();
-    this.targetId = targetId;
-    this.createTime = new Date();
-  }
 }
