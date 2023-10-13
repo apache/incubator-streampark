@@ -70,7 +70,7 @@ public class LdapService {
    *
    * @param userId user identity id
    * @param userPwd user login password
-   * @return user email
+   * @return boolean ldapLoginStatus
    */
   public boolean ldapLogin(String userId, String userPwd) {
 
