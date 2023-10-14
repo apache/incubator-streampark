@@ -56,6 +56,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,6 +81,7 @@ import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.
 
 @Slf4j
 @Service
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements ApplicationInfoService {
 

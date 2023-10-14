@@ -63,7 +63,6 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
@@ -133,9 +132,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           new ThreadPoolExecutor.AbortPolicy());
 
   @Autowired private ApplicationBackUpService backUpService;
-  @Autowired private ApplicationManageService applicationManageService;
 
-  @Autowired private ApplicationInfoService applicationInfoService;
+  @Autowired private ApplicationManageService applicationManageService;
 
   @Autowired private ApplicationConfigService configService;
 
