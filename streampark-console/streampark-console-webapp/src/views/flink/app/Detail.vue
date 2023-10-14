@@ -46,7 +46,7 @@
   import DetailTab from './components/AppDetail/DetailTab.vue';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
-  import { ExternalLinkBadge } from '/@/views/setting/externalLink/components';
+  import { LinkBadge } from '/@/components/LinkBadge';
 
   const route = useRoute();
   const router = useRouter();
@@ -245,7 +245,7 @@
       <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
       <Space class="-mt-8px">
         <div v-for="link in externalLinks" :key="link.id">
-          <ExternalLinkBadge
+          <LinkBadge
             :label="link.badgeLabel"
             :redirect="link.renderedLinkUrl"
             :color="link.badgeColor"

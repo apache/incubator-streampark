@@ -31,7 +31,9 @@
   import { PlusOutlined } from '@ant-design/icons-vue';
   import { ColumnsType } from 'ant-design-vue/lib/table';
   import { useModal } from '/@/components/Modal';
-  import { ExternalLinkModal, ExternalLinkBadge } from './components';
+  import { LinkBadge } from '/@/components/LinkBadge';
+  import { ExternalLinkModal } from './components';
+
   import { PageWrapper } from '/@/components/Page';
   import { Table, Popconfirm, Card } from 'ant-design-vue';
   import { fetchExternalLink, fetchExternalLinkDelete } from '/@/api/setting/externalLink';
@@ -108,7 +110,7 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'badgeColor'">
-            <ExternalLinkBadge
+            <LinkBadge
               :color="record.badgeColor"
               :label="record.badgeLabel"
               :message="record.badgeName"

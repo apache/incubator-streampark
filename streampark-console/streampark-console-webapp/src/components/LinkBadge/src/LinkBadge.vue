@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
   import { computed } from 'vue';
-  interface ExternalLinkBadgeProps {
+  interface BadgeProps {
     label: String;
     message: String;
     color?: string;
@@ -35,7 +35,7 @@
     disabled?: boolean;
     onBadgeClick?: () => void;
   }
-  const props = defineProps<ExternalLinkBadgeProps>();
+  const props = defineProps<BadgeProps>();
   const hasLabel = computed(() => !!props.label);
   const isClickable = computed(() => !!props.redirect && !props.disabled);
   function handleClick() {
