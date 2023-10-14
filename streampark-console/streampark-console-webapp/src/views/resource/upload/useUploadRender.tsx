@@ -16,7 +16,7 @@
  */
 import { Select, Tag } from 'ant-design-vue';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/resource/material/material.data';
+import { EngineTypeEnum, ResourceTypeEnum } from './upload.data';
 
 import flinkAppSvg from '/@/assets/icons/flink2.svg';
 import sparkSvg from '/@/assets/icons/spark.svg';

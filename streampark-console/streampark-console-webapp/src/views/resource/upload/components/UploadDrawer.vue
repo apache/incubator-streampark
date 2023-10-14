@@ -28,7 +28,7 @@
     </template>
     <BasicForm @register="registerForm" :schemas="getResourceFormSchema">
       <template #resource="{ model, field }">
-        <Resource ref="resourceRef" v-model:value="model[field]" :form-model="model" />
+        <Upload ref="resourceRef" v-model:value="model[field]" :form-model="model" />
       </template>
     </BasicForm>
   </BasicDrawer>
@@ -45,14 +45,14 @@
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import Resource from '/@/views/resource/material/components/Resource.vue';
+  import Upload from './Upload.vue';
   import { fetchAddResource, fetchUpdateResource, checkResource } from '/@/api/flink/resource';
-  import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/resource/material/material.data';
+  import { EngineTypeEnum, ResourceTypeEnum } from '../upload.data';
   import {
     renderEngineType,
     renderResourceType,
     renderStreamParkResourceGroup,
-  } from '/@/views/resource/material/useMaterialRender';
+  } from '../useUploadRender';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { exceptionPropWidth } from '/@/utils';
 

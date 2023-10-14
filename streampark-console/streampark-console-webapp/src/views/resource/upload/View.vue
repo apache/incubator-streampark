@@ -93,7 +93,7 @@
         </template>
       </template>
     </BasicTable>
-    <ResourceDrawer
+    <UploadDrawer
       :teamResource="teamResource"
       @register="registerDrawer"
       @success="handleSuccess"
@@ -109,9 +109,9 @@
 <script lang="ts" setup>
   import { defineComponent, onMounted, ref } from 'vue';
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
-  import ResourceDrawer from './components/ResourceDrawer.vue';
+  import UploadDrawer from './components/UploadDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { columns, searchFormSchema, EngineTypeEnum, ResourceTypeEnum } from './material.data';
+  import { columns, searchFormSchema, EngineTypeEnum, ResourceTypeEnum } from './upload.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';

@@ -146,7 +146,7 @@
         </a-button>
       </div>
       <List>
-        <ListItem v-for="(item, index) in clusters" :key="index">
+        <ListItem v-for="(item, index) in clusters" :key="'cluster'.concat(String(index))">
           <ListItemMeta
             :title="item.clusterName"
             style="width: 20%"

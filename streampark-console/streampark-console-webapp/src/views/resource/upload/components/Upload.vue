@@ -17,13 +17,12 @@
 <script lang="ts">
   import { defineComponent, onMounted, reactive, ref } from 'vue';
   import { toPomString } from '/@/views/flink/app/utils/Pom';
-
   export default defineComponent({
-    name: 'Resource',
+    name: 'Upload',
   });
 </script>
 
-<script setup lang="ts" name="Resource">
+<script setup lang="ts" name="Upload">
   import { getMonacoOptions } from '/@/views/flink/app/data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
@@ -31,8 +30,7 @@
   import { fetchUpload } from '/@/api/flink/resource';
 
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
-  import { ResourceTypeEnum } from '/@/views/resource/material/material.data';
-
+  import { ResourceTypeEnum } from '../upload.data';
   interface DependencyType {
     artifactId: string;
     exclusions: string[];
