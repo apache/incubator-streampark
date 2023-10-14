@@ -19,7 +19,7 @@
   import { defineComponent } from 'vue';
 
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { ExternalLink } from '/@/api/flink/setting/types/externalLink.type';
+  import { ExternalLink } from '/@/api/setting/types/externalLink.type';
   import { useMessage } from '/@/hooks/web/useMessage';
 
   export default defineComponent({
@@ -34,7 +34,7 @@
   import { ExternalLinkModal, ExternalLinkBadge } from './components';
   import { PageWrapper } from '/@/components/Page';
   import { Table, Popconfirm, Card } from 'ant-design-vue';
-  import { fetchExternalLink, fetchExternalLinkDelete } from '/@/api/flink/setting/externalLink';
+  import { fetchExternalLink, fetchExternalLinkDelete } from '/@/api/setting/externalLink';
   import { BasicTitle } from '/@/components/Basic';
   const [registerLinkModal, { openModal: openLinkModal }] = useModal();
   const { Swal } = useMessage();

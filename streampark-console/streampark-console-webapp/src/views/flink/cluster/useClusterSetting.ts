@@ -18,28 +18,28 @@ import { ExecModeEnum } from '/@/enums/flinkEnum';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, onMounted, reactive, ref, unref } from 'vue';
-import { k8sRestExposedType, resolveOrder } from '../../flink/app/data';
+import { k8sRestExposedType, resolveOrder } from '../app/data';
 import {
   renderDynamicProperties,
   renderInputDropdown,
   renderOptionsItems,
   renderTotalMemory,
   renderYarnQueue,
-} from '../../flink/app/hooks/useFlinkRender';
-import { fetchCheckHadoop } from '/@/api/flink/setting';
-import { fetchListFlinkEnv } from '/@/api/flink/setting/flinkEnv';
+} from '../app/hooks/useFlinkRender';
+import { fetchCheckHadoop } from '/@/api/setting';
+import { fetchListFlinkEnv } from '/@/api/flink/app/flinkEnv';
 import { FormSchema } from '/@/components/Table';
-import optionData from '../../flink/app/data/option';
+import optionData from '../app/data/option';
 import {
   fetchFlinkBaseImages,
   fetchK8sNamespaces,
   fetchSessionClusterIds,
 } from '/@/api/flink/app/flinkHistory';
-import { handleFormValue } from '../../flink/app/utils';
+import { handleFormValue } from '../app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
-import { fetchAlertSetting } from '/@/api/flink/setting/alert';
+import { AlertSetting } from '/@/api/setting/types/alert.type';
+import { fetchAlertSetting } from '/@/api/setting/alert';
 
 export const useClusterSetting = () => {
   const { createMessage } = useMessage();

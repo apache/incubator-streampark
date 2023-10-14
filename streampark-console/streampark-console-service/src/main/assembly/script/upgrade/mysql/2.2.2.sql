@@ -22,6 +22,10 @@ set foreign_key_checks = 0;
 
 -- reset t_menu
 truncate table `t_menu`;
+
+-- ----------------------------
+-- reset t_menu
+-- ----------------------------
 insert into `t_menu` values (110000, 0, 'Apache Flink', '/flink', 'PageView', null, null, '0', 1, 1, now(), now());
 insert into `t_menu` values (120000, 0, 'Apache Spark', '/spark', 'PageView', null, null, '0', 1, 2, now(), now());
 insert into `t_menu` values (130000, 0, 'resource.menu', '/resource', 'PageView', null, 0, '0', 1, 3, now(), now());
@@ -76,10 +80,10 @@ insert into `t_menu` values (130301, 130300, 'resource add', NULL, NULL, 'resour
 insert into `t_menu` values (130302, 130300, 'resource update', NULL, NULL, 'resource:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (130303, 130300, 'resource delete', NULL, NULL, 'resource:delete', NULL, '1', 1, NULL, now(), now());
 
-insert into `t_menu` values (140100, 140000, 'setting.system', '/setting/system', 'setting/System/index', null, null, '0', 1, 1, now(), now());
-insert into `t_menu` values (140200, 140000, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, null, '0', 1, 2, now(), now());
-insert into `t_menu` values (140300, 140000, 'setting.externalLink', '/setting/externalLink', 'setting/ExternalLink/index', 'menu:view', null, '0', 1, 5, now(), now());
-insert into `t_menu` values (140400, 140000, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/YarnQueue/index', 'menu:view', null, '0', 1, 6, now(), now());
+insert into `t_menu` values (140100, 140000, 'setting.system', '/setting/system', 'setting/system/View', null, null, '0', 1, 1, now(), now());
+insert into `t_menu` values (140200, 140000, 'setting.alarm', '/setting/alarm', 'setting/alarm/View', null, null, '0', 1, 2, now(), now());
+insert into `t_menu` values (140300, 140000, 'setting.externalLink', '/setting/externalLink', 'setting/externalLink/View', 'menu:view', null, '0', 1, 5, now(), now());
+insert into `t_menu` values (140400, 140000, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/yarnQueue/View', 'menu:view', null, '0', 1, 6, now(), now());
 insert into `t_menu` values (140101, 140100, 'setting view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (140102, 140100, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 
@@ -91,11 +95,11 @@ insert into `t_menu` values (140401, 140400, 'yarn queue add', null, null, 'yarn
 insert into `t_menu` values (140402, 140400, 'yarn queue edit', null, null, 'yarnQueue:update', '', '1', 0, null, now(), now());
 insert into `t_menu` values (140403, 140400, 'yarn queue delete', null, null, 'yarnQueue:delete', '', '1', 0, null, now(), now());
 
-insert into `t_menu` values (150100, 150000, 'system.user', '/system/user', 'system/user/User', null, null, '0', 1, 1, now(), now());
-insert into `t_menu` values (150200, 150000, 'system.role', '/system/role', 'system/role/Role', null, null, '0', 1, 2, now(), now());
-insert into `t_menu` values (150300, 150000, 'system.token', '/system/token', 'system/token/Token', null, null, '0', 1, 1, now(), now());
-insert into `t_menu` values (150400, 150000, 'system.team', '/system/team', 'system/team/Team', null, null, '0', 1, 2, now(), now());
-insert into `t_menu` values (150500, 150000, 'system.member', '/system/member', 'system/member/Member', null, null, '0', 1, 2, now(), now());
+insert into `t_menu` values (150100, 150000, 'system.user', '/system/user', 'system/user/View', null, null, '0', 1, 1, now(), now());
+insert into `t_menu` values (150200, 150000, 'system.role', '/system/role', 'system/role/View', null, null, '0', 1, 2, now(), now());
+insert into `t_menu` values (150300, 150000, 'system.token', '/system/token', 'system/token/View', null, null, '0', 1, 1, now(), now());
+insert into `t_menu` values (150400, 150000, 'system.team', '/system/team', 'system/team/View', null, null, '0', 1, 2, now(), now());
+insert into `t_menu` values (150500, 150000, 'system.member', '/system/member', 'system/member/View', null, null, '0', 1, 2, now(), now());
 
 insert into `t_menu` values (150101, 150100, 'user view', null, null, 'user:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (150102, 150100, 'user add', null, null, 'user:add', null, '1', 1, null, now(), now());

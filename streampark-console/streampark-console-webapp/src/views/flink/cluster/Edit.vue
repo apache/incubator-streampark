@@ -29,15 +29,15 @@
     fetchCheckCluster,
     fetchGetCluster,
     fetchUpdateCluster,
-  } from '/@/api/flink/setting/flinkCluster';
+  } from '/@/api/flink/app/flinkCluster';
 
   import { useClusterSetting } from './useClusterSetting';
   import { nextTick, onMounted, reactive } from 'vue';
   import { useRoute } from 'vue-router';
   import { useEdit } from '../app/hooks/useEdit';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { fetchAlertSetting } from '/@/api/flink/setting/alert';
-  import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
+  import { fetchAlertSetting } from '/@/api/setting/alert';
+  import { AlertSetting } from '/@/api/setting/types/alert.type';
 
   const go = useGo();
   const route = useRoute();
@@ -79,7 +79,7 @@
             showConfirmButton: false,
             timer: 2000,
           });
-          go('/setting/flinkCluster');
+          go('/flink/cluster');
         } else {
           Swal.fire('Failed', res.msg, 'error');
         }
@@ -136,7 +136,7 @@
     <BasicForm @register="registerForm" @submit="handleSubmitCluster" :schemas="getClusterSchema">
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="go('/setting/flinkCluster')">
+          <a-button @click="go('/flink/cluster')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">

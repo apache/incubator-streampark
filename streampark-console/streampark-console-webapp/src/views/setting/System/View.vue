@@ -23,9 +23,9 @@
 <script setup lang="ts" name="SystemSetting">
   import { Collapse, Card } from 'ant-design-vue';
   import { ref, onMounted, computed } from 'vue';
-  import { fetchSystemSetting } from '/@/api/flink/setting';
-  import { SystemSetting } from '/@/api/flink/setting/types/setting.type';
-  import { fetchSystemSettingUpdate } from '/@/api/flink/setting';
+  import { fetchSystemSetting } from '/@/api/setting';
+  import { SystemSetting } from '/@/api/setting/types/setting.type';
+  import { fetchSystemSettingUpdate } from '/@/api/setting';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import SettingList from './SettingList.vue';

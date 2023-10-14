@@ -79,7 +79,7 @@
   import { columns, searchFormSchema } from './variable.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { fetchVariableDelete, fetchVariableList } from '/@/api/variable';
+  import { fetchVariableDelete, fetchVariableList } from '/@/api/resource/variable';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
 

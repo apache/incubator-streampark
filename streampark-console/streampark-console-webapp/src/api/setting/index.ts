@@ -19,7 +19,6 @@ import { defHttp } from '/@/utils/http/axios';
 
 enum SETTING_APi {
   GET = '/flink/setting/get',
-  WEB_URL = '/flink/setting/weburl',
   ALL = '/flink/setting/all',
   CHECK_HADOOP = '/flink/setting/checkHadoop',
   SYNC = '/flink/setting/sync',

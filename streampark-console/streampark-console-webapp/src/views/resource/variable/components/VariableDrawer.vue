@@ -47,8 +47,8 @@
     fetchCheckVariableCode,
     fetchUpdateVariable,
     fetchVariableInfo,
-  } from '/@/api/variable';
-  import { VariableListRecord } from '/@/api/variable/model/variableModel';
+  } from '/@/api/resource/variable';
+  import { VariableListRecord } from '/@/api/resource/variable/model/variableModel';
 
   const emit = defineEmits(['success', 'register']);
 

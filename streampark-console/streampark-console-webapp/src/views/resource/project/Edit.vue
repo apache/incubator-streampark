@@ -23,7 +23,7 @@
   import { defineComponent, onMounted, ref } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
   import { useProject } from './useProject';
-  import { updateProject } from '/@/api/project';
+  import { updateProject } from '/@/api/resource/project';
   import { BasicForm } from '/@/components/Form';
   import { PageWrapper } from '/@/components/Page';
   import { BuildStateEnum } from '/@/enums/flinkEnum';

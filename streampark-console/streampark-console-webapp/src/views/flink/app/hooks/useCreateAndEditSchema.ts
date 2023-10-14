@@ -37,24 +37,24 @@ import { useDrawer } from '/@/components/Drawer';
 import { Alert } from 'ant-design-vue';
 import Icon from '/@/components/Icon';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { fetchVariableAll } from '/@/api/variable';
+import { fetchVariableAll } from '/@/api/resource/variable';
 import {
   fetchFlinkBaseImages,
   fetchK8sNamespaces,
   fetchSessionClusterIds,
 } from '/@/api/flink/app/flinkHistory';
-import { fetchSelect } from '/@/api/project';
-import { fetchAlertSetting } from '/@/api/flink/setting/alert';
-import { fetchFlinkCluster } from '/@/api/flink/setting/flinkCluster';
-import { fetchFlinkEnv, fetchListFlinkEnv } from '/@/api/flink/setting/flinkEnv';
-import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
-import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
-import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
+import { fetchSelect } from '/@/api/resource/project';
+import { fetchAlertSetting } from '/@/api/setting/alert';
+import { fetchFlinkCluster } from '/@/api/flink/app/flinkCluster';
+import { fetchFlinkEnv, fetchListFlinkEnv } from '/@/api/flink/app/flinkEnv';
+import { FlinkEnv } from '/@/api/flink/app/flinkEnv.type';
+import { AlertSetting } from '/@/api/setting/types/alert.type';
+import { FlinkCluster } from '/@/api/flink/app/flinkCluster.type';
 import { AppTypeEnum, ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { fetchCheckHadoop } from '/@/api/flink/setting';
-import { fetchTeamResource } from '/@/api/flink/resource';
+import { fetchCheckHadoop } from '/@/api/setting';
+import { fetchTeamResource } from '/@/api/resource/upload';
 const { t } = useI18n();
 
 export interface HistoryRecord {

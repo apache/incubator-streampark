@@ -23,8 +23,8 @@
 <script setup lang="ts" name="MavenSetting">
   import { List, Input, Switch } from 'ant-design-vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { SystemSetting } from '/@/api/flink/setting/types/setting.type';
-  import { fetchSystemSettingUpdate } from '/@/api/flink/setting';
+  import { SystemSetting } from '/@/api/setting/types/setting.type';
+  import { fetchSystemSettingUpdate } from '/@/api/setting';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
 

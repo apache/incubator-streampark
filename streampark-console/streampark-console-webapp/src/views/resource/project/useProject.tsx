@@ -17,11 +17,11 @@
 import { FormSchema } from '/@/components/Table';
 import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, nextTick, reactive, ref, unref } from 'vue';
-import { fetchBranches, getDetail, gitCheck, isExist } from '/@/api/project';
+import { fetchBranches, getDetail, gitCheck, isExist } from '/@/api/resource/project';
 import { useForm } from '/@/components/Form';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useRoute } from 'vue-router';
-import { ProjectRecord } from '/@/api/project/model/projectModel';
+import { ProjectRecord } from '/@/api/resource/project/model/projectModel';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { GitCredentialEnum, ProjectTypeEnum, CVSTypeEnum } from '/@/enums/projectEnum';
 import RepositoryGroup from './components/RepositoryGroup';

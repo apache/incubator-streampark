@@ -33,7 +33,7 @@
   import { useRouter } from 'vue-router';
   import { fetchStart } from '/@/api/flink/app/app';
   import { RestoreModeEnum } from '/@/enums/flinkEnum';
-  import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
+  import { fetchFlinkEnv } from '/@/api/flink/app/flinkEnv';
   import { renderFlinkAppRestoreMode } from '/@/views/flink/app/hooks/useFlinkRender';
 
   const SelectOption = Select.Option;

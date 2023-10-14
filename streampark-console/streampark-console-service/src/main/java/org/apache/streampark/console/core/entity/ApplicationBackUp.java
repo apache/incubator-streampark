@@ -47,6 +47,8 @@ public class ApplicationBackUp {
 
   private transient boolean backup;
 
+  public ApplicationBackUp() {}
+
   public ApplicationBackUp(Application application) {
     this.appId = application.getId();
     this.sqlId = application.getSqlId();

@@ -18,8 +18,8 @@
   import { defineComponent } from 'vue';
   import { AppStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { fetchAppExternalLink } from '/@/api/flink/setting/externalLink';
-  import { ExternalLink } from '/@/api/flink/setting/types/externalLink.type';
+  import { fetchAppExternalLink } from '/@/api/setting/externalLink';
+  import { ExternalLink } from '/@/api/setting/types/externalLink.type';
   export default defineComponent({
     name: 'ApplicationDetail',
   });
@@ -39,14 +39,14 @@
   import { getDescSchema } from './data/detail.data';
   import { fetchCheckToken, fetchCopyCurl } from '/@/api/system/token';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { baseUrl } from '/@/api/index';
+  import { baseUrl } from '/@/api';
   import { fetchListVer } from '/@/api/flink/config';
   import { fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
   import Mergely from './components/Mergely.vue';
   import DetailTab from './components/AppDetail/DetailTab.vue';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
-  import { ExternalLinkBadge } from '/@/views/setting/ExternalLink/components';
+  import { ExternalLinkBadge } from '/@/views/setting/externalLink/components';
 
   const route = useRoute();
   const router = useRouter();

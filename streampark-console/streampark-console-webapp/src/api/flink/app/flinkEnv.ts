@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
-import { FlinkCreate, FlinkEnv } from './types/flinkEnv.type';
+import { FlinkCreate, FlinkEnv } from './flinkEnv.type';
 import { Result } from '/#/axios';
 import { defHttp } from '/@/utils/http/axios';
 

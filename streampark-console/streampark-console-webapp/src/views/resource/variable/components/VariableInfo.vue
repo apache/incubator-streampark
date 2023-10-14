@@ -40,7 +40,7 @@
   import { Description, DescItem } from '/@/components/Description';
   import Icon from '/@/components/Icon';
   import { useDrawerInner, BasicDrawer } from '/@/components/Drawer';
-  import { fetchVariableInfo } from '/@/api/variable';
+  import { fetchVariableInfo } from '/@/api/resource/variable';
   import { usePermission } from '/@/hooks/web/usePermission';
   import { useI18n } from '/@/hooks/web/useI18n';
 

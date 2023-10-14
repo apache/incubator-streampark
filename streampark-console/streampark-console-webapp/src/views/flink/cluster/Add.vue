@@ -25,7 +25,7 @@
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { fetchCheckCluster, fetchCreateCluster } from '/@/api/flink/setting/flinkCluster';
+  import { fetchCheckCluster, fetchCreateCluster } from '/@/api/flink/app/flinkCluster';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useGo } from '/@/hooks/web/usePage';
   import { useClusterSetting } from './useClusterSetting';
@@ -62,7 +62,7 @@
               showConfirmButton: false,
               timer: 2000,
             });
-            go('/setting/flinkCluster');
+            go('/flink/cluster');
           } else {
             Swal.fire(
               'Failed',
@@ -86,7 +86,7 @@
     <BasicForm @register="registerForm" @submit="handleSubmitCluster" :schemas="getClusterSchema">
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="go('/setting/flinkCluster')">
+          <a-button @click="go('/flink/cluster')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">

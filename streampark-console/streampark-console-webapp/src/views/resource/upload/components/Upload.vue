@@ -27,7 +27,7 @@
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
   import { Tabs, Alert, Tag, Space } from 'ant-design-vue';
-  import { fetchUpload } from '/@/api/flink/resource';
+  import { fetchUpload } from '/@/api/resource/upload';
 
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
   import { ResourceTypeEnum } from '../upload.data';

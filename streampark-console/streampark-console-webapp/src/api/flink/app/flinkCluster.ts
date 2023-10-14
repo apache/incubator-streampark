@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
-import { FlinkCluster } from './types/flinkCluster.type';
+import { FlinkCluster } from './flinkCluster.type';
 import { Result } from '/#/axios';
 import { defHttp } from '/@/utils/http/axios';
 

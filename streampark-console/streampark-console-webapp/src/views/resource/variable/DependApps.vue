@@ -21,7 +21,7 @@
 </script>
 <script setup lang="ts" name="DependApp">
   import { useRoute, useRouter } from 'vue-router';
-  import { fetchDependApps } from '/@/api/variable';
+  import { fetchDependApps } from '/@/api/resource/variable';
   import Icon from '/@/components/Icon';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTable, useTable } from '/@/components/Table';

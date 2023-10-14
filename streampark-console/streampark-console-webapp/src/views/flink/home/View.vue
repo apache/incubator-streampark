@@ -41,8 +41,8 @@
     fetchListFlinkEnv,
     fetchFlinkEnvRemove,
     fetchFlinkInfo,
-  } from '/@/api/flink/setting/flinkEnv';
-  import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
+  } from '/@/api/flink/app/flinkEnv';
+  import { FlinkEnv } from '/@/api/flink/app/flinkEnv.type';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useDrawer } from '/@/components/Drawer';
   import { PageWrapper } from '/@/components/Page';

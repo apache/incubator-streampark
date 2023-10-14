@@ -34,8 +34,8 @@
     PlusOutlined,
   } from '@ant-design/icons-vue';
   import { useModal } from '/@/components/Modal';
-  import { fetchAlertSetting, fetchSendAlert, fetchAlertDelete } from '/@/api/flink/setting/alert';
-  import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
+  import { fetchAlertSetting, fetchSendAlert, fetchAlertDelete } from '/@/api/setting/alert';
+  import { AlertSetting } from '/@/api/setting/types/alert.type';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { AlertTypeInfo, DetailModal, AlertModal } from './components';
   import { PageWrapper } from '/@/components/Page';

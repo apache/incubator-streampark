@@ -17,7 +17,7 @@
 import { optionsKeyMapping } from '../data/option';
 import { fetchYarn } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
-import { fetchRemoteURL } from '/@/api/flink/setting/flinkCluster';
+import { fetchRemoteURL } from '/@/api/flink/app/flinkCluster';
 import {
   AppStateEnum,
   ConfigTypeEnum,

@@ -46,7 +46,7 @@
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Upload from './Upload.vue';
-  import { fetchAddResource, fetchUpdateResource, checkResource } from '/@/api/flink/resource';
+  import { fetchAddResource, fetchUpdateResource, checkResource } from '/@/api/resource/upload';
   import { EngineTypeEnum, ResourceTypeEnum } from '../upload.data';
   import {
     renderEngineType,

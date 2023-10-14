@@ -115,7 +115,11 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
-  import { fetchResourceDelete, fetchResourceList, fetchTeamResource } from '/@/api/flink/resource';
+  import {
+    fetchResourceDelete,
+    fetchResourceList,
+    fetchTeamResource,
+  } from '/@/api/resource/upload';
   import { Tag } from 'ant-design-vue';
   import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
 

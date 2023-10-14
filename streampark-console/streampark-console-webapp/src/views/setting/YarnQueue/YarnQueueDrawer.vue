@@ -31,7 +31,7 @@
     fetchCheckYarnQueue,
     fetchYarnQueueCreate,
     fetchYarnQueueUpdate,
-  } from '/@/api/flink/setting/yarnQueue';
+  } from '/@/api/setting/yarnQueue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { renderYarnQueueLabel } from './useYarnQueueRender';
 

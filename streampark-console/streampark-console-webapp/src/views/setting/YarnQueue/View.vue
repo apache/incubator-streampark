@@ -15,10 +15,10 @@
   limitations under the License.
 -->
 <template>
-  <PageWrapper>
+  <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'gateway:add'">
+        <a-button type="primary" @click="handleCreate" v-auth="'yarnQueue:create'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -28,12 +28,18 @@
           <TableAction
             :actions="[
               {
+                icon: 'clarity:note-edit-line',
+                auth: 'yarnQueue:update',
+                tooltip: t('common.edit'),
+                onClick: handleYarnQueueEdit.bind(null, record),
+              },
+              {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
-                auth: 'gateway:delete',
-                tooltip: t('setting.flinkGateway.deleteGateway'),
+                tooltip: t('common.delText'),
+                auth: 'yarnQueue:delete',
                 popConfirm: {
-                  title: t('setting.flinkGateway.operation.deleteConfirm'),
+                  title: t('setting.yarnQueue.deleteConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },
               },
@@ -42,52 +48,45 @@
         </template>
       </template>
     </BasicTable>
-    <FlinkGatewayDrawer @register="registerDrawer" @success="handleSuccess" />
-  </PageWrapper>
+    <YarnQueueDrawer
+      :okText="t('common.okText')"
+      @register="registerDrawer"
+      @success="handleSuccess"
+    />
+  </div>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import FlinkGatewayDrawer from './components/FlinkGatewayDrawer.vue';
+  import YarnQueueDrawer from './YarnQueueDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { fetchGatewayDelete, fetchGatewayList } from '/@/api/flink/setting/flinkGateway';
+  import Icon from '/@/components/Icon';
   import { columns, searchFormSchema } from './index.data';
+  import { fetchYarnQueueList, fetchYarnQueueDelete } from '/@/api/setting/yarnQueue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import Icon from '/@/components/Icon';
-  import { PageWrapper } from '/@/components/Page';
+
   export default defineComponent({
-    name: 'FlinkGateway',
-    components: {
-      BasicTable,
-      FlinkGatewayDrawer: FlinkGatewayDrawer,
-      TableAction,
-      Icon,
-      PageWrapper,
-    },
+    name: 'YarnQueue',
+    components: { BasicTable, YarnQueueDrawer, TableAction, Icon },
     setup() {
-      const { t } = useI18n();
-      const { createMessage } = useMessage();
       const [registerDrawer, { openDrawer }] = useDrawer();
-      const [registerTable, { reload, updateTableDataRecord }] = useTable({
-        title: t('setting.flinkGateway.tableTitle'),
-        api: fetchGatewayList,
-        // beforeFetch: (params) => {
-        //   if (params.user) {
-        //     params.username = params.user;
-        //     delete params.user;
-        //   }
-        //   return params;
-        // },
+      const { createMessage } = useMessage();
+      const { t } = useI18n();
+      const [registerTable, { reload }] = useTable({
+        title: t('setting.yarnQueue.tableTitle'),
+        api: fetchYarnQueueList,
         columns,
         formConfig: {
           baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
+          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
-        useSearchForm: false,
-        showTableSetting: true,
         rowKey: 'id',
+        pagination: true,
+        useSearchForm: true,
+        showTableSetting: true,
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
@@ -103,24 +102,33 @@
         });
       }
 
+      function handleYarnQueueEdit(record: Recordable) {
+        openDrawer(true, {
+          record,
+          isUpdate: true,
+        });
+      }
+
+      /* Delete the organization */
       async function handleDelete(record: Recordable) {
-        const res = await fetchGatewayDelete(record.id);
-        if (res) {
-          createMessage.success(t('setting.flinkGateway.operation.deleteSuccess'));
+        const { data } = await fetchYarnQueueDelete({ id: record.id });
+        if (data.status === 'success') {
+          createMessage.success(
+            `${t('setting.yarnQueue.deleteYarnQueue')} ${t('setting.yarnQueue.success')}`,
+          );
           reload();
         } else {
-          createMessage.success(t('setting.flinkGateway.operation.deleteFailed'));
+          createMessage.error(`${t('setting.yarnQueue.deleteYarnQueue')} ${t('common.failed')}`);
         }
       }
 
-      function handleSuccess({ isUpdate, values }) {
-        if (isUpdate) {
-          createMessage.success(t('setting.flinkGateway.operation.updateSuccess'));
-          updateTableDataRecord(values.id, values);
-        } else {
-          createMessage.success(t('setting.flinkGateway.operation.createSuccess'));
-          reload();
-        }
+      function handleSuccess(isUpdate: boolean) {
+        createMessage.success(
+          `${isUpdate ? t('common.edit') : t('setting.yarnQueue.createQueue')} ${t(
+            'setting.yarnQueue.success',
+          )}`,
+        );
+        reload();
       }
 
       return {
@@ -128,6 +136,7 @@
         registerTable,
         registerDrawer,
         handleCreate,
+        handleYarnQueueEdit,
         handleDelete,
         handleSuccess,
       };
