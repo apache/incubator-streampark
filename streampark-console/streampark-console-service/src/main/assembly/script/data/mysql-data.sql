@@ -104,10 +104,10 @@ insert into `t_menu` values (130301, 130300, 'resource add', NULL, NULL, 'resour
 insert into `t_menu` values (130302, 130300, 'resource update', NULL, NULL, 'resource:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (130303, 130300, 'resource delete', NULL, NULL, 'resource:delete', NULL, '1', 1, NULL, now(), now());
 
-insert into `t_menu` values (140100, 140000, 'setting.system', '/setting/system', 'setting/System/index', null, null, '0', 1, 1, now(), now());
-insert into `t_menu` values (140200, 140000, 'setting.alarm', '/setting/alarm', 'setting/Alarm/index', null, null, '0', 1, 2, now(), now());
-insert into `t_menu` values (140300, 140000, 'setting.externalLink', '/setting/externalLink', 'setting/ExternalLink/index', 'menu:view', null, '0', 1, 5, now(), now());
-insert into `t_menu` values (140400, 140000, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/YarnQueue/index', 'menu:view', null, '0', 1, 6, now(), now());
+insert into `t_menu` values (140100, 140000, 'setting.system', '/setting/system', 'setting/system/index', null, null, '0', 1, 1, now(), now());
+insert into `t_menu` values (140200, 140000, 'setting.alarm', '/setting/alarm', 'setting/alarm/index', null, null, '0', 1, 2, now(), now());
+insert into `t_menu` values (140300, 140000, 'setting.externalLink', '/setting/externalLink', 'setting/externalLink/index', 'menu:view', null, '0', 1, 5, now(), now());
+insert into `t_menu` values (140400, 140000, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/yarnQueue/index', 'menu:view', null, '0', 1, 6, now(), now());
 insert into `t_menu` values (140101, 140100, 'setting view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (140102, 140100, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 
