@@ -154,6 +154,27 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
+  public void persistMetrics(Application appParam) {
+    this.baseMapper.persistMetrics(appParam);
+  }
+
+  @Override
+  public boolean mapping(Application appParam) {
+    boolean mapping = this.baseMapper.mapping(appParam);
+    Application application = getById(appParam.getId());
+    if (isKubernetesApp(application)) {
+      // todo mark
+      k8SFlinkTrackMonitor.doWatching(toTrackId(application));
+      if (K8sFlinkConfig.isV2Enabled()) {
+        flinkK8sObserver.watchApplication(application);
+      }
+    } else {
+      FlinkAppHttpWatcher.doWatching(application);
+    }
+    return mapping;
+  }
+
+  @Override
   public Boolean delete(Application appParam) {
 
     Application application = getById(appParam.getId());

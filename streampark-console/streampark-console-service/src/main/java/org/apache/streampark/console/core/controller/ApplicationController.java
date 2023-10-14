@@ -157,7 +157,7 @@ public class ApplicationController {
   @PostMapping("mapping")
   @RequiresPermissions("app:mapping")
   public RestResponse mapping(Application app) {
-    boolean flag = applicationInfoService.mapping(app);
+    boolean flag = applicationManageService.mapping(app);
     return RestResponse.success(flag);
   }
 
