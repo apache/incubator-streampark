@@ -22,10 +22,6 @@ set foreign_key_checks = 0;
 
 -- reset t_menu
 truncate table `t_menu`;
-
--- ----------------------------
--- reset t_menu
--- ----------------------------
 insert into `t_menu` values (110000, 0, 'Apache Flink', '/flink', 'PageView', null, null, '0', 1, 1, now(), now());
 insert into `t_menu` values (120000, 0, 'Apache Spark', '/spark', 'PageView', null, null, '0', 1, 2, now(), now());
 insert into `t_menu` values (130000, 0, 'resource.menu', '/resource', 'PageView', null, 0, '0', 1, 3, now(), now());
