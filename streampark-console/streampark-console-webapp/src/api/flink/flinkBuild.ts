@@ -22,13 +22,13 @@ enum BUILD_API {
   DETAIL = '/flink/pipe/detail',
 }
 
-export function fetchBuild(data): Promise<AxiosResponse<any>> {
+export function fetchBuild(data: { appId: string; forceBuild: boolean; }): Promise<AxiosResponse<any>> {
   return defHttp.post({ url: BUILD_API.BUILD, data }, { isReturnNativeResponse: true });
 }
 /**
  * Get build details
- * @param params appId:string
  * @returns
+ * @param data
  */
 export function fetchBuildDetail(data: { appId: string }): Promise<{ pipeline: any; docker: any }> {
   return defHttp.post({ url: BUILD_API.DETAIL, data });

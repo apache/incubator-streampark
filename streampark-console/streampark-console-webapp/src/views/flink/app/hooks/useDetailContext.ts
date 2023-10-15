@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { InjectionKey } from 'vue';
-import { AppListRecord } from '/@/api/flink/app/app.type';
+import { AppListRecord } from '/@/api/flink/app.type';
 import { createContext, useContext } from '/@/hooks/core/useContext';
 
 export interface DetailProviderContextProps {

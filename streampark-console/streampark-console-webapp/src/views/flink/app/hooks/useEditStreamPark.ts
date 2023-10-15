@@ -21,7 +21,7 @@ import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { renderSqlHistory } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
 import { decodeByBase64 } from '/@/utils/cipher';
-import { fetchFlinkSql } from '/@/api/flink/app/flinkSql';
+import { fetchFlinkSql } from '/@/api/flink/flinkSql';
 import { toPomString } from '../utils/Pom';
 import { handleDependencyJsonToPom } from '../utils';
 import { useDrawer } from '/@/components/Drawer';

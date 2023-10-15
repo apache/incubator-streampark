@@ -23,7 +23,7 @@ import { decodeByBase64 } from '/@/utils/cipher';
 import { fetchGetVer } from '/@/api/flink/config';
 
 import { ApiTreeSelect } from '/@/components/Form';
-import { fetchAppConf, fetchName } from '/@/api/flink/app/app';
+import { fetchAppConf, fetchName } from '/@/api/flink/app';
 import { SettingTwoTone } from '@ant-design/icons-vue';
 import { fetchListConf } from '/@/api/resource/project';
 import { UseStrategyEnum } from '/@/enums/flinkEnum';

@@ -29,7 +29,7 @@
     fetchCheckCluster,
     fetchGetCluster,
     fetchUpdateCluster,
-  } from '/@/api/flink/app/flinkCluster';
+  } from '/@/api/flink/flinkCluster';
 
   import { useClusterSetting } from './useClusterSetting';
   import { nextTick, onMounted, reactive } from 'vue';

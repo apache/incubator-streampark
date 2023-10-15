@@ -32,7 +32,7 @@
   import { formSchema } from '../index.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-  import { fetchGatewayCreate } from '/@/api/flink/app/flinkGateway';
+  import { fetchGatewayCreate } from '/@/api/flink/flinkGateway';
   import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({

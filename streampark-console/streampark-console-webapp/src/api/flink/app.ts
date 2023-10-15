@@ -109,7 +109,7 @@ export function fetchCheckName(data: { id?: string; jobName: string }): Promise<
   return defHttp.post({ url: APP_API.CHECK_NAME, data });
 }
 
-export function fetchMain(data) {
+export function fetchMain(data):Promise<string> {
   return defHttp.post({ url: APP_API.MAIN, data });
 }
 /**
@@ -117,7 +117,7 @@ export function fetchMain(data) {
  * @param params
  * @returns {String} file path
  */
-export function fetchUpload(params) {
+export function fetchUpload(params) :Promise<string> {
   return defHttp.post<string>({
     url: APP_API.UPLOAD,
     params,
@@ -167,8 +167,8 @@ export function fetchDeleteOperationLog(id: string) {
 
 /**
  * forced stop
- * @param params id:string
  * @returns
+ * @param data
  */
 export function fetchForcedStop(data: { id: string }): Promise<boolean> {
   return defHttp.post({ url: APP_API.FORCED_STOP, data });

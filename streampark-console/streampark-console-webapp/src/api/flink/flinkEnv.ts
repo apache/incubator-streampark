@@ -124,8 +124,8 @@ export function fetchFlinkCreate(data: FlinkCreate): Promise<AxiosResponse<Resul
 
 /**
  * update flink
- * @param {FlinkCreate} params
  * @returns {Promise<AxiosResponse<Result>>}
+ * @param data
  */
 export function fetchFlinkUpdate(data: FlinkCreate): Promise<AxiosResponse<Result>> {
   return defHttp.post<AxiosResponse<Result>>(

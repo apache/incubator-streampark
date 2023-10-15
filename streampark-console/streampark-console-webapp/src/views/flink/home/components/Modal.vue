@@ -28,7 +28,7 @@
   import { SvgIcon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { fetchCheckEnv, fetchFlinkCreate, fetchFlinkUpdate } from '/@/api/flink/app/flinkEnv';
+  import { fetchCheckEnv, fetchFlinkCreate, fetchFlinkUpdate } from '/@/api/flink/flinkEnv';
 
   const emit = defineEmits(['reload', 'register']);
   const versionId = ref<string | null>(null);

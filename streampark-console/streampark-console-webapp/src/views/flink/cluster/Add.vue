@@ -25,7 +25,7 @@
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { fetchCheckCluster, fetchCreateCluster } from '/@/api/flink/app/flinkCluster';
+  import { fetchCheckCluster, fetchCreateCluster } from '/@/api/flink/flinkCluster';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useGo } from '/@/hooks/web/usePage';
   import { useClusterSetting } from './useClusterSetting';

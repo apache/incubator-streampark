@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { HadoopConf } from './index.type';
+import { HadoopConf } from './config.type';
 import { defHttp } from '/@/utils/http/axios';
 
 enum CONFIG_API {
@@ -47,8 +47,8 @@ export function fetchListVer(data) {
 }
 /**
  * delete configuration
- * @param {String}
  * @returns {Promise<Boolean>}
+ * @param data
  */
 export function fetchRemoveConf(data: { id: string }): Promise<boolean> {
   return defHttp.post({

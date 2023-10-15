@@ -24,7 +24,7 @@
 </script>
 <script setup lang="ts" name="LogModal">
   import { reactive, ref, unref } from 'vue';
-  import { fetchK8sStartLog } from '/@/api/flink/app/app';
+  import { fetchK8sStartLog } from '/@/api/flink/app';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { Icon } from '/@/components/Icon';
   import { formatToDateTime } from '/@/utils/dateUtil';

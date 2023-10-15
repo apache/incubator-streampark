@@ -27,14 +27,14 @@ import {
   renderYarnQueue,
 } from '../app/hooks/useFlinkRender';
 import { fetchCheckHadoop } from '/@/api/setting';
-import { fetchListFlinkEnv } from '/@/api/flink/app/flinkEnv';
+import { fetchListFlinkEnv } from '/@/api/flink/flinkEnv';
 import { FormSchema } from '/@/components/Table';
 import optionData from '../app/data/option';
 import {
   fetchFlinkBaseImages,
   fetchK8sNamespaces,
   fetchSessionClusterIds,
-} from '/@/api/flink/app/flinkHistory';
+} from '/@/api/flink/flinkHistory';
 import { handleFormValue } from '../app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';

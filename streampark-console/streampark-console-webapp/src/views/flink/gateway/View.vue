@@ -51,7 +51,7 @@
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
   import FlinkGatewayDrawer from './components/FlinkGatewayDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { fetchGatewayDelete, fetchGatewayList } from '/@/api/flink/app/flinkGateway';
+  import { fetchGatewayDelete, fetchGatewayList } from '/@/api/flink/flinkGateway';
   import { columns, searchFormSchema } from './index.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';

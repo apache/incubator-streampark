@@ -42,8 +42,8 @@
     fetchClusterShutdown,
     fetchClusterStart,
     fetchFlinkCluster,
-  } from '/@/api/flink/app/flinkCluster';
-  import { FlinkCluster } from '/@/api/flink/app/flinkCluster.type';
+  } from '/@/api/flink/flinkCluster';
+  import { FlinkCluster } from '/@/api/flink/flinkCluster.type';
   import { useGo } from '/@/hooks/web/usePage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { PageWrapper } from '/@/components/Page';

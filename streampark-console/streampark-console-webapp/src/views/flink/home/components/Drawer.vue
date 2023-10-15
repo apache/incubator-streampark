@@ -26,8 +26,8 @@
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { SyncOutlined } from '@ant-design/icons-vue';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  import { FlinkEnv } from '/@/api/flink/app/flinkEnv.type';
-  import { fetchFlinkInfo, fetchFlinkSync } from '/@/api/flink/app/flinkEnv';
+  import { FlinkEnv } from '/@/api/flink/flinkEnv.type';
+  import { fetchFlinkInfo, fetchFlinkSync } from '/@/api/flink/flinkEnv';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
 

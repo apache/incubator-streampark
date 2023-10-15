@@ -29,10 +29,10 @@
   import { Description, useDescription } from '/@/components/Description';
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
-  import { fetchBackUps, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app/app';
+  import { fetchBackUps, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app';
   import { onUnmounted, reactive, h, unref, ref, onMounted, computed } from 'vue';
   import { useIntervalFn, useClipboard } from '@vueuse/core';
-  import { AppListRecord } from '/@/api/flink/app/app.type';
+  import { AppListRecord } from '/@/api/flink/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';
   import { handleView } from './utils';
   import { Button } from '/@/components/Button';
@@ -41,7 +41,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { baseUrl } from '/@/api';
   import { fetchListVer } from '/@/api/flink/config';
-  import { fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
+  import { fetchSavePonitHistory } from '/@/api/flink/savepoint';
   import Mergely from './components/Mergely.vue';
   import DetailTab from './components/AppDetail/DetailTab.vue';
   import { createDetailProviderContext } from './hooks/useDetailContext';

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { fetchRemoveSavePoint } from '/@/api/flink/app/savepoint';
+import { fetchRemoveSavePoint } from '/@/api/flink/savepoint';
 import { ActionItem } from '/@/components/Table';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useClipboard } from '@vueuse/core';

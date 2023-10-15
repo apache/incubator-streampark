@@ -17,9 +17,9 @@
 import { Alert, Form, Input, Tag } from 'ant-design-vue';
 import { h, onMounted, reactive, ref, unref, VNode } from 'vue';
 import { handleAppBuildStatueText } from '../utils';
-import { fetchCheckName, fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app/app';
-import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
-import { fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
+import { fetchCheckName, fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app';
+import { fetchBuild, fetchBuildDetail } from '/@/api/flink/flinkBuild';
+import { fetchSavePonitHistory } from '/@/api/flink/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
 import { AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
