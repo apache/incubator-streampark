@@ -19,7 +19,7 @@
   import { Descriptions, Tag } from 'ant-design-vue';
   import { computed, toRefs } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { alertTypes } from '../index.data';
+  import { alertTypes } from './index.data';
   import { useI18n } from '/@/hooks/web/useI18n';
 
   const { t } = useI18n();

@@ -40,16 +40,5 @@ public interface MenuService extends IService<Menu> {
 
   Map<String, Object> findMenus(Menu menu);
 
-  void createMenu(Menu menu);
-
-  void updateMenu(Menu menu) throws Exception;
-
-  /**
-   * Recursively delete menu buttons
-   *
-   * @param menuIds menuIds
-   */
-  void deleteMenus(String[] menuIds) throws Exception;
-
   List<VueRouter<Menu>> getUserRouters(Long userId, Long teamId);
 }

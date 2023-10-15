@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 import { optionsKeyMapping } from '../data/option';
-import { fetchYarn } from '/@/api/flink/app/app';
-import { AppListRecord } from '/@/api/flink/app/app.type';
-import { fetchRemoteURL } from '/@/api/flink/setting/flinkCluster';
+import { fetchYarn } from '/@/api/flink/app';
+import { AppListRecord } from '/@/api/flink/app.type';
+import { fetchRemoteURL } from '/@/api/flink/flinkCluster';
 import {
   AppStateEnum,
   ConfigTypeEnum,

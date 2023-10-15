@@ -21,7 +21,7 @@ import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { getAlertSvgIcon } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
-import { fetchMain } from '/@/api/flink/app/app';
+import { fetchMain } from '/@/api/flink/app';
 import { ResourceFromEnum } from '/@/enums/flinkEnum';
 
 export const useEditFlinkSchema = (jars: Ref) => {
