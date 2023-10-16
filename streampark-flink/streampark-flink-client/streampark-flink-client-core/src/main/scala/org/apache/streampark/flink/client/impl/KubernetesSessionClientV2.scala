@@ -182,7 +182,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
         case _: FlinkResourceNotFound => ZIO.unit
         case _: UnsupportedAction => ZIO.unit
       }
-      .as(ShutDownResponse())
+      .as(ShutDownResponse(name))
       .runIOAsTry match {
       case Success(result) => logInfo(richMsg("Shutdown Flink cluster successfully.")); result
       case Failure(err) => logError(richMsg(s"Fail to shutdown Flink cluster"), err); throw err
@@ -210,7 +210,9 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
       .filter(str => StringUtils.isNotBlank(str))
       .getOrElse(return Left("Flink base image should not be empty"))
 
-    val serviceAccount = Option(deployReq.k8sDeployParam.serviceAccount)
+    val serviceAccount = flinkConfObj
+      .getOption(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT)
+      .orElse(Option(deployReq.k8sDeployParam.serviceAccount))
       .getOrElse(FlinkDeploymentDef.DEFAULT_SERVICE_ACCOUNT)
 
     val flinkVersion = Option(deployReq.flinkVersion.majorVersion)

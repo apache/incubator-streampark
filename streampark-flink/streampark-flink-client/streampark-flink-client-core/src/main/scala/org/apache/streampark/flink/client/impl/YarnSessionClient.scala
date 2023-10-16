@@ -271,7 +271,7 @@ object YarnSessionClient extends YarnClientTrait {
       logInfo(s"the ${shutDownRequest.clusterId}'s final status is ${clusterDescriptor.getYarnClient
           .getApplicationReport(ConverterUtils.toApplicationId(shutDownRequest.clusterId))
           .getFinalApplicationStatus}")
-      ShutDownResponse()
+      ShutDownResponse(shutDownRequest.clusterId)
     } catch {
       case e: Exception =>
         logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")

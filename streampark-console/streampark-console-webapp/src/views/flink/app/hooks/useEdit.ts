@@ -17,8 +17,8 @@
 import { reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { optionsValueMapping } from '../data/option';
-import { fetchGet } from '/@/api/flink/app/app';
-import { AppListRecord } from '/@/api/flink/app/app.type';
+import { fetchGet } from '/@/api/flink/app';
+import { AppListRecord } from '/@/api/flink/app.type';
 import { isString } from '/@/utils/is';
 
 export const useEdit = () => {

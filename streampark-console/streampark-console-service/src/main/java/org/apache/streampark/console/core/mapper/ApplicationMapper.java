@@ -29,17 +29,17 @@ import java.util.List;
 
 public interface ApplicationMapper extends BaseMapper<Application> {
 
-  IPage<Application> page(Page<Application> page, @Param("application") Application application);
+  IPage<Application> page(Page<Application> page, @Param("app") Application application);
 
-  Application getApp(@Param("application") Application application);
+  Application getApp(@Param("app") Application application);
 
-  void persistMetrics(@Param("application") Application application);
+  void persistMetrics(@Param("app") Application application);
 
   List<Application> getByTeamId(@Param("teamId") Long teamId);
 
   List<Application> getProbeApps();
 
-  boolean mapping(@Param("application") Application appParam);
+  boolean mapping(@Param("app") Application appParam);
 
   List<String> getRecentK8sNamespace(@Param("limitSize") Integer limit);
 

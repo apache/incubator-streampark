@@ -15,25 +15,29 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: 'System',
-    userManagement: 'User Management',
-    roleManagement: 'Role Management',
-    menuManagement: 'Menu Management',
-    tokenManagement: 'Token Management',
-    teamManagement: 'Team Management',
-    memberManagement: 'Member Management',
-    project: 'Project',
-    application: 'Application',
-    variable: 'Variable',
-    resource: 'Resource',
-    setting: 'Settings',
+  system: {
+    menu: 'System',
+    user: 'User Management',
+    role: 'Role Management',
+    token: 'Token Management',
+    team: 'Team Management',
+    member: 'Member Management',
+  },
+  resource: {
+    menu: 'Resources',
+    project: 'Projects',
+    upload: 'Uploads',
+    variable: 'Variables',
+  },
+  flink: {
+    application: 'Applications',
+    flinkHome: 'Flink Home',
+    flinkCluster: 'Clusters',
   },
   setting: {
-    system: 'System Setting',
-    alarm: 'Alarm Setting',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Flink Cluster',
+    menu: 'Settings',
+    system: 'Environments',
+    alarm: 'Alarms',
     externalLink: 'External Link',
     yarnQueue: 'Yarn Queue',
     flinkGateway: 'FLink Gateway',

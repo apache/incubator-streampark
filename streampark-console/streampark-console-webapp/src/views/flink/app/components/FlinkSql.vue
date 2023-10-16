@@ -31,7 +31,7 @@
   import { Button } from 'ant-design-vue';
   import { isEmpty } from '/@/utils/is';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { fetchFlinkSqlVerify } from '/@/api/flink/app/flinkSql';
+  import { fetchFlinkSqlVerify } from '/@/api/flink/flinkSql';
   import { format } from '../FlinkSqlFormatter';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useFullContent } from '/@/hooks/event/useFullscreen';

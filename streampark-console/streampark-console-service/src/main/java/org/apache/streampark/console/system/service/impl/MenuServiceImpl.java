@@ -40,8 +40,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,28 +124,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  public void createMenu(Menu menu) {
-    menu.setCreateTime(new Date());
-    setMenu(menu);
-    this.save(menu);
-  }
-
-  @Override
-  public void updateMenu(Menu menu) throws Exception {
-    menu.setModifyTime(new Date());
-    setMenu(menu);
-    baseMapper.updateById(menu);
-  }
-
-  @Override
-  public void deleteMenus(String[] menuIds) throws Exception {
-    // Find users associated with these menus/buttons
-    this.roleMenuServie.deleteByMenuId(menuIds);
-    // Recursively delete these menus/buttons
-    this.removeByIds(Arrays.asList(menuIds));
-  }
-
-  @Override
   public List<VueRouter<Menu>> getUserRouters(Long userId, Long teamId) {
     List<VueRouter<Menu>> routes = new ArrayList<>();
     // The query type is the menu type
@@ -164,16 +140,5 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
           routes.add(route);
         });
     return VueRouterUtils.buildVueRouter(routes);
-  }
-
-  private void setMenu(Menu menu) {
-    if (menu.getParentId() == null) {
-      menu.setParentId(0L);
-    }
-    if (Menu.TYPE_BUTTON.equals(menu.getType())) {
-      menu.setPath(null);
-      menu.setIcon(null);
-      menu.setComponent(null);
-    }
   }
 }

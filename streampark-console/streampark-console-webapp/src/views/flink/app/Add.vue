@@ -32,7 +32,7 @@
   import { useDrawer } from '/@/components/Drawer';
   import Mergely from './components/Mergely.vue';
   import { handleConfTemplate } from '/@/api/flink/config';
-  import { fetchAppConf, fetchCreate } from '/@/api/flink/app/app';
+  import { fetchAppConf, fetchCreate } from '/@/api/flink/app';
   import options from './data/option';
   import { useCreateSchema } from './hooks/useCreateSchema';
   import { getAppConfType, handleSubmitParams } from './utils';
@@ -43,7 +43,7 @@
   import VariableReview from './components/VariableReview.vue';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import UseSysHadoopConf from './components/UseSysHadoopConf.vue';
-  import { CreateParams } from '/@/api/flink/app/app.type';
+  import { CreateParams } from '/@/api/flink/app.type';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import {
     AppTypeEnum,

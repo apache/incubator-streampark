@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 export default {
-  systemSetting: 'System Setting',
+  systemSetting: 'Environment Setting',
   systemSettingItems: {
     mavenSetting: {
       name: 'Maven Setting',

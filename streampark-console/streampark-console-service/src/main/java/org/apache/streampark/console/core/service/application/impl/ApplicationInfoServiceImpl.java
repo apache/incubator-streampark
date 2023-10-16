@@ -75,7 +75,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
 import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service
@@ -456,22 +455,6 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public boolean mapping(Application appParam) {
-    boolean mapping = this.baseMapper.mapping(appParam);
-    Application application = getById(appParam.getId());
-    if (isKubernetesApp(application)) {
-      // todo mark
-      k8SFlinkTrackMonitor.doWatching(toTrackId(application));
-      if (K8sFlinkConfig.isV2Enabled()) {
-        flinkK8sObserver.watchApplication(application);
-      }
-    } else {
-      FlinkAppHttpWatcher.doWatching(application);
-    }
-    return mapping;
-  }
-
-  @Override
   public String checkSavepointPath(Application appParam) throws Exception {
     String savepointPath = appParam.getSavePoint();
     if (StringUtils.isBlank(savepointPath)) {
@@ -503,11 +486,6 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     } else {
       return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
     }
-  }
-
-  @Override
-  public void persistMetrics(Application appParam) {
-    this.baseMapper.persistMetrics(appParam);
   }
 
   private Boolean checkJobName(String jobName) {

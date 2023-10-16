@@ -186,7 +186,7 @@ public class FlinkAppHttpWatcher {
   public void doStop() {
     log.info(
         "FlinkAppHttpWatcher StreamPark Console will be shutdown,persistent application to database.");
-    WATCHING_APPS.forEach((k, v) -> applicationInfoService.persistMetrics(v));
+    WATCHING_APPS.forEach((k, v) -> applicationManageService.persistMetrics(v));
   }
 
   /**
@@ -529,7 +529,7 @@ public class FlinkAppHttpWatcher {
     } else {
       WATCHING_APPS.put(application.getId(), application);
     }
-    applicationInfoService.persistMetrics(application);
+    applicationManageService.persistMetrics(application);
   }
 
   /**

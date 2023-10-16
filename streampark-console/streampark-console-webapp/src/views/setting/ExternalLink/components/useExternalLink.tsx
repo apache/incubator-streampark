@@ -17,7 +17,8 @@
 
 import { Input, Space } from 'ant-design-vue';
 
-import ExternalLinkBadge from './Badge.vue';
+import { LinkBadge } from '/@/components/LinkBadge';
+
 import { useI18n } from '/@/hooks/web/useI18n';
 
 const { t } = useI18n();
@@ -38,13 +39,13 @@ export const renderColorField = (formModel: Recordable, field: string) => {
         value={formModel[field]}
         onInput={(e) => (formModel[field] = e.target.value)}
       />
-      <ExternalLinkBadge
+      <LinkBadge
         label={t('setting.externalLink.form.badgeLabel')}
         message={t('setting.externalLink.form.badgeName')}
         color={DEFAULT_GREEN_HEX}
         onBadgeClick={handlePromptColorUpdate(DEFAULT_GREEN_HEX)}
       />
-      <ExternalLinkBadge
+      <LinkBadge
         label="Fink"
         message="Metrics"
         color={DEFAULT_BLUE_HEX}
@@ -56,7 +57,7 @@ export const renderColorField = (formModel: Recordable, field: string) => {
 
 export const renderPreview = (formModel: Recordable) => {
   return (
-    <ExternalLinkBadge
+    <LinkBadge
       label={formModel['badgeLabel']}
       message={formModel['badgeName'] || t('setting.externalLink.form.badgeName')}
       color={formModel['badgeColor']}

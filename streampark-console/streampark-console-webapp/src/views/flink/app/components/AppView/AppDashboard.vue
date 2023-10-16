@@ -17,7 +17,7 @@
 
 <script lang="ts" setup>
   import { onMounted, reactive, ref } from 'vue';
-  import { fetchDashboard } from '/@/api/flink/app/app';
+  import { fetchDashboard } from '/@/api/flink/app';
   import StatisticCard from './StatisticCard.vue';
   import { Row, Col } from 'ant-design-vue';
   import { useI18n } from '/@/hooks/web/useI18n';

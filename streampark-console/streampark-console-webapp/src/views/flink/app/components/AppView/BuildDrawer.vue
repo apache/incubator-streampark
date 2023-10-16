@@ -32,9 +32,9 @@
     handleAppBuildStepText,
   } from '../../utils';
   import BuildLayer from './BuildLayer.vue';
-  import { AppListRecord } from '/@/api/flink/app/app.type';
+  import { AppListRecord } from '/@/api/flink/app.type';
   import { useTimeoutFn } from '@vueuse/core';
-  import { fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
+  import { fetchBuildDetail } from '/@/api/flink/flinkBuild';
   import { useI18n } from '/@/hooks/web/useI18n';
 
   const TimelineItem = Timeline.Item;

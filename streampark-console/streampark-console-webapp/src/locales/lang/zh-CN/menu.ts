@@ -15,25 +15,29 @@
  * limitations under the License.
  */
 export default {
-  menu: {
-    system: '系统管理',
-    userManagement: '用户管理',
-    roleManagement: '角色管理',
-    menuManagement: '菜单管理',
-    tokenManagement: 'Token 管理',
-    teamManagement: '团队管理',
-    memberManagement: '成员管理',
+  system: {
+    menu: '系统管理',
+    user: '用户管理',
+    role: '角色管理',
+    token: 'Token 管理',
+    team: '团队管理',
+    member: '成员管理',
+  },
+  resource: {
+    menu: '资源中心',
     project: '项目管理',
-    application: '作业管理',
+    upload: '物料管理',
     variable: '变量管理',
-    resource: '资源管理',
-    setting: '设置中心',
+  },
+  flink: {
+    application: '作业管理',
+    flinkHome: 'Flink版本',
+    flinkCluster: '集群管理',
   },
   setting: {
-    system: '系统设置',
+    menu: '设置中心',
+    system: '环境设置',
     alarm: '告警设置',
-    flinkHome: 'Flink 版本',
-    flinkCluster: 'Flink 集群',
     externalLink: '扩展链接',
     yarnQueue: 'Yarn 队列',
     flinkGateway: 'FLink 网关',

@@ -102,7 +102,7 @@ public class FlinkK8sChangeEventListener {
     }
     // update application record
     setByJobStatusCV(app, jobStatus);
-    applicationInfoService.persistMetrics(app);
+    applicationManageService.persistMetrics(app);
 
     // email alerts when necessary
     FlinkAppStateEnum state = app.getStateEnum();
@@ -148,7 +148,7 @@ public class FlinkK8sChangeEventListener {
     app.setTotalSlot(metrics.totalSlot());
     app.setAvailableSlot(metrics.availableSlot());
 
-    applicationInfoService.persistMetrics(app);
+    applicationManageService.persistMetrics(app);
   }
 
   @SuppressWarnings("UnstableApiUsage")
