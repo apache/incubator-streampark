@@ -69,6 +69,7 @@ drop sequence if exists "public"."streampark_t_team_id_seq";
 drop sequence if exists "public"."streampark_t_variable_id_seq";
 drop sequence if exists "public"."streampark_t_external_link_id_seq";
 drop sequence if exists "public"."streampark_t_yarn_queue_id_seq";
+drop sequence if exists "public"."streampark_t_datasource_id_seq";
 
 -- ----------------------------
 -- drop trigger if exists
@@ -844,3 +845,38 @@ create trigger "streampark_t_flink_project_modify_time_tri" before update on "pu
 create trigger "streampark_t_menu_modify_time_tri" before update on "public"."t_menu" for each row execute procedure "public"."update_modify_time"();
 create trigger "streampark_t_role_modify_time_tri" before update on "public"."t_role" for each row execute procedure "public"."update_modify_time"();
 create trigger "streampark_t_user_modify_time_tri" before update on "public"."t_user" for each row execute procedure "public"."update_modify_time"();
+
+
+
+-- ----------------------------
+-- table structure for t_datasource
+-- ----------------------------
+create sequence "public"."streampark_t_datasource_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+
+create table "public"."t_datasource" (
+  "id" int8 not null default nextval('streampark_t_datasource_id_seq'::regclass),
+  "datasource_name" varchar(128) not null collate "pg_catalog"."default",
+  "datasource_type" varchar(128) not null collate "pg_catalog"."default",
+  "host" varchar(64) collate "pg_catalog"."default",
+  "port" varchar(64) collate "pg_catalog"."default",
+  "database" varchar(128) collate "pg_catalog"."default",
+  "param" varchar(128) collate "pg_catalog"."default",
+  "username" varchar(64) collate "pg_catalog"."default",
+  "password" varchar(64) collate "pg_catalog"."default",
+  "state" int4 default 0,
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+)
+;
+comment on column "public"."t_datasource"."datasource_name" is 'datasource name';
+comment on column "public"."t_datasource"."datasource_type" is 'datasource type';
+comment on column "public"."t_datasource"."host" is 'host';
+comment on column "public"."t_datasource"."port" is 'port';
+comment on column "public"."t_datasource"."database" is 'database';
+comment on column "public"."t_datasource"."param" is 'param';
+comment on column "public"."t_datasource"."username" is 'username';
+comment on column "public"."t_datasource"."password" is 'password';
+comment on column "public"."t_datasource"."state" is 'state';
+
+alter table "public"."t_datasource" add constraint "t_datasource_pkey" primary key ("id");
