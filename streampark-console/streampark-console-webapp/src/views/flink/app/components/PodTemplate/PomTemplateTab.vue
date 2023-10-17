@@ -31,12 +31,12 @@
     fetchExtractHostAliasFromPodTemplate,
     fetchInitPodTemplate,
     fetchPreviewHostAlias,
-  } from '/@/api/flink/app/flinkPodtmpl';
+  } from '/@/api/flink/flinkPodtmpl';
   import {
     fetchFlinkJmPodTemplates,
     fetchFlinkPodTemplates,
     fetchFlinkTmPodTemplates,
-  } from '/@/api/flink/app/flinkHistory';
+  } from '/@/api/flink/flinkHistory';
   import HistoryDrawer from './HistoryDrawer.vue';
   import HostAliasDrawer from './HostAliasDrawer.vue';
   import TemplateButtonGroup from './TemplateButtonGroup.vue';

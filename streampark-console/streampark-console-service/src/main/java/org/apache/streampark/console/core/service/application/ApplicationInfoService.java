@@ -35,14 +35,6 @@ import java.util.Map;
 public interface ApplicationInfoService extends IService<Application> {
 
   /**
-   * Maps the given application.
-   *
-   * @param appParam The application to be mapped.
-   * @return True if the mapping was successful, false otherwise.
-   */
-  boolean mapping(Application appParam);
-
-  /**
    * Checks the environment for the given application.
    *
    * @param appParam the application to check the environment for
@@ -141,13 +133,6 @@ public interface ApplicationInfoService extends IService<Application> {
    * @return AppExistsState indicating the existence state of the application.
    */
   AppExistsStateEnum checkExists(Application appParam);
-
-  /**
-   * Persists the metrics of the given application.
-   *
-   * @param appParam The application which metrics need to be persisted.
-   */
-  void persistMetrics(Application appParam);
 
   /**
    * Reads the configuration for the given application and returns it as a String.

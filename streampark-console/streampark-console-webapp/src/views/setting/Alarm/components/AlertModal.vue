@@ -22,12 +22,12 @@
 <script setup lang="ts" name="AlertModal">
   import { ref, defineComponent, h } from 'vue';
   import { omit } from 'lodash-es';
-  import { alertFormSchema, alertTypes } from '../index.data';
+  import { alertFormSchema, alertTypes } from './index.data';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { BasicForm, useForm } from '/@/components/Form';
   import { Form, Select, Input, Divider } from 'ant-design-vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { fetchAlertAdd, fetchAlertUpdate, fetchExistsAlert } from '/@/api/flink/setting/alert';
+  import { fetchAlertAdd, fetchAlertUpdate, fetchExistsAlert } from '/@/api/setting/alert';
   import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';

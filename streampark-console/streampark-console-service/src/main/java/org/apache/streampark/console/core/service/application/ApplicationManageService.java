@@ -77,6 +77,21 @@ public interface ApplicationManageService extends IService<Application> {
   void toEffective(Application appParam);
 
   /**
+   * Persists the metrics of the given application.
+   *
+   * @param appParam The application which metrics need to be persisted.
+   */
+  void persistMetrics(Application appParam);
+
+  /**
+   * Maps the given application.
+   *
+   * @param appParam The application to be mapped.
+   * @return True if the mapping was successful, false otherwise.
+   */
+  boolean mapping(Application appParam);
+
+  /**
    * Checks if the given application is ready to build and update.
    *
    * @param appParam the application to check for readiness

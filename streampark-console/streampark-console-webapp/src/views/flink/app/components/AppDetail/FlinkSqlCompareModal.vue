@@ -25,7 +25,7 @@
   import { Select, Tag } from 'ant-design-vue';
   import { Icon, SvgIcon } from '/@/components/Icon';
   import { useDetailProviderContext } from '../../hooks/useDetailContext';
-  import { fetchFlinkSql, fetchFlinkSqlList } from '/@/api/flink/app/flinkSql';
+  import { fetchFlinkSql, fetchFlinkSqlList } from '/@/api/flink/flinkSql';
   import { useDrawer } from '/@/components/Drawer';
   import { BasicForm, useForm } from '/@/components/Form';
   import { BasicModal, useModalInner } from '/@/components/Modal';

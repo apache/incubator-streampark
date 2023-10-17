@@ -35,6 +35,7 @@ import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 import org.apache.flink.v1beta1.FlinkDeploymentSpec.FlinkVersion
 import zio.ZIO
 
+import scala.collection.convert.ImplicitConversions.`map AsScala`
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.mapAsScalaMapConverter
 import scala.util.{Failure, Success, Try}
@@ -125,7 +126,20 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
 
   @throws[Throwable]
   def deploy(deployRequest: DeployRequest): DeployResponse = {
-
+    logInfo(
+      s"""
+         |--------------------------------------- kubernetes cluster start ---------------------------------------
+         |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
+         |    flinkVersion     : ${deployRequest.flinkVersion.version}
+         |    execMode         : ${deployRequest.executionMode.name()}
+         |    clusterId        : ${deployRequest.clusterId}
+         |    namespace        : ${deployRequest.k8sDeployParam.kubernetesNamespace}
+         |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
+         |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
+         |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
+         |    properties       : ${deployRequest.properties.mkString(",")}
+         |--------------------------------------------------------------------------------------------------------
+         |""".stripMargin)
     val richMsg: String => String = s"[flink-submit][appId=${deployRequest.id}] " + _
 
     val flinkConfig =
@@ -168,7 +182,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
         case _: FlinkResourceNotFound => ZIO.unit
         case _: UnsupportedAction => ZIO.unit
       }
-      .as(ShutDownResponse())
+      .as(ShutDownResponse(name))
       .runIOAsTry match {
       case Success(result) => logInfo(richMsg("Shutdown Flink cluster successfully.")); result
       case Failure(err) => logError(richMsg(s"Fail to shutdown Flink cluster"), err); throw err
@@ -176,15 +190,15 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
   }
 
   private def genFlinkDeployDef(
-      deployRequest: DeployRequest,
+      deployReq: DeployRequest,
       originFlinkConfig: Configuration): Either[FailureMessage, FlinkDeploymentDef] = {
     val flinkConfObj = originFlinkConfig.clone()
     val flinkConfMap = originFlinkConfig.toMap.asScala.toMap
 
-    val namespace = Option(deployRequest.k8sDeployParam.kubernetesNamespace)
+    val namespace = Option(deployReq.k8sDeployParam.kubernetesNamespace)
       .getOrElse("default")
 
-    val name = Option(deployRequest.k8sDeployParam.clusterId)
+    val name = Option(deployReq.k8sDeployParam.clusterId)
       .filter(str => StringUtils.isNotBlank(str))
       .getOrElse(return Left("Kubernetes CR name should not be empty"))
 
@@ -192,18 +206,19 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
       .getOption(KubernetesConfigOptions.CONTAINER_IMAGE_PULL_POLICY)
       .map(_.toString)
 
-    val image = Option(deployRequest.k8sDeployParam.flinkImage)
+    val image = Option(deployReq.k8sDeployParam.flinkImage)
       .filter(str => StringUtils.isNotBlank(str))
       .getOrElse(return Left("Flink base image should not be empty"))
 
-    val serviceAccount = Option(deployRequest.k8sDeployParam.serviceAccount)
+    val serviceAccount = flinkConfObj
+      .getOption(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT)
+      .orElse(Option(deployReq.k8sDeployParam.serviceAccount))
       .getOrElse(FlinkDeploymentDef.DEFAULT_SERVICE_ACCOUNT)
 
-    val flinkVersion = Option(deployRequest.flinkVersion.majorVersion)
+    val flinkVersion = Option(deployReq.flinkVersion.majorVersion)
       .map(majorVer => "V" + majorVer.replace(".", "_"))
       .flatMap(v => FlinkVersion.values().find(_.name() == v))
-      .getOrElse(
-        return Left(s"Unsupported Flink version:${deployRequest.flinkVersion.majorVersion}"))
+      .getOrElse(return Left(s"Unsupported Flink version:${deployReq.flinkVersion.majorVersion}"))
 
     val jobManager = {
       val cpu = flinkConfMap
@@ -255,7 +270,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
         .removeKey(KUBERNETES_TM_CPU_KEY)
         .removeKey(KUBERNETES_JM_CPU_AMOUNT_KEY)
         .removeKey(KUBERNETES_JM_CPU_KEY)
-      Option(deployRequest.k8sDeployParam.flinkRestExposedType).foreach {
+      Option(deployReq.k8sDeployParam.flinkRestExposedType).foreach {
         exposedType => result += KUBERNETES_REST_SERVICE_EXPORTED_TYPE_KEY -> exposedType.getName
       }
       result.toMap

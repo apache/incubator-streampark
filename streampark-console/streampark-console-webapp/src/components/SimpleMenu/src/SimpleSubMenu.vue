@@ -19,14 +19,14 @@
     :name="item.path"
     v-if="!menuHasChildren(item) && getShowMenu"
     v-bind="$props"
-    :class="getLevelClass"
+    :class="[getLevelClass, theme]"
   >
-    <Icon v-if="getIcon" :icon="getIcon" :size="20" />
+    <SvgIcon v-if="item.path === '/spark'" name="spark" size="25" class="mr-2" />
     <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-1 collapse-title">
       {{ getI18nName }}
     </div>
     <template #title>
-      <span :class="['ml-2', `${prefixCls}-sub-title`]">
+      <span :class="[`${prefixCls}-sub-title`]">
         {{ getI18nName }}
       </span>
       <SimpleMenuTag :item="item" :collapseParent="getIsCollapseParent" />
@@ -39,11 +39,11 @@
     :collapsedShowTitle="collapsedShowTitle"
   >
     <template #title>
-      <span>
+      <span class="menu-down-svg">
         <SvgIcon v-if="item.path === '/system'" name="management" size="25" />
         <SvgIcon v-if="item.path === '/flink'" name="flink3" size="25" />
-        <SvgIcon v-if="item.path === '/spark'" name="spark" size="25" />
         <SvgIcon v-if="item.path === '/setting'" name="settings" size="25" />
+        <SvgIcon v-if="item.path === '/resource'" name="resource" size="25" />
       </span>
       <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-2 collapse-title">
         {{ getI18nName }}
@@ -64,7 +64,6 @@
 
   import { defineComponent, computed } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import Icon from '/@/components/Icon/index';
 
   import MenuItem from './components/MenuItem.vue';
   import SubMenu from './components/SubMenuItem.vue';
@@ -80,7 +79,6 @@
       SubMenu,
       MenuItem,
       SimpleMenuTag: createAsyncComponent(() => import('./SimpleMenuTag.vue')),
-      Icon,
     },
     props: {
       item: {

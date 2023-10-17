@@ -14,5 +14,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { default as ExternalLinkBadge } from './Badge.vue';
 export { default as ExternalLinkModal } from './Modal.vue';

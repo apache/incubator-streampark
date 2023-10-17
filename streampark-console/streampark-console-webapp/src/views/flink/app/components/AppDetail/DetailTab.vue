@@ -39,7 +39,7 @@
   import { getMonacoOptions } from '../../data';
   import { useRoute } from 'vue-router';
   import { fetchGetVer, fetchListVer, fetchRemoveConf } from '/@/api/flink/config';
-  import { fetchRemoveSavePoint, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
+  import { fetchRemoveSavePoint, fetchSavePonitHistory } from '/@/api/flink/savepoint';
 
   import {
     fetchBackUps,
@@ -47,7 +47,7 @@
     fetchRemoveBackup,
     fetchDeleteOperationLog,
     fetchYarn,
-  } from '/@/api/flink/app/app';
+  } from '/@/api/flink/app';
   import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';
   import CompareModal from './CompareModal.vue';
@@ -61,7 +61,7 @@
     JobTypeEnum,
     SavePointEnum,
   } from '/@/enums/flinkEnum';
-  import { fetchFlinkSql, fetchFlinkSqlList, fetchRemoveFlinkSql } from '/@/api/flink/app/flinkSql';
+  import { fetchFlinkSql, fetchFlinkSqlList, fetchRemoveFlinkSql } from '/@/api/flink/flinkSql';
   import FlinkSqlReview from './FlinkSqlReview.vue';
   import FlinkSqlCompareModal from './FlinkSqlCompareModal.vue';
   import { OperationEnum } from '/@/enums/flinkEnum';

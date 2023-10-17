@@ -41,9 +41,9 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
 import { CandidateTypeEnum, FailoverStrategyEnum, RestoreModeEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { fetchYarnQueueList } from '/@/api/flink/setting/yarnQueue';
+import { fetchYarnQueueList } from '/@/api/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
-import { ResourceTypeEnum } from '/@/views/flink/resource/resource.data';
+import { ResourceTypeEnum } from '/@/views/resource/upload/upload.data';
 
 const { t } = useI18n();
 /* render input dropdown component */

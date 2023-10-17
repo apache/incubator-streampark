@@ -19,8 +19,8 @@ import { useRouter } from 'vue-router';
 import { handleIsStart } from '../utils';
 import { useFlinkAppStore } from '/@/store/modules/flinkApplication';
 import { useFlinkApplication } from './useApp';
-import { fetchAppRecord, fetchAppRemove } from '/@/api/flink/app/app';
-import { AppListRecord } from '/@/api/flink/app/app.type';
+import { fetchAppRecord, fetchAppRemove } from '/@/api/flink/app';
+import { AppListRecord } from '/@/api/flink/app.type';
 import { ActionItem, FormProps } from '/@/components/Table';
 import { useMessage } from '/@/hooks/web/useMessage';
 import {

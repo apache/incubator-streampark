@@ -37,7 +37,7 @@ public class HadoopContainer extends GenericContainer<HadoopContainer> {
   public static final Logger LOG = LoggerFactory.getLogger(HadoopContainer.class);
 
   // Hadoop version is 2.7.0
-  public static final DockerImageName DOCKER_IMAGE_NAME =
+  private static final DockerImageName DOCKER_IMAGE_NAME =
       DockerImageName.parse("sequenceiq/hadoop-docker:latest");
 
   public static final Map<Integer, Integer> MAPPED_PORTS =

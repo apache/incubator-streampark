@@ -17,8 +17,16 @@
 @simple-prefix-cls: ~'@{namespace}-simple-menu';
 @prefix-cls: ~'@{namespace}-menu';
 
+.mt-5 {
+  top: 15px;
+}
+
+.menu-down-svg {
+  vertical-align: -0.2em !important;
+}
+
 .@{prefix-cls} {
-  margin-top: 4px;
+
   &-dark&-vertical .@{simple-prefix-cls}__parent {
     background-color: @sider-dark-bg-color;
     > .@{prefix-cls}-submenu-title {
@@ -43,6 +51,7 @@
 }
 
 .@{simple-prefix-cls} {
+  top: 10px;
   &-sub-title {
     overflow: hidden;
     text-overflow: ellipsis;

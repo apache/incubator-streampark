@@ -48,6 +48,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -112,7 +113,7 @@ public class Application implements Serializable {
   private String k8sJmPodTemplate;
   private String k8sTmPodTemplate;
 
-  private String ingressTemplate;
+  @Getter private String ingressTemplate;
   private String defaultModeIngress;
 
   /** flink-hadoop integration on flink-k8s mode */
@@ -251,10 +252,6 @@ public class Application implements Serializable {
   private transient Integer buildStatus;
 
   private transient AppControl appControl;
-
-  public String getIngressTemplate() {
-    return ingressTemplate;
-  }
 
   public void setDefaultModeIngress(String defaultModeIngress) {
     this.defaultModeIngress = defaultModeIngress;

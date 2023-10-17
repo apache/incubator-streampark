@@ -26,8 +26,8 @@ import {
 
 import { SvgIcon } from '/@/components/Icon';
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
-import { fetchMain, fetchName } from '/@/api/flink/app/app';
-import { modules, fetchListConf, fetchListJars } from '/@/api/flink/project';
+import { fetchMain, fetchName } from '/@/api/flink/app';
+import { modules, fetchListConf, fetchListJars } from '/@/api/resource/project';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { renderResourceFrom, renderStreamParkJarApp } from './useFlinkRender';

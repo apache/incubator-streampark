@@ -31,11 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -66,20 +63,5 @@ public class MenuController {
   public RestResponse menuList(Menu menu) {
     Map<String, Object> maps = this.menuService.findMenus(menu);
     return RestResponse.success(maps);
-  }
-
-  @Operation(summary = "Create menu")
-  @PostMapping("post")
-  @RequiresPermissions("menu:add")
-  public RestResponse addMenu(@Valid Menu menu) {
-    this.menuService.createMenu(menu);
-    return RestResponse.success();
-  }
-
-  @PutMapping("update")
-  @RequiresPermissions("menu:update")
-  public RestResponse updateMenu(@Valid Menu menu) throws Exception {
-    this.menuService.updateMenu(menu);
-    return RestResponse.success();
   }
 }
