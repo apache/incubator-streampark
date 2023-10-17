@@ -17,7 +17,7 @@
 version: '3.8'
 services:
   streampark-console:
-    image: apache/streampark:latest
+    image: apache/streampark:dev
     command: ${RUN_COMMAND}
     ports:
       - 10000:10000
