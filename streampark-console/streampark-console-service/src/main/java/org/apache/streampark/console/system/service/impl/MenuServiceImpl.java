@@ -51,6 +51,10 @@ import java.util.stream.Collectors;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
+  public static final String IDS = "ids";
+  public static final String ROWS = "rows";
+  public static final String TOTAL = "total";
+
   @Autowired private UserService userService;
 
   @Autowired private RoleMenuServie roleMenuServie;
@@ -111,14 +115,14 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             ids.add(m.getMenuId().toString());
             trees.add(new RouterTree(m));
           });
-      result.put("ids", ids);
-      result.put("total", menus.size());
+      result.put(IDS, ids);
+      result.put(TOTAL, menus.size());
       RouterTree<Menu> routerTree = VueRouterUtils.buildRouterTree(trees);
-      result.put("rows", routerTree);
+      result.put(ROWS, routerTree);
     } catch (Exception e) {
       log.error("Failed to query menu", e);
-      result.put("rows", null);
-      result.put("total", 0);
+      result.put(ROWS, null);
+      result.put(TOTAL, 0);
     }
     return result;
   }
