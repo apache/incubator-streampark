@@ -50,10 +50,10 @@
 
 ## 🎉 Features
 
-* Apache Flink & Spark application development scaffolding
-* Supports multiple versions of Flink & Spark
-* A range of out-of-the-box connectors
-* one-stop stream processing operation platform
+* Apache Flink & Spark application development scaffold
+* Support multiple versions of Flink & Spark
+* Wide range of out-of-the-box connectors
+* One-stop stream processing operation platform
 * Support catalog、olap、streaming-warehouse etc.
 * ...
 
