@@ -50,11 +50,10 @@
 
 ## 🎉 Features
 
-* Apache Flink & Spark stream processing application development framework
-* Out-of-the-box connectors
+* Apache Flink & Spark application development scaffold
 * Support multiple versions of Flink & Spark
-* Scala 2.12 support
-* One-stop stream processing management platform
+* Wide range of out-of-the-box connectors
+* One-stop stream processing operation platform
 * Support catalog、olap、streaming-warehouse etc.
 * ...
 
