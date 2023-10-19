@@ -122,14 +122,6 @@ print_logo() {
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
 }
 
-checkPerm() {
-  if [ -x "$PRG_DIR/mvnw" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 selectScala() {
   echo_w 'StreamPark supports Scala 2.11 and 2.12. Which version do you need ?'
   select scala in "2.11" "2.12"
@@ -150,12 +142,12 @@ selectScala() {
 }
 
 selectMode() {
-  echo_w 'StreamPark supports front-end and server-side mixed / detached packaging mode, Which mode do you need ?'
-  select scala in "mixed mode" "detached mode"
+  echo_w 'StreamPark supports front-end and server-side mixed/detached build mode, Which mode do you need ?'
+  select scala in "mixed mode (recommend)" "detached mode"
   do
     case $scala in
-      "mixed mode")
-        echo_g "mixed mode selected (mixed build project of front-end and back-ends)"
+      "mixed mode (recommend)")
+        echo_g "mixed mode selected (mixed build project front-end and back-ends)"
         return 1
         ;;
       "detached mode")
@@ -170,74 +162,80 @@ selectMode() {
   done
 }
 
+build() {
+  scalaArg=$1
+  modeArg=$2
 
-mixedPackage() {
-  scala="scala-2.11"
-  if [ "$1" == 2 ]; then
+  if [ ! -x "$PRG_DIR/mvnw" ]; then
+    # shellcheck disable=SC2006
+    echo_r "permission denied: $PRG_DIR/mvnw, please check."
+    exit 1
+  else
     scala="scala-2.12"
-  fi
+    if [ $scalaArg == 1 ]; then
+      scala="scala-2.11"
+    fi
 
-  echo_g "build info: package mode @ mixed, $scala, now build starting..."
+    profile="-P${scala},shaded,dist"
+    if [ $modeArg == 1 ]; then
+      profile="${profile},webapp"
+      echo_g "build info: package mode @ mixed, $scala, now build starting..."
+    else
+      echo_g "build info: package mode @ detached, $scala, now build starting..."
+    fi
 
-  "$PRG_DIR/mvnw" -P$scala,shaded,webapp,dist -DskipTests clean install
+    "$PRG_DIR"/mvnw $profile -DskipTests clean install
 
-  if [ $? -eq 0 ]; then
-     printf '\n'
-     echo_g """StreamPark project build successful!
-     info: package mode @ mixed, $scala
-     dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
-  fi
-}
+    if [ $? -eq 0 ]; then
+      if [ $modeArg == 1 ]; then
+        printf '\n'
+        echo_g """StreamPark project build successful!
+        info: package mode @ mixed, $scala
+        dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
+      else
+        printf '\n'
+        echo_g """StreamPark project build successful!
+        info: package mode @ detached, $scala
+        dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist
 
-detachedPackage () {
-  scala="scala-2.11"
-  if [ "$1" == 2 ]; then
-    scala="scala-2.12"
-  fi
+        Next, you need to build front-end by yourself.
 
-  echo_g "build info: package mode @ detached, $scala, now build starting..."
+         1) cd $(cd "$PRG_DIR" &>/dev/null && pwd)/streampark-console/streampark-console-webapp
+         2) pnpm install && pnpm build
 
-  "$PRG_DIR"/mvnw -P$scala,shaded,dist -DskipTests clean install
-
-  if [ $? -eq 0 ]; then
-    printf '\n'
-    echo_g """StreamPark project build successful!
-    info: package mode @ detached, $scala
-    dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist
-
-    Next, you need to build front-end by yourself.
-
-     1) cd $(cd "$PRG_DIR" &>/dev/null && pwd)/streampark-console/streampark-console-webapp
-     2) pnpm install && pnpm build
-
-    please visit: https://streampark.apache.org/docs/user-guide/deployment for more detail. \n"""
+        please visit: https://streampark.apache.org/docs/user-guide/deployment for more detail. \n"""
+      fi
+    else
+      javaSource="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.java"
+      javaClass="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.class"
+      wrapperJarPath="$PRG_DIR/.mvn/wrapper/maven-wrapper.jar"
+      # For Cygwin, switch paths to Windows format before running javac
+      if $cygwin; then
+        javaSource=$(cygpath --path --windows "$javaSource")
+        javaClass=$(cygpath --path --windows "$javaClass")
+      fi
+      if [ -e "$javaSource" ]; then
+        [ ! -e "$javaClass" ] && ("$JAVA_HOME/bin/javac" "$javaSource")
+        if [ -e "$javaClass" ]; then
+          ("$JAVA_HOME/bin/java" -cp "$PRG_DIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath")
+          if [ $? -eq 1 ]; then
+            echo_r "Error: $wrapperJarPath is invalid. retry download it and build project again..."
+            rm -f $wrapperJarPath
+            build $scalaArg $modeArg
+          fi
+        fi
+      fi
+    fi
   fi
 }
 
 main() {
   print_logo
-  checkPerm
-  if [ $? -eq 1 ]; then
-    # shellcheck disable=SC2006
-    echo_r "permission denied: $PRG_DIR/mvnw, please check."
-    exit 1
-  fi
   selectMode
-  if [ $? -eq 1 ]; then
-    selectScala
-    if [ $? -eq 1 ]; then
-      mixedPackage 1
-    else
-      mixedPackage 2
-    fi
-  else
-    selectScala
-    if [ $? -eq 1 ]; then
-      detachedPackage 1
-    else
-      detachedPackage 2
-    fi
-  fi
+  mode=$?
+  selectScala
+  scala=$?
+  build $scala $mode
 }
 
 main "$@"
