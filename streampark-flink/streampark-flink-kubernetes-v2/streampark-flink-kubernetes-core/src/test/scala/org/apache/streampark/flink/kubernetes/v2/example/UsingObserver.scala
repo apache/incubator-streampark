@@ -78,6 +78,18 @@ class UsingObserver extends AnyWordSpecLike with BeforeAndAfterAll {
     } yield ()
   }
 
+  "Only subscribe Flink job enpoint changes." in unsafeRun {
+    for {
+      _ <- FlinkK8sObserver.track(TrackKey.appJob(234, "fdev", "simple-appjob"))
+      _ <- FlinkK8sObserver.restSvcEndpointSnaps
+             .flatSubscribe()
+             .map { case (appId, status) => (appId, status.ipRest) }
+             .diffPrev
+             .debug
+             .runDrain
+    } yield ()
+  }
+
   "Subscribe Flink cluster metrics changes." in unsafeRun {
     for {
       // track resource
