@@ -112,7 +112,7 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
     for {
       _ <- FlinkK8sOperator.deployApplicationJob(114514, spec)
       // subscribe job status
-      _ <- FlinkK8sObserver.evaluatedJobSnaps.flatSubscribeValues().debugPretty.runDrain.fork
+      _ <- FlinkK8sObserver.evaluatedJobSnaps.flatSubscribeValues().debugPretty.runDrain
     } yield ()
   }
 
