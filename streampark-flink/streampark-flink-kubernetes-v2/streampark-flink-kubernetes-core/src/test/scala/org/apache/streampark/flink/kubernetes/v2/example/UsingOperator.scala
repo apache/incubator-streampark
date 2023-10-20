@@ -97,7 +97,7 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
 
   "Deploy a simple Flink application job with flinkConfiguration to Kubernetes" in unsafeRun {
     val spec = FlinkDeploymentDef(
-      name = "basic-appjob",
+      name = "simple-appjob",
       namespace = "fdev",
       image = "flink:1.16",
       flinkVersion = FlinkVersion.V1_16,
@@ -119,7 +119,7 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
 
   "Deploy a simple Flink application job with flinkConfiguration to Kubernetes and subscribe job status and endpoint" in unsafeRun {
     val spec = FlinkDeploymentDef(
-      name = "basic-appjob",
+      name = "simple-appjob",
       namespace = "fdev",
       image = "flink:1.16",
       flinkVersion = FlinkVersion.V1_16,
