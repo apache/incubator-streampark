@@ -62,8 +62,8 @@ public class FactoryUtil {
     if (matchingFactories.isEmpty()) {
       throw new ValidationException(
           String.format(
-              "Could not find any factory for identifier '%s' that implements '%s' in the classpath.\n\n"
-                  + "Available factory identifiers are:\n\n"
+              "Could not find any factory for identifier '%s' that implements '%s' in the classpath.%n%n"
+                  + "Available factory identifiers are:%n%n"
                   + "%s",
               factoryIdentifier,
               factoryClass.getName(),
