@@ -39,7 +39,7 @@ class RedisConfig(parameters: Properties) extends Serializable {
             if (x.contains(sinkOption.SIGN_COLON)) x;
             else {
               throw new IllegalArgumentException(
-                s"redis sentinel host invalid {$x} must match host:port ")
+                s"Redis sentinel host invalid {$x} must match host:port ")
             }
           })
         .toSet

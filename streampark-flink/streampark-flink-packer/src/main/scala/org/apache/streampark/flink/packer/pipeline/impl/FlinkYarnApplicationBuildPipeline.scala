@@ -52,7 +52,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
           HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
         case _ =>
       }
-      logInfo(s"recreate building workspace: ${request.yarnProvidedPath}")
+      logInfo(s"Recreate building workspace: ${request.yarnProvidedPath}")
     }.getOrElse(throw getError.exception)
 
     val mavenJars =

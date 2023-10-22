@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
@@ -531,7 +532,8 @@ public class AppBuildPipeServiceImpl
       case CUSTOM_CODE:
         switch (app.getApplicationType()) {
           case STREAMPARK_FLINK:
-            return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
+            return String.format(
+                "%s/%s", app.getAppLib(), app.getModule().concat(Constant.JAR_SUFFIX));
           case APACHE_FLINK:
             return String.format("%s/%s", app.getAppHome(), app.getJar());
           default:

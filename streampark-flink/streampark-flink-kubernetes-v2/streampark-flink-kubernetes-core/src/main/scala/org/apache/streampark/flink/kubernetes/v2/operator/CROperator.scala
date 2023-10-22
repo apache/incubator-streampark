@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.v2.operator
 
+import org.apache.streampark.common.Constant
 import org.apache.streampark.flink.kubernetes.v2.{pathLastSegment, yamlMapper}
 import org.apache.streampark.flink.kubernetes.v2.K8sTools.usingK8sClient
 import org.apache.streampark.flink.kubernetes.v2.fs.FileMirror
@@ -67,12 +68,13 @@ object CROperator extends CROperator {
       // Generate FlinkDeployment CR
       correctedJob        <- mirrorJobJarToHttpFileServer(spec.job, mirrorSpace)
       correctedExtJars    <- mirrorExtJarsToHttpFileServer(spec.extJarPaths, mirrorSpace)
-      correctedPod        <- correctPodSpec(
-                               spec.podTemplate,
-                               correctedExtJars ++ correctedJob.map(_.jarURI).filter(_.startsWith("http://")).toArray[String]
-                             )
+      correctedPod        <-
+        correctPodSpec(
+          spec.podTemplate,
+          correctedExtJars ++ correctedJob.map(_.jarURI).filter(_.startsWith(Constant.HTTP_SCHEMA)).toArray[String]
+        )
       correctedLocalUriJob = correctedJob.map { jobDef =>
-                               if (!jobDef.jarURI.startsWith("http://")) jobDef
+                               if (!jobDef.jarURI.startsWith(Constant.HTTP_SCHEMA)) jobDef
                                else jobDef.copy("local:///opt/flink/lib/" + pathLastSegment(jobDef.jarURI))
                              }
       correctedSpec        = spec.copy(

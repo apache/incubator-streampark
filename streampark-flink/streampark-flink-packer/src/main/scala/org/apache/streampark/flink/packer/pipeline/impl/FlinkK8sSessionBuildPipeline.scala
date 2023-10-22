@@ -38,7 +38,7 @@ class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends
       execStep(1) {
         val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
         LfsOperator.mkCleanDirs(buildWorkspace)
-        logInfo(s"recreate building workspace: $buildWorkspace")
+        logInfo(s"Recreate building workspace: $buildWorkspace")
         buildWorkspace
       }.getOrElse(throw getError.exception)
 
@@ -50,7 +50,7 @@ class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends
           request.mainClass,
           request.providedLibs,
           request.getShadedJarPath(buildWorkspace))
-        logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
+        logInfo(s"Output shaded flink job jar: ${output.getAbsolutePath}")
         output
       }.getOrElse(throw getError.exception)
 

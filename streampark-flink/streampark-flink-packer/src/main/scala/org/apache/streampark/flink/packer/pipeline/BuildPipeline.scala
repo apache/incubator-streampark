@@ -97,20 +97,20 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     Try {
       curStep = seq
       stepsStatus(seq) = PipelineStepStatusEnum.running -> System.currentTimeMillis
-      logInfo(s"building pipeline step[$seq/$allSteps] running => ${pipeType.getSteps.get(seq)}")
+      logInfo(s"Building pipeline step[$seq/$allSteps] running => ${pipeType.getSteps.get(seq)}")
       watcher.onStepStateChange(snapshot)
       process
     } match {
       case Success(result) =>
         stepsStatus(seq) = PipelineStepStatusEnum.success -> System.currentTimeMillis
-        logInfo(s"building pipeline step[$seq/$allSteps] success")
+        logInfo(s"Building pipeline step[$seq/$allSteps] success")
         watcher.onStepStateChange(snapshot)
         Some(result)
       case Failure(cause) =>
         stepsStatus(seq) = PipelineStepStatusEnum.failure -> System.currentTimeMillis
         pipeStatus = PipelineStatusEnum.failure
         error = PipeError.of(cause.getMessage, cause)
-        logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")
+        logInfo(s"Building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")
         watcher.onStepStateChange(snapshot)
         None
     }
@@ -119,7 +119,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
   protected def skipStep(step: Int): Unit = {
     curStep = step
     stepsStatus(step) = PipelineStepStatusEnum.skipped -> System.currentTimeMillis
-    logInfo(s"building pipeline step[$step/$allSteps] skipped => ${pipeType.getSteps.get(step)}")
+    logInfo(s"Building pipeline step[$step/$allSteps] skipped => ${pipeType.getSteps.get(step)}")
     watcher.onStepStateChange(snapshot)
   }
 
@@ -128,7 +128,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     pipeStatus = PipelineStatusEnum.running
     Try {
       watcher.onStart(snapshot)
-      logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
+      logInfo(s"Building pipeline is launching, params=${offerBuildParam.toString}")
       executor
         .submit(new Callable[BuildResult] {
           override def call(): BuildResult = buildProcess()
@@ -137,14 +137,14 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     } match {
       case Success(result) =>
         pipeStatus = PipelineStatusEnum.success
-        logInfo(s"building pipeline has finished successfully.")
+        logInfo(s"Building pipeline has finished successfully.")
         watcher.onFinish(snapshot, result)
         result
       case Failure(cause) =>
         pipeStatus = PipelineStatusEnum.failure
         error = PipeError.of(cause.getMessage, cause)
         // log and print error trace stack
-        logError(s"building pipeline has failed.", cause)
+        logError(s"Building pipeline has failed.", cause)
         val result = ErrorResult()
         watcher.onFinish(snapshot, result)
         result

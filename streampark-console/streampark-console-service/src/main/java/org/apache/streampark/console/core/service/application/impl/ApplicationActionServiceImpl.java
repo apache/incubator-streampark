@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
@@ -651,7 +652,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             case STREAMPARK_FLINK:
               flinkUserJar =
                   String.format(
-                      "%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
+                      "%s/%s",
+                      application.getAppLib(), application.getModule().concat(Constant.JAR_SUFFIX));
               break;
             case APACHE_FLINK:
               flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
