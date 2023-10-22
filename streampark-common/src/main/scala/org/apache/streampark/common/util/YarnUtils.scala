@@ -141,12 +141,12 @@ object YarnUtils extends Logger {
                 val activeRMId = {
                   Option(RMHAUtils.findActiveRMHAId(yarnConf)) match {
                     case Some(x) =>
-                      logInfo("findActiveRMHAId successful")
+                      logInfo("'findActiveRMHAId' successful")
                       x
                     case None =>
                       // if you don't know why, don't modify it
                       logWarn(
-                        s"findActiveRMHAId is null,config yarn.acl.enable:${yarnConf.get("yarn.acl.enable")},now http try it.")
+                        s"'findActiveRMHAId' is null,config yarn.acl.enable:${yarnConf.get("yarn.acl.enable")},now http try it.")
                       // url ==> rmId
                       val idUrlMap = new JavaHashMap[String, String]
                       val rmIds = HAUtil.getRMHAIds(conf)
@@ -181,7 +181,7 @@ object YarnUtils extends Logger {
                 require(
                   activeRMId != null,
                   "[StreamPark] YarnUtils.getRMWebAppURL: can not found yarn active node")
-                logInfo(s"current activeRMHAId: $activeRMId")
+                logInfo(s"Current activeRMHAId: $activeRMId")
                 val appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId)
                 val hostnameActiveRMKey =
                   HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId)
@@ -220,7 +220,7 @@ object YarnUtils extends Logger {
               .append(address.getPort)
               .toString()
         }
-        logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
+        logInfo(s"Yarn resourceManager webapp url:$rmHttpURL")
       }
     }
     rmHttpURL
