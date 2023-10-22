@@ -66,7 +66,7 @@ object Utils extends Logger {
 
   def required(expression: Boolean, errorMessage: Any): Unit = {
     if (!expression) {
-      throw new IllegalArgumentException(s"requirement failed: ${errorMessage.toString}")
+      throw new IllegalArgumentException(s"Requirement failed: ${errorMessage.toString}")
     }
   }
 

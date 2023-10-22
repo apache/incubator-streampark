@@ -103,7 +103,7 @@ object InternalConfigHolder extends Logger {
             SystemPropertyUtils.get(key) match {
               case v if v != null => v.cast[T](config.classType)
               case _ =>
-                throw new IllegalArgumentException(s"config key has not been registered: $key")
+                throw new IllegalArgumentException(s"Config key has not been registered: $key")
             }
           case conf: InternalOption => conf.defaultValue.asInstanceOf[T]
         }

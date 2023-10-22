@@ -287,7 +287,7 @@ object HadoopUtils extends Logger {
     val tmpDir = FileUtils.createTempDir()
     val fs = FileSystem.get(new Configuration)
     val sourcePath = fs.makeQualified(new Path(jarOnHdfs))
-    if (!fs.exists(sourcePath)) throw new IOException(s"jar file: $jarOnHdfs doesn't exist.")
+    if (!fs.exists(sourcePath)) throw new IOException(s"Jar file: $jarOnHdfs doesn't exist.")
     val destPath = new Path(tmpDir.getAbsolutePath + "/" + sourcePath.getName)
     fs.copyToLocalFile(sourcePath, destPath)
     new File(destPath.toString).getAbsolutePath

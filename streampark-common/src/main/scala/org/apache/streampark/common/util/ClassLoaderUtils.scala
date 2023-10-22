@@ -18,7 +18,7 @@ package org.apache.streampark.common.util
 
 import java.io.{File, IOException}
 import java.net.{URL, URLClassLoader}
-import java.util.function.{Consumer, Supplier}
+import java.util.function.Supplier
 
 import scala.collection.mutable.ArrayBuffer
 
