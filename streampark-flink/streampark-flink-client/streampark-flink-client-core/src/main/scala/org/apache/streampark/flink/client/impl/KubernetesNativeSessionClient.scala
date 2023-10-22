@@ -40,8 +40,12 @@ import scala.collection.convert.ImplicitConversions._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-/** kubernetes native session mode submit */
-@Deprecated("use KubernetesSessionClientV2 instead")
+/**
+ * Kubernetes native session mode submit.
+ * @deprecated
+ *   Please use [[KubernetesSessionClientV2]] instead.
+ */
+@Deprecated
 object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Logger {
 
   @throws[Exception]
