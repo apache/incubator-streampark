@@ -199,11 +199,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  public Boolean delete(Long id, Application application) throws InternalException {
+  public Boolean delete(Long id, Application appParam) throws InternalException {
     SavePoint savePoint = getById(id);
     try {
       if (StringUtils.isNotEmpty(savePoint.getPath())) {
-        application.getFsOperator().delete(savePoint.getPath());
+        appParam.getFsOperator().delete(savePoint.getPath());
       }
       return removeById(id);
     } catch (Exception e) {
@@ -221,17 +221,17 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  public void removeApp(Application application) {
-    Long appId = application.getId();
+  public void removeApp(Application appParam) {
+    Long appId = appParam.getId();
 
     LambdaQueryWrapper<SavePoint> queryWrapper =
         new LambdaQueryWrapper<SavePoint>().eq(SavePoint::getAppId, appId);
     this.remove(queryWrapper);
 
     try {
-      application
+      appParam
           .getFsOperator()
-          .delete(application.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+          .delete(appParam.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
     } catch (Exception e) {
       log.error(e.getMessage(), e);
     }

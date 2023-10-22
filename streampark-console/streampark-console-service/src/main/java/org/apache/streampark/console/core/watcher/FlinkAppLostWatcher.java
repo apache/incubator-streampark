@@ -98,7 +98,7 @@ public class FlinkAppLostWatcher {
             .filter(application -> FlinkAppStateEnum.isLost(application.getState()))
             .collect(Collectors.toList());
     updateState(probeApplication);
-    probeApplication.stream().forEach(this::monitorApplication);
+    probeApplication.forEach(this::monitorApplication);
   }
 
   private void updateState(List<Application> applications) {
@@ -118,7 +118,7 @@ public class FlinkAppLostWatcher {
       watch(probeApps);
     } else {
       List<AlertProbeMsg> alertProbeMsgs = generateProbeResults(probeApps);
-      alertProbeMsgs.stream().forEach(this::alert);
+      alertProbeMsgs.forEach(this::alert);
       reset(probeApps);
     }
   }
@@ -135,7 +135,8 @@ public class FlinkAppLostWatcher {
   }
 
   private void alert(AlertProbeMsg alertProbeMsg) {
-    alertProbeMsg.getAlertId().stream()
+    alertProbeMsg
+        .getAlertId()
         .forEach((alterId) -> alertService.alert(alterId, AlertTemplate.of(alertProbeMsg)));
   }
 

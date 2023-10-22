@@ -253,7 +253,7 @@ public class FlinkAppHttpWatcher {
               ? jobsOverview.getJobs().stream()
                   .filter(a -> StringUtils.equals(application.getJobId(), a.getId()))
                   .findFirst()
-              : jobsOverview.getJobs().stream().findFirst();
+              : Optional.empty();
     } else {
       optional =
           jobsOverview.getJobs().stream()

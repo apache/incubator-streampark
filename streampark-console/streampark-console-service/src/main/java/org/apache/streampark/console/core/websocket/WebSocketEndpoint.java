@@ -34,6 +34,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.Map;
 
+@Getter
 @Slf4j
 @Component
 @ServerEndpoint(value = "/websocket/{id}")
@@ -41,27 +42,29 @@ public class WebSocketEndpoint {
 
   private static final Map<String, Session> SOCKET_SESSIONS = new CopyOnWriteMap<>();
 
-  @Getter private String id;
+  private String id;
 
-  @Getter private Session session;
+  private Session session;
 
   @OnOpen
   public void onOpen(Session session, @PathParam("id") String id) {
-    if (log.isDebugEnabled()) {
-      log.debug("websocket onOpen....");
-    }
+    log.debug("Websocket onOpen....");
     this.id = id;
     this.session = session;
     SOCKET_SESSIONS.put(id, session);
   }
 
   @OnClose
-  public void onClose() throws IOException {
-    if (log.isDebugEnabled()) {
-      log.debug("websocket onClose....");
+  public void onClose() {
+    if (SOCKET_SESSIONS.containsKey(this.id)) {
+      try (Session remove = SOCKET_SESSIONS.remove(this.id)) {
+        if (remove != null) {
+          log.debug("Websocket onClose id: {}", this.id);
+        }
+      } catch (IOException e) {
+        log.error("WebSocket onClose error: {}", e.getMessage(), e);
+      }
     }
-    this.session.close();
-    SOCKET_SESSIONS.remove(this.id);
   }
 
   @OnError

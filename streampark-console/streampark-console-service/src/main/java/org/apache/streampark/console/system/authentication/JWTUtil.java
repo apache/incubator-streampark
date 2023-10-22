@@ -114,7 +114,7 @@ public class JWTUtil {
           .withExpiresAt(date)
           .sign(algorithm);
     } catch (Exception e) {
-      log.error("error：{}", e);
+      log.error("error：{}", e.getMessage());
       return null;
     }
   }
