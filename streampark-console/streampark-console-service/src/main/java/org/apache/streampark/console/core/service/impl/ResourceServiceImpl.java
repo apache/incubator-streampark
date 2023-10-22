@@ -104,7 +104,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       return null;
     }
     Page<Resource> page = new MybatisPager<Resource>().getDefaultPage(restRequest);
-    return this.baseMapper.page(page, resource);
+    return this.baseMapper.selectPage(page, resource);
   }
 
   /**

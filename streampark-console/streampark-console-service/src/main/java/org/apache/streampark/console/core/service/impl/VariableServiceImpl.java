@@ -95,7 +95,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
       return null;
     }
     Page<Variable> page = new MybatisPager<Variable>().getDefaultPage(request);
-    return this.baseMapper.page(page, variable);
+    return this.baseMapper.selectPage(page, variable);
   }
 
   @Override
@@ -170,7 +170,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
    */
   @Override
   public List<Variable> findByTeamId(Long teamId, String keyword) {
-    return baseMapper.selectByTeamId(teamId, keyword);
+    return baseMapper.selectVarsByTeamId(teamId, keyword);
   }
 
   /**

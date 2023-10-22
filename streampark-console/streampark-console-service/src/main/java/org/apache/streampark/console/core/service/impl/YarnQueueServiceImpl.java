@@ -77,7 +77,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     Page<YarnQueue> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
-    return this.baseMapper.findQueues(page, yarnQueue);
+    return this.baseMapper.selectPage(page, yarnQueue);
   }
 
   /**

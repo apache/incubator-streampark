@@ -277,32 +277,32 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
 
   @Override
   public List<String> getRecentK8sNamespace() {
-    return baseMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
+    return baseMapper.selectRecentK8sNamespaces(DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
   public List<String> getRecentK8sClusterId(Integer executionMode) {
-    return baseMapper.getRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
+    return baseMapper.selectRecentK8sClusterIds(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
   public List<String> getRecentFlinkBaseImage() {
-    return baseMapper.getRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
+    return baseMapper.selectRecentFlinkBaseImages(DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
   public List<String> getRecentK8sPodTemplate() {
-    return baseMapper.getRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+    return baseMapper.selectRecentK8sPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override
   public List<String> getRecentK8sJmPodTemplate() {
-    return baseMapper.getRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+    return baseMapper.selectRecentK8sJmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override
   public List<String> getRecentK8sTmPodTemplate() {
-    return baseMapper.getRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+    return baseMapper.selectRecentK8sTmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override

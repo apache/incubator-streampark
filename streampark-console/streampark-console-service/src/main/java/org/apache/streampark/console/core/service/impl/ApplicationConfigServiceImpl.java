@@ -82,7 +82,7 @@ public class ApplicationConfigServiceImpl
 
     applicationConfig.setContent(config);
     applicationConfig.setCreateTime(new Date());
-    Integer version = this.baseMapper.getLastVersion(application.getId());
+    Integer version = this.baseMapper.selectLastVersion(application.getId());
     applicationConfig.setVersion(version == null ? 1 : version + 1);
     save(applicationConfig);
     this.setLatestOrEffective(latest, applicationConfig.getId(), application.getId());
@@ -182,12 +182,12 @@ public class ApplicationConfigServiceImpl
 
   @Override
   public ApplicationConfig getLatest(Long appId) {
-    return baseMapper.getLatest(appId);
+    return baseMapper.selectLatest(appId);
   }
 
   @Override
   public ApplicationConfig getEffective(Long appId) {
-    return baseMapper.getEffective(appId);
+    return baseMapper.selectEffective(appId);
   }
 
   @Override
@@ -205,7 +205,7 @@ public class ApplicationConfigServiceImpl
   public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
     Page<ApplicationConfig> page =
         new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
-    IPage<ApplicationConfig> configList = this.baseMapper.pageByAppId(page, config.getAppId());
+    IPage<ApplicationConfig> configList = this.baseMapper.selectPageByAppId(page, config.getAppId());
     fillEffectiveField(config.getAppId(), configList.getRecords());
     return configList;
   }

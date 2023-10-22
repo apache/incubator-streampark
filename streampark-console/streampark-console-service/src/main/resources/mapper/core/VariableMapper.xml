@@ -29,7 +29,7 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="page" resultType="org.apache.streampark.console.core.entity.Variable" parameterType="org.apache.streampark.console.core.entity.Variable">
+    <select id="selectPage" resultType="org.apache.streampark.console.core.entity.Variable" parameterType="org.apache.streampark.console.core.entity.Variable">
         select
             v.*,
             u.username as creatorName
@@ -55,7 +55,7 @@
              limit 1
     </select>
 
-    <select id="selectByTeamId" resultType="org.apache.streampark.console.core.entity.Variable">
+    <select id="selectVarsByTeamId" resultType="org.apache.streampark.console.core.entity.Variable">
         select *
         from t_variable
         <where>

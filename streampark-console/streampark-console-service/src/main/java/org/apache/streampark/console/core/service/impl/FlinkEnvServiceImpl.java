@@ -121,7 +121,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
   @Override
   public FlinkEnv getByAppId(Long appId) {
-    return this.baseMapper.getByAppId(appId);
+    return this.baseMapper.selectByAppId(appId);
   }
 
   @Override

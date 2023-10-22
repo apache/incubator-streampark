@@ -26,7 +26,7 @@
         <result column="modify_time" jdbcType="DATE" property="modifyTime"/>
     </resultMap>
 
-    <select id="findQueues" resultType="org.apache.streampark.console.core.entity.YarnQueue">
+    <select id="selectPage" resultType="org.apache.streampark.console.core.entity.YarnQueue">
         select * from t_yarn_queue
         <where>
             <if test="yarnQueue.teamId != null">

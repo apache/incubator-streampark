@@ -204,7 +204,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   public void forcedStop(Application appParam) {
     CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(appParam.getId());
     CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(appParam.getId());
-    Application application = this.baseMapper.getApp(appParam);
+    Application application = this.baseMapper.selectApp(appParam);
     if (isKubernetesApp(application)) {
       KubernetesDeploymentHelper.watchPodTerminatedLog(
           application.getK8sNamespace(), application.getJobName(), application.getJobId());
