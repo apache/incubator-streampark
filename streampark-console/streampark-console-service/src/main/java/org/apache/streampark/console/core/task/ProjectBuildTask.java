@@ -100,7 +100,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       File workTree = git.getRepository().getWorkTree();
       printWorkTree(workTree, "");
       String successMsg =
-          String.format("[StreamPark] project [%s] git clone successful!\n", project.getName());
+          String.format("[StreamPark] project [%s] git clone successful!%n", project.getName());
       fileLogger.info(successMsg);
       git.close();
       return true;
