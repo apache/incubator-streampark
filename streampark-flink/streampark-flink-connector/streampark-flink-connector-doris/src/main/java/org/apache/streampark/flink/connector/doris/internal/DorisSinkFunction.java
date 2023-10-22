@@ -39,6 +39,7 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 
@@ -84,7 +85,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
         LOGGER.warn(
             String.format(
                 " row data not fulfilled. {database: %s, table: %s, dataRows: %s}",
-                data.getDatabase(), data.getTable(), data.getDataRows()));
+                data.getDatabase(), data.getTable(), Arrays.toString(data.getDataRows())));
         return;
       }
       dorisSinkWriter.writeRecords(data.getDatabase(), data.getTable(), data.getDataRows());

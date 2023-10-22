@@ -30,7 +30,6 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
-import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
 
@@ -126,17 +125,15 @@ public class ConsoleAspect {
               "Permission denied, only user himself can access this permission");
           break;
         case TEAM:
-          Member member = memberService.findByUserName(paramId, currentUser.getUsername());
           ApiAlertException.throwIfTrue(
-              member == null,
+              memberService.findByUserName(paramId, currentUser.getUsername()) == null,
               "Permission denied, only user belongs to this team can access this permission");
           break;
         case APP:
           Application app = applicationManageService.getById(paramId);
           ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
-          member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
           ApiAlertException.throwIfTrue(
-              member == null,
+              memberService.findByUserName(app.getTeamId(), currentUser.getUsername()) == null,
               "Permission denied, only user belongs to this team can access this permission");
           break;
         default:
