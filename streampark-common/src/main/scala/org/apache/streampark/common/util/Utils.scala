@@ -147,7 +147,7 @@ object Utils extends Logger {
     Try(f) match {
       case Success(result) => Success(result)
       case Failure(e) if retryCount > 0 =>
-        logWarn(s"retry failed, execution caused by: ", e)
+        logWarn(s"Retry failed, execution caused by: ", e)
         logWarn(
           s"$retryCount times retry remaining, the next attempt will be in ${interval.toMillis} ms")
         LockSupport.parkNanos(interval.toNanos)
