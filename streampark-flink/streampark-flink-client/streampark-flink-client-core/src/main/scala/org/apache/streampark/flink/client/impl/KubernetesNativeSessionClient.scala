@@ -41,7 +41,7 @@ import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 /** kubernetes native session mode submit */
-@deprecated("use KubernetesSessionClientV2 instead")
+@Deprecated("use KubernetesSessionClientV2 instead")
 object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Logger {
 
   @throws[Exception]

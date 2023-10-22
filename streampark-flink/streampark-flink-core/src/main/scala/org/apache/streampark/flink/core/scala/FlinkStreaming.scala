@@ -44,12 +44,12 @@ class StreamingContext(
   /** Recommend use this Api to start task */
   def start(): JobExecutionResult = execute()
 
-  @deprecated override def execute(): JobExecutionResult = {
+  @Deprecated override def execute(): JobExecutionResult = {
     val appName = parameter.getAppName(required = true)
     execute(appName)
   }
 
-  @deprecated override def execute(jobName: String): JobExecutionResult = {
+  @Deprecated override def execute(jobName: String): JobExecutionResult = {
     printLogo(s"FlinkStreaming $jobName Starting...")
     super.execute(jobName)
   }
