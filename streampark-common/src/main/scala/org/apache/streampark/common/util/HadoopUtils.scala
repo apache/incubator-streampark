@@ -121,7 +121,7 @@ object HadoopUtils extends Logger {
         val end = value.getEndTime.getTime
         ((end - start) * 0.90f).toLong
       case _ =>
-        logWarn("get kerberos tgtRefreshTime failed, try get kerberos.ttl. ")
+        logWarn("Get kerberos tgtRefreshTime failed, try get kerberos.ttl. ")
         val timeUnit = DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL))
         timeUnit._2 match {
           case TimeUnit.SECONDS => timeUnit._1 * 1000
@@ -199,7 +199,7 @@ object HadoopUtils extends Logger {
   }
 
   private[this] def getKerberosUGI(): UserGroupInformation = {
-    logInfo("kerberos login starting....")
+    logInfo("Kerberos login starting....")
 
     require(
       kerberosPrincipal.nonEmpty && kerberosKeytab.nonEmpty,
@@ -221,7 +221,7 @@ object HadoopUtils extends Logger {
       val ugi =
         UserGroupInformation.loginUserFromKeytabAndReturnUGI(kerberosPrincipal, kerberosKeytab)
       UserGroupInformation.setLoginUser(ugi)
-      logInfo("kerberos authentication successful")
+      logInfo("Kerberos authentication successful")
       ugi
     } match {
       case Success(ugi) => ugi

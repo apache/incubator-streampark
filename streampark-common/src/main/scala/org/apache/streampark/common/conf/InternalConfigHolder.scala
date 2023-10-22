@@ -159,7 +159,7 @@ object InternalConfigHolder extends Logger {
   /** log the current configuration info. */
   def log(): Unit = {
     val configKeys = keys()
-    logInfo(s"""registered configs:
+    logInfo(s"""Registered configs:
                |ConfigHub collected configs: ${configKeys.size}
                |  ${configKeys
                 .map(
