@@ -63,29 +63,29 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
 
   def from(descriptor: TableDescriptor): Table = tableEnv.from(descriptor)
 
-  @deprecated override def execute(jobName: String): JobExecutionResult = {
+  @Deprecated override def execute(jobName: String): JobExecutionResult = {
     printLogo(s"FlinkTable $jobName Starting...")
     null
   }
 
-  @deprecated override def fromTableSource(source: TableSource[_]): Table =
+  @Deprecated override def fromTableSource(source: TableSource[_]): Table =
     tableEnv.fromTableSource(source)
 
-  @deprecated override def insertInto(
+  @Deprecated override def insertInto(
       table: Table,
       sinkPath: String,
       sinkPathContinued: String*): Unit =
     tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @deprecated override def insertInto(targetPath: String, table: Table): Unit =
+  @Deprecated override def insertInto(targetPath: String, table: Table): Unit =
     tableEnv.insertInto(targetPath, table)
 
-  @deprecated override def explain(table: Table): String = tableEnv.explain(table)
+  @Deprecated override def explain(table: Table): String = tableEnv.explain(table)
 
-  @deprecated override def explain(table: Table, extended: Boolean): String =
+  @Deprecated override def explain(table: Table, extended: Boolean): String =
     tableEnv.explain(table, extended)
 
-  @deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @Deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
 
-  @deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
 }
