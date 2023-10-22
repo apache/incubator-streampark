@@ -210,8 +210,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  public List<FlinkSql> getByTeamId(Long teamId) {
-    return this.baseMapper.getByTeamId(teamId);
+  public List<FlinkSql> listByTeamId(Long teamId) {
+    return this.baseMapper.selectByTeamId(teamId);
   }
 
   @Override

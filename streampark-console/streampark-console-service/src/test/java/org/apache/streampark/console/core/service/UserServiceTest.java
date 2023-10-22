@@ -54,7 +54,7 @@ class UserServiceTest extends SpringUnitTestBase {
     user.setPassword("test");
     user.setUserType(UserTypeEnum.USER);
     user.setStatus(User.STATUS_VALID);
-    userService.createUser(user);
+    userService.saveUser(user);
     // lock user
     user.setStatus(User.STATUS_LOCK);
     Map<String, Object> data =

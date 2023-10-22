@@ -64,7 +64,7 @@ public class ApplicationConfigServiceImpl
   @Autowired private EffectiveService effectiveService;
 
   @Override
-  public synchronized void create(Application application, Boolean latest) {
+  public synchronized void save(Application application, Boolean latest) {
     String decode = new String(Base64.getDecoder().decode(application.getConfig()));
     String config = DeflaterUtils.zipString(decode.trim());
 
@@ -115,7 +115,7 @@ public class ApplicationConfigServiceImpl
           if (latestConfig != null) {
             removeById(latestConfig.getId());
           }
-          this.create(application, latest);
+          this.save(application, latest);
         } else {
           String decode = new String(Base64.getDecoder().decode(application.getConfig()));
           String encode = DeflaterUtils.zipString(decode.trim());
@@ -124,7 +124,7 @@ public class ApplicationConfigServiceImpl
             if (latestConfig != null) {
               removeById(latestConfig.getId());
             }
-            this.create(application, latest);
+            this.save(application, latest);
           }
         }
       }
@@ -142,7 +142,7 @@ public class ApplicationConfigServiceImpl
           if (latestConfig != null) {
             removeById(latestConfig.getId());
           }
-          this.create(application, latest);
+          this.save(application, latest);
         } else {
           this.setLatestOrEffective(latest, configId, application.getId());
         }
@@ -153,10 +153,10 @@ public class ApplicationConfigServiceImpl
           String encode = DeflaterUtils.zipString(decode.trim());
           // create...
           if (!config.getContent().equals(encode)) {
-            this.create(application, latest);
+            this.save(application, latest);
           }
         } else {
-          this.create(application, latest);
+          this.save(application, latest);
         }
       }
     }
@@ -205,13 +205,14 @@ public class ApplicationConfigServiceImpl
   public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
     Page<ApplicationConfig> page =
         new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
-    IPage<ApplicationConfig> configList = this.baseMapper.pageByAppId(page, config.getAppId());
+    IPage<ApplicationConfig> configList =
+        this.baseMapper.selectPageByAppId(page, config.getAppId());
     fillEffectiveField(config.getAppId(), configList.getRecords());
     return configList;
   }
 
   @Override
-  public List<ApplicationConfig> history(Application application) {
+  public List<ApplicationConfig> listHistory(Application application) {
     LambdaQueryWrapper<ApplicationConfig> queryWrapper =
         new LambdaQueryWrapper<ApplicationConfig>()
             .eq(ApplicationConfig::getAppId, application.getId())

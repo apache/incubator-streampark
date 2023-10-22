@@ -43,7 +43,7 @@ class VariableServiceTest extends SpringUnitTestBase {
     variable.setCreatorId(userId);
     variable.setTeamId(teamId);
     variableService.save(variable);
-    Variable findVariable = variableService.findByVariableCode(teamId, variableCode);
+    Variable findVariable = variableService.listByVariableCode(teamId, variableCode);
     Assertions.assertNotNull(findVariable);
     String paramWithPlaceholders = "--kafka.brokers ${" + variableCode + "}";
     String realParam = variableService.replaceVariable(teamId, paramWithPlaceholders);
@@ -65,7 +65,7 @@ class VariableServiceTest extends SpringUnitTestBase {
     variable.setCreatorId(userId);
     variable.setTeamId(teamId);
     variableService.save(variable);
-    Variable findVariable = variableService.findByVariableCode(teamId, variableCode);
+    Variable findVariable = variableService.listByVariableCode(teamId, variableCode);
     Assertions.assertNotNull(findVariable);
     String paramWithPlaceholders = "--kafka.brokers ${" + variableCode + "}";
     String realParam = variableService.replaceVariable(teamId, paramWithPlaceholders);

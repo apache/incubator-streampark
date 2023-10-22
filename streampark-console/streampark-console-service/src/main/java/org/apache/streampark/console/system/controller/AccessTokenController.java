@@ -150,7 +150,7 @@ public class AccessTokenController {
   @DeleteMapping(value = "delete")
   @RequiresPermissions("token:delete")
   public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
-    boolean res = accessTokenService.deleteToken(tokenId);
+    boolean res = accessTokenService.removeById(tokenId);
     return RestResponse.success(res);
   }
 

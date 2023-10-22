@@ -126,7 +126,7 @@ public class ConsoleAspect {
               "Permission denied, only user himself can access this permission");
           break;
         case TEAM:
-          Member member = memberService.findByUserName(paramId, currentUser.getUsername());
+          Member member = memberService.listByUserName(paramId, currentUser.getUsername());
           ApiAlertException.throwIfTrue(
               member == null,
               "Permission denied, only user belongs to this team can access this permission");
@@ -134,7 +134,7 @@ public class ConsoleAspect {
         case APP:
           Application app = applicationManageService.getById(paramId);
           ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
-          member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
+          member = memberService.listByUserName(app.getTeamId(), currentUser.getUsername());
           ApiAlertException.throwIfTrue(
               member == null,
               "Permission denied, only user belongs to this team can access this permission");

@@ -95,7 +95,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
           new ThreadPoolExecutor.AbortPolicy());
 
   @Override
-  public RestResponse create(Project project) {
+  public RestResponse saveProject(Project project) {
     LambdaQueryWrapper<Project> queryWrapper =
         new LambdaQueryWrapper<Project>().eq(Project::getName, project.getName());
     long count = count(queryWrapper);
@@ -178,7 +178,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public IPage<Project> page(Project project, RestRequest request) {
     Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
-    return this.baseMapper.page(page, project);
+    return this.baseMapper.selectPage(page, project);
   }
 
   @Override
@@ -187,7 +187,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  public List<Project> findByTeamId(Long teamId) {
+  public List<Project> listByTeamId(Long teamId) {
     return this.baseMapper.selectByTeamId(teamId);
   }
 

@@ -50,7 +50,7 @@
         and e.target_type = 1
     </select>
 
-    <select id="pageByAppId" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
+    <select id="selectPageByAppId" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
         select * from t_flink_config
         where app_id=#{appId}
     </select>

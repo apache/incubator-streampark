@@ -39,7 +39,7 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
    * @param version
    * @throws IOException
    */
-  boolean create(FlinkEnv version) throws Exception;
+  boolean saveFlinkEnv(FlinkEnv version) throws Exception;
 
   /**
    * delete flink env

@@ -30,7 +30,7 @@ import java.util.Map;
 
 public interface ProjectService extends IService<Project> {
 
-  RestResponse create(Project project);
+  RestResponse saveProject(Project project);
 
   boolean update(Project projectParam);
 
@@ -40,7 +40,7 @@ public interface ProjectService extends IService<Project> {
 
   Boolean existsByTeamId(Long teamId);
 
-  List<Project> findByTeamId(Long teamId);
+  List<Project> listByTeamId(Long teamId);
 
   void build(Long id) throws Exception;
 

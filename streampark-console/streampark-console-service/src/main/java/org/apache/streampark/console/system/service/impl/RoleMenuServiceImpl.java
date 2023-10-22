@@ -37,7 +37,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
 
   @Override
   @Transactional
-  public void deleteByRoleId(Long roleId) {
+  public void removeByRoleId(Long roleId) {
     LambdaQueryWrapper<RoleMenu> queryWrapper =
         new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, roleId);
     baseMapper.delete(queryWrapper);
@@ -45,7 +45,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
 
   @Override
   @Transactional
-  public void deleteByMenuId(String[] menuIds) {
+  public void removeByMenuId(String[] menuIds) {
     List<String> list = Arrays.asList(menuIds);
     LambdaQueryWrapper<RoleMenu> queryWrapper =
         new LambdaQueryWrapper<RoleMenu>().in(RoleMenu::getMenuId, list);
@@ -53,7 +53,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
   }
 
   @Override
-  public List<RoleMenu> getByRoleId(String roleId) {
+  public List<RoleMenu> listByRoleId(String roleId) {
     LambdaQueryWrapper<RoleMenu> queryWrapper =
         new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, roleId);
     return baseMapper.selectList(queryWrapper);

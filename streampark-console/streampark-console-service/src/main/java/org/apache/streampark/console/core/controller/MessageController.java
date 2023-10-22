@@ -46,7 +46,7 @@ public class MessageController {
   @PostMapping("notice")
   public RestResponse notice(Integer type, RestRequest request) {
     NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(type);
-    IPage<Message> pages = messageService.getUnRead(noticeTypeEnum, request);
+    IPage<Message> pages = messageService.pageUnRead(noticeTypeEnum, request);
     return RestResponse.success(pages);
   }
 

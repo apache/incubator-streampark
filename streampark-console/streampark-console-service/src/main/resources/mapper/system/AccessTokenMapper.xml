@@ -37,7 +37,7 @@
         as finalStatus
     </sql>
 
-    <select id="page" resultType="org.apache.streampark.console.system.entity.AccessToken"
+    <select id="selectPage" resultType="org.apache.streampark.console.system.entity.AccessToken"
             parameterType="org.apache.streampark.console.system.entity.AccessToken">
         select
         <include refid="Base_Column_List"/>

@@ -71,7 +71,7 @@ public class FlinkClusterController {
   @PostMapping("create")
   @RequiresPermissions("cluster:create")
   public RestResponse create(FlinkCluster cluster) {
-    Boolean success = flinkClusterService.create(cluster);
+    Boolean success = flinkClusterService.saveFlinkCluster(cluster);
     return RestResponse.success(success);
   }
 
@@ -111,7 +111,7 @@ public class FlinkClusterController {
   @Operation(summary = "Delete flink cluster")
   @PostMapping("delete")
   public RestResponse delete(FlinkCluster cluster) {
-    flinkClusterService.delete(cluster);
+    flinkClusterService.remove(cluster);
     return RestResponse.success();
   }
 }

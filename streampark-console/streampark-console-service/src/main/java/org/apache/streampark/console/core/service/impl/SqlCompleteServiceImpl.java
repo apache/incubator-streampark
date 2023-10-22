@@ -55,7 +55,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
   }
 
   @Override
-  public List<String> getComplete(String sql) {
+  public List<String> listComplete(String sql) {
     if (sql.length() > 0 && BLACK_SET.contains(sql.charAt(sql.length() - 1))) {
       return new ArrayList<>();
     }

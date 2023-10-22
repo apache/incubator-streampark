@@ -87,7 +87,7 @@ public class FlinkAppLostWatcher {
 
   public void watch(List<Application> applications) {
     List<Application> probeApplication =
-        applications.isEmpty() ? applicationManageService.getProbeApps() : applications;
+        applications.isEmpty() ? applicationManageService.listProbeApps() : applications;
     if (probeApplication.isEmpty()) {
       log.info("there is no application that needs to be probe");
       return;
@@ -113,7 +113,7 @@ public class FlinkAppLostWatcher {
   }
 
   private void handleProbeResults() {
-    List<Application> probeApps = applicationManageService.getProbeApps();
+    List<Application> probeApps = applicationManageService.listProbeApps();
     if (shouldRetry(probeApps)) {
       watch(probeApps);
     } else {

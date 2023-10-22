@@ -82,14 +82,9 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   }
 
   @Override
-  public boolean deleteToken(Long id) {
-    return this.removeById(id);
-  }
-
-  @Override
   public IPage<AccessToken> findAccessTokens(AccessToken tokenParam, RestRequest request) {
     Page<AccessToken> page = new MybatisPager<AccessToken>().getDefaultPage(request);
-    this.baseMapper.page(page, tokenParam);
+    this.baseMapper.selectPage(page, tokenParam);
     List<AccessToken> records = page.getRecords();
     page.setRecords(records);
     return page;

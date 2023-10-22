@@ -80,7 +80,7 @@ public class VariableController {
   @Operation(summary = "List variables")
   @PostMapping("list")
   public RestResponse variableList(@RequestParam Long teamId, String keyword) {
-    List<Variable> variableList = variableService.findByTeamId(teamId, keyword);
+    List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
     for (Variable v : variableList) {
       v.dataMasking();
     }
@@ -99,7 +99,7 @@ public class VariableController {
   @PostMapping("post")
   @RequiresPermissions("variable:add")
   public RestResponse addVariable(@Valid Variable variable) {
-    this.variableService.createVariable(variable);
+    this.variableService.saveVariable(variable);
     return RestResponse.success();
   }
 
@@ -131,7 +131,7 @@ public class VariableController {
   @PostMapping("check/code")
   public RestResponse checkVariableCode(
       @RequestParam Long teamId, @NotBlank(message = "{required}") String variableCode) {
-    boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
+    boolean result = this.variableService.listByVariableCode(teamId, variableCode) == null;
     return RestResponse.success(result);
   }
 }

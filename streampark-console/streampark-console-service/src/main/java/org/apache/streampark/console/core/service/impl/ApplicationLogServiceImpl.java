@@ -57,7 +57,7 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
   }
 
   @Override
-  public Boolean delete(ApplicationLog applicationLog) {
+  public Boolean remove(ApplicationLog applicationLog) {
     return removeById(applicationLog.getId());
   }
 }

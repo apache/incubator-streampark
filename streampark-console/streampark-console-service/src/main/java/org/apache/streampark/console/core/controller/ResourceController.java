@@ -91,7 +91,7 @@ public class ResourceController {
   @Operation(summary = "List resource")
   @PostMapping("list")
   public RestResponse listResource(@RequestParam Long teamId) {
-    List<Resource> resourceList = resourceService.findByTeamId(teamId);
+    List<Resource> resourceList = resourceService.listByTeamId(teamId);
     return RestResponse.success(resourceList);
   }
 

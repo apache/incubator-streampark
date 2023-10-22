@@ -28,7 +28,7 @@ import java.util.List;
 
 public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
-  void create(Application application, Boolean latest);
+  void save(Application application, Boolean latest);
 
   void update(Application application, Boolean latest);
 
@@ -44,7 +44,7 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
   IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request);
 
-  List<ApplicationConfig> history(Application application);
+  List<ApplicationConfig> listHistory(Application application);
 
   String readTemplate();
 

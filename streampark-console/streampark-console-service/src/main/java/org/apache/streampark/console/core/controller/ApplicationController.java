@@ -96,7 +96,7 @@ public class ApplicationController {
   @PostMapping("create")
   @RequiresPermissions("app:create")
   public RestResponse create(Application app) throws IOException {
-    boolean saved = applicationManageService.create(app);
+    boolean saved = applicationManageService.saveApplication(app);
     return RestResponse.success(saved);
   }
 
@@ -335,7 +335,7 @@ public class ApplicationController {
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
   public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
-    Boolean deleted = applicationLogService.delete(applicationLog);
+    Boolean deleted = applicationLogService.remove(applicationLog);
     return RestResponse.success(deleted);
   }
 
@@ -344,7 +344,7 @@ public class ApplicationController {
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
-    Boolean deleted = applicationManageService.delete(app);
+    Boolean deleted = applicationManageService.remove(app);
     return RestResponse.success(deleted);
   }
 
@@ -352,7 +352,7 @@ public class ApplicationController {
   @PermissionAction(id = "#backUp.appId", type = PermissionTypeEnum.APP)
   @PostMapping("deletebak")
   public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
-    Boolean deleted = backUpService.delete(backUp.getId());
+    Boolean deleted = backUpService.remove(backUp.getId());
     return RestResponse.success(deleted);
   }
 

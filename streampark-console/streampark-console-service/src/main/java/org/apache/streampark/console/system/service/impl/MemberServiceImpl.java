@@ -56,45 +56,45 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   @Transactional
-  public void deleteByRoleIds(String[] roleIds) {
+  public void removeByRoleIds(String[] roleIds) {
     Arrays.stream(roleIds).forEach(id -> baseMapper.deleteByRoleId(Long.valueOf(id)));
   }
 
   @Override
   @Transactional
-  public void deleteByUserId(Long userId) {
+  public void removeByUserId(Long userId) {
     baseMapper.deleteByUserId(userId);
   }
 
   @Override
-  public void deleteByTeamId(Long teamId) {
+  public void removeByTeamId(Long teamId) {
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId);
     this.remove(queryWrapper);
   }
 
   @Override
-  public IPage<Member> findUsers(Member member, RestRequest request) {
+  public IPage<Member> listUsers(Member member, RestRequest request) {
     ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
     Page<Member> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
-    return baseMapper.findUsers(page, member);
+    return baseMapper.selectPage(page, member);
   }
 
   @Override
-  public List<User> findCandidateUsers(Long teamId) {
-    return baseMapper.findUsersNotInTeam(teamId);
+  public List<User> listCandidateUsers(Long teamId) {
+    return baseMapper.selectUsersNotInTeam(teamId);
   }
 
   @Override
-  public List<Team> findUserTeams(Long userId) {
-    return teamService.findUserTeams(userId);
+  public List<Team> listUserTeams(Long userId) {
+    return teamService.listUserTeams(userId);
   }
 
   @Override
-  public Member findByUserName(Long teamId, String userName) {
-    User user = userService.findByName(userName);
+  public Member listByUserName(Long teamId, String userName) {
+    User user = userService.getByName(userName);
     if (user == null) {
       return null;
     }
@@ -111,7 +111,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public List<Long> findUserIdsByRoleId(Long roleId) {
+  public List<Long> listUserIdsByRoleId(Long roleId) {
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>().eq(Member::getRoleId, roleId);
     List<Member> list = baseMapper.selectList(queryWrapper);
@@ -119,9 +119,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public void createMember(Member member) {
+  public void saveMember(Member member) {
     User user =
-        Optional.ofNullable(userService.findByName(member.getUserName()))
+        Optional.ofNullable(userService.getByName(member.getUserName()))
             .orElseThrow(
                 () ->
                     new ApiAlertException(
@@ -151,7 +151,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public void deleteMember(Member memberArg) {
+  public void removeMember(Member memberArg) {
     Member member =
         Optional.ofNullable(this.getById(memberArg.getId()))
             .orElseThrow(

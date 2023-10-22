@@ -98,7 +98,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
     flinkEnv.setFlinkHome(defaultFlinkHome);
     flinkEnv.setFlinkName(DEFAULT_FLINK_VERSION);
     flinkEnv.setId(1L);
-    envService.create(flinkEnv);
+    envService.saveFlinkEnv(flinkEnv);
     FlinkCluster flinkCluster = new FlinkCluster();
     flinkCluster.setId(1L);
     flinkCluster.setAddress(cluster.getFlinkJobManagerUrl());

@@ -30,5 +30,5 @@ public interface AlertConfigService extends IService<AlertConfig> {
 
   boolean exist(AlertConfig alertConfig);
 
-  boolean deleteById(Long id) throws AlertException;
+  boolean removeConfigById(Long id) throws AlertException;
 }

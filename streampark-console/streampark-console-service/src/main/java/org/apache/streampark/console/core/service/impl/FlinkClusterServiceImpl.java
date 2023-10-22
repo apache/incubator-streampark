@@ -141,7 +141,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public Boolean create(FlinkCluster flinkCluster) {
+  public Boolean saveFlinkCluster(FlinkCluster flinkCluster) {
     flinkCluster.setUserId(commonService.getUserId());
     return internalCreate(flinkCluster);
   }
@@ -304,7 +304,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public List<FlinkCluster> getByExecutionModes(Collection<FlinkExecutionMode> executionModeEnums) {
+  public List<FlinkCluster> listByExecutionModes(
+      Collection<FlinkExecutionMode> executionModeEnums) {
     return getBaseMapper()
         .selectList(
             new LambdaQueryWrapper<FlinkCluster>()
@@ -341,7 +342,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void delete(FlinkCluster cluster) {
+  public void remove(FlinkCluster cluster) {
     Long id = cluster.getId();
     FlinkCluster flinkCluster = getById(id);
     ApiAlertException.throwIfNull(flinkCluster, "Flink cluster not exist, please check.");

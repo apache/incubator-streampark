@@ -43,7 +43,7 @@ public interface VariableService extends IService<Variable> {
    * @param teamId
    * @return
    */
-  List<Variable> findByTeamId(Long teamId);
+  List<Variable> listByTeamId(Long teamId);
 
   /**
    * Get variables through team and search keywords.
@@ -52,7 +52,7 @@ public interface VariableService extends IService<Variable> {
    * @param keyword Fuzzy search keywords through variable code or description, Nullable.
    * @return
    */
-  List<Variable> findByTeamId(Long teamId, String keyword);
+  List<Variable> listByTeamId(Long teamId, String keyword);
 
   boolean existsByTeamId(Long teamId);
 
@@ -61,11 +61,11 @@ public interface VariableService extends IService<Variable> {
    *
    * @param variable variable
    */
-  void createVariable(Variable variable);
+  void saveVariable(Variable variable);
 
   void deleteVariable(Variable variable);
 
-  Variable findByVariableCode(Long teamId, String variableCode);
+  Variable listByVariableCode(Long teamId, String variableCode);
 
   String replaceVariable(Long teamId, String mixed);
 

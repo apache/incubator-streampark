@@ -35,28 +35,28 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
   void persistMetrics(@Param("app") Application application);
 
-  List<Application> getByTeamId(@Param("teamId") Long teamId);
+  List<Application> selectByTeamId(@Param("teamId") Long teamId);
 
-  List<Application> getProbeApps();
+  List<Application> selectProbeApps();
 
   boolean mapping(@Param("app") Application appParam);
 
-  List<String> getRecentK8sNamespace(@Param("limitSize") Integer limit);
+  List<String> selectRecentK8sNamespace(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sClusterId(
+  List<String> selectRecentK8sClusterId(
       @Param("executionMode") Integer executionMode, @Param("limitSize") Integer limit);
 
-  List<String> getRecentFlinkBaseImage(@Param("limitSize") Integer limit);
+  List<String> selectRecentFlinkBaseImage(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sPodTemplate(@Param("limitSize") Integer limit);
+  List<String> selectRecentK8sPodTemplate(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sJmPodTemplate(@Param("limitSize") Integer limit);
+  List<String> selectRecentK8sJmPodTemplate(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sTmPodTemplate(@Param("limitSize") Integer limit);
+  List<String> selectRecentK8sTmPodTemplate(@Param("limitSize") Integer limit);
 
   void resetOptionState();
 
-  List<Application> getByProjectId(@Param("projectId") Long id);
+  List<Application> selectByProjectId(@Param("projectId") Long id);
 
   boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
 

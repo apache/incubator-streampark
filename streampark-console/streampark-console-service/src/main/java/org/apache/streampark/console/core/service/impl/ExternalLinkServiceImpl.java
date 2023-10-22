@@ -49,7 +49,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   private final ApplicationManageService applicationManageService;
 
   @Override
-  public void create(ExternalLink externalLink) {
+  public void saveExternalLink(ExternalLink externalLink) {
     if (!this.check(externalLink)) {
       return;
     }
@@ -69,7 +69,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   }
 
   @Override
-  public void delete(Long linkId) {
+  public void remove(Long linkId) {
     baseMapper.deleteById(linkId);
   }
 

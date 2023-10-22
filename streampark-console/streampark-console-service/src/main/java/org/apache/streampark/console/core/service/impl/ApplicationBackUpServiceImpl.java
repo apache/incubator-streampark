@@ -178,7 +178,7 @@ public class ApplicationBackUpServiceImpl
   }
 
   @Override
-  public Boolean delete(Long id) throws InternalException {
+  public Boolean remove(Long id) throws InternalException {
     ApplicationBackUp backUp = getById(id);
     try {
       Application application = applicationManageService.getById(backUp.getAppId());

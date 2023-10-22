@@ -126,6 +126,6 @@ public class FlinkSqlController {
   @Operation(summary = "Get the complete sql")
   @PostMapping("sqlComplete")
   public RestResponse getSqlComplete(@NotNull(message = "{required}") String sql) {
-    return RestResponse.success().put("word", sqlComplete.getComplete(sql));
+    return RestResponse.success().put("word", sqlComplete.listComplete(sql));
   }
 }

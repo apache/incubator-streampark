@@ -276,37 +276,37 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public List<String> getRecentK8sNamespace() {
-    return baseMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
+  public List<String> listRecentK8sNamespace() {
+    return baseMapper.selectRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentK8sClusterId(Integer executionMode) {
-    return baseMapper.getRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
+  public List<String> listRecentK8sClusterId(Integer executionMode) {
+    return baseMapper.selectRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentFlinkBaseImage() {
-    return baseMapper.getRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
+  public List<String> listRecentFlinkBaseImage() {
+    return baseMapper.selectRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentK8sPodTemplate() {
-    return baseMapper.getRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+  public List<String> listRecentK8sPodTemplate() {
+    return baseMapper.selectRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentK8sJmPodTemplate() {
-    return baseMapper.getRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+  public List<String> listRecentK8sJmPodTemplate() {
+    return baseMapper.selectRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentK8sTmPodTemplate() {
-    return baseMapper.getRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+  public List<String> listRecentK8sTmPodTemplate() {
+    return baseMapper.selectRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> historyUploadJars() {
+  public List<String> listHistoryUploadJars() {
     return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
         .filter(File::isFile)
         .sorted(Comparator.comparingLong(File::lastModified).reversed())

@@ -55,7 +55,7 @@ public class YarnQueueController {
   @ApiAccess
   @PostMapping("list")
   public RestResponse list(RestRequest restRequest, YarnQueue yarnQueue) {
-    IPage<YarnQueue> queuePage = yarnQueueService.findYarnQueues(yarnQueue, restRequest);
+    IPage<YarnQueue> queuePage = yarnQueueService.pageYarnQueues(yarnQueue, restRequest);
     return RestResponse.success(queuePage);
   }
 
@@ -71,7 +71,7 @@ public class YarnQueueController {
   @PostMapping("create")
   @RequiresPermissions("yarnQueue:create")
   public RestResponse create(YarnQueue yarnQueue) {
-    return RestResponse.success(yarnQueueService.createYarnQueue(yarnQueue));
+    return RestResponse.success(yarnQueueService.saveYarnQueue(yarnQueue));
   }
 
   @Operation(summary = "Update yarn queue")
@@ -90,7 +90,7 @@ public class YarnQueueController {
   @PostMapping("delete")
   @RequiresPermissions("yarnQueue:delete")
   public RestResponse delete(YarnQueue yarnQueue) {
-    yarnQueueService.deleteYarnQueue(yarnQueue);
+    yarnQueueService.removeYarnQueue(yarnQueue);
     return RestResponse.success();
   }
 }

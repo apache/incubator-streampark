@@ -57,28 +57,28 @@ public class MemberController {
   @Operation(summary = "List members")
   @PostMapping("list")
   public RestResponse memberList(RestRequest restRequest, Member member) {
-    IPage<Member> userList = memberService.findUsers(member, restRequest);
+    IPage<Member> userList = memberService.listUsers(member, restRequest);
     return RestResponse.success(userList);
   }
 
   @Operation(summary = "List candidate users")
   @PostMapping("candidateUsers")
   public RestResponse candidateUsers(Long teamId) {
-    List<User> userList = memberService.findCandidateUsers(teamId);
+    List<User> userList = memberService.listCandidateUsers(teamId);
     return RestResponse.success(userList);
   }
 
   @Operation(summary = "List teams")
   @PostMapping("teams")
   public RestResponse listTeams(Long userId) {
-    List<Team> teamList = memberService.findUserTeams(userId);
+    List<Team> teamList = memberService.listUserTeams(userId);
     return RestResponse.success(teamList);
   }
 
   @Operation(summary = "Check the username")
   @PostMapping("check/user")
   public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
-    Member result = this.memberService.findByUserName(teamId, userName);
+    Member result = this.memberService.listByUserName(teamId, userName);
     return RestResponse.success(result == null);
   }
 
@@ -87,7 +87,7 @@ public class MemberController {
   @PostMapping("post")
   @RequiresPermissions("member:add")
   public RestResponse create(@Valid Member member) {
-    this.memberService.createMember(member);
+    this.memberService.saveMember(member);
     return RestResponse.success();
   }
 
@@ -96,7 +96,7 @@ public class MemberController {
   @DeleteMapping("delete")
   @RequiresPermissions("member:delete")
   public RestResponse delete(Member member) {
-    this.memberService.deleteMember(member);
+    this.memberService.removeMember(member);
     return RestResponse.success();
   }
 

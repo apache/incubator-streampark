@@ -60,7 +60,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   @Autowired private RoleMenuServie roleMenuServie;
 
   @Override
-  public List<String> findUserPermissions(Long userId, Long teamId) {
+  public List<String> listUserPermissions(Long userId, Long teamId) {
     User user =
         Optional.ofNullable(userService.getById(userId))
             .orElseThrow(
@@ -71,11 +71,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     if (UserTypeEnum.ADMIN == user.getUserType()) {
       return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
     }
-    return this.baseMapper.findUserPermissions(userId, teamId);
+    return this.baseMapper.selectUserPermissions(userId, teamId);
   }
 
   @Override
-  public List<Menu> findUserMenus(Long userId, Long teamId) {
+  public List<Menu> listUserMenus(Long userId, Long teamId) {
     User user =
         Optional.ofNullable(userService.getById(userId))
             .orElseThrow(
@@ -88,11 +88,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
           new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum);
       return this.list(queryWrapper);
     }
-    return this.baseMapper.findUserMenus(userId, teamId);
+    return this.baseMapper.selectUserMenus(userId, teamId);
   }
 
   @Override
-  public Map<String, Object> findMenus(Menu menu) {
+  public Map<String, Object> pageMenus(Menu menu) {
     Map<String, Object> result = new HashMap<>(16);
     try {
       LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
@@ -128,10 +128,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  public List<VueRouter<Menu>> getUserRouters(Long userId, Long teamId) {
+  public List<VueRouter<Menu>> listUserRouters(Long userId, Long teamId) {
     List<VueRouter<Menu>> routes = new ArrayList<>();
     // The query type is the menu type
-    List<Menu> menus = this.findUserMenus(userId, teamId);
+    List<Menu> menus = this.listUserMenus(userId, teamId);
     menus.forEach(
         menu -> {
           VueRouter<Menu> route = new VueRouter<>();

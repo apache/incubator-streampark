@@ -25,9 +25,9 @@ import java.util.List;
 
 public interface ExternalLinkService extends IService<ExternalLink> {
 
-  void create(ExternalLink externalLink);
+  void saveExternalLink(ExternalLink externalLink);
 
-  void delete(Long linkId);
+  void remove(Long linkId);
 
   void update(ExternalLink externalLink);
 

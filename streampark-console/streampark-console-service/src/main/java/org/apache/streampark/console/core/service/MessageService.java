@@ -28,5 +28,5 @@ public interface MessageService extends IService<Message> {
 
   void push(Message message);
 
-  IPage<Message> getUnRead(NoticeTypeEnum noticeTypeEnum, RestRequest request);
+  IPage<Message> pageUnRead(NoticeTypeEnum noticeTypeEnum, RestRequest request);
 }

@@ -29,25 +29,25 @@ import java.util.List;
 
 public interface MemberService extends IService<Member> {
 
-  void deleteByRoleIds(String[] roleIds);
+  void removeByRoleIds(String[] roleIds);
 
-  void deleteByUserId(Long userId);
+  void removeByUserId(Long userId);
 
-  void deleteByTeamId(Long teamId);
+  void removeByTeamId(Long teamId);
 
-  IPage<Member> findUsers(Member member, RestRequest request);
+  IPage<Member> listUsers(Member member, RestRequest request);
 
-  List<User> findCandidateUsers(Long teamId);
+  List<User> listCandidateUsers(Long teamId);
 
-  List<Team> findUserTeams(Long userId);
+  List<Team> listUserTeams(Long userId);
 
-  Member findByUserName(Long teamId, String userName);
+  Member listByUserName(Long teamId, String userName);
 
-  List<Long> findUserIdsByRoleId(Long roleId);
+  List<Long> listUserIdsByRoleId(Long roleId);
 
-  void createMember(Member member);
+  void saveMember(Member member);
 
-  void deleteMember(Member member);
+  void removeMember(Member member);
 
   void updateMember(Member member);
 }

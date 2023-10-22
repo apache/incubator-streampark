@@ -50,7 +50,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @return True if the application was successfully created, false otherwise.
    * @throws IOException If an I/O error occurs.
    */
-  boolean create(Application appParam) throws IOException;
+  boolean saveApplication(Application appParam) throws IOException;
 
   /**
    * Copies the given Application.
@@ -105,7 +105,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @param appParam The Application to be deleted.
    * @return True if the deletion was successful, false otherwise.
    */
-  Boolean delete(Application appParam);
+  Boolean remove(Application appParam);
 
   /**
    * Retrieves the Application with the specified details from the system.
@@ -152,7 +152,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @param teamId The ID of the team to retrieve the applications for.
    * @return A list of Application objects associated with the given team ID.
    */
-  List<Application> getByTeamId(Long teamId);
+  List<Application> listByTeamId(Long teamId);
 
   /**
    * Retrieves a list of applications by team ID and execution modes.
@@ -162,7 +162,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @return A list of applications that belong to the specified team and have the specified
    *     execution modes
    */
-  List<Application> getByTeamIdAndExecutionModes(
+  List<Application> listByTeamIdAndExecutionModes(
       Long teamId, Collection<FlinkExecutionMode> executionModeEnums);
 
   /**
@@ -170,5 +170,5 @@ public interface ApplicationManageService extends IService<Application> {
    *
    * @return a list of applications be probing or need to probe.
    */
-  List<Application> getProbeApps();
+  List<Application> listProbeApps();
 }

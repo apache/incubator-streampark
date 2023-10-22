@@ -57,7 +57,7 @@ public class ProjectController {
   public RestResponse create(Project project) {
     ApiAlertException.throwIfNull(
         project.getTeamId(), "The teamId can't be null. Create team failed.");
-    return projectService.create(project);
+    return projectService.saveProject(project);
   }
 
   @Operation(summary = "Update project")
@@ -155,7 +155,7 @@ public class ProjectController {
   @Operation(summary = "List the team projects")
   @PostMapping("select")
   public RestResponse select(@RequestParam Long teamId) {
-    List<Project> list = projectService.findByTeamId(teamId);
+    List<Project> list = projectService.listByTeamId(teamId);
     return RestResponse.success().data(list);
   }
 }

@@ -79,7 +79,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   }
 
   @Override
-  public boolean create(FlinkEnv version) throws Exception {
+  public boolean saveFlinkEnv(FlinkEnv version) throws Exception {
     long count = this.baseMapper.selectCount(null);
     version.setIsDefault(count == 0);
     version.setCreateTime(new Date());

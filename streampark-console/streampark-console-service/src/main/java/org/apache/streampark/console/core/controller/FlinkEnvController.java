@@ -60,7 +60,7 @@ public class FlinkEnvController {
   @PostMapping("create")
   public RestResponse create(FlinkEnv version) {
     try {
-      flinkEnvService.create(version);
+      flinkEnvService.saveFlinkEnv(version);
     } catch (Exception e) {
       throw new ApiDetailException(e);
     }

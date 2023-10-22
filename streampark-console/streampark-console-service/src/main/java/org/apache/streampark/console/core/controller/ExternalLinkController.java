@@ -74,7 +74,7 @@ public class ExternalLinkController {
   @PostMapping("/create")
   @RequiresPermissions("externalLink:create")
   public RestResponse create(@Valid ExternalLink externalLink) {
-    externalLinkService.create(externalLink);
+    externalLinkService.saveExternalLink(externalLink);
     return RestResponse.success();
   }
 
@@ -93,7 +93,7 @@ public class ExternalLinkController {
   @RequiresPermissions("externalLink:delete")
   public RestResponse delete(
       @NotNull(message = "The link id cannot be null") @RequestParam("id") Long id) {
-    externalLinkService.delete(id);
+    externalLinkService.remove(id);
     return RestResponse.success();
   }
 }

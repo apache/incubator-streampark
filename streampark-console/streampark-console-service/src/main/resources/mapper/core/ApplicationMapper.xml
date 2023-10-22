@@ -113,7 +113,7 @@
             limit 1
     </select>
 
-    <select id="getByProjectId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
+    <select id="selectByProjectId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
         select * from t_flink_app where project_id=#{projectId}
     </select>
 
@@ -240,7 +240,7 @@
         where id=#{app.id}
     </update>
 
-    <select id="getByTeamId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
+    <select id="selectByTeamId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
         select
             t.*,
             u.username,
@@ -255,7 +255,7 @@
         where t.team_id=#{teamId}
     </select>
 
-    <select id="getProbeApps" resultType="org.apache.streampark.console.core.entity.Application">
+    <select id="selectProbeApps" resultType="org.apache.streampark.console.core.entity.Application">
         select
             t.*,
             u.username,
@@ -286,7 +286,7 @@
         where id=#{app.id}
     </update>
 
-    <select id="getRecentK8sNamespace" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="selectRecentK8sNamespace" resultType="java.lang.String" parameterType="java.lang.Integer">
         select k8s_namespace
         from (
             select k8s_namespace, max(create_time) as ct
@@ -298,7 +298,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentK8sClusterId" resultType="java.lang.String" parameterType="java.util.Map">
+    <select id="selectRecentK8sClusterId" resultType="java.lang.String" parameterType="java.util.Map">
         select cluster_id
         from (
             select cluster_id, max(create_time) as ct
@@ -311,7 +311,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentFlinkBaseImage" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="selectRecentFlinkBaseImage" resultType="java.lang.String" parameterType="java.lang.Integer">
         select flink_image
         from (
             select flink_image, max(create_time) as ct
@@ -324,7 +324,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentK8sPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="selectRecentK8sPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
         select k8s_pod_template
         from (
             select k8s_pod_template, max(create_time) as ct
@@ -338,7 +338,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentK8sJmPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="selectRecentK8sJmPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
         select k8s_jm_pod_template
         from (
             select k8s_jm_pod_template, max(create_time) as ct
@@ -352,7 +352,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentK8sTmPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="selectRecentK8sTmPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
         select k8s_tm_pod_template
         from (
             select k8s_tm_pod_template, max(create_time) as ct

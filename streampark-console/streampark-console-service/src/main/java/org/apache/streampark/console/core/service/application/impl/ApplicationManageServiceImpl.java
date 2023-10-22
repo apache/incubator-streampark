@@ -175,7 +175,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public Boolean delete(Application appParam) {
+  public Boolean remove(Application appParam) {
 
     Application application = getById(appParam.getId());
 
@@ -308,7 +308,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @SneakyThrows
   @Override
-  public boolean create(Application appParam) {
+  public boolean saveApplication(Application appParam) {
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
     appParam.setUserId(commonService.getUserId());
@@ -356,7 +356,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         flinkSqlService.create(flinkSql);
       }
       if (appParam.getConfig() != null) {
-        configService.create(appParam, true);
+        configService.save(appParam, true);
       }
       return true;
     } else {
@@ -685,16 +685,16 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public List<Application> getByProjectId(Long id) {
-    return baseMapper.getByProjectId(id);
+    return baseMapper.selectByProjectId(id);
   }
 
   @Override
-  public List<Application> getByTeamId(Long teamId) {
-    return baseMapper.getByTeamId(teamId);
+  public List<Application> listByTeamId(Long teamId) {
+    return baseMapper.selectByTeamId(teamId);
   }
 
   @Override
-  public List<Application> getByTeamIdAndExecutionModes(
+  public List<Application> listByTeamIdAndExecutionModes(
       Long teamId, @Nonnull Collection<FlinkExecutionMode> executionModeEnums) {
     return getBaseMapper()
         .selectList(
@@ -707,8 +707,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                         .collect(Collectors.toSet())));
   }
 
-  public List<Application> getProbeApps() {
-    return this.baseMapper.getProbeApps();
+  public List<Application> listProbeApps() {
+    return this.baseMapper.selectProbeApps();
   }
 
   @Override
