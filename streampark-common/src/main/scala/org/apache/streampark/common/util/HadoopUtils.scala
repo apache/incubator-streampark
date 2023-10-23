@@ -17,8 +17,8 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder}
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.{CommonConfig, ConfigKeys, InternalConfigHolder}
+import org.apache.streampark.common.conf.ConfigKeys._
 
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
@@ -62,7 +62,7 @@ object HadoopUtils extends Logger {
     InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME)
 
   private[this] lazy val kerberosConf: Map[String, String] =
-    SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME, null) match {
+    SystemPropertyUtils.get(ConfigKeys.KEY_APP_HOME, null) match {
       case null =>
         getClass.getResourceAsStream("/kerberos.yml") match {
           case x if x != null => PropertiesUtils.fromYamlFile(x)

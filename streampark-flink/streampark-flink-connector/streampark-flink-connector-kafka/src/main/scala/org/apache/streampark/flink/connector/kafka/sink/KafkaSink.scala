@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.kafka.sink
 
-import org.apache.streampark.common.conf.ConfigConst
+import org.apache.streampark.common.conf.ConfigKeys
 import org.apache.streampark.common.util.{ConfigUtils, Utils}
 import org.apache.streampark.flink.connector.kafka.bean.KafkaEqualityPartitioner
 import org.apache.streampark.flink.connector.sink.Sink
@@ -83,10 +83,10 @@ class KafkaSink(
     val producer = {
       val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic, alias)
       Utils.copyProperties(property, prop)
-      val topicId = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
+      val topicId = prop.remove(ConfigKeys.KEY_KAFKA_TOPIC).toString
 
       /** kafkaProducersPoolSize will be used under EXACTLY_ONCE semantics */
-      val semantic = Try(Some(prop.remove(ConfigConst.KEY_KAFKA_SEMANTIC).toString.toUpperCase))
+      val semantic = Try(Some(prop.remove(ConfigKeys.KEY_KAFKA_SEMANTIC).toString.toUpperCase))
         .getOrElse(None) match {
         case None => Semantic.AT_LEAST_ONCE
         case Some("AT_LEAST_ONCE") => Semantic.AT_LEAST_ONCE

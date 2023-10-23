@@ -16,7 +16,7 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.PARAM_PREFIX
+import org.apache.streampark.common.conf.ConfigKeys.PARAM_PREFIX
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.Logger
 

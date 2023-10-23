@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.Constant;
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
@@ -418,7 +418,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       // Get the sql of the replaced placeholder
       String realSql = variableService.replaceVariable(application.getTeamId(), flinkSql.getSql());
       flinkSql.setSql(DeflaterUtils.zipString(realSql));
-      extraParameter.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
+      extraParameter.put(ConfigKeys.KEY_FLINK_SQL(null), flinkSql.getSql());
     }
 
     // TODO Need to display more K8s submission parameters in the front-end UI.
@@ -478,12 +478,12 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             submitResponse -> {
               if (submitResponse.flinkConfig() != null) {
                 String jmMemory =
-                    submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_JM_PROCESS_MEMORY());
+                    submitResponse.flinkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY());
                 if (jmMemory != null) {
                   application.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
                 }
                 String tmMemory =
-                    submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TM_PROCESS_MEMORY());
+                    submitResponse.flinkConfig().get(ConfigKeys.KEY_FLINK_TM_PROCESS_MEMORY());
                 if (tmMemory != null) {
                   application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
                 }
@@ -610,7 +610,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             resource.getFilePath(), "pyflink file can't be null, start application failed.");
 
         ApiAlertException.throwIfFalse(
-            resource.getFilePath().endsWith(ConfigConst.PYTHON_SUFFIX()),
+            resource.getFilePath().endsWith(Constant.PYTHON_SUFFIX),
             "pyflink format error, must be a \".py\" suffix, start application failed.");
 
         flinkUserJar = resource.getFilePath();
@@ -621,7 +621,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           appConf =
               String.format(
                   "json://{\"%s\":\"%s\"}",
-                  ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                  ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
         } else {
           switch (application.getApplicationType()) {
             case STREAMPARK_FLINK:
@@ -639,7 +639,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
               appConf =
                   String.format(
                       "json://{\"%s\":\"%s\"}",
-                      ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                      ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
               break;
             default:
               throw new IllegalArgumentException(
@@ -701,19 +701,19 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or "
                     + "the cluster has been deleted. Please contact the Admin.",
                 application.getFlinkClusterId()));
-        properties.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
+        properties.put(ConfigKeys.KEY_YARN_APP_ID(), cluster.getClusterId());
       } else {
         String yarnQueue =
-            (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
+            (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_QUEUE());
         String yarnLabelExpr =
-            (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_NODE_LABEL());
+            (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_NODE_LABEL());
         Optional.ofNullable(yarnQueue)
-            .ifPresent(yq -> properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yq));
+            .ifPresent(yq -> properties.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yq));
         Optional.ofNullable(yarnLabelExpr)
-            .ifPresent(yLabel -> properties.put(ConfigConst.KEY_YARN_APP_NODE_LABEL(), yLabel));
+            .ifPresent(yLabel -> properties.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), yLabel));
       }
     } else if (FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode())) {
-      properties.put(ConfigConst.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
+      properties.put(ConfigKeys.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
     }
 
     if (FlinkExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {

@@ -16,8 +16,8 @@
  */
 package org.apache.streampark.flink.core.conf
 
-import org.apache.streampark.common.conf.ConfigConst
-import org.apache.streampark.common.conf.ConfigConst.{KEY_FLINK_OPTION_PREFIX, KEY_FLINK_PROPERTY_PREFIX}
+import org.apache.streampark.common.conf.ConfigKeys
+import org.apache.streampark.common.conf.ConfigKeys.{KEY_FLINK_OPTION_PREFIX, KEY_FLINK_PROPERTY_PREFIX}
 import org.apache.streampark.common.util.PropertiesUtils
 
 import org.apache.commons.cli.{DefaultParser, Options}
@@ -96,7 +96,7 @@ object ParameterCli {
                 x =>
                   val key = x._1.drop(propertyPrefix.length).trim
                   val value = x._2.trim
-                  if (key == ConfigConst.KEY_FLINK_APP_NAME) {
+                  if (key == ConfigKeys.KEY_FLINK_APP_NAME) {
                     buffer.append(s" -D$key=${value.replace(" ", "_")}")
                   } else {
                     buffer.append(s" -D$key=$value")
@@ -104,7 +104,7 @@ object ParameterCli {
               }
             buffer.toString.trim
           case "--name" =>
-            map.getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "").trim match {
+            map.getOrElse(propertyPrefix.concat(ConfigKeys.KEY_FLINK_APP_NAME), "").trim match {
               case appName if appName.nonEmpty => appName
               case _ => ""
             }

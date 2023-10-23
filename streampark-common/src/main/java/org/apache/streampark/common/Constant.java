@@ -18,15 +18,36 @@
 package org.apache.streampark.common;
 
 /** A constant class to hold the constants variables. */
-public class Constant {
+public final class Constant {
 
   private Constant() {}
 
   public static final String DEFAULT = "default";
+
   public static final String STREAM_PARK = "streampark";
+
   public static final String HTTP_SCHEMA = "http://";
+
   public static final String HTTPS_SCHEMA = "https://";
+
   public static final String JAR_SUFFIX = ".jar";
+
   public static final String ZIP_SUFFIX = ".zip";
+
+  public static final String EMPTY_STRING = "";
+
+  public static final String PYTHON_SUFFIX = ".py";
+
   public static final String SEMICOLON = ";";
+
+  public static final String DEFAULT_DATAMASK_STRING = "********";
+
+  public static final String PYTHON_FLINK_DRIVER_CLASS_NAME =
+      "org.apache.flink.client.python.PythonDriver";
+
+  public static final String STREAMPARK_FLINKSQL_CLIENT_CLASS =
+      "org.apache.streampark.flink.cli.SqlClient";
+
+  public static final String PYTHON_EXECUTABLE = "venv.zip/venv/bin/python3";
+
 }

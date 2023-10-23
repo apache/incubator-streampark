@@ -16,7 +16,8 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import com.esotericsoftware.kryo.Serializer
@@ -77,7 +78,7 @@ abstract class FlinkStreamTableTrait(
   }
 
   @Deprecated def execute(jobName: String): JobExecutionResult = {
-    printLogo(s"FlinkStreamTable $jobName Starting...")
+    Utils.printLogo(s"FlinkStreamTable $jobName Starting...")
     if (isConvertedToDataStream) {
       streamEnv.execute(jobName)
     } else null

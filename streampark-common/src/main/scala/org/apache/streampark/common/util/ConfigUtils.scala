@@ -16,7 +16,8 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.Constant
+import org.apache.streampark.common.conf.ConfigKeys._
 
 import java.util.{Map => JavaMap, Properties}
 
@@ -52,7 +53,7 @@ object ConfigUtils {
       val kafkaProperty = new Properties()
       param.foreach(x => kafkaProperty.put(x._1, x._2.trim))
       val _topic = topic match {
-        case SIGN_EMPTY =>
+        case Constant.EMPTY_STRING =>
           val top = kafkaProperty.getOrElse(KEY_KAFKA_TOPIC, null)
           if (top == null || top.split(",|\\s+").length > 1) {
             throw new IllegalArgumentException(
