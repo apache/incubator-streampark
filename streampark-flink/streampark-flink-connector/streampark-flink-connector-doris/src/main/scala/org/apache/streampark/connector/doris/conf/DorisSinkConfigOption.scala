@@ -49,7 +49,7 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
         .getProperty(k)
         .split(SIGN_COMMA)
         .filter(_.nonEmpty)
-        .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
+        .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", Constant.HTTP_SCHEMA))
         .toList
     }
   )

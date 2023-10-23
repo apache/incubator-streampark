@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.connector.clickhouse.conf
 
+import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.ConfigOption
 import org.apache.streampark.common.util.ConfigUtils
 
@@ -57,7 +58,7 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
         .getProperty(k)
         .split(SIGN_COMMA)
         .filter(_.nonEmpty)
-        .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
+        .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", Constant.HTTP_SCHEMA))
         .toList
     }
   )
@@ -71,7 +72,7 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
   val database: ConfigOption[String] = ConfigOption(
     key = "database",
     required = true,
-    defaultValue = "default",
+    defaultValue = Constant.DEFAULT,
     classType = classOf[String])
 
   val requestTimeout: ConfigOption[Int] = ConfigOption(

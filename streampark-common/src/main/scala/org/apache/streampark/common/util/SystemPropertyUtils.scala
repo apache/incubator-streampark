@@ -43,7 +43,7 @@ object SystemPropertyUtils extends Logger {
   def get(key: String, default: String): String = {
     require(key != null, "[StreamPark] key must not be null.")
     key match {
-      case empty if empty.isEmpty => throw new IllegalArgumentException("key must not be empty.")
+      case empty if empty.isEmpty => throw new IllegalArgumentException("Key must not be empty.")
       case other =>
         Try {
           System.getSecurityManager match {

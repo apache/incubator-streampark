@@ -16,21 +16,9 @@
  */
 package org.apache.streampark.common.conf
 
-import java.time.LocalDateTime
-
-object ConfigConst {
-
-  /** common const */
-  val DEFAULT_DATAMASK_STRING = "********"
+object ConfigKeys {
 
   val PARAM_PREFIX = "--"
-
-  /** pyflink */
-  val PYTHON_SUFFIX = ".py"
-
-  val PYTHON_DRIVER_CLASS_NAME = "org.apache.flink.client.python.PythonDriver"
-
-  val PYTHON_EXECUTABLE = "venv.zip/venv/bin/python3"
 
   /** about parameter... */
   val KEY_APP_HOME = "app.home"
@@ -48,9 +36,6 @@ object ConfigConst {
   val KEY_TIMEOUT = "timeout"
 
   val KEY_SEMANTIC = "semantic"
-
-  /** sign.... */
-  val SIGN_EMPTY = ""
 
   /** kerberos */
   val KEY_KERBEROS = "kerberos"
@@ -179,24 +164,5 @@ object ConfigConst {
   val KEY_FLINK_JM_PROCESS_MEMORY = "jobmanager.memory.process.size"
 
   val KEY_FLINK_TM_PROCESS_MEMORY = "taskmanager.memory.process.size"
-
-  val STREAMPARK_FLINKSQL_CLIENT_CLASS = "org.apache.streampark.flink.cli.SqlClient"
-
-  def printLogo(info: String): Unit = {
-    // scalastyle:off println
-    println("\n")
-    println("        _____ __                                             __       ")
-    println("       / ___// /_________  ____ _____ ___  ____  ____ ______/ /__     ")
-    println("       \\__ \\/ __/ ___/ _ \\/ __ `/ __ `__ \\/ __ \\  __ `/ ___/ //_/")
-    println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ")
-    println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ")
-    println("                                       /_/                        \n\n")
-    println("    Version:  2.2.0-SNAPSHOT                                          ")
-    println("    WebSite:  https://streampark.apache.org                           ")
-    println("    GitHub :  https://github.com/apache/incubator-streampark                    ")
-    println(s"    Info   :  $info                                 ")
-    println(s"    Time   :  ${LocalDateTime.now}              \n\n")
-    // scalastyle:on println
-  }
 
 }

@@ -16,10 +16,10 @@
  */
 package org.apache.streampark.connector.doris.conf
 
-import org.apache.streampark.common.conf.ConfigConst
+import org.apache.streampark.common.Constant
+import org.apache.streampark.common.conf.ConfigKeys
 
 import java.util.Properties
-
 import scala.collection.convert.ImplicitConversions._
 
 object DorisConfig {
@@ -83,7 +83,7 @@ class DorisConfig(parameters: Properties) {
 
   override def toString: String = {
     s"""
-       |{ doris user: $user, password: ${ConfigConst.DEFAULT_DATAMASK_STRING}, hosts: ${loadUrl.mkString(",")} }
+       |{ doris user: $user, password: ${Constant.DEFAULT_DATAMASK_STRING}, hosts: ${loadUrl.mkString(",")} }
        |""".stripMargin
   }
 }

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.conf.ConfigKeys;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -97,7 +97,7 @@ public final class WebUtils {
   }
 
   public static String getAppHome() {
-    return System.getProperty(ConfigConst.KEY_APP_HOME());
+    return System.getProperty(ConfigKeys.KEY_APP_HOME());
   }
 
   public static File getAppDir(String dir) {

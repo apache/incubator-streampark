@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigConst;
-import org.apache.streampark.common.conf.K8sFlinkConfig;
+import org.apache.streampark.common.Constant;
+import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
@@ -103,7 +103,7 @@ public class Application implements Serializable {
   private String k8sName;
 
   /** k8s namespace */
-  private String k8sNamespace = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE();
+  private String k8sNamespace = Constant.DEFAULT;
 
   /** The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type) */
   private Integer k8sRestExposedType;
@@ -258,10 +258,7 @@ public class Application implements Serializable {
   }
 
   public void setK8sNamespace(String k8sNamespace) {
-    this.k8sNamespace =
-        StringUtils.isBlank(k8sNamespace)
-            ? K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE()
-            : k8sNamespace;
+    this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? Constant.DEFAULT : k8sNamespace;
   }
 
   public K8sPodTemplates getK8sPodTemplates() {
@@ -281,10 +278,10 @@ public class Application implements Serializable {
 
     Map<String, Object> hotParamsMap = this.getHotParamsMap();
     if (MapUtils.isNotEmpty(hotParamsMap)
-        && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
-      String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
+        && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
+      String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE()).toString();
       String labelExpr =
-          Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
+          Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
               .map(Object::toString)
               .orElse(null);
       this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());

@@ -127,7 +127,7 @@ case class ClickHouseWriterTask(
         s"""Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.storageType}""")
       failoverWriter.write(sinkRequest)
       logInfo(
-        s"failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
+        s"Failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
     } else {
       sinkRequest.incrementCounter()
       logWarn(

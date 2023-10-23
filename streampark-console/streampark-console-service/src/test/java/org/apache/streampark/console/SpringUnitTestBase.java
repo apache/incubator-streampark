@@ -18,7 +18,7 @@
 package org.apache.streampark.console;
 
 import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -68,7 +68,7 @@ public abstract class SpringUnitTestBase {
     Path localWorkspace =
         Files.createDirectories(new File(mockedHome + "/localWorkspace").toPath());
 
-    System.setProperty(ConfigConst.KEY_APP_HOME(), mockedHome);
+    System.setProperty(ConfigKeys.KEY_APP_HOME(), mockedHome);
     System.setProperty(
         CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
         localWorkspace.toAbsolutePath().toString());

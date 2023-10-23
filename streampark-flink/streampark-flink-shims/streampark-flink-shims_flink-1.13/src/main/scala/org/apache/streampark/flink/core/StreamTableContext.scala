@@ -108,7 +108,7 @@ class StreamTableContext(
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 
-  @deprecated override def connect(
+  @Deprecated override def connect(
       connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor =
     tableEnv.connect(connectorDescriptor)
 
@@ -119,20 +119,20 @@ class StreamTableContext(
 
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
-  @deprecated def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+  @Deprecated def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
 
-  @deprecated def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
+  @Deprecated def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
     tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @deprecated def insertInto(targetPath: String, table: Table): Unit =
+  @Deprecated def insertInto(targetPath: String, table: Table): Unit =
     tableEnv.insertInto(targetPath, table)
 
-  @deprecated def explain(table: Table): String = tableEnv.explain(table)
+  @Deprecated def explain(table: Table): String = tableEnv.explain(table)
 
-  @deprecated def explain(table: Table, extended: Boolean): String =
+  @Deprecated def explain(table: Table, extended: Boolean): String =
     tableEnv.explain(table, extended)
 
-  @deprecated def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @Deprecated def explain(extended: Boolean): String = tableEnv.explain(extended)
 
-  @deprecated def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @Deprecated def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
 }

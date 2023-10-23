@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
@@ -138,7 +138,7 @@ public class FlinkCluster implements Serializable {
     }
     Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
     if (FlinkExecutionMode.YARN_SESSION == getFlinkExecutionModeEnum()) {
-      map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
+      map.put(ConfigKeys.KEY_YARN_APP_NAME(), this.clusterName);
       map.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
     }
     map.entrySet().removeIf(entry -> entry.getValue() == null);

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
@@ -251,7 +252,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         project.getModule(), "Project module can't be null, please check.");
     File apps = new File(project.getDistHome(), project.getModule());
     for (File file : Objects.requireNonNull(apps.listFiles())) {
-      if (file.getName().endsWith(".jar")) {
+      if (file.getName().endsWith(Constant.JAR_SUFFIX)) {
         list.add(file.getName());
       }
     }

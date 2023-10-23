@@ -55,7 +55,7 @@ class RestClientFactoryImpl(val config: ES7Config) extends RestClientFactory wit
             httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
           if (credentialsProvider != null) {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
-            logInfo("elasticsearch auth by userName,password...")
+            logInfo("Elasticsearch auth by userName,password...")
           }
           httpClientBuilder
         }

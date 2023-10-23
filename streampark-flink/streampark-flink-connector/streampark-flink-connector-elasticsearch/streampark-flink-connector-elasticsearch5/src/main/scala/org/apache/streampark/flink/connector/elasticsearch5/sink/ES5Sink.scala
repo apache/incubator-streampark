@@ -38,6 +38,9 @@ import scala.collection.convert.ImplicitConversions._
 
 object ES5Sink {
 
+  val functionNullHintMsg = "ES pocess element func must not null"
+  val sinkNullHintMsg = "Sink Stream must not null"
+
   def apply(
       @(transient @param)
       property: Properties = new Properties(),
@@ -73,8 +76,8 @@ class ES5Sink(
       stream: JavaDataStream[T],
       failureHandler: ActionRequestFailureHandler,
       f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    require(stream != null, () => s"sink Stream must not null")
-    require(f != null, () => s"es pocess element func  must not null")
+    require(stream != null, () => sinkNullHintMsg)
+    require(f != null, () => functionNullHintMsg)
     val esSink: ElasticsearchSink[T] =
       new ElasticsearchSink(userConfig, config.host, new ESSinkFunction(f), failureHandler)
     if (config.disableFlushOnCheckpoint) {
@@ -89,8 +92,8 @@ class ES5Sink(
       stream: DataStream[T],
       failureHandler: ActionRequestFailureHandler,
       f: T => ActionRequest): DataStreamSink[T] = {
-    require(stream != null, () => s"sink Stream must not null")
-    require(f != null, () => s"es pocess element fun  must not null")
+    require(stream != null, () => sinkNullHintMsg)
+    require(f != null, () => functionNullHintMsg)
     val esSink: ElasticsearchSink[T] =
       new ElasticsearchSink(userConfig, config.host, new ESSinkFunction(f), failureHandler)
     if (config.disableFlushOnCheckpoint) {

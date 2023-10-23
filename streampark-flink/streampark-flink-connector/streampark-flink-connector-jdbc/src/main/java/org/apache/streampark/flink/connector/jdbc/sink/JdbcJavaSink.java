@@ -55,7 +55,7 @@ public class JdbcJavaSink<T> {
   }
 
   public DataStreamSink<T> sink(DataStream<T> dataStream) {
-    Utils.notNull(sqlFunc, "transformFunction can not be null");
+    Utils.notNull(sqlFunc, "TransformFunction can not be null");
     this.jdbc =
         this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter().toMap(), alias) : this.jdbc;
     JdbcSinkFunction<T> sinkFun = new JdbcSinkFunction<>(this.jdbc, this.sqlFunc);

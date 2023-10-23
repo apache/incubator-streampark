@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.core.scala
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
+import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.{Logger, SystemPropertyUtils, Utils}
 import org.apache.streampark.flink.core.{FlinkStreamingInitializer, StreamEnvConfig}
 import org.apache.streampark.flink.core.EnhancerImplicit._
 
@@ -44,13 +44,13 @@ class StreamingContext(
   /** Recommend use this Api to start task */
   def start(): JobExecutionResult = execute()
 
-  @deprecated override def execute(): JobExecutionResult = {
+  @Deprecated override def execute(): JobExecutionResult = {
     val appName = parameter.getAppName(required = true)
     execute(appName)
   }
 
-  @deprecated override def execute(jobName: String): JobExecutionResult = {
-    printLogo(s"FlinkStreaming $jobName Starting...")
+  @Deprecated override def execute(jobName: String): JobExecutionResult = {
+    Utils.printLogo(s"FlinkStreaming $jobName Starting...")
     super.execute(jobName)
   }
 }

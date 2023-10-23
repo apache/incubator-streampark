@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.Constant;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -70,7 +70,7 @@ public class Variable implements Serializable {
 
   public void dataMasking() {
     if (desensitization) {
-      this.setVariableValue(ConfigConst.DEFAULT_DATAMASK_STRING());
+      this.setVariableValue(Constant.DEFAULT_DATAMASK_STRING);
     }
   }
 }

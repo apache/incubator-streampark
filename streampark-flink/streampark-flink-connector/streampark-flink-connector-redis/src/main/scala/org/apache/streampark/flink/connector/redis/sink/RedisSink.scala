@@ -97,7 +97,7 @@ class RedisSink(
             val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
               throw new IllegalArgumentException(
                 s"""
-                   |redis config error,property:${x._1} invalid,init FlinkJedisSentinelConfig error, property options:
+                   |Redis config error,property:${x._1} invalid,init FlinkJedisSentinelConfig error, property options:
                    |<String masterName>,
                    |<Set<String> sentinels>,
                    |<int connectionTimeout>,
@@ -121,7 +121,7 @@ class RedisSink(
             val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
               throw new IllegalArgumentException(
                 s"""
-                   |redis config error,property:${x._1} invalid,init FlinkJedisPoolConfig error,property options:
+                   |Redis config error,property:${x._1} invalid,init FlinkJedisPoolConfig error,property options:
                    |<String host>,
                    |<int port>,
                    |<int timeout>,
@@ -138,7 +138,7 @@ class RedisSink(
         builder.build()
       case _ =>
         throw throw new IllegalArgumentException(
-          s"redis connectType must be jedisPool|sentinel $connectType")
+          s"Redis connectType must be jedisPool|sentinel $connectType")
     }
   }
 
@@ -155,12 +155,12 @@ class RedisSink(
       stream: DataStream[T],
       mapper: RedisMapper[T],
       ttl: Int = Int.MaxValue): DataStreamSink[T] = {
-    require(stream != null, () => s"sink Stream must not null")
-    require(mapper != null, () => s"redis mapper must not null")
-    require(ttl > 0, () => s"redis ttl must greater than 0")
+    require(stream != null, () => s"Sink Stream must not null")
+    require(mapper != null, () => s"Redis mapper must not null")
+    require(ttl > 0, () => s"Redis ttl must greater than 0")
     val sinkFun = (enableCheckpoint, cpMode) match {
       case (false, CheckpointingMode.EXACTLY_ONCE) =>
-        throw new IllegalArgumentException("redis sink EXACTLY_ONCE must enable checkpoint")
+        throw new IllegalArgumentException("Redis sink EXACTLY_ONCE must enable checkpoint")
       case (true, CheckpointingMode.EXACTLY_ONCE) =>
         new Redis2PCSinkFunction[T](config, mapper, ttl)
       case _ => new RedisSinkFunction[T](config, mapper, ttl)

@@ -17,8 +17,9 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.conf.{ConfigConst, Workspace}
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.Constant
+import org.apache.streampark.common.conf.{ConfigKeys, Workspace}
+import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.{ApplicationType, FlinkDevelopmentMode, FlinkExecutionMode, FlinkRestoreMode}
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util.{DeflaterUtils, FileUtils, Logger, SystemPropertyUtils}
@@ -251,9 +252,9 @@ trait FlinkClientTrait extends Logger {
         // python.archives
         .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
         // python.client.executable
-        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
         // python.executable
-        .safeSet(PythonOptions.PYTHON_EXECUTABLE, ConfigConst.PYTHON_EXECUTABLE)
+        .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
     }
 
     val packageProgram = PackagedProgram.newBuilder

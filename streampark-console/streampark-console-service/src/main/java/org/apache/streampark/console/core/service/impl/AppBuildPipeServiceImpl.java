@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
@@ -94,6 +94,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -175,7 +176,7 @@ public class AppBuildPipeServiceImpl
    * @return Whether the pipeline was successfully started
    */
   @Override
-  public boolean buildApplication(Long appId, boolean forceBuild) {
+  public boolean buildApplication(@NotNull Long appId, boolean forceBuild) {
     // check the build environment
     checkBuildEnv(appId, forceBuild);
 
@@ -439,7 +440,7 @@ public class AppBuildPipeServiceImpl
     }
 
     FlinkExecutionMode executionModeEnum = app.getFlinkExecutionMode();
-    String mainClass = ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
+    String mainClass = Constant.STREAMPARK_FLINKSQL_CLIENT_CLASS;
     switch (executionModeEnum) {
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
@@ -531,7 +532,8 @@ public class AppBuildPipeServiceImpl
       case CUSTOM_CODE:
         switch (app.getApplicationType()) {
           case STREAMPARK_FLINK:
-            return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
+            return String.format(
+                "%s/%s", app.getAppLib(), app.getModule().concat(Constant.JAR_SUFFIX));
           case APACHE_FLINK:
             return String.format("%s/%s", app.getAppHome(), app.getJar());
           default:
