@@ -49,5 +49,4 @@ public final class Constant {
       "org.apache.streampark.flink.cli.SqlClient";
 
   public static final String PYTHON_EXECUTABLE = "venv.zip/venv/bin/python3";
-
 }
