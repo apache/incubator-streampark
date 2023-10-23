@@ -237,14 +237,14 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getLog4BuildStart() {
     return String.format(
-        "%sproject : %s\nbranches: %s\ncommand : %s\n\n",
+        "%sproject : %s%nbranches: %s%ncommand : %s%n%n",
         getLogHeader("maven install"), getName(), getBranches(), getMavenArgs());
   }
 
   @JsonIgnore
   public String getLog4CloneStart() {
     return String.format(
-        "%sproject  : %s\nbranches : %s\nworkspace: %s\n\n",
+        "%sproject  : %s%nbranches : %s%nworkspace: %s%n%n",
         getLogHeader("git clone"), getName(), getBranches(), getAppSource());
   }
 

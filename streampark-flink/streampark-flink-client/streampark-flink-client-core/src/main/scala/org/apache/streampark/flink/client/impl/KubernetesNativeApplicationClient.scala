@@ -31,8 +31,12 @@ import org.apache.flink.configuration.{Configuration, DeploymentOptions, Pipelin
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-/** kubernetes native application mode submit */
-@deprecated("use KubernetesApplicationClientV2 instead")
+/**
+ * Kubernetes native application mode submit.
+ * @deprecated
+ *   Please use [[KubernetesApplicationClientV2]] instead.
+ */
+@Deprecated
 object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
 
   @throws[Exception]

@@ -48,15 +48,47 @@ public interface SettingService extends IService<Setting> {
 
   String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
 
+  /**
+   * Retrieves the value of the setting associated with the specified key.
+   *
+   * @param key the key of the setting to retrieve
+   * @return the value of the setting if found, null otherwise
+   */
   Setting get(String key);
 
+  /**
+   * Updates the specified Setting.
+   *
+   * @param setting the Setting object to update
+   * @return true if the update is successful, false otherwise
+   */
   boolean update(Setting setting);
 
+  /**
+   * Retrieves the Maven configuration settings.
+   *
+   * @return The MavenConfig object containing the Maven configuration settings.
+   */
   MavenConfig getMavenConfig();
 
+  /**
+   * Retrieves the Docker configuration settings.
+   *
+   * @return The DockerConfig object representing the configuration for Docker.
+   */
   DockerConfig getDockerConfig();
 
+  /**
+   * Retrieves the StreamPark address.
+   *
+   * @return a String representing the StreamPark address.
+   */
   String getStreamParkAddress();
 
+  /**
+   * Retrieves the default ingress mode.
+   *
+   * @return The default ingress mode.
+   */
   String getIngressModeDefault();
 }

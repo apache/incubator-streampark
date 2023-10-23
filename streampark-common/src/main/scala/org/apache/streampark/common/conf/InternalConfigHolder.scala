@@ -17,6 +17,7 @@
 
 package org.apache.streampark.common.conf
 
+import org.apache.streampark.common.Constant
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 import org.apache.streampark.common.util.ImplicitsUtils._
 
@@ -103,7 +104,7 @@ object InternalConfigHolder extends Logger {
             SystemPropertyUtils.get(key) match {
               case v if v != null => v.cast[T](config.classType)
               case _ =>
-                throw new IllegalArgumentException(s"config key has not been registered: $key")
+                throw new IllegalArgumentException(s"Config key has not been registered: $key")
             }
           case conf: InternalOption => conf.defaultValue.asInstanceOf[T]
         }
@@ -159,12 +160,12 @@ object InternalConfigHolder extends Logger {
   /** log the current configuration info. */
   def log(): Unit = {
     val configKeys = keys()
-    logInfo(s"""registered configs:
+    logInfo(s"""Registered configs:
                |ConfigHub collected configs: ${configKeys.size}
                |  ${configKeys
                 .map(
                   key =>
-                    s"$key = ${if (key.contains("password")) ConfigConst.DEFAULT_DATAMASK_STRING
+                    s"$key = ${if (key.contains("password")) Constant.DEFAULT_DATAMASK_STRING
                       else get(key)}")
                 .mkString("\n  ")}""".stripMargin)
   }

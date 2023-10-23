@@ -17,8 +17,8 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder}
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.{CommonConfig, ConfigKeys, InternalConfigHolder}
+import org.apache.streampark.common.conf.ConfigKeys._
 
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
@@ -62,7 +62,7 @@ object HadoopUtils extends Logger {
     InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME)
 
   private[this] lazy val kerberosConf: Map[String, String] =
-    SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME, null) match {
+    SystemPropertyUtils.get(ConfigKeys.KEY_APP_HOME, null) match {
       case null =>
         getClass.getResourceAsStream("/kerberos.yml") match {
           case x if x != null => PropertiesUtils.fromYamlFile(x)
@@ -121,7 +121,7 @@ object HadoopUtils extends Logger {
         val end = value.getEndTime.getTime
         ((end - start) * 0.90f).toLong
       case _ =>
-        logWarn("get kerberos tgtRefreshTime failed, try get kerberos.ttl. ")
+        logWarn("Get kerberos tgtRefreshTime failed, try get kerberos.ttl. ")
         val timeUnit = DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL))
         timeUnit._2 match {
           case TimeUnit.SECONDS => timeUnit._1 * 1000
@@ -199,7 +199,7 @@ object HadoopUtils extends Logger {
   }
 
   private[this] def getKerberosUGI(): UserGroupInformation = {
-    logInfo("kerberos login starting....")
+    logInfo("Kerberos login starting....")
 
     require(
       kerberosPrincipal.nonEmpty && kerberosKeytab.nonEmpty,
@@ -221,7 +221,7 @@ object HadoopUtils extends Logger {
       val ugi =
         UserGroupInformation.loginUserFromKeytabAndReturnUGI(kerberosPrincipal, kerberosKeytab)
       UserGroupInformation.setLoginUser(ugi)
-      logInfo("kerberos authentication successful")
+      logInfo("Kerberos authentication successful")
       ugi
     } match {
       case Success(ugi) => ugi
@@ -287,7 +287,7 @@ object HadoopUtils extends Logger {
     val tmpDir = FileUtils.createTempDir()
     val fs = FileSystem.get(new Configuration)
     val sourcePath = fs.makeQualified(new Path(jarOnHdfs))
-    if (!fs.exists(sourcePath)) throw new IOException(s"jar file: $jarOnHdfs doesn't exist.")
+    if (!fs.exists(sourcePath)) throw new IOException(s"Jar file: $jarOnHdfs doesn't exist.")
     val destPath = new Path(tmpDir.getAbsolutePath + "/" + sourcePath.getName)
     fs.copyToLocalFile(sourcePath, destPath)
     new File(destPath.toString).getAbsolutePath

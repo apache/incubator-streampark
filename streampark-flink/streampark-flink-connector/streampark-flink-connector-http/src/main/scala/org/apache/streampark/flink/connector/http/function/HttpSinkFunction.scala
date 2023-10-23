@@ -62,7 +62,7 @@ class HttpSinkFunction(
         val table = thresholdConf.failoverTable
         require(
           table != null && table.nonEmpty,
-          () => s"http async  insert failoverTable must not null")
+          () => s"Http async  insert failoverTable must not null")
 
         httpSinkWriter = HttpSinkWriter(thresholdConf, header)
         failoverChecker = FailoverChecker(thresholdConf.delayTime)

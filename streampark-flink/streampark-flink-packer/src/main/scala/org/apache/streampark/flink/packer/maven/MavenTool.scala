@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.packer.maven
 
+import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{InternalConfigHolder, Workspace}
 import org.apache.streampark.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
 import org.apache.streampark.common.util.{Logger, Utils}
@@ -60,7 +61,10 @@ object MavenTool extends Logger {
 
   private[this] def getRemoteRepos(): List[RemoteRepository] = {
     val builder =
-      new RemoteRepository.Builder("central", "default", InternalConfigHolder.get(MAVEN_REMOTE_URL))
+      new RemoteRepository.Builder(
+        "central",
+        Constant.DEFAULT,
+        InternalConfigHolder.get(MAVEN_REMOTE_URL))
     val remoteRepository =
       if (
         InternalConfigHolder.get(MAVEN_AUTH_USER) == null || InternalConfigHolder.get(
@@ -98,8 +102,9 @@ object MavenTool extends Logger {
     // check userJarPath
     val uberJar = new File(outFatJarPath)
     require(
-      outFatJarPath.endsWith(".jar") && !uberJar.isDirectory,
-      s"[StreamPark] streampark-packer: outFatJarPath($outFatJarPath) should be a JAR file.")
+      outFatJarPath.endsWith(Constant.JAR_SUFFIX) && !uberJar.isDirectory,
+      s"[StreamPark] streampark-packer: outFatJarPath($outFatJarPath) should be a JAR file."
+    )
     uberJar.delete()
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]

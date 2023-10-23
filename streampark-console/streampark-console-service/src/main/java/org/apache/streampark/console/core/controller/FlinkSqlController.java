@@ -50,6 +50,10 @@ import java.util.List;
 @RequestMapping("flink/sql")
 public class FlinkSqlController {
 
+  public static final String TYPE = "type";
+  public static final String START = "start";
+  public static final String END = "end";
+
   @Autowired private FlinkSqlService flinkSqlService;
 
   @Autowired private VariableService variableService;
@@ -68,14 +72,14 @@ public class FlinkSqlController {
           RestResponse.success()
               .data(false)
               .message(exception)
-              .put("type", flinkSqlValidationResult.failedType().getFailedType())
-              .put("start", flinkSqlValidationResult.lineStart())
-              .put("end", flinkSqlValidationResult.lineEnd());
+              .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
+              .put(START, flinkSqlValidationResult.lineStart())
+              .put(END, flinkSqlValidationResult.lineEnd());
 
       if (flinkSqlValidationResult.errorLine() > 0) {
         response
-            .put("start", flinkSqlValidationResult.errorLine())
-            .put("end", flinkSqlValidationResult.errorLine() + 1);
+            .put(START, flinkSqlValidationResult.errorLine())
+            .put(END, flinkSqlValidationResult.errorLine() + 1);
       }
       return response;
     } else {

@@ -54,8 +54,8 @@ public class JdbcJavaSource<T> {
       SQLResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    Utils.notNull(queryFunction, "queryFunction must not be null");
-    Utils.notNull(resultFunction, "resultFunction must not be null");
+    Utils.notNull(queryFunction, "'queryFunction' must not be null");
+    Utils.notNull(resultFunction, "'resultFunction' must not be null");
     this.jdbc =
         this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter().toMap(), alias) : this.jdbc;
     JdbcSourceFunction<T> sourceFunction =

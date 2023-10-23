@@ -44,7 +44,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
     } else {
       execStep(1) {
         LfsOperator.mkCleanDirs(request.workspace)
-        logInfo(s"recreate building workspace: ${request.workspace}")
+        logInfo(s"Recreate building workspace: ${request.workspace}")
       }.getOrElse(throw getError.exception)
       // build flink job shaded jar
       val shadedJar =

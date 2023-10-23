@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.runner;
 
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.util.Utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class StartedUpRunner implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) {
     if (context.isActive()) {
-      ConfigConst.printLogo("streampark-console start successful");
+      Utils.printLogo("streampark-console start successful");
     }
   }
 }

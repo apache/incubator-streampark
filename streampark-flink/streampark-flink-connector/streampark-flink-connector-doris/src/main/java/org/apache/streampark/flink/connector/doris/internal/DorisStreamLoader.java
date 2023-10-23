@@ -138,7 +138,7 @@ public class DorisStreamLoader implements Serializable {
             throw new LoadStatusFailedException(
                 String.format(
                     "Failed to flush data to doris, Error "
-                        + "could not get the final state of label[%s].\n",
+                        + "could not get the final state of label[%s].%n",
                     label),
                 null);
           }
@@ -148,11 +148,11 @@ public class DorisStreamLoader implements Serializable {
             throw new LoadStatusFailedException(
                 String.format(
                     "Failed to flush data to doris, Error "
-                        + "could not get the final state of label[%s]. response[%s]\n",
+                        + "could not get the final state of label[%s]. response[%s]%n",
                     label, loadResult),
                 null);
           }
-          LOG.info(String.format("Checking label[%s] state[%s]\n", label, labelState));
+          LOG.info(String.format("Checking label[%s] state[%s]%n", label, labelState));
           switch (labelState) {
             case LAEBL_STATE_VISIBLE:
               return;
@@ -163,7 +163,7 @@ public class DorisStreamLoader implements Serializable {
             case RESULT_LABEL_ABORTED:
               throw new LoadStatusFailedException(
                   String.format(
-                      "Failed to flush data to doris, Error " + "label[%s] state[%s]\n",
+                      "Failed to flush data to doris, Error " + "label[%s] state[%s]%n",
                       label, labelState),
                   null,
                   true);
@@ -171,7 +171,7 @@ public class DorisStreamLoader implements Serializable {
             default:
               throw new LoadStatusFailedException(
                   String.format(
-                      "Failed to flush data to doris, Error " + "label[%s] state[%s]\n",
+                      "Failed to flush data to doris, Error " + "label[%s] state[%s]%n",
                       label, labelState),
                   null);
           }

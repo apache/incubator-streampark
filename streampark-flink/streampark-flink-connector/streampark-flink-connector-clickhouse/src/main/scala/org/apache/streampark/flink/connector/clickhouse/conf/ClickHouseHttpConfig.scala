@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.connector.clickhouse.conf
 
-import org.apache.streampark.common.conf.ConfigConst
 import org.apache.streampark.flink.connector.conf.ThresholdConf
 
+import org.apache.streampark.common.Constant
 import java.util.{Base64, Properties}
 import java.util.concurrent.ThreadLocalRandom
 
@@ -69,7 +69,7 @@ class ClickHouseHttpConfig(parameters: Properties)
 
   override def toString: String = {
     s"""
-       |{ user: $user, password: ${ConfigConst.DEFAULT_DATAMASK_STRING}, hosts: ${hosts.mkString(",")} }
+       |{ user: $user, password: ${Constant.DEFAULT_DATAMASK_STRING}, hosts: ${hosts.mkString(",")} }
        |""".stripMargin
   }
 }

@@ -16,7 +16,7 @@
  */
 package org.apache.streampark.flink.core.test
 
-import org.apache.streampark.common.conf.ConfigConst.{KEY_FLINK_SQL, PARAM_PREFIX}
+import org.apache.streampark.common.conf.ConfigKeys.{KEY_FLINK_SQL, PARAM_PREFIX}
 import org.apache.streampark.common.util.DeflaterUtils
 import org.apache.streampark.flink.core.{FlinkSqlExecutor, FlinkTableInitializer, StreamTableContext}
 

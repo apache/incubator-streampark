@@ -120,7 +120,7 @@ public class FlinkStandaloneSessionCluster implements Startable {
     if (!this.yamlConfContent.contains(TM_SLOT_NUM_KEY)) {
       this.yamlConfContent =
           String.format(
-              "%s\n%s\n", this.yamlConfContent, String.format(SLOT_CONF_FORMAT, slotsNumPerTm));
+              "%s%n%s%n", this.yamlConfContent, String.format(SLOT_CONF_FORMAT, slotsNumPerTm));
     }
   }
 
@@ -130,7 +130,7 @@ public class FlinkStandaloneSessionCluster implements Startable {
             ? this.yamlConfContent
             : (yamlConfStr.contains(JM_RPC_ADDR_KEY)
                 ? yamlConfStr
-                : String.format("%s\n%s\n", this.yamlConfContent, yamlConfStr));
+                : String.format("%s%n%s%n", this.yamlConfContent, yamlConfStr));
   }
 
   /** A tool class to create a flink standalone session cluster quickly. */

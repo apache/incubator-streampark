@@ -80,9 +80,9 @@ class HBaseSink(
     implicit val prop: Properties =
       ConfigUtils.getConf(ctx.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)(alias)
     Utils.copyProperties(property, prop)
-    require(stream != null, () => s"sink Stream must not null")
-    require(tableName != null, () => s"sink tableName must not null")
-    require(fun != null, () => s" fun must not null")
+    require(stream != null, () => s"Sink Stream must not null")
+    require(tableName != null, () => s"Sink tableName must not null")
+    require(fun != null, () => s"Func must not null")
     prop
   }
 }

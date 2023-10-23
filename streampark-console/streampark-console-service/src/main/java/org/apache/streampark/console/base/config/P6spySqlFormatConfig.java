@@ -40,7 +40,7 @@ public class P6spySqlFormatConfig implements MessageFormattingStrategy {
     return StringUtils.isBlank(sql)
         ? ""
         : String.format(
-            "%s  | consume %d ms | SQL statement：\n %s;",
+            "%s  | consume %d ms | SQL statement：%n %s;",
             DateUtils.formatFullTime(LocalDateTime.now()),
             elapsed,
             sql.replaceAll("\\s+", StringUtils.SPACE));

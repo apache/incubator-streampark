@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.conf.ConfigConst
+import org.apache.streampark.common.conf.ConfigKeys
 import org.apache.streampark.common.util.ImplicitsUtils._
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
@@ -116,7 +116,7 @@ object KubernetesRetriever extends Logger {
             .apps()
             .deployments()
             .inNamespace(namespace)
-            .withLabel("type", ConfigConst.FLINK_NATIVE_KUBERNETES_LABEL)
+            .withLabel("type", ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL)
             .list()
             .getItems
             .asScala
