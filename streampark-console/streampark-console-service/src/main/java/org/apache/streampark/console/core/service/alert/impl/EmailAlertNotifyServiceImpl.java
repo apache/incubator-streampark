@@ -70,7 +70,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
       htmlEmail.setHostName(emailConfig.getSmtpHost());
       htmlEmail.setAuthentication(emailConfig.getUserName(), emailConfig.getPassword());
       htmlEmail.setFrom(emailConfig.getFrom());
-      if (emailConfig.isSsl()) {
+      if (emailConfig.getSsl()) {
         htmlEmail.setSSLCheckServerIdentity(true);
         htmlEmail.setSSLOnConnect(true);
         htmlEmail.setSslSmtpPort(emailConfig.getSmtpPort().toString());

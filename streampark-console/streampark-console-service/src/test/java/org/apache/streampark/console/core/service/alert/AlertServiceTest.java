@@ -233,7 +233,7 @@ class AlertServiceTest {
     htmlEmail.setAuthentication(this.emailConfig.getUserName(), this.emailConfig.getPassword());
     htmlEmail.setFrom(this.emailConfig.getFrom());
 
-    if (this.emailConfig.isSsl()) {
+    if (this.emailConfig.getSsl()) {
       htmlEmail.setSSLOnConnect(true);
       htmlEmail.setSslSmtpPort(this.emailConfig.getSmtpPort().toString());
     } else {
