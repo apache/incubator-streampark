@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigKeys._
 
 import redis.clients.jedis.{Jedis, Protocol}
 import redis.clients.jedis.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}

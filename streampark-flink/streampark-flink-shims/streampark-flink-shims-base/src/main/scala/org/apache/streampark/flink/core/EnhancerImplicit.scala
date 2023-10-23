@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_NAME, KEY_FLINK_APP_NAME}
+import org.apache.streampark.common.conf.ConfigKeys.{KEY_APP_NAME, KEY_FLINK_APP_NAME}
 import org.apache.streampark.common.util.DeflaterUtils
 
 import org.apache.flink.api.java.utils.ParameterTool

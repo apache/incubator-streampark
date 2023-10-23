@@ -16,7 +16,8 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import org.apache.flink.api.common.JobExecutionResult
@@ -40,7 +41,7 @@ abstract class FlinkTableTrait(val parameter: ParameterTool, private val tableEn
   }
 
   def execute(jobName: String): JobExecutionResult = {
-    printLogo(s"FlinkTable $jobName Starting...")
+    Utils.printLogo(s"FlinkTable $jobName Starting...")
     null
   }
 

@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.proxy
 
 import org.apache.streampark.common.Constant
-import org.apache.streampark.common.conf.{ConfigConst, FlinkVersion}
+import org.apache.streampark.common.conf.{ConfigKeys, FlinkVersion}
 import org.apache.streampark.common.util.{ClassLoaderUtils, Logger, Utils}
 import org.apache.streampark.common.util.ImplicitsUtils._
 
@@ -108,10 +108,10 @@ object FlinkShimsProxy extends Logger {
   }
 
   def addShimsUrls(flinkVersion: FlinkVersion, addShimUrl: File => Unit): Unit = {
-    val appHome = System.getProperty(ConfigConst.KEY_APP_HOME)
+    val appHome = System.getProperty(ConfigKeys.KEY_APP_HOME)
     require(
       appHome != null,
-      String.format("%s is not found on System env.", ConfigConst.KEY_APP_HOME))
+      String.format("%s is not found on System env.", ConfigKeys.KEY_APP_HOME))
 
     val libPath = new File(s"$appHome/lib")
     require(libPath.exists())

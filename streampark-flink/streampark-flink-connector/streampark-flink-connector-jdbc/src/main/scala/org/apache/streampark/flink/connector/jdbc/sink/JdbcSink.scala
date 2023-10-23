@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.jdbc.sink
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.Semantic
 import org.apache.streampark.common.util.{ConfigUtils, Logger}
 import org.apache.streampark.flink.connector.jdbc.internal.{Jdbc2PCSinkFunction, JdbcSinkFunction}
