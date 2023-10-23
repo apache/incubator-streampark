@@ -30,10 +30,10 @@ public class RestRequest implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Schema(example = "10", required = true)
-  private int pageSize = 10;
+  private Integer pageSize = 10;
 
   @Schema(example = "1", required = true)
-  private int pageNum = 1;
+  private Integer pageNum = 1;
 
   @Schema(example = "", description = "e.g. create_time")
   private String sortField;

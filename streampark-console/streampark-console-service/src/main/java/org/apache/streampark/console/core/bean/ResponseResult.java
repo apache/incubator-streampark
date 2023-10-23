@@ -21,7 +21,7 @@ import lombok.Data;
 
 @Data
 public class ResponseResult<T> {
-  private int status;
+  private Integer status;
   private String msg;
   private T result;
 }

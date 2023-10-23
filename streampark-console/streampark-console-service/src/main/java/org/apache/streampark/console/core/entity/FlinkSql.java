@@ -55,11 +55,11 @@ public class FlinkSql {
   private Integer candidate;
 
   private Date createTime;
-  private transient boolean effective = false;
+  private transient Boolean effective = false;
   /** sql diff */
-  private transient boolean sqlDifference = false;
+  private transient Boolean sqlDifference = false;
   /** dependency diff */
-  private transient boolean dependencyDifference = false;
+  private transient Boolean dependencyDifference = false;
 
   public FlinkSql() {}
 

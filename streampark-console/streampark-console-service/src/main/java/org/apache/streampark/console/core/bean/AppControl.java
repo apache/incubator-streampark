@@ -25,11 +25,11 @@ import lombok.experimental.Accessors;
 public class AppControl {
 
   /** allow to start the application */
-  private boolean allowStart;
+  private Boolean allowStart;
 
   /** allow to stop the application */
-  private boolean allowStop;
+  private Boolean allowStop;
 
   /** allow to build the application */
-  private boolean allowBuild;
+  private Boolean allowBuild;
 }

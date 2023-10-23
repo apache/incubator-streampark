@@ -38,7 +38,7 @@ public class EmailConfig {
   private String from;
   private String userName;
   private String password;
-  private boolean ssl;
+  private Boolean ssl;
 
   /**
    * Constructs the EmailConfig object from the given settings map.

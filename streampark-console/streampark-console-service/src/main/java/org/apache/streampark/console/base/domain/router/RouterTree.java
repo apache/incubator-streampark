@@ -46,7 +46,7 @@ public class RouterTree<T> {
 
   private String type;
 
-  private boolean display;
+  private Boolean display;
 
   private Double order;
 
@@ -58,9 +58,9 @@ public class RouterTree<T> {
 
   private String parentId;
 
-  private boolean hasParent = false;
+  private Boolean hasParent = false;
 
-  private boolean hasChildren = false;
+  private Boolean hasChildren = false;
 
   private Date createTime;
 
