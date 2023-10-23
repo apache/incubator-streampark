@@ -250,7 +250,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         appParam.setStateArray(newArray);
       }
     }
-    this.baseMapper.page(page, appParam);
+    this.baseMapper.selectPage(page, appParam);
     List<Application> records = page.getRecords();
     long now = System.currentTimeMillis();
 
@@ -685,12 +685,12 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public List<Application> getByProjectId(Long id) {
-    return baseMapper.getByProjectId(id);
+    return baseMapper.selectAppsByProjectId(id);
   }
 
   @Override
   public List<Application> getByTeamId(Long teamId) {
-    return baseMapper.getByTeamId(teamId);
+    return baseMapper.selectAppsByTeamId(teamId);
   }
 
   @Override
@@ -708,7 +708,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   public List<Application> getProbeApps() {
-    return this.baseMapper.getProbeApps();
+    return this.baseMapper.selectProbeApps();
   }
 
   @Override
@@ -752,7 +752,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Override
   public Application getApp(Application appParam) {
-    Application application = this.baseMapper.getApp(appParam);
+    Application application = this.baseMapper.selectApp(appParam);
     ApplicationConfig config = configService.getEffective(appParam.getId());
     config = config == null ? configService.getLatest(appParam.getId()) : config;
     if (config != null) {

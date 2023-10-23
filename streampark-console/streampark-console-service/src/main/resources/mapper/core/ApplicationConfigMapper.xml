@@ -28,20 +28,20 @@
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
 
-    <select id="getLatest" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
+    <select id="selectLatest" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
         select *
         from t_flink_config
         where app_id=#{appId}
         and latest=true
     </select>
 
-    <select id="getLastVersion" resultType="java.lang.Integer" parameterType="java.lang.Long">
+    <select id="selectLastVersion" resultType="java.lang.Integer" parameterType="java.lang.Long">
         select max(`version`) as lastVersion
         from t_flink_config
         where app_id = #{appId}
     </select>
 
-    <select id="getEffective" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
+    <select id="selectEffective" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
         select s.*
         from t_flink_config s
         inner join t_flink_effective e
@@ -50,7 +50,7 @@
         and e.target_type = 1
     </select>
 
-    <select id="pageByAppId" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
+    <select id="selectPageByAppId" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
         select * from t_flink_config
         where app_id=#{appId}
     </select>

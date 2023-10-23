@@ -31,5 +31,5 @@ public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
 
   Integer getLatestVersion(@Param("appId") Long appId);
 
-  List<FlinkSql> getByTeamId(@Param("teamId") Long teamId);
+  List<FlinkSql> selectSqlsByTeamId(@Param("teamId") Long teamId);
 }
