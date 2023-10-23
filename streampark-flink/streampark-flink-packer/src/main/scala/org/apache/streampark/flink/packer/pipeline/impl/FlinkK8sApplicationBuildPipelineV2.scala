@@ -41,7 +41,7 @@ class FlinkK8sApplicationBuildPipelineV2(request: FlinkK8sApplicationBuildReques
       execStep(1) {
         val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
         LfsOperator.mkCleanDirs(buildWorkspace)
-        logInfo(s"recreate building workspace: $buildWorkspace")
+        logInfo(s"Recreate building workspace: $buildWorkspace")
         buildWorkspace
       }.getOrElse(throw getError.exception)
 
@@ -57,7 +57,7 @@ class FlinkK8sApplicationBuildPipelineV2(request: FlinkK8sApplicationBuildReques
         }
         val shadedJar =
           MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
-        logInfo(s"output shaded flink job jar: ${shadedJar.getAbsolutePath}")
+        logInfo(s"Output shaded flink job jar: ${shadedJar.getAbsolutePath}")
         shadedJar -> extJarLibs
       }.getOrElse(throw getError.exception)
 

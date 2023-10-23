@@ -15,26 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.client.bean
+package org.apache.streampark.common;
 
-import org.apache.streampark.common.Constant
-import org.apache.streampark.common.conf.FlinkVersion
-import org.apache.streampark.common.enums.FlinkExecutionMode
+/** A constant class to hold the constants variables. */
+public class Constant {
 
-import javax.annotation.Nullable
+  private Constant() {}
 
-import java.util.{Map => JavaMap}
-
-case class CancelRequest(
-    id: Long,
-    flinkVersion: FlinkVersion,
-    executionMode: FlinkExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
-    jobId: String,
-    override val withSavepoint: Boolean,
-    withDrain: Boolean,
-    savepointPath: String,
-    nativeFormat: Boolean,
-    override val kubernetesNamespace: String = Constant.DEFAULT)
-  extends SavepointRequestTrait
+  public static final String DEFAULT = "default";
+  public static final String STREAM_PARK = "streampark";
+  public static final String HTTP_SCHEMA = "http://";
+  public static final String HTTPS_SCHEMA = "https://";
+  public static final String JAR_SUFFIX = ".jar";
+  public static final String ZIP_SUFFIX = ".zip";
+  public static final String SEMICOLON = ";";
+}

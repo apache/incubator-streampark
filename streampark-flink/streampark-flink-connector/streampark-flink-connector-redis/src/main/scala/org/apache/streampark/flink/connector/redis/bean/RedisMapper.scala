@@ -25,15 +25,19 @@ import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, 
 
 object RedisMapper {
 
+  val additionalFailoverTableNullHint = "Redis additionalKey insert failoverTable must not null";
+  val insertFailoverTableNullHint = "Redis cmd insert failoverTable must not null";
+
+
   def map[T](
       cmd: RedisCommand,
       additionalKey: String,
       scalaKeyFun: T => String,
       scalaValueFun: T => String): RedisMapper[T] = {
-    require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
-    require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
-    require(scalaKeyFun != null, () => s"redis scalaKeyFun  insert failoverTable must not null")
-    require(scalaValueFun != null, () => s"redis scalaValueFun  insert failoverTable must not null")
+    require(cmd != null, () => insertFailoverTableNullHint)
+    require(additionalKey != null, () => failoverTableNullHint)
+    require(scalaKeyFun != null, () => s"Redis scalaKeyFun insert failoverTable must not null")
+    require(scalaValueFun != null, () => s"Redis scalaValueFun insert failoverTable must not null")
     new RedisMapper[T](cmd, additionalKey, scalaKeyFun, scalaValueFun)
   }
 
@@ -42,10 +46,10 @@ object RedisMapper {
       additionalKey: String,
       javaKeyFun: TransformFunction[T, String],
       javaValueFun: TransformFunction[T, String]): RedisMapper[T] = {
-    require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
-    require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
-    require(javaKeyFun != null, () => s"redis javaKeyFun  insert failoverTable must not null")
-    require(javaValueFun != null, () => s"redis javaValueFun  insert failoverTable must not null")
+    require(cmd != null, () => insertFailoverTableNullHint)
+    require(additionalKey != null, () => additionalFailoverTableNullHint)
+    require(javaKeyFun != null, () => s"Redis javaKeyFun insert failoverTable must not null")
+    require(javaValueFun != null, () => s"Redis javaValueFun insert failoverTable must not null")
     new RedisMapper[T](cmd, additionalKey, javaKeyFun, javaValueFun)
   }
 }

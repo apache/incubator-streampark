@@ -22,6 +22,8 @@ import org.apache.streampark.common.util.Logger
 import java.util
 import java.util.regex.Pattern
 
+import org.apache.streampark.common.Constant
+
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -62,7 +64,7 @@ case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) 
       result = prefixMap.map(m => s"""${m._1} VALUES ${m._2.mkString(",")}""").toList
     }
 
-    logDebug(s"script to commit: ${result.mkString(";")}")
+    logDebug(s"script to commit: ${result.mkString(Constant.SEMICOLON)}")
 
     result
   }

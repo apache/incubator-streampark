@@ -78,7 +78,7 @@ class JdbcSink(
       case Semantic.EXACTLY_ONCE =>
         val sinkFun = new Jdbc2PCSinkFunction[T](prop, toSQLFn)
         if (parallelism > 1) {
-          logWarn(s"parallelism:$parallelism, Jdbc Semantic EXACTLY_ONCE,parallelism bust be 1.")
+          logWarn(s"'parallelism':$parallelism, Jdbc Semantic EXACTLY_ONCE,parallelism bust be 1.")
         }
         stream.addSink(sinkFun)
       case _ =>

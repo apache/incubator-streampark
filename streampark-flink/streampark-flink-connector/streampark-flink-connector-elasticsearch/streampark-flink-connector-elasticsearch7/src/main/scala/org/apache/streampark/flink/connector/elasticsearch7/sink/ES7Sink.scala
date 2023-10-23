@@ -41,6 +41,10 @@ import scala.annotation.meta.param
 import scala.collection.convert.ImplicitConversions._
 
 object ES7Sink {
+
+  val functionNullHintMsg = "ES pocess element func must not null"
+  val sinkNullHintMsg = "Sink Stream must not null"
+
   def apply(
       @(transient @param)
       property: Properties = new Properties(),
@@ -74,8 +78,8 @@ class ES7Sink(
       restClientFactory: Option[RestClientFactory],
       failureHandler: ActionRequestFailureHandler,
       f: T => ActionRequest): DataStreamSink[T] = {
-    require(stream != null, "sink Stream must not null")
-    require(f != null, "es process element func must not null")
+    require(stream != null, sinkNullHintMsg)
+    require(f != null, functionNullHintMsg)
     val sinkFunc: ESSinkFunction[T] = new ESSinkFunction(f)
     val esSink: ElasticsearchSink[T] = buildESSink(restClientFactory, failureHandler, sinkFunc)
     if (config.disableFlushOnCheckpoint) {
@@ -90,8 +94,8 @@ class ES7Sink(
       restClientFactory: Option[RestClientFactory],
       failureHandler: ActionRequestFailureHandler,
       f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    require(stream != null, "sink Stream must not null")
-    require(f != null, "es process element func must not null")
+    require(stream != null, sinkNullHintMsg)
+    require(f != null, functionNullHintMsg)
     val sinkFunc: ESSinkFunction[T] = new ESSinkFunction(f)
     val esSink: ElasticsearchSink[T] = buildESSink(restClientFactory, failureHandler, sinkFunc)
     if (config.disableFlushOnCheckpoint) {
