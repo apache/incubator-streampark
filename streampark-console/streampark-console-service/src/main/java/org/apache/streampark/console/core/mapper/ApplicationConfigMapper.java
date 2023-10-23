@@ -33,5 +33,6 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
 
   ApplicationConfig selectLatest(@Param("appId") Long appId);
 
-  IPage<ApplicationConfig> selectPageByAppId(Page<ApplicationConfig> page, @Param("appId") Long appId);
+  IPage<ApplicationConfig> selectPageByAppId(
+      Page<ApplicationConfig> page, @Param("appId") Long appId);
 }
