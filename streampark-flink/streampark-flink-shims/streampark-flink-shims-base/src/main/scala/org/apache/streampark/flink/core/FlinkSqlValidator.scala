@@ -16,9 +16,8 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
-import org.apache.streampark.common.util.{ExceptionUtils, Logger, Utils}
+import org.apache.streampark.common.util.{ExceptionUtils, Logger}
 import org.apache.streampark.flink.core.SqlCommand._
 
 import org.apache.calcite.config.Lex
@@ -84,7 +83,7 @@ object FlinkSqlValidator extends Logger {
               .getOrElse(Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS))
             sqlDialect.toUpperCase() match {
               case "HIVE" =>
-              case Constant.DEFAULT =>
+              case "DEFAULT" =>
                 val parser = calciteClass
                   .getConstructor(Array(classOf[Config]): _*)
                   .newInstance(sqlParserConfigMap(sqlDialect.toUpperCase()))
