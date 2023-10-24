@@ -21,6 +21,7 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.table.api.{CompiledPlan, ExplainDetail, ExplainFormat, PlanReference, Schema, Table, TableDescriptor, TableResult}
 import org.apache.flink.table.api.bridge.scala.{StreamStatementSet, StreamTableEnvironment}
+import org.apache.flink.table.catalog.CatalogDescriptor
 import org.apache.flink.table.connector.ChangelogMode
 import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.resource.ResourceUri
@@ -152,4 +153,8 @@ class StreamTableContext(
       format: ExplainFormat,
       extraDetails: ExplainDetail*): String =
     tableEnv.explainSql(statement, format, extraDetails: _*)
+
+  override def createCatalog(catalog: String, catalogDescriptor: CatalogDescriptor): Unit = {
+    tableEnv.createCatalog(catalog, catalogDescriptor)
+  }
 }

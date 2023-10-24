@@ -19,6 +19,7 @@ package org.apache.streampark.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{CompiledPlan, ExplainDetail, ExplainFormat, PlanReference, Table, TableDescriptor, TableEnvironment, TableResult}
+import org.apache.flink.table.catalog.CatalogDescriptor
 import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.resource.ResourceUri
 
@@ -93,4 +94,9 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
       format: ExplainFormat,
       extraDetails: ExplainDetail*): String =
     tableEnv.explainSql(statement, format, extraDetails: _*)
+
+  override def createCatalog(catalog: String, catalogDescriptor: CatalogDescriptor): Unit = {
+    tableEnv.createCatalog(catalog, catalogDescriptor)
+  }
+
 }

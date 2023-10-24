@@ -17,7 +17,7 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
-import org.apache.streampark.common.util.{ExceptionUtils, Logger, Utils}
+import org.apache.streampark.common.util.{ExceptionUtils, Logger}
 import org.apache.streampark.flink.core.SqlCommand._
 
 import org.apache.calcite.config.Lex
@@ -44,7 +44,12 @@ object FlinkSqlValidator extends Logger {
   private[this] lazy val sqlParserConfigMap: Map[String, SqlParser.Config] = {
     def getConfig(sqlDialect: SqlDialect): Config = {
       val conformance = sqlDialect match {
-        case HIVE => FlinkSqlConformance.HIVE
+        case HIVE =>
+          try {
+            FlinkSqlConformance.HIVE
+          } catch {
+            case _ => FlinkSqlConformance.DEFAULT
+          }
         case DEFAULT => FlinkSqlConformance.DEFAULT
         case _ => throw new UnsupportedOperationException(s"Unsupported sqlDialect: $sqlDialect")
       }
