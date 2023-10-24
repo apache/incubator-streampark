@@ -42,7 +42,7 @@
         where app_id = #{appId}
     </select>
 
-    <select id="getByTeamId" resultType="org.apache.streampark.console.core.entity.FlinkSql" parameterType="java.lang.Long">
+    <select id="selectSqlsByTeamId" resultType="org.apache.streampark.console.core.entity.FlinkSql" parameterType="java.lang.Long">
         select s.*
         from t_flink_sql s
         inner join t_flink_app a

@@ -29,7 +29,7 @@
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
 
-    <select id="getByAppId" resultType="org.apache.streampark.console.core.entity.FlinkEnv" parameterType="java.lang.Long">
+    <select id="selectByAppId" resultType="org.apache.streampark.console.core.entity.FlinkEnv" parameterType="java.lang.Long">
         select v.*
         from t_flink_env v
         inner join (

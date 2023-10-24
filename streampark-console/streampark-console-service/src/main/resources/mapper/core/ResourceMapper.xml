@@ -33,7 +33,7 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="page" resultType="org.apache.streampark.console.core.entity.Resource" parameterType="org.apache.streampark.console.core.entity.Resource">
+    <select id="selectPage" resultType="org.apache.streampark.console.core.entity.Resource" parameterType="org.apache.streampark.console.core.entity.Resource">
         select
         v.*,
         u.username as creatorName

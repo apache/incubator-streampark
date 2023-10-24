@@ -179,7 +179,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public IPage<Project> page(Project project, RestRequest request) {
     Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
-    return this.baseMapper.page(page, project);
+    return this.baseMapper.selectPage(page, project);
   }
 
   @Override
@@ -189,7 +189,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public List<Project> findByTeamId(Long teamId) {
-    return this.baseMapper.selectByTeamId(teamId);
+    return this.baseMapper.selectProjectsByTeamId(teamId);
   }
 
   @Override
