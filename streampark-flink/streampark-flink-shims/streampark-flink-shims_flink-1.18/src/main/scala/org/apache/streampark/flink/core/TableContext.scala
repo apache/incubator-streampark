@@ -95,6 +95,7 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
       extraDetails: ExplainDetail*): String =
     tableEnv.explainSql(statement, format, extraDetails: _*)
 
+  /** @since 1.18 */
   override def createCatalog(catalog: String, catalogDescriptor: CatalogDescriptor): Unit = {
     tableEnv.createCatalog(catalog, catalogDescriptor)
   }

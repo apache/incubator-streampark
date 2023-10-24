@@ -154,6 +154,7 @@ class StreamTableContext(
       extraDetails: ExplainDetail*): String =
     tableEnv.explainSql(statement, format, extraDetails: _*)
 
+  /** @since 1.18 */
   override def createCatalog(catalog: String, catalogDescriptor: CatalogDescriptor): Unit = {
     tableEnv.createCatalog(catalog, catalogDescriptor)
   }

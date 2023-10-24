@@ -29,7 +29,7 @@ import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.config.TableConfigOptions
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 object FlinkSqlValidator extends Logger {
 
@@ -45,10 +45,11 @@ object FlinkSqlValidator extends Logger {
     def getConfig(sqlDialect: SqlDialect): Config = {
       val conformance = sqlDialect match {
         case HIVE =>
-          try {
-            FlinkSqlConformance.HIVE
-          } catch {
-            case _ => FlinkSqlConformance.DEFAULT
+          Try(FlinkSqlConformance.HIVE) match {
+            case Success(v) => v
+            // for flink 1.18+
+            case Failure(_: NoSuchFieldError) => FlinkSqlConformance.DEFAULT
+            case Failure(e) => throw new IllegalArgumentException(e)
           }
         case DEFAULT => FlinkSqlConformance.DEFAULT
         case _ => throw new UnsupportedOperationException(s"Unsupported sqlDialect: $sqlDialect")
