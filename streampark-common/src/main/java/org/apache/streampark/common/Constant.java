@@ -24,6 +24,8 @@ public final class Constant {
 
   public static final String DEFAULT = "default";
 
+  public static final String DEFAULT_UPPER_CASE = "DEFAULT";
+
   public static final String STREAM_PARK = "streampark";
 
   public static final String HTTP_SCHEMA = "http://";
