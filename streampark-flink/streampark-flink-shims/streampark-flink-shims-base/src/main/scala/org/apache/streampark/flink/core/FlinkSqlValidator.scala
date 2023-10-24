@@ -29,7 +29,7 @@ import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.config.TableConfigOptions
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 object FlinkSqlValidator extends Logger {
 
