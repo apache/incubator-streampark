@@ -23,6 +23,7 @@ import java.net.{URL => NetURL}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.function.Consumer
 import java.util.regex.Pattern
+
 import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
