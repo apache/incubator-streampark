@@ -44,7 +44,14 @@ object FlinkSqlValidator extends Logger {
   private[this] lazy val sqlParserConfigMap: Map[String, SqlParser.Config] = {
     def getConfig(sqlDialect: SqlDialect): Config = {
       val conformance = sqlDialect match {
-        case HIVE => FlinkSqlConformance.HIVE
+        case HIVE =>
+          try {
+            FlinkSqlConformance.HIVE
+          } catch {
+            // for flink 1.18+
+            case _: NoSuchFieldError => FlinkSqlConformance.DEFAULT
+            case e => throw new IllegalArgumentException("Init Flink sql Dialect error: ", e)
+          }
         case DEFAULT => FlinkSqlConformance.DEFAULT
         case _ => throw new UnsupportedOperationException(s"Unsupported sqlDialect: $sqlDialect")
       }
