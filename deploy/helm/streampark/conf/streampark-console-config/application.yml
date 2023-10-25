@@ -92,8 +92,8 @@ streampark:
     # lark alert proxy,default https://open.feishu.cn
     lark-url:
   yarn:
-    # default sample, or kerberos
-    http-auth: sample
+    # default simple, or kerberos
+    http-auth: simple
 
   # HADOOP_USER_NAME
   hadoop-user-name: hdfs
