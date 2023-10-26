@@ -160,6 +160,9 @@ public class Application implements Serializable {
 
   private String mainClass;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
+  private String dependency;
+
   private Date startTime;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
@@ -220,7 +223,6 @@ public class Application implements Serializable {
   /** running job */
   private transient JobsOverview.Task overview;
 
-  private String dependency;
   private transient Long sqlId;
   private transient String flinkSql;
 
