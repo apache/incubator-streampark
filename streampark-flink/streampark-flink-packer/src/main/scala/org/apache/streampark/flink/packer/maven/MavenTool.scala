@@ -46,7 +46,7 @@ import java.util
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object MavenTool extends Logger {
 
@@ -76,9 +76,6 @@ object MavenTool extends Logger {
     List(remoteRepository)
   }
 
-  private val isJarFile = (file: File) =>
-    file.isFile && Try(Utils.checkJarFile(file.toURI.toURL)).isSuccess
-
   /**
    * Build a fat-jar with custom jar libraries.
    *
@@ -102,16 +99,34 @@ object MavenTool extends Logger {
     uberJar.delete()
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
-    jarLibs
-      .map(lib => new File(lib))
-      .filter(_.exists)
-      .foreach {
-        case libFile if isJarFile(libFile) => jarSet.add(libFile)
-        case libFile if libFile.isDirectory =>
-          libFile.listFiles.filter(isJarFile).foreach(jarSet.add)
-        case _ =>
-      }
-    logInfo(s"start shaded fat-jar: ${jarLibs.mkString(",")}")
+    jarLibs.foreach {
+      x =>
+        new File(x) match {
+          case jarFile if jarFile.exists() =>
+            if (jarFile.isFile) {
+              Try(Utils.checkJarFile(jarFile.toURI.toURL)) match {
+                case Success(_) => jarSet.add(jarFile)
+                case Failure(e) => logWarn(s"buildFatJar: error, ${e.getMessage}")
+              }
+            } else {
+              jarFile.listFiles.foreach(
+                jar => {
+                  if (jar.isFile) {
+                    Try(Utils.checkJarFile(jar.toURI.toURL)) match {
+                      case Success(_) => jarSet.add(jar)
+                      case Failure(e) =>
+                        logWarn(
+                          s"buildFatJar: directory [${jarFile.getAbsolutePath}], error: ${e.getMessage}")
+                    }
+                  }
+                })
+            }
+          case _ =>
+        }
+    }
+
+    logInfo(s"start shaded fat-jar: ${jarSet.mkString(",")}")
+
     // shade jars
     val shadeRequest = {
       val req = new ShadeRequest

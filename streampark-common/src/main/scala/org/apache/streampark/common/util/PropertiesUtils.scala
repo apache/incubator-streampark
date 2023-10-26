@@ -30,7 +30,7 @@ import java.util.regex.Pattern
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.collection.mutable.{Map => MutableMap}
+import scala.collection.mutable.{ArrayBuffer, Map => MutableMap}
 
 object PropertiesUtils extends Logger {
 
@@ -303,6 +303,47 @@ object PropertiesUtils extends Logger {
       }
       map.toMap
     }
+  }
+
+  @Nonnull def extractArguments(args: String): List[String] = {
+    val programArgs = new ArrayBuffer[String]()
+    if (StringUtils.isNotEmpty(args)) {
+      val array = args.split("\\s+")
+      val iter = array.iterator
+      def join(s: String, v: String): Unit = {
+        if (v.startsWith(s)) {
+          if (v.endsWith(s)) {
+            programArgs += v.replaceAll(s"^$s|$s$$", "")
+          } else {
+            var value = v
+            while (!value.endsWith(s) && iter.hasNext) {
+              value += s" ${iter.next()}"
+            }
+            programArgs += value.replaceAll(s"^$s|$s$$", "")
+          }
+        }
+      }
+
+      while (iter.hasNext) {
+        val v = iter.next()
+        if (v.startsWith("'")) {
+          if (v.endsWith("'")) {
+            programArgs += v.replaceAll("^'|'$", "")
+          } else {
+            join("'", v)
+          }
+        } else if (v.startsWith("\"")) {
+          if (v.endsWith("\"")) {
+            programArgs += v.replaceAll("^\"|\"$", "")
+          } else {
+            join("\"", v)
+          }
+        } else {
+          programArgs += v
+        }
+      }
+    }
+    programArgs.toList
   }
 
   @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] =
