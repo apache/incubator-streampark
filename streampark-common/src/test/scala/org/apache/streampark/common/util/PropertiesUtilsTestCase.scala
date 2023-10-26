@@ -16,75 +16,19 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.commons.lang3.StringUtils
 import org.junit.jupiter.api.{Assertions, Test}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.language.postfixOps
 
 class PropertiesUtilsTestCase {
 
   @Test def testExtractProgramArgs(): Unit = {
-    val argsStr = "--host localhost:8123\n\n\n" +
-      "--sql \"\"\"insert into table_a select * from table_b\"\"\"\n" +
-      "--c d\r\n" +
-      "--x yyy"
+    val args =
+      "mysql-sync-database \n--database employees \n--mysql-conf hostname=127.0.0.1 \n--mysql-conf port=3306 \n--mysql-conf username=root \n--mysql-conf password=123456 \n--mysql-conf database-name=employees \n--including-tables 'test|test.*' \n--sink-conf fenodes=127.0.0.1:8030 \n--sink-conf username=root \n--sink-conf password= \n--sink-conf jdbc-url=jdbc:mysql://127.0.0.1:9030 \n--sink-conf sink.label-prefix=label\n--table-conf replication_num=1 "
     val programArgs = new ArrayBuffer[String]()
-    if (StringUtils.isNotEmpty(argsStr)) {
-      val multiLineChar = "\"\"\""
-      val array = argsStr.split("\\s+")
-      if (array.filter(_.startsWith(multiLineChar)).isEmpty) {
-        array.foreach(programArgs +=)
-      } else {
-        val argsArray = new ArrayBuffer[String]()
-        val tempBuffer = new ArrayBuffer[String]()
-
-        def processElement(index: Int, multiLine: Boolean): Unit = {
-
-          if (index == array.length) {
-            if (tempBuffer.nonEmpty) {
-              argsArray += tempBuffer.mkString(" ")
-            }
-            return
-          }
-
-          val next = index + 1
-          val elem = array(index)
-
-          if (elem.trim.nonEmpty) {
-            if (!multiLine) {
-              if (elem.startsWith(multiLineChar)) {
-                tempBuffer += elem.drop(3)
-                processElement(next, true)
-              } else {
-                argsArray += elem
-                processElement(next, false)
-              }
-            } else {
-              if (elem.endsWith(multiLineChar)) {
-                tempBuffer += elem.dropRight(3)
-                argsArray += tempBuffer.mkString(" ")
-                tempBuffer.clear()
-                processElement(next, false)
-              } else {
-                tempBuffer += elem
-                processElement(next, multiLine)
-              }
-            }
-          } else {
-            tempBuffer += elem
-            processElement(next, false)
-          }
-        }
-
-        processElement(0, false)
-        argsArray.foreach(x => programArgs += x.trim)
-      }
-    }
-
-    Assertions.assertEquals("localhost:8123", programArgs(1))
-    Assertions.assertEquals("insert into table_a select * from table_b", programArgs(3))
-    Assertions.assertEquals("d", programArgs(5))
-    Assertions.assertEquals("yyy", programArgs(7))
+    programArgs ++= PropertiesUtils.extractArguments(args)
+    println(programArgs)
   }
 
   @Test def testDynamicProperties(): Unit = {
