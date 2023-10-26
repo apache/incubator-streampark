@@ -849,6 +849,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     application.setRelease(ReleaseState.NEED_RELEASE.get());
     if (application.isUploadJob()) {
+      application.setDependency(appParam.getDependency());
+
       Application.Dependency thisDependency =
           Application.Dependency.toDependency(appParam.getDependency());
       Application.Dependency targetDependency =
