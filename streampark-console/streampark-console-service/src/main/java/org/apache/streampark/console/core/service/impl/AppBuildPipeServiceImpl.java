@@ -351,17 +351,12 @@ public class AppBuildPipeServiceImpl
       case YARN_PER_JOB:
       case YARN_SESSION:
       case REMOTE:
-        boolean skipBuild = app.isCustomCodeJob();
-        if (skipBuild && app.isUploadJob()) {
-          skipBuild = app.getDependencyObject().isEmpty();
-        }
         FlinkRemotePerJobBuildRequest buildRequest =
             new FlinkRemotePerJobBuildRequest(
                 app.getJobName(),
                 app.getLocalAppHome(),
                 mainClass,
                 flinkUserJar,
-                skipBuild,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),

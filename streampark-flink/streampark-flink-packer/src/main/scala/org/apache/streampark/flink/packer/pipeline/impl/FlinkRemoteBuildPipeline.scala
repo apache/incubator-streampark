@@ -31,28 +31,21 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
   /** The construction logic needs to be implemented by subclasses */
   @throws[Throwable]
   override protected def buildProcess(): ShadedBuildResponse = {
-    // create workspace.
-    // the sub workspace path like: APP_WORKSPACE/jobName
-    if (request.skipBuild) {
-      ShadedBuildResponse(request.workspace, request.customFlinkUserJar)
-    } else {
-      execStep(1) {
-        LfsOperator.mkCleanDirs(request.workspace)
-        logInfo(s"recreate building workspace: ${request.workspace}")
+    execStep(1) {
+      LfsOperator.mkCleanDirs(request.workspace)
+      logInfo(s"recreate building workspace: ${request.workspace}")
+    }.getOrElse(throw getError.exception)
+    // build flink job shaded jar
+    val shadedJar =
+      execStep(2) {
+        val output = MavenTool.buildFatJar(
+          request.mainClass,
+          request.providedLibs,
+          request.getShadedJarPath(request.workspace))
+        logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
+        output
       }.getOrElse(throw getError.exception)
-      // build flink job shaded jar
-      val shadedJar =
-        execStep(2) {
-          val output = MavenTool.buildFatJar(
-            request.mainClass,
-            request.providedLibs,
-            request.getShadedJarPath(request.workspace))
-          logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
-          output
-        }.getOrElse(throw getError.exception)
-      ShadedBuildResponse(request.workspace, shadedJar.getAbsolutePath)
-    }
-
+    ShadedBuildResponse(request.workspace, shadedJar.getAbsolutePath)
   }
 
 }
