@@ -310,36 +310,19 @@ object PropertiesUtils extends Logger {
     if (StringUtils.isNotEmpty(args)) {
       val array = args.split("\\s+")
       val iter = array.iterator
-      def join(s: String, v: String): Unit = {
-        if (v.startsWith(s)) {
-          if (v.endsWith(s)) {
-            programArgs += v.replaceAll(s"^$s|$s$$", "")
-          } else {
-            var value = v
-            while (!value.endsWith(s) && iter.hasNext) {
-              value += s" ${iter.next()}"
-            }
-            programArgs += value.replaceAll(s"^$s|$s$$", "")
-          }
-        }
-      }
-
       while (iter.hasNext) {
         val v = iter.next()
-        if (v.startsWith("'")) {
-          if (v.endsWith("'")) {
-            programArgs += v.replaceAll("^'|'$", "")
-          } else {
-            join("'", v)
-          }
-        } else if (v.startsWith("\"")) {
-          if (v.endsWith("\"")) {
-            programArgs += v.replaceAll("^\"|\"$", "")
-          } else {
-            join("\"", v)
-          }
-        } else {
-          programArgs += v
+        val p = v.take(1)
+        p match {
+          case "'" | "\"" =>
+            var value = v
+            if (!v.endsWith(p)) {
+              while (!value.endsWith(p) && iter.hasNext) {
+                value += s" ${iter.next()}"
+              }
+            }
+            programArgs += value.replaceAll(s"^$p|$p$$", "")
+          case _ => programArgs += v
         }
       }
     }
