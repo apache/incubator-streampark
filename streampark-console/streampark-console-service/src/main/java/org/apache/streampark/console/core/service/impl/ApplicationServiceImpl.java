@@ -703,6 +703,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   public boolean create(Application appParam) {
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
+    appParam.setBuild(true);
     appParam.setUserId(commonService.getUserId());
     appParam.setState(FlinkAppState.ADDED.getValue());
     appParam.setRelease(ReleaseState.NEED_RELEASE.get());
@@ -734,6 +735,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     } else {
       throw new ApiAlertException("create application failed");
     }
+  }
+
+  @Override
+  public boolean save(Application entity) {
+    String dependency = entity.getDependency();
+    if (entity.isFlinkSqlJob()) {
+      entity.setDependency(null);
+    }
+    boolean flag = super.save(entity);
+    entity.setDependency(dependency);
+    return flag;
   }
 
   private boolean existsByJobName(String jobName) {
@@ -837,7 +849,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     application.setRelease(ReleaseState.NEED_RELEASE.get());
     if (application.isUploadJob()) {
-      if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
+      Application.Dependency thisDependency =
+          Application.Dependency.toDependency(appParam.getDependency());
+      Application.Dependency targetDependency =
+          Application.Dependency.toDependency(application.getDependency());
+
+      boolean depDifference = !thisDependency.eq(targetDependency);
+      if (depDifference) {
+        application.setBuild(true);
+      } else if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
         application.setBuild(true);
       } else {
         File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());

@@ -514,7 +514,7 @@ export const renderResourceFrom = (model: Recordable) => {
       value={model.resourceFrom}
       placeholder="Please select resource from"
     >
-      <Select.Option value="csv">
+      <Select.Option value="cvs">
         <SvgIcon name="github" />
         <span class="pl-10px">CICD</span>
         <span class="gray">(build from CVS)</span>

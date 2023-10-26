@@ -220,7 +220,7 @@ public class Application implements Serializable {
   /** running job */
   private transient JobsOverview.Task overview;
 
-  private transient String dependency;
+  private String dependency;
   private transient Long sqlId;
   private transient String flinkSql;
 
@@ -388,15 +388,6 @@ public class Application implements Serializable {
     return this.cpMaxFailureInterval != null
         && this.cpFailureRateInterval != null
         && this.cpFailureAction != null;
-  }
-
-  public boolean eqFlinkJob(Application other) {
-    if (this.isFlinkSqlJob() && other.isFlinkSqlJob()) {
-      if (this.getFlinkSql().trim().equals(other.getFlinkSql().trim())) {
-        return this.getDependencyObject().eq(other.getDependencyObject());
-      }
-    }
-    return false;
   }
 
   /** Local compilation and packaging working directory */
@@ -752,11 +743,11 @@ public class Application implements Serializable {
 
     @Override
     public String toString() {
-      return groupId + ":" + artifactId + ":" + version + getClassifier(":");
+      return groupId + ":" + artifactId + ":" + version + getClassifier();
     }
 
-    private String getClassifier(String joiner) {
-      return StringUtils.isEmpty(classifier) ? "" : joiner + classifier;
+    private String getClassifier() {
+      return StringUtils.isEmpty(classifier) ? "" : ":" + classifier;
     }
   }
 }

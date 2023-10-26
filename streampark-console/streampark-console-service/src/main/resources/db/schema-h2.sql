@@ -46,6 +46,7 @@ create table if not exists `t_flink_app` (
   `jar` varchar(255)  default null,
   `jar_check_sum` bigint default null,
   `main_class` varchar(255)  default null,
+  `dependency` text ,
   `args` text,
   `options` text,
   `hot_params` text ,

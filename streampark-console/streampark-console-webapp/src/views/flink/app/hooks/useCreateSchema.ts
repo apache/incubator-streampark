@@ -63,14 +63,6 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     suggestions,
   } = useCreateAndEditSchema(dependencyRef);
 
-  // async function handleEditConfig(config: string) {
-  //   console.log('config', config);
-  //   const res = await fetchAppConf({ config });
-  //   const conf = decodeByBase64(res);
-  //   openConfDrawer(true, {
-  //     configOverride: conf,
-  //   });
-  // }
   function handleCheckConfig(_rule: RuleObject, value: StoreValue) {
     if (value) {
       const confType = getAppConfType(value);
@@ -97,7 +89,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
               if (value === 'sql') {
                 formModel.tableEnv = 1;
               } else {
-                formModel.resourceFrom = 'csv';
+                formModel.resourceFrom = 'cvs';
               }
             },
           };
@@ -109,7 +101,6 @@ export const useCreateSchema = (dependencyRef: Ref) => {
       },
       ...getExecutionModeSchema.value,
       ...getFlinkClusterSchemas.value,
-      ...getFlinkSqlSchema.value,
       {
         field: 'resourceFrom',
         label: t('flink.app.resourceFrom'),
@@ -133,6 +124,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
         rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
+      ...getFlinkSqlSchema.value,
       {
         field: 'project',
         label: t('flink.app.project'),

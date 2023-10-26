@@ -185,7 +185,7 @@
     // common params...
     const resourceFrom = values.resourceFrom;
     if (resourceFrom) {
-      if (resourceFrom === 'csv') {
+      if (resourceFrom === 'cvs') {
         params['resourceFrom'] = ResourceFromEnum.CICD;
         //streampark flink
         if (values.appType == AppTypeEnum.STREAMPARK_FLINK) {
@@ -210,15 +210,15 @@
           appType: AppTypeEnum.APACHE_FLINK,
           jar: unref(uploadJar),
           mainClass: values.mainClass,
+          dependency: await getDependency(),
         });
         handleCreateApp(params);
       }
     }
   }
-  /* flink sql mode */
-  async function handleSubmitSQL(values: Recordable) {
+  async function getDependency() {
     // Trigger a pom confirmation operation.
-    await unref(dependencyRef)?.handleApplyPom();
+    unref(dependencyRef)?.handleApplyPom();
     // common params...
     const dependency: { pom?: string; jar?: string } = {};
     const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
@@ -233,14 +233,18 @@
         jar: unref(uploadJars),
       });
     }
-
+    return dependency.pom === undefined && dependency.jar === undefined
+      ? null
+      : JSON.stringify(dependency);
+  }
+  /* flink sql mode */
+  async function handleSubmitSQL(values: Recordable) {
     let config = values.configOverride;
-    if (config != null && config !== undefined && config.trim() != '') {
+    if (config != null && config.trim() != '') {
       config = encryptByBase64(config);
     } else {
       config = null;
     }
-
     handleCluster(values);
     const params = {
       jobType: JobTypeEnum.SQL,
@@ -248,10 +252,7 @@
       appType: AppTypeEnum.STREAMPARK_FLINK,
       config,
       format: values.isSetConfig ? 1 : null,
-      dependency:
-        dependency.pom === undefined && dependency.jar === undefined
-          ? null
-          : JSON.stringify(dependency),
+      dependency: await getDependency(),
     };
     handleSubmitParams(params, values, k8sTemplate);
     handleCreateApp(params);
@@ -285,7 +286,7 @@
     const param = {};
     for (const k in params) {
       const v = params[k];
-      if (v != null && v !== undefined) {
+      if (v != null) {
         param[k] = v;
       }
     }

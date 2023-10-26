@@ -40,6 +40,7 @@
         <result column="tracking" jdbcType="INTEGER" property="tracking"/>
         <result column="jar" jdbcType="VARCHAR" property="jar"/>
         <result column="jar_check_sum" jdbcType="VARCHAR" property="jarCheckSum"/>
+        <result column="dependency" jdbcType="LONGVARCHAR" property="dependency"/>
         <result column="main_class" jdbcType="VARCHAR" property="mainClass"/>
         <result column="job_id" jdbcType="VARCHAR" property="jobId"/>
         <result column="job_manager_url" jdbcType="VARCHAR" property="jobManagerUrl"/>

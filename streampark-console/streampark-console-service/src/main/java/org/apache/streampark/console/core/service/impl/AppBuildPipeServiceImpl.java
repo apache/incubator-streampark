@@ -184,32 +184,24 @@ public class AppBuildPipeServiceImpl
 
             if (app.isCustomCodeJob()) {
               // customCode upload jar to appHome...
-              String appHome = app.getAppHome();
               FsOperator fsOperator = app.getFsOperator();
-              fsOperator.delete(appHome);
-              if (app.isUploadJob()) {
+              if (app.isCICDJob()) {
+                String appHome = app.getAppHome();
+                fsOperator.mkCleanDirs(appHome);
+                fsOperator.upload(app.getDistHome(), appHome);
+              } else {
                 File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
                 // upload jar copy to appHome
                 String uploadJar = appUploads.concat("/").concat(app.getJar());
                 checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
-                switch (app.getApplicationType()) {
-                  case STREAMPARK_FLINK:
-                    fsOperator.mkdirs(app.getAppLib());
-                    fsOperator.copy(uploadJar, app.getAppLib(), false, true);
-                    break;
-                  case APACHE_FLINK:
-                    fsOperator.mkdirs(appHome);
-                    fsOperator.copy(uploadJar, appHome, false, true);
-                    break;
-                  default:
-                    throw new IllegalArgumentException(
-                        "[StreamPark] unsupported ApplicationType of custom code: "
-                            + app.getApplicationType());
+                if (app.getApplicationType() == ApplicationType.STREAMPARK_FLINK) {
+                  fsOperator.mkdirs(app.getAppLib());
+                  fsOperator.copy(uploadJar, app.getAppLib(), false, true);
                 }
-              } else {
-                fsOperator.upload(app.getDistHome(), appHome);
               }
-            } else {
+            }
+
+            if (app.isFlinkSqlJob() || app.isUploadJob()) {
               if (!app.getDependencyObject().getJar().isEmpty()) {
                 String localUploads = Workspace.local().APP_UPLOADS();
                 // copy jar to local upload dir
@@ -335,7 +327,8 @@ public class AppBuildPipeServiceImpl
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
     String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
     ExecutionMode executionMode = app.getExecutionModeEnum();
-    String mainClass = ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
+    String mainClass =
+        app.isCustomCodeJob() ? app.getMainClass() : ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
     switch (executionMode) {
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
@@ -358,13 +351,17 @@ public class AppBuildPipeServiceImpl
       case YARN_PER_JOB:
       case YARN_SESSION:
       case REMOTE:
+        boolean skipBuild = app.isCustomCodeJob();
+        if (skipBuild && app.isUploadJob()) {
+          skipBuild = app.getDependencyObject().isEmpty();
+        }
         FlinkRemotePerJobBuildRequest buildRequest =
             new FlinkRemotePerJobBuildRequest(
                 app.getJobName(),
                 app.getLocalAppHome(),
                 mainClass,
                 flinkUserJar,
-                app.isCustomCodeJob(),
+                skipBuild,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -424,7 +421,7 @@ public class AppBuildPipeServiceImpl
           case STREAMPARK_FLINK:
             return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
           case APACHE_FLINK:
-            return String.format("%s/%s", app.getAppHome(), app.getJar());
+            return String.format("%s/%s", WebUtils.getAppTempDir(), app.getJar());
           default:
             throw new IllegalArgumentException(
                 "[StreamPark] unsupported ApplicationType of custom code: "
