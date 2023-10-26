@@ -403,18 +403,18 @@ trait FlinkClientTrait extends Logger {
     programArgs ++= PropertiesUtils.extractArguments(submitRequest.args)
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
-      programArgs ++ PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml
-      programArgs ++ PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
-      programArgs ++ PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
+      programArgs += PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml
+      programArgs += PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
+      programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
 
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINK_SQL =>
-          programArgs ++ PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
+          programArgs += PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
-            programArgs ++ PARAM_KEY_APP_CONF += submitRequest.appConf
+            programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
           }
         case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
-          programArgs ++ PARAM_KEY_APP_CONF += submitRequest.appConf
+          programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
       }
 
     }
