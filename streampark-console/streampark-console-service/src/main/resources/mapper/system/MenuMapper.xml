@@ -33,7 +33,7 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="findUserPermissions" resultType="string">
+    <select id="selectPermissions" resultType="string">
         select distinct m.perms
         from t_role r
         left join t_member ur on (r.role_id = ur.role_id)
@@ -45,7 +45,7 @@
         and m.perms &lt;&gt; ''
     </select>
 
-    <select id="findUserMenus" resultMap="menu">
+    <select id="selectMenus" resultMap="menu">
         select m.*
         from t_menu m inner join t_role_menu rm
         on m.menu_id = rm.menu_id
@@ -57,7 +57,7 @@
         order by m.order_num
     </select>
 
-    <select id="findUserIdsByMenuId" parameterType="string" resultType="string">
+    <select id="selectUserIdsByMenuId" parameterType="string" resultType="string">
         select user_id
         from t_member
         where role_id in

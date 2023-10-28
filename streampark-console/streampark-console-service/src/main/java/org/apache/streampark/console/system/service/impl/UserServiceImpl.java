@@ -93,7 +93,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     Page<User> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
-    IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
+    IPage<User> resPage = this.baseMapper.selectPage(page, user);
 
     Utils.notNull(resPage);
     if (resPage.getTotal() == 0) {
@@ -187,7 +187,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   public List<User> getNoTokenUser() {
-    List<User> users = this.baseMapper.getNoTokenUser();
+    List<User> users = this.baseMapper.selectNoTokenUsers();
     if (!users.isEmpty()) {
       users.forEach(User::dataMasking);
     }
@@ -236,7 +236,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   public List<User> findByAppOwner(Long teamId) {
-    return baseMapper.findByAppOwner(teamId);
+    return baseMapper.selectUsersByAppOwner(teamId);
   }
 
   /**

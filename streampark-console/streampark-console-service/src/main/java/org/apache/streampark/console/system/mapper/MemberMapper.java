@@ -46,7 +46,7 @@ public interface MemberMapper extends BaseMapper<Member> {
    */
   Boolean deleteByRoleId(@Param("roleId") Long roleId);
 
-  IPage<Member> findUsers(Page<Member> page, @Param("member") Member member);
+  IPage<Member> selectPage(Page<Member> page, @Param("member") Member member);
 
-  List<User> findUsersNotInTeam(@Param("teamId") Long teamId);
+  List<User> selectUsersNotInTeam(@Param("teamId") Long teamId);
 }
