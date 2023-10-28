@@ -18,11 +18,11 @@
 package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.Constant
-import org.apache.streampark.common.conf.{ConfigKeys, Workspace}
 import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, FlinkDevelopmentMode, FlinkExecutionMode, FlinkRestoreMode}
 import org.apache.streampark.common.fs.FsOperator
-import org.apache.streampark.common.util.{DeflaterUtils, FileUtils, Logger, SystemPropertyUtils}
+import org.apache.streampark.common.util.{DeflaterUtils, ExceptionUtils, FileUtils, Logger, SystemPropertyUtils, Utils}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -223,14 +223,30 @@ trait FlinkClientTrait extends Logger {
     Try {
       logInfo(s"[flink-submit] Attempting to submit in Rest API Submit Plan.")
       restApiFunc(submitRequest, flinkConfig)
-    }.getOrElse {
-      logWarn(s"[flink-submit] RestAPI Submit Plan failed,try JobGraph Submit Plan now.")
-      Try(jobGraphFunc(submitRequest, flinkConfig)) match {
-        case Success(r) => r
-        case Failure(e) =>
-          logError(s"[flink-submit] Both Rest API Submit Plan and JobGraph Submit Plan failed.")
-          throw e
-      }
+    } match {
+      case Failure(e) =>
+        logWarn(
+          s"""
+             |\n[flink-submit] RestAPI Submit Plan failed, error detail:
+             |------------------------------------------------------------------
+             |${ExceptionUtils.stringifyException(e)}
+             |------------------------------------------------------------------
+             |Try JobGraph Submit Plan now...
+             |""".stripMargin
+        )
+        Try(jobGraphFunc(submitRequest, flinkConfig)) match {
+          case Success(r) => r
+          case Failure(e) =>
+            logError(s"""
+                        |\n[flink-submit] JobGraph Submit failed, error detail:
+                        |------------------------------------------------------------------
+                        |${ExceptionUtils.stringifyException(e)}
+                        |------------------------------------------------------------------
+                        |Both Rest API Submit and JobGraph failed!
+                        |""".stripMargin)
+            throw e
+        }
+      case Success(v) => v
     }
   }
 
@@ -242,12 +258,13 @@ trait FlinkClientTrait extends Logger {
       .setUserClassPaths(
         Lists.newArrayList(submitRequest.flinkVersion.flinkLibs: _*)
       )
+      .setEntryPointClassName(
+        flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get()
+      )
       .setArguments(
         flinkConfig
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList()): _*)
-      .setEntryPointClassName(
-        flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get()
+          .orElse(Lists.newArrayList()): _*
       )
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
 
