@@ -18,12 +18,9 @@
 package org.apache.streampark.flink.client
 
 import org.apache.streampark.common.conf.FlinkVersion
-import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.proxy.FlinkShimsProxy
-
-import java.net.URL
 
 import scala.language.{implicitConversions, reflectiveCalls}
 import scala.reflect.ClassTag
@@ -72,20 +69,9 @@ object FlinkClient extends Logger {
       request: Object,
       flinkVersion: FlinkVersion,
       requestBody: (String, String)): T = {
-
-    val classpath = request match {
-      case request: SubmitRequest =>
-        request.executionMode match {
-          case ExecutionMode.REMOTE => List(request.userJarFile.toURI.toURL)
-          case _ => List.empty[URL]
-        }
-      case _ => List.empty[URL]
-    }
-
     flinkVersion.checkVersion()
     FlinkShimsProxy.proxy(
       flinkVersion,
-      classpath,
       (classLoader: ClassLoader) => {
         val submitClass = classLoader.loadClass(FLINK_CLIENT_HANDLER_CLASS_NAME)
         val requestClass = classLoader.loadClass(requestBody._1)
