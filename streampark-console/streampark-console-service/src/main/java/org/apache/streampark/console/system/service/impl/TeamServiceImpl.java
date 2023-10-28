@@ -67,7 +67,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     Page<Team> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
-    return this.baseMapper.findTeam(page, team);
+    return this.baseMapper.selectPage(page, team);
   }
 
   @Override
@@ -144,6 +144,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     if (UserTypeEnum.ADMIN == user.getUserType()) {
       return this.list();
     }
-    return baseMapper.findUserTeams(userId);
+    return baseMapper.selectTeamsByUserId(userId);
   }
 }

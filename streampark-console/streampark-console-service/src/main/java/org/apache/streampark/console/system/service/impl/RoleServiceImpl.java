@@ -63,7 +63,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     Page<Role> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
-    return this.baseMapper.findRole(page, role);
+    return this.baseMapper.selectPage(page, role);
   }
 
   @Override

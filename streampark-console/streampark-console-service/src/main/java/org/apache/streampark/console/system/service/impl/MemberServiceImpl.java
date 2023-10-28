@@ -79,12 +79,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     Page<Member> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
-    return baseMapper.findUsers(page, member);
+    return baseMapper.selectPage(page, member);
   }
 
   @Override
   public List<User> findCandidateUsers(Long teamId) {
-    return baseMapper.findUsersNotInTeam(teamId);
+    return baseMapper.selectUsersNotInTeam(teamId);
   }
 
   @Override
