@@ -241,11 +241,8 @@ trait FlinkClientTrait extends Logger {
     val packageProgram = PackagedProgram.newBuilder
       .setJarFile(jarFile)
       .setUserClassPaths(
-        Lists.newArrayList(
-          submitRequest.flinkVersion.flinkLib
-            .listFiles()
-            .map(_.toURI.toURL)
-            .toBuffer[URL]: _*))
+        Lists.newArrayList(submitRequest.flinkVersion.flinkLibs: _*)
+      )
       .setEntryPointClassName(
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
