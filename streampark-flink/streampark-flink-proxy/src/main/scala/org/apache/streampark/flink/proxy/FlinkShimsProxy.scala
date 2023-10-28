@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.{ClassLoaderUtils, Logger, Utils}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
 import java.net.URL
+import java.sql.DriverManager
 import java.util.function.{Function => JavaFunc}
 import java.util.regex.Pattern
 
@@ -55,8 +56,8 @@ object FlinkShimsProxy extends Logger {
    * @tparam T
    * @return
    */
-  def proxy[T](flinkVersion: FlinkVersion, func: ClassLoader => T): T = {
-    val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion)
+  def proxy[T](flinkVersion: FlinkVersion, classPaths: List[URL], func: ClassLoader => T): T = {
+    val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion, classPaths)
     ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
@@ -70,8 +71,11 @@ object FlinkShimsProxy extends Logger {
    * @tparam T
    * @return
    */
-  def proxy[T](flinkVersion: FlinkVersion, func: JavaFunc[ClassLoader, T]): T = {
-    val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion)
+  def proxy[T](
+      flinkVersion: FlinkVersion,
+      classPaths: List[URL],
+      func: JavaFunc[ClassLoader, T]): T = {
+    val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion, classPaths)
     ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
@@ -157,14 +161,15 @@ object FlinkShimsProxy extends Logger {
     ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
-  private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
+  private[this] def getFlinkShimsClassLoader(
+      flinkVersion: FlinkVersion,
+      classPaths: List[URL]): ClassLoader = {
     logInfo(s"add flink shims urls classloader,flink version: $flinkVersion")
-
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${flinkVersion.fullVersion}", {
         // 1) flink/lib
         val libURL = getFlinkHomeLib(flinkVersion.flinkHome, "lib", !_.getName.startsWith("log4j"))
-        val shimsUrls = ListBuffer[URL](libURL: _*)
+        val shimsUrls = ListBuffer[URL](libURL: _*) ++ classPaths
 
         // 2) add all shims jar
         addShimsUrls(

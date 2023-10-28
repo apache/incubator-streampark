@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.{ClassLoaderUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean.{CancelRequest, CancelResponse, SavepointRequestTrait, SavepointResponse, SubmitRequest, SubmitResponse, TriggerSavepointRequest}
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
@@ -46,6 +46,7 @@ object RemoteClient extends FlinkClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
+
     // 2) submit job
     super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(
       jobGraphSubmit)
