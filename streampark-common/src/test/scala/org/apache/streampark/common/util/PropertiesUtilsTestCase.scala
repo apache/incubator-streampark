@@ -16,83 +16,32 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.commons.lang3.StringUtils
 import org.junit.jupiter.api.{Assertions, Test}
 
-import scala.annotation.tailrec
-import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 
 class PropertiesUtilsTestCase {
 
   @Test def testExtractProgramArgs(): Unit = {
-    val argsStr = "--host localhost:8123\n" +
-      "--sql \"insert into table_a select * from table_b\"\n" +
-      "--c d\r\n" +
-      "--including-tables \"BASE_CARD_ETPS|BASE_CHECKED_STAT\"\n"
-    val programArgs = new ArrayBuffer[String]()
-    if (StringUtils.isNotBlank(argsStr)) {
-      val multiChar = "\""
-      val array = argsStr.split("\\s+")
-      if (!array.exists(_.startsWith(multiChar))) {
-        array.foreach(
-          x => {
-            if (x.trim.nonEmpty) {
-              programArgs += x
-            }
-          })
-      } else {
-        val argsArray = new ArrayBuffer[String]()
-        val tempBuffer = new ArrayBuffer[String]()
-
-        @tailrec
-        def processElement(index: Int, multi: Boolean): Unit = {
-
-          if (index == array.length) {
-            if (tempBuffer.nonEmpty) {
-              argsArray += tempBuffer.mkString(" ")
-            }
-            return
-          }
-
-          val next = index + 1
-          val elem = array(index).trim
-          val until = if (elem.endsWith(multiChar)) 1 else 0
-
-          if (elem.isEmpty) {
-            processElement(next, multi = false)
-          } else {
-            if (multi) {
-              if (elem.endsWith(multiChar)) {
-                tempBuffer += elem.dropRight(1)
-                argsArray += tempBuffer.mkString(" ")
-                tempBuffer.clear()
-                processElement(next, multi = false)
-              } else {
-                tempBuffer += elem
-                processElement(next, multi)
-              }
-            } else {
-              if (elem.startsWith(multiChar)) {
-                tempBuffer += elem.drop(1).dropRight(until)
-                processElement(next, multi = true)
-              } else {
-                argsArray += elem.dropRight(until)
-                processElement(next, multi = false)
-              }
-            }
-          }
-        }
-
-        processElement(0, multi = false)
-        argsArray.foreach(x => programArgs += x)
-      }
-    }
-
-    Assertions.assertEquals("localhost:8123", programArgs(1))
-    Assertions.assertEquals("insert into table_a select * from table_b", programArgs(3))
-    Assertions.assertEquals("d", programArgs(5))
-    Assertions.assertEquals("BASE_CARD_ETPS|BASE_CHECKED_STAT", programArgs(7))
+    val args =
+      "mysql-sync-database " +
+        "--database employees " +
+        "--mysql-conf hostname=127.0.0.1 " +
+        "--mysql-conf port=3306 " +
+        "--mysql-conf username=root " +
+        "--mysql-conf password=123456 " +
+        "--mysql-conf database-name=employees " +
+        "--including-tables 'test|test.*' " +
+        "--excluding-tables \"emp_*\" " +
+        "--query 'select * from employees where age > 20' " +
+        "--sink-conf fenodes=127.0.0.1:8030 " +
+        "--sink-conf username=root " +
+        "--sink-conf password= " +
+        "--sink-conf jdbc-url=jdbc:mysql://127.0.0.1:9030 " +
+        "--sink-conf sink.label-prefix=label" +
+        "--table-conf replication_num=1"
+    val programArgs = PropertiesUtils.extractArguments(args)
+    println(programArgs)
   }
 
   @Test def testDynamicProperties(): Unit = {

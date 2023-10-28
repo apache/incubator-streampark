@@ -237,27 +237,11 @@ trait FlinkClientTrait extends Logger {
   private[client] def getJobGraph(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): (PackagedProgram, JobGraph) = {
-    if (submitRequest.developmentMode == FlinkDevelopmentMode.PYFLINK) {
-      val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
-      if (!FsOperator.lfs.exists(pythonVenv)) {
-        throw new RuntimeException(s"$pythonVenv File does not exist")
-      }
 
-      val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
-      if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
-        flinkConfig.safeSet(PipelineOptions.JARS, util.Arrays.asList(localLib))
-      }
-
-      flinkConfig
-        // python.archives
-        .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
-        // python.client.executable
-        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
-        // python.executable
-        .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
-    }
-
-    val packageProgram = PackagedProgram.newBuilder
+    val pkgBuilder = PackagedProgram.newBuilder
+      .setUserClassPaths(
+        Lists.newArrayList(submitRequest.flinkVersion.flinkLibs: _*)
+      )
       .setArguments(
         flinkConfig
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
@@ -266,8 +250,30 @@ trait FlinkClientTrait extends Logger {
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get()
       )
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-      .build()
 
+    submitRequest.developmentMode match {
+      case FlinkDevelopmentMode.PYFLINK =>
+        val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
+        if (!FsOperator.lfs.exists(pythonVenv)) {
+          throw new RuntimeException(s"$pythonVenv File does not exist")
+        }
+
+        val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
+        if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
+          flinkConfig.safeSet(PipelineOptions.JARS, util.Arrays.asList(localLib))
+        }
+
+        flinkConfig
+          // python.archives
+          .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
+          // python.client.executable
+          .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+          // python.executable
+          .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+      case _ =>
+    }
+
+    val packageProgram = pkgBuilder.build()
     val jobGraph = PackagedProgramUtils.createJobGraph(
       packageProgram,
       flinkConfig,
