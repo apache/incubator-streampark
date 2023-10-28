@@ -271,6 +271,7 @@ trait FlinkClientTrait extends Logger {
           // python.executable
           .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
       case _ =>
+        pkgBuilder.setJarFile(submitRequest.userJarFile)
     }
 
     val packageProgram = pkgBuilder.build()
