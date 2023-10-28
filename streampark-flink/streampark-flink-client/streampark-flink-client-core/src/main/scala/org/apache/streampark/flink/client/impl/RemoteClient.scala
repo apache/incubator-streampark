@@ -26,9 +26,11 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
+import org.apache.flink.yarn.configuration.YarnConfigOptions
 
 import java.io.File
 import java.lang.{Integer => JavaInt}
+import java.util
 
 import scala.util.{Failure, Success, Try}
 
@@ -111,23 +113,16 @@ object RemoteClient extends FlinkClientTrait {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var client: ClusterClient[StandaloneClusterId] = null
-    Try {
-      val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
-      val yarnClusterId: StandaloneClusterId = standAloneDescriptor._1
-      clusterDescriptor = standAloneDescriptor._2
+    val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
+    val yarnClusterId: StandaloneClusterId = standAloneDescriptor._1
+    clusterDescriptor = standAloneDescriptor._2
 
-      client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
-      val jobId =
-        FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
-      logInfo(
-        s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
-      SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
-    } match {
-      case Success(s) => s
-      case Failure(e) =>
-        logError(s"${submitRequest.executionMode} mode submit by restApi fail.")
-        throw e
-    }
+    client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
+    val jobId =
+      FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
+    logInfo(
+      s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+    SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
   }
 
   /** Submit flink session job with building JobGraph via Standalone ClusterClient api. */

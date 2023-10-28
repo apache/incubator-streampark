@@ -20,7 +20,7 @@ package org.apache.streampark.flink.client.`trait`
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
-import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils}
+import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils, Utils}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -40,10 +40,10 @@ import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
+import java.net.URL
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
@@ -209,11 +209,24 @@ trait FlinkClientTrait extends Logger {
     } match {
       case Failure(e) =>
         logWarn(
-          s"[flink-submit] RestAPI Submit Plan failed, error: $e, try JobGraph Submit Plan now.")
+          s"""
+             |\n[flink-submit] RestAPI Submit Plan failed, error detail:
+             |------------------------------------------------------------------
+             |${Utils.stringifyException(e)}
+             |------------------------------------------------------------------
+             |Try JobGraph Submit Plan now...
+             |""".stripMargin
+        )
         Try(jobGraphFunc(submitRequest, flinkConfig, jarFile)) match {
           case Success(r) => r
           case Failure(e) =>
-            logError(s"[flink-submit] Both Rest API Submit Plan and JobGraph Submit Plan failed.")
+            logError(s"""
+                        |\n[flink-submit] JobGraph Submit failed, error detail:
+                        |------------------------------------------------------------------
+                        |${Utils.stringifyException(e)}
+                        |------------------------------------------------------------------
+                        |Both Rest API Submit and JobGraph failed!
+                        |""".stripMargin)
             throw e
         }
       case Success(v) => v
@@ -224,15 +237,21 @@ trait FlinkClientTrait extends Logger {
       flinkConfig: Configuration,
       submitRequest: SubmitRequest,
       jarFile: File): (PackagedProgram, JobGraph) = {
+
     val packageProgram = PackagedProgram.newBuilder
       .setJarFile(jarFile)
+      .setUserClassPaths(
+        Lists.newArrayList(
+          submitRequest.flinkVersion.flinkLib
+            .listFiles()
+            .map(_.toURI.toURL)
+            .toBuffer[URL]: _*))
       .setEntryPointClassName(
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-      .setArguments(
-        flinkConfig
-          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList()): _*)
+      .setArguments(flinkConfig
+        .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+        .orElse(Lists.newArrayList()): _*)
       .build()
 
     val jobGraph = PackagedProgramUtils.createJobGraph(
@@ -416,9 +435,8 @@ trait FlinkClientTrait extends Logger {
         case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
           programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
       }
-
     }
-    programArgs.toList.asJava
+    Lists.newArrayList(programArgs: _*)
   }
 
   private[this] def applyConfiguration(
