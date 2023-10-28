@@ -80,7 +80,7 @@ public class VariableController {
   @Operation(summary = "List variables")
   @PostMapping("list")
   public RestResponse variableList(@RequestParam Long teamId, String keyword) {
-    List<Variable> variableList = variableService.findByTeamId(teamId, keyword);
+    List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
     for (Variable v : variableList) {
       v.dataMasking();
     }
@@ -91,7 +91,7 @@ public class VariableController {
   @PostMapping("dependApps")
   @RequiresPermissions("variable:depend_apps")
   public RestResponse dependApps(RestRequest restRequest, Variable variable) {
-    IPage<Application> dependApps = variableService.dependAppsPage(variable, restRequest);
+    IPage<Application> dependApps = variableService.pageDependApps(variable, restRequest);
     return RestResponse.success(dependApps);
   }
 

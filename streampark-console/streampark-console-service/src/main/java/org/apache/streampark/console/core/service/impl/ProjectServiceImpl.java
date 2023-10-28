@@ -142,7 +142,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     if (projectParam.getBuildState() != null) {
       project.setBuildState(projectParam.getBuildState());
       if (BuildStateEnum.NEED_REBUILD == BuildStateEnum.of(projectParam.getBuildState())) {
-        List<Application> applications = getApplications(project);
+        List<Application> applications = list(project);
         // Update deployment status
         applications.forEach(
             (app) -> {
@@ -188,7 +188,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  public List<Project> findByTeamId(Long teamId) {
+  public List<Project> listByTeamId(Long teamId) {
     return this.baseMapper.selectProjectsByTeamId(teamId);
   }
 
@@ -210,7 +210,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             },
             fileLogger -> {
               List<Application> applications =
-                  this.applicationManageService.getByProjectId(project.getId());
+                  this.applicationManageService.listByProjectId(project.getId());
               applications.forEach(
                   (app) -> {
                     fileLogger.info(
@@ -271,12 +271,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  public List<Application> getApplications(Project project) {
-    return this.applicationManageService.getByProjectId(project.getId());
+  public List<Application> list(Project project) {
+    return this.applicationManageService.listByProjectId(project.getId());
   }
 
   @Override
-  public boolean checkExists(Project project) {
+  public boolean exists(Project project) {
     if (project.getId() != null) {
       Project proj = getById(project.getId());
       if (proj.getName().equals(project.getName())) {

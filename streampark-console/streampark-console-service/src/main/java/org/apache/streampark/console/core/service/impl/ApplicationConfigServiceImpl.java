@@ -212,7 +212,7 @@ public class ApplicationConfigServiceImpl
   }
 
   @Override
-  public List<ApplicationConfig> history(Application appParam) {
+  public List<ApplicationConfig> list(Application appParam) {
     LambdaQueryWrapper<ApplicationConfig> queryWrapper =
         new LambdaQueryWrapper<ApplicationConfig>()
             .eq(ApplicationConfig::getAppId, appParam.getId())

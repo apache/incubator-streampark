@@ -223,7 +223,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     this.removeById(resource);
   }
 
-  public List<Resource> findByTeamId(Long teamId) {
+  public List<Resource> listByTeamId(Long teamId) {
     LambdaQueryWrapper<Resource> queryWrapper =
         new LambdaQueryWrapper<Resource>().eq(Resource::getTeamId, teamId);
     return baseMapper.selectList(queryWrapper);
@@ -493,13 +493,13 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   private List<Application> getResourceApplicationsById(Resource resource) {
     List<Application> dependApplications = new ArrayList<>();
-    List<Application> applications = applicationManageService.getByTeamId(resource.getTeamId());
+    List<Application> applications = applicationManageService.listByTeamId(resource.getTeamId());
     Map<Long, Application> applicationMap =
         applications.stream()
             .collect(Collectors.toMap(Application::getId, application -> application));
 
     // Get the application that depends on this resource
-    List<FlinkSql> flinkSqls = flinkSqlService.getByTeamId(resource.getTeamId());
+    List<FlinkSql> flinkSqls = flinkSqlService.listByTeamId(resource.getTeamId());
     for (FlinkSql flinkSql : flinkSqls) {
       String sqlTeamResource = flinkSql.getTeamResource();
       if (sqlTeamResource != null

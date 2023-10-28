@@ -71,7 +71,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Override
-  public IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest request) {
+  public IPage<YarnQueue> page(YarnQueue yarnQueue, RestRequest request) {
     Utils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
     Utils.notNull(yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
     Page<YarnQueue> page = new Page<>();
@@ -217,7 +217,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public void checkNotReferencedByFlinkClusters(
       @Nonnull String queueLabel, @Nonnull String operation) {
     List<FlinkCluster> clustersReferenceYarnQueueLabel =
-        flinkClusterService.getByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
+        flinkClusterService.listByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
             .stream()
             .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
             .collect(Collectors.toList());
@@ -231,7 +231,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
       @Nonnull Long teamId, @Nonnull String queueLabel, @Nonnull String operation) {
     List<Application> appsReferenceQueueLabel =
         applicationManageService
-            .getByTeamIdAndExecutionModes(
+            .listByTeamIdAndExecutionModes(
                 teamId,
                 Sets.newHashSet(
                     FlinkExecutionMode.YARN_APPLICATION, FlinkExecutionMode.YARN_PER_JOB))

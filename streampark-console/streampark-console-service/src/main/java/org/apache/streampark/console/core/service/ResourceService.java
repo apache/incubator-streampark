@@ -81,7 +81,7 @@ public interface ResourceService extends IService<Resource> {
    * @param teamId
    * @return team resources
    */
-  List<Resource> findByTeamId(Long teamId);
+  List<Resource> listByTeamId(Long teamId);
 
   /**
    * change resource owner

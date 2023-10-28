@@ -49,7 +49,7 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   Boolean existsByFlinkEnvId(Long id);
 
-  List<FlinkCluster> getByExecutionModes(Collection<FlinkExecutionMode> executionModeEnums);
+  List<FlinkCluster> listByExecutionModes(Collection<FlinkExecutionMode> executionModeEnums);
 
   void updateClusterState(Long id, ClusterState state);
 }

@@ -108,7 +108,7 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
    * @param appParam The application for which to retrieve the history.
    * @return The list of application configurations representing the history.
    */
-  List<ApplicationConfig> history(Application appParam);
+  List<ApplicationConfig> list(Application appParam);
 
   /**
    * Reads a template from a file or a database.
