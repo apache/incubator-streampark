@@ -255,7 +255,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     long now = System.currentTimeMillis();
 
     List<Long> appIds = records.stream().map(Application::getId).collect(Collectors.toList());
-    Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listAppIdPipelineStatusMap(appIds);
+    Map<Long, PipelineStatusEnum> pipeStates =
+        appBuildPipeService.listAppIdPipelineStatusMap(appIds);
 
     List<Application> newRecords =
         records.stream()
