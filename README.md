@@ -73,7 +73,7 @@ Download address for run-directly software package : [https://streampark.apache.
 
 ## 🚀 Quick Start
 
-click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
+Click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
 
 ## 💋 Our users
 
