@@ -126,7 +126,10 @@ object FlinkSqlExecutor extends Logger {
               throw new RuntimeException("StreamPark dose not support 'select' statement now!")
             case DELETE | UPDATE =>
               if (runMode == "STREAMING") {
-                throw new UnsupportedOperationException(s"$command unsupported streaming mode.")
+                throw new UnsupportedOperationException(
+                  s"Currently, ${command.toUpperCase()} statement only supports in batch mode, " +
+                    s"and it requires the target table connector implements the SupportsRowLevelDelete, " +
+                    s"For more details please refer to: https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/dev/table/sql/$command")
               }
             case _ =>
               try {
