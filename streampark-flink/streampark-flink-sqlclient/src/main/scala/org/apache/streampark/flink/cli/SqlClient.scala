@@ -49,12 +49,12 @@ object SqlClient extends App {
 
   private[this] val sets = SqlCommandParser.parseSQL(flinkSql).filter(_.command == SqlCommand.SET)
 
-  private[this] val defaultMode = RuntimeExecutionMode.STREAMING.name().toLowerCase()
+  private[this] val defaultMode = RuntimeExecutionMode.STREAMING.name()
 
   private[this] val mode = sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
     case Some(e) =>
       // 1) flink sql execution.runtime-mode has highest priority
-      val m = e.operands(1)
+      val m = e.operands(1).toUpperCase()
       arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
       m
     case None =>
@@ -66,7 +66,7 @@ object SqlClient extends App {
             case f =>
               val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(f.drop(7)))
               // 3) application conf execution.runtime-mode
-              parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode)
+              parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode).toUpperCase()
           }
           arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
           m
@@ -75,11 +75,11 @@ object SqlClient extends App {
   }
 
   mode match {
-    case "batch" => BatchSqlApp.main(arguments.toArray)
-    case "streaming" => StreamSqlApp.main(arguments.toArray)
+    case "STREAMING" | "AUTOMATIC" => StreamSqlApp.main(arguments.toArray)
+    case "BATCH" => BatchSqlApp.main(arguments.toArray)
     case _ =>
       throw new IllegalArgumentException(
-        "Usage: runtime execution-mode invalid, optional [streaming|batch]")
+        "Usage: runtime execution-mode invalid, optional [STREAMING|BATCH|AUTOMATIC]")
   }
 
   private[this] object BatchSqlApp extends FlinkTable {
