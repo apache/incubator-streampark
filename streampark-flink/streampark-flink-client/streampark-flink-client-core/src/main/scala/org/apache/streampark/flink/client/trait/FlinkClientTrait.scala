@@ -22,7 +22,7 @@ import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, FlinkDevelopmentMode, FlinkExecutionMode, FlinkRestoreMode}
 import org.apache.streampark.common.fs.FsOperator
-import org.apache.streampark.common.util.{DeflaterUtils, ExceptionUtils, FileUtils, Logger, SystemPropertyUtils, Utils}
+import org.apache.streampark.common.util.{DeflaterUtils, ExceptionUtils, FileUtils, Logger, PropertiesUtils, SystemPropertyUtils, Utils}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -274,12 +274,8 @@ trait FlinkClientTrait extends Logger {
         if (!FsOperator.lfs.exists(pythonVenv)) {
           throw new RuntimeException(s"$pythonVenv File does not exist")
         }
-
-        val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
-        if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
-          flinkConfig.safeSet(PipelineOptions.JARS, util.Arrays.asList(localLib))
-        }
-
+        // including $app/lib
+        includingPipelineJars(submitRequest, flinkConfig)
         flinkConfig
           // python.archives
           .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
@@ -457,60 +453,7 @@ trait FlinkClientTrait extends Logger {
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
     val programArgs = new ArrayBuffer[String]()
-    val args = submitRequest.args
-
-    if (StringUtils.isNotBlank(args)) {
-      val multiChar = "\""
-      val array = args.split("\\s+")
-      if (!array.exists(_.startsWith(multiChar))) {
-        array.foreach(programArgs +=)
-      } else {
-        val argsArray = new ArrayBuffer[String]()
-        val tempBuffer = new ArrayBuffer[String]()
-
-        @tailrec
-        def processElement(index: Int, multi: Boolean): Unit = {
-
-          if (index == array.length) {
-            if (tempBuffer.nonEmpty) {
-              argsArray += tempBuffer.mkString(" ")
-            }
-            return
-          }
-
-          val next = index + 1
-          val elem = array(index).trim
-
-          if (elem.isEmpty) {
-            processElement(next, multi = false)
-          } else {
-            if (multi) {
-              if (elem.endsWith(multiChar)) {
-                tempBuffer += elem.dropRight(1)
-                argsArray += tempBuffer.mkString(" ")
-                tempBuffer.clear()
-                processElement(next, multi = false)
-              } else {
-                tempBuffer += elem
-                processElement(next, multi)
-              }
-            } else {
-              val until = if (elem.endsWith(multiChar)) 1 else 0
-              if (elem.startsWith(multiChar)) {
-                tempBuffer += elem.drop(1).dropRight(until)
-                processElement(next, multi = true)
-              } else {
-                argsArray += elem.dropRight(until)
-                processElement(next, multi = false)
-              }
-            }
-          }
-        }
-
-        processElement(0, multi = false)
-        argsArray.foreach(x => programArgs += x)
-      }
-    }
+    programArgs ++= PropertiesUtils.extractArguments(submitRequest.args)
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
 
@@ -546,7 +489,7 @@ trait FlinkClientTrait extends Logger {
       programArgs.add("-py")
       programArgs.add(submitRequest.userJarFile.getAbsolutePath)
     }
-    programArgs.toList.asJava
+    Lists.newArrayList(programArgs: _*)
   }
 
   private[this] def applyConfiguration(
@@ -648,6 +591,15 @@ trait FlinkClientTrait extends Logger {
     val savepointPath = tryGetSavepointPathIfNeed(savepointRequest)
     val clientWrapper = new FlinkClusterClient(client)
     clientWrapper.triggerSavepoint(jobID, savepointPath, savepointRequest.nativeFormat).get()
+  }
+
+  private[client] def includingPipelineJars(
+      submitRequest: SubmitRequest,
+      flinkConfig: Configuration) = {
+    val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
+    if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
+      flinkConfig.safeSet(PipelineOptions.JARS, util.Arrays.asList(localLib))
+    }
   }
 
 }
