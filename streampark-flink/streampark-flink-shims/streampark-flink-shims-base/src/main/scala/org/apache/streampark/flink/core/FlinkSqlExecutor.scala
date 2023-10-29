@@ -20,8 +20,9 @@ import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.core.SqlCommand._
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.Configuration
+import org.apache.flink.configuration.{Configuration, ExecutionOptions}
 import org.apache.flink.table.api.TableEnvironment
 
 import java.util
@@ -38,9 +39,10 @@ object FlinkSqlExecutor extends Logger {
       sql: String,
       parameter: ParameterTool,
       context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
+
     val flinkSql: String =
-      if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
-    require(flinkSql != null && flinkSql.trim.nonEmpty, "verify failed: flink sql cannot be empty")
+      if (StringUtils.isBlank(sql)) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
+    require(StringUtils.isNotBlank(flinkSql), "verify failed: flink sql cannot be empty")
 
     def callback(r: String): Unit = {
       callbackFunc match {
@@ -48,6 +50,8 @@ object FlinkSqlExecutor extends Logger {
         case x => x(r)
       }
     }
+
+    val runMode = parameter.get(ExecutionOptions.RUNTIME_MODE.key())
 
     var hasInsert = false
     val statementSet = context.createStatementSet()
@@ -120,6 +124,10 @@ object FlinkSqlExecutor extends Logger {
             case SELECT =>
               logError("StreamPark dose not support 'SELECT' statement now!")
               throw new RuntimeException("StreamPark dose not support 'select' statement now!")
+            case DELETE | UPDATE =>
+              if (runMode == "STREAMING") {
+                throw new UnsupportedOperationException(s"$command unsupported streaming mode.")
+              }
             case _ =>
               try {
                 lock.lock()
