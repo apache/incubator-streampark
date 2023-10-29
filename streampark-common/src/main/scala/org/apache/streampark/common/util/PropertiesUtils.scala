@@ -321,7 +321,7 @@ object PropertiesUtils extends Logger {
                 value += s" ${iter.next()}"
               }
             }
-            programArgs += value.replaceAll(s"^$p|$p$$", "")
+            programArgs += value.substring(1, value.length - 1)
           case _ => programArgs += v
         }
       }
