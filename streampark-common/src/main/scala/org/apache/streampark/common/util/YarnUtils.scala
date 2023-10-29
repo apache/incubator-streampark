@@ -47,7 +47,7 @@ object YarnUtils extends Logger {
   lazy val PROXY_YARN_URL = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_PROXY_YARN_URL)
 
   /**
-   * hadoop.http.authentication.type<br> get yarn http authentication mode.<br> ex: sample, kerberos
+   * hadoop.http.authentication.type<br> get yarn http authentication mode.<br> ex: simple, kerberos
    *
    * @return
    */
@@ -56,9 +56,9 @@ object YarnUtils extends Logger {
     "kerberos".equalsIgnoreCase(yarnHttpAuth)
   }
 
-  lazy val hasYarnHttpSampleAuth: Boolean = {
+  lazy val hasYarnHttpSimpleAuth: Boolean = {
     val yarnHttpAuth: String = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_YARN_AUTH)
-    "sample".equalsIgnoreCase(yarnHttpAuth)
+    "simple".equalsIgnoreCase(yarnHttpAuth)
   }
 
   /**
@@ -300,7 +300,7 @@ object YarnUtils extends Logger {
         })
     } else {
       val url =
-        if (!hasYarnHttpSampleAuth) reqUrl
+        if (!hasYarnHttpSimpleAuth) reqUrl
         else {
           s"$reqUrl?user.name=${HadoopUtils.hadoopUserName}"
         }
