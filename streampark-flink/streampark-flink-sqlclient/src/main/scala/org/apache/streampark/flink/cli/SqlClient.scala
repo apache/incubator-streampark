@@ -27,10 +27,13 @@ import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.ExecutionOptions
 
+import scala.collection.mutable.ArrayBuffer
 import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
 
 object SqlClient extends App {
+
+  val arguments = ArrayBuffer(args: _*)
 
   private[this] val parameterTool = ParameterTool.fromArgs(args)
 
@@ -51,25 +54,29 @@ object SqlClient extends App {
   private[this] val mode = sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
     case Some(e) =>
       // 1) flink sql execution.runtime-mode has highest priority
-      e.operands(1)
+      val m = e.operands(1)
+      arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
+      m
     case None =>
       // 2) dynamic properties execution.runtime-mode
       parameterTool.get(ExecutionOptions.RUNTIME_MODE.key(), null) match {
         case null =>
-          parameterTool.get(KEY_APP_CONF(), null) match {
+          val m = parameterTool.get(KEY_APP_CONF(), null) match {
             case null => defaultMode
             case f =>
               val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(f.drop(7)))
               // 3) application conf execution.runtime-mode
               parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode)
           }
+          arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
+          m
         case m => m
       }
   }
 
   mode match {
-    case "batch" => BatchSqlApp.main(args)
-    case "streaming" => StreamSqlApp.main(args)
+    case "batch" => BatchSqlApp.main(arguments.toArray)
+    case "streaming" => StreamSqlApp.main(arguments.toArray)
     case _ =>
       throw new IllegalArgumentException(
         "Usage: runtime execution-mode invalid, optional [streaming|batch]")
