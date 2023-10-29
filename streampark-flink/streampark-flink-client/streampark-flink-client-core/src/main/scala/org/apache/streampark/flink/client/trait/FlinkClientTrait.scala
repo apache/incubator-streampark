@@ -40,7 +40,6 @@ import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
-import java.net.URL
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.collection.JavaConversions._
@@ -200,33 +199,35 @@ trait FlinkClientTrait extends Logger {
   def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse
 
   def trySubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File)(
-      restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse)(
-      jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse): SubmitResponse = {
-    // Prioritize using Rest API submit while using JobGraph submit plan as backup
+      jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse,
+      restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse): SubmitResponse = {
+    // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
     Try {
-      logInfo(s"[flink-submit] Attempting to submit in Rest API Submit Plan.")
-      restApiFunc(submitRequest, flinkConfig, jarFile)
+      logInfo(s"[flink-submit] Submit job with JobGraph Plan.")
+      jobGraphFunc(submitRequest, flinkConfig, jarFile)
     } match {
       case Failure(e) =>
         logWarn(
-          s"""
-             |\n[flink-submit] RestAPI Submit Plan failed, error detail:
+          s"""\n
+             |[flink-submit] JobGraph Submit Plan failed, error detail:
              |------------------------------------------------------------------
              |${Utils.stringifyException(e)}
              |------------------------------------------------------------------
-             |Try JobGraph Submit Plan now...
+             |Now retry submit with RestAPI Plan ...
              |""".stripMargin
         )
-        Try(jobGraphFunc(submitRequest, flinkConfig, jarFile)) match {
+        Try(restApiFunc(submitRequest, flinkConfig, jarFile)) match {
           case Success(r) => r
           case Failure(e) =>
-            logError(s"""
-                        |\n[flink-submit] JobGraph Submit failed, error detail:
-                        |------------------------------------------------------------------
-                        |${Utils.stringifyException(e)}
-                        |------------------------------------------------------------------
-                        |Both Rest API Submit and JobGraph failed!
-                        |""".stripMargin)
+            logError(
+              s"""\n
+                 |[flink-submit] RestAPI Submit failed, error detail:
+                 |------------------------------------------------------------------
+                 |${Utils.stringifyException(e)}
+                 |------------------------------------------------------------------
+                 |Both JobGraph submit plan and Rest API submit plan all failed!
+                 |""".stripMargin
+            )
             throw e
         }
       case Success(v) => v

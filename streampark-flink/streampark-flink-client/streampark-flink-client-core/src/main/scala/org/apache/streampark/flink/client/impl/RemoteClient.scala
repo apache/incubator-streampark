@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.{ClassLoaderUtils, Utils}
+import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean.{CancelRequest, CancelResponse, SavepointRequestTrait, SavepointResponse, SubmitRequest, SubmitResponse, TriggerSavepointRequest}
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
@@ -26,13 +26,9 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
-import org.apache.flink.yarn.configuration.YarnConfigOptions
 
 import java.io.File
 import java.lang.{Integer => JavaInt}
-import java.util
-
-import scala.util.{Failure, Success, Try}
 
 /** Submit Job to Remote Cluster */
 object RemoteClient extends FlinkClientTrait {
@@ -48,8 +44,9 @@ object RemoteClient extends FlinkClientTrait {
       flinkConfig: Configuration): SubmitResponse = {
 
     // 2) submit job
-    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(
-      jobGraphSubmit)
+    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(
+      jobGraphSubmit,
+      restApiSubmit)
   }
 
   override def doCancel(request: CancelRequest, flinkConfig: Configuration): CancelResponse = {
