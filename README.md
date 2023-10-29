@@ -93,7 +93,7 @@ You can submit any ideas as [pull requests](https://github.com/apache/incubator-
 
 ### 🍻 How to Contribute
 
-We welcome your suggestions, comments (including criticisms), comments and contributions. See 🔗[How to Contribute](https://streampark.apache.org/community/submit_guide/submit_code) and 🔗[Code Submission Guide](https://streampark.apache.org/community/submit_guide/submit_code)
+We welcome your suggestions,comments(including criticisms) and contributions. See 🔗[How to Contribute](https://streampark.apache.org/community/submit_guide/submit_code) and 🔗[Code Submission Guide](https://streampark.apache.org/community/submit_guide/submit_code)
 
 Thank you to all the people who already contributed to StreamPark!
 
