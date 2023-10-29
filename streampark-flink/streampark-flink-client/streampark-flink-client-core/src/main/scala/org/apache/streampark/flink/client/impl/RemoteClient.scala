@@ -44,8 +44,7 @@ object RemoteClient extends FlinkClientTrait {
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
     //  submit job
-    super.trySubmit(submitRequest, flinkConfig)(restApiSubmit)(jobGraphSubmit)
-
+    super.trySubmit(submitRequest, flinkConfig)(jobGraphSubmit, restApiSubmit)
   }
 
   override def doCancel(request: CancelRequest, flinkConfig: Configuration): CancelResponse = {
