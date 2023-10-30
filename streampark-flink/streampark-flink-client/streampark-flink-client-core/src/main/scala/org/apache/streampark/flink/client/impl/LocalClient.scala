@@ -67,9 +67,9 @@ object LocalClient extends FlinkClientTrait {
   }
 
   override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      savepointRequest: TriggerSavepointRequest,
       flinkConfig: Configuration): SavepointResponse = {
-    RemoteClient.doTriggerSavepoint(request, flinkConfig)
+    RemoteClient.doTriggerSavepoint(savepointRequest, flinkConfig)
   }
 
   override def doCancel(

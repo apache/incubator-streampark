@@ -48,12 +48,14 @@ object RemoteClient extends FlinkClientTrait {
 
   }
 
-  override def doCancel(request: CancelRequest, flinkConfig: Configuration): CancelResponse = {
+  override def doCancel(
+      cancelRequest: CancelRequest,
+      flinkConfig: Configuration): CancelResponse = {
     executeClientAction(
-      request,
+      cancelRequest,
       flinkConfig,
       (jobID, clusterClient) => {
-        CancelResponse(super.cancelJob(request, jobID, clusterClient))
+        CancelResponse(super.cancelJob(cancelRequest, jobID, clusterClient))
       })
   }
 
@@ -90,13 +92,13 @@ object RemoteClient extends FlinkClientTrait {
   }
 
   override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      savepointRequest: TriggerSavepointRequest,
       flinkConfig: Configuration): SavepointResponse = {
     executeClientAction(
-      request,
+      savepointRequest,
       flinkConfig,
       (jobID, clusterClient) => {
-        SavepointResponse(super.triggerSavepoint(request, jobID, clusterClient))
+        SavepointResponse(super.triggerSavepoint(savepointRequest, jobID, clusterClient))
       })
   }
 
