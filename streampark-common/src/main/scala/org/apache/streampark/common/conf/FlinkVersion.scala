@@ -59,6 +59,8 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
     lib
   }
 
+  lazy val flinkLibs: List[NetURL] = flinkLib.listFiles().map(_.toURI.toURL).toList
+
   lazy val version: String = {
     val flinkVersion = new AtomicReference[String]
     val cmd = List(

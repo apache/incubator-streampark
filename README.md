@@ -66,18 +66,18 @@ git clone git@github.com:apache/incubator-streampark.git
 cd incubator-streampark
 ./build.sh
 ```
-🗄 Deatils:how to [Development](https://streampark.apache.org/docs/user-guide/development)
+🗄 Details:how to [Development](https://streampark.apache.org/docs/user-guide/development)
 ## 🧑‍💻 Downloads
 
 Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)
 
 ## 🚀 Quick Start
 
-click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
+Click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
 
 ## 💋 Our users
 
-Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project ? [Welcome to add your company](https://github.com/apache/incubator-streampark/issues/163)!
+Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project? [Welcome to add your company](https://github.com/apache/incubator-streampark/issues/163)!
 
 ![Our users](https://streampark.apache.org/image/users.png)
 

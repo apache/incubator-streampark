@@ -30,7 +30,7 @@ import java.util.regex.Pattern
 import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
-import scala.collection.mutable.{Map => MutableMap}
+import scala.collection.mutable.{ArrayBuffer, Map => MutableMap}
 
 object PropertiesUtils extends Logger {
 
@@ -303,6 +303,30 @@ object PropertiesUtils extends Logger {
       }
       map.toMap
     }
+  }
+
+  @Nonnull def extractArguments(args: String): List[String] = {
+    val programArgs = new ArrayBuffer[String]()
+    if (StringUtils.isNotEmpty(args)) {
+      val array = args.split("\\s+")
+      val iter = array.iterator
+      while (iter.hasNext) {
+        val v = iter.next()
+        val p = v.take(1)
+        p match {
+          case "'" | "\"" =>
+            var value = v
+            if (!v.endsWith(p)) {
+              while (!value.endsWith(p) && iter.hasNext) {
+                value += s" ${iter.next()}"
+              }
+            }
+            programArgs += value.substring(1, value.length - 1)
+          case _ => programArgs += v
+        }
+      }
+    }
+    programArgs.toList
   }
 
   @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] =

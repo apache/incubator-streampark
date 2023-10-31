@@ -102,10 +102,8 @@ object YarnApplicationClient extends YarnClientTrait {
         throw new RuntimeException(s"$pyVenv File does not exist")
       }
 
-      val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
-      if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
-        flinkConfig.safeSet(PipelineOptions.JARS, util.Arrays.asList(localLib))
-      }
+      // including $app/lib
+      includingPipelineJars(submitRequest, flinkConfig)
 
       // yarn.ship-files
       val shipFiles = new util.ArrayList[String]()
