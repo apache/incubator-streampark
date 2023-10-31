@@ -55,11 +55,12 @@ class IngressStrategyV1 extends IngressStrategy {
         val ingress = new IngressBuilder()
           .withNewMetadata()
           .withName(clusterId)
-          .addToAnnotations(buildIngressAnnotations(clusterId).asJava)
+          .addToAnnotations(buildIngressAnnotations(clusterId, nameSpace).asJava)
           .addToLabels(buildIngressLabels(clusterId).asJava)
           .addToOwnerReferences(ownerReference) // Add OwnerReference
           .endMetadata()
           .withNewSpec()
+          .withIngressClassName("nginx")
           .addNewRule()
           .withHost(domainName)
           .withNewHttp()
