@@ -36,7 +36,7 @@ public interface ProjectService extends IService<Project> {
 
   boolean delete(Long id);
 
-  IPage<Project> page(Project project, RestRequest restRequest);
+  IPage<Project> getPage(Project project, RestRequest restRequest);
 
   Boolean existsByTeamId(Long teamId);
 

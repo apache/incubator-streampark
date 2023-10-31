@@ -90,7 +90,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   }
 
   @Override
-  public IPage<Variable> page(Variable variable, RestRequest request) {
+  public IPage<Variable> getPage(Variable variable, RestRequest request) {
     if (variable.getTeamId() == null) {
       return null;
     }
@@ -99,7 +99,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   }
 
   @Override
-  public IPage<Application> pageDependApps(Variable variable, RestRequest request) {
+  public IPage<Application> getDependAppsPage(Variable variable, RestRequest request) {
     List<Application> applications = getDependApplicationsByCode(variable);
 
     IPage<Application> page = new Page<>();

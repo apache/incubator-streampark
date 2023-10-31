@@ -202,7 +202,7 @@ public class ApplicationConfigServiceImpl
   }
 
   @Override
-  public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
+  public IPage<ApplicationConfig> getPage(ApplicationConfig config, RestRequest request) {
     Page<ApplicationConfig> page =
         new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
     IPage<ApplicationConfig> configList =

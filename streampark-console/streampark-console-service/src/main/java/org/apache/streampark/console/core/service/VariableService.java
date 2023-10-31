@@ -35,7 +35,7 @@ public interface VariableService extends IService<Variable> {
    * @param restRequest The query request containing search filters and pagination options.
    * @return An IPage object containing the found Variable objects matching the search criteria.
    */
-  IPage<Variable> page(Variable variable, RestRequest restRequest);
+  IPage<Variable> getPage(Variable variable, RestRequest restRequest);
 
   /**
    * Retrieves a list of variables based on the team ID.
@@ -102,7 +102,7 @@ public interface VariableService extends IService<Variable> {
    * @param request The REST request containing additional parameters for retrieving the page.
    * @return An instance of IPage<Application> containing the dependent applications.
    */
-  IPage<Application> pageDependApps(Variable variable, RestRequest request);
+  IPage<Application> getDependAppsPage(Variable variable, RestRequest request);
 
   /**
    * Updates the given variable.

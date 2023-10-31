@@ -63,7 +63,7 @@ public class VariableController {
   @PostMapping("page")
   @RequiresPermissions("variable:view")
   public RestResponse page(RestRequest restRequest, Variable variable) {
-    IPage<Variable> page = variableService.page(variable, restRequest);
+    IPage<Variable> page = variableService.getPage(variable, restRequest);
     for (Variable v : page.getRecords()) {
       v.dataMasking();
     }
@@ -91,7 +91,7 @@ public class VariableController {
   @PostMapping("dependApps")
   @RequiresPermissions("variable:depend_apps")
   public RestResponse dependApps(RestRequest restRequest, Variable variable) {
-    IPage<Application> dependApps = variableService.pageDependApps(variable, restRequest);
+    IPage<Application> dependApps = variableService.getDependAppsPage(variable, restRequest);
     return RestResponse.success(dependApps);
   }
 

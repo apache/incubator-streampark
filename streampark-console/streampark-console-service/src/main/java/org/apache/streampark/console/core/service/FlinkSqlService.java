@@ -54,5 +54,5 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
   List<FlinkSql> listByTeamId(Long teamId);
 
-  IPage<FlinkSql> page(Long appId, RestRequest request);
+  IPage<FlinkSql> getPage(Long appId, RestRequest request);
 }

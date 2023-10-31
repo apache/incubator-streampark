@@ -99,7 +99,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   @Autowired private FlinkSqlService flinkSqlService;
 
   @Override
-  public IPage<Resource> page(Resource resource, RestRequest restRequest) {
+  public IPage<Resource> getPage(Resource resource, RestRequest restRequest) {
     if (resource.getTeamId() == null) {
       return null;
     }

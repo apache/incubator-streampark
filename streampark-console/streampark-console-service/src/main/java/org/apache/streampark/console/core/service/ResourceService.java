@@ -37,7 +37,7 @@ public interface ResourceService extends IService<Resource> {
    * @param restRequest queryRequest
    * @return IPage
    */
-  IPage<Resource> page(Resource resource, RestRequest restRequest);
+  IPage<Resource> getPage(Resource resource, RestRequest restRequest);
 
   /**
    * check resource exists by user id

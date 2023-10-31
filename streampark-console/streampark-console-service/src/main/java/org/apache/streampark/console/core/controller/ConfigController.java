@@ -66,7 +66,7 @@ public class ConfigController {
   @Operation(summary = "List the application configs")
   @PostMapping("list")
   public RestResponse list(ApplicationConfig config, RestRequest request) {
-    IPage<ApplicationConfig> page = applicationConfigService.page(config, request);
+    IPage<ApplicationConfig> page = applicationConfigService.getPage(config, request);
     return RestResponse.success(page);
   }
 

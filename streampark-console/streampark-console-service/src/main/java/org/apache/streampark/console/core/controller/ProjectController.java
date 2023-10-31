@@ -98,7 +98,7 @@ public class ProjectController {
     if (project.getTeamId() == null) {
       return RestResponse.success(Collections.emptyList());
     }
-    IPage<Project> page = projectService.page(project, restRequest);
+    IPage<Project> page = projectService.getPage(project, restRequest);
     return RestResponse.success().data(page);
   }
 

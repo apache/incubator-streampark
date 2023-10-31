@@ -100,7 +100,7 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
    * @return an IPage containing the ApplicationConfig objects that match the filter criteria
    *     specified in the config object, limited by the settings in the request object
    */
-  IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request);
+  IPage<ApplicationConfig> getPage(ApplicationConfig config, RestRequest request);
 
   /**
    * Retrieves the history of application configurations for a given application.
