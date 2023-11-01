@@ -117,7 +117,7 @@ public class AccessTokenController {
   @RequiresPermissions("token:view")
   public RestResponse tokensList(
       RestRequest restRequest, @Parameter(hidden = true) AccessToken accessToken) {
-    IPage<AccessToken> accessTokens = accessTokenService.findAccessTokens(accessToken, restRequest);
+    IPage<AccessToken> accessTokens = accessTokenService.getPage(accessToken, restRequest);
     return RestResponse.success(accessTokens);
   }
 

@@ -126,14 +126,14 @@ public class ConsoleAspect {
           break;
         case TEAM:
           ApiAlertException.throwIfTrue(
-              memberService.findByUserName(paramId, currentUser.getUsername()) == null,
+              memberService.getByTeamIdUserName(paramId, currentUser.getUsername()) == null,
               "Permission denied, only user belongs to this team can access this permission");
           break;
         case APP:
           Application app = applicationManageService.getById(paramId);
           ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
           ApiAlertException.throwIfTrue(
-              memberService.findByUserName(app.getTeamId(), currentUser.getUsername()) == null,
+              memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername()) == null,
               "Permission denied, only user belongs to this team can access this permission");
           break;
         default:

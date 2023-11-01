@@ -74,7 +74,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public IPage<Member> findUsers(Member member, RestRequest request) {
+  public IPage<Member> getPage(Member member, RestRequest request) {
     ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
     Page<Member> page = new Page<>();
     page.setCurrent(request.getPageNum());
@@ -83,18 +83,18 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public List<User> findCandidateUsers(Long teamId) {
+  public List<User> listUsersNotInTeam(Long teamId) {
     return baseMapper.selectUsersNotInTeam(teamId);
   }
 
   @Override
-  public List<Team> findUserTeams(Long userId) {
-    return teamService.findUserTeams(userId);
+  public List<Team> listTeamsByUserId(Long userId) {
+    return teamService.listByUserId(userId);
   }
 
   @Override
-  public Member findByUserName(Long teamId, String userName) {
-    User user = userService.findByName(userName);
+  public Member getByTeamIdUserName(Long teamId, String userName) {
+    User user = userService.getByName(userName);
     if (user == null) {
       return null;
     }
@@ -111,7 +111,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public List<Long> findUserIdsByRoleId(Long roleId) {
+  public List<Long> listUserIdsByRoleId(Long roleId) {
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>().eq(Member::getRoleId, roleId);
     List<Member> list = baseMapper.selectList(queryWrapper);
@@ -121,7 +121,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   @Override
   public void createMember(Member member) {
     User user =
-        Optional.ofNullable(userService.findByName(member.getUserName()))
+        Optional.ofNullable(userService.getByName(member.getUserName()))
             .orElseThrow(
                 () ->
                     new ApiAlertException(
