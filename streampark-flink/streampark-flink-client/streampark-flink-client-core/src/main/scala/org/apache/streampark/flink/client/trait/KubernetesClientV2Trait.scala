@@ -34,6 +34,7 @@ import scala.collection.mutable
 import scala.jdk.CollectionConverters.asScalaBufferConverter
 import scala.util.{Failure, Success, Try}
 
+/** Flink K8s session/application mode cancel and Savepoint */
 trait KubernetesClientV2Trait extends FlinkClientTrait {
 
   protected type FailureMessage = String
@@ -60,6 +61,7 @@ trait KubernetesClientV2Trait extends FlinkClientTrait {
     Try(yamlMapper.readValue(yaml, classOf[Pod]))
   }
 
+  /** Generate JobDef */
   protected def genJobDef(
       flinkConfObj: Configuration,
       jarUriHint: Option[String]): Either[FailureMessage, JobDef] = {

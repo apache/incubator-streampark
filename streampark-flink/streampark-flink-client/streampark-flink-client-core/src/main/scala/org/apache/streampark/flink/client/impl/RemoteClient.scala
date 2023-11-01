@@ -34,10 +34,6 @@ import scala.util.{Failure, Success, Try}
 /** Submit Job to Remote Cluster */
 object RemoteClient extends FlinkClientTrait {
 
-  /**
-   * @param submitRequest
-   * @param flinkConfig
-   */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {}
 
   override def doSubmit(
