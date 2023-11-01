@@ -54,7 +54,7 @@ public interface ProjectService extends IService<Project> {
 
   String getAppConfPath(Long id, String module);
 
-  List<Application> list(Project project);
+  List<Application> listApps(Project project);
 
   boolean exists(Project project);
 }

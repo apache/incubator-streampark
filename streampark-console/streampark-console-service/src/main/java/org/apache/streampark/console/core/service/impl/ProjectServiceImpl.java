@@ -142,7 +142,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     if (projectParam.getBuildState() != null) {
       project.setBuildState(projectParam.getBuildState());
       if (BuildStateEnum.NEED_REBUILD == BuildStateEnum.of(projectParam.getBuildState())) {
-        List<Application> applications = list(project);
+        List<Application> applications = listApps(project);
         // Update deployment status
         applications.forEach(
             (app) -> {
@@ -271,7 +271,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  public List<Application> list(Project project) {
+  public List<Application> listApps(Project project) {
     return this.applicationManageService.listByProjectId(project.getId());
   }
 
