@@ -81,7 +81,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
     )
   }
 
-  // Generate FlinkDeployment CR definition, it is a pure effect function.
+  /** Generate FlinkDeployment CR definition, it is a pure effect function. */
   private def genFlinkDeployDef(
       submitReq: SubmitRequest,
       originFlinkConfig: Configuration,
@@ -246,6 +246,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       ))
   }
 
+  /** Shutdown Flink Application deployment. */
   @throws[Throwable]
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
     val name = shutDownRequest.clusterId
