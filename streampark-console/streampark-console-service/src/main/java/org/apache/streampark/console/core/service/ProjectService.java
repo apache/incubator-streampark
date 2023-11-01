@@ -36,11 +36,11 @@ public interface ProjectService extends IService<Project> {
 
   boolean delete(Long id);
 
-  IPage<Project> page(Project project, RestRequest restRequest);
+  IPage<Project> getPage(Project project, RestRequest restRequest);
 
   Boolean existsByTeamId(Long teamId);
 
-  List<Project> findByTeamId(Long teamId);
+  List<Project> listByTeamId(Long teamId);
 
   void build(Long id) throws Exception;
 
@@ -54,7 +54,7 @@ public interface ProjectService extends IService<Project> {
 
   String getAppConfPath(Long id, String module);
 
-  List<Application> getApplications(Project project);
+  List<Application> listApps(Project project);
 
-  boolean checkExists(Project project);
+  boolean exists(Project project);
 }

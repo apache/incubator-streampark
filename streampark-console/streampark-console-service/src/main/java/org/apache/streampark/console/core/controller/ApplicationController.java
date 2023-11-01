@@ -139,7 +139,7 @@ public class ApplicationController {
   @Operation(summary = "Get applications dashboard data")
   @PostMapping("dashboard")
   public RestResponse dashboard(Long teamId) {
-    Map<String, Serializable> map = applicationInfoService.dashboard(teamId);
+    Map<String, Serializable> map = applicationInfoService.getDashboardDataMap(teamId);
     return RestResponse.success(map);
   }
 
@@ -319,14 +319,14 @@ public class ApplicationController {
   @Operation(summary = "List application backups")
   @PostMapping("backups")
   public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
-    IPage<ApplicationBackUp> backups = backUpService.page(backUp, request);
+    IPage<ApplicationBackUp> backups = backUpService.getPage(backUp, request);
     return RestResponse.success(backups);
   }
 
   @Operation(summary = "List application operation logs")
   @PostMapping("optionlog")
   public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
-    IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
+    IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
     return RestResponse.success(applicationList);
   }
 

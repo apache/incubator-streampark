@@ -55,7 +55,7 @@ public class YarnQueueController {
   @ApiAccess
   @PostMapping("list")
   public RestResponse list(RestRequest restRequest, YarnQueue yarnQueue) {
-    IPage<YarnQueue> queuePage = yarnQueueService.findYarnQueues(yarnQueue, restRequest);
+    IPage<YarnQueue> queuePage = yarnQueueService.getPage(yarnQueue, restRequest);
     return RestResponse.success(queuePage);
   }
 

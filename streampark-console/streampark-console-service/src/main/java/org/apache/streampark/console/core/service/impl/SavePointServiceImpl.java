@@ -212,7 +212,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
+  public IPage<SavePoint> getPage(SavePoint savePoint, RestRequest request) {
     Page<SavePoint> page =
         new MybatisPager<SavePoint>().getPage(request, "trigger_time", Constant.ORDER_DESC);
     LambdaQueryWrapper<SavePoint> queryWrapper =

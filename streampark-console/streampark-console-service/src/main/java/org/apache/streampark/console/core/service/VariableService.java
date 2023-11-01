@@ -35,7 +35,7 @@ public interface VariableService extends IService<Variable> {
    * @param restRequest The query request containing search filters and pagination options.
    * @return An IPage object containing the found Variable objects matching the search criteria.
    */
-  IPage<Variable> page(Variable variable, RestRequest restRequest);
+  IPage<Variable> getPage(Variable variable, RestRequest restRequest);
 
   /**
    * Retrieves a list of variables based on the team ID.
@@ -43,7 +43,7 @@ public interface VariableService extends IService<Variable> {
    * @param teamId The ID of the team to filter the variables by.
    * @return A list of variables that belong to the specified team.
    */
-  List<Variable> findByTeamId(Long teamId);
+  List<Variable> listByTeamId(Long teamId);
 
   /**
    * Retrieve a list of variables based on the team ID and search keywords.
@@ -53,7 +53,7 @@ public interface VariableService extends IService<Variable> {
    *     nullable.
    * @return A List of Variable objects that match the specified team ID and search keywords.
    */
-  List<Variable> findByTeamId(Long teamId, String keyword);
+  List<Variable> listByTeamId(Long teamId, String keyword);
 
   /**
    * Check if a team exists by teamId.
@@ -102,7 +102,7 @@ public interface VariableService extends IService<Variable> {
    * @param request The REST request containing additional parameters for retrieving the page.
    * @return An instance of IPage<Application> containing the dependent applications.
    */
-  IPage<Application> dependAppsPage(Variable variable, RestRequest request);
+  IPage<Application> getDependAppsPage(Variable variable, RestRequest request);
 
   /**
    * Updates the given variable.

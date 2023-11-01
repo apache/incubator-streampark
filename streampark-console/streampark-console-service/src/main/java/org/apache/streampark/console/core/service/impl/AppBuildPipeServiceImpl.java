@@ -577,7 +577,7 @@ public class AppBuildPipeServiceImpl
   }
 
   @Override
-  public Map<Long, PipelineStatusEnum> listPipelineStatus(List<Long> appIds) {
+  public Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds) {
     if (CollectionUtils.isEmpty(appIds)) {
       return Collections.emptyMap();
     }

@@ -304,7 +304,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public List<FlinkCluster> getByExecutionModes(Collection<FlinkExecutionMode> executionModeEnums) {
+  public List<FlinkCluster> listByExecutionModes(
+      Collection<FlinkExecutionMode> executionModeEnums) {
     return getBaseMapper()
         .selectList(
             new LambdaQueryWrapper<FlinkCluster>()

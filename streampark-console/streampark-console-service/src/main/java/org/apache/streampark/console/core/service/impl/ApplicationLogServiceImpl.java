@@ -40,7 +40,7 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
     implements ApplicationLogService {
 
   @Override
-  public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {
+  public IPage<ApplicationLog> getPage(ApplicationLog applicationLog, RestRequest request) {
     Page<ApplicationLog> page =
         new MybatisPager<ApplicationLog>().getPage(request, "option_time", Constant.ORDER_DESC);
     LambdaQueryWrapper<ApplicationLog> queryWrapper =

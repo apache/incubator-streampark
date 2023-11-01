@@ -98,7 +98,7 @@ public class ProjectController {
     if (project.getTeamId() == null) {
       return RestResponse.success(Collections.emptyList());
     }
-    IPage<Project> page = projectService.page(project, restRequest);
+    IPage<Project> page = projectService.getPage(project, restRequest);
     return RestResponse.success().data(page);
   }
 
@@ -127,7 +127,7 @@ public class ProjectController {
   @Operation(summary = "Check the project")
   @PostMapping("exists")
   public RestResponse exists(Project project) {
-    boolean exists = projectService.checkExists(project);
+    boolean exists = projectService.exists(project);
     return RestResponse.success().data(exists);
   }
 
@@ -155,7 +155,7 @@ public class ProjectController {
   @Operation(summary = "List the team projects")
   @PostMapping("select")
   public RestResponse select(@RequestParam Long teamId) {
-    List<Project> list = projectService.findByTeamId(teamId);
+    List<Project> list = projectService.listByTeamId(teamId);
     return RestResponse.success().data(list);
   }
 }

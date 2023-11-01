@@ -53,7 +53,7 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
    * @param request The {@link RestRequest} object used for pagination and sorting.
    * @return An {@link IPage} containing the retrieved {@link ApplicationBackUp} objects.
    */
-  IPage<ApplicationBackUp> page(ApplicationBackUp bakParam, RestRequest request);
+  IPage<ApplicationBackUp> getPage(ApplicationBackUp bakParam, RestRequest request);
 
   /**
    * Rolls back the changes made by the specified application backup.
