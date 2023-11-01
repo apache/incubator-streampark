@@ -51,11 +51,7 @@ trait IngressStrategy {
     val annotations = Map(
       "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
       "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
-      "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;" + String
-        .format(
-          " sub_filter '<base href=\"./\">' '<base href=\"/%s/%s/\">'; sub_filter_once off;",
-          namespace,
-          clusterId))
+      "nginx.ingress.kubernetes.io/configuration-snippet" -> s"""rewrite ^(/$clusterId)$$ $$1/ permanent; sub_filter '<base href="./">' '<base href="/$namespace/$clusterId/">'; sub_filter_once off;"""
     )
     val ingressClass = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
     if (ingressClass.nonEmpty) {
