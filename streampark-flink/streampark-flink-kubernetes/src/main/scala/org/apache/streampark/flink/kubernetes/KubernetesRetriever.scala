@@ -41,11 +41,11 @@ import scala.util.{Failure, Success, Try}
 object KubernetesRetriever extends Logger {
 
   // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
-  val FLINK_CLIENT_TIMEOUT_SEC = 30L
+  val FLINK_CLIENT_TIMEOUT_SEC = 60L
   // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
-  val FLINK_REST_AWAIT_TIMEOUT_SEC = 10L
+  val FLINK_REST_AWAIT_TIMEOUT_SEC = 30L
   // see org.apache.flink.configuration.RestOptions.RETRY_MAX_ATTEMPTS
-  val FLINK_REST_RETRY_MAX_ATTEMPTS = 2
+  val FLINK_REST_RETRY_MAX_ATTEMPTS = 30
 
   /** get new KubernetesClient */
   @throws(classOf[KubernetesClientException])
