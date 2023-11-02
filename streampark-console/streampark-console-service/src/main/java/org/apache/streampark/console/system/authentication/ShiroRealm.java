@@ -85,7 +85,7 @@ public class ShiroRealm extends AuthorizingRealm {
       throw new AuthenticationException("Token verification failed");
     }
     // Query user information by username
-    User user = userService.getByName(username);
+    User user = userService.getByUsername(username);
 
     if (user == null) {
       throw new AuthenticationException("ERROR Incorrect username or password!");

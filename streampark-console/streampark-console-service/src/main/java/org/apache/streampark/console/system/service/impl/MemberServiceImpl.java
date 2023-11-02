@@ -94,7 +94,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public Member getByTeamIdUserName(Long teamId, String userName) {
-    User user = userService.getByName(userName);
+    User user = userService.getByUsername(userName);
     if (user == null) {
       return null;
     }
@@ -121,7 +121,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   @Override
   public void createMember(Member member) {
     User user =
-        Optional.ofNullable(userService.getByName(member.getUserName()))
+        Optional.ofNullable(userService.getByUsername(member.getUserName()))
             .orElseThrow(
                 () ->
                     new ApiAlertException(

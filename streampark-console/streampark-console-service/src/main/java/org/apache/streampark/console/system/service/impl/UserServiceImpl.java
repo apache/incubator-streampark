@@ -82,7 +82,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private ShiroProperties shiroProperties;
 
   @Override
-  public User getByName(String username) {
+  public User getByUsername(String username) {
     LambdaQueryWrapper<User> queryWrapper =
         new LambdaQueryWrapper<User>().eq(User::getUsername, username);
     return baseMapper.selectOne(queryWrapper);
@@ -235,7 +235,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   }
 
   @Override
-  public List<User> listByAppOwner(Long teamId) {
+  public List<User> listByTeamId(Long teamId) {
     return baseMapper.selectUsersByAppOwner(teamId);
   }
 

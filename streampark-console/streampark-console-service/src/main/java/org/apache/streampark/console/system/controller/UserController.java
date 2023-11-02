@@ -107,7 +107,7 @@ public class UserController {
   @Operation(summary = "Check the username")
   @PostMapping("check/name")
   public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
-    boolean result = this.userService.getByName(username) == null;
+    boolean result = this.userService.getByUsername(username) == null;
     return RestResponse.success(result);
   }
 
@@ -161,7 +161,7 @@ public class UserController {
   @Operation(summary = "List the team users")
   @PostMapping("appOwners")
   public RestResponse appOwners(Long teamId) {
-    List<User> userList = userService.listByAppOwner(teamId);
+    List<User> userList = userService.listByTeamId(teamId);
     userList.forEach(User::dataMasking);
     return RestResponse.success(userList);
   }

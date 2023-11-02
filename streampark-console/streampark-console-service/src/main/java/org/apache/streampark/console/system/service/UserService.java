@@ -39,7 +39,7 @@ public interface UserService extends IService<User> {
    * @param username username
    * @return user
    */
-  User getByName(String username);
+  User getByUsername(String username);
 
   /**
    * find uer detail, contains basic info, role, department
@@ -106,7 +106,7 @@ public interface UserService extends IService<User> {
 
   void fillInTeam(User user);
 
-  List<User> listByAppOwner(Long teamId);
+  List<User> listByTeamId(Long teamId);
 
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 
