@@ -34,11 +34,11 @@ public interface MenuService extends IService<Menu> {
    * @param teamId team id. If it's null, will find permissions from all teams.
    * @return permissions
    */
-  List<String> findUserPermissions(Long userId, Long teamId);
+  List<String> listPermissions(Long userId, Long teamId);
 
-  List<Menu> findUserMenus(Long userId, Long teamId);
+  List<Menu> listMenus(Long userId, Long teamId);
 
-  Map<String, Object> findMenus(Menu menu);
+  Map<String, Object> listMenuMap(Menu menu);
 
-  List<VueRouter<Menu>> getUserRouters(Long userId, Long teamId);
+  List<VueRouter<Menu>> listRouters(Long userId, Long teamId);
 }

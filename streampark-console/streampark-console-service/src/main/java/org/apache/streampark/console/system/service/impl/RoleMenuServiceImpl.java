@@ -53,7 +53,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
   }
 
   @Override
-  public List<RoleMenu> getByRoleId(String roleId) {
+  public List<RoleMenu> listByRoleId(String roleId) {
     LambdaQueryWrapper<RoleMenu> queryWrapper =
         new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, roleId);
     return baseMapper.selectList(queryWrapper);

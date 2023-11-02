@@ -69,7 +69,7 @@ public class UserController {
       value = {"user:view", "app:view"},
       logical = Logical.OR)
   public RestResponse userList(RestRequest restRequest, User user) {
-    IPage<User> userList = userService.findUserDetail(user, restRequest);
+    IPage<User> userList = userService.getPage(user, restRequest);
     return RestResponse.success(userList);
   }
 
@@ -100,14 +100,14 @@ public class UserController {
   @Operation(summary = "List without token users")
   @PostMapping("getNoTokenUser")
   public RestResponse getNoTokenUser() {
-    List<User> userList = this.userService.getNoTokenUser();
+    List<User> userList = this.userService.listNoTokenUser();
     return RestResponse.success(userList);
   }
 
   @Operation(summary = "Check the username")
   @PostMapping("check/name")
   public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
-    boolean result = this.userService.findByName(username) == null;
+    boolean result = this.userService.getByUsername(username) == null;
     return RestResponse.success(result);
   }
 
@@ -161,7 +161,7 @@ public class UserController {
   @Operation(summary = "List the team users")
   @PostMapping("appOwners")
   public RestResponse appOwners(Long teamId) {
-    List<User> userList = userService.findByAppOwner(teamId);
+    List<User> userList = userService.listByTeamId(teamId);
     userList.forEach(User::dataMasking);
     return RestResponse.success(userList);
   }

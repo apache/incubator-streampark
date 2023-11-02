@@ -58,21 +58,21 @@ public class RoleController {
   @PostMapping("list")
   @RequiresPermissions("role:view")
   public RestResponse roleList(RestRequest restRequest, Role role) {
-    IPage<Role> roleList = roleService.findRoles(role, restRequest);
+    IPage<Role> roleList = roleService.getPage(role, restRequest);
     return RestResponse.success(roleList);
   }
 
   @Operation(summary = "Check the role name")
   @PostMapping("check/name")
   public RestResponse checkRoleName(@NotBlank(message = "{required}") String roleName) {
-    Role result = this.roleService.findByName(roleName);
+    Role result = this.roleService.getByName(roleName);
     return RestResponse.success(result == null);
   }
 
   @Operation(summary = "List role menus")
   @PostMapping("menu")
   public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
-    List<RoleMenu> list = this.roleMenuServie.getByRoleId(roleId);
+    List<RoleMenu> list = this.roleMenuServie.listByRoleId(roleId);
     List<String> roleMenus =
         list.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))

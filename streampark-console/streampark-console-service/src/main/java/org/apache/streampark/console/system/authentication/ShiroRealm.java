@@ -63,7 +63,7 @@ public class ShiroRealm extends AuthorizingRealm {
     SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
 
     // Get user permission set
-    Set<String> permissionSet = userService.getPermissions(userId, null);
+    Set<String> permissionSet = userService.listPermissions(userId, null);
     simpleAuthorizationInfo.setStringPermissions(permissionSet);
     return simpleAuthorizationInfo;
   }
@@ -85,7 +85,7 @@ public class ShiroRealm extends AuthorizingRealm {
       throw new AuthenticationException("Token verification failed");
     }
     // Query user information by username
-    User user = userService.findByName(username);
+    User user = userService.getByUsername(username);
 
     if (user == null) {
       throw new AuthenticationException("ERROR Incorrect username or password!");

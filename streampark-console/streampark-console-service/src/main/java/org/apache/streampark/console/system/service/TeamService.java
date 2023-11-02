@@ -27,9 +27,9 @@ import java.util.List;
 
 public interface TeamService extends IService<Team> {
 
-  IPage<Team> findTeams(Team team, RestRequest request);
+  IPage<Team> getPage(Team team, RestRequest request);
 
-  Team findByName(String teamName);
+  Team getByName(String teamName);
 
   void createTeam(Team team);
 
@@ -37,5 +37,5 @@ public interface TeamService extends IService<Team> {
 
   void updateTeam(Team team);
 
-  List<Team> findUserTeams(Long userId);
+  List<Team> listByUserId(Long userId);
 }
