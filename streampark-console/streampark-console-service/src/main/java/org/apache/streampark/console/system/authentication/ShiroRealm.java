@@ -63,7 +63,7 @@ public class ShiroRealm extends AuthorizingRealm {
     SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
 
     // Get user permission set
-    Set<String> permissionSet = userService.listPermissionsByUserIdTeamId(userId, null);
+    Set<String> permissionSet = userService.listPermissions(userId, null);
     simpleAuthorizationInfo.setStringPermissions(permissionSet);
     return simpleAuthorizationInfo;
   }

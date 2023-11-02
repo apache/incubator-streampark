@@ -180,8 +180,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   }
 
   @Override
-  public Set<String> listPermissionsByUserIdTeamId(Long userId, @Nullable Long teamId) {
-    List<String> userPermissions = this.menuService.listPermissionsByUserIdTeamId(userId, teamId);
+  public Set<String> listPermissions(Long userId, @Nullable Long teamId) {
+    List<String> userPermissions = this.menuService.listPermissions(userId, teamId);
     return new HashSet<>(userPermissions);
   }
 
@@ -261,7 +261,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     userInfo.put("user", user);
 
     // 3) permissions
-    Set<String> permissions = this.listPermissionsByUserIdTeamId(user.getUserId(), teamId);
+    Set<String> permissions = this.listPermissions(user.getUserId(), teamId);
     userInfo.put("permissions", permissions);
 
     return userInfo;

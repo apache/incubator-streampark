@@ -94,7 +94,7 @@ public interface UserService extends IService<User> {
    * @param teamId team id. If it's null, will find permissions from all teams.
    * @return permissions
    */
-  Set<String> listPermissionsByUserIdTeamId(Long userId, @Nullable Long teamId);
+  Set<String> listPermissions(Long userId, @Nullable Long teamId);
 
   List<User> listNoTokenUser();
 
