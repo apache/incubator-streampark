@@ -27,12 +27,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 public interface AccessTokenMapper extends BaseMapper<AccessToken> {
 
-  IPage<AccessToken> page(Page<AccessToken> page, @Param("accessToken") AccessToken accessToken);
+  IPage<AccessToken> selectPage(
+      Page<AccessToken> page, @Param("accessToken") AccessToken accessToken);
 
-  AccessToken getByUserToken(
+  AccessToken selectByUserToken(
       @Param("userId") Long userId, @Param("accessToken") String accessToken);
 
-  AccessToken getById(@Param("id") Long id);
+  AccessToken selectById(@Param("id") Long id);
 
-  AccessToken getByUserId(@Param("userId") Long userId);
+  AccessToken selectByUserId(@Param("userId") Long userId);
 }

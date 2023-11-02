@@ -64,7 +64,7 @@ public class SavePointController {
   @Operation(summary = "List application savepoint histories")
   @PostMapping("history")
   public RestResponse history(SavePoint savePoint, RestRequest request) {
-    IPage<SavePoint> page = savePointService.page(savePoint, request);
+    IPage<SavePoint> page = savePointService.getPage(savePoint, request);
     return RestResponse.success(page);
   }
 

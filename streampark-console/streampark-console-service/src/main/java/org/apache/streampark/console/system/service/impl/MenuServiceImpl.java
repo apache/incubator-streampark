@@ -71,7 +71,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     if (UserTypeEnum.ADMIN == user.getUserType()) {
       return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
     }
-    return this.baseMapper.findUserPermissions(userId, teamId);
+    return this.baseMapper.selectPermissions(userId, teamId);
   }
 
   @Override
@@ -88,7 +88,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
           new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum);
       return this.list(queryWrapper);
     }
-    return this.baseMapper.findUserMenus(userId, teamId);
+    return this.baseMapper.selectMenus(userId, teamId);
   }
 
   @Override

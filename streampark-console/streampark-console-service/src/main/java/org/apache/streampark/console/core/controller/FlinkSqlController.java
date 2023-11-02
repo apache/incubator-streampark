@@ -90,7 +90,7 @@ public class FlinkSqlController {
   @Operation(summary = "List the application sql")
   @PostMapping("list")
   public RestResponse list(Long appId, RestRequest request) {
-    IPage<FlinkSql> page = flinkSqlService.page(appId, request);
+    IPage<FlinkSql> page = flinkSqlService.getPage(appId, request);
     return RestResponse.success(page);
   }
 

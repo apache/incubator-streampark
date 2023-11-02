@@ -66,14 +66,14 @@ public class ConfigController {
   @Operation(summary = "List the application configs")
   @PostMapping("list")
   public RestResponse list(ApplicationConfig config, RestRequest request) {
-    IPage<ApplicationConfig> page = applicationConfigService.page(config, request);
+    IPage<ApplicationConfig> page = applicationConfigService.getPage(config, request);
     return RestResponse.success(page);
   }
 
   @Operation(summary = "List application config histories")
   @PostMapping("history")
   public RestResponse history(Application application) {
-    List<ApplicationConfig> history = applicationConfigService.history(application);
+    List<ApplicationConfig> history = applicationConfigService.list(application);
     return RestResponse.success(history);
   }
 

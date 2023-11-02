@@ -62,7 +62,7 @@ public class ApplicationBackUpServiceImpl
   @Autowired private FlinkSqlService flinkSqlService;
 
   @Override
-  public IPage<ApplicationBackUp> page(ApplicationBackUp bakParam, RestRequest request) {
+  public IPage<ApplicationBackUp> getPage(ApplicationBackUp bakParam, RestRequest request) {
     Page<ApplicationBackUp> page = new MybatisPager<ApplicationBackUp>().getDefaultPage(request);
     LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
         new LambdaQueryWrapper<ApplicationBackUp>()

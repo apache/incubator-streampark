@@ -55,7 +55,7 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
   boolean allowToBuildNow(@Nonnull Long appId);
 
   /** list pipeline status on application id list */
-  Map<Long, PipelineStatusEnum> listPipelineStatus(List<Long> appIds);
+  Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds);
 
   /**
    * delete appBuildPipeline By application

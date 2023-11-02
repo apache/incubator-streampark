@@ -40,11 +40,11 @@ import scala.util.Try
 trait YarnClientTrait extends FlinkClientTrait {
 
   private[this] def executeClientAction[R <: SavepointRequestTrait, O](
-      request: R,
+      savepointRequestTrait: R,
       flinkConf: Configuration,
       actionFunc: (JobID, ClusterClient[_]) => O): O = {
 
-    flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
+    flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, savepointRequestTrait.clusterId)
     val clusterClientFactory = new YarnClusterClientFactory
     val applicationId = clusterClientFactory.getClusterId(flinkConf)
     if (applicationId == null) {
@@ -57,22 +57,22 @@ trait YarnClientTrait extends FlinkClientTrait {
       .getClusterClient
       .autoClose(
         client =>
-          Try(actionFunc(getJobID(request.jobId), client)).recover {
+          Try(actionFunc(getJobID(savepointRequestTrait.jobId), client)).recover {
             case e =>
               throw new FlinkException(
-                s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
+                s"[StreamPark] Do ${savepointRequestTrait.getClass.getSimpleName} for the job ${savepointRequestTrait.jobId} failed. " +
                   s"detail: ${ExceptionUtils.stringifyException(e)}");
           }.get)
   }
 
   override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      savepointRequest: TriggerSavepointRequest,
       flinkConf: Configuration): SavepointResponse = {
     executeClientAction(
-      request,
+      savepointRequest,
       flinkConf,
       (jid, client) => {
-        SavepointResponse(super.triggerSavepoint(request, jid, client))
+        SavepointResponse(super.triggerSavepoint(savepointRequest, jid, client))
       })
   }
 

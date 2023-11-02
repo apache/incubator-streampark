@@ -71,7 +71,7 @@ public interface SavePointService extends IService<SavePoint> {
    * @param request The RestRequest object containing additional request parameters.
    * @return An instance of IPage<SavePoint> representing the page of SavePoint objects.
    */
-  IPage<SavePoint> page(SavePoint savePoint, RestRequest request);
+  IPage<SavePoint> getPage(SavePoint savePoint, RestRequest request);
 
   /**
    * Removes all savepoints for the specified application.

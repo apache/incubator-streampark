@@ -210,12 +210,12 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  public List<FlinkSql> getByTeamId(Long teamId) {
+  public List<FlinkSql> listByTeamId(Long teamId) {
     return this.baseMapper.selectSqlsByTeamId(teamId);
   }
 
   @Override
-  public IPage<FlinkSql> page(Long appId, RestRequest request) {
+  public IPage<FlinkSql> getPage(Long appId, RestRequest request) {
     Page<FlinkSql> page =
         new MybatisPager<FlinkSql>().getPage(request, "version", Constant.ORDER_DESC);
     LambdaQueryWrapper<FlinkSql> queryWrapper =

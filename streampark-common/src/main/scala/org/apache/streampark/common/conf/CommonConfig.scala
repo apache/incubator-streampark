@@ -45,7 +45,7 @@ object CommonConfig {
     key = "streampark.yarn.http-auth",
     defaultValue = "",
     classType = classOf[String],
-    description = "yarn http auth type. ex: sample, kerberos")
+    description = "yarn http auth type. ex: simple, kerberos")
 
   val DOCKER_HOST: InternalOption = InternalOption(
     key = "streampark.docker.http-client.docker-host",

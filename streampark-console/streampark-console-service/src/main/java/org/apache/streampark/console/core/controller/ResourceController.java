@@ -68,7 +68,7 @@ public class ResourceController {
   @Operation(summary = "List resources")
   @PostMapping("page")
   public RestResponse page(RestRequest restRequest, Resource resource) {
-    IPage<Resource> page = resourceService.page(resource, restRequest);
+    IPage<Resource> page = resourceService.getPage(resource, restRequest);
     return RestResponse.success(page);
   }
 
@@ -91,7 +91,7 @@ public class ResourceController {
   @Operation(summary = "List resource")
   @PostMapping("list")
   public RestResponse listResource(@RequestParam Long teamId) {
-    List<Resource> resourceList = resourceService.findByTeamId(teamId);
+    List<Resource> resourceList = resourceService.listByTeamId(teamId);
     return RestResponse.success(resourceList);
   }
 
