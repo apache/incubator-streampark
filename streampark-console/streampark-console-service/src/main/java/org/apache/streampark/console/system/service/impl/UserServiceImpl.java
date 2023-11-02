@@ -82,14 +82,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private ShiroProperties shiroProperties;
 
   @Override
-  public User findByName(String username) {
+  public User getByUsername(String username) {
     LambdaQueryWrapper<User> queryWrapper =
         new LambdaQueryWrapper<User>().eq(User::getUsername, username);
     return baseMapper.selectOne(queryWrapper);
   }
 
   @Override
-  public IPage<User> findUserDetail(User user, RestRequest request) {
+  public IPage<User> getPage(User user, RestRequest request) {
     Page<User> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
@@ -180,13 +180,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   }
 
   @Override
-  public Set<String> getPermissions(Long userId, @Nullable Long teamId) {
-    List<String> userPermissions = this.menuService.findUserPermissions(userId, teamId);
+  public Set<String> listPermissions(Long userId, @Nullable Long teamId) {
+    List<String> userPermissions = this.menuService.listPermissions(userId, teamId);
     return new HashSet<>(userPermissions);
   }
 
   @Override
-  public List<User> getNoTokenUser() {
+  public List<User> listNoTokenUser() {
     List<User> users = this.baseMapper.selectNoTokenUsers();
     if (!users.isEmpty()) {
       users.forEach(User::dataMasking);
@@ -220,7 +220,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void fillInTeam(User user) {
     if (user.getLastTeamId() == null) {
-      List<Team> teams = memberService.findUserTeams(user.getUserId());
+      List<Team> teams = memberService.listTeamsByUserId(user.getUserId());
 
       ApiAlertException.throwIfTrue(
           CollectionUtils.isEmpty(teams),
@@ -235,7 +235,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   }
 
   @Override
-  public List<User> findByAppOwner(Long teamId) {
+  public List<User> listByTeamId(Long teamId) {
     return baseMapper.selectUsersByAppOwner(teamId);
   }
 
@@ -261,7 +261,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     userInfo.put("user", user);
 
     // 3) permissions
-    Set<String> permissions = this.getPermissions(user.getUserId(), teamId);
+    Set<String> permissions = this.listPermissions(user.getUserId(), teamId);
     userInfo.put("permissions", permissions);
 
     return userInfo;

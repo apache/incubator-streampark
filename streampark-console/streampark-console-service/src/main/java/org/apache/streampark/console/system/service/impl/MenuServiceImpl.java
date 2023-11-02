@@ -60,7 +60,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   @Autowired private RoleMenuServie roleMenuServie;
 
   @Override
-  public List<String> findUserPermissions(Long userId, Long teamId) {
+  public List<String> listPermissions(Long userId, Long teamId) {
     User user =
         Optional.ofNullable(userService.getById(userId))
             .orElseThrow(
@@ -75,7 +75,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  public List<Menu> findUserMenus(Long userId, Long teamId) {
+  public List<Menu> listMenus(Long userId, Long teamId) {
     User user =
         Optional.ofNullable(userService.getById(userId))
             .orElseThrow(
@@ -92,7 +92,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  public Map<String, Object> findMenus(Menu menu) {
+  public Map<String, Object> listMenuMap(Menu menu) {
     Map<String, Object> result = new HashMap<>(16);
     try {
       LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
@@ -128,10 +128,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   }
 
   @Override
-  public List<VueRouter<Menu>> getUserRouters(Long userId, Long teamId) {
+  public List<VueRouter<Menu>> listRouters(Long userId, Long teamId) {
     List<VueRouter<Menu>> routes = new ArrayList<>();
     // The query type is the menu type
-    List<Menu> menus = this.findUserMenus(userId, teamId);
+    List<Menu> menus = this.listMenus(userId, teamId);
     menus.forEach(
         menu -> {
           VueRouter<Menu> route = new VueRouter<>();

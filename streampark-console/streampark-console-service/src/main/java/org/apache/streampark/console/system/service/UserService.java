@@ -39,7 +39,7 @@ public interface UserService extends IService<User> {
    * @param username username
    * @return user
    */
-  User findByName(String username);
+  User getByUsername(String username);
 
   /**
    * find uer detail, contains basic info, role, department
@@ -48,7 +48,7 @@ public interface UserService extends IService<User> {
    * @param restRequest queryRequest
    * @return IPage
    */
-  IPage<User> findUserDetail(User user, RestRequest restRequest);
+  IPage<User> getPage(User user, RestRequest restRequest);
 
   /**
    * update login time
@@ -94,9 +94,9 @@ public interface UserService extends IService<User> {
    * @param teamId team id. If it's null, will find permissions from all teams.
    * @return permissions
    */
-  Set<String> getPermissions(Long userId, @Nullable Long teamId);
+  Set<String> listPermissions(Long userId, @Nullable Long teamId);
 
-  List<User> getNoTokenUser();
+  List<User> listNoTokenUser();
 
   void setLastTeam(Long teamId, Long userId);
 
@@ -106,7 +106,7 @@ public interface UserService extends IService<User> {
 
   void fillInTeam(User user);
 
-  List<User> findByAppOwner(Long teamId);
+  List<User> listByTeamId(Long teamId);
 
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 
