@@ -87,7 +87,7 @@ Various companies and organizations use StreamPark for research, production and 
 
 ### 🙋 Submit Pull Request and Issues
 
-You can submit any ideas as [pull requests](https://github.com/apache/incubator-streampark/pulls) or as [GitHub issues](https://github.com/apache/incubator-streampark/issues/new/choose).
+You can submit any ideas as [pull requests](https://github.com/apache/incubator-streampark/pulls) or as [issues](https://github.com/apache/incubator-streampark/issues/new/choose).
 
 > If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
