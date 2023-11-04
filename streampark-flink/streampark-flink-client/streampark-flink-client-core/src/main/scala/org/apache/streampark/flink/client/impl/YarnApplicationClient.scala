@@ -101,10 +101,6 @@ object YarnApplicationClient extends YarnClientTrait {
       if (!FsOperator.hdfs.exists(pyVenv)) {
         throw new RuntimeException(s"$pyVenv File does not exist")
       }
-
-      // including $app/lib
-      includingPipelineJars(submitRequest, flinkConfig)
-
       // yarn.ship-files
       val shipFiles = new util.ArrayList[String]()
       shipFiles.add(submitRequest.userJarFile.getParentFile.getAbsolutePath)
