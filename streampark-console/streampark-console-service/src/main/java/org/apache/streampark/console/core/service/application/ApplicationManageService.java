@@ -105,7 +105,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @param appParam The Application to be deleted.
    * @return True if the deletion was successful, false otherwise.
    */
-  Boolean remove(Application appParam);
+  Boolean removeByApp(Application appParam);
 
   /**
    * Retrieves the Application with the specified details from the system.

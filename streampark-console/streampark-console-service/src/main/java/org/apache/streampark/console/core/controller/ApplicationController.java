@@ -344,7 +344,7 @@ public class ApplicationController {
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
-    Boolean deleted = applicationManageService.remove(app);
+    Boolean deleted = applicationManageService.removeByApp(app);
     return RestResponse.success(deleted);
   }
 

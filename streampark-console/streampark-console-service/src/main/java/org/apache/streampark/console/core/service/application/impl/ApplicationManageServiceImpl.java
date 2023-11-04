@@ -175,7 +175,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public Boolean remove(Application appParam) {
+  public Boolean removeByApp(Application appParam) {
 
     Application application = getById(appParam.getId());
 
