@@ -50,14 +50,14 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
   }
 
   @Override
-  public void removeApp(Long appId) {
+  public void removeByAppId(Long appId) {
     LambdaQueryWrapper<ApplicationLog> queryWrapper =
         new LambdaQueryWrapper<ApplicationLog>().eq(ApplicationLog::getAppId, appId);
     this.remove(queryWrapper);
   }
 
   @Override
-  public Boolean delete(ApplicationLog applicationLog) {
+  public boolean removeById(ApplicationLog applicationLog) {
     return removeById(applicationLog.getId());
   }
 }

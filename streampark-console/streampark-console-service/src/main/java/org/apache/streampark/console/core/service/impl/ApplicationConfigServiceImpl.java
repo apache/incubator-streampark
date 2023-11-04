@@ -107,7 +107,7 @@ public class ApplicationConfigServiceImpl
       ApplicationConfig effectiveConfig = getEffective(appParam.getId());
       if (Utils.isEmpty(appParam.getConfig())) {
         if (effectiveConfig != null) {
-          effectiveService.delete(appParam.getId(), EffectiveTypeEnum.CONFIG);
+          effectiveService.remove(appParam.getId(), EffectiveTypeEnum.CONFIG);
         }
       } else {
         // there was no configuration before, is a new configuration
@@ -245,7 +245,7 @@ public class ApplicationConfigServiceImpl
   }
 
   @Override
-  public void removeApp(Long appId) {
+  public void removeByAppId(Long appId) {
     baseMapper.delete(
         new LambdaQueryWrapper<ApplicationConfig>().eq(ApplicationConfig::getAppId, appId));
   }

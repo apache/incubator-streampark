@@ -215,7 +215,7 @@ public class AppBuildPipeServiceImpl
     BuildPipeline pipeline = createPipelineInstance(app);
 
     // clear history
-    removeApp(app.getId());
+    removeByAppId(app.getId());
     // register pipeline progress event watcher.
     // save snapshot of pipeline to db when status of pipeline was changed.
     pipeline.registerWatcher(
@@ -593,7 +593,7 @@ public class AppBuildPipeServiceImpl
   }
 
   @Override
-  public void removeApp(Long appId) {
+  public void removeByAppId(Long appId) {
     baseMapper.delete(
         new LambdaQueryWrapper<AppBuildPipeline>().eq(AppBuildPipeline::getAppId, appId));
   }

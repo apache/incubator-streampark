@@ -145,7 +145,7 @@ public class ApplicationBackUpServiceImpl
   }
 
   @Override
-  public void removeApp(Application appParam) {
+  public void removeByApp(Application appParam) {
     try {
       baseMapper.delete(
           new LambdaQueryWrapper<ApplicationBackUp>()
@@ -178,12 +178,12 @@ public class ApplicationBackUpServiceImpl
   }
 
   @Override
-  public Boolean delete(Long id) throws InternalException {
+  public Boolean removeById(Long id) throws InternalException {
     ApplicationBackUp backUp = getById(id);
     try {
       Application application = applicationManageService.getById(backUp.getAppId());
       application.getFsOperator().delete(backUp.getPath());
-      removeById(id);
+      super.removeById(id);
       return true;
     } catch (Exception e) {
       throw new InternalException(e.getMessage());

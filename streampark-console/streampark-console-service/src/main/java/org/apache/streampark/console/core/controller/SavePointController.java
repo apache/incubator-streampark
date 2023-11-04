@@ -74,7 +74,7 @@ public class SavePointController {
   public RestResponse delete(Long id) throws InternalException {
     SavePoint savePoint = savePointService.getById(id);
     Application application = applicationManageService.getById(savePoint.getAppId());
-    Boolean deleted = savePointService.delete(id, application);
+    Boolean deleted = savePointService.remove(id, application);
     return RestResponse.success(deleted);
   }
 
