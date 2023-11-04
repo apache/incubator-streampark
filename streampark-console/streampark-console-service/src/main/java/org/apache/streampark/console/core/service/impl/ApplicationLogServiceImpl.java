@@ -56,8 +56,7 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
     this.remove(queryWrapper);
   }
 
-  @Override
-  public boolean removeById(ApplicationLog applicationLog) {
+  public boolean remove(ApplicationLog applicationLog) {
     return removeById(applicationLog.getId());
   }
 }

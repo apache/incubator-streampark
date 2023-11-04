@@ -123,7 +123,7 @@ public class VariableController {
   @DeleteMapping("delete")
   @RequiresPermissions("variable:delete")
   public RestResponse deleteVariable(@Valid Variable variable) {
-    this.variableService.removeVariable(variable);
+    this.variableService.remove(variable);
     return RestResponse.success();
   }
 

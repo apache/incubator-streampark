@@ -29,5 +29,5 @@ public interface ApplicationLogService extends IService<ApplicationLog> {
 
   void removeByAppId(Long appId);
 
-  boolean removeById(ApplicationLog applicationLog);
+  boolean remove(ApplicationLog applicationLog);
 }
