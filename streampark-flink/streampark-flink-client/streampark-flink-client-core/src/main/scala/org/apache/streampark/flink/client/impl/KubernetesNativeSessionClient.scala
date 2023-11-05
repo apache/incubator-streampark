@@ -189,7 +189,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
           clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
       }
       if (client.getWebInterfaceURL != null) {
-        DeployResponse(client.getWebInterfaceURL, client.getClusterId, flinkConfig.toMap)
+        DeployResponse(client.getWebInterfaceURL, client.getClusterId)
       } else {
         null
       }

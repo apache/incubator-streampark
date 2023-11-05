@@ -165,7 +165,7 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
         throw err
     }
 
-    DeployResponse(null, deployRequest.clusterId, flinkConfig.toMap)
+    DeployResponse(null, deployRequest.clusterId)
   }
 
   /** Shutdown Flink cluster. */
