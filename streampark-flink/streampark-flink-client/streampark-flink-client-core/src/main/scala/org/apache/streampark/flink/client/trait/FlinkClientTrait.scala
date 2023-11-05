@@ -257,10 +257,7 @@ trait FlinkClientTrait extends Logger {
       flinkConfig: Configuration): (PackagedProgram, JobGraph) = {
 
     val pkgBuilder = PackagedProgram.newBuilder
-
-    val classPaths = submitRequest.flinkVersion.flinkLibs ++ submitRequest.localLibs
-    pkgBuilder
-      .setUserClassPaths(Lists.newArrayList(classPaths: _*))
+      .setUserClassPaths(Lists.newArrayList(submitRequest.classPaths: _*))
       .setEntryPointClassName(
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get()
       )
