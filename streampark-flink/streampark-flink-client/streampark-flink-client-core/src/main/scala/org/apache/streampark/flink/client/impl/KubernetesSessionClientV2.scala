@@ -158,13 +158,14 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
     FlinkK8sOperator.deployCluster(deployRequest.id, flinkDeployDef).runIOAsTry match {
       case Success(_) =>
         logInfo(richMsg("Flink Cluster has been submitted successfully."))
-        DeployResponse(null, deployRequest.clusterId)
       case Failure(err) =>
         logError(
           richMsg(s"Submit Flink Cluster fail in${deployRequest.executionMode.getName}_V2 mode!"),
           err)
         throw err
     }
+
+    DeployResponse(null, deployRequest.clusterId)
   }
 
   /** Shutdown Flink cluster. */
