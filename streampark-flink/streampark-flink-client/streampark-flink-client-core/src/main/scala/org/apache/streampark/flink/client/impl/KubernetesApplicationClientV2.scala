@@ -172,7 +172,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
         .orElse(submitReq.k8sSubmitParam.taskManagerMemory)
         .getOrElse(KUBERNETES_TM_MEMORY_DEFAULT)
 
-      val ephemeralStorage = Option(submitReq.k8sSubmitParam.jobManagerEphemeralStorage)
+      val ephemeralStorage = Option(submitReq.k8sSubmitParam.taskManagerEphemeralStorage)
         .getOrElse(return Left(s"JobManagerEphemeralStorage should not be empty"))
 
       val podTemplate = submitReq.k8sSubmitParam.taskManagerPodTemplate.map(
