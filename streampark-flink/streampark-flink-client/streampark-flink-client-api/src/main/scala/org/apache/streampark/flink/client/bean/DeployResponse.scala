@@ -19,6 +19,4 @@ package org.apache.streampark.flink.client.bean
 
 import javax.annotation.Nullable
 
-import java.util.{Map => JavaMap}
-
 case class DeployResponse(@Nullable address: String = "", clusterId: String)
