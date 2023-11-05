@@ -122,5 +122,5 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
    *
    * @param appId The id of the app to be removed.
    */
-  void removeApp(Long appId);
+  void removeByAppId(Long appId);
 }

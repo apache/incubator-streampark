@@ -199,7 +199,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  public Boolean delete(Long id, Application appParam) throws InternalException {
+  public Boolean remove(Long id, Application appParam) throws InternalException {
     SavePoint savePoint = getById(id);
     try {
       if (StringUtils.isNotEmpty(savePoint.getPath())) {
@@ -221,7 +221,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  public void removeApp(Application appParam) {
+  public void remove(Application appParam) {
     Long appId = appParam.getId();
 
     LambdaQueryWrapper<SavePoint> queryWrapper =

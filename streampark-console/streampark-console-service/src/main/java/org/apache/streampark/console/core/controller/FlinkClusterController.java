@@ -111,7 +111,7 @@ public class FlinkClusterController {
   @Operation(summary = "Delete flink cluster")
   @PostMapping("delete")
   public RestResponse delete(FlinkCluster cluster) {
-    flinkClusterService.delete(cluster);
+    flinkClusterService.remove(cluster);
     return RestResponse.success();
   }
 }

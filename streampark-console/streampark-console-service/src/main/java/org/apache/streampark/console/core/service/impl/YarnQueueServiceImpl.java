@@ -157,7 +157,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   }
 
   @Override
-  public void deleteYarnQueue(YarnQueue yarnQueue) {
+  public void remove(YarnQueue yarnQueue) {
     YarnQueue queueFromDB = getYarnQueueByIdWithPreconditions(yarnQueue);
 
     checkNotReferencedByApplications(

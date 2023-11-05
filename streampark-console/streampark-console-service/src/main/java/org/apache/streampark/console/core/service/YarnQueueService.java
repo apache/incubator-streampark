@@ -35,7 +35,7 @@ public interface YarnQueueService extends IService<YarnQueue> {
 
   void updateYarnQueue(YarnQueue yarnQueue);
 
-  void deleteYarnQueue(YarnQueue yarnQueue);
+  void remove(YarnQueue yarnQueue);
 
   void checkQueueLabel(FlinkExecutionMode executionModeEnum, String queueLabel);
 

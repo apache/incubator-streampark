@@ -158,7 +158,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  public boolean delete(Long id) {
+  public boolean removeById(Long id) {
     Project project = getById(id);
     Utils.notNull(project);
     LambdaQueryWrapper<Application> queryWrapper =
@@ -169,7 +169,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
     try {
       project.delete();
-      removeById(id);
+      super.removeById(id);
       return true;
     } catch (IOException e) {
       return false;

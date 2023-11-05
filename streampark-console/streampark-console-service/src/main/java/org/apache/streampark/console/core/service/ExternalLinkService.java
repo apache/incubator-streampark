@@ -27,7 +27,7 @@ public interface ExternalLinkService extends IService<ExternalLink> {
 
   void create(ExternalLink externalLink);
 
-  void delete(Long linkId);
+  void removeById(Long linkId);
 
   void update(ExternalLink externalLink);
 

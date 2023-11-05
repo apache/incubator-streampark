@@ -90,7 +90,7 @@ public class YarnQueueController {
   @PostMapping("delete")
   @RequiresPermissions("yarnQueue:delete")
   public RestResponse delete(YarnQueue yarnQueue) {
-    yarnQueueService.deleteYarnQueue(yarnQueue);
+    yarnQueueService.remove(yarnQueue);
     return RestResponse.success();
   }
 }

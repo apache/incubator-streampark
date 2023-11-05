@@ -113,7 +113,7 @@ public class ProjectController {
   @PostMapping("delete")
   @RequiresPermissions("project:delete")
   public RestResponse delete(Long id) {
-    Boolean deleted = projectService.delete(id);
+    Boolean deleted = projectService.removeById(id);
     return RestResponse.success().data(deleted);
   }
 
