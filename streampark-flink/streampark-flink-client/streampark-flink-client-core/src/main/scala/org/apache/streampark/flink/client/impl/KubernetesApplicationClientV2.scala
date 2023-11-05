@@ -104,11 +104,13 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       .getOrElse(return Left("Flink base image should not be empty"))
 
     val ingress = submitReq.k8sSubmitParam.ingressDefinition
+      .getOrElse(return Left("Flink base ingress should not be empty"))
 
     val imagePullPolicy = flinkConfObj
       .getOption(KubernetesConfigOptions.CONTAINER_IMAGE_PULL_POLICY)
       .map(_.toString)
       .orElse(submitReq.k8sSubmitParam.imagePullPolicy)
+      .getOrElse(return Left("Flink base imagePullPolicy should not be empty"))
 
     val serviceAccount = flinkConfObj
       .getOption(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT)
@@ -142,6 +144,9 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
         .orElse(submitReq.k8sSubmitParam.jobManagerMemory)
         .getOrElse(KUBERNETES_JM_MEMORY_DEFAULT)
 
+      val ephemeralStorage = Option(submitReq.k8sSubmitParam.jobManagerEphemeralStorage)
+        .getOrElse(return Left(s"JobManagerEphemeralStorage should not be empty"))
+
       val podTemplate = submitReq.k8sSubmitParam.jobManagerPodTemplate.map(
         yaml =>
           unmarshalPodTemplate(yaml)
@@ -149,7 +154,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       JobManagerDef(
         cpu = cpu,
         memory = mem,
-        ephemeralStorage = submitReq.k8sSubmitParam.jobManagerEphemeralStorage,
+        ephemeralStorage = ephemeralStorage,
         podTemplate = podTemplate)
     }
 
@@ -167,6 +172,9 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
         .orElse(submitReq.k8sSubmitParam.taskManagerMemory)
         .getOrElse(KUBERNETES_TM_MEMORY_DEFAULT)
 
+      val ephemeralStorage = Option(submitReq.k8sSubmitParam.jobManagerEphemeralStorage)
+        .getOrElse(return Left(s"JobManagerEphemeralStorage should not be empty"))
+
       val podTemplate = submitReq.k8sSubmitParam.taskManagerPodTemplate.map(
         yaml =>
           unmarshalPodTemplate(yaml)
@@ -174,7 +182,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       TaskManagerDef(
         cpu = cpu,
         memory = mem,
-        ephemeralStorage = submitReq.k8sSubmitParam.taskManagerEphemeralStorage,
+        ephemeralStorage = ephemeralStorage,
         podTemplate = podTemplate)
     }
 
