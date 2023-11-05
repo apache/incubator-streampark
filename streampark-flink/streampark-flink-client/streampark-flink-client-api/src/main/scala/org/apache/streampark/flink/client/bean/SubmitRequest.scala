@@ -56,39 +56,40 @@ case class SubmitRequest(
     @Nullable k8sSubmitParam: KubernetesSubmitParam,
     @Nullable extraParameter: JavaMap[String, Any]) {
 
-  private[this] val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_PROPERTY_PREFIX)
+  private[this] lazy val appProperties: Map[String, String] = getParameterMap(
+    KEY_FLINK_PROPERTY_PREFIX)
 
-  val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
+  lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
 
-  val appMain: String = this.developmentMode match {
+  lazy val appMain: String = this.developmentMode match {
     case FlinkDevelopmentMode.FLINK_SQL => Constant.STREAMPARK_FLINKSQL_CLIENT_CLASS
     case FlinkDevelopmentMode.PYFLINK => Constant.PYTHON_FLINK_DRIVER_CLASS_NAME
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
-  val effectiveAppName: String =
+  lazy val effectiveAppName: String =
     if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
 
-  val classPaths: List[URL] = {
+  lazy val classPaths: List[URL] = {
     val path = s"${Workspace.local.APP_WORKSPACE}/$id/lib"
     val lib = Try(new File(path).listFiles().map(_.toURI.toURL).toList).getOrElse(List.empty[URL])
     flinkVersion.flinkLibs ++ lib
   }
 
-  val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
+  lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
 
-  val allowNonRestoredState: Boolean = Try(
+  lazy val allowNonRestoredState: Boolean = Try(
     properties.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean)
     .getOrElse(false)
 
-  val savepointRestoreSettings: SavepointRestoreSettings = {
+  lazy val savepointRestoreSettings: SavepointRestoreSettings = {
     savePoint match {
       case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
       case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
     }
   }
 
-  val userJarFile: File = {
+  lazy val userJarFile: File = {
     executionMode match {
       case FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION => null
       case _ =>
@@ -97,7 +98,7 @@ case class SubmitRequest(
     }
   }
 
-  val safePackageProgram: Boolean = {
+  lazy val safePackageProgram: Boolean = {
     // ref FLINK-21164 FLINK-9844 packageProgram.close()
     // must be flink 1.12.2 and above
     flinkVersion.version.split("\\.").map(_.trim.toInt) match {
