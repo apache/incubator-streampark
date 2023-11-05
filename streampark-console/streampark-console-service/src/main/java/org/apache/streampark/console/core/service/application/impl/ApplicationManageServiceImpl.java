@@ -175,7 +175,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public Boolean removeByApp(Application appParam) {
+  public Boolean remove(Application appParam) {
 
     Application application = getById(appParam.getId());
 
@@ -193,10 +193,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     // remove related hdfs
     // 5) remove backup
-    backUpService.removeByApp(application);
+    backUpService.remove(application);
 
     // 6) remove savepoint
-    savePointService.removeByApp(application);
+    savePointService.remove(application);
 
     // 7) remove BuildPipeline
     appBuildPipeService.removeByAppId(application.getId());

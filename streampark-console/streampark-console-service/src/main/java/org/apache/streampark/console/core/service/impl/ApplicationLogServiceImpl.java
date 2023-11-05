@@ -55,8 +55,4 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
         new LambdaQueryWrapper<ApplicationLog>().eq(ApplicationLog::getAppId, appId);
     this.remove(queryWrapper);
   }
-
-  public boolean remove(ApplicationLog applicationLog) {
-    return removeById(applicationLog.getId());
-  }
 }

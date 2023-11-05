@@ -221,7 +221,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  public void removeByApp(Application appParam) {
+  public void remove(Application appParam) {
     Long appId = appParam.getId();
 
     LambdaQueryWrapper<SavePoint> queryWrapper =

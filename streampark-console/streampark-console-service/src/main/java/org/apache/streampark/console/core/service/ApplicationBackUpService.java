@@ -74,7 +74,7 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
    *
    * @param appParam the application to be removed
    */
-  void removeByApp(Application appParam);
+  void remove(Application appParam);
 
   /**
    * Rolls back a Flink SQL application to its previous state.

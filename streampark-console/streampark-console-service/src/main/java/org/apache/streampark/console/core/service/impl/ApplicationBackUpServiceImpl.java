@@ -140,12 +140,12 @@ public class ApplicationBackUpServiceImpl
       ApplicationBackUp backup = backUpPages.getRecords().get(0);
       String path = backup.getPath();
       appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
-      removeById(backup.getId());
+      super.removeById(backup.getId());
     }
   }
 
   @Override
-  public void removeByApp(Application appParam) {
+  public void remove(Application appParam) {
     try {
       baseMapper.delete(
           new LambdaQueryWrapper<ApplicationBackUp>()

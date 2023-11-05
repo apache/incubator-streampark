@@ -78,7 +78,7 @@ public interface SavePointService extends IService<SavePoint> {
    *
    * @param appParam the application to be removed
    */
-  void removeByApp(Application appParam);
+  void remove(Application appParam);
 
   /**
    * Returns the savepoint path for the given application.

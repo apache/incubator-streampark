@@ -334,8 +334,8 @@ public class ApplicationController {
   @PermissionAction(id = "#applicationLog.appId", type = PermissionTypeEnum.APP)
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
-  public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
-    Boolean deleted = applicationLogService.removeById(applicationLog);
+  public RestResponse deleteOperationLog(Long id) {
+    Boolean deleted = applicationLogService.removeById(id);
     return RestResponse.success(deleted);
   }
 
@@ -344,7 +344,7 @@ public class ApplicationController {
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
-    Boolean deleted = applicationManageService.removeByApp(app);
+    Boolean deleted = applicationManageService.remove(app);
     return RestResponse.success(deleted);
   }
 
