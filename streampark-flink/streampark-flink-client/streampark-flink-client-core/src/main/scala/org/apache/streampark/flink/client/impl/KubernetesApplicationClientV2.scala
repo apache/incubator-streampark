@@ -103,14 +103,15 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       .filter(str => StringUtils.isNotBlank(str))
       .getOrElse(return Left("Flink base image should not be empty"))
 
-    val ingress = submitReq.k8sSubmitParam.ingressDefinition
-      .getOrElse(return Left("Flink base ingress should not be empty"))
+    val ingress = Option(submitReq.k8sSubmitParam.ingressDefinition)
+      .getOrElse(return Left("Ingress should not be empty"))
 
-    val imagePullPolicy = flinkConfObj
-      .getOption(KubernetesConfigOptions.CONTAINER_IMAGE_PULL_POLICY)
-      .map(_.toString)
-      .orElse(submitReq.k8sSubmitParam.imagePullPolicy)
-      .getOrElse(return Left("Flink base imagePullPolicy should not be empty"))
+    val imagePullPolicy = Option(
+      flinkConfObj
+        .getOption(KubernetesConfigOptions.CONTAINER_IMAGE_PULL_POLICY)
+        .map(_.toString)
+        .orElse(submitReq.k8sSubmitParam.imagePullPolicy))
+      .getOrElse(return Left("Flink imagePullPolicy should not be empty"))
 
     val serviceAccount = flinkConfObj
       .getOption(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT)

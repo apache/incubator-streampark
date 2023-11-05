@@ -205,10 +205,11 @@ object KubernetesSessionClientV2 extends KubernetesClientV2Trait with Logger {
       .filter(str => StringUtils.isNotBlank(str))
       .getOrElse(return Left("Kubernetes CR name should not be empty"))
 
-    val imagePullPolicy = flinkConfObj
-      .getOption(KubernetesConfigOptions.CONTAINER_IMAGE_PULL_POLICY)
-      .map(_.toString)
-      .getOrElse(return Left("Flink base imagePullPolicy should not be empty"))
+    val imagePullPolicy = Option(
+      flinkConfObj
+        .getOption(KubernetesConfigOptions.CONTAINER_IMAGE_PULL_POLICY)
+        .map(_.toString))
+      .getOrElse(return Left("Flink imagePullPolicy should not be empty"))
 
     val image = Option(deployReq.k8sDeployParam.flinkImage)
       .filter(str => StringUtils.isNotBlank(str))
