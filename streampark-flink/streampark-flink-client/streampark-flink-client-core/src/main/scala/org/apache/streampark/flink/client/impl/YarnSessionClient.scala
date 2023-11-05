@@ -219,7 +219,10 @@ object YarnSessionClient extends YarnClientTrait {
               .retrieve(ApplicationId.fromString(deployRequest.clusterId))
               .getClusterClient
             if (yarnClient.getWebInterfaceURL != null) {
-              return DeployResponse(yarnClient.getWebInterfaceURL, yarnClient.getClusterId.toString)
+              return DeployResponse(
+                yarnClient.getWebInterfaceURL,
+                yarnClient.getClusterId.toString,
+                flinkConfig.toMap)
             }
           }
         } catch {
