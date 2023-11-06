@@ -96,7 +96,7 @@ public class FlinkEnvController {
   @Operation(summary = "Delete flink environment")
   @PostMapping("delete")
   public RestResponse delete(Long id) {
-    flinkEnvService.delete(id);
+    flinkEnvService.removeById(id);
     return RestResponse.success();
   }
 

@@ -89,7 +89,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   }
 
   @Override
-  public void delete(Long id) {
+  public void removeById(Long id) {
     FlinkEnv flinkEnv = getById(id);
     checkOrElseAlert(flinkEnv);
     Long count = this.baseMapper.selectCount(null);

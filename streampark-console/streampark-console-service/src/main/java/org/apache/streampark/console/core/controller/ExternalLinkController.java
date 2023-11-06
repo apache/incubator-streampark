@@ -93,7 +93,7 @@ public class ExternalLinkController {
   @RequiresPermissions("externalLink:delete")
   public RestResponse delete(
       @NotNull(message = "The link id cannot be null") @RequestParam("id") Long id) {
-    externalLinkService.delete(id);
+    externalLinkService.removeById(id);
     return RestResponse.success();
   }
 }

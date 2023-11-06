@@ -203,7 +203,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   }
 
   @Override
-  public void deleteResource(Resource resource) {
+  public void remove(Resource resource) {
     Resource findResource = getById(resource.getId());
     checkOrElseAlert(findResource);
 

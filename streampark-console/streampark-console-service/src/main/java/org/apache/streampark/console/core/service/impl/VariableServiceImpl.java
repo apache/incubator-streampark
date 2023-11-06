@@ -83,7 +83,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   }
 
   @Override
-  public void deleteVariable(Variable variable) {
+  public void remove(Variable variable) {
     ApiAlertException.throwIfTrue(
         isDependByApplications(variable), "Sorry, the variable is actually used.");
     this.removeById(variable);

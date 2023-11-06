@@ -84,7 +84,7 @@ public class ResourceController {
   @DeleteMapping("delete")
   @RequiresPermissions("resource:delete")
   public RestResponse deleteResource(@Valid Resource resource) {
-    this.resourceService.deleteResource(resource);
+    this.resourceService.remove(resource);
     return RestResponse.success();
   }
 

@@ -175,31 +175,31 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public Boolean delete(Application appParam) {
+  public Boolean remove(Application appParam) {
 
     Application application = getById(appParam.getId());
 
     // 1) remove flink sql
-    flinkSqlService.removeApp(application.getId());
+    flinkSqlService.removeByAppId(application.getId());
 
     // 2) remove log
-    applicationLogService.removeApp(application.getId());
+    applicationLogService.removeByAppId(application.getId());
 
     // 3) remove config
-    configService.removeApp(application.getId());
+    configService.removeByAppId(application.getId());
 
     // 4) remove effective
-    effectiveService.removeApp(application.getId());
+    effectiveService.removeByAppId(application.getId());
 
     // remove related hdfs
     // 5) remove backup
-    backUpService.removeApp(application);
+    backUpService.remove(application);
 
     // 6) remove savepoint
-    savePointService.removeApp(application);
+    savePointService.remove(application);
 
     // 7) remove BuildPipeline
-    appBuildPipeService.removeApp(application.getId());
+    appBuildPipeService.removeByAppId(application.getId());
 
     // 8) remove app
     removeApp(application);

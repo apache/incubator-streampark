@@ -75,7 +75,7 @@ public interface VariableService extends IService<Variable> {
    *
    * @param variable the Variable object to be deleted
    */
-  void deleteVariable(Variable variable);
+  void remove(Variable variable);
 
   /**
    * Find a Variable by its code and team ID.

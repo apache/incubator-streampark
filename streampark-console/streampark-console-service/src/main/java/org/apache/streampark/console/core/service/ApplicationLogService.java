@@ -27,7 +27,5 @@ public interface ApplicationLogService extends IService<ApplicationLog> {
 
   IPage<ApplicationLog> getPage(ApplicationLog applicationLog, RestRequest request);
 
-  void removeApp(Long appId);
-
-  Boolean delete(ApplicationLog applicationLog);
+  void removeByAppId(Long appId);
 }

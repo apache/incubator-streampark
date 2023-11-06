@@ -69,7 +69,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   }
 
   @Override
-  public void delete(Long linkId) {
+  public void removeById(Long linkId) {
     baseMapper.deleteById(linkId);
   }
 

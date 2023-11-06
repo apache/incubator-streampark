@@ -73,7 +73,7 @@ public interface ResourceService extends IService<Resource> {
    *
    * @param resource
    */
-  void deleteResource(Resource resource);
+  void remove(Resource resource);
 
   /**
    * Get resource through team id.

@@ -36,7 +36,7 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
    * @return true if the object was successfully deleted, false otherwise.
    * @throws InternalException if an internal error occurs during the deletion process.
    */
-  Boolean delete(Long id) throws InternalException;
+  Boolean removeById(Long id) throws InternalException;
 
   /**
    * Performs a backup for the given application and Flink SQL parameters.
@@ -74,7 +74,7 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
    *
    * @param appParam the application to be removed
    */
-  void removeApp(Application appParam);
+  void remove(Application appParam);
 
   /**
    * Rolls back a Flink SQL application to its previous state.

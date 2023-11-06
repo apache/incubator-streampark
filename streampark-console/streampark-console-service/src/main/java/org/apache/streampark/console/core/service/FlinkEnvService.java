@@ -49,7 +49,7 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
    *
    * @param id the ID of the Flink environment to delete
    */
-  void delete(Long id);
+  void removeById(Long id);
 
   /**
    * Updates the specified version of Flink environment.
