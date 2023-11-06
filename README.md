@@ -99,6 +99,10 @@ Thank you to all the people who already contributed to StreamPark!
 
 [![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/incubator-streampark/graphs/contributors)
 
+## License
+
+Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
 ## 💬 Social Media
 
 - [Twitter](https://twitter.com/ASFStreamPark)
