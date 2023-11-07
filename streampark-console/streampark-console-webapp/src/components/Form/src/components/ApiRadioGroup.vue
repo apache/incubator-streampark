@@ -31,7 +31,6 @@
   import { Radio } from 'ant-design-vue';
   import { isFunction } from '/@/utils/is';
   import { useRuleFormItem } from '/@/hooks/component/useFormItem';
-  import { useAttrs } from '/@/hooks/core/useAttrs';
   import { propTypes } from '/@/utils/propTypes';
   import { get, omit } from 'lodash-es';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -67,12 +66,12 @@
       immediate: propTypes.bool.def(true),
     },
     emits: ['options-change', 'change'],
-    setup(props, { emit }) {
+    setup(props, { attrs, emit }) {
       const options = ref<OptionsItem[]>([]);
       const loading = ref(false);
       const isFirstLoad = ref(true);
       const emitData = ref<any[]>([]);
-      const attrs = useAttrs();
+
       const { t } = useI18n();
       // Embedded in the form, just use the hook binding to perform form verification
       const [state] = useRuleFormItem(props);
