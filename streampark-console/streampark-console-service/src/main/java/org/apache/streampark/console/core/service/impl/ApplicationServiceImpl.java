@@ -819,6 +819,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     newApp.setJarCheckSum(oldApp.getJarCheckSum());
     newApp.setTags(oldApp.getTags());
     newApp.setTeamId(oldApp.getTeamId());
+    newApp.setDependency(oldApp.getDependency());
 
     boolean saved = save(newApp);
     if (saved) {
