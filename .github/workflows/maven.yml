@@ -19,19 +19,8 @@ name: Maven Package Test
 
 on:
   push:
-    branches:
-      - dev
-    paths-ignore:
-      - '**.md'
-      - 'deploy/**'
-      - 'script/**'
-      - 'streampark-console/streampark-console-webapp/**'
   pull_request:
-    paths-ignore:
-      - '**.md'
-      - 'deploy/**'
-      - 'script/**'
-      - 'streampark-console/streampark-console-webapp/**'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
