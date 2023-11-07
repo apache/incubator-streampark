@@ -28,7 +28,6 @@
   import { Radio } from 'ant-design-vue';
   import { isString } from '/@/utils/is';
   import { useRuleFormItem } from '/@/hooks/component/useFormItem';
-  import { useAttrs } from '/@/hooks/core/useAttrs';
 
   type OptionsItem = { label: string; value: string | number | boolean; disabled?: boolean };
   type RadioItem = string | OptionsItem;
@@ -48,8 +47,7 @@
         default: () => [],
       },
     },
-    setup(props) {
-      const attrs = useAttrs();
+    setup(props, { attrs }) {
       // Embedded in the form, just use the hook binding to perform form verification
       const [state] = useRuleFormItem(props);
 

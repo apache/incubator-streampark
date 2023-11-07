@@ -26,7 +26,6 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { isFunction } from '/@/utils/is';
   import { getSlot } from '/@/utils/helper/tsxHelper';
-  import { useAttrs } from '/@/hooks/core/useAttrs';
 
   const props = {
     useCollapse: { type: Boolean, default: true },
@@ -58,11 +57,10 @@
     name: 'Description',
     props,
     emits: ['register'],
-    setup(props, { slots, emit }) {
+    setup(props, { slots, attrs, emit }) {
       const propsRef = ref<Partial<DescriptionProps> | null>(null);
 
       const { prefixCls } = useDesign('description');
-      const attrs = useAttrs();
 
       // Custom title component: get title
       const getMergeProps = computed(() => {
