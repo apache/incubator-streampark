@@ -296,12 +296,10 @@ public class AppBuildPipeServiceImpl
     switch (executionMode) {
       case YARN_APPLICATION:
         String yarnProvidedPath = app.getAppLib();
-        String localWorkspace = app.getLocalAppHome().concat("/lib");
         FlinkYarnApplicationBuildRequest yarnAppRequest =
             new FlinkYarnApplicationBuildRequest(
                 app.getJobName(),
                 mainClass,
-                localWorkspace,
                 yarnProvidedPath,
                 app.getDevelopmentMode(),
                 app.getDependencyInfo());
