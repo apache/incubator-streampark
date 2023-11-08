@@ -66,14 +66,12 @@ object YarnApplicationClient extends YarnClientTrait {
         submitRequest.hdfsWorkspace.appJars,
         submitRequest.hdfsWorkspace.appPlugins
       )
-      submitRequest.developmentMode match {
-        case DevelopmentMode.FLINK_SQL =>
-          array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
-          val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
-          if (HdfsUtils.exists(jobLib)) {
-            array += jobLib
-          }
-        case _ =>
+      val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
+      if (HdfsUtils.exists(jobLib)) {
+        array += jobLib
+      }
+      if (submitRequest.developmentMode == DevelopmentMode.FLINK_SQL) {
+        array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
       }
       array.toList
     }

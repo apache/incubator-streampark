@@ -1500,7 +1500,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     "%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
             break;
           case APACHE_FLINK:
-            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+            if (application.getFsOperator().exists(application.getAppLib())) {
+              flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
+            } else {
+              flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+            }
             break;
           default:
             throw new IllegalArgumentException(
