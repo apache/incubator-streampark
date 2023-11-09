@@ -224,20 +224,19 @@ streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath
 MIT License
 ========================================================================
 
-The files under the directory streampark-console/streampark-console-webapp/ without the "Apache License 2.0" License header are provided under the MIT License, from https://github.com/vbenjs/vue-vben-admin
+The following components are provided under the MIT License
+These files from https://github.com/vbenjs/vue-vben-admin
 
-The list of specific documents is as follows
-
-streampark-console/streampark-console-webapp/build/**
-streampark-console/streampark-console-webapp/src/components/**
-streampark-console/streampark-console-webapp/src/directives/**
-streampark-console/streampark-console-webapp/src/logics/**
-streampark-console/streampark-console-webapp/src/utils/**
 streampark-console/streampark-console-webapp/src/App.vue
 streampark-console/streampark-console-webapp/src/main.ts
 streampark-console/streampark-console-webapp/src/locales/helper.ts
 streampark-console/streampark-console-webapp/src/locales/setupI18n.ts
 streampark-console/streampark-console-webapp/src/locales/useLocale.ts
+streampark-console/streampark-console-webapp/build/**
+streampark-console/streampark-console-webapp/src/components/**
+streampark-console/streampark-console-webapp/src/directives/**
+streampark-console/streampark-console-webapp/src/logics/**
+streampark-console/streampark-console-webapp/src/utils/**
 streampark-console/streampark-console-webapp/src/views/base/error-log/**
 streampark-console/streampark-console-webapp/src/views/base/exception/**
 streampark-console/streampark-console-webapp/src/views/base/lock/**
@@ -250,4 +249,3 @@ streampark-console/streampark-console-webapp/src/router/**
 streampark-console/streampark-console-webapp/src/settings/**
 streampark-console/streampark-console-webapp/src/store/**
 streampark-console/streampark-console-webapp/types/**
-
