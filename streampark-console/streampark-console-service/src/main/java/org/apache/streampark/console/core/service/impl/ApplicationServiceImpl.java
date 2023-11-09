@@ -1494,6 +1494,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (application.getFsOperator().exists(application.getAppLib())) {
               flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
             } else {
+              // compatible with historical version
               flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
             }
             break;

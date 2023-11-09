@@ -288,7 +288,7 @@ public class AppBuildPipeServiceImpl
   /** create building pipeline instance */
   private BuildPipeline createPipelineInstance(@Nonnull Application app) {
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
-    String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
+    String userLocalJar = retrieveUserLocalJar(flinkEnv, app);
     ExecutionMode executionMode = app.getExecutionModeEnum();
     String mainClass =
         app.isCustomCodeJob() ? app.getMainClass() : ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS();
@@ -312,7 +312,7 @@ public class AppBuildPipeServiceImpl
                 app.getJobName(),
                 app.getLocalAppHome(),
                 mainClass,
-                flinkUserJar,
+                userLocalJar,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -325,7 +325,7 @@ public class AppBuildPipeServiceImpl
                 app.getJobName(),
                 app.getLocalAppHome(),
                 mainClass,
-                flinkUserJar,
+                userLocalJar,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -340,7 +340,7 @@ public class AppBuildPipeServiceImpl
                 app.getJobName(),
                 app.getLocalAppHome(),
                 mainClass,
-                flinkUserJar,
+                userLocalJar,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -370,17 +370,18 @@ public class AppBuildPipeServiceImpl
       localUploadDIR.mkdirs();
     }
 
+    FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
     if (app.isFlinkSqlJob() || app.isUploadJob()) {
       if (!app.getDependencyObject().getJar().isEmpty()) {
         for (String jar : app.getDependencyObject().getJar()) {
           File localJar = new File(WebUtils.getAppTempDir(), jar);
-          File uploadJar = new File(localUploadDIR, jar);
-          if (!localJar.exists() && !uploadJar.exists()) {
+          File localUploadJar = new File(localUploadDIR, jar);
+          if (!localJar.exists() && !localUploadJar.exists()) {
             throw new ApiAlertException("Missing file: " + jar + ", please upload again");
           }
           if (localJar.exists()) {
-            checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploadDIR);
+            checkOrElseUploadJar(localFS, localJar, localUploadJar, localUploadDIR);
           }
         }
       }
@@ -391,16 +392,37 @@ public class AppBuildPipeServiceImpl
       FsOperator fsOperator = app.getFsOperator();
 
       if (app.isUploadJob()) {
-        // 1). upload jar to local upload.
+        // 1). upload jar to local uploadDIR.
         File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
-        File uploadJar = new File(localUploadDIR, app.getJar());
-        checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploadDIR);
+        File localUploadJar = new File(localUploadDIR, app.getJar());
+        checkOrElseUploadJar(localFS, localJar, localUploadJar, localUploadDIR);
 
+        // 2) copy jar to local $app_home/lib
+        boolean cleanUpload = false;
+        File libJar = new File(app.getLocalAppLib(), app.getJar());
+        if (!localFS.exists(app.getLocalAppLib())) {
+          cleanUpload = true;
+        } else {
+          if (libJar.exists()) {
+            if (!FileUtils.equals(localJar, libJar)) {
+              cleanUpload = true;
+            }
+          } else {
+            cleanUpload = true;
+          }
+        }
+
+        if (cleanUpload) {
+          localFS.mkCleanDirs(app.getLocalAppLib());
+          localFS.upload(localUploadJar.getAbsolutePath(), app.getLocalAppLib());
+        }
+
+        // 3) for YARNApplication mode
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
           List<File> jars = new ArrayList<>(0);
 
           // 1) user jar
-          jars.add(uploadJar);
+          jars.add(libJar);
 
           // 2). jar dependency
           app.getDependencyObject()
@@ -413,7 +435,7 @@ public class AppBuildPipeServiceImpl
           }
 
           fsOperator.mkCleanDirs(app.getAppLib());
-          // upload jars to uploadDIR
+          // 4). upload jars to appLibDIR
           jars.forEach(jar -> fsOperator.upload(jar.getAbsolutePath(), app.getAppLib()));
         }
       } else {
@@ -425,14 +447,14 @@ public class AppBuildPipeServiceImpl
   }
 
   /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
-  private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
+  private String retrieveUserLocalJar(FlinkEnv flinkEnv, Application app) {
     switch (app.getDevelopmentMode()) {
       case CUSTOM_CODE:
         switch (app.getApplicationType()) {
           case STREAMPARK_FLINK:
-            return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
+            return String.format("%s/%s", app.getLocalAppLib(), app.getModule().concat(".jar"));
           case APACHE_FLINK:
-            return String.format("%s/%s", Workspace.local().APP_UPLOADS(), app.getJar());
+            return String.format("%s/%s", app.getLocalAppLib(), app.getJar());
           default:
             throw new IllegalArgumentException(
                 "[StreamPark] unsupported ApplicationType of custom code: "
@@ -440,10 +462,6 @@ public class AppBuildPipeServiceImpl
         }
       case FLINK_SQL:
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
-        if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
-          String clientPath = Workspace.remote().APP_CLIENT();
-          return String.format("%s/%s", clientPath, sqlDistJar);
-        }
         return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
       default:
         throw new UnsupportedOperationException(

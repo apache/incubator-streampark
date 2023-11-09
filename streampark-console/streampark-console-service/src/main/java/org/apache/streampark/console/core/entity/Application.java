@@ -440,6 +440,11 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
+  public String getLocalAppLib() {
+    return getLocalAppHome().concat("/lib");
+  }
+
+  @JsonIgnore
   public ApplicationType getApplicationType() {
     return ApplicationType.of(appType);
   }
