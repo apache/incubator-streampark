@@ -91,7 +91,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -390,29 +389,31 @@ public class AppBuildPipeServiceImpl
     if (app.isCustomCodeJob()) {
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
+
       if (app.isUploadJob()) {
         // 1). upload jar to local upload.
         File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
         File uploadJar = new File(localUploadDIR, app.getJar());
         checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploadDIR);
+
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
           List<File> jars = new ArrayList<>(0);
+
+          // 1) user jar
           jars.add(uploadJar);
 
-          // 2). jar dependency to local upload
-          if (!app.getDependencyObject().getJar().isEmpty()) {
-            for (String jar : app.getDependencyObject().getJar()) {
-              jars.add(new File(localUploadDIR, jar));
-            }
+          // 2). jar dependency
+          app.getDependencyObject()
+              .getJar()
+              .forEach(jar -> jars.add(new File(localUploadDIR, jar)));
+
+          // 3). pom dependency
+          if (!app.getDependencyInfo().mavenArts().isEmpty()) {
+            jars.addAll(MavenTool.resolveArtifactsAsJava(app.getDependencyInfo().mavenArts()));
           }
 
-          // 3. pom dependency to local upload
-          if (!app.getDependencyInfo().mavenArts().isEmpty()) {
-            Set<File> dependJars =
-                MavenTool.resolveArtifactsAsJava(app.getDependencyInfo().mavenArts());
-            jars.addAll(dependJars);
-          }
-          fsOperator.mkdirs(app.getAppLib());
+          fsOperator.mkCleanDirs(app.getAppLib());
+          // upload jars to uploadDIR
           jars.forEach(jar -> fsOperator.upload(jar.getAbsolutePath(), app.getAppLib()));
         }
       } else {
