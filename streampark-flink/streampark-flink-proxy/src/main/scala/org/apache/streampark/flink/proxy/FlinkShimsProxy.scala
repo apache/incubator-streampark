@@ -159,7 +159,6 @@ object FlinkShimsProxy extends Logger {
 
   private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
     logInfo(s"add flink shims urls classloader,flink version: $flinkVersion")
-
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${flinkVersion.fullVersion}", {
         // 1) flink/lib

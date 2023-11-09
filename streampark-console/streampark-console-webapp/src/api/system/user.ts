@@ -104,8 +104,7 @@ export function deleteUser(data) {
 }
 
 export function resetPassword(data): Promise<AxiosResponse<Result<string>>> {
-  return defHttp.put({ url: Api.ResetPassword, data },
-    { isReturnNativeResponse: true },);
+  return defHttp.put({ url: Api.ResetPassword, data }, { isReturnNativeResponse: true });
 }
 
 export function checkUserName(data) {

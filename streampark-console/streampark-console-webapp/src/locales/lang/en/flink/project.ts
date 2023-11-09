@@ -81,5 +81,7 @@ export default {
     updateProject: 'Update Project',
     deleteProject: 'Delete Project',
     deleteProjectMessage: 'Are you sure delete this project ?',
+    httpsCredential: 'Use Git or checkout with SVN using the web URL.',
+    sshCredential: 'Use a password-protected SSH key.',
   },
 };

@@ -38,6 +38,7 @@ import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.util.FS;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +46,8 @@ import java.util.List;
 
 /** */
 public class GitUtils {
+
+  private GitUtils() {}
 
   public static Git clone(Project project) throws GitAPIException {
     CloneCommand cloneCommand =
@@ -98,13 +101,24 @@ public class GitUtils {
                     @Override
                     protected JSch createDefaultJSch(FS fs) throws JSchException {
                       JSch jSch = super.createDefaultJSch(fs);
-                      if (project.getPrvkeyPath() == null) {
+                      String prvkeyPath = project.getPrvkeyPath();
+                      if (StringUtils.isBlank(prvkeyPath)) {
+                        String userHome = System.getProperty("user.home");
+                        if (userHome != null) {
+                          String rsaPath = userHome.concat("/.ssh/id_rsa");
+                          File resFile = new File(rsaPath);
+                          if (resFile.exists()) {
+                            prvkeyPath = rsaPath;
+                          }
+                        }
+                      }
+                      if (prvkeyPath == null) {
                         return jSch;
                       }
                       if (StringUtils.isEmpty(project.getPassword())) {
-                        jSch.addIdentity(project.getPrvkeyPath());
+                        jSch.addIdentity(prvkeyPath);
                       } else {
-                        jSch.addIdentity(project.getPrvkeyPath(), project.getPassword());
+                        jSch.addIdentity(prvkeyPath, project.getPassword());
                       }
                       return jSch;
                     }

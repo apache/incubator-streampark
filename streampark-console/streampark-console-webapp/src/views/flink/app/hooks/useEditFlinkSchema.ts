@@ -23,6 +23,8 @@ import { Alert } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
 import { fetchMain } from '/@/api/flink/app/app';
 import { ResourceFromEnum } from '/@/enums/flinkEnum';
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 
 export const useEditFlinkSchema = (jars: Ref) => {
   const flinkSql = ref();
@@ -114,6 +116,12 @@ export const useEditFlinkSchema = (jars: Ref) => {
           placeholder: 'Please enter Main class',
         },
         rules: [{ required: true, message: 'Program Main is required' }],
+      },
+      {
+        field: 'dependency',
+        label: t('flink.app.dependency'),
+        component: 'Input',
+        slot: 'dependency',
       },
       ...getFlinkFormOtherSchemas.value,
     ];

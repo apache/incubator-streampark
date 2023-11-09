@@ -55,5 +55,5 @@ export default {
   locked: 'locked',
   effective: 'effective',
   resetSucceeded: 'Reset Succeeded',
-  newPasswordTip: "The new password is: ",
+  newPasswordTip: 'The new password is: ',
 };

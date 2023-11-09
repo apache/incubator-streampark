@@ -54,8 +54,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
       s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
-    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(
-      jobGraphSubmit)
+    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(
+      jobGraphSubmit,
+      restApiSubmit)
   }
 
   /** Submit flink session job via rest api. */

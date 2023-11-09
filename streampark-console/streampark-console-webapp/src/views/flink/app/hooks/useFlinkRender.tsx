@@ -461,7 +461,7 @@ export const renderSqlHistory = (
             )}
 
             <span style="color: darkgrey">
-                <Icon icon="ant-design:clock-circle-outlined" />
+              <Icon icon="ant-design:clock-circle-outlined" />
               {ver.createTime}
             </span>
           </div>
@@ -514,7 +514,7 @@ export const renderResourceFrom = (model: Recordable) => {
       value={model.resourceFrom}
       placeholder="Please select resource from"
     >
-      <Select.Option value="csv">
+      <Select.Option value="cvs">
         <SvgIcon name="github" />
         <span class="pl-10px">CICD</span>
         <span class="gray">(build from CVS)</span>

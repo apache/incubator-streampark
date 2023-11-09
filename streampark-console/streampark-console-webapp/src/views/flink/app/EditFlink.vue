@@ -39,6 +39,7 @@
   import VariableReview from './components/VariableReview.vue';
   import { useDrawer } from '/@/components/Drawer';
   import { ExecModeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
+  import Dependency from '/@/views/flink/app/components/Dependency.vue';
 
   const route = useRoute();
   const { t } = useI18n();
@@ -52,6 +53,7 @@
   const uploadJar = ref('');
   const programArgRef = ref();
   const podTemplateRef = ref();
+  const dependencyRef = ref();
 
   const k8sTemplate = reactive({
     podTemplate: '',
@@ -116,6 +118,7 @@
       setFieldsValue(defaultParams);
       app.args && programArgRef.value?.setContent(app.args);
       setTimeout(() => {
+        unref(dependencyRef)?.setDefaultValue(JSON.parse(app.dependency || '{}'));
         unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', app.k8sPodTemplate);
         unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', app.k8sJmPodTemplate);
         unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', app.k8sTmPodTemplate);
@@ -142,15 +145,34 @@
 
   /* Handling update parameters */
   function handleAppUpdate(values: Recordable) {
+    // Trigger a pom confirmation operation.
+    unref(dependencyRef)?.handleApplyPom();
+    // common params...
+    const dependency: { pom?: string; jar?: string } = {};
+    const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
+    const uploadJars = unref(dependencyRef)?.uploadJars;
+    if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
+      Object.assign(dependency, {
+        pom: unref(dependencyRecords),
+      });
+    }
+    if (uploadJars && unref(uploadJars).length > 0) {
+      Object.assign(dependency, {
+        jar: unref(uploadJars),
+      });
+    }
     submitLoading.value = true;
     try {
       const params = {
         id: app.id,
         jar: values.jar,
         mainClass: values.mainClass,
+        dependency:
+          dependency.pom === undefined && dependency.jar === undefined
+            ? null
+            : JSON.stringify(dependency),
       };
       handleSubmitParams(params, values, k8sTemplate);
-
       handleUpdateApp(params);
     } catch (error) {
       submitLoading.value = false;
@@ -212,11 +234,15 @@
       <template #args="{ model }">
         <ProgramArgs
           ref="programArgRef"
-          v-if="model.args != null && model.args != undefined"
+          v-if="model.args != null"
           v-model:value="model.args"
           :suggestions="suggestions"
           @preview="(value) => openReviewDrawer(true, { value, suggestions })"
         />
+      </template>
+
+      <template #dependency="{ model, field }">
+        <Dependency ref="dependencyRef" v-model:value="model[field]" :form-model="model" />
       </template>
 
       <template #formFooter>

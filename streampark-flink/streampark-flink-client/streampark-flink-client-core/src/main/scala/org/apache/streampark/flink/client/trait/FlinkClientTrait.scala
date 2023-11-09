@@ -20,7 +20,7 @@ package org.apache.streampark.flink.client.`trait`
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
-import org.apache.streampark.common.util.{DeflaterUtils, Logger}
+import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils, Utils}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -42,9 +42,7 @@ import org.apache.flink.util.Preconditions.checkNotNull
 import java.io.File
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
-import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
@@ -201,21 +199,38 @@ trait FlinkClientTrait extends Logger {
   def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse
 
   def trySubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File)(
-      restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse)(
-      jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse): SubmitResponse = {
-    // Prioritize using Rest API submit while using JobGraph submit plan as backup
+      jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse,
+      restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse): SubmitResponse = {
+    // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
     Try {
-      logInfo(s"[flink-submit] Attempting to submit in Rest API Submit Plan.")
-      restApiFunc(submitRequest, flinkConfig, jarFile)
-    }.getOrElse {
-      logWarn(s"[flink-submit] RestAPI Submit Plan failed,try JobGraph Submit Plan now.")
-      Try(jobGraphFunc(submitRequest, flinkConfig, jarFile)) match {
-        case Success(r) => r
-        case Failure(e) =>
-          logError(s"[flink-submit] Both Rest API Submit Plan and JobGraph Submit Plan failed.")
-          throw e
-      }
-
+      logInfo(s"[flink-submit] Submit job with JobGraph Plan.")
+      jobGraphFunc(submitRequest, flinkConfig, jarFile)
+    } match {
+      case Failure(e) =>
+        logWarn(
+          s"""\n
+             |[flink-submit] JobGraph Submit Plan failed, error detail:
+             |------------------------------------------------------------------
+             |${Utils.stringifyException(e)}
+             |------------------------------------------------------------------
+             |Now retry submit with RestAPI Plan ...
+             |""".stripMargin
+        )
+        Try(restApiFunc(submitRequest, flinkConfig, jarFile)) match {
+          case Success(r) => r
+          case Failure(e) =>
+            logError(
+              s"""\n
+                 |[flink-submit] RestAPI Submit failed, error detail:
+                 |------------------------------------------------------------------
+                 |${Utils.stringifyException(e)}
+                 |------------------------------------------------------------------
+                 |Both JobGraph submit plan and Rest API submit plan all failed!
+                 |""".stripMargin
+            )
+            throw e
+        }
+      case Success(v) => v
     }
   }
 
@@ -223,15 +238,18 @@ trait FlinkClientTrait extends Logger {
       flinkConfig: Configuration,
       submitRequest: SubmitRequest,
       jarFile: File): (PackagedProgram, JobGraph) = {
+
     val packageProgram = PackagedProgram.newBuilder
       .setJarFile(jarFile)
+      .setUserClassPaths(
+        Lists.newArrayList(submitRequest.flinkVersion.flinkLibs: _*)
+      )
       .setEntryPointClassName(
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-      .setArguments(
-        flinkConfig
-          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList()): _*)
+      .setArguments(flinkConfig
+        .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+        .orElse(Lists.newArrayList()): _*)
       .build()
 
     val jobGraph = PackagedProgramUtils.createJobGraph(
@@ -399,63 +417,9 @@ trait FlinkClientTrait extends Logger {
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
     val programArgs = new ArrayBuffer[String]()
-    val args = submitRequest.args
-
-    if (StringUtils.isNotEmpty(args)) {
-      val multiChar = "\""
-      val array = args.split("\\s+")
-      if (!array.exists(_.startsWith(multiChar))) {
-        array.foreach(programArgs +=)
-      } else {
-        val argsArray = new ArrayBuffer[String]()
-        val tempBuffer = new ArrayBuffer[String]()
-
-        @tailrec
-        def processElement(index: Int, multi: Boolean): Unit = {
-
-          if (index == array.length) {
-            if (tempBuffer.nonEmpty) {
-              argsArray += tempBuffer.mkString(" ")
-            }
-            return
-          }
-
-          val next = index + 1
-          val elem = array(index).trim
-
-          if (elem.isEmpty) {
-            processElement(next, multi = false)
-          } else {
-            if (multi) {
-              if (elem.endsWith(multiChar)) {
-                tempBuffer += elem.dropRight(1)
-                argsArray += tempBuffer.mkString(" ")
-                tempBuffer.clear()
-                processElement(next, multi = false)
-              } else {
-                tempBuffer += elem
-                processElement(next, multi)
-              }
-            } else {
-              val until = if (elem.endsWith(multiChar)) 1 else 0
-              if (elem.startsWith(multiChar)) {
-                tempBuffer += elem.drop(1).dropRight(until)
-                processElement(next, multi = true)
-              } else {
-                argsArray += elem.dropRight(until)
-                processElement(next, multi = false)
-              }
-            }
-          }
-        }
-
-        processElement(0, multi = false)
-        argsArray.foreach(x => programArgs += x)
-      }
-    }
+    programArgs ++= PropertiesUtils.extractArguments(submitRequest.args)
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
-
       programArgs += PARAM_KEY_FLINK_CONF += submitRequest.flinkYaml
       programArgs += PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
       programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
@@ -469,9 +433,8 @@ trait FlinkClientTrait extends Logger {
         case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
           programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
       }
-
     }
-    programArgs.toList.asJava
+    Lists.newArrayList(programArgs: _*)
   }
 
   private[this] def applyConfiguration(

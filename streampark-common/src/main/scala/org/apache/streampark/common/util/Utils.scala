@@ -21,13 +21,16 @@ import org.apache.commons.lang3.StringUtils
 import java.io.{BufferedInputStream, File, FileInputStream, IOException, PrintWriter, StringWriter}
 import java.lang.{Boolean => JavaBool, Byte => JavaByte, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 import java.net.URL
+import java.time.Duration
 import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
+import java.util.concurrent.locks.LockSupport
 import java.util.jar.{JarFile, JarInputStream}
 
+import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
-object Utils {
+object Utils extends Logger {
 
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
@@ -134,6 +137,21 @@ object Utils {
           case e: Throwable if func != null => func(e)
         }
       })
+  }
+
+  @tailrec
+  def retry[R](retryCount: Int, interval: Duration = Duration.ofSeconds(5))(f: => R): Try[R] = {
+    require(retryCount >= 0)
+    Try(f) match {
+      case Success(result) => Success(result)
+      case Failure(e) if retryCount > 0 =>
+        logWarn(s"retry failed, execution caused by: ", e)
+        logWarn(
+          s"$retryCount times retry remaining, the next attempt will be in ${interval.toMillis} ms")
+        LockSupport.parkNanos(interval.toNanos)
+        retry(retryCount - 1, interval)(f)
+      case Failure(e) => Failure(e)
+    }
   }
 
   /**

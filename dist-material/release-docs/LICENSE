@@ -589,8 +589,7 @@ The following components are provided under the BSD License. See project link fo
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
     https://mvnrepository.com/artifact/com.thoughtworks.paranamer/paranamer/2.8 BSD
-    https://mvnrepository.com/artifact/com.jcraft/jsch/0.1.55 BSD
-    https://mvnrepository.com/artifact/com.jcraft/jzlib/1.1.1 BSD
+    https://mvnrepository.com/artifact/com.github.mwiede/jsch/0.2.11 BSD
 
 
 ========================================================================

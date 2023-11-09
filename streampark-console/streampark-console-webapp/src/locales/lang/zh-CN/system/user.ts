@@ -55,5 +55,5 @@ export default {
   locked: '锁定',
   effective: '有效',
   resetSucceeded: '重置成功',
-  newPasswordTip: "新的密码为：",
+  newPasswordTip: '新的密码为：',
 };

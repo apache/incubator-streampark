@@ -59,7 +59,7 @@
         />
       </a>
       <p class="text-light-100 pt-10px" style="border-top: 1px solid #dad7d7">
-        Copyright © 2022 The Apache Software Foundation. Apache StreamPark, StreamPark, and its
+        Copyright © 2023 The Apache Software Foundation. Apache StreamPark, StreamPark, and its
         feather logo are trademarks of The Apache Software Foundation.
       </p>
     </footer>
@@ -121,9 +121,12 @@
     }
   }
 
-  [data-theme='dark']{
-    .@{prefix-cls}-form{
-      .ant-form-item-has-error :not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+  [data-theme='dark'] {
+    .@{prefix-cls}-form {
+      .ant-form-item-has-error
+        :not(.ant-input-affix-wrapper-disabled):not(
+          .ant-input-affix-wrapper-borderless
+        ).ant-input-affix-wrapper,
       .ant-input-affix-wrapper,
       .ant-input {
         color: rgba(0, 0, 0, 0.85);

@@ -53,6 +53,7 @@ create table `t_flink_app` (
   `jar` varchar(255) collate utf8mb4_general_ci default null,
   `jar_check_sum` bigint default null,
   `main_class` varchar(255) collate utf8mb4_general_ci default null,
+  `dependency` text collate utf8mb4_general_ci default null,
   `args` text collate utf8mb4_general_ci,
   `options` text collate utf8mb4_general_ci,
   `hot_params` text collate utf8mb4_general_ci,

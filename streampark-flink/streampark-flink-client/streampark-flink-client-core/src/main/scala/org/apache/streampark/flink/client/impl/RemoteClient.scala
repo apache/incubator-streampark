@@ -30,8 +30,6 @@ import org.apache.flink.configuration._
 import java.io.File
 import java.lang.{Integer => JavaInt}
 
-import scala.util.{Failure, Success, Try}
-
 /** Submit Job to Remote Cluster */
 object RemoteClient extends FlinkClientTrait {
 
@@ -44,10 +42,11 @@ object RemoteClient extends FlinkClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    // 2) submit job
-    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(
-      jobGraphSubmit)
 
+    // 2) submit job
+    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(
+      jobGraphSubmit,
+      restApiSubmit)
   }
 
   override def doCancel(request: CancelRequest, flinkConfig: Configuration): CancelResponse = {
@@ -112,23 +111,16 @@ object RemoteClient extends FlinkClientTrait {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var client: ClusterClient[StandaloneClusterId] = null
-    Try {
-      val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
-      val yarnClusterId: StandaloneClusterId = standAloneDescriptor._1
-      clusterDescriptor = standAloneDescriptor._2
+    val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
+    val yarnClusterId: StandaloneClusterId = standAloneDescriptor._1
+    clusterDescriptor = standAloneDescriptor._2
 
-      client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
-      val jobId =
-        FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
-      logInfo(
-        s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
-      SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
-    } match {
-      case Success(s) => s
-      case Failure(e) =>
-        logError(s"${submitRequest.executionMode} mode submit by restApi fail.")
-        throw e
-    }
+    client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
+    val jobId =
+      FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
+    logInfo(
+      s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+    SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
   }
 
   /** Submit flink session job with building JobGraph via Standalone ClusterClient api. */

@@ -107,7 +107,6 @@ case class FlinkRemotePerJobBuildRequest(
     workspace: String,
     mainClass: String,
     customFlinkUserJar: String,
-    skipBuild: Boolean,
     executionMode: ExecutionMode,
     developmentMode: DevelopmentMode,
     flinkVersion: FlinkVersion,

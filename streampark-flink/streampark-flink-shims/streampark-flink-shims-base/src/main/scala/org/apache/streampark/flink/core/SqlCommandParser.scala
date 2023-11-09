@@ -391,6 +391,12 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   case object END_STATEMENT_SET
     extends SqlCommand("end statement set", "END", Converters.NO_OPERANDS)
 
+  // Since: 2.1.2 for flink 1.18
+  case object DELETE extends SqlCommand("delete", "(DELETE\\s+FROM\\s+.+)")
+
+  // Since: 2.1.2 for flink 1.18
+  case object UPDATE extends SqlCommand("update", "(UPDATE\\s+.+)")
+
   private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^(['\"])|(['\"])$", "")
 
 }

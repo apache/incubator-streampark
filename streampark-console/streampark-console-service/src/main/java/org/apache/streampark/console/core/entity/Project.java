@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.jar.JarFile;
 
 @Slf4j
 @Data
@@ -192,6 +193,15 @@ public class Project implements Serializable {
         CommandUtils.execute("mvn --version");
       }
     } catch (Exception e) {
+      File wrapperJar = new File(WebUtils.getAppHome().concat("/.mvn/wrapper/maven-wrapper.jar"));
+      if (wrapperJar.exists()) {
+        try {
+          JarFile jarFile = new JarFile(wrapperJar, true);
+          jarFile.close();
+        } catch (Exception ignored) {
+          FileUtils.deleteQuietly(wrapperJar);
+        }
+      }
       if (CommonUtils.isWindows()) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
