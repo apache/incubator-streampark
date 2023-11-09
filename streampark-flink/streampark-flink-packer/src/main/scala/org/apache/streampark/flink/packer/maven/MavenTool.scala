@@ -43,8 +43,10 @@ import javax.annotation.{Nonnull, Nullable}
 
 import java.io.File
 import java.util
+import java.util.{HashSet, Set => JavaSet}
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
@@ -175,6 +177,9 @@ object MavenTool extends Logger {
     val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
     buildFatJar(mainClass, jarLibs ++ artFilePaths, outFatJarPath)
   }
+
+  def resolveArtifactsAsJava(mavenArtifacts: Set[Artifact]): JavaSet[File] = resolveArtifacts(
+    mavenArtifacts).asJava
 
   /**
    * Resolve the collectoin of artifacts, Artifacts will be download to ConfigConst.MAVEN_LOCAL_DIR

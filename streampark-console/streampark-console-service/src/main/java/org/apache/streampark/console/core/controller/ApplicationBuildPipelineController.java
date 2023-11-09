@@ -95,56 +95,51 @@ public class ApplicationBuildPipelineController {
   @PermissionAction(id = "#appId", type = PermissionType.APP)
   @PostMapping(value = "build")
   @RequiresPermissions("app:create")
-  public RestResponse buildApplication(Long appId, boolean forceBuild) {
-    try {
-      Application app = applicationService.getById(appId);
+  public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
+    Application app = applicationService.getById(appId);
 
-      // 1) check flink version
-      FlinkEnv env = flinkEnvService.getById(app.getVersionId());
-      boolean checkVersion = env.getFlinkVersion().checkVersion(false);
-      if (!checkVersion) {
-        throw new ApiAlertException(
-            "Unsupported flink version: " + env.getFlinkVersion().version());
-      }
-
-      // 2) check env
-      boolean envOk = applicationService.checkEnv(app);
-      if (!envOk) {
-        throw new ApiAlertException(
-            "Check flink env failed, please check the flink version of this job");
-      }
-
-      if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
-        throw new ApiAlertException(
-            "The job is invalid, or the job cannot be built while it is running");
-      }
-      // check if you need to go through the build process (if the jar and pom have changed,
-      // you need to go through the build process, if other common parameters are modified,
-      // you don't need to go through the build process)
-
-      ApplicationLog applicationLog = new ApplicationLog();
-      applicationLog.setOptionName(
-          org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
-      applicationLog.setAppId(app.getId());
-      applicationLog.setOptionTime(new Date());
-
-      boolean needBuild = applicationService.checkBuildAndUpdate(app);
-      if (!needBuild) {
-        applicationLog.setSuccess(true);
-        applicationLogService.save(applicationLog);
-        return RestResponse.success(true);
-      }
-
-      // rollback
-      if (app.isNeedRollback() && app.isFlinkSqlJob()) {
-        flinkSqlService.rollback(app);
-      }
-
-      boolean actionResult = appBuildPipeService.buildApplication(app, applicationLog);
-      return RestResponse.success(actionResult);
-    } catch (Exception e) {
-      return RestResponse.success(false).message(e.getMessage());
+    // 1) check flink version
+    FlinkEnv env = flinkEnvService.getById(app.getVersionId());
+    boolean checkVersion = env.getFlinkVersion().checkVersion(false);
+    if (!checkVersion) {
+      throw new ApiAlertException("Unsupported flink version: " + env.getFlinkVersion().version());
     }
+
+    // 2) check env
+    boolean envOk = applicationService.checkEnv(app);
+    if (!envOk) {
+      throw new ApiAlertException(
+          "Check flink env failed, please check the flink version of this job");
+    }
+
+    if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
+      throw new ApiAlertException(
+          "The job is invalid, or the job cannot be built while it is running");
+    }
+    // check if you need to go through the build process (if the jar and pom have changed,
+    // you need to go through the build process, if other common parameters are modified,
+    // you don't need to go through the build process)
+
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(
+        org.apache.streampark.console.core.enums.Operation.RELEASE.getValue());
+    applicationLog.setAppId(app.getId());
+    applicationLog.setOptionTime(new Date());
+
+    boolean needBuild = applicationService.checkBuildAndUpdate(app);
+    if (!needBuild) {
+      applicationLog.setSuccess(true);
+      applicationLogService.save(applicationLog);
+      return RestResponse.success(true);
+    }
+
+    // rollback
+    if (app.isNeedRollback() && app.isFlinkSqlJob()) {
+      flinkSqlService.rollback(app);
+    }
+
+    boolean actionResult = appBuildPipeService.buildApplication(app, applicationLog);
+    return RestResponse.success(actionResult);
   }
 
   /**

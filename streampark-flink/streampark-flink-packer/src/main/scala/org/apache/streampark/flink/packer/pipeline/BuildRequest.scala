@@ -116,7 +116,6 @@ case class FlinkRemotePerJobBuildRequest(
 case class FlinkYarnApplicationBuildRequest(
     appName: String,
     mainClass: String,
-    localWorkspace: String,
     yarnProvidedPath: String,
     developmentMode: DevelopmentMode,
     dependencyInfo: DependencyInfo)

@@ -704,16 +704,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
 
-    if (appParam.isFlinkSqlJob()) {
-      appParam.setBuild(true);
-    } else {
-      if (appParam.isUploadJob()) {
-        appParam.setBuild(!appParam.getDependencyObject().isEmpty());
-      } else {
-        appParam.setBuild(false);
-      }
-    }
-
+    appParam.setBuild(true);
     appParam.setUserId(commonService.getUserId());
     appParam.setState(FlinkAppState.ADDED.getValue());
     appParam.setRelease(ReleaseState.NEED_RELEASE.get());
@@ -819,6 +810,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     newApp.setJarCheckSum(oldApp.getJarCheckSum());
     newApp.setTags(oldApp.getTags());
     newApp.setTeamId(oldApp.getTeamId());
+    newApp.setDependency(oldApp.getDependency());
 
     boolean saved = save(newApp);
     if (saved) {
@@ -1499,7 +1491,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     "%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
             break;
           case APACHE_FLINK:
-            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+            if (application.getFsOperator().exists(application.getAppLib())) {
+              flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
+            } else {
+              // compatible with historical version
+              flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+            }
             break;
           default:
             throw new IllegalArgumentException(
