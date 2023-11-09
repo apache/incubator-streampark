@@ -224,25 +224,4 @@ streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath
 MIT License
 ========================================================================
 
-The following file are provided under the MIT License.
-
-streampark-console/streampark-console-webapp/build/*
-streampark-console/streampark-console-webapp/src/components/*
-streampark-console/streampark-console-webapp/src/directives/*
-streampark-console/streampark-console-webapp/src/logics/*
-streampark-console/streampark-console-webapp/src/utils/*
-streampark-console/streampark-console-webapp/src/App.vue
-streampark-console/streampark-console-webapp/src/main.ts
-streampark-console/streampark-console-webapp/types/*
-
-The files in the following directory without "the Apache License header" are copied from vue-vben-admin
-
-streampark-console/streampark-console-webapp/src/enums
-streampark-console/streampark-console-webapp/src/design
-streampark-console/streampark-console-webapp/src/hooks
-streampark-console/streampark-console-webapp/src/layouts
-streampark-console/streampark-console-webapp/src/locales
-streampark-console/streampark-console-webapp/src/router
-streampark-console/streampark-console-webapp/src/settings
-streampark-console/streampark-console-webapp/src/store
-streampark-console/streampark-console-webapp/src/views/base
+The files under the directory streampark-console/streampark-console-webapp/ without the "Apache License 2.0" License header are provided under the MIT License, from https://github.com/vbenjs/vue-vben-admin
