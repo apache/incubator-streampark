@@ -391,14 +391,10 @@ public class AppBuildPipeServiceImpl
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
       if (app.isUploadJob()) {
-
         // 1). upload jar to local upload.
         File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
-
         File uploadJar = new File(localUploadDIR, app.getJar());
-
         checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploadDIR);
-
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
           List<File> jars = new ArrayList<>(0);
           jars.add(uploadJar);
@@ -417,8 +413,7 @@ public class AppBuildPipeServiceImpl
             jars.addAll(dependJars);
           }
           fsOperator.mkdirs(app.getAppLib());
-          jars.forEach(
-              jar -> fsOperator.upload(jar.getAbsolutePath(), app.getAppLib(), false, true));
+          jars.forEach(jar -> fsOperator.upload(jar.getAbsolutePath(), app.getAppLib()));
         }
       } else {
         String appHome = app.getAppHome();
@@ -509,11 +504,11 @@ public class AppBuildPipeServiceImpl
   private void checkOrElseUploadJar(
       FsOperator fsOperator, File localJar, File targetJar, File targetDir) {
     if (!fsOperator.exists(targetJar.getAbsolutePath())) {
-      fsOperator.upload(localJar.getAbsolutePath(), targetDir.getAbsolutePath(), false, true);
+      fsOperator.upload(localJar.getAbsolutePath(), targetDir.getAbsolutePath());
     } else {
       // The file exists to check whether it is consistent, and if it is inconsistent, re-upload it
       if (!FileUtils.equals(localJar, targetJar)) {
-        fsOperator.upload(localJar.getAbsolutePath(), targetDir.getAbsolutePath(), false, true);
+        fsOperator.upload(localJar.getAbsolutePath(), targetDir.getAbsolutePath());
       }
     }
   }
