@@ -381,8 +381,7 @@ public class AppBuildPipeServiceImpl
             throw new ApiAlertException("Missing file: " + jar + ", please upload again");
           }
           if (localJar.exists()) {
-            checkOrElseUploadJar(
-                FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(), localUploadDIR);
+            checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploadDIR);
           }
         }
       }
@@ -394,13 +393,11 @@ public class AppBuildPipeServiceImpl
       if (app.isUploadJob()) {
 
         // 1). upload jar to local upload.
+        File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
+
         File uploadJar = new File(localUploadDIR, app.getJar());
 
-        checkOrElseUploadJar(
-            FsOperator.lfs(),
-            new File(WebUtils.getAppTempDir(), app.getJar()),
-            uploadJar.getAbsolutePath(),
-            localUploadDIR);
+        checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploadDIR);
 
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
           List<File> jars = new ArrayList<>(0);
@@ -510,12 +507,12 @@ public class AppBuildPipeServiceImpl
   }
 
   private void checkOrElseUploadJar(
-      FsOperator fsOperator, File localJar, String targetJar, File targetDir) {
-    if (!fsOperator.exists(targetJar)) {
+      FsOperator fsOperator, File localJar, File targetJar, File targetDir) {
+    if (!fsOperator.exists(targetJar.getAbsolutePath())) {
       fsOperator.upload(localJar.getAbsolutePath(), targetDir.getAbsolutePath(), false, true);
     } else {
       // The file exists to check whether it is consistent, and if it is inconsistent, re-upload it
-      if (!FileUtils.equals(localJar, new File(targetJar))) {
+      if (!FileUtils.equals(localJar, targetJar)) {
         fsOperator.upload(localJar.getAbsolutePath(), targetDir.getAbsolutePath(), false, true);
       }
     }

@@ -704,16 +704,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
 
-    if (appParam.isFlinkSqlJob()) {
-      appParam.setBuild(true);
-    } else {
-      if (appParam.isUploadJob()) {
-        appParam.setBuild(!appParam.getDependencyObject().isEmpty());
-      } else {
-        appParam.setBuild(false);
-      }
-    }
-
+    appParam.setBuild(true);
     appParam.setUserId(commonService.getUserId());
     appParam.setState(FlinkAppState.ADDED.getValue());
     appParam.setRelease(ReleaseState.NEED_RELEASE.get());
