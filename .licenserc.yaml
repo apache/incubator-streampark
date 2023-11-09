@@ -59,6 +59,7 @@ header:
     - '**/*.pem'
     - 'ssh_config'
     - 'workers'
+    - 'streampark-console/streampark-console-webapp'
 
   comment: on-failure
 
