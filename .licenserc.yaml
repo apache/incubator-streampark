@@ -59,6 +59,7 @@ header:
     - '**/*.pem'
     - 'ssh_config'
     - 'workers'
+    - 'streampark-console/streampark-console-webapp/windi.config.ts'
     - 'streampark-console/streampark-console-webapp/src/App.vue'
     - 'streampark-console/streampark-console-webapp/src/main.ts'
     - 'streampark-console/streampark-console-webapp/src/locales/helper.ts'
