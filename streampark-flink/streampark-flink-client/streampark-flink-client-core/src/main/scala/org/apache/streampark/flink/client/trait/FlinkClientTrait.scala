@@ -213,12 +213,12 @@ trait FlinkClientTrait extends Logger {
             throw new RuntimeException(
               s"""\n
                  |[flink-submit] Both JobGraph submit plan and Rest API submit plan all failed!
-                 |JobGraph submit plan failed detail:
+                 |JobGraph Submit plan failed detail:
                  |------------------------------------------------------------------
                  |${Utils.stringifyException(e)}
                  |------------------------------------------------------------------
                  |
-                 | RestAPI Submit failed detail:
+                 | RestAPI Submit plan failed detail:
                  | ------------------------------------------------------------------
                  |${Utils.stringifyException(e1)}
                  |------------------------------------------------------------------
