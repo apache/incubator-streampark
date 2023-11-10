@@ -16,7 +16,7 @@
 -->
 <template>
   <transition>
-    <div class="fixed z-index-999999 w-full h-full bg-white [dark]:bg-[#151515]">
+    <div class="fixed z-[999999] w-full h-full bg-white dark:bg-[#151515]">
       <Login sessionTimeout />
     </div>
   </transition>
