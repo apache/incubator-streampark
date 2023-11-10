@@ -38,6 +38,8 @@ case class Artifact(
     }
   }
 
+  lazy val jarName = s"$artifactId-$version.jar"
+
 }
 
 object Artifact {

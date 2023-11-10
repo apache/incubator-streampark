@@ -95,6 +95,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -424,7 +425,17 @@ public class AppBuildPipeServiceImpl
 
           // 3). pom dependency
           if (!app.getDependencyInfo().mavenArts().isEmpty()) {
-            jars.addAll(MavenTool.resolveArtifactsAsJava(app.getDependencyInfo().mavenArts()));
+            Set<File> mavenArts =
+                MavenTool.resolveArtifactsAsJava(
+                    app.getDependencyInfo()
+                        .mavenArts()
+                        .filter(
+                            x -> {
+                              File jarFile = new File(localUploadDIR, x.jarName());
+                              return !jarFile.exists();
+                            })
+                        .toSet());
+            jars.addAll(mavenArts);
           }
 
           // 4). local uploadDIR to hdfs uploadsDIR

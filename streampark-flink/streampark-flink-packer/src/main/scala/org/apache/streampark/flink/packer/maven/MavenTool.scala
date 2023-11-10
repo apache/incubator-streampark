@@ -43,7 +43,6 @@ import javax.annotation.{Nonnull, Nullable}
 
 import java.io.File
 import java.util
-import java.util.{HashSet, Set => JavaSet}
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -56,8 +55,10 @@ object MavenTool extends Logger {
 
   private[this] val excludeArtifact = List(
     Artifact.of("org.apache.flink:force-shading:*"),
+    Artifact.of("org.apache.flink:flink-shaded-force-shading:*"),
     Artifact.of("com.google.code.findbugs:jsr305:*"),
-    Artifact.of("org.apache.logging.log4j:*:*"))
+    Artifact.of("org.apache.logging.log4j:*:*")
+  )
 
   private[this] def getRemoteRepos(): List[RemoteRepository] = {
     val builder =
@@ -145,7 +146,7 @@ object MavenTool extends Logger {
       }
       req.setResourceTransformers(transformer.toList)
       // issue: https://github.com/apache/incubator-streampark/issues/2350
-      req.setFilters(List(new ShadeFilter))
+      req.setFilters(List(new ShadedFilter))
       req.setRelocators(Lists.newArrayList())
       req
     }
@@ -178,7 +179,7 @@ object MavenTool extends Logger {
     buildFatJar(mainClass, jarLibs ++ artFilePaths, outFatJarPath)
   }
 
-  def resolveArtifactsAsJava(mavenArtifacts: Set[Artifact]): JavaSet[File] = resolveArtifacts(
+  def resolveArtifactsAsJava(mavenArtifacts: Set[Artifact]): util.Set[File] = resolveArtifacts(
     mavenArtifacts).asJava
 
   /**
@@ -256,13 +257,13 @@ object MavenTool extends Logger {
     (repoSystem, session)
   }
 
-  class ShadeFilter extends Filter {
+  private class ShadedFilter extends Filter {
     override def canFilter(jar: File): Boolean = true
 
     override def isFiltered(name: String): Boolean = {
       if (name.startsWith("META-INF/")) {
         if (name.endsWith(".SF") || name.endsWith(".DSA") || name.endsWith(".RSA")) {
-          logInfo(s"shade ignore file: $name")
+          logInfo(s"shaded ignore file: $name")
           return true
         }
       }
