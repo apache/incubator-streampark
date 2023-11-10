@@ -402,21 +402,10 @@ public class AppBuildPipeServiceImpl
         checkOrElseUploadJar(localFS, localJar, localUploadJar, localUploadDIR);
 
         // 2) copy jar to local $app_home/lib
-        boolean cleanUpload = false;
         File libJar = new File(app.getLocalAppLib(), app.getJar());
-        if (!localFS.exists(app.getLocalAppLib())) {
-          cleanUpload = true;
-        } else {
-          if (libJar.exists()) {
-            if (!FileUtils.equals(localJar, libJar)) {
-              cleanUpload = true;
-            }
-          } else {
-            cleanUpload = true;
-          }
-        }
-
-        if (cleanUpload) {
+        if (!localFS.exists(app.getLocalAppLib())
+            || !libJar.exists()
+            || !FileUtils.equals(localJar, libJar)) {
           localFS.mkCleanDirs(app.getLocalAppLib());
           localFS.upload(localUploadJar.getAbsolutePath(), app.getLocalAppLib());
         }
