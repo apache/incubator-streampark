@@ -241,15 +241,13 @@ trait FlinkClientTrait extends Logger {
 
     val packageProgram = PackagedProgram.newBuilder
       .setJarFile(jarFile)
-      .setUserClassPaths(
-        Lists.newArrayList(submitRequest.flinkVersion.flinkLibs: _*)
-      )
       .setEntryPointClassName(
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-      .setArguments(flinkConfig
-        .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-        .orElse(Lists.newArrayList()): _*)
+      .setArguments(
+        flinkConfig
+          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+          .orElse(Lists.newArrayList()): _*)
       .build()
 
     val jobGraph = PackagedProgramUtils.createJobGraph(
