@@ -62,15 +62,10 @@ public class PostgreSQLQueryInterceptor implements Interceptor {
     RowBounds rowBounds = (RowBounds) args[2];
     ResultHandler<?> resultHandler = (ResultHandler<?>) args[3];
     Executor executor = (Executor) invocation.getTarget();
-    CacheKey cacheKey;
-    BoundSql boundSql;
-    if (args.length == 4) {
-      boundSql = ms.getBoundSql(parameter);
-      cacheKey = executor.createCacheKey(ms, parameter, rowBounds, boundSql);
-    } else {
-      cacheKey = (CacheKey) args[4];
-      boundSql = (BoundSql) args[5];
-    }
+    boolean fourLen = args.length == 4;
+    BoundSql boundSql = fourLen ? ms.getBoundSql(parameter) : (BoundSql) args[5];
+    CacheKey cacheKey =
+        fourLen ? executor.createCacheKey(ms, parameter, rowBounds, boundSql) : (CacheKey) args[4];
     return executor.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
   }
 

@@ -25,10 +25,8 @@ public final class ObjectUtils {
 
   public static boolean trimEquals(Object o1, Object o2) {
     boolean equals = Objects.deepEquals(o1, o2);
-    if (!equals) {
-      if (o1 instanceof String && o2 instanceof String) {
-        return o1.toString().trim().equals(o2.toString().trim());
-      }
+    if (!equals && o1 instanceof String && o2 instanceof String) {
+      return o1.toString().trim().equals(o2.toString().trim());
     }
     return equals;
   }

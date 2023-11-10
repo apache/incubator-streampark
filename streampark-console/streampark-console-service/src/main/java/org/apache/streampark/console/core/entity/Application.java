@@ -363,10 +363,10 @@ public class Application implements Serializable {
   }
 
   public boolean eqFlinkJob(Application other) {
-    if (this.isFlinkSqlJob() && other.isFlinkSqlJob()) {
-      if (this.getFlinkSql().trim().equals(other.getFlinkSql().trim())) {
-        return this.getDependencyObject().equals(other.getDependencyObject());
-      }
+    if (this.isFlinkSqlJob()
+        && other.isFlinkSqlJob()
+        && this.getFlinkSql().trim().equals(other.getFlinkSql().trim())) {
+      return this.getDependencyObject().equals(other.getDependencyObject());
     }
     return false;
   }

@@ -239,16 +239,15 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
     Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
 
-    if (ArrayUtils.isNotEmpty(appParam.getStateArray())) {
-      if (Arrays.stream(appParam.getStateArray())
-          .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
-        Integer[] newArray =
-            ArrayUtils.insert(
-                appParam.getStateArray().length,
-                appParam.getStateArray(),
-                FlinkAppStateEnum.POS_TERMINATED.getValue());
-        appParam.setStateArray(newArray);
-      }
+    if (ArrayUtils.isNotEmpty(appParam.getStateArray())
+        && Arrays.stream(appParam.getStateArray())
+            .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
+      Integer[] newArray =
+          ArrayUtils.insert(
+              appParam.getStateArray().length,
+              appParam.getStateArray(),
+              FlinkAppStateEnum.POS_TERMINATED.getValue());
+      appParam.setStateArray(newArray);
     }
     this.baseMapper.selectPage(page, appParam);
     List<Application> records = page.getRecords();
@@ -492,21 +491,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     // 2) k8s podTemplate changed.
-    if (application.getBuild()
-        && FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
-      if (ObjectUtils.trimNoEquals(
-              application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
-          || ObjectUtils.trimNoEquals(
-              application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate())
-          || ObjectUtils.trimNoEquals(
-              application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate())
-          || ObjectUtils.trimNoEquals(
-              application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
-          || ObjectUtils.trimNoEquals(
-              application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())
-          || ObjectUtils.trimNoEquals(application.getFlinkImage(), appParam.getFlinkImage())) {
-        application.setBuild(true);
-      }
+    if (application.getBuild() && isK8sPodTemplateChanged(application, appParam)) {
+      application.setBuild(true);
     }
 
     // 3) flink version changed
@@ -516,13 +502,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     // 4) yarn application mode change
-    if (!application.getBuild()) {
-      if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
-        if (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
-            || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
-          application.setBuild(true);
-        }
-      }
+    if (!application.getBuild() && isYarnApplicationModeChange(application, appParam)) {
+      application.setBuild(true);
     }
 
     appParam.setJobType(application.getJobType());
@@ -840,5 +821,26 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   private boolean isYarnNotDefaultQueue(Application application) {
     return FlinkExecutionMode.isYarnPerJobOrAppMode(application.getFlinkExecutionMode())
         && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
+  }
+
+  private boolean isK8sPodTemplateChanged(Application application, Application appParam) {
+    return FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+        && (ObjectUtils.trimNoEquals(
+                application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
+            || ObjectUtils.trimNoEquals(
+                application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate())
+            || ObjectUtils.trimNoEquals(
+                application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate())
+            || ObjectUtils.trimNoEquals(
+                application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
+            || ObjectUtils.trimNoEquals(
+                application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())
+            || ObjectUtils.trimNoEquals(application.getFlinkImage(), appParam.getFlinkImage()));
+  }
+
+  private boolean isYarnApplicationModeChange(Application application, Application appParam) {
+    return !application.getExecutionMode().equals(appParam.getExecutionMode())
+        && (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
+            || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode());
   }
 }

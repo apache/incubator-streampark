@@ -111,33 +111,34 @@ public class ConsoleAspect {
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
     boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
+    if (isAdmin) {
+      return (RestResponse) joinPoint.proceed();
+    }
 
-    if (!isAdmin) {
-      PermissionTypeEnum permissionTypeEnum = permissionAction.type();
-      Long paramId = getParamId(joinPoint, methodSignature, permissionAction.id());
+    PermissionTypeEnum permissionTypeEnum = permissionAction.type();
+    Long paramId = getParamId(joinPoint, methodSignature, permissionAction.id());
 
-      switch (permissionTypeEnum) {
-        case USER:
-          ApiAlertException.throwIfTrue(
-              !currentUser.getUserId().equals(paramId),
-              "Permission denied, only user himself can access this permission");
-          break;
-        case TEAM:
-          ApiAlertException.throwIfTrue(
-              memberService.getByTeamIdUserName(paramId, currentUser.getUsername()) == null,
-              "Permission denied, only user belongs to this team can access this permission");
-          break;
-        case APP:
-          Application app = applicationManageService.getById(paramId);
-          ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
-          ApiAlertException.throwIfTrue(
-              memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername()) == null,
-              "Permission denied, only user belongs to this team can access this permission");
-          break;
-        default:
-          throw new IllegalArgumentException(
-              String.format("Permission type %s is not supported.", permissionTypeEnum));
-      }
+    switch (permissionTypeEnum) {
+      case USER:
+        ApiAlertException.throwIfTrue(
+            !currentUser.getUserId().equals(paramId),
+            "Permission denied, only user himself can access this permission");
+        break;
+      case TEAM:
+        ApiAlertException.throwIfTrue(
+            memberService.getByTeamIdUserName(paramId, currentUser.getUsername()) == null,
+            "Permission denied, only user belongs to this team can access this permission");
+        break;
+      case APP:
+        Application app = applicationManageService.getById(paramId);
+        ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
+        ApiAlertException.throwIfTrue(
+            memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername()) == null,
+            "Permission denied, only user belongs to this team can access this permission");
+        break;
+      default:
+        throw new IllegalArgumentException(
+            String.format("Permission type %s is not supported.", permissionTypeEnum));
     }
 
     return (RestResponse) joinPoint.proceed();
