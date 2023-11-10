@@ -71,6 +71,7 @@ import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipe
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -86,6 +87,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -164,7 +168,7 @@ public class AppBuildPipeServiceImpl
     pipeline.registerWatcher(
         new PipeWatcher() {
           @Override
-          public void onStart(PipeSnapshot snapshot) {
+          public void onStart(PipeSnapshot snapshot) throws Exception {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
@@ -364,7 +368,7 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  private void prepareJars(Application app) {
+  private void prepareJars(Application app) throws IOException {
     File localUploadDIR = new File(Workspace.local().APP_UPLOADS());
     if (!localUploadDIR.exists()) {
       localUploadDIR.mkdirs();
@@ -421,7 +425,7 @@ public class AppBuildPipeServiceImpl
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
           List<File> jars = new ArrayList<>(0);
 
-          // 1) user jar
+          // 1). user jar
           jars.add(libJar);
 
           // 2). jar dependency
@@ -434,9 +438,24 @@ public class AppBuildPipeServiceImpl
             jars.addAll(MavenTool.resolveArtifactsAsJava(app.getDependencyInfo().mavenArts()));
           }
 
+          // 4). local uploadDIR to hdfs uploadsDIR
+          String hdfsUploadDIR = Workspace.remote().APP_UPLOADS();
+          for (File jarFile : jars) {
+            String hdfsUploadPath = hdfsUploadDIR + "/" + jarFile.getName();
+            if (!fsOperator.exists(hdfsUploadPath)) {
+              fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
+            } else {
+              InputStream inputStream = Files.newInputStream(jarFile.toPath());
+              if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(hdfsUploadPath))) {
+                fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
+              }
+            }
+          }
+
+          // 5). copy jars to $hdfs_app_home/lib
           fsOperator.mkCleanDirs(app.getAppLib());
-          // 4). upload jars to appLibDIR
-          jars.forEach(jar -> fsOperator.upload(jar.getAbsolutePath(), app.getAppLib()));
+          jars.forEach(
+              jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
         }
       } else {
         String appHome = app.getAppHome();

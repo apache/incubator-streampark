@@ -207,7 +207,6 @@ public class FlinkRESTAPIWatcher {
               STOP_FROM_MAP.getOrDefault(key, null) == null
                   ? StopFrom.NONE
                   : STOP_FROM_MAP.get(key);
-          final OptionState optionState = OPTIONING.get(key);
           try {
             // query status from flink rest api
             getFromFlinkRestApi(application, stopFrom);
@@ -220,37 +219,36 @@ public class FlinkRESTAPIWatcher {
                Query from flink's restAPI and yarn's restAPI both failed.
                In this case, it is necessary to decide whether to return to the final state depending on the state being operated
               */
-              if (optionState == null || !optionState.equals(OptionState.STARTING)) {
-                // non-mapping
-                if (application.getState() != FlinkAppState.MAPPING.getValue()) {
-                  log.error(
-                      "FlinkRESTAPIWatcher getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
-                  if (StopFrom.NONE.equals(stopFrom)) {
-                    savePointService.expire(application.getId());
-                    application.setState(FlinkAppState.LOST.getValue());
-                    alertService.alert(application, FlinkAppState.LOST);
-                  } else {
-                    application.setState(FlinkAppState.CANCELED.getValue());
-                  }
+              // non-mapping
+              if (application.getState() != FlinkAppState.MAPPING.getValue()) {
+                log.error(
+                    "FlinkRESTAPIWatcher getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
+                if (StopFrom.NONE.equals(stopFrom)) {
+                  savePointService.expire(application.getId());
+                  application.setState(FlinkAppState.LOST.getValue());
+                  alertService.alert(application, FlinkAppState.LOST);
+                } else {
+                  application.setState(FlinkAppState.CANCELED.getValue());
                 }
-                /*
-                 This step means that the above two ways to get information have failed, and this step is the last step,
-                 which will directly identify the mission as cancelled or lost.
-                 Need clean savepoint.
-                */
-                application.setEndTime(new Date());
-                cleanSavepoint(application);
-                cleanOptioning(optionState, key);
-                doPersistMetrics(application, true);
-                FlinkAppState appState = FlinkAppState.of(application.getState());
-                if (appState.equals(FlinkAppState.FAILED) || appState.equals(FlinkAppState.LOST)) {
-                  alertService.alert(application, FlinkAppState.of(application.getState()));
-                  if (appState.equals(FlinkAppState.FAILED)) {
-                    try {
-                      applicationService.start(application, true);
-                    } catch (Exception e) {
-                      log.error(e.getMessage(), e);
-                    }
+              }
+              /*
+               This step means that the above two ways to get information have failed, and this step is the last step,
+               which will directly identify the mission as cancelled or lost.
+               Need clean savepoint.
+              */
+              application.setEndTime(new Date());
+              cleanSavepoint(application);
+              OptionState optionState = OPTIONING.get(key);
+              cleanOptioning(optionState, key);
+              doPersistMetrics(application, true);
+              FlinkAppState appState = FlinkAppState.of(application.getState());
+              if (appState.equals(FlinkAppState.FAILED) || appState.equals(FlinkAppState.LOST)) {
+                alertService.alert(application, FlinkAppState.of(application.getState()));
+                if (appState.equals(FlinkAppState.FAILED)) {
+                  try {
+                    applicationService.start(application, true);
+                  } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                   }
                 }
               }
@@ -738,9 +736,6 @@ public class FlinkRESTAPIWatcher {
 
   private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {
     String result = YarnUtils.restRequest(url);
-    if (null == result) {
-      return null;
-    }
     return JacksonUtils.read(result, clazz);
   }
 

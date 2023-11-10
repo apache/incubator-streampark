@@ -30,6 +30,7 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.impl.client.HttpClients
 
+import java.io.IOException
 import java.net.InetAddress
 import java.security.PrivilegedExceptionAction
 import java.util
@@ -257,20 +258,19 @@ object YarnUtils extends Logger {
    *   url
    * @return
    */
+  @throws[IOException]
   def restRequest(url: String): String = {
     if (url == null) return null
-
     url match {
       case u if u.matches("^http(|s)://.*") =>
         Try(request(url)) match {
           case Success(v) => v
           case Failure(e) =>
             if (hasYarnHttpKerberosAuth) {
-              logError(s"yarnUtils authRestRequest error, url: $u, detail: $e")
+              throw new IOException(s"yarnUtils authRestRequest error, url: $u, detail: $e")
             } else {
-              logError(s"yarnUtils restRequest error, url: $u, detail: $e")
+              throw new IOException(s"yarnUtils restRequest error, url: $u, detail: $e")
             }
-            null
         }
       case _ =>
         Try(request(s"${getRMWebAppURL()}/$url")) match {
@@ -281,8 +281,7 @@ object YarnUtils extends Logger {
             } match {
               case Success(v) => v
               case Failure(e) =>
-                logError(s"yarnUtils restRequest retry 5 times all failed. detail: $e")
-                null
+                throw new IOException(s"yarnUtils restRequest retry 5 times all failed. detail: $e")
             }
         }
     }

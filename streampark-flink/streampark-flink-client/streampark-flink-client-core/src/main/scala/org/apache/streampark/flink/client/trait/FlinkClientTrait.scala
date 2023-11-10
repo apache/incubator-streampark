@@ -207,28 +207,22 @@ trait FlinkClientTrait extends Logger {
       jobGraphFunc(submitRequest, flinkConfig, jarFile)
     } match {
       case Failure(e) =>
-        logWarn(
-          s"""\n
-             |[flink-submit] JobGraph Submit Plan failed, error detail:
-             |------------------------------------------------------------------
-             |${Utils.stringifyException(e)}
-             |------------------------------------------------------------------
-             |Now retry submit with RestAPI Plan ...
-             |""".stripMargin
-        )
         Try(restApiFunc(submitRequest, flinkConfig, jarFile)) match {
           case Success(r) => r
-          case Failure(e) =>
-            logError(
+          case Failure(e1) =>
+            throw new RuntimeException(
               s"""\n
-                 |[flink-submit] RestAPI Submit failed, error detail:
+                 |[flink-submit] Both JobGraph submit plan and Rest API submit plan all failed!
+                 |JobGraph submit plan failed detail:
                  |------------------------------------------------------------------
                  |${Utils.stringifyException(e)}
                  |------------------------------------------------------------------
-                 |Both JobGraph submit plan and Rest API submit plan all failed!
-                 |""".stripMargin
-            )
-            throw e
+                 |
+                 | RestAPI Submit failed, error detail:
+                 | ------------------------------------------------------------------
+                 |${Utils.stringifyException(e1)}
+                 |------------------------------------------------------------------
+                 |""".stripMargin)
         }
       case Success(v) => v
     }
