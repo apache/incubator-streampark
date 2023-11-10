@@ -218,7 +218,7 @@ trait FlinkClientTrait extends Logger {
                  |${Utils.stringifyException(e)}
                  |------------------------------------------------------------------
                  |
-                 | RestAPI Submit failed, error detail:
+                 | RestAPI Submit failed detail:
                  | ------------------------------------------------------------------
                  |${Utils.stringifyException(e1)}
                  |------------------------------------------------------------------
