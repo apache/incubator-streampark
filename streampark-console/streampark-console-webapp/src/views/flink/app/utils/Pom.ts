@@ -22,65 +22,40 @@ export function toPomString(pom) {
   const classifier = pom.classifier;
   const exclusions = pom.exclusions || [];
   let exclusionString = '';
-  let pomString = '';
+  let classifierString = '';
   if (exclusions.length > 0) {
     exclusions.forEach((item) => {
       exclusionString +=
-        '        <exclusion>\n' +
-        '          <groupId>' +
+        '      <exclusion>\n' +
+        '        <groupId>' +
         item.groupId +
         '</groupId>\n' +
-        '          <artifactId>' +
+        '        <artifactId>' +
         item.artifactId +
         '</artifactId>\n' +
-        '        </exclusion>\n';
+        '      </exclusion>\n';
     });
-    pomString =
-      '  <dependency>\n' +
-      '     <groupId>' +
-      groupId +
-      '</groupId>\n' +
-      '     <artifactId>' +
-      artifactId +
-      '</artifactId>\n' +
-      '     <version>' +
-      version +
-      '</version>\n' +
-      '     <exclusions>\n' +
-      exclusionString +
-      '     </exclusions>\n' +
-      '   </dependency>';
-  } else {
-    if (classifier != null) {
-      pomString =
-        '  <dependency>\n' +
-        '    <groupId>' +
-        groupId +
-        '</groupId>\n' +
-        '    <artifactId>' +
-        artifactId +
-        '</artifactId>\n' +
-        '    <version>' +
-        version +
-        '</version>\n' +
-        '    <classifier>' +
-        classifier +
-        '</classifier>\n' +
-        '  </dependency>';
-    } else {
-      pomString =
-        '  <dependency>\n' +
-        '    <groupId>' +
-        groupId +
-        '</groupId>\n' +
-        '    <artifactId>' +
-        artifactId +
-        '</artifactId>\n' +
-        '    <version>' +
-        version +
-        '</version>\n' +
-        '  </dependency>';
-    }
+    exclusionString = '    <exclusions>\n' + exclusionString + '    </exclusions>\n';
   }
+
+  if (classifier != null) {
+    classifierString = '    <classifier>' + classifier + '</classifier>\n';
+  }
+
+  const pomString =
+    '  <dependency>\n' +
+    '    <groupId>' +
+    groupId +
+    '</groupId>\n' +
+    '    <artifactId>' +
+    artifactId +
+    '</artifactId>\n' +
+    '    <version>' +
+    version +
+    '</version>\n' +
+    classifierString +
+    exclusionString +
+    '  </dependency>';
+
   return pomString;
 }

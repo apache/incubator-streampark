@@ -160,7 +160,7 @@ object MavenTool extends Logger {
   /**
    * Build a fat-jar with custom jar librarties and maven artifacts.
    *
-   * @param dependencyInfo
+   * @param artifact
    *   maven artifacts and jar libraries for building a fat-jar
    * @param outFatJarPath
    *   output paths of fat-jar, like "/streampark/workspace/233/my-fat.jar"
@@ -168,10 +168,10 @@ object MavenTool extends Logger {
   @throws[Exception]
   def buildFatJar(
       @Nullable mainClass: String,
-      @Nonnull dependencyInfo: DependencyInfo,
+      @Nonnull artifact: MavenArtifact,
       @Nonnull outFatJarPath: String): File = {
-    val jarLibs = dependencyInfo.extJarLibs
-    val arts = dependencyInfo.mavenArts
+    val jarLibs = artifact.extJarLibs
+    val arts = artifact.mavenArts
     if (jarLibs.isEmpty && arts.isEmpty) {
       throw new Exception(s"[StreamPark] streampark-packer: empty artifacts.")
     }

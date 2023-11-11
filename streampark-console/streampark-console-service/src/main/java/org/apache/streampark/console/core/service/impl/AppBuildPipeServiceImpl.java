@@ -307,7 +307,7 @@ public class AppBuildPipeServiceImpl
                 mainClass,
                 yarnProvidedPath,
                 app.getDevelopmentMode(),
-                app.getDependencyInfo());
+                app.getMavenArtifact());
         log.info("Submit params to building pipeline : {}", yarnAppRequest);
         return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
       case YARN_PER_JOB:
@@ -322,7 +322,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo());
+                app.getMavenArtifact());
         log.info("Submit params to building pipeline : {}", buildRequest);
         return FlinkRemoteBuildPipeline.of(buildRequest);
       case KUBERNETES_NATIVE_SESSION:
@@ -335,7 +335,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo(),
+                app.getMavenArtifact(),
                 app.getClusterId(),
                 app.getK8sNamespace());
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
@@ -350,7 +350,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo(),
+                app.getMavenArtifact(),
                 app.getClusterId(),
                 app.getK8sNamespace(),
                 app.getFlinkImage(),
@@ -379,8 +379,8 @@ public class AppBuildPipeServiceImpl
     FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
     if (app.isFlinkSqlJob() || app.isUploadJob()) {
-      if (!app.getDependencyObject().getJar().isEmpty()) {
-        for (String jar : app.getDependencyObject().getJar()) {
+      if (!app.getMavenDependency().getJar().isEmpty()) {
+        for (String jar : app.getMavenDependency().getJar()) {
           File localJar = new File(WebUtils.getAppTempDir(), jar);
           File localUploadJar = new File(localUploadDIR, jar);
           if (!localJar.exists() && !localUploadJar.exists()) {
@@ -420,14 +420,12 @@ public class AppBuildPipeServiceImpl
           jars.add(libJar);
 
           // 2). jar dependency
-          app.getDependencyObject()
-              .getJar()
-              .forEach(jar -> jars.add(new File(localUploadDIR, jar)));
+          app.getMavenDependency().getJar().forEach(jar -> jars.add(new File(localUploadDIR, jar)));
 
           // 3). pom dependency
-          if (!app.getDependencyObject().getPom().isEmpty()) {
+          if (!app.getMavenDependency().getPom().isEmpty()) {
             Set<Artifact> artifacts =
-                app.getDependencyObject().getPom().stream()
+                app.getMavenDependency().getPom().stream()
                     .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
                     .map(
                         pom ->
