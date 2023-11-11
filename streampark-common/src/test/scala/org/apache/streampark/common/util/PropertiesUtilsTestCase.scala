@@ -24,8 +24,20 @@ import scala.language.postfixOps
 class PropertiesUtilsTestCase {
 
   @Test def testExtractProgramArgs(): Unit = {
-    val args =
-      "mysql-sync-database \n--database employees \n--mysql-conf hostname=127.0.0.1 \n--mysql-conf port=3306 \n--mysql-conf username=root \n--mysql-conf password=123456 \n--mysql-conf database-name=employees \n--including-tables 'test|test.*' \n--sink-conf fenodes=127.0.0.1:8030 \n--sink-conf username=root \n--sink-conf password= \n--sink-conf jdbc-url=jdbc:mysql://127.0.0.1:9030 \n--sink-conf sink.label-prefix=label\n--table-conf replication_num=1 "
+    val args = "mysql-sync-table \n" +
+      "--warehouse hdfs:///paimon \n" +
+      "--database test_db \n" +
+      "--table test_table \n" +
+      "--mysql-conf hostname=localhost \n" +
+      "--mysql-conf username=root \n" +
+      "--mysql-conf password=123456 \n" +
+      "--mysql-conf database-name='employees' \n" +
+      "--mysql-conf table-name='employees' \n" +
+      "--catalog-conf metastore=hive \n" +
+      "--catalog-conf uri=thrift://localhost:9083 \n" +
+      "--table-conf bucket=1 \n" +
+      "--table-conf changelog-producer=input \n" +
+      "--table-conf sink.parallelism=1"
     val programArgs = new ArrayBuffer[String]()
     programArgs ++= PropertiesUtils.extractArguments(args)
     println(programArgs)
