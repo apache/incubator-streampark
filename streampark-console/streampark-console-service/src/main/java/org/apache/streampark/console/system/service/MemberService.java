@@ -47,7 +47,7 @@ public interface MemberService extends IService<Member> {
 
   void createMember(Member member);
 
-  void removeMember(Member member);
+  void remove(Member member);
 
   void updateMember(Member member);
 }

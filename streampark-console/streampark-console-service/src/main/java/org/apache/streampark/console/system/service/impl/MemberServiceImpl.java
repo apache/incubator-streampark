@@ -151,7 +151,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public void removeMember(Member memberArg) {
+  public void remove(Member memberArg) {
     Member member =
         Optional.ofNullable(this.getById(memberArg.getId()))
             .orElseThrow(
