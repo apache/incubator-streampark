@@ -426,9 +426,8 @@ public class AppBuildPipeServiceImpl
 
           // 3). pom dependency
           if (!app.getDependencyObject().getPom().isEmpty()) {
-            List<Application.Pom> poms = app.getDependencyObject().getPom();
             Set<Artifact> artifacts =
-                poms.stream()
+                app.getDependencyObject().getPom().stream()
                     .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
                     .map(
                         pom ->
