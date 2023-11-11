@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *    https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 @menu-prefix-cls: ~'@{namespace}-menu';
 @menu-popup-prefix-cls: ~'@{namespace}-menu-popup';
 @submenu-popup-prefix-cls: ~'@{namespace}-menu-submenu-popup';
@@ -44,7 +28,7 @@
   }
 
   .@{menu-prefix-cls} {
-    &-opened > * > &-submenu-title-icon {
+    &-opened>*>&-submenu-title-icon {
       transform: translateY(-50%) rotate(90deg) !important;
     }
 
@@ -67,6 +51,7 @@
     }
 
     &-dark {
+
       .@{menu-prefix-cls}-item,
       .@{menu-prefix-cls}-submenu-title {
         color: @menu-dark-subsidiary-color;
@@ -84,6 +69,7 @@
     }
 
     &-light {
+
       .@{menu-prefix-cls}-item,
       .@{menu-prefix-cls}-submenu-title {
         color: @text-color-base;
@@ -105,6 +91,7 @@
 }
 
 .content();
+
 .content() {
   .@{menu-prefix-cls} {
     position: relative;
@@ -157,12 +144,12 @@
       }
     }
 
-    &-item > i {
+    &-item>i {
       margin-right: 6px;
     }
 
-    &-submenu-title > i,
-    &-submenu-title span > i {
+    &-submenu-title>i,
+    &-submenu-title span>i {
       margin-right: 8px;
     }
 
@@ -186,6 +173,7 @@
         padding: 12px 0;
         text-align: center;
       }
+
       .@{menu-prefix-cls}-submenu-popup {
         padding: 12px 0;
       }
@@ -197,6 +185,7 @@
         align-items: center;
         justify-content: center;
       }
+
       .@{menu-prefix-cls}-submenu-collapsed-show-tit {
         flex-direction: column;
       }
@@ -218,7 +207,7 @@
       transition: transform @transition-time @ease-in-out;
     }
 
-    &-vertical &-opened > * > &-submenu-title-icon {
+    &-vertical &-opened>*>&-submenu-title-icon {
       transform: translateY(-50%) rotate(180deg);
     }
 
@@ -226,6 +215,7 @@
       &-nested {
         padding-left: 20px;
       }
+
       .@{menu-prefix-cls}-item {
         padding-left: 43px;
       }
@@ -239,13 +229,15 @@
 
         .light-border();
       }
+
       &-active.@{menu-prefix-cls}-submenu {
         color: @primary-color;
       }
     }
 
     &-light&-vertical&-collapse {
-      > li.@{menu-prefix-cls}-item-active,
+
+      >li.@{menu-prefix-cls}-item-active,
       .@{menu-prefix-cls}-submenu-active {
         position: relative;
         background-color: fade(@primary-color, 5);
@@ -269,6 +261,7 @@
     &-dark&-vertical &-item,
     &-dark&-vertical &-submenu-title {
       color: @menu-dark-subsidiary-color;
+
       &-active:not(.@{menu-prefix-cls}-submenu) {
         color: #fff !important;
         background-color: @primary-color !important;
@@ -280,7 +273,8 @@
     }
 
     &-dark&-vertical&-collapse {
-      > li.@{menu-prefix-cls}-item-active,
+
+      >li.@{menu-prefix-cls}-item-active,
       .@{menu-prefix-cls}-submenu-active {
         position: relative;
         color: #fff !important;
@@ -303,6 +297,7 @@
     }
 
     &-dark&-vertical &-submenu &-item {
+
       &-active,
       &-active:hover {
         color: #fff;
@@ -310,7 +305,7 @@
       }
     }
 
-    &-dark&-vertical &-child-item-active > &-submenu-title {
+    &-dark&-vertical &-child-item-active>&-submenu-title {
       color: #fff;
     }
 
