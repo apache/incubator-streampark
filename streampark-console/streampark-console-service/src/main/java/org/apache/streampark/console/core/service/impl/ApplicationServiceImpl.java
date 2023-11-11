@@ -40,6 +40,7 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.bean.MavenDependency;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -852,12 +853,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     application.setRelease(ReleaseState.NEED_RELEASE.get());
 
     if (application.isUploadJob()) {
-      Application.Dependency thisDependency =
-          Application.Dependency.toDependency(appParam.getDependency());
-      Application.Dependency targetDependency =
-          Application.Dependency.toDependency(application.getDependency());
+      MavenDependency thisDependency = MavenDependency.of(appParam.getDependency());
+      MavenDependency targetDependency = MavenDependency.of(application.getDependency());
 
-      if (!thisDependency.eq(targetDependency)) {
+      if (!thisDependency.equals(targetDependency)) {
         application.setDependency(appParam.getDependency());
         application.setBuild(true);
       } else if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {

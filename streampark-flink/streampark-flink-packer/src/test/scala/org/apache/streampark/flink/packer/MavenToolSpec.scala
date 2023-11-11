@@ -16,7 +16,7 @@
  */
 package org.apache.streampark.flink.packer
 
-import org.apache.streampark.flink.packer.maven.{Artifact, DependencyInfo, MavenTool}
+import org.apache.streampark.flink.packer.maven.{Artifact, MavenArtifact, MavenTool}
 
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfterAll
@@ -87,7 +87,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
         val fatJarPath = outputDir.concat("fat-3.jar")
         val fatJar = MavenTool.buildFatJar(
           null,
-          DependencyInfo(
+          MavenArtifact(
             Set(Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
             Set(path("jars/commons-dbutils-1.7.jar"))),
           fatJarPath)

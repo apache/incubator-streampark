@@ -21,7 +21,7 @@ import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.enums.{DevelopmentMode, ExecutionMode}
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 import org.apache.streampark.flink.packer.docker.DockerConf
-import org.apache.streampark.flink.packer.maven.DependencyInfo
+import org.apache.streampark.flink.packer.maven.MavenArtifact
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -44,17 +44,17 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   def flinkVersion: FlinkVersion
 
-  def dependencyInfo: DependencyInfo
+  def dependency: MavenArtifact
 
   def customFlinkUserJar: String
 
-  lazy val providedLibs: DependencyInfo = {
+  lazy val providedLibs: MavenArtifact = {
     val providedLibs =
       ArrayBuffer(localWorkspace.APP_JARS, localWorkspace.APP_PLUGINS, customFlinkUserJar)
     if (developmentMode == DevelopmentMode.FLINK_SQL) {
       providedLibs += s"${localWorkspace.APP_SHIMS}/flink-${flinkVersion.majorVersion}"
     }
-    dependencyInfo.merge(providedLibs.toSet)
+    dependency.merge(providedLibs.toSet)
   }
 
   def getShadedJarPath(rootWorkspace: String): String = {
@@ -79,7 +79,7 @@ case class FlinkK8sSessionBuildRequest(
     executionMode: ExecutionMode,
     developmentMode: DevelopmentMode,
     flinkVersion: FlinkVersion,
-    dependencyInfo: DependencyInfo,
+    dependency: MavenArtifact,
     clusterId: String,
     k8sNamespace: String)
   extends FlinkK8sBuildParam
@@ -92,7 +92,7 @@ case class FlinkK8sApplicationBuildRequest(
     executionMode: ExecutionMode,
     developmentMode: DevelopmentMode,
     flinkVersion: FlinkVersion,
-    dependencyInfo: DependencyInfo,
+    dependency: MavenArtifact,
     clusterId: String,
     k8sNamespace: String,
     flinkBaseImage: String,
@@ -110,7 +110,7 @@ case class FlinkRemotePerJobBuildRequest(
     executionMode: ExecutionMode,
     developmentMode: DevelopmentMode,
     flinkVersion: FlinkVersion,
-    dependencyInfo: DependencyInfo)
+    dependency: MavenArtifact)
   extends FlinkBuildParam
 
 case class FlinkYarnApplicationBuildRequest(
@@ -118,5 +118,5 @@ case class FlinkYarnApplicationBuildRequest(
     mainClass: String,
     yarnProvidedPath: String,
     developmentMode: DevelopmentMode,
-    dependencyInfo: DependencyInfo)
+    dependencyInfo: MavenArtifact)
   extends BuildParam

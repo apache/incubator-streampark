@@ -43,7 +43,6 @@ import javax.annotation.{Nonnull, Nullable}
 
 import java.io.File
 import java.util
-import java.util.{HashSet, Set => JavaSet}
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -56,8 +55,10 @@ object MavenTool extends Logger {
 
   private[this] val excludeArtifact = List(
     Artifact.of("org.apache.flink:force-shading:*"),
+    Artifact.of("org.apache.flink:flink-shaded-force-shading:*"),
     Artifact.of("com.google.code.findbugs:jsr305:*"),
-    Artifact.of("org.apache.logging.log4j:*:*"))
+    Artifact.of("org.apache.logging.log4j:*:*")
+  )
 
   private[this] def getRemoteRepos(): List[RemoteRepository] = {
     val builder =
@@ -145,7 +146,7 @@ object MavenTool extends Logger {
       }
       req.setResourceTransformers(transformer.toList)
       // issue: https://github.com/apache/incubator-streampark/issues/2350
-      req.setFilters(List(new ShadeFilter))
+      req.setFilters(List(new ShadedFilter))
       req.setRelocators(Lists.newArrayList())
       req
     }
@@ -159,7 +160,7 @@ object MavenTool extends Logger {
   /**
    * Build a fat-jar with custom jar librarties and maven artifacts.
    *
-   * @param dependencyInfo
+   * @param artifact
    *   maven artifacts and jar libraries for building a fat-jar
    * @param outFatJarPath
    *   output paths of fat-jar, like "/streampark/workspace/233/my-fat.jar"
@@ -167,10 +168,10 @@ object MavenTool extends Logger {
   @throws[Exception]
   def buildFatJar(
       @Nullable mainClass: String,
-      @Nonnull dependencyInfo: DependencyInfo,
+      @Nonnull artifact: MavenArtifact,
       @Nonnull outFatJarPath: String): File = {
-    val jarLibs = dependencyInfo.extJarLibs
-    val arts = dependencyInfo.mavenArts
+    val jarLibs = artifact.extJarLibs
+    val arts = artifact.mavenArts
     if (jarLibs.isEmpty && arts.isEmpty) {
       throw new Exception(s"[StreamPark] streampark-packer: empty artifacts.")
     }
@@ -178,8 +179,8 @@ object MavenTool extends Logger {
     buildFatJar(mainClass, jarLibs ++ artFilePaths, outFatJarPath)
   }
 
-  def resolveArtifactsAsJava(mavenArtifacts: Set[Artifact]): JavaSet[File] = resolveArtifacts(
-    mavenArtifacts).asJava
+  def resolveArtifactsAsJava(mavenArtifacts: util.Set[Artifact]): util.Set[File] = resolveArtifacts(
+    mavenArtifacts.toSet).asJava
 
   /**
    * Resolve the collectoin of artifacts, Artifacts will be download to ConfigConst.MAVEN_LOCAL_DIR
@@ -192,37 +193,55 @@ object MavenTool extends Logger {
    */
   @throws[Exception]
   def resolveArtifacts(mavenArtifacts: Set[Artifact]): Set[File] = {
-    if (mavenArtifacts == null) Set.empty[File];
-    else {
-      val (repoSystem, session) = getMavenEndpoint()
-      val artifacts = mavenArtifacts.map(
-        e => {
-          new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version)
-        })
-      logInfo(s"start resolving dependencies: ${artifacts.mkString}")
-
-      val remoteRepos = getRemoteRepos()
-      // read relevant artifact descriptor info
-      // plz don't simplify the following lambda syntax to maintain the readability of the code.
-      val resolvedArtifacts = artifacts
-        .map(artifact => new ArtifactDescriptorRequest(artifact, remoteRepos, null))
-        .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
-        .flatMap(_.getDependencies)
-        .filter(_.getScope == "compile")
-        .filter(x => !excludeArtifact.exists(_.eq(x.getArtifact)))
-        .map(_.getArtifact)
-
-      val mergedArtifacts = artifacts ++ resolvedArtifacts
-      logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
-
-      // download artifacts
-      val artReqs =
-        mergedArtifacts.map(artifact => new ArtifactRequest(artifact, remoteRepos, null))
-      repoSystem
-        .resolveArtifacts(session, artReqs)
-        .map(_.getArtifact.getFile)
-        .toSet
+    if (mavenArtifacts == null) {
+      return Set.empty[File]
     }
+
+    val (repoSystem, session) = getMavenEndpoint()
+    val artifacts = mavenArtifacts.map(
+      e => {
+        new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version) -> e.extensions
+      })
+
+    logInfo(s"start resolving dependencies: ${artifacts.mkString}")
+
+    val remoteRepos = getRemoteRepos()
+    // read relevant artifact descriptor info
+    // plz don't simplify the following lambda syntax to maintain the readability of the code.
+    val dependenciesArtifacts = artifacts
+      .map(artifact => new ArtifactDescriptorRequest(artifact._1, remoteRepos, null) -> artifact._2)
+      .map(descReq => repoSystem.readArtifactDescriptor(session, descReq._1) -> descReq._2)
+      .flatMap(
+        result =>
+          result._1.getDependencies
+            .filter(
+              dep => {
+                dep.getScope match {
+                  case "compile" if !excludeArtifact.exists(_.filter(dep.getArtifact)) =>
+                    val ga = s"${dep.getArtifact.getGroupId}:${dep.getArtifact.getArtifactId}"
+                    val exclusion = result._2.contains(ga)
+                    if (exclusion) {
+                      val art = result._1.getArtifact
+                      val name = s"${art.getGroupId}:${art.getArtifactId}"
+                      logInfo(s"[MavenTool] $name dependencies exclusion $ga")
+                    }
+                    !exclusion
+                  case _ => false
+                }
+              })
+            .map(_.getArtifact))
+
+    val mergedArtifacts = artifacts.map(_._1) ++ dependenciesArtifacts
+
+    logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
+
+    // download artifacts
+    val artReqs =
+      mergedArtifacts.map(artifact => new ArtifactRequest(artifact, remoteRepos, null))
+    repoSystem
+      .resolveArtifacts(session, artReqs)
+      .map(_.getArtifact.getFile)
+      .toSet
   }
 
   /** create composite maven endpoint */
@@ -256,13 +275,13 @@ object MavenTool extends Logger {
     (repoSystem, session)
   }
 
-  class ShadeFilter extends Filter {
+  private class ShadedFilter extends Filter {
     override def canFilter(jar: File): Boolean = true
 
     override def isFiltered(name: String): Boolean = {
       if (name.startsWith("META-INF/")) {
         if (name.endsWith(".SF") || name.endsWith(".DSA") || name.endsWith(".RSA")) {
-          logInfo(s"shade ignore file: $name")
+          logInfo(s"shaded ignore file: $name")
           return true
         }
       }
@@ -271,5 +290,4 @@ object MavenTool extends Logger {
 
     override def finished(): Unit = {}
   }
-
 }

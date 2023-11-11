@@ -91,7 +91,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       execStep(3) {
         val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
         val extJarLibs = request.developmentMode match {
-          case DevelopmentMode.FLINK_SQL => request.dependencyInfo.extJarLibs
+          case DevelopmentMode.FLINK_SQL => request.dependency.extJarLibs
           case DevelopmentMode.CUSTOM_CODE => Set[String]()
         }
         val shadedJar =

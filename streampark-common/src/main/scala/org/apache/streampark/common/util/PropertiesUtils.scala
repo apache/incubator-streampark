@@ -322,7 +322,18 @@ object PropertiesUtils extends Logger {
               }
             }
             programArgs += value.substring(1, value.length - 1)
-          case _ => programArgs += v
+          case _ =>
+            val regexp = "(.*)='(.*)'$"
+            if (v.matches(regexp)) {
+              programArgs += v.replaceAll(regexp, "$1=$2")
+            } else {
+              val regexp = "(.*)=\"(.*)\"$"
+              if (v.matches(regexp)) {
+                programArgs += v.replaceAll(regexp, "$1=$2")
+              } else {
+                programArgs += v
+              }
+            }
         }
       }
     }

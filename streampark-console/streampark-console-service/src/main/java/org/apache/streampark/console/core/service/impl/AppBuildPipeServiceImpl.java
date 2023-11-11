@@ -50,6 +50,7 @@ import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
+import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -71,6 +72,7 @@ import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipe
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -86,11 +88,15 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -164,7 +170,7 @@ public class AppBuildPipeServiceImpl
     pipeline.registerWatcher(
         new PipeWatcher() {
           @Override
-          public void onStart(PipeSnapshot snapshot) {
+          public void onStart(PipeSnapshot snapshot) throws Exception {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
@@ -301,7 +307,7 @@ public class AppBuildPipeServiceImpl
                 mainClass,
                 yarnProvidedPath,
                 app.getDevelopmentMode(),
-                app.getDependencyInfo());
+                app.getMavenArtifact());
         log.info("Submit params to building pipeline : {}", yarnAppRequest);
         return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
       case YARN_PER_JOB:
@@ -316,7 +322,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo());
+                app.getMavenArtifact());
         log.info("Submit params to building pipeline : {}", buildRequest);
         return FlinkRemoteBuildPipeline.of(buildRequest);
       case KUBERNETES_NATIVE_SESSION:
@@ -329,7 +335,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo(),
+                app.getMavenArtifact(),
                 app.getClusterId(),
                 app.getK8sNamespace());
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
@@ -344,7 +350,7 @@ public class AppBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getDependencyInfo(),
+                app.getMavenArtifact(),
                 app.getClusterId(),
                 app.getK8sNamespace(),
                 app.getFlinkImage(),
@@ -364,7 +370,7 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  private void prepareJars(Application app) {
+  private void prepareJars(Application app) throws IOException {
     File localUploadDIR = new File(Workspace.local().APP_UPLOADS());
     if (!localUploadDIR.exists()) {
       localUploadDIR.mkdirs();
@@ -373,8 +379,8 @@ public class AppBuildPipeServiceImpl
     FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
     if (app.isFlinkSqlJob() || app.isUploadJob()) {
-      if (!app.getDependencyObject().getJar().isEmpty()) {
-        for (String jar : app.getDependencyObject().getJar()) {
+      if (!app.getMavenDependency().getJar().isEmpty()) {
+        for (String jar : app.getMavenDependency().getJar()) {
           File localJar = new File(WebUtils.getAppTempDir(), jar);
           File localUploadJar = new File(localUploadDIR, jar);
           if (!localJar.exists() && !localUploadJar.exists()) {
@@ -398,21 +404,10 @@ public class AppBuildPipeServiceImpl
         checkOrElseUploadJar(localFS, localJar, localUploadJar, localUploadDIR);
 
         // 2) copy jar to local $app_home/lib
-        boolean cleanUpload = false;
         File libJar = new File(app.getLocalAppLib(), app.getJar());
-        if (!localFS.exists(app.getLocalAppLib())) {
-          cleanUpload = true;
-        } else {
-          if (libJar.exists()) {
-            if (!FileUtils.equals(localJar, libJar)) {
-              cleanUpload = true;
-            }
-          } else {
-            cleanUpload = true;
-          }
-        }
-
-        if (cleanUpload) {
+        if (!localFS.exists(app.getLocalAppLib())
+            || !libJar.exists()
+            || !FileUtils.equals(localJar, libJar)) {
           localFS.mkCleanDirs(app.getLocalAppLib());
           localFS.upload(localUploadJar.getAbsolutePath(), app.getLocalAppLib());
         }
@@ -421,22 +416,48 @@ public class AppBuildPipeServiceImpl
         if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
           List<File> jars = new ArrayList<>(0);
 
-          // 1) user jar
+          // 1). user jar
           jars.add(libJar);
 
           // 2). jar dependency
-          app.getDependencyObject()
-              .getJar()
-              .forEach(jar -> jars.add(new File(localUploadDIR, jar)));
+          app.getMavenDependency().getJar().forEach(jar -> jars.add(new File(localUploadDIR, jar)));
 
           // 3). pom dependency
-          if (!app.getDependencyInfo().mavenArts().isEmpty()) {
-            jars.addAll(MavenTool.resolveArtifactsAsJava(app.getDependencyInfo().mavenArts()));
+          if (!app.getMavenDependency().getPom().isEmpty()) {
+            Set<Artifact> artifacts =
+                app.getMavenDependency().getPom().stream()
+                    .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
+                    .map(
+                        pom ->
+                            new Artifact(
+                                pom.getGroupId(),
+                                pom.getArtifactId(),
+                                pom.getVersion(),
+                                pom.getClassifier(),
+                                pom.toExclusionString()))
+                    .collect(Collectors.toSet());
+            Set<File> mavenArts = MavenTool.resolveArtifactsAsJava(artifacts);
+            jars.addAll(mavenArts);
           }
 
+          // 4). local uploadDIR to hdfs uploadsDIR
+          String hdfsUploadDIR = Workspace.remote().APP_UPLOADS();
+          for (File jarFile : jars) {
+            String hdfsUploadPath = hdfsUploadDIR + "/" + jarFile.getName();
+            if (!fsOperator.exists(hdfsUploadPath)) {
+              fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
+            } else {
+              InputStream inputStream = Files.newInputStream(jarFile.toPath());
+              if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(hdfsUploadPath))) {
+                fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
+              }
+            }
+          }
+
+          // 5). copy jars to $hdfs_app_home/lib
           fsOperator.mkCleanDirs(app.getAppLib());
-          // 4). upload jars to appLibDIR
-          jars.forEach(jar -> fsOperator.upload(jar.getAbsolutePath(), app.getAppLib()));
+          jars.forEach(
+              jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
         }
       } else {
         String appHome = app.getAppHome();

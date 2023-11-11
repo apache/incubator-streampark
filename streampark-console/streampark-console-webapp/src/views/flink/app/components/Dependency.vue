@@ -33,6 +33,7 @@
   import { fetchUpload } from '/@/api/flink/app/app';
   import { fetchUploadJars } from '/@/api/flink/app/flinkHistory';
   import UploadJobJar from './UploadJobJar.vue';
+  import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 
   interface DependencyType {
     artifactId: string;
@@ -89,10 +90,16 @@
       Swal.fire('Failed', t('flink.app.dependencyError'), 'error');
       return;
     }
-    const scalaVersion = props.flinkEnvs.find((v) => v.id === versionId)?.scalaVersion;
+
+    let flinkEnv = props.flinkEnvs || [];
+    if (props.flinkEnvs?.length == 0) {
+      flinkEnv = await fetchFlinkEnv();
+    }
+    const scalaVersion = flinkEnv.find((v) => v.id === versionId)?.scalaVersion;
     if (props.value == null || props.value.trim() === '') {
       return;
     }
+
     const groupExp = /<groupId>([\s\S]*?)<\/groupId>/;
     const artifactExp = /<artifactId>([\s\S]*?)<\/artifactId>/;
     const versionExp = /<version>([\s\S]*?)<\/version>/;
@@ -125,26 +132,23 @@
               mvnPom.classifier = classifier;
             }
             const id = getId(mvnPom);
-            const pomExclusion = {};
+            const pomExclusion = [];
             if (exclusion != null) {
               const exclusions = exclusion.split('<exclusion>');
               exclusions.forEach((e) => {
                 if (e != null && e.length > 0) {
                   const e_group = e.match(groupExp) ? groupExp.exec(e)![1].trim() : null;
                   const e_artifact = e.match(artifactExp) ? artifactExp.exec(e)![1].trim() : null;
-                  const id = e_group + '_' + e_artifact;
-                  pomExclusion[id] = {
+                  pomExclusion.push({
                     groupId: e_group,
                     artifactId: e_artifact,
-                  };
+                  });
                 }
               });
             }
             mvnPom.exclusions = pomExclusion;
             dependency.pom[id] = mvnPom;
           }
-        } else {
-          console.error('dependency error...');
         }
       });
 

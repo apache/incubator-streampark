@@ -27,17 +27,17 @@ import scala.collection.JavaConversions._
  * @param extJarLibs
  *   collection of jar lib paths, which elements can be a directory or file path.
  */
-case class DependencyInfo(mavenArts: Set[Artifact] = Set(), extJarLibs: Set[String] = Set()) {
+case class MavenArtifact(mavenArts: Set[Artifact] = Set(), extJarLibs: Set[String] = Set()) {
 
   def this(mavenArts: JavaList[Artifact], extJarLibs: JavaList[String]) {
     this(mavenArts.toSet, extJarLibs.toSet)
   }
 
-  def merge(jarLibs: Set[String]): DependencyInfo =
-    if (jarLibs != null) DependencyInfo(mavenArts, extJarLibs ++ jarLibs) else this.copy()
+  def merge(jarLibs: Set[String]): MavenArtifact =
+    if (jarLibs != null) MavenArtifact(mavenArts, extJarLibs ++ jarLibs) else this.copy()
 
 }
 
-object DependencyInfo {
-  def empty: DependencyInfo = new DependencyInfo()
+object MavenArtifact {
+  def empty: MavenArtifact = new MavenArtifact()
 }

@@ -738,9 +738,6 @@ public class FlinkRESTAPIWatcher {
 
   private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {
     String result = YarnUtils.restRequest(url);
-    if (null == result) {
-      return null;
-    }
     return JacksonUtils.read(result, clazz);
   }
 
