@@ -233,18 +233,23 @@ trait FlinkClientTrait extends Logger {
       submitRequest: SubmitRequest,
       jarFile: File): (PackagedProgram, JobGraph) = {
 
-    val packageProgram = PackagedProgram.newBuilder
+    val pgkBuilder = PackagedProgram.newBuilder
       .setJarFile(jarFile)
-      .setUserClassPaths(
-        Lists.newArrayList(submitRequest.flinkVersion.flinkLibs: _*)
-      )
       .setEntryPointClassName(
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-      .setArguments(flinkConfig
-        .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-        .orElse(Lists.newArrayList()): _*)
-      .build()
+      .setArguments(
+        flinkConfig
+          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+          .orElse(Lists.newArrayList()): _*)
+    // userClassPath...
+    submitRequest.executionMode match {
+      case ExecutionMode.REMOTE | ExecutionMode.YARN_PER_JOB =>
+        pgkBuilder.setUserClassPaths(submitRequest.flinkVersion.flinkLibs)
+      case _ =>
+    }
+
+    val packageProgram = pgkBuilder.build()
 
     val jobGraph = PackagedProgramUtils.createJobGraph(
       packageProgram,
