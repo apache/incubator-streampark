@@ -433,7 +433,8 @@ public class AppBuildPipeServiceImpl
                                 pom.getGroupId(),
                                 pom.getArtifactId(),
                                 pom.getVersion(),
-                                pom.getClassifier()))
+                                pom.getClassifier(),
+                                pom.toExclusionString()))
                     .collect(Collectors.toSet());
             Set<File> mavenArts = MavenTool.resolveArtifactsAsJava(artifacts);
             jars.addAll(mavenArts);

@@ -93,6 +93,7 @@
     if (props.value == null || props.value.trim() === '') {
       return;
     }
+
     const groupExp = /<groupId>([\s\S]*?)<\/groupId>/;
     const artifactExp = /<artifactId>([\s\S]*?)<\/artifactId>/;
     const versionExp = /<version>([\s\S]*?)<\/version>/;

@@ -597,7 +597,13 @@ export const useCreateAndEditSchema = (
       },
     ];
   });
+
   onMounted(async () => {
+    //get flinkEnv
+    fetchFlinkEnv().then((res) => {
+      flinkEnvs.value = res;
+    });
+
     /* Get project data */
     fetchSelect({}).then((res) => {
       projectList.value = res;
@@ -608,10 +614,6 @@ export const useCreateAndEditSchema = (
       alerts.value = res;
     });
 
-    //get flinkEnv
-    fetchFlinkEnv().then((res) => {
-      flinkEnvs.value = res;
-    });
     //get flinkCluster
     fetchFlinkCluster().then((res) => {
       flinkClusters.value = res;

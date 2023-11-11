@@ -19,15 +19,17 @@ package org.apache.streampark.flink.packer.maven
 
 import org.eclipse.aether.artifact.{Artifact => AetherArtifact}
 
+import java.util.{Collections, Set => JavaSet}
 import java.util.regex.Pattern
 
 case class Artifact(
     groupId: String,
     artifactId: String,
     version: String,
-    classifier: String = null) {
+    classifier: String = null,
+    extensions: JavaSet[String] = Collections.emptySet()) {
 
-  def eq(artifact: AetherArtifact): Boolean = {
+  def filter(artifact: AetherArtifact): Boolean = {
     artifact.getGroupId match {
       case g if g == groupId =>
         artifact.getArtifactId match {
@@ -37,9 +39,6 @@ case class Artifact(
       case _ => false
     }
   }
-
-  lazy val jarName = s"$artifactId-$version.jar"
-
 }
 
 object Artifact {

@@ -198,22 +198,42 @@ object MavenTool extends Logger {
       val (repoSystem, session) = getMavenEndpoint()
       val artifacts = mavenArtifacts.map(
         e => {
-          new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version)
+          new DefaultArtifact(
+            e.groupId,
+            e.artifactId,
+            e.classifier,
+            "jar",
+            e.version) -> e.extensions
         })
       logInfo(s"start resolving dependencies: ${artifacts.mkString}")
 
       val remoteRepos = getRemoteRepos()
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
-      val resolvedArtifacts = artifacts
-        .map(artifact => new ArtifactDescriptorRequest(artifact, remoteRepos, null))
-        .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
-        .flatMap(_.getDependencies)
+      val dependenciesArtifacts = artifacts
+        .map(
+          artifact => new ArtifactDescriptorRequest(artifact._1, remoteRepos, null) -> artifact._2)
+        .map(descReq => repoSystem.readArtifactDescriptor(session, descReq._1) -> descReq._2)
+        .flatMap(
+          descResult => {
+            descResult._1.getDependencies.filter(
+              d => {
+                val ga = s"${d.getArtifact.getGroupId}:${d.getArtifact.getArtifactId}"
+                val exclusion = descResult._2.contains(ga)
+                if (exclusion) {
+                  val art = descResult._1.getArtifact
+                  val name = s"${art.getGroupId}:${art.getArtifactId}"
+                  logInfo(s"[MavenTool] $name dependencies exclusion $ga")
+                }
+                !exclusion
+              })
+          })
         .filter(_.getScope == "compile")
-        .filter(x => !excludeArtifact.exists(_.eq(x.getArtifact)))
+        .filter(x => !excludeArtifact.exists(_.filter(x.getArtifact)))
         .map(_.getArtifact)
 
-      val mergedArtifacts = artifacts ++ resolvedArtifacts
+      val mergedArtifacts = artifacts.map(_._1) ++ dependenciesArtifacts
+
       logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
@@ -272,5 +292,4 @@ object MavenTool extends Logger {
 
     override def finished(): Unit = {}
   }
-
 }

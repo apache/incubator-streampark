@@ -84,7 +84,8 @@ public class MavenDependency {
                         pom.getGroupId(),
                         pom.getArtifactId(),
                         pom.getVersion(),
-                        pom.getClassifier()))
+                        pom.getClassifier(),
+                        pom.toExclusionString()))
             .collect(Collectors.toList());
     List<String> extJars =
         this.jar.stream()

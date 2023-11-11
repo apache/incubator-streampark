@@ -24,6 +24,7 @@ import lombok.Data;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 public class MavenPom {
@@ -43,13 +44,17 @@ public class MavenPom {
     }
 
     MavenPom that = (MavenPom) o;
-    boolean gav =
+
+    boolean basic =
         this.groupId.equals(that.groupId)
             && this.artifactId.equals(that.artifactId)
-            && this.version.equals(that.version)
-            && this.classifier.equals(that.classifier);
+            && this.version.equals(that.version);
 
-    if (gav) {
+    boolean classify =
+        StringUtils.isAllBlank(this.classifier, that.classifier)
+            || this.classifier.equals(that.classifier);
+
+    if (basic && classify) {
       Set<MavenExclusion> thisEx =
           this.exclusions == null ? Collections.emptySet() : this.exclusions;
       Set<MavenExclusion> thatEx =
@@ -74,6 +79,12 @@ public class MavenPom {
   @Override
   public String toString() {
     return groupId + ":" + artifactId + ":" + version + getClassifier();
+  }
+
+  public Set<String> toExclusionString() {
+    return this.exclusions.stream()
+        .map(x -> String.format("%s:%s", x.getGroupId(), x.getArtifactId()))
+        .collect(Collectors.toSet());
   }
 
   public String getClassifier() {
