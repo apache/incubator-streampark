@@ -33,6 +33,7 @@
   import { fetchUpload } from '/@/api/flink/app/app';
   import { fetchUploadJars } from '/@/api/flink/app/flinkHistory';
   import UploadJobJar from './UploadJobJar.vue';
+  import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 
   interface DependencyType {
     artifactId: string;
@@ -89,7 +90,12 @@
       Swal.fire('Failed', t('flink.app.dependencyError'), 'error');
       return;
     }
-    const scalaVersion = props.flinkEnvs.find((v) => v.id === versionId)?.scalaVersion;
+
+    let flinkEnv = props.flinkEnvs || [];
+    if (props.flinkEnvs?.length == 0) {
+      flinkEnv = await fetchFlinkEnv();
+    }
+    const scalaVersion = flinkEnv.find((v) => v.id === versionId)?.scalaVersion;
     if (props.value == null || props.value.trim() === '') {
       return;
     }

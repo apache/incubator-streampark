@@ -856,7 +856,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       MavenDependency thisDependency = MavenDependency.of(appParam.getDependency());
       MavenDependency targetDependency = MavenDependency.of(application.getDependency());
 
-      if (!thisDependency.eq(targetDependency)) {
+      if (!thisDependency.equals(targetDependency)) {
         application.setDependency(appParam.getDependency());
         application.setBuild(true);
       } else if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {

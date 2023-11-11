@@ -51,20 +51,27 @@ public class MavenDependency {
     return new MavenDependency();
   }
 
-  public boolean eq(MavenDependency that) {
-    if (that == null) {
+  @Override
+  public boolean equals(Object that) {
+    if (this == that) {
+      return true;
+    }
+
+    if (that == null || getClass() != that.getClass()) {
       return false;
     }
 
-    if (this.pom.size() != that.pom.size()
-        || this.jar.size() != that.jar.size()
-        || !this.pom.containsAll(that.pom)) {
+    MavenDependency thatDep = (MavenDependency) that;
+
+    if (this.pom.size() != thatDep.pom.size()
+        || this.jar.size() != thatDep.jar.size()
+        || !this.pom.containsAll(thatDep.pom)) {
       return false;
     }
 
     File localJar = WebUtils.getAppTempDir();
     File localUploads = new File(Workspace.local().APP_UPLOADS());
-    HashSet<String> otherJars = new HashSet<>(that.jar);
+    HashSet<String> otherJars = new HashSet<>(thatDep.jar);
     for (String jarName : jar) {
       if (!otherJars.contains(jarName)
           || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {

@@ -86,7 +86,7 @@ public class FlinkSql {
     MavenDependency thisDependency = MavenDependency.of(this.getDependency());
     MavenDependency targetDependency = MavenDependency.of(target.getDependency());
 
-    boolean depDifference = !thisDependency.eq(targetDependency);
+    boolean depDifference = !thisDependency.equals(targetDependency);
     if (sqlDifference && depDifference) {
       return ChangedType.ALL;
     }

@@ -59,7 +59,7 @@ public class MavenPom {
           this.exclusions == null ? Collections.emptySet() : this.exclusions;
       Set<MavenExclusion> thatEx =
           that.exclusions == null ? Collections.emptySet() : that.exclusions;
-      return thisEx.containsAll(thatEx);
+      return thisEx.size() == thatEx.size() && thisEx.containsAll(thatEx);
     }
     return false;
   }
