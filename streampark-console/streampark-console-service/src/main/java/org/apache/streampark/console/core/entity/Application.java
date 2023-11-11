@@ -743,6 +743,13 @@ public class Application implements Serializable {
       return this.toString().equals(o.toString());
     }
 
+    public String artifactName() {
+      if (StringUtils.isBlank(classifier)) {
+        return String.format("%s-%s.jar", artifactId, version);
+      }
+      return String.format("%s-%s-%s.jar", artifactId, version, classifier);
+    }
+
     @Override
     public int hashCode() {
       return Objects.hash(groupId, artifactId, version, classifier);
@@ -753,7 +760,7 @@ public class Application implements Serializable {
       return groupId + ":" + artifactId + ":" + version + getClassifier();
     }
 
-    private String getClassifier() {
+    public String getClassifier() {
       return StringUtils.isEmpty(classifier) ? "" : ":" + classifier;
     }
   }

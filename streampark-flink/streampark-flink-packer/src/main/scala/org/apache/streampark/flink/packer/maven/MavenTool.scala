@@ -179,8 +179,8 @@ object MavenTool extends Logger {
     buildFatJar(mainClass, jarLibs ++ artFilePaths, outFatJarPath)
   }
 
-  def resolveArtifactsAsJava(mavenArtifacts: Set[Artifact]): util.Set[File] = resolveArtifacts(
-    mavenArtifacts).asJava
+  def resolveArtifactsAsJava(mavenArtifacts: util.Set[Artifact]): util.Set[File] = resolveArtifacts(
+    mavenArtifacts.toSet).asJava
 
   /**
    * Resolve the collectoin of artifacts, Artifacts will be download to ConfigConst.MAVEN_LOCAL_DIR

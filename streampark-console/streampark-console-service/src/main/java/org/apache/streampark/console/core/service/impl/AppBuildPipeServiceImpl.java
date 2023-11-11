@@ -50,6 +50,7 @@ import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
+import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -424,17 +425,20 @@ public class AppBuildPipeServiceImpl
               .forEach(jar -> jars.add(new File(localUploadDIR, jar)));
 
           // 3). pom dependency
-          if (!app.getDependencyInfo().mavenArts().isEmpty()) {
-            Set<File> mavenArts =
-                MavenTool.resolveArtifactsAsJava(
-                    app.getDependencyInfo()
-                        .mavenArts()
-                        .filter(
-                            x -> {
-                              File jarFile = new File(localUploadDIR, x.jarName());
-                              return !jarFile.exists();
-                            })
-                        .toSet());
+          if (!app.getDependencyObject().getPom().isEmpty()) {
+            List<Application.Pom> poms = app.getDependencyObject().getPom();
+            Set<Artifact> artifacts =
+                poms.stream()
+                    .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
+                    .map(
+                        pom ->
+                            new Artifact(
+                                pom.getGroupId(),
+                                pom.getArtifactId(),
+                                pom.getVersion(),
+                                pom.getClassifier()))
+                    .collect(Collectors.toSet());
+            Set<File> mavenArts = MavenTool.resolveArtifactsAsJava(artifacts);
             jars.addAll(mavenArts);
           }
 
