@@ -81,6 +81,6 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     Assertions.assertEquals(AccessToken.STATUS_DISABLE, afterToggle.getStatus());
 
     // delete
-    Assertions.assertTrue(accessTokenService.deleteToken(tokenId));
+    Assertions.assertTrue(accessTokenService.removeById(tokenId));
   }
 }

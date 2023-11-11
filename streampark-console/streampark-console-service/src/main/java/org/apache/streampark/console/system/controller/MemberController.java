@@ -96,7 +96,7 @@ public class MemberController {
   @DeleteMapping("delete")
   @RequiresPermissions("member:delete")
   public RestResponse delete(Member member) {
-    this.memberService.deleteMember(member);
+    this.memberService.remove(member);
     return RestResponse.success();
   }
 

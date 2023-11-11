@@ -29,11 +29,11 @@ import java.util.List;
 
 public interface MemberService extends IService<Member> {
 
-  void deleteByRoleIds(String[] roleIds);
+  void removeByRoleIds(String[] roleIds);
 
-  void deleteByUserId(Long userId);
+  void removeByUserId(Long userId);
 
-  void deleteByTeamId(Long teamId);
+  void removeByTeamId(Long teamId);
 
   IPage<Member> getPage(Member member, RestRequest request);
 
@@ -47,7 +47,7 @@ public interface MemberService extends IService<Member> {
 
   void createMember(Member member);
 
-  void deleteMember(Member member);
+  void remove(Member member);
 
   void updateMember(Member member);
 }

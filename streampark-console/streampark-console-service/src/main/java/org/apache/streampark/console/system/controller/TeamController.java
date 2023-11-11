@@ -74,7 +74,7 @@ public class TeamController {
   @DeleteMapping("delete")
   @RequiresPermissions("team:delete")
   public RestResponse deleteTeam(Team team) {
-    this.teamService.deleteTeam(team.getId());
+    this.teamService.removeById(team.getId());
     return RestResponse.success();
   }
 
