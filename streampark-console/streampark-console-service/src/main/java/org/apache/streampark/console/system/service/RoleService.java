@@ -31,7 +31,7 @@ public interface RoleService extends IService<Role> {
 
   void createRole(Role role);
 
-  void deleteRole(Long roleId);
+  void removeById(Long roleId);
 
   void updateRole(Role role);
 }

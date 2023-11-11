@@ -56,18 +56,18 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   @Transactional
-  public void deleteByRoleIds(String[] roleIds) {
+  public void removeByRoleIds(String[] roleIds) {
     Arrays.stream(roleIds).forEach(id -> baseMapper.deleteByRoleId(Long.valueOf(id)));
   }
 
   @Override
   @Transactional
-  public void deleteByUserId(Long userId) {
+  public void removeByUserId(Long userId) {
     baseMapper.deleteByUserId(userId);
   }
 
   @Override
-  public void deleteByTeamId(Long teamId) {
+  public void removeByTeamId(Long teamId) {
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId);
     this.remove(queryWrapper);
@@ -151,7 +151,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public void deleteMember(Member memberArg) {
+  public void removeMember(Member memberArg) {
     Member member =
         Optional.ofNullable(this.getById(memberArg.getId()))
             .orElseThrow(

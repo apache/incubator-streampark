@@ -92,7 +92,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   }
 
   @Override
-  public void deleteTeam(Long teamId) {
+  public void removeById(Long teamId) {
     log.info("{} Proceed delete team[Id={}]", commonService.getCurrentUser().getUsername(), teamId);
     Team team = this.getById(teamId);
 
@@ -113,9 +113,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         String.format(
             "Please delete the variables under the team[name=%s] first!", team.getTeamName()));
 
-    memberService.deleteByTeamId(teamId);
+    memberService.removeByTeamId(teamId);
     userService.clearLastTeam(teamId);
-    this.removeById(teamId);
+    super.removeById(teamId);
   }
 
   @Override

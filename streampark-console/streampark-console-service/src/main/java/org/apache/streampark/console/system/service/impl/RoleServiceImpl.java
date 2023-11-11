@@ -81,7 +81,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
   }
 
   @Override
-  public void deleteRole(Long roleId) {
+  public void removeById(Long roleId) {
     Role role =
         Optional.ofNullable(this.getById(roleId))
             .orElseThrow(
@@ -94,8 +94,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         String.format(
             "There are some users of role %s, delete role failed, please unbind it first.",
             role.getRoleName()));
-    this.removeById(roleId);
-    this.roleMenuService.deleteByRoleId(roleId);
+    super.removeById(roleId);
+    this.roleMenuService.removeByRoleId(roleId);
   }
 
   @Override
