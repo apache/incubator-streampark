@@ -225,22 +225,24 @@ object MavenTool extends Logger {
 
     val mergedArtifacts = artifacts ++ dependencies
 
-    logInfo(s"""
-               |start resolving dependencies...
-               |--------------------------------------------------------------------------------
-               ||Target dependencies list：
-               |${artifacts.mkString(",\n")}
-               |
-               ||Requires dependencies list:
-               |${dependencies.mkString(",\n")}
-               |
-               ||Exclusion dependencies list:
-               |${exclusions.map(x => s"${x.groupId}:${x.artifactId}").mkString(",\n")}
-               |
-               ||Final dependencies list:
-               |${mergedArtifacts.mkString(",\n")}
-               |--------------------------------------------------------------------------------
-               |""".stripMargin)
+    logInfo(
+      s"""
+         |start resolving dependencies...
+         |--------------------------------------------------------------------------------
+         ||Target dependencies list：
+         |${artifacts.mkString(",\n")}
+         |
+         ||Requires dependencies list:
+         |${dependencies.mkString(",\n")}
+         |
+         ||Exclusion dependencies list:
+         |${exclusions.map(x => s"${x.groupId}:${x.artifactId}").mkString(",\n")}
+         |
+         ||Final dependencies list:
+         |${mergedArtifacts.mkString(",\n")}
+         |--------------------------------------------------------------------------------
+         |""".stripMargin
+    )
 
     // download artifacts
     val artReq = mergedArtifacts.map(a => new ArtifactRequest(a, remoteRepos, null))
