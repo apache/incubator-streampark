@@ -53,7 +53,13 @@ object MavenTool extends Logger {
 
   private[this] lazy val plexusLog = new ConsoleLogger(PlexusLog.LEVEL_INFO, "streampark-maven")
 
-  private[this] val excludeArtifact = List(
+  /** create maven repository endpoint */
+  private[this] lazy val locator = MavenRepositorySystemUtils.newServiceLocator
+
+  /** default maven local repository */
+  private[this] lazy val localRepo = new LocalRepository(Workspace.MAVEN_LOCAL_PATH)
+
+  private[this] val excludeArtifact = Set(
     Artifact.of("org.apache.flink:force-shading:*"),
     Artifact.of("org.apache.flink:flink-shaded-force-shading:*"),
     Artifact.of("com.google.code.findbugs:jsr305:*"),
@@ -198,61 +204,57 @@ object MavenTool extends Logger {
     }
 
     val (repoSystem, session) = getMavenEndpoint()
-    val artifacts = mavenArtifacts.map(
-      e => {
-        new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version) -> e.extensions
-      })
 
-    logInfo(s"start resolving dependencies: ${artifacts.mkString}")
+    val artifacts = mavenArtifacts.map(
+      e => new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version))
+
+    val exclusions = mavenArtifacts
+      .flatMap(_.extensions.map(_.split(":")))
+      .map(a => Artifact(a.head, a.last, null)) ++ excludeArtifact
 
     val remoteRepos = getRemoteRepos()
-    // read relevant artifact descriptor info
-    // plz don't simplify the following lambda syntax to maintain the readability of the code.
-    val dependenciesArtifacts = artifacts
-      .map(artifact => new ArtifactDescriptorRequest(artifact._1, remoteRepos, null) -> artifact._2)
-      .map(descReq => repoSystem.readArtifactDescriptor(session, descReq._1) -> descReq._2)
-      .flatMap(
-        result =>
-          result._1.getDependencies
-            .filter(
-              dep => {
-                dep.getScope match {
-                  case "compile" if !excludeArtifact.exists(_.filter(dep.getArtifact)) =>
-                    val ga = s"${dep.getArtifact.getGroupId}:${dep.getArtifact.getArtifactId}"
-                    val exclusion = result._2.contains(ga)
-                    if (exclusion) {
-                      val art = result._1.getArtifact
-                      val name = s"${art.getGroupId}:${art.getArtifactId}"
-                      logInfo(s"[MavenTool] $name dependencies exclusion $ga")
-                    }
-                    !exclusion
-                  case _ => false
-                }
-              })
-            .map(_.getArtifact))
 
-    val mergedArtifacts = artifacts.map(_._1) ++ dependenciesArtifacts
+    // read relevant artifact descriptor info and excluding items if necessary.
+    val dependencies = artifacts
+      .map(artifact => new ArtifactDescriptorRequest(artifact, remoteRepos, null))
+      .map(descReq => repoSystem.readArtifactDescriptor(session, descReq))
+      .flatMap(_.getDependencies)
+      .filter(_.getScope == "compile")
+      .filter(dep => !exclusions.exists(_.filter(dep.getArtifact)))
+      .map(_.getArtifact)
 
-    logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
+    val mergedArtifacts = artifacts ++ dependencies
+
+    logInfo(
+      s"""
+         |start resolving dependencies...
+         |--------------------------------------------------------------------------------
+         ||User-declared dependencies list：
+         |${artifacts.mkString(",\n")}
+         |
+         ||Indirect dependencies list:
+         |${dependencies.mkString(",\n")}
+         |
+         ||Exclusion indirect dependencies list:
+         |${exclusions.map(x => s"${x.groupId}:${x.artifactId}").mkString(",\n")}
+         |
+         ||Final dependencies list:
+         |${mergedArtifacts.mkString(",\n")}
+         |--------------------------------------------------------------------------------
+         |""".stripMargin
+    )
 
     // download artifacts
-    val artReqs =
-      mergedArtifacts.map(artifact => new ArtifactRequest(artifact, remoteRepos, null))
+    val artReq = mergedArtifacts.map(a => new ArtifactRequest(a, remoteRepos, null))
+
     repoSystem
-      .resolveArtifacts(session, artReqs)
+      .resolveArtifacts(session, artReq)
       .map(_.getArtifact.getFile)
       .toSet
   }
 
   /** create composite maven endpoint */
   private[this] def getMavenEndpoint(): (RepositorySystem, RepositorySystemSession) = {
-
-    /** create maven repository endpoint */
-
-    lazy val locator = MavenRepositorySystemUtils.newServiceLocator
-
-    /** default maven local repository */
-    lazy val localRepo = new LocalRepository(Workspace.MAVEN_LOCAL_PATH)
 
     def newRepoSystem(): RepositorySystem = {
       locator.addService(
