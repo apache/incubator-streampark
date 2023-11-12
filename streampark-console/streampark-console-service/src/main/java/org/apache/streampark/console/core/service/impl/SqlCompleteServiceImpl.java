@@ -226,7 +226,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
      * @param now current FST node
      */
     private void getDFSWord(List<WordWithFrequency> returnSource, String buffer, TreeNode now) {
-      if (now.getNext().size() == 0 || now.isStop()) {
+      if (now.getNext().isEmpty() || now.isStop()) {
         returnSource.add(new WordWithFrequency(buffer + now.getStep(), now.getCount()));
       } else {
         now.getNext()
