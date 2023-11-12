@@ -229,13 +229,13 @@ object MavenTool extends Logger {
       s"""
          |start resolving dependencies...
          |--------------------------------------------------------------------------------
-         ||Target dependencies list：
+         ||User-declared dependencies list：
          |${artifacts.mkString(",\n")}
          |
-         ||Requires dependencies list:
+         ||Indirect dependencies list:
          |${dependencies.mkString(",\n")}
          |
-         ||Exclusion dependencies list:
+         ||Exclusion indirect dependencies list:
          |${exclusions.map(x => s"${x.groupId}:${x.artifactId}").mkString(",\n")}
          |
          ||Final dependencies list:
