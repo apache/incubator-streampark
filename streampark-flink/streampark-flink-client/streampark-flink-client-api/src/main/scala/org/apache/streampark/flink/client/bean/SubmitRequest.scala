@@ -70,11 +70,12 @@ case class SubmitRequest(
   lazy val effectiveAppName: String =
     if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
 
-  lazy val classPaths: List[URL] = {
+  lazy val libs: List[URL] = {
     val path = s"${Workspace.local.APP_WORKSPACE}/$id/lib"
-    val lib = Try(new File(path).listFiles().map(_.toURI.toURL).toList).getOrElse(List.empty[URL])
-    flinkVersion.flinkLibs ++ lib
+    Try(new File(path).listFiles().map(_.toURI.toURL).toList).getOrElse(List.empty[URL])
   }
+
+  lazy val classPaths: List[URL] = flinkVersion.flinkLibs ++ libs
 
   lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
 
