@@ -43,8 +43,6 @@ import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
-import java.net.URL
-import java.util
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.collection.convert.ImplicitConversions._
@@ -273,6 +271,14 @@ trait FlinkClientTrait extends Logger {
         val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
         if (!FsOperator.lfs.exists(pythonVenv)) {
           throw new RuntimeException(s"$pythonVenv File does not exist")
+        }
+        // including $app/lib
+        val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
+        if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
+          val localLibUrl = new File(localLib).listFiles().map(_.toURI.toURL).toList
+          pkgBuilder.setUserClassPaths(
+            Lists.newArrayList(localLibUrl: _*)
+          )
         }
         flinkConfig
           // python.archives
