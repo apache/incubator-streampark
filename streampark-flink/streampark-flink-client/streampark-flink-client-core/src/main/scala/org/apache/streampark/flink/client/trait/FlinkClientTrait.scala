@@ -42,9 +42,6 @@ import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
-import java.io.File
-import java.net.URL
-import java.util
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
 import scala.collection.convert.ImplicitConversions._
@@ -257,7 +254,6 @@ trait FlinkClientTrait extends Logger {
       flinkConfig: Configuration): (PackagedProgram, JobGraph) = {
 
     val pkgBuilder = PackagedProgram.newBuilder
-      .setUserClassPaths(Lists.newArrayList(submitRequest.classPaths: _*))
       .setEntryPointClassName(
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get()
       )
@@ -281,8 +277,13 @@ trait FlinkClientTrait extends Logger {
           .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
           // python.executable
           .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+        if (submitRequest.libs.nonEmpty) {
+          pkgBuilder.setUserClassPaths(submitRequest.libs)
+        }
       case _ =>
-        pkgBuilder.setJarFile(submitRequest.userJarFile)
+        pkgBuilder
+          .setUserClassPaths(submitRequest.classPaths)
+          .setJarFile(submitRequest.userJarFile)
     }
 
     val packageProgram = pkgBuilder.build()
