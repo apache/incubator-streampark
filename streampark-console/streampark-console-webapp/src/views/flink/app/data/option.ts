@@ -487,6 +487,66 @@ const options = [
       }
     },
   },
+  {
+    key: 'taskmanager.memory.network.max',
+    name: 'taskmanager.memory.network.max',
+    placeholder: 'Max Network Memory size for TaskExecutors',
+    description: 'This biggest  Network Memory  is used for allocation of network buffers',
+    unit: 'mb',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 64,
+    max: 1024,
+    step: 1,
+    defaultValue: 1024,
+    validator: (_rule, value, callback) => {
+      if (!value) {
+        callback(new Error('memory.network.max is required or you can delete this option'));
+      } else {
+        callback();
+      }
+    },
+  },
+  {
+    key: 'taskmanager.memory.network.min',
+    name: 'taskmanager.memory.network.min',
+    placeholder: 'Min Network Memory size for TaskExecutors',
+    description: 'This minimum  Network Memory  is used for allocation of network buffers',
+    unit: 'mb',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 64,
+    max: 1024,
+    step: 1,
+    defaultValue: 64,
+    validator: (_rule, value, callback) => {
+      if (!value) {
+        callback(new Error('memory.network.min is required or you can delete this option'));
+      } else {
+        callback();
+      }
+    },
+  },
+  {
+    key: 'taskmanager.memory.network.fraction',
+    name: 'taskmanager.memory.network.fraction',
+    placeholder: 'Fraction of  Network Memory size for TaskExecutors',
+    description: 'The fraction of  Network Memory size is used for allocation of network buffers',
+    unit: 'mb',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 0.1,
+    max: 1,
+    step: 0.1,
+    defaultValue: 0.1,
+    validator: (_rule, value, callback) => {
+      if (!value) {
+        callback(new Error('memory.network.fraction is required or you can delete this option'));
+      } else {
+        callback();
+      }
+    },
+  },
 ];
 
 const optionsKeyMapping = new Map<string, Recordable>();
