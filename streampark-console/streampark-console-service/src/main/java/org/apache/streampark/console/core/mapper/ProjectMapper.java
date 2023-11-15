@@ -35,7 +35,7 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
   IPage<Project> selectPage(Page<Project> page, @Param("project") Project project);
 
-  Boolean existsByTeamId(@Param("teamId") Long teamId);
+  boolean existsByTeamId(@Param("teamId") Long teamId);
 
   List<Project> selectProjectsByTeamId(@Param("teamId") Long teamId);
 }
