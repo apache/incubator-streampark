@@ -467,8 +467,9 @@ public class AppBuildPipeServiceImpl
             jars.forEach(
                 jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
           }
+          break;
         default:
-          throw new IllegalArgumentException("");
+          throw new IllegalArgumentException("ResourceFrom error: " + resourceFrom);
       }
     }
   }
