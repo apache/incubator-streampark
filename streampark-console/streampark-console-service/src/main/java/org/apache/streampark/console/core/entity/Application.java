@@ -27,7 +27,6 @@ import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.bean.MavenDependency;
 import org.apache.streampark.console.core.enums.FlinkAppState;
@@ -394,6 +393,11 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
+  public String getDistJar() {
+    return getDistHome() + "/" + getJar();
+  }
+
+  @JsonIgnore
   public String getLocalAppHome() {
     String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
     log.info("local appHome:{}", path);
@@ -504,75 +508,6 @@ public class Application implements Serializable {
       return this.restartSize > 0 && this.restartCount <= this.restartSize;
     }
     return false;
-  }
-
-  /**
-   * Parameter comparison, mainly to compare whether the parameters related to Flink runtime have
-   * changed
-   */
-  public boolean eqJobParam(Application other) {
-    // 1) Resolve Order has it changed
-    // 2) flink Version has it changed
-    // 3) Execution Mode has it changed
-    // 4) Parallelism has it changed
-    // 5) Task Slots has it changed
-    // 6) Options has it changed
-    // 7) properties has it changed
-    // 8) Program Args has it changed
-    // 9) Flink Version  has it changed
-
-    if (!ObjectUtils.safeEquals(this.getVersionId(), other.getVersionId())) {
-      return false;
-    }
-
-    if (!ObjectUtils.safeEquals(this.getResolveOrder(), other.getResolveOrder())
-        || !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode())
-        || !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
-      return false;
-    }
-
-    if (this.getOptions() != null) {
-      if (other.getOptions() != null) {
-        if (!this.getOptions().trim().equals(other.getOptions().trim())) {
-          Map<String, Object> optMap = this.getOptionMap();
-          Map<String, Object> otherMap = other.getOptionMap();
-          if (optMap.size() != otherMap.size()) {
-            return false;
-          }
-          for (Map.Entry<String, Object> entry : optMap.entrySet()) {
-            if (!entry.getValue().equals(otherMap.get(entry.getKey()))) {
-              return false;
-            }
-          }
-        }
-      } else {
-        return false;
-      }
-    } else if (other.getOptions() != null) {
-      return false;
-    }
-
-    if (this.getDynamicProperties() != null) {
-      if (other.getDynamicProperties() != null) {
-        if (!this.getDynamicProperties().trim().equals(other.getDynamicProperties().trim())) {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } else if (other.getDynamicProperties() != null) {
-      return false;
-    }
-
-    if (this.getArgs() != null) {
-      if (other.getArgs() != null) {
-        return this.getArgs().trim().equals(other.getArgs().trim());
-      } else {
-        return false;
-      }
-    } else {
-      return other.getArgs() == null;
-    }
   }
 
   @JsonIgnore

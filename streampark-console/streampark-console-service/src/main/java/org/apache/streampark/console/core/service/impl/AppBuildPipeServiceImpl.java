@@ -37,6 +37,7 @@ import org.apache.streampark.console.core.enums.CandidateType;
 import org.apache.streampark.console.core.enums.NoticeType;
 import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.ResourceFrom;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -396,73 +397,78 @@ public class AppBuildPipeServiceImpl
     if (app.isCustomCodeJob()) {
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
+      ResourceFrom resourceFrom = ResourceFrom.of(app.getResourceFrom());
+      switch (resourceFrom) {
+        case CICD:
+          String appLib = app.getAppLib();
+          fsOperator.mkCleanDirs(appLib);
+          fsOperator.upload(app.getDistJar(), appLib);
+          break;
+        case UPLOAD:
+          // 1). upload jar to local uploadDIR.
+          File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
+          File localUploadJar = new File(localUploadDIR, app.getJar());
+          checkOrElseUploadJar(localFS, localJar, localUploadJar, localUploadDIR);
 
-      if (app.isUploadJob()) {
-        // 1). upload jar to local uploadDIR.
-        File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
-        File localUploadJar = new File(localUploadDIR, app.getJar());
-        checkOrElseUploadJar(localFS, localJar, localUploadJar, localUploadDIR);
-
-        // 2) copy jar to local $app_home/lib
-        File libJar = new File(app.getLocalAppLib(), app.getJar());
-        if (!localFS.exists(app.getLocalAppLib())
-            || !libJar.exists()
-            || !FileUtils.equals(localJar, libJar)) {
-          localFS.mkCleanDirs(app.getLocalAppLib());
-          localFS.upload(localUploadJar.getAbsolutePath(), app.getLocalAppLib());
-        }
-
-        // 3) for YARNApplication mode
-        if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
-          List<File> jars = new ArrayList<>(0);
-
-          // 1). user jar
-          jars.add(libJar);
-
-          // 2). jar dependency
-          app.getMavenDependency().getJar().forEach(jar -> jars.add(new File(localUploadDIR, jar)));
-
-          // 3). pom dependency
-          if (!app.getMavenDependency().getPom().isEmpty()) {
-            Set<Artifact> artifacts =
-                app.getMavenDependency().getPom().stream()
-                    .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
-                    .map(
-                        pom ->
-                            new Artifact(
-                                pom.getGroupId(),
-                                pom.getArtifactId(),
-                                pom.getVersion(),
-                                pom.getClassifier(),
-                                pom.toExclusionString()))
-                    .collect(Collectors.toSet());
-            Set<File> mavenArts = MavenTool.resolveArtifactsAsJava(artifacts);
-            jars.addAll(mavenArts);
+          // 2) copy jar to local $app_home/lib
+          File libJar = new File(app.getLocalAppLib(), app.getJar());
+          if (!localFS.exists(app.getLocalAppLib())
+              || !libJar.exists()
+              || !FileUtils.equals(localJar, libJar)) {
+            localFS.mkCleanDirs(app.getLocalAppLib());
+            localFS.upload(localUploadJar.getAbsolutePath(), app.getLocalAppLib());
           }
 
-          // 4). local uploadDIR to hdfs uploadsDIR
-          String hdfsUploadDIR = Workspace.remote().APP_UPLOADS();
-          for (File jarFile : jars) {
-            String hdfsUploadPath = hdfsUploadDIR + "/" + jarFile.getName();
-            if (!fsOperator.exists(hdfsUploadPath)) {
-              fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
-            } else {
-              InputStream inputStream = Files.newInputStream(jarFile.toPath());
-              if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(hdfsUploadPath))) {
+          // 3) for YARNApplication mode
+          if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+            List<File> jars = new ArrayList<>(0);
+
+            // 1). user jar
+            jars.add(libJar);
+
+            // 2). jar dependency
+            app.getMavenDependency()
+                .getJar()
+                .forEach(jar -> jars.add(new File(localUploadDIR, jar)));
+
+            // 3). pom dependency
+            if (!app.getMavenDependency().getPom().isEmpty()) {
+              Set<Artifact> artifacts =
+                  app.getMavenDependency().getPom().stream()
+                      .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
+                      .map(
+                          pom ->
+                              new Artifact(
+                                  pom.getGroupId(),
+                                  pom.getArtifactId(),
+                                  pom.getVersion(),
+                                  pom.getClassifier(),
+                                  pom.toExclusionString()))
+                      .collect(Collectors.toSet());
+              Set<File> mavenArts = MavenTool.resolveArtifactsAsJava(artifacts);
+              jars.addAll(mavenArts);
+            }
+
+            // 4). local uploadDIR to hdfs uploadsDIR
+            String hdfsUploadDIR = Workspace.remote().APP_UPLOADS();
+            for (File jarFile : jars) {
+              String hdfsUploadPath = hdfsUploadDIR + "/" + jarFile.getName();
+              if (!fsOperator.exists(hdfsUploadPath)) {
                 fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
+              } else {
+                InputStream inputStream = Files.newInputStream(jarFile.toPath());
+                if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(hdfsUploadPath))) {
+                  fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
+                }
               }
             }
+            // 5). copy jars to $hdfs_app_home/lib
+            fsOperator.mkCleanDirs(app.getAppLib());
+            jars.forEach(
+                jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
           }
-
-          // 5). copy jars to $hdfs_app_home/lib
-          fsOperator.mkCleanDirs(app.getAppLib());
-          jars.forEach(
-              jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
-        }
-      } else {
-        String appHome = app.getAppHome();
-        fsOperator.mkCleanDirs(appHome);
-        fsOperator.upload(app.getDistHome(), appHome);
+        default:
+          throw new IllegalArgumentException("");
       }
     }
   }
