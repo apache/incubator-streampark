@@ -413,6 +413,9 @@ public class AppBuildPipeServiceImpl
       // 3) for YARNApplication mode
       if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
         // 1) upload user jar to hdfs workspace
+        if (!fsOperator.exists(app.getAppHome())) {
+          fsOperator.mkdirs(app.getAppHome());
+        }
         String pipelineJar = app.getAppHome().concat("/").concat(userJar.getName());
         if (!fsOperator.exists(pipelineJar)) {
           fsOperator.upload(localUploadJar.getAbsolutePath(), app.getAppHome());
@@ -462,7 +465,11 @@ public class AppBuildPipeServiceImpl
           }
         }
         // 5). copy jars to $hdfs_app_home/lib
-        fsOperator.mkCleanDirs(app.getAppLib());
+        if (!fsOperator.exists(app.getAppLib())) {
+          fsOperator.mkdirs(app.getAppLib());
+        } else {
+          fsOperator.mkCleanDirs(app.getAppLib());
+        }
         dependencyJars.forEach(
             jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
       }
