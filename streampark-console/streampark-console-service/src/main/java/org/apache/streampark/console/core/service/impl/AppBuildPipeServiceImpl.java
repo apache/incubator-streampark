@@ -468,16 +468,14 @@ public class AppBuildPipeServiceImpl
   }
 
   private File getAppDistJar(Application app) {
-    File userJar;
     if (app.getApplicationType() == ApplicationType.STREAMPARK_FLINK) {
-      userJar = new File(app.getDistHome(), app.getModule().concat(".jar"));
-    } else if (app.getApplicationType() == ApplicationType.APACHE_FLINK) {
-      userJar = new File(app.getDistHome(), app.getJar());
-    } else {
-      throw new IllegalArgumentException(
-          "[StreamPark] unsupported ApplicationType of custom code: " + app.getApplicationType());
+      return new File(app.getDistHome(), app.getModule().concat(".jar"));
     }
-    return userJar;
+    if (app.getApplicationType() == ApplicationType.APACHE_FLINK) {
+      return new File(app.getDistHome(), app.getJar());
+    }
+    throw new IllegalArgumentException(
+        "[StreamPark] unsupported ApplicationType of custom code: " + app.getApplicationType());
   }
 
   /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
