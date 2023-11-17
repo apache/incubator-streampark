@@ -374,9 +374,7 @@ public class AppBuildPipeServiceImpl
 
   private void prepareJars(Application app) throws IOException {
     File localUploadDIR = new File(Workspace.local().APP_UPLOADS());
-    if (!localUploadDIR.exists()) {
-      localUploadDIR.mkdirs();
-    }
+    FileUtils.mkdir(localUploadDIR);
 
     FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
@@ -399,34 +397,38 @@ public class AppBuildPipeServiceImpl
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
       ResourceFrom resourceFrom = ResourceFrom.of(app.getResourceFrom());
-      File localUploadJar = new File(localUploadDIR, app.getJar());
-      switch (resourceFrom) {
-        case CICD:
-          // upload jar to local uploadDIR.
-          File userJar = getAppDistJar(app);
-          checkOrElseUploadJar(localFS, userJar, localUploadJar, localUploadDIR);
-          break;
-        case UPLOAD:
-          // 1). upload jar to local uploadDIR.
-          File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
-          checkOrElseUploadJar(localFS, localJar, localUploadJar, localUploadDIR);
-          break;
-        default:
-          throw new IllegalArgumentException("ResourceFrom error: " + resourceFrom);
+
+      File userJar;
+      if (resourceFrom == ResourceFrom.CICD) {
+        userJar = getAppDistJar(app);
+      } else if (resourceFrom == ResourceFrom.UPLOAD) {
+        userJar = new File(WebUtils.getAppTempDir(), app.getJar());
+      } else {
+        throw new IllegalArgumentException("ResourceFrom error: " + resourceFrom);
       }
+      // 2) copy user jar to localUpload DIR
+      File localUploadJar = new File(localUploadDIR, userJar.getName());
+      checkOrElseUploadJar(localFS, userJar, localUploadJar, localUploadDIR);
 
       // 3) for YARNApplication mode
       if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+        // 1) upload user jar to hdfs workspace
+        String pipelineJar = app.getAppHome().concat("/").concat(userJar.getName());
+        if (!fsOperator.exists(pipelineJar)) {
+          fsOperator.upload(localUploadJar.getAbsolutePath(), app.getAppHome());
+        } else {
+          InputStream inputStream = Files.newInputStream(localUploadJar.toPath());
+          if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(pipelineJar))) {
+            fsOperator.upload(localUploadJar.getAbsolutePath(), app.getAppHome());
+          }
+        }
 
-        List<File> hdfsUploadJars = new ArrayList<>(0);
-
-        // 1). user jar
-        hdfsUploadJars.add(localUploadJar);
+        List<File> dependencyJars = new ArrayList<>(0);
 
         // 2). jar dependency
         app.getMavenDependency()
             .getJar()
-            .forEach(jar -> hdfsUploadJars.add(new File(localUploadDIR, jar)));
+            .forEach(jar -> dependencyJars.add(new File(localUploadDIR, jar)));
 
         // 3). pom dependency
         if (!app.getMavenDependency().getPom().isEmpty()) {
@@ -443,12 +445,12 @@ public class AppBuildPipeServiceImpl
                               pom.toExclusionString()))
                   .collect(Collectors.toSet());
           Set<File> mavenArts = MavenTool.resolveArtifactsAsJava(artifacts);
-          hdfsUploadJars.addAll(mavenArts);
+          dependencyJars.addAll(mavenArts);
         }
 
         // 4). local uploadDIR to hdfs uploadsDIR
         String hdfsUploadDIR = Workspace.remote().APP_UPLOADS();
-        for (File jarFile : hdfsUploadJars) {
+        for (File jarFile : dependencyJars) {
           String hdfsUploadPath = hdfsUploadDIR + "/" + jarFile.getName();
           if (!fsOperator.exists(hdfsUploadPath)) {
             fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
@@ -461,7 +463,7 @@ public class AppBuildPipeServiceImpl
         }
         // 5). copy jars to $hdfs_app_home/lib
         fsOperator.mkCleanDirs(app.getAppLib());
-        hdfsUploadJars.forEach(
+        dependencyJars.forEach(
             jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
       }
     }
