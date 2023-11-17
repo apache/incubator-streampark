@@ -233,7 +233,7 @@ trait FlinkClientTrait extends Logger {
       submitRequest: SubmitRequest,
       jarFile: File): (PackagedProgram, JobGraph) = {
 
-    val pgkBuilder = PackagedProgram.newBuilder
+    val packageProgram = PackagedProgram.newBuilder
       .setJarFile(jarFile)
       .setEntryPointClassName(
         flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
@@ -242,14 +242,7 @@ trait FlinkClientTrait extends Logger {
         flinkConfig
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
           .orElse(Lists.newArrayList()): _*)
-    // userClassPath...
-    submitRequest.executionMode match {
-      case ExecutionMode.REMOTE | ExecutionMode.YARN_PER_JOB =>
-        pgkBuilder.setUserClassPaths(submitRequest.flinkVersion.flinkLibs)
-      case _ =>
-    }
-
-    val packageProgram = pgkBuilder.build()
+      .build()
 
     val jobGraph = PackagedProgramUtils.createJobGraph(
       packageProgram,

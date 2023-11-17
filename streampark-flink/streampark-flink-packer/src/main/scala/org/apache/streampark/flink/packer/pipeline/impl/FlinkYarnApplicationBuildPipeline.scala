@@ -43,28 +43,22 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
    */
   @throws[Throwable]
   override protected def buildProcess(): SimpleBuildResponse = {
-    execStep(1) {
-      request.developmentMode match {
-        case DevelopmentMode.FLINK_SQL => HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
-        case _ =>
-      }
-      logInfo(s"recreate building workspace: ${request.yarnProvidedPath}")
-    }.getOrElse(throw getError.exception)
-
-    val mavenJars =
-      execStep(2) {
-        request.developmentMode match {
-          case DevelopmentMode.FLINK_SQL =>
-            val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
-            mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
-          case _ => Set[String]()
-        }
+    if (request.developmentMode == DevelopmentMode.FLINK_SQL) {
+      execStep(1) {
+        HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
+        logInfo(s"recreate building workspace: ${request.yarnProvidedPath}")
       }.getOrElse(throw getError.exception)
 
-    execStep(3) {
-      mavenJars.foreach(jar => uploadToHdfs(FsOperator.hdfs, jar, request.yarnProvidedPath))
-    }.getOrElse(throw getError.exception)
+      val mavenJars =
+        execStep(2) {
+          val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
+          mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
+        }.getOrElse(throw getError.exception)
 
+      execStep(3) {
+        mavenJars.foreach(jar => uploadToHdfs(FsOperator.hdfs, jar, request.yarnProvidedPath))
+      }.getOrElse(throw getError.exception)
+    }
     SimpleBuildResponse()
   }
 
