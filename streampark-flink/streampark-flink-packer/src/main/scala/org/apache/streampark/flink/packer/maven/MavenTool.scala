@@ -29,7 +29,7 @@ import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.codehaus.plexus.logging.{Logger => PlexusLog}
 import org.codehaus.plexus.logging.console.ConsoleLogger
 import org.eclipse.aether.{RepositorySystem, RepositorySystemSession}
-import org.eclipse.aether.artifact.DefaultArtifact
+import org.eclipse.aether.artifact.{Artifact, DefaultArtifact}
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
 import org.eclipse.aether.repository.{LocalRepository, RemoteRepository}
 import org.eclipse.aether.resolution.{ArtifactDescriptorRequest, ArtifactRequest}
@@ -205,23 +205,29 @@ object MavenTool extends Logger {
 
     val (repoSystem, session) = getMavenEndpoint()
 
-    val artifacts = mavenArtifacts.map(
-      e => new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version))
-
     val exclusions = mavenArtifacts
       .flatMap(_.extensions.map(_.split(":")))
       .map(a => Artifact(a.head, a.last, null)) ++ excludeArtifact
 
     val remoteRepos = getRemoteRepos()
 
+    val exclusionAll = exclusions.exists(e => e.groupId == "*" && e.artifactId == "*")
+
+    val artifacts = mavenArtifacts.map(
+      e => new DefaultArtifact(e.groupId, e.artifactId, e.classifier, "jar", e.version))
+
     // read relevant artifact descriptor info and excluding items if necessary.
-    val dependencies = artifacts
-      .map(artifact => new ArtifactDescriptorRequest(artifact, remoteRepos, null))
-      .map(descReq => repoSystem.readArtifactDescriptor(session, descReq))
-      .flatMap(_.getDependencies)
-      .filter(_.getScope == "compile")
-      .filter(dep => !exclusions.exists(_.filter(dep.getArtifact)))
-      .map(_.getArtifact)
+    val dependencies =
+      if (exclusionAll) Set.empty[DefaultArtifact]
+      else {
+        artifacts
+          .map(artifact => new ArtifactDescriptorRequest(artifact, remoteRepos, null))
+          .map(descReq => repoSystem.readArtifactDescriptor(session, descReq))
+          .flatMap(_.getDependencies)
+          .filter(_.getScope == "compile")
+          .filter(dep => !exclusions.exists(_.filter(dep.getArtifact)))
+          .map(_.getArtifact)
+      }
 
     val mergedArtifacts = artifacts ++ dependencies
 

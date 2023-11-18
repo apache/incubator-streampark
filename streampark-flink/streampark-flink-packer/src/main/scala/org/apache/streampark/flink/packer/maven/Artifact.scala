@@ -30,13 +30,11 @@ case class Artifact(
     extensions: JavaSet[String] = Collections.emptySet()) {
 
   def filter(artifact: AetherArtifact): Boolean = {
-    artifact.getGroupId match {
-      case g if g == groupId =>
-        artifact.getArtifactId match {
-          case "*" => true
-          case a => a == artifactId
-        }
-      case _ => false
+    (artifact.getGroupId, artifact.getArtifactId) match {
+      case ("*", "*") => true
+      case (g, "*") => g == this.groupId
+      case ("*", a) => a == this.artifactId
+      case (g, a) => g == this.groupId && a == this.artifactId
     }
   }
 }

@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.FileUtils;
@@ -373,9 +374,7 @@ public class AppBuildPipeServiceImpl
 
   private void prepareJars(Application app) throws IOException {
     File localUploadDIR = new File(Workspace.local().APP_UPLOADS());
-    if (!localUploadDIR.exists()) {
-      localUploadDIR.mkdirs();
-    }
+    FileUtils.mkdir(localUploadDIR);
 
     FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
@@ -398,91 +397,106 @@ public class AppBuildPipeServiceImpl
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
       ResourceFrom resourceFrom = ResourceFrom.of(app.getResourceFrom());
-      switch (resourceFrom) {
-        case CICD:
-          String appLib = app.getAppLib();
-          fsOperator.mkCleanDirs(appLib);
-          fsOperator.upload(app.getDistJar(), appLib);
-          break;
-        case UPLOAD:
-          // 1). upload jar to local uploadDIR.
-          File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
-          File localUploadJar = new File(localUploadDIR, app.getJar());
-          checkOrElseUploadJar(localFS, localJar, localUploadJar, localUploadDIR);
 
-          // 2) copy jar to local $app_home/lib
-          File libJar = new File(app.getLocalAppLib(), app.getJar());
-          if (!localFS.exists(app.getLocalAppLib())
-              || !libJar.exists()
-              || !FileUtils.equals(localJar, libJar)) {
-            localFS.mkCleanDirs(app.getLocalAppLib());
-            localFS.upload(localUploadJar.getAbsolutePath(), app.getLocalAppLib());
+      File userJar;
+      if (resourceFrom == ResourceFrom.CICD) {
+        userJar = getAppDistJar(app);
+      } else if (resourceFrom == ResourceFrom.UPLOAD) {
+        userJar = new File(WebUtils.getAppTempDir(), app.getJar());
+      } else {
+        throw new IllegalArgumentException("ResourceFrom error: " + resourceFrom);
+      }
+      // 2) copy user jar to localUpload DIR
+      File localUploadJar = new File(localUploadDIR, userJar.getName());
+      checkOrElseUploadJar(localFS, userJar, localUploadJar, localUploadDIR);
+
+      // 3) for YARNApplication mode
+      if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+        // 1) upload user jar to hdfs workspace
+        if (!fsOperator.exists(app.getAppHome())) {
+          fsOperator.mkdirs(app.getAppHome());
+        }
+        String pipelineJar = app.getAppHome().concat("/").concat(userJar.getName());
+        if (!fsOperator.exists(pipelineJar)) {
+          fsOperator.upload(localUploadJar.getAbsolutePath(), app.getAppHome());
+        } else {
+          InputStream inputStream = Files.newInputStream(localUploadJar.toPath());
+          if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(pipelineJar))) {
+            fsOperator.upload(localUploadJar.getAbsolutePath(), app.getAppHome());
           }
+        }
 
-          // 3) for YARNApplication mode
-          if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
-            List<File> jars = new ArrayList<>(0);
+        List<File> dependencyJars = new ArrayList<>(0);
 
-            // 1). user jar
-            jars.add(libJar);
+        // 2). jar dependency
+        app.getMavenDependency()
+            .getJar()
+            .forEach(jar -> dependencyJars.add(new File(localUploadDIR, jar)));
 
-            // 2). jar dependency
-            app.getMavenDependency()
-                .getJar()
-                .forEach(jar -> jars.add(new File(localUploadDIR, jar)));
+        // 3). pom dependency
+        if (!app.getMavenDependency().getPom().isEmpty()) {
+          Set<Artifact> artifacts =
+              app.getMavenDependency().getPom().stream()
+                  .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
+                  .map(
+                      pom ->
+                          new Artifact(
+                              pom.getGroupId(),
+                              pom.getArtifactId(),
+                              pom.getVersion(),
+                              pom.getClassifier(),
+                              pom.toExclusionString()))
+                  .collect(Collectors.toSet());
+          Set<File> mavenArts = MavenTool.resolveArtifactsAsJava(artifacts);
+          dependencyJars.addAll(mavenArts);
+        }
 
-            // 3). pom dependency
-            if (!app.getMavenDependency().getPom().isEmpty()) {
-              Set<Artifact> artifacts =
-                  app.getMavenDependency().getPom().stream()
-                      .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
-                      .map(
-                          pom ->
-                              new Artifact(
-                                  pom.getGroupId(),
-                                  pom.getArtifactId(),
-                                  pom.getVersion(),
-                                  pom.getClassifier(),
-                                  pom.toExclusionString()))
-                      .collect(Collectors.toSet());
-              Set<File> mavenArts = MavenTool.resolveArtifactsAsJava(artifacts);
-              jars.addAll(mavenArts);
+        // 4). local uploadDIR to hdfs uploadsDIR
+        String hdfsUploadDIR = Workspace.remote().APP_UPLOADS();
+        for (File jarFile : dependencyJars) {
+          String hdfsUploadPath = hdfsUploadDIR + "/" + jarFile.getName();
+          if (!fsOperator.exists(hdfsUploadPath)) {
+            fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
+          } else {
+            InputStream inputStream = Files.newInputStream(jarFile.toPath());
+            if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(hdfsUploadPath))) {
+              fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
             }
-
-            // 4). local uploadDIR to hdfs uploadsDIR
-            String hdfsUploadDIR = Workspace.remote().APP_UPLOADS();
-            for (File jarFile : jars) {
-              String hdfsUploadPath = hdfsUploadDIR + "/" + jarFile.getName();
-              if (!fsOperator.exists(hdfsUploadPath)) {
-                fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
-              } else {
-                InputStream inputStream = Files.newInputStream(jarFile.toPath());
-                if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(hdfsUploadPath))) {
-                  fsOperator.upload(jarFile.getAbsolutePath(), hdfsUploadDIR);
-                }
-              }
-            }
-            // 5). copy jars to $hdfs_app_home/lib
-            fsOperator.mkCleanDirs(app.getAppLib());
-            jars.forEach(
-                jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
           }
-          break;
-        default:
-          throw new IllegalArgumentException("ResourceFrom error: " + resourceFrom);
+        }
+        // 5). copy jars to $hdfs_app_home/lib
+        if (!fsOperator.exists(app.getAppLib())) {
+          fsOperator.mkdirs(app.getAppLib());
+        } else {
+          fsOperator.mkCleanDirs(app.getAppLib());
+        }
+        dependencyJars.forEach(
+            jar -> fsOperator.copy(hdfsUploadDIR + "/" + jar.getName(), app.getAppLib()));
       }
     }
   }
 
+  private File getAppDistJar(Application app) {
+    if (app.getApplicationType() == ApplicationType.STREAMPARK_FLINK) {
+      return new File(app.getDistHome(), app.getModule().concat(".jar"));
+    }
+    if (app.getApplicationType() == ApplicationType.APACHE_FLINK) {
+      return new File(app.getDistHome(), app.getJar());
+    }
+    throw new IllegalArgumentException(
+        "[StreamPark] unsupported ApplicationType of custom code: " + app.getApplicationType());
+  }
+
   /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
   private String retrieveUserLocalJar(FlinkEnv flinkEnv, Application app) {
+    File localUploadDIR = new File(Workspace.local().APP_UPLOADS());
     switch (app.getDevelopmentMode()) {
       case CUSTOM_CODE:
         switch (app.getApplicationType()) {
           case STREAMPARK_FLINK:
-            return String.format("%s/%s", app.getLocalAppLib(), app.getModule().concat(".jar"));
+            return String.format("%s/%s", localUploadDIR, app.getModule().concat(".jar"));
           case APACHE_FLINK:
-            return String.format("%s/%s", app.getLocalAppLib(), app.getJar());
+            return String.format("%s/%s", localUploadDIR, app.getJar());
           default:
             throw new IllegalArgumentException(
                 "[StreamPark] unsupported ApplicationType of custom code: "

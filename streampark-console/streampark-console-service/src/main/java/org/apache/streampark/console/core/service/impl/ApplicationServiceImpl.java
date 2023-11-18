@@ -1487,15 +1487,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           case STREAMPARK_FLINK:
             flinkUserJar =
                 String.format(
-                    "%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
+                    "%s/%s", application.getAppHome(), application.getModule().concat(".jar"));
             break;
           case APACHE_FLINK:
-            if (application.getFsOperator().exists(application.getAppLib())) {
-              flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
-            } else {
-              // compatible with historical version
-              flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
-            }
+            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
             break;
           default:
             throw new IllegalArgumentException(

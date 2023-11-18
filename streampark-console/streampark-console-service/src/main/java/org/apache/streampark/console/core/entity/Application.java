@@ -388,26 +388,21 @@ public class Application implements Serializable {
   public String getDistHome() {
     String path =
         String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
-    log.info("local distHome:{}", path);
+    log.info("local distHome: {}", path);
     return path;
-  }
-
-  @JsonIgnore
-  public String getDistJar() {
-    return getDistHome() + "/" + getJar();
   }
 
   @JsonIgnore
   public String getLocalAppHome() {
     String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
-    log.info("local appHome:{}", path);
+    log.info("local appHome: {}", path);
     return path;
   }
 
   @JsonIgnore
   public String getRemoteAppHome() {
     String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
-    log.info("remote appHome:{}", path);
+    log.info("remote appHome: {}", path);
     return path;
   }
 

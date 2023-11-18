@@ -79,6 +79,17 @@ object FileUtils {
       s"[StreamPark] FileUtils.exists: file $path is not exist!")
   }
 
+  def mkdir(dir: File) = {
+    if (dir.exists && !dir.isDirectory) {
+      throw new IOException(s"File $dir exists and is not a directory. Unable to create directory.")
+    } else if (!dir.mkdirs) {
+      // Double-check that some other thread or process hasn't made
+      if (!dir.isDirectory) {
+        throw new IOException(s"Unable to create directory $dir")
+      }
+    }
+  }
+
   def getPathFromEnv(env: String): String = {
     val path = System.getenv(env)
     require(
