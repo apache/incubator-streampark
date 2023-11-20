@@ -18,10 +18,10 @@
 package org.apache.streampark.flink.kubernetes.ingress
 
 import org.apache.streampark.common.conf.{ConfigKeys, InternalConfigHolder, K8sFlinkConfig}
+import org.apache.streampark.common.util.FileUtils
 
 import io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
-import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
 
 import java.io.File
@@ -36,26 +36,26 @@ trait IngressStrategy {
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit
 
   def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {
-    val workspaceDir = new File(buildWorkspace)
-    if (!workspaceDir.exists) workspaceDir.mkdir
     if (ingressTemplates.isEmpty) null
     else {
+      val workspaceDir = new File(buildWorkspace)
+      FileUtils.mkdir(workspaceDir)
       val outputPath = buildWorkspace + "/ingress.yaml"
       val outputFile = new File(outputPath)
-      FileUtils.write(outputFile, ingressTemplates, "UTF-8")
+      FileUtils.writeFile(ingressTemplates, outputFile)
       outputPath
     }
   }
 
   def buildIngressAnnotations(clusterId: String, namespace: String): Map[String, String] = {
-    val annotations = Map(
+    var annotations = Map(
       "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
       "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
       "nginx.ingress.kubernetes.io/configuration-snippet" -> s"""rewrite ^(/$clusterId)$$ $$1/ permanent; sub_filter '<base href="./">' '<base href="/$namespace/$clusterId/">'; sub_filter_once off;"""
     )
     val ingressClass = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
     if (ingressClass.nonEmpty) {
-      annotations + ("kubernetes.io/ingress.class" -> ingressClass)
+      annotations += ("kubernetes.io/ingress.class" -> ingressClass)
     }
     annotations
   }
