@@ -148,14 +148,14 @@ public class ProjectController {
   @Operation(summary = "List project configurations")
   @PostMapping("listconf")
   public RestResponse listConf(Project project) {
-    List<Map<String, Object>> list = projectService.listConf(project);
-    return RestResponse.success().data(list);
+    List<Map<String, Object>> confList = projectService.listConf(project);
+    return RestResponse.success().data(confList);
   }
 
   @Operation(summary = "List the team projects")
   @PostMapping("select")
   public RestResponse select(@RequestParam Long teamId) {
-    List<Project> list = projectService.listByTeamId(teamId);
-    return RestResponse.success().data(list);
+    List<Project> projectList = projectService.listByTeamId(teamId);
+    return RestResponse.success().data(projectList);
   }
 }

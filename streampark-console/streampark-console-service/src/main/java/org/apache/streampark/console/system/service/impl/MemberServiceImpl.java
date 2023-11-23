@@ -114,8 +114,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   public List<Long> listUserIdsByRoleId(Long roleId) {
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>().eq(Member::getRoleId, roleId);
-    List<Member> list = baseMapper.selectList(queryWrapper);
-    return list.stream().map(Member::getUserId).collect(Collectors.toList());
+    List<Member> memberList = baseMapper.selectList(queryWrapper);
+    return memberList.stream().map(Member::getUserId).collect(Collectors.toList());
   }
 
   @Override

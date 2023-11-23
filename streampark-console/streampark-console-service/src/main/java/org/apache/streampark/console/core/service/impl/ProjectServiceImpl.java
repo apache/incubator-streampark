@@ -247,16 +247,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public List<String> jars(Project project) {
-    List<String> list = new ArrayList<>(0);
+    List<String> jarList = new ArrayList<>(0);
     ApiAlertException.throwIfNull(
         project.getModule(), "Project module can't be null, please check.");
     File apps = new File(project.getDistHome(), project.getModule());
     for (File file : Objects.requireNonNull(apps.listFiles())) {
       if (file.getName().endsWith(Constant.JAR_SUFFIX)) {
-        list.add(file.getName());
+        jarList.add(file.getName());
       }
     }
-    return list;
+    return jarList;
   }
 
   @Override
@@ -296,13 +296,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       if (!unzipFile.exists()) {
         GZipUtils.deCompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
       }
-      List<Map<String, Object>> list = new ArrayList<>();
+      List<Map<String, Object>> confList = new ArrayList<>();
       File[] files = unzipFile.listFiles(x -> "conf".equals(x.getName()));
       Utils.notNull(files);
       for (File item : files) {
-        eachFile(item, list, true);
+        eachFile(item, confList, true);
       }
-      return list;
+      return confList;
     } catch (Exception e) {
       log.info(e.getMessage());
     }
