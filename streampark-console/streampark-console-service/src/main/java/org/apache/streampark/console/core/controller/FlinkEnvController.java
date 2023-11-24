@@ -45,8 +45,8 @@ public class FlinkEnvController {
   @Operation(summary = "Get flink environment")
   @PostMapping("list")
   public RestResponse list() {
-    List<FlinkEnv> list = flinkEnvService.list();
-    return RestResponse.success(list);
+    List<FlinkEnv> flinkEnvList = flinkEnvService.list();
+    return RestResponse.success(flinkEnvList);
   }
 
   @Operation(summary = "Verify flink environment")

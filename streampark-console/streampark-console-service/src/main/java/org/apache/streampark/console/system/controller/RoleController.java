@@ -72,12 +72,12 @@ public class RoleController {
   @Operation(summary = "List role menus")
   @PostMapping("menu")
   public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
-    List<RoleMenu> list = this.roleMenuServie.listByRoleId(roleId);
-    List<String> roleMenus =
-        list.stream()
+    List<RoleMenu> roleMenuList = this.roleMenuServie.listByRoleId(roleId);
+    List<String> menuIdList =
+        roleMenuList.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
             .collect(Collectors.toList());
-    return RestResponse.success(roleMenus);
+    return RestResponse.success(menuIdList);
   }
 
   @Operation(summary = "Create role")
