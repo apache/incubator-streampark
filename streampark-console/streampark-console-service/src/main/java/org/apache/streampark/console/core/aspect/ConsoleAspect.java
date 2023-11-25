@@ -111,6 +111,7 @@ public class ConsoleAspect {
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
     boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
+
     if (!isAdmin) {
       PermissionTypeEnum permissionTypeEnum = permissionAction.type();
       Long paramId = getParamId(joinPoint, methodSignature, permissionAction.id());

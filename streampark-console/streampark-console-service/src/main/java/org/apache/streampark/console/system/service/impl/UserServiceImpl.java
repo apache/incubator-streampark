@@ -221,6 +221,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   public void fillInTeam(User user) {
     if (user.getLastTeamId() == null) {
       List<Team> teams = memberService.listTeamsByUserId(user.getUserId());
+
       ApiAlertException.throwIfTrue(
           CollectionUtils.isEmpty(teams),
           "The current user does not belong to any team, please contact the administrator!");
