@@ -219,19 +219,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   public void fillInTeam(User user) {
-    if (user.getLastTeamId() != null) {
-      return;
-    }
+    if (user.getLastTeamId() == null) {
+      List<Team> teams = memberService.listTeamsByUserId(user.getUserId());
+      ApiAlertException.throwIfTrue(
+          CollectionUtils.isEmpty(teams),
+          "The current user does not belong to any team, please contact the administrator!");
 
-    List<Team> teams = memberService.listTeamsByUserId(user.getUserId());
-    ApiAlertException.throwIfTrue(
-        CollectionUtils.isEmpty(teams),
-        "The current user does not belong to any team, please contact the administrator!");
-
-    if (teams.size() == 1) {
-      Team team = teams.get(0);
-      user.setLastTeamId(team.getId());
-      this.baseMapper.updateById(user);
+      if (teams.size() == 1) {
+        Team team = teams.get(0);
+        user.setLastTeamId(team.getId());
+        this.baseMapper.updateById(user);
+      }
     }
   }
 

@@ -50,21 +50,20 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    if (!(request instanceof MultipartHttpServletRequest)) {
-      return true;
-    }
-
-    MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-    Map<String, MultipartFile> files = multipartRequest.getFileMap();
-    for (String file : files.keySet()) {
-      MultipartFile multipartFile = multipartRequest.getFile(file);
-      ApiAlertException.throwIfNull(
-          multipartFile, "File to upload can't be null. Upload file failed.");
-      boolean isJarOrPyFile =
-          FileUtils.isJarFileType(multipartFile.getInputStream())
-              || isPythonFileType(multipartFile.getContentType(), multipartFile.getInputStream());
-      ApiAlertException.throwIfFalse(
-          isJarOrPyFile, "Illegal file type, Only support standard jar files. Upload file failed.");
+    if (request instanceof MultipartHttpServletRequest) {
+      MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+      Map<String, MultipartFile> files = multipartRequest.getFileMap();
+      for (String file : files.keySet()) {
+        MultipartFile multipartFile = multipartRequest.getFile(file);
+        ApiAlertException.throwIfNull(
+            multipartFile, "File to upload can't be null. Upload file failed.");
+        boolean isJarOrPyFile =
+            FileUtils.isJarFileType(multipartFile.getInputStream())
+                || isPythonFileType(multipartFile.getContentType(), multipartFile.getInputStream());
+        ApiAlertException.throwIfFalse(
+            isJarOrPyFile,
+            "Illegal file type, Only support standard jar files. Upload file failed.");
+      }
     }
     return true;
   }
