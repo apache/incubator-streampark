@@ -74,18 +74,15 @@ public class FlinkPodTemplateController {
   private Map<String, String> covertHostsParamToMap(String hosts) {
     if (StringUtils.isBlank(hosts)) {
       return new HashMap<>(0);
-    } else {
-      return Arrays.stream(hosts.split(","))
-          .filter(StringUtils::isNotBlank)
-          .map(String::trim)
-          .map(e -> e.split(":"))
-          .filter(
-              arr ->
-                  arr.length == 2
-                      && StringUtils.isNotBlank(arr[0])
-                      && StringUtils.isNotBlank(arr[1]))
-          .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
     }
+    return Arrays.stream(hosts.split(","))
+        .filter(StringUtils::isNotBlank)
+        .map(String::trim)
+        .map(e -> e.split(":"))
+        .filter(
+            arr ->
+                arr.length == 2 && StringUtils.isNotBlank(arr[0]) && StringUtils.isNotBlank(arr[1]))
+        .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
   }
 
   @Operation(summary = "Extract host-alias from pod template")

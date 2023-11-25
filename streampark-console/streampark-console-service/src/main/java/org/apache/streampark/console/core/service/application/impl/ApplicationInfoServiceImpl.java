@@ -403,7 +403,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
           return AppExistsStateEnum.IN_YARN;
         }
         // check whether clusterId, namespace, jobId on kubernetes
-        else if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+        if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
             && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
           return AppExistsStateEnum.IN_KUBERNETES;
         }
@@ -419,7 +419,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         return AppExistsStateEnum.IN_YARN;
       }
       // check whether clusterId, namespace, jobId on kubernetes
-      else if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+      if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
           && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
         return AppExistsStateEnum.IN_KUBERNETES;
       }

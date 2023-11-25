@@ -109,9 +109,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     if (status) {
       return response.message("Add project successfully").data(true);
-    } else {
-      return response.message("Add project failed").data(false);
     }
+    return response.message("Add project failed").data(false);
   }
 
   @Override

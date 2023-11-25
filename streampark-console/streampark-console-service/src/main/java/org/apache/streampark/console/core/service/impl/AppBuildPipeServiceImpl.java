@@ -517,9 +517,8 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
         if (K8sFlinkConfig.isV2Enabled()) {
           return FlinkK8sApplicationBuildPipelineV2.of(k8sApplicationBuildRequest);
-        } else {
-          return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
         }
+        return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
       default:
         throw new UnsupportedOperationException(
             "Unsupported Building Application for ExecutionMode: " + app.getFlinkExecutionMode());
@@ -602,9 +601,8 @@ public class AppBuildPipeServiceImpl
     AppBuildPipeline old = getById(pipe.getAppId());
     if (old == null) {
       return save(pipe);
-    } else {
-      return updateById(pipe);
     }
+    return updateById(pipe);
   }
 
   private void checkOrElseUploadJar(

@@ -405,9 +405,8 @@ public class ApplicationController {
     String error = applicationInfoService.checkSavepointPath(app);
     if (error == null) {
       return RestResponse.success(true);
-    } else {
-      return RestResponse.success(false).message(error);
     }
+    return RestResponse.success(false).message(error);
   }
 
   @Operation(summary = "Get application on k8s deploy logs")

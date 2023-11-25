@@ -436,10 +436,9 @@ public class FlinkAppHttpWatcher {
     if (application.getStartTime() == null || startTime != application.getStartTime().getTime()) {
       application.setStartTime(new Date(startTime));
     }
-    if (endTime != -1) {
-      if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
-        application.setEndTime(new Date(endTime));
-      }
+    if (endTime != -1
+        && (application.getEndTime() == null || endTime != application.getEndTime().getTime())) {
+      application.setEndTime(new Date(endTime));
     }
 
     application.setJobId(jobOverview.getId());
@@ -676,19 +675,18 @@ public class FlinkAppHttpWatcher {
 
   private Overview httpOverview(Application application) throws IOException {
     String appId = application.getAppId();
-    if (appId != null) {
-      if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
-          || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode()) {
-        String reqURL;
-        if (StringUtils.isBlank(application.getJobManagerUrl())) {
-          String format = "proxy/%s/overview";
-          reqURL = String.format(format, appId);
-        } else {
-          String format = "%s/overview";
-          reqURL = String.format(format, application.getJobManagerUrl());
-        }
-        return yarnRestRequest(reqURL, Overview.class);
+    if (appId != null
+        && (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
+            || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode())) {
+      String reqURL;
+      if (StringUtils.isBlank(application.getJobManagerUrl())) {
+        String format = "proxy/%s/overview";
+        reqURL = String.format(format, appId);
+      } else {
+        String format = "%s/overview";
+        reqURL = String.format(format, application.getJobManagerUrl());
       }
+      return yarnRestRequest(reqURL, Overview.class);
     }
     return null;
   }

@@ -82,9 +82,8 @@ public class FlinkSqlController {
             .put(END, flinkSqlValidationResult.errorLine() + 1);
       }
       return response;
-    } else {
-      return RestResponse.success(true);
     }
+    return RestResponse.success(true);
   }
 
   @Operation(summary = "List the application sql")
