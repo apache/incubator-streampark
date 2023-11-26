@@ -21,9 +21,7 @@ set names utf8mb4;
 set foreign_key_checks = 0;
 
 alter table `t_flink_app`
-    add column `dependency` text collate utf8mb4_general_ci default null after `main_class`;
+    add column `dependency` text collate utf8mb4_general_ci default null after `main_class`,
+    modify column `modify_time` datetime not null comment 'modify time';
 
 set foreign_key_checks = 1;
-
-alter table `t_flink_app`
-    modify column `modify_time` datetime not null comment 'modify time';
