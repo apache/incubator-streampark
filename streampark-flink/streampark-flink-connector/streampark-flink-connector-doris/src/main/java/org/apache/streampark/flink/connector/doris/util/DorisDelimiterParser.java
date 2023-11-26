@@ -24,7 +24,7 @@ public class DorisDelimiterParser {
   private static final String HEX_STRING = "0123456789ABCDEF";
 
   public static String parse(String sp) throws RuntimeException {
-    if (sp == null || sp.length() == 0) {
+    if (sp == null || sp.isBlank()) {
       throw new RuntimeException("Delimiter can't be empty");
     }
     if (!sp.toUpperCase().startsWith("\\X")) {
