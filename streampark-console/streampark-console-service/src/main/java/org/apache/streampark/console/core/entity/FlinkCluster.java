@@ -136,13 +136,13 @@ public class FlinkCluster implements Serializable {
     if (StringUtils.isBlank(this.options)) {
       return Collections.emptyMap();
     }
-    Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
+    Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
     if (FlinkExecutionMode.YARN_SESSION == getFlinkExecutionModeEnum()) {
-      map.put(ConfigKeys.KEY_YARN_APP_NAME(), this.clusterName);
-      map.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
+      optionMap.put(ConfigKeys.KEY_YARN_APP_NAME(), this.clusterName);
+      optionMap.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
     }
-    map.entrySet().removeIf(entry -> entry.getValue() == null);
-    return map;
+    optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
+    return optionMap;
   }
 
   @JsonIgnore
@@ -176,16 +176,16 @@ public class FlinkCluster implements Serializable {
 
   @JsonIgnore
   public Map<String, Object> getProperties() {
-    Map<String, Object> map = new HashMap<>();
-    Map<String, String> dynamicProperties =
+    Map<String, Object> propertyMap = new HashMap<>();
+    Map<String, String> dynamicPropertyMap =
         PropertiesUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
-    map.putAll(this.getOptionMap());
-    map.putAll(dynamicProperties);
+    propertyMap.putAll(this.getOptionMap());
+    propertyMap.putAll(dynamicPropertyMap);
     ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
     if (resolveOrder != null) {
-      map.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
+      propertyMap.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
     }
-    return map;
+    return propertyMap;
   }
 
   public static class SFunc {

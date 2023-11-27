@@ -352,8 +352,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     if (applicationConfig == null) {
       return null;
     }
-    Map<String, String> map = applicationConfig.readConfig();
-    return FlinkUtils.isCheckpointEnabled(map) ? map.get(SAVEPOINT_DIRECTORY.key()) : null;
+    Map<String, String> configMap = applicationConfig.readConfig();
+    return FlinkUtils.isCheckpointEnabled(configMap)
+        ? configMap.get(SAVEPOINT_DIRECTORY.key())
+        : null;
   }
 
   /**

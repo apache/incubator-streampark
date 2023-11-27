@@ -60,7 +60,7 @@ public class MenuController {
   @PostMapping("list")
   @RequiresPermissions("menu:view")
   public RestResponse menuList(Menu menu) {
-    Map<String, Object> maps = this.menuService.listMenuMap(menu);
-    return RestResponse.success(maps);
+    Map<String, Object> menuMap = this.menuService.listMenuMap(menu);
+    return RestResponse.success(menuMap);
   }
 }
