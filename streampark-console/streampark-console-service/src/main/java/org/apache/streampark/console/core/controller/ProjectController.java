@@ -134,14 +134,14 @@ public class ProjectController {
   @Operation(summary = "List project modules")
   @PostMapping("modules")
   public RestResponse modules(Long id) {
-    List<String> result = projectService.modules(id);
+    List<String> result = projectService.listModules(id);
     return RestResponse.success().data(result);
   }
 
   @Operation(summary = "List project jars")
   @PostMapping("jars")
   public RestResponse jars(Project project) {
-    List<String> result = projectService.jars(project);
+    List<String> result = projectService.listJars(project);
     return RestResponse.success().data(result);
   }
 

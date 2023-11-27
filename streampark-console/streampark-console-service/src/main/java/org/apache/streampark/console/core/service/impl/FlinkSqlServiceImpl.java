@@ -118,7 +118,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  public List<FlinkSql> history(Application application) {
+  public List<FlinkSql> listFlinkSqlHistory(Application application) {
     LambdaQueryWrapper<FlinkSql> queryWrapper =
         new LambdaQueryWrapper<FlinkSql>()
             .eq(FlinkSql::getAppId, application.getId())

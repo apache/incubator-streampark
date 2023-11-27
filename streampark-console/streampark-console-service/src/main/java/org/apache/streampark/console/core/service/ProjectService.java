@@ -46,9 +46,9 @@ public interface ProjectService extends IService<Project> {
 
   RestResponse getBuildLog(Long id, Long startOffset);
 
-  List<String> modules(Long id);
+  List<String> listModules(Long id);
 
-  List<String> jars(Project project);
+  List<String> listJars(Project project);
 
   List<Map<String, Object>> listConf(Project project);
 
