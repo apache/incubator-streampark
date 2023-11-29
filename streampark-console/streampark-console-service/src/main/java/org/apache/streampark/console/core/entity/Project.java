@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.GitUtils;
@@ -43,9 +44,11 @@ import org.eclipse.jgit.lib.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Data
@@ -211,16 +214,37 @@ public class Project implements Serializable {
 
     StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
-    if (StringUtils.isNotEmpty(this.buildArgs)) {
+    if (StringUtils.isNotBlank(this.buildArgs)) {
+      List<String> dangerArgs = getLogicalOperators(this.buildArgs);
+      ApiAlertException.throwIfTrue(
+          !dangerArgs.isEmpty(),
+          String.format(
+              "Invalid build args, dangerous operator detected: %s, in your buildArgs: %s",
+              dangerArgs.stream().collect(Collectors.joining(",")), this.buildArgs));
       cmdBuffer.append(this.buildArgs.trim());
     }
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
-    if (StringUtils.isNotEmpty(setting)) {
+    if (StringUtils.isNotBlank(setting)) {
+      List<String> dangerArgs = getLogicalOperators(setting);
+      ApiAlertException.throwIfTrue(
+          !dangerArgs.isEmpty(),
+          String.format(
+              "Invalid maven setting path, dangerous operator detected: %s, in your maven setting path: %s",
+              dangerArgs.stream().collect(Collectors.joining(",")), setting));
+      File file = new File(setting);
+      ApiAlertException.throwIfFalse(
+          file.exists() && file.isFile(),
+          String.format("Invalid maven setting path error, %s no exists or not file", setting));
       cmdBuffer.append(" --settings ").append(setting);
     }
 
     return cmdBuffer.toString();
+  }
+
+  private List<String> getLogicalOperators(String param) {
+    List<String> dangerArgs = Arrays.asList(" || ", " | ", " && ", " & ");
+    return dangerArgs.stream().filter(param::contains).collect(Collectors.toList());
   }
 
   @JsonIgnore
