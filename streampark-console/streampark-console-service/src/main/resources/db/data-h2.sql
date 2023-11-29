@@ -81,10 +81,10 @@ insert into `t_menu` values (130200, 130000, 'resource.variable', '/resource/var
 insert into `t_menu` values (130300, 130000, 'resource.upload', '/resource/upload', 'resource/upload/View', null, null, '0', 1, 3, now(), now());
 
 insert into `t_menu` values (130101, 130100, 'project view', null, null, 'project:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (130102, 130100, 'project add', '/project/add', 'project/Add', 'project:create', '', '0', 0, null, now(), now());
+insert into `t_menu` values (130102, 130100, 'project add', '/project/add', 'resource/project/Add', 'project:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (130103, 130100, 'project build', null, null, 'project:build', null, '1', 1, null, now(), now());
 insert into `t_menu` values (130104, 130100, 'project delete', null, null, 'project:delete', null, '1', 1, null, now(), now());
-insert into `t_menu` values (130105, 130100, 'project edit', '/project/edit', 'project/Edit', 'project:update', null, '0', 0, null, now(), now());
+insert into `t_menu` values (130105, 130100, 'project edit', '/project/edit', 'resource/project/Edit', 'project:update', null, '0', 0, null, now(), now());
 
 insert into `t_menu` values (130201, 130200, 'variable view', NULL, NULL, 'variable:view', NULL, '1', 1, null, now(), now());
 insert into `t_menu` values (130202, 130200, 'variable depend view', null, null, 'variable:depend_apps', null, '1', 1, NULL, now(), now());

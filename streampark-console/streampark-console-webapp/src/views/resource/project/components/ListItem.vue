@@ -125,17 +125,16 @@
   import { computed } from 'vue';
   import { buildProject, deleteProject } from '/@/api/resource/project';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { useGo } from '/@/hooks/web/usePage';
   import { ProjectRecord } from '/@/api/resource/project/model/projectModel';
   import { BuildStateEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { ProjectTypeEnum } from '/@/enums/projectEnum';
+  import { router } from '/@/router';
 
   const { t } = useI18n();
   const emit = defineEmits(['viewLog', 'success']);
 
   const { Swal, createMessage } = useMessage();
-  const go = useGo();
   const props = defineProps({
     item: { type: Object as PropType<ProjectRecord>, required: true },
   });
@@ -172,7 +171,7 @@
   }
 
   const handleEdit = function () {
-    go(`/project/edit?id=${props.item.id}`);
+    router.push({ path: '/project/edit', query: { id: props.item.id } });
   };
 
   async function handleDelete() {
