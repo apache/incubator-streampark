@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.CommonUtils;
@@ -189,8 +190,9 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getMavenArgs() {
     String mvn = "mvn";
+    boolean windows = Utils.isWindows();
     try {
-      if (CommonUtils.isWindows()) {
+      if (windows) {
         CommandUtils.execute("mvn.cmd --version");
       } else {
         CommandUtils.execute("mvn --version");
@@ -205,7 +207,7 @@ public class Project implements Serializable {
           FileUtils.deleteQuietly(wrapperJar);
         }
       }
-      if (CommonUtils.isWindows()) {
+      if (windows) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw");
@@ -216,12 +218,14 @@ public class Project implements Serializable {
 
     if (StringUtils.isNotBlank(this.buildArgs)) {
       List<String> dangerArgs = getLogicalOperators(this.buildArgs);
-      ApiAlertException.throwIfTrue(
-          !dangerArgs.isEmpty(),
-          String.format(
-              "Invalid build args, dangerous operator detected: %s, in your buildArgs: %s",
-              dangerArgs.stream().collect(Collectors.joining(",")), this.buildArgs));
-      cmdBuffer.append(this.buildArgs.trim());
+      if (dangerArgs.isEmpty()) {
+        cmdBuffer.append(this.buildArgs.trim());
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "Invalid build args, dangerous operator detected: %s, in your buildArgs: %s",
+                dangerArgs.stream().collect(Collectors.joining(",")), this.buildArgs));
+      }
     }
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
@@ -233,12 +237,13 @@ public class Project implements Serializable {
               "Invalid maven setting path, dangerous operator detected: %s, in your maven setting path: %s",
               dangerArgs.stream().collect(Collectors.joining(",")), setting));
       File file = new File(setting);
-      ApiAlertException.throwIfFalse(
-          file.exists() && file.isFile(),
-          String.format("Invalid maven setting path error, %s no exists or not file", setting));
-      cmdBuffer.append(" --settings ").append(setting);
+      if (file.exists() && file.isFile()) {
+        cmdBuffer.append(" --settings ").append(setting);
+      } else {
+        throw new IllegalArgumentException(
+            String.format("Invalid maven setting path, %s no exists or not file", setting));
+      }
     }
-
     return cmdBuffer.toString();
   }
 
