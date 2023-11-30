@@ -229,7 +229,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  public List<String> modules(Long id) {
+  public List<String> listModules(Long id) {
     Project project = getById(id);
     Utils.notNull(project);
 
@@ -245,7 +245,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
-  public List<String> jars(Project project) {
+  public List<String> listJars(Project project) {
     List<String> jarList = new ArrayList<>(0);
     ApiAlertException.throwIfNull(
         project.getModule(), "Project module can't be null, please check.");
