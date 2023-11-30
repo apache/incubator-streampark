@@ -44,6 +44,7 @@ import org.eclipse.jgit.lib.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -216,7 +217,7 @@ public class Project implements Serializable {
     StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
     if (StringUtils.isNotBlank(this.buildArgs)) {
-      List<String> dangerArgs = getLogicalOperators(this.buildArgs);
+      List<String> dangerArgs = getDangerArgs(this.buildArgs);
       if (dangerArgs.isEmpty()) {
         cmdBuffer.append(this.buildArgs.trim());
       } else {
@@ -229,7 +230,7 @@ public class Project implements Serializable {
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
     if (StringUtils.isNotBlank(setting)) {
-      List<String> dangerArgs = getLogicalOperators(setting);
+      List<String> dangerArgs = getDangerArgs(setting);
       if (dangerArgs.isEmpty()) {
         File file = new File(setting);
         if (file.exists() && file.isFile()) {
@@ -248,9 +249,18 @@ public class Project implements Serializable {
     return cmdBuffer.toString();
   }
 
-  private List<String> getLogicalOperators(String param) {
-    List<String> dangerArgs = Arrays.asList(" || ", " | ", " && ", " & ");
-    return dangerArgs.stream().filter(param::contains).collect(Collectors.toList());
+  private List<String> getDangerArgs(String param) {
+    List<String> dangerArgs = Arrays.asList("|", "&");
+    String[] args = param.split("\\s+");
+    List<String> result = new ArrayList<>();
+    for (String arg : args) {
+      for (String danger : dangerArgs) {
+        if (arg.startsWith(danger)) {
+          result.add(arg);
+        }
+      }
+    }
+    return result;
   }
 
   @JsonIgnore

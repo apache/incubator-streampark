@@ -26,6 +26,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /** Test for {@link FileUtils} */
@@ -105,5 +108,26 @@ class FileUtilsTest {
       System.arraycopy(tmpReadBytes, 0, readBytes, i, tmpReadBytes.length);
     }
     Assertions.assertArrayEquals(fileBytes, readBytes);
+  }
+
+  @Test
+  public void testDangerArgs() {
+    String param = "mvn clean | echo \"ccc\"";
+    List<String> dangerArgs = getDangerArgs(param);
+    Assertions.assertEquals(dangerArgs.size(), 1);
+  }
+
+  private List<String> getDangerArgs(String param) {
+    List<String> dangerArgs = Arrays.asList("|", "&");
+    String[] args = param.split("\\s+");
+    List<String> result = new ArrayList<>();
+    for (String arg : args) {
+      for (String danger : dangerArgs) {
+        if (arg.startsWith(danger)) {
+          result.add(arg);
+        }
+      }
+    }
+    return result;
   }
 }
