@@ -22,7 +22,6 @@ import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -222,7 +221,7 @@ public class Project implements Serializable {
       } else {
         throw new IllegalArgumentException(
             String.format(
-                "Invalid build args, dangerous operator detected: %s, in your buildArgs: %s",
+                "Invalid build args, dangerous operation symbol detected: %s, in your buildArgs: %s",
                 dangerArgs.stream().collect(Collectors.joining(",")), this.buildArgs));
       }
     }
@@ -230,17 +229,19 @@ public class Project implements Serializable {
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
     if (StringUtils.isNotBlank(setting)) {
       List<String> dangerArgs = getLogicalOperators(setting);
-      ApiAlertException.throwIfTrue(
-          !dangerArgs.isEmpty(),
-          String.format(
-              "Invalid maven setting path, dangerous operator detected: %s, in your maven setting path: %s",
-              dangerArgs.stream().collect(Collectors.joining(",")), setting));
-      File file = new File(setting);
-      if (file.exists() && file.isFile()) {
-        cmdBuffer.append(" --settings ").append(setting);
+      if (dangerArgs.isEmpty()) {
+        File file = new File(setting);
+        if (file.exists() && file.isFile()) {
+          cmdBuffer.append(" --settings ").append(setting);
+        } else {
+          throw new IllegalArgumentException(
+              String.format("Invalid maven setting path, %s no exists or not file", setting));
+        }
       } else {
         throw new IllegalArgumentException(
-            String.format("Invalid maven setting path, %s no exists or not file", setting));
+            String.format(
+                "Invalid maven setting path, dangerous operation symbol detected: %s, in your maven setting path: %s",
+                dangerArgs.stream().collect(Collectors.joining(",")), setting));
       }
     }
     return cmdBuffer.toString();
