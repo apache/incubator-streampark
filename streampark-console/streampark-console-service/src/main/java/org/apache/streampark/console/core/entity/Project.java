@@ -43,9 +43,11 @@ import org.eclipse.jgit.lib.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Data
@@ -213,15 +215,60 @@ public class Project implements Serializable {
     StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
     if (StringUtils.isNotBlank(this.buildArgs)) {
-      cmdBuffer.append(this.buildArgs.trim());
+      List<String> dangerArgs = getDangerArgs(this.buildArgs);
+      if (dangerArgs.isEmpty()) {
+        cmdBuffer.append(this.buildArgs.trim());
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "Invalid build args, dangerous operation symbol detected: %s, in your buildArgs: %s",
+                dangerArgs.stream().collect(Collectors.joining(",")), this.buildArgs));
+      }
     }
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
     if (StringUtils.isNotBlank(setting)) {
-      cmdBuffer.append(" --settings ").append(setting);
+      List<String> dangerArgs = getDangerArgs(setting);
+      if (dangerArgs.isEmpty()) {
+        File file = new File(setting);
+        if (file.exists() && file.isFile()) {
+          cmdBuffer.append(" --settings ").append(setting);
+        } else {
+          throw new IllegalArgumentException(
+              String.format("Invalid maven setting path, %s no exists or not file", setting));
+        }
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "Invalid maven setting path, dangerous operation symbol detected: %s, in your maven setting path: %s",
+                dangerArgs.stream().collect(Collectors.joining(",")), setting));
+      }
     }
-
     return cmdBuffer.toString();
+  }
+
+  private List<String> getDangerArgs(String param) {
+    String[] args = param.split("\\s+");
+    List<String> dangerArgs = new ArrayList<>();
+    for (String arg : args) {
+      if (arg.length() == 1) {
+        if (arg.equals("|")) {
+          dangerArgs.add("|");
+        }
+        if (arg.equals("&")) {
+          dangerArgs.add("&");
+        }
+      } else {
+        arg = arg.substring(0, 2);
+        if (arg.equals("||")) {
+          dangerArgs.add("||");
+        }
+        if (arg.equals("&&")) {
+          dangerArgs.add("&&");
+        }
+      }
+    }
+    return dangerArgs;
   }
 
   @JsonIgnore
