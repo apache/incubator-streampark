@@ -66,11 +66,11 @@ public enum AlertTypeEnum {
   private static final Map<Integer, AlertTypeEnum> CACHE_MAP = createCacheMap();
 
   private static Map<Integer, AlertTypeEnum> createCacheMap() {
-    Map<Integer, AlertTypeEnum> map = new HashMap<>();
+    Map<Integer, AlertTypeEnum> cacheMap = new HashMap<>();
     for (AlertTypeEnum notifyType : AlertTypeEnum.values()) {
-      map.put(notifyType.code, notifyType);
+      cacheMap.put(notifyType.code, notifyType);
     }
-    return Collections.unmodifiableMap(map);
+    return Collections.unmodifiableMap(cacheMap);
   }
 
   AlertTypeEnum(Integer code, Class<? extends AlertNotifyService> clazz) {

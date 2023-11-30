@@ -139,8 +139,8 @@ public class ApplicationController {
   @Operation(summary = "Get applications dashboard data")
   @PostMapping("dashboard")
   public RestResponse dashboard(Long teamId) {
-    Map<String, Serializable> map = applicationInfoService.getDashboardDataMap(teamId);
-    return RestResponse.success(map);
+    Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
+    return RestResponse.success(dashboardMap);
   }
 
   @Operation(summary = "List applications")

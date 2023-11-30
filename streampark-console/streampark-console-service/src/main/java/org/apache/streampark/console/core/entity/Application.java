@@ -430,9 +430,9 @@ public class Application implements Serializable {
     if (StringUtils.isBlank(this.options)) {
       return Collections.emptyMap();
     }
-    Map<String, Object> map = JacksonUtils.read(this.options, Map.class);
-    map.entrySet().removeIf(entry -> entry.getValue() == null);
-    return map;
+    Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
+    optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
+    return optionMap;
   }
 
   @JsonIgnore
@@ -538,9 +538,9 @@ public class Application implements Serializable {
   @SuppressWarnings("unchecked")
   public Map<String, Object> getHotParamsMap() {
     if (StringUtils.isNotBlank(this.hotParams)) {
-      Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
-      map.entrySet().removeIf(entry -> entry.getValue() == null);
-      return map;
+      Map<String, Object> hotParamsMap = JacksonUtils.read(this.hotParams, Map.class);
+      hotParamsMap.entrySet().removeIf(entry -> entry.getValue() == null);
+      return hotParamsMap;
     }
     return Collections.EMPTY_MAP;
   }

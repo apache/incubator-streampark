@@ -311,30 +311,30 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   private void eachFile(File file, List<Map<String, Object>> list, Boolean isRoot) {
     if (file != null && file.exists() && file.listFiles() != null) {
       if (isRoot) {
-        Map<String, Object> map = new HashMap<>(0);
-        map.put("key", file.getName());
-        map.put("title", file.getName());
-        map.put("value", file.getAbsolutePath());
+        Map<String, Object> fileMap = new HashMap<>(0);
+        fileMap.put("key", file.getName());
+        fileMap.put("title", file.getName());
+        fileMap.put("value", file.getAbsolutePath());
         List<Map<String, Object>> children = new ArrayList<>();
         eachFile(file, children, false);
         if (!children.isEmpty()) {
-          map.put("children", children);
+          fileMap.put("children", children);
         }
-        list.add(map);
+        list.add(fileMap);
       } else {
         for (File item : Objects.requireNonNull(file.listFiles())) {
           String title = item.getName();
           String value = item.getAbsolutePath();
-          Map<String, Object> map = new HashMap<>(0);
-          map.put("key", title);
-          map.put("title", title);
-          map.put("value", value);
+          Map<String, Object> fileMap = new HashMap<>(0);
+          fileMap.put("key", title);
+          fileMap.put("title", title);
+          fileMap.put("value", value);
           List<Map<String, Object>> children = new ArrayList<>();
           eachFile(item, children, false);
           if (!children.isEmpty()) {
-            map.put("children", children);
+            fileMap.put("children", children);
           }
-          list.add(map);
+          list.add(fileMap);
         }
       }
     }

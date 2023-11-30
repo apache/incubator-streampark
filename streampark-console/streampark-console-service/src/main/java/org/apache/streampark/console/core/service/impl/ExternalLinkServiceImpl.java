@@ -86,13 +86,14 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   }
 
   private void renderLinkUrl(ExternalLink link, Application app) {
-    Map<String, String> map = new HashMap<>();
-    map.put(PlaceholderTypeEnum.JOB_ID.get(), app.getJobId());
-    map.put(PlaceholderTypeEnum.JOB_NAME.get(), app.getJobName());
-    map.put(PlaceholderTypeEnum.YARN_ID.get(), app.getAppId());
+    Map<String, String> placeholderValueMap = new HashMap<>();
+    placeholderValueMap.put(PlaceholderTypeEnum.JOB_ID.get(), app.getJobId());
+    placeholderValueMap.put(PlaceholderTypeEnum.JOB_NAME.get(), app.getJobName());
+    placeholderValueMap.put(PlaceholderTypeEnum.YARN_ID.get(), app.getAppId());
     PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("{", "}");
     link.setRenderedLinkUrl(
-        propertyPlaceholderHelper.replacePlaceholders(link.getLinkUrl().trim(), map::get));
+        propertyPlaceholderHelper.replacePlaceholders(
+            link.getLinkUrl().trim(), placeholderValueMap::get));
   }
 
   private boolean check(ExternalLink params) {
