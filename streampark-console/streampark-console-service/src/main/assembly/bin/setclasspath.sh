@@ -55,7 +55,22 @@ if [ -z "$JAVA_HOME" ] && [ -z "$JRE_HOME" ]; then
 fi
 
 if [ -z "$JRE_HOME" ]; then
+  # JAVA_HOME_MUST be set
+  if [ ! -x "$JAVA_HOME"/bin/java ]; then
+    echo "The JAVA_HOME environment variable is not defined correctly"
+    echo "JAVA_HOME=$JAVA_HOME"
+    echo "This environment variable is needed to run this program"
+    echo "NB: JAVA_HOME should point to a JDK not a JRE"
+    exit 1
+  fi
   JRE_HOME="$JAVA_HOME"
+else
+  if [ ! -x "$JRE_HOME"/bin/java ]; then
+    echo "The JRE_HOME environment variable is not defined correctly"
+    echo "JRE_HOME=$JRE_HOME"
+    echo "This environment variable is needed to run this program"
+    exit 1
+  fi
 fi
 
 # Set standard commands for invoking Java, if not already set.
