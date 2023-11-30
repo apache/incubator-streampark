@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -112,19 +111,30 @@ class FileUtilsTest {
 
   @Test
   public void testDangerArgs() {
-    String param = "mvn clean | echo \"ccc\"";
+    String param = "mvn clean || echo \"ccc\" && rm -rf /* ";
     List<String> dangerArgs = getDangerArgs(param);
-    Assertions.assertEquals(dangerArgs.size(), 1);
+    Assertions.assertEquals(dangerArgs.size(), 2);
   }
 
   private List<String> getDangerArgs(String param) {
-    List<String> dangerArgs = Arrays.asList("|", "&");
     String[] args = param.split("\\s+");
     List<String> result = new ArrayList<>();
+
     for (String arg : args) {
-      for (String danger : dangerArgs) {
-        if (arg.startsWith(danger)) {
-          result.add(arg);
+      if (arg.length() == 1) {
+        if (arg.equals("|")) {
+          result.add("|");
+        }
+        if (arg.equals("&")) {
+          result.add("&");
+        }
+      } else {
+        arg = arg.substring(0, 2);
+        if (arg.equals("||")) {
+          result.add("||");
+        }
+        if (arg.equals("&&")) {
+          result.add("&&");
         }
       }
     }

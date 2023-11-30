@@ -45,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.jar.JarFile;
@@ -250,17 +249,27 @@ public class Project implements Serializable {
   }
 
   private List<String> getDangerArgs(String param) {
-    List<String> dangerArgs = Arrays.asList("|", "&");
     String[] args = param.split("\\s+");
-    List<String> result = new ArrayList<>();
+    List<String> dangerArgs = new ArrayList<>();
     for (String arg : args) {
-      for (String danger : dangerArgs) {
-        if (arg.startsWith(danger)) {
-          result.add(arg);
+      if (arg.length() == 1) {
+        if (arg.equals("|")) {
+          dangerArgs.add("|");
+        }
+        if (arg.equals("&")) {
+          dangerArgs.add("&");
+        }
+      } else {
+        arg = arg.substring(0, 2);
+        if (arg.equals("||")) {
+          dangerArgs.add("||");
+        }
+        if (arg.equals("&&")) {
+          dangerArgs.add("&&");
         }
       }
     }
-    return result;
+    return dangerArgs;
   }
 
   @JsonIgnore
