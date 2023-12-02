@@ -47,7 +47,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -202,15 +201,6 @@ public class Project implements Serializable {
     try {
       CommandUtils.execute(mvn + " --version");
     } catch (Exception e) {
-      File wrapperJar = new File(WebUtils.getAppHome().concat("/.mvn/wrapper/maven-wrapper.jar"));
-      if (wrapperJar.exists()) {
-        try {
-          JarFile jarFile = new JarFile(wrapperJar, true);
-          jarFile.close();
-        } catch (Exception ignored) {
-          FileUtils.deleteQuietly(wrapperJar);
-        }
-      }
       if (windows) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
