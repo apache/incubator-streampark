@@ -852,7 +852,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     application.setRelease(ReleaseState.NEED_RELEASE.get());
 
-    if (application.isUploadJob()) {
+    if (application.isApacheFlinkCustomCodeJob()) {
       MavenDependency thisDependency = MavenDependency.of(appParam.getDependency());
       MavenDependency targetDependency = MavenDependency.of(application.getDependency());
 

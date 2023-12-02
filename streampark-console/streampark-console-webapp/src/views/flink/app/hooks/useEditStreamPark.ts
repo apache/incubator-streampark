@@ -16,7 +16,7 @@
  */
 import { FormSchema } from '/@/components/Table';
 import { computed, h, Ref, ref, unref } from 'vue';
-import { ExecModeEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
+import { AppTypeEnum, ExecModeEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
 import { useCreateAndEditSchema } from './useCreateAndEditSchema';
 import { renderSqlHistory } from './useFlinkRender';
 import { Alert } from 'ant-design-vue';
@@ -141,13 +141,23 @@ export const useEditStreamParkSchema = (
         ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.projectName,
       },
       { field: 'project', label: 'ProjectId', component: 'Input', show: false },
-
       {
         field: 'module',
         label: 'Application',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
         ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.module,
+      },
+      {
+        field: 'dependency',
+        label: t('flink.app.dependency'),
+        component: 'Input',
+        slot: 'dependency',
+        ifShow: ({ values }) => {
+          return values.jobType == JobTypeEnum.SQL
+            ? true
+            : values?.appType == AppTypeEnum.APACHE_FLINK;
+        },
       },
       { field: 'configId', label: 'configId', component: 'Input', show: false },
       { field: 'config', label: '', component: 'Input', show: false },

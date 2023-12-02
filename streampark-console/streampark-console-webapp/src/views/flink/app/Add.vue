@@ -201,6 +201,7 @@
         } else {
           params['jar'] = values.jar || null;
           params['mainClass'] = values.mainClass || null;
+          params['dependency'] = await getDependency();
         }
         handleCreateApp(params);
       } else {
