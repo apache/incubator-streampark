@@ -70,6 +70,7 @@ public final class MavenWrapperHelper {
                 String wrapperMd5 = properties.getProperty("wrapperMd5");
                 if (wrapperMd5 == null) {
                     System.err.println("wrapperMd5 not in " + propertiesPath);
+                    System.exit(1);
                 }
                 String fileMd5 = getFileMd5(wrapperJar);
                 System.exit(wrapperMd5.equals(fileMd5) ? 0 : 1);
