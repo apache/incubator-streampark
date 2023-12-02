@@ -46,7 +46,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -187,24 +186,20 @@ public class Project implements Serializable {
 
   @JsonIgnore
   public String getMavenArgs() {
-    String mvn = "mvn";
     boolean windows = Utils.isWindows();
+    String mvn = windows ? "mvn.cmd" : "mvn";
+
+    String mavenHome = System.getenv("M2_HOME");
+    if (mavenHome == null) {
+      mavenHome = System.getenv("MAVEN_HOME");
+    }
+    if (mavenHome != null) {
+      mvn = mavenHome + "/bin/" + mvn;
+    }
+
     try {
-      if (windows) {
-        CommandUtils.execute("mvn.cmd --version");
-      } else {
-        CommandUtils.execute("mvn --version");
-      }
+      CommandUtils.execute(mvn + " --version");
     } catch (Exception e) {
-      File wrapperJar = new File(WebUtils.getAppHome().concat("/.mvn/wrapper/maven-wrapper.jar"));
-      if (wrapperJar.exists()) {
-        try {
-          JarFile jarFile = new JarFile(wrapperJar, true);
-          jarFile.close();
-        } catch (Exception ignored) {
-          FileUtils.deleteQuietly(wrapperJar);
-        }
-      }
       if (windows) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
