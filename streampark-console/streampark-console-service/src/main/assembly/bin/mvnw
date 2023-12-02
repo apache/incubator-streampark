@@ -210,7 +210,7 @@ fi
 if [ -r "$wrapperJarPath" ]; then
   log "Found $wrapperJarPath"
   log "Check found $wrapperJarPath starting"
-  ("$JAVA_HOME/bin/java" -cp .mvn/wrapper MavenWrapperHelper "verify" "$wrapperJarPath" "$wrapperProperties")
+  ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath" "$wrapperProperties")
   if [ $? -eq 1 ]; then
     echo "WARN: Check found $wrapperJarPath invalided."
     rm -f $wrapperJarPath
@@ -255,7 +255,7 @@ if [ ! -e "$wrapperJarPath" ]; then
   else
     log "Falling back to using Java to download"
     log " - Running MavenWrapperHelper.java ..."
-    ("$JAVA_HOME/bin/java" -cp .mvn/wrapper MavenWrapperHelper "download" "$wrapperUrl" "$wrapperJarPath")
+    ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "download" "$wrapperUrl" "$wrapperJarPath")
     if [ $? -ne 0 ]; then
       rm -f "$wrapperJarPath"
       echo "ERROR: download wrapperJar by Java failed, please retry"
@@ -264,7 +264,7 @@ if [ ! -e "$wrapperJarPath" ]; then
   fi
 
   log "Check $wrapperJarPath."
-  ("$JAVA_HOME/bin/java" -cp .mvn/wrapper MavenWrapperHelper "verify" "$wrapperJarPath" "$wrapperProperties")
+  ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath" "$wrapperProperties")
   if [ $? -eq 1 ]; then
     echo "ERROR: Check $wrapperJarPath invalided, please retry"
     exit 1
