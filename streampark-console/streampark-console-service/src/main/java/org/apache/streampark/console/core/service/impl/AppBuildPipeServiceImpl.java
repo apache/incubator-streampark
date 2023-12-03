@@ -437,7 +437,15 @@ public class AppBuildPipeServiceImpl
         if (!app.getMavenDependency().getPom().isEmpty()) {
           Set<Artifact> artifacts =
               app.getMavenDependency().getPom().stream()
-                  .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
+                  .filter(
+                      dep -> {
+                        File file = new File(localUploadDIR, dep.artifactName());
+                        if (file.exists()) {
+                          dependencyJars.add(file);
+                          return false;
+                        }
+                        return true;
+                      })
                   .map(
                       pom ->
                           new Artifact(
