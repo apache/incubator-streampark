@@ -144,9 +144,9 @@
   }
 
   /* Handling update parameters */
-  function handleAppUpdate(values: Recordable) {
+  async function handleAppUpdate(values: Recordable) {
     // Trigger a pom confirmation operation.
-    unref(dependencyRef)?.handleApplyPom();
+    await unref(dependencyRef)?.handleApplyPom();
     // common params...
     const dependency: { pom?: string; jar?: string } = {};
     const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
@@ -173,7 +173,7 @@
             : JSON.stringify(dependency),
       };
       handleSubmitParams(params, values, k8sTemplate);
-      handleUpdateApp(params);
+      await handleUpdateApp(params);
     } catch (error) {
       submitLoading.value = false;
     }
