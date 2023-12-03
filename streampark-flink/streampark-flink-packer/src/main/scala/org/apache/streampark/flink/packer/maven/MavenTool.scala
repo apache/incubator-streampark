@@ -34,18 +34,17 @@ import org.codehaus.plexus.logging.console.ConsoleLogger
 import org.eclipse.aether.{RepositorySystem, RepositorySystemSession}
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
-import org.eclipse.aether.repository.{LocalRepository, RemoteRepository}
+import org.eclipse.aether.repository.{LocalRepository, Proxy, RemoteRepository}
 import org.eclipse.aether.resolution.{ArtifactDescriptorRequest, ArtifactRequest}
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory
 import org.eclipse.aether.spi.connector.transport.TransporterFactory
 import org.eclipse.aether.transport.file.FileTransporterFactory
 import org.eclipse.aether.transport.http.HttpTransporterFactory
-import org.eclipse.aether.util.repository.{AuthenticationBuilder, DefaultMirrorSelector}
+import org.eclipse.aether.util.repository.{AuthenticationBuilder, DefaultMirrorSelector, DefaultProxySelector}
 
 import javax.annotation.{Nonnull, Nullable}
 
 import java.io.File
-import java.nio.file.Paths
 import java.util
 
 import scala.collection.JavaConversions._
@@ -283,18 +282,35 @@ object MavenTool extends Logger {
       val setting = getSettings()
       if (setting != null) {
         // 1) mirror
-        val defaultMirror = new DefaultMirrorSelector()
-        setting.getMirrors.foreach {
-          mirror =>
-            defaultMirror.add(
-              mirror.getId,
-              mirror.getUrl,
-              "default",
-              false,
-              mirror.getMirrorOf,
-              "default")
+        val mirrors = setting.getMirrors
+        if (mirrors.nonEmpty) {
+          val defaultMirror = new DefaultMirrorSelector()
+          setting.getMirrors.foreach {
+            mirror =>
+              defaultMirror.add(
+                mirror.getId,
+                mirror.getUrl,
+                "default",
+                false,
+                mirror.getMirrorOf,
+                null)
+          }
+          session.setMirrorSelector(defaultMirror)
         }
-        session.setMirrorSelector(defaultMirror)
+
+        // 2) proxy
+        val proxies = setting.getProxies
+        if (proxies.nonEmpty && proxies.exists(_.isActive)) {
+          val proxySelector = new DefaultProxySelector()
+          proxies.foreach(
+            p => {
+              if (p.isActive) {
+                val proxy = new Proxy(p.getProtocol, p.getHost, p.getPort)
+                proxySelector.add(proxy, p.getNonProxyHosts)
+              }
+            })
+          session.setProxySelector(proxySelector)
+        }
       }
       session
     }
