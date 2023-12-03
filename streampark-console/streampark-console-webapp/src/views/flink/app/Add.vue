@@ -203,7 +203,7 @@
           params['mainClass'] = values.mainClass || null;
           params['dependency'] = await getDependency();
         }
-        handleCreateApp(params);
+        await handleCreateApp(params);
       } else {
         // from upload
         Object.assign(params, {
@@ -213,13 +213,13 @@
           mainClass: values.mainClass,
           dependency: await getDependency(),
         });
-        handleCreateApp(params);
+        await handleCreateApp(params);
       }
     }
   }
   async function getDependency() {
     // Trigger a pom confirmation operation.
-    unref(dependencyRef)?.handleApplyPom();
+    await unref(dependencyRef)?.handleApplyPom();
     // common params...
     const dependency: { pom?: string; jar?: string } = {};
     const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
