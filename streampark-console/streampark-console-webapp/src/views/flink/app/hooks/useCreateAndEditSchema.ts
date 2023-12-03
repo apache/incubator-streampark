@@ -49,13 +49,7 @@ import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
-import {
-  AppTypeEnum,
-  ClusterStateEnum,
-  ExecModeEnum,
-  JobTypeEnum,
-  ResourceFromEnum,
-} from '/@/enums/flinkEnum';
+import { AppTypeEnum, ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
@@ -124,21 +118,6 @@ export const useCreateAndEditSchema = (
           }
         },
         rules: [{ required: true, message: t('flink.app.addAppTips.flinkSqlIsRequiredMessage') }],
-      },
-      {
-        field: 'dependency',
-        label: t('flink.app.dependency'),
-        component: 'Input',
-        slot: 'dependency',
-        ifShow: ({ values }) => {
-          if (edit?.appId) {
-            return values.jobType == JobTypeEnum.SQL
-              ? true
-              : values.resourceFrom == ResourceFromEnum.UPLOAD;
-          } else {
-            return values?.jobType == 'sql' ? true : values?.resourceFrom != 'cvs';
-          }
-        },
       },
       { field: 'configOverride', label: '', component: 'Input', show: false },
       {

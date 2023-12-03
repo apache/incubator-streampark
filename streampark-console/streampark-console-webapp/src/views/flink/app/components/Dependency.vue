@@ -75,7 +75,7 @@
   const { t } = useI18n();
   const defaultValue = '';
   const { Swal } = useMessage();
-  const { onChange, setContent } = useMonaco(pomBox, {
+  const { onChange, setContent, getContent } = useMonaco(pomBox, {
     language: 'xml',
     code: props.value || defaultValue,
     options: {
@@ -106,7 +106,8 @@
     const classifierExp = /<classifier>([\s\S]*?)<\/classifier>/;
     const exclusionsExp = /<exclusions>([\s\S]*?)<\/exclusions>/;
     const invalidArtifact: Array<string> = [];
-    props.value
+    const propsValue = await getContent();
+    propsValue
       .split('</dependency>')
       .filter((x) => x.replace(/\\s+/, '') !== '')
       .forEach((dep) => {
@@ -217,8 +218,7 @@
   /* load history config records */
   async function handleReloadHistoryUploads() {
     selectedHistoryUploadJars.value = [];
-    const res = await fetchUploadJars();
-    historyUploadJars.value = res;
+    historyUploadJars.value = await fetchUploadJars();
   }
 
   const filteredHistoryUploadJarsOptions = computed(() => {
@@ -291,7 +291,7 @@
   <Tabs type="card" v-model:activeKey="activeTab" class="pom-card">
     <TabPane key="pom" tab="Maven pom">
       <div class="relative">
-        <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
+        <div ref="pomBox" class="pom-box syntax-true" style="height: 330px"></div>
         <a-button type="primary" class="apply-pom" @click="handleApplyPom()">
           {{ t('common.apply') }}
         </a-button>

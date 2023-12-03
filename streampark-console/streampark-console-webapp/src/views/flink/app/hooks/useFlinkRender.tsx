@@ -39,7 +39,7 @@ import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
-import { CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
+import { AppTypeEnum, CandidateTypeEnum, FailoverStrategyEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/flink/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
@@ -507,10 +507,17 @@ export const renderCompareSelectTag = (ver: any) => {
   );
 };
 
+function handleResourceFrom(model: Recordable, value: string) {
+  model.resourceFrom = value;
+  if (value == 'upload') {
+    model.appType = String(AppTypeEnum.APACHE_FLINK);
+  }
+}
+
 export const renderResourceFrom = (model: Recordable) => {
   return (
     <Select
-      onChange={(value: string) => (model.resourceFrom = value)}
+      onChange={(value: string) => handleResourceFrom(model, value)}
       value={model.resourceFrom}
       placeholder="Please select resource from"
     >

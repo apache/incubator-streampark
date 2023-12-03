@@ -98,7 +98,7 @@ public final class MavenWrapperHelper {
         log(" - Downloader complete");
     }
 
-    public static String getFileMd5(String path) throws Exception {
+    private static String getFileMd5(String path) throws Exception {
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         try (FileInputStream inputStream = new FileInputStream(path)) {
             byte[] buffer = new byte[1024];

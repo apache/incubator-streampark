@@ -18,26 +18,29 @@
 package org.apache.streampark.flink.packer.maven
 
 import org.apache.streampark.common.conf.{InternalConfigHolder, Workspace}
-import org.apache.streampark.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
+import org.apache.streampark.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL, MAVEN_SETTINGS_PATH}
 import org.apache.streampark.common.util.{Logger, Utils}
 
 import com.google.common.collect.Lists
+import org.apache.commons.lang3.StringUtils
 import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
 import org.apache.maven.plugins.shade.filter.Filter
 import org.apache.maven.plugins.shade.resource.{ManifestResourceTransformer, ResourceTransformer, ServicesResourceTransformer}
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
+import org.apache.maven.settings.Settings
+import org.apache.maven.settings.building.{DefaultSettingsBuilderFactory, DefaultSettingsBuildingRequest}
 import org.codehaus.plexus.logging.{Logger => PlexusLog}
 import org.codehaus.plexus.logging.console.ConsoleLogger
 import org.eclipse.aether.{RepositorySystem, RepositorySystemSession}
-import org.eclipse.aether.artifact.{Artifact, DefaultArtifact}
+import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
-import org.eclipse.aether.repository.{LocalRepository, RemoteRepository}
+import org.eclipse.aether.repository.{LocalRepository, Proxy, RemoteRepository}
 import org.eclipse.aether.resolution.{ArtifactDescriptorRequest, ArtifactRequest}
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory
 import org.eclipse.aether.spi.connector.transport.TransporterFactory
 import org.eclipse.aether.transport.file.FileTransporterFactory
 import org.eclipse.aether.transport.http.HttpTransporterFactory
-import org.eclipse.aether.util.repository.AuthenticationBuilder
+import org.eclipse.aether.util.repository.{AuthenticationBuilder, DefaultMirrorSelector, DefaultProxySelector}
 
 import javax.annotation.{Nonnull, Nullable}
 
@@ -109,8 +112,8 @@ object MavenTool extends Logger {
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
     jarLibs.foreach {
-      x =>
-        new File(x) match {
+      jar =>
+        new File(jar) match {
           case jarFile if jarFile.exists() =>
             if (jarFile.isFile) {
               Try(Utils.checkJarFile(jarFile.toURI.toURL)) match {
@@ -203,7 +206,7 @@ object MavenTool extends Logger {
       return Set.empty[File]
     }
 
-    val (repoSystem, session) = getMavenEndpoint()
+    val (repoSystem, session) = getRepositoryEndpoint()
 
     val exclusions = mavenArtifacts
       .flatMap(_.extensions.map(_.split(":")))
@@ -260,7 +263,7 @@ object MavenTool extends Logger {
   }
 
   /** create composite maven endpoint */
-  private[this] def getMavenEndpoint(): (RepositorySystem, RepositorySystemSession) = {
+  private[this] def getRepositoryEndpoint(): (RepositorySystem, RepositorySystemSession) = {
 
     def newRepoSystem(): RepositorySystem = {
       locator.addService(
@@ -275,12 +278,62 @@ object MavenTool extends Logger {
     def newSession(system: RepositorySystem): RepositorySystemSession = {
       val session = MavenRepositorySystemUtils.newSession
       session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo))
+
+      val setting = getSettings()
+      if (setting != null) {
+        // 1) mirror
+        val mirrors = setting.getMirrors
+        if (mirrors.nonEmpty) {
+          val defaultMirror = new DefaultMirrorSelector()
+          setting.getMirrors.foreach {
+            mirror =>
+              defaultMirror.add(
+                mirror.getId,
+                mirror.getUrl,
+                "default",
+                false,
+                mirror.getMirrorOf,
+                null)
+          }
+          session.setMirrorSelector(defaultMirror)
+        }
+
+        // 2) proxy
+        val proxies = setting.getProxies
+        if (proxies.nonEmpty && proxies.exists(_.isActive)) {
+          val proxySelector = new DefaultProxySelector()
+          proxies.foreach(
+            p => {
+              if (p.isActive) {
+                val proxy = new Proxy(p.getProtocol, p.getHost, p.getPort)
+                proxySelector.add(proxy, p.getNonProxyHosts)
+              }
+            })
+          session.setProxySelector(proxySelector)
+        }
+      }
       session
     }
 
     val repoSystem = newRepoSystem()
     val session = newSession(repoSystem)
     (repoSystem, session)
+  }
+
+  private def getSettings(): Settings = {
+    val settingPath = InternalConfigHolder.get[String](MAVEN_SETTINGS_PATH)
+    if (StringUtils.isNotBlank(settingPath)) {
+      val settingFile = new File(settingPath)
+      if (settingFile.exists() && settingFile.isFile) {
+        val settingsBuilderFactory = new DefaultSettingsBuilderFactory()
+        val settingsBuilder = settingsBuilderFactory.newInstance
+        val settingRequest = new DefaultSettingsBuildingRequest()
+        settingRequest.setGlobalSettingsFile(settingFile)
+        settingRequest.setUserSettingsFile(settingFile)
+        return settingsBuilder.build(settingRequest).getEffectiveSettings
+      }
+    }
+    null
   }
 
   private class ShadedFilter extends Filter {

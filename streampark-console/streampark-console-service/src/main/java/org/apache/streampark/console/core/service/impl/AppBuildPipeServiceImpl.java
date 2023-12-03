@@ -378,7 +378,7 @@ public class AppBuildPipeServiceImpl
 
     FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
-    if (app.isFlinkSqlJob() || app.isUploadJob()) {
+    if (app.isFlinkSqlJob() || app.isApacheFlinkCustomCodeJob()) {
       if (!app.getMavenDependency().getJar().isEmpty()) {
         for (String jar : app.getMavenDependency().getJar()) {
           File localJar = new File(WebUtils.getAppTempDir(), jar);
@@ -393,7 +393,7 @@ public class AppBuildPipeServiceImpl
       }
     }
 
-    if (app.isCustomCodeJob()) {
+    if (app.isApacheFlinkCustomCodeJob()) {
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
       ResourceFrom resourceFrom = ResourceFrom.of(app.getResourceFrom());
@@ -437,7 +437,15 @@ public class AppBuildPipeServiceImpl
         if (!app.getMavenDependency().getPom().isEmpty()) {
           Set<Artifact> artifacts =
               app.getMavenDependency().getPom().stream()
-                  .filter(x -> !new File(localUploadDIR, x.artifactName()).exists())
+                  .filter(
+                      dep -> {
+                        File file = new File(localUploadDIR, dep.artifactName());
+                        if (file.exists()) {
+                          dependencyJars.add(file);
+                          return false;
+                        }
+                        return true;
+                      })
                   .map(
                       pom ->
                           new Artifact(

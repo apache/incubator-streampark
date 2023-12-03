@@ -243,6 +243,15 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
+        field: 'dependency',
+        label: t('flink.app.dependency'),
+        component: 'Input',
+        slot: 'dependency',
+        ifShow: ({ values }) => {
+          return values?.jobType == 'sql' ? true : values?.appType == AppTypeEnum.APACHE_FLINK;
+        },
+      },
+      {
         field: 'config',
         label: t('flink.app.appConf'),
         component: 'ApiTreeSelect',
