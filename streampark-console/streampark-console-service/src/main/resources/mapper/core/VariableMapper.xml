@@ -36,7 +36,7 @@
         from t_variable v
         inner join t_user u
         on v.creator_id = u.user_id
-        and v.team_id = ${variable.teamId}
+        and v.team_id = #{variable.teamId}
         <if test="variable.description != null and variable.description != ''">
             and v.description like concat('%',#{variable.description},'%')
         </if>

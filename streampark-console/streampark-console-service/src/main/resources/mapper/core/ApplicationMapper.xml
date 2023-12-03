@@ -161,10 +161,10 @@
                 and t.execution_mode = #{application.executionMode}
             </if>
             <if test="application.jobName != null and application.jobName != ''">
-                and t.job_name like concat('%',${application.jobName},'%')
+                and t.job_name like concat('%',#{application.jobName},'%')
             </if>
             <if test="application.projectName != null and application.projectName != ''">
-                and p.name like concat('%',${application.projectName},'%')
+                and p.name like concat('%',#{application.projectName},'%')
             </if>
             <if test="application.appId != null and application.appId != ''">
                 and t.app_id = #{application.appId}
@@ -183,7 +183,7 @@
                 </foreach>
             </if>
             <if test="application.tags != null and application.tags != ''">
-                and t.tags like concat('%',${application.tags},'%')
+                and t.tags like concat('%',#{application.tags},'%')
             </if>
         </where>
     </select>
