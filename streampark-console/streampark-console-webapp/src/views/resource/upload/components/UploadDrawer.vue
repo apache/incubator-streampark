@@ -185,7 +185,7 @@
         resourceJson = JSON.stringify(values.resourceGroup);
       } else {
         const resource: { pom?: string; jar?: string } = {};
-        unref(resourceRef).handleApplyPom();
+        await unref(resourceRef).handleApplyPom();
         const dependencyRecords = unref(resourceRef)?.dependencyRecords;
         const uploadJars = unref(resourceRef)?.uploadJars;
         if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
