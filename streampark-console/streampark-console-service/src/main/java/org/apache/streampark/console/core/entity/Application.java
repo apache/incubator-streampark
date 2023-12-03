@@ -463,12 +463,6 @@ public class Application implements Serializable {
   }
 
   @JsonIgnore
-  public boolean isApacheFlinkCustomCodeJob() {
-    return DevelopmentMode.CUSTOM_CODE.getValue().equals(this.getJobType())
-        && getApplicationType() == ApplicationType.APACHE_FLINK;
-  }
-
-  @JsonIgnore
   public boolean isUploadJob() {
     return isCustomCodeJob() && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
   }

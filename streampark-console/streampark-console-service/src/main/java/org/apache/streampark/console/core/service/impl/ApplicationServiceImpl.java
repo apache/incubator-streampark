@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
@@ -852,7 +853,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     application.setRelease(ReleaseState.NEED_RELEASE.get());
 
-    if (application.isApacheFlinkCustomCodeJob()) {
+    if (application.getApplicationType() == ApplicationType.APACHE_FLINK) {
       MavenDependency thisDependency = MavenDependency.of(appParam.getDependency());
       MavenDependency targetDependency = MavenDependency.of(application.getDependency());
 

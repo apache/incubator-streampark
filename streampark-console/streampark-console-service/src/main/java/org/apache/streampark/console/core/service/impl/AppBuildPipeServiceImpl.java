@@ -378,7 +378,7 @@ public class AppBuildPipeServiceImpl
 
     FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
-    if (app.isFlinkSqlJob() || app.isApacheFlinkCustomCodeJob()) {
+    if (app.getApplicationType().equals(ApplicationType.APACHE_FLINK)) {
       if (!app.getMavenDependency().getJar().isEmpty()) {
         for (String jar : app.getMavenDependency().getJar()) {
           File localJar = new File(WebUtils.getAppTempDir(), jar);
@@ -393,7 +393,7 @@ public class AppBuildPipeServiceImpl
       }
     }
 
-    if (app.isApacheFlinkCustomCodeJob()) {
+    if (app.getApplicationType() == ApplicationType.APACHE_FLINK) {
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
       ResourceFrom resourceFrom = ResourceFrom.of(app.getResourceFrom());
