@@ -322,17 +322,18 @@ object MavenTool extends Logger {
 
   private def getSettings(): Settings = {
     val settingPath = InternalConfigHolder.get[String](MAVEN_SETTINGS_PATH)
-    if (StringUtils.isBlank(settingPath)) null;
-    else {
-      val settingsBuilderFactory = new DefaultSettingsBuilderFactory()
-      val settingsBuilder = settingsBuilderFactory.newInstance
+    if (StringUtils.isNotBlank(settingPath)) {
       val settingFile = new File(settingPath)
-
-      val settingRequest = new DefaultSettingsBuildingRequest()
-      settingRequest.setGlobalSettingsFile(settingFile)
-      settingRequest.setUserSettingsFile(settingFile)
-      settingsBuilder.build(settingRequest).getEffectiveSettings
+      if (settingFile.exists() && settingFile.isFile) {
+        val settingsBuilderFactory = new DefaultSettingsBuilderFactory()
+        val settingsBuilder = settingsBuilderFactory.newInstance
+        val settingRequest = new DefaultSettingsBuildingRequest()
+        settingRequest.setGlobalSettingsFile(settingFile)
+        settingRequest.setUserSettingsFile(settingFile)
+        return settingsBuilder.build(settingRequest).getEffectiveSettings
+      }
     }
+    null
   }
 
   private class ShadedFilter extends Filter {
