@@ -34,22 +34,11 @@ public interface MenuService extends IService<Menu> {
    * @param teamId team id. If it's null, will find permissions from all teams.
    * @return permissions
    */
-  List<String> findUserPermissions(Long userId, Long teamId);
+  List<String> listPermissions(Long userId, Long teamId);
 
-  List<Menu> findUserMenus(Long userId, Long teamId);
+  List<Menu> listMenus(Long userId, Long teamId);
 
-  Map<String, Object> findMenus(Menu menu);
+  Map<String, Object> listMenuMap(Menu menu);
 
-  void createMenu(Menu menu);
-
-  void updateMenu(Menu menu) throws Exception;
-
-  /**
-   * Recursively delete menu buttons
-   *
-   * @param menuIds menuIds
-   */
-  void deleteMenus(String[] menuIds) throws Exception;
-
-  List<VueRouter<Menu>> getUserRouters(Long userId, Long teamId);
+  List<VueRouter<Menu>> listRouters(Long userId, Long teamId);
 }

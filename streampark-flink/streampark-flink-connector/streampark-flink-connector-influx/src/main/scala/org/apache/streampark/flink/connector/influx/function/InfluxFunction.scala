@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.influx.function
 
-import org.apache.streampark.common.conf.ConfigConst.{KEY_JDBC_PASSWORD, KEY_JDBC_URL, KEY_JDBC_USER}
+import org.apache.streampark.common.conf.ConfigKeys.{KEY_JDBC_PASSWORD, KEY_JDBC_URL, KEY_JDBC_USER}
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.connector.influx.bean.InfluxEntity

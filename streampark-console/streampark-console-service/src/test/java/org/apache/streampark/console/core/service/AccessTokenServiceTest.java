@@ -55,18 +55,18 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     String username = JWTUtil.getUserName(jwtToken.getToken());
     Assertions.assertNotNull(username);
     Assertions.assertEquals("admin", username);
-    User user = userService.findByName(username);
+    User user = userService.getByUsername(username);
     Assertions.assertNotNull(user);
     Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username));
 
     // list
     AccessToken mockToken1 = new AccessToken();
     mockToken1.setUserId(100000L);
-    IPage<AccessToken> tokens1 = accessTokenService.findAccessTokens(mockToken1, new RestRequest());
+    IPage<AccessToken> tokens1 = accessTokenService.getPage(mockToken1, new RestRequest());
     Assertions.assertEquals(1, tokens1.getRecords().size());
     AccessToken mockToken2 = new AccessToken();
     mockToken2.setUserId(100001L);
-    IPage<AccessToken> tokens2 = accessTokenService.findAccessTokens(mockToken2, new RestRequest());
+    IPage<AccessToken> tokens2 = accessTokenService.getPage(mockToken2, new RestRequest());
     Assertions.assertTrue(tokens2.getRecords().isEmpty());
 
     // toggle
@@ -81,6 +81,6 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     Assertions.assertEquals(AccessToken.STATUS_DISABLE, afterToggle.getStatus());
 
     // delete
-    Assertions.assertTrue(accessTokenService.deleteToken(tokenId));
+    Assertions.assertTrue(accessTokenService.removeById(tokenId));
   }
 }

@@ -27,7 +27,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface YarnQueueService extends IService<YarnQueue> {
 
-  IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest restRequest);
+  IPage<YarnQueue> getPage(YarnQueue yarnQueue, RestRequest restRequest);
 
   ResponseResult<String> checkYarnQueue(YarnQueue yarnQueue);
 
@@ -35,7 +35,7 @@ public interface YarnQueueService extends IService<YarnQueue> {
 
   void updateYarnQueue(YarnQueue yarnQueue);
 
-  void deleteYarnQueue(YarnQueue yarnQueue);
+  void remove(YarnQueue yarnQueue);
 
   void checkQueueLabel(FlinkExecutionMode executionModeEnum, String queueLabel);
 

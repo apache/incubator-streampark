@@ -77,6 +77,21 @@ public interface ApplicationManageService extends IService<Application> {
   void toEffective(Application appParam);
 
   /**
+   * Persists the metrics of the given application.
+   *
+   * @param appParam The application which metrics need to be persisted.
+   */
+  void persistMetrics(Application appParam);
+
+  /**
+   * Maps the given application.
+   *
+   * @param appParam The application to be mapped.
+   * @return True if the mapping was successful, false otherwise.
+   */
+  boolean mapping(Application appParam);
+
+  /**
    * Checks if the given application is ready to build and update.
    *
    * @param appParam the application to check for readiness
@@ -90,7 +105,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @param appParam The Application to be deleted.
    * @return True if the deletion was successful, false otherwise.
    */
-  Boolean delete(Application appParam);
+  Boolean remove(Application appParam);
 
   /**
    * Retrieves the Application with the specified details from the system.
@@ -121,7 +136,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @param id The project ID to search for applications.
    * @return A list of applications associated with the project ID.
    */
-  List<Application> getByProjectId(Long id);
+  List<Application> listByProjectId(Long id);
 
   /**
    * Changes the ownership of all applications associated with a user.
@@ -137,7 +152,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @param teamId The ID of the team to retrieve the applications for.
    * @return A list of Application objects associated with the given team ID.
    */
-  List<Application> getByTeamId(Long teamId);
+  List<Application> listByTeamId(Long teamId);
 
   /**
    * Retrieves a list of applications by team ID and execution modes.
@@ -147,7 +162,7 @@ public interface ApplicationManageService extends IService<Application> {
    * @return A list of applications that belong to the specified team and have the specified
    *     execution modes
    */
-  List<Application> getByTeamIdAndExecutionModes(
+  List<Application> listByTeamIdAndExecutionModes(
       Long teamId, Collection<FlinkExecutionMode> executionModeEnums);
 
   /**
@@ -155,5 +170,5 @@ public interface ApplicationManageService extends IService<Application> {
    *
    * @return a list of applications be probing or need to probe.
    */
-  List<Application> getProbeApps();
+  List<Application> listProbeApps();
 }

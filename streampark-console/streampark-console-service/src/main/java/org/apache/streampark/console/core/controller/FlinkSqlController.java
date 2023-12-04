@@ -50,6 +50,10 @@ import java.util.List;
 @RequestMapping("flink/sql")
 public class FlinkSqlController {
 
+  public static final String TYPE = "type";
+  public static final String START = "start";
+  public static final String END = "end";
+
   @Autowired private FlinkSqlService flinkSqlService;
 
   @Autowired private VariableService variableService;
@@ -68,25 +72,24 @@ public class FlinkSqlController {
           RestResponse.success()
               .data(false)
               .message(exception)
-              .put("type", flinkSqlValidationResult.failedType().getFailedType())
-              .put("start", flinkSqlValidationResult.lineStart())
-              .put("end", flinkSqlValidationResult.lineEnd());
+              .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
+              .put(START, flinkSqlValidationResult.lineStart())
+              .put(END, flinkSqlValidationResult.lineEnd());
 
       if (flinkSqlValidationResult.errorLine() > 0) {
         response
-            .put("start", flinkSqlValidationResult.errorLine())
-            .put("end", flinkSqlValidationResult.errorLine() + 1);
+            .put(START, flinkSqlValidationResult.errorLine())
+            .put(END, flinkSqlValidationResult.errorLine() + 1);
       }
       return response;
-    } else {
-      return RestResponse.success(true);
     }
+    return RestResponse.success(true);
   }
 
   @Operation(summary = "List the application sql")
   @PostMapping("list")
   public RestResponse list(Long appId, RestRequest request) {
-    IPage<FlinkSql> page = flinkSqlService.page(appId, request);
+    IPage<FlinkSql> page = flinkSqlService.getPage(appId, request);
     return RestResponse.success(page);
   }
 
@@ -115,7 +118,7 @@ public class FlinkSqlController {
   @Operation(summary = "List the applications sql histories")
   @PostMapping("history")
   public RestResponse sqlhistory(Application application) {
-    List<FlinkSql> sqlList = flinkSqlService.history(application);
+    List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(application);
     return RestResponse.success(sqlList);
   }
 

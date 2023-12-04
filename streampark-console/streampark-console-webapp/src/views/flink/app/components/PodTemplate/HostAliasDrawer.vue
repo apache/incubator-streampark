@@ -29,7 +29,7 @@
     fetchCompleteHostAliasToPodTemplate,
     fetchPreviewHostAlias,
     fetchSysHosts,
-  } from '/@/api/flink/app/flinkPodtmpl';
+  } from '/@/api/flink/flinkPodtmpl';
 
   const SelectOption = Select.Option;
   const emit = defineEmits(['complete', 'register']);

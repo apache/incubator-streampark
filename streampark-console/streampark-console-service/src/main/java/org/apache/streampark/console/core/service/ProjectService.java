@@ -34,27 +34,27 @@ public interface ProjectService extends IService<Project> {
 
   boolean update(Project projectParam);
 
-  boolean delete(Long id);
+  boolean removeById(Long id);
 
-  IPage<Project> page(Project project, RestRequest restRequest);
+  IPage<Project> getPage(Project project, RestRequest restRequest);
 
   Boolean existsByTeamId(Long teamId);
 
-  List<Project> findByTeamId(Long teamId);
+  List<Project> listByTeamId(Long teamId);
 
   void build(Long id) throws Exception;
 
   RestResponse getBuildLog(Long id, Long startOffset);
 
-  List<String> modules(Long id);
+  List<String> listModules(Long id);
 
-  List<String> jars(Project project);
+  List<String> listJars(Project project);
 
   List<Map<String, Object>> listConf(Project project);
 
   String getAppConfPath(Long id, String module);
 
-  List<Application> getApplications(Project project);
+  List<Application> listApps(Project project);
 
-  boolean checkExists(Project project);
+  boolean exists(Project project);
 }

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
+import org.apache.streampark.common.Constant
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.common.zio.ZIOExt.{IOOps, OptionZIOOps}
 import org.apache.streampark.flink.client.`trait`.KubernetesClientV2Trait
@@ -80,7 +81,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
     )
   }
 
-  // Generate FlinkDeployment CR definition, it is a pure effect function.
+  /** Generate FlinkDeployment CR definition, it is a pure effect function. */
   private def genFlinkDeployDef(
       submitReq: SubmitRequest,
       originFlinkConfig: Configuration,
@@ -90,7 +91,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
     val flinkConfMap = originFlinkConfig.toMap.asScala.toMap
 
     val namespace = Option(submitReq.k8sSubmitParam.kubernetesNamespace)
-      .getOrElse("default")
+      .getOrElse(Constant.DEFAULT)
 
     val name = submitReq.k8sSubmitParam.kubernetesName
       .orElse(Option(submitReq.k8sSubmitParam.clusterId))
@@ -245,6 +246,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
       ))
   }
 
+  /** Shutdown Flink Application deployment. */
   @throws[Throwable]
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
     val name = shutDownRequest.clusterId
@@ -261,7 +263,7 @@ object KubernetesApplicationClientV2 extends KubernetesClientV2Trait with Logger
         case _: FlinkResourceNotFound => ZIO.unit
         case _: UnsupportedAction => ZIO.unit
       }
-      .as(ShutDownResponse())
+      .as(ShutDownResponse(name))
       .runIOAsTry match {
       case Success(result) =>
         logInfo(richMsg("Shutdown Flink Application deployment successfully.")); result

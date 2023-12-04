@@ -58,7 +58,7 @@ public class AuthenticatorImpl implements Authenticator {
   }
 
   private User passwordAuthenticate(String username, String password) {
-    User user = usersService.findByName(username);
+    User user = usersService.getByUsername(username);
 
     ApiAlertException.throwIfNull(user, String.format("User [%s] does not exist", username));
 
@@ -76,12 +76,12 @@ public class AuthenticatorImpl implements Authenticator {
   }
 
   private User ldapAuthenticate(String username, String password) throws Exception {
-    String ldapEmail = ldapService.ldapLogin(username, password);
-    if (StringUtils.isBlank(ldapEmail)) {
+    boolean ldapLoginStatus = ldapService.ldapLogin(username, password);
+    if (!ldapLoginStatus) {
       return null;
     }
     // check if user exist
-    User user = usersService.findByName(username);
+    User user = usersService.getByUsername(username);
 
     if (user != null) {
       ApiAlertException.throwIfTrue(
@@ -95,7 +95,7 @@ public class AuthenticatorImpl implements Authenticator {
 
   private User ssoAuthenticate(String username) throws Exception {
     // check if user exist
-    User user = usersService.findByName(username);
+    User user = usersService.getByUsername(username);
 
     if (user != null) {
       ApiAlertException.throwIfTrue(

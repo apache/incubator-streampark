@@ -25,13 +25,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface RoleService extends IService<Role> {
 
-  IPage<Role> findRoles(Role role, RestRequest request);
+  IPage<Role> getPage(Role role, RestRequest request);
 
-  Role findByName(String roleName);
+  Role getByName(String roleName);
 
   void createRole(Role role);
 
-  void deleteRole(Long roleId);
+  void removeById(Long roleId);
 
   void updateRole(Role role);
 }

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
@@ -91,17 +91,20 @@ import java.util.stream.Collectors;
 public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     implements ResourceService {
 
+  public static final String STATE = "state";
+  public static final String EXCEPTION = "exception";
+
   @Autowired private ApplicationManageService applicationManageService;
   @Autowired private CommonService commonService;
   @Autowired private FlinkSqlService flinkSqlService;
 
   @Override
-  public IPage<Resource> page(Resource resource, RestRequest restRequest) {
+  public IPage<Resource> getPage(Resource resource, RestRequest restRequest) {
     if (resource.getTeamId() == null) {
       return null;
     }
     Page<Resource> page = new MybatisPager<Resource>().getDefaultPage(restRequest);
-    return this.baseMapper.page(page, resource);
+    return this.baseMapper.selectPage(page, resource);
   }
 
   /**
@@ -200,7 +203,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   }
 
   @Override
-  public void deleteResource(Resource resource) {
+  public void remove(Resource resource) {
     Resource findResource = getById(resource.getId());
     checkOrElseAlert(findResource);
 
@@ -220,7 +223,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     this.removeById(resource);
   }
 
-  public List<Resource> findByTeamId(Long teamId) {
+  public List<Resource> listByTeamId(Long teamId) {
     LambdaQueryWrapper<Resource> queryWrapper =
         new LambdaQueryWrapper<Resource>().eq(Resource::getTeamId, teamId);
     return baseMapper.selectList(queryWrapper);
@@ -273,7 +276,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   public RestResponse checkResource(Resource resourceParam) throws JsonProcessingException {
     ResourceTypeEnum type = resourceParam.getResourceType();
     Map<String, Serializable> resp = new HashMap<>(0);
-    resp.put("state", 0);
+    resp.put(STATE, 0);
     switch (type) {
       case FLINK_APP:
         // check main.
@@ -282,11 +285,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
           jarFile = getResourceJar(resourceParam);
         } catch (Exception e) {
           // get jarFile error
-          resp.put("state", 1);
-          resp.put("exception", ExceptionUtils.stringifyException(e));
+          resp.put(STATE, 1);
+          resp.put(EXCEPTION, ExceptionUtils.stringifyException(e));
           return RestResponse.success().data(resp);
         }
-        if (jarFile.getName().endsWith(ConfigConst.PYTHON_SUFFIX())) {
+        if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
           return RestResponse.success().data(resp);
         }
         Manifest manifest = Utils.getJarManifest(jarFile);
@@ -294,7 +297,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
         if (mainClass == null) {
           // main class is null
-          resp.put("state", 2);
+          resp.put(STATE, 2);
           return RestResponse.success().data(resp);
         }
         return RestResponse.success().data(resp);
@@ -319,8 +322,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             jars = MavenTool.resolveArtifacts(artifact);
           } catch (Exception e) {
             // connector download is null
-            resp.put("state", 1);
-            resp.put("exception", ExceptionUtils.stringifyException(e));
+            resp.put(STATE, 1);
+            resp.put(EXCEPTION, ExceptionUtils.stringifyException(e));
             return RestResponse.success().data(resp);
           }
           String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
@@ -341,8 +344,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
           factories = getConnectorFactory(connector);
         } catch (Exception e) {
           // flink connector invalid
-          resp.put("state", 2);
-          resp.put("exception", ExceptionUtils.stringifyException(e));
+          resp.put(STATE, 2);
+          resp.put(EXCEPTION, ExceptionUtils.stringifyException(e));
           return RestResponse.success().data(resp);
         }
 
@@ -350,7 +353,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         connectorResource = getConnectorResource(jars, factories);
         if (connectorResource == null) {
           // connector is null
-          resp.put("state", 3);
+          resp.put(STATE, 3);
           return RestResponse.success().data(resp);
         }
 
@@ -358,7 +361,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         boolean exists =
             existsFlinkConnector(resourceParam.getId(), connectorResource.getFactoryIdentifier());
         if (exists) {
-          resp.put("state", 4);
+          resp.put(STATE, 4);
           resp.put("name", connectorResource.getFactoryIdentifier());
           return RestResponse.success(resp);
         }
@@ -366,11 +369,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         if (resourceParam.getId() != null) {
           Resource resource = getById(resourceParam.getId());
           if (!resource.getResourceName().equals(connectorResource.getFactoryIdentifier())) {
-            resp.put("state", 5);
+            resp.put(STATE, 5);
             return RestResponse.success().data(resp);
           }
         }
-        resp.put("state", 0);
+        resp.put(STATE, 0);
         resp.put("connector", JacksonUtils.write(connectorResource));
         return RestResponse.success().data(resp);
     }
@@ -490,13 +493,13 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   private List<Application> getResourceApplicationsById(Resource resource) {
     List<Application> dependApplications = new ArrayList<>();
-    List<Application> applications = applicationManageService.getByTeamId(resource.getTeamId());
+    List<Application> applications = applicationManageService.listByTeamId(resource.getTeamId());
     Map<Long, Application> applicationMap =
         applications.stream()
             .collect(Collectors.toMap(Application::getId, application -> application));
 
     // Get the application that depends on this resource
-    List<FlinkSql> flinkSqls = flinkSqlService.getByTeamId(resource.getTeamId());
+    List<FlinkSql> flinkSqls = flinkSqlService.listByTeamId(resource.getTeamId());
     for (FlinkSql flinkSql : flinkSqls) {
       String sqlTeamResource = flinkSql.getTeamResource();
       if (sqlTeamResource != null

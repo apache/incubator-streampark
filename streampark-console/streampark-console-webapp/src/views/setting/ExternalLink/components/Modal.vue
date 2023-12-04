@@ -26,13 +26,10 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { Icon } from '/@/components/Icon';
-  import {
-    fetchExternalLinkCreate,
-    fetchExternalLinkUpdate,
-  } from '/@/api/flink/setting/externalLink';
+  import { fetchExternalLinkCreate, fetchExternalLinkUpdate } from '/@/api/setting/externalLink';
 
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { ExternalLink } from '/@/api/flink/setting/types/externalLink.type';
+  import { ExternalLink } from '/@/api/setting/types/externalLink.type';
   import { ResultEnum } from '/@/enums/httpEnum';
   import { renderColorField, renderPreview } from './useExternalLink';
 

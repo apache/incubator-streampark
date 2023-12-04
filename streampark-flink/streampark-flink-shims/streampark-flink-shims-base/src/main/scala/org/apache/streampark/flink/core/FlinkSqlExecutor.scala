@@ -16,13 +16,13 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
+import org.apache.streampark.common.conf.ConfigKeys.KEY_FLINK_SQL
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.core.SqlCommand._
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.Configuration
+import org.apache.flink.configuration.{Configuration, ExecutionOptions}
 import org.apache.flink.table.api.TableEnvironment
 
 import java.util
@@ -39,6 +39,7 @@ object FlinkSqlExecutor extends Logger {
       sql: String,
       parameter: ParameterTool,
       context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
+
     val flinkSql: String =
       if (StringUtils.isBlank(sql)) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
     require(StringUtils.isNotBlank(flinkSql), "verify failed: flink sql cannot be empty")
@@ -49,6 +50,8 @@ object FlinkSqlExecutor extends Logger {
         case x => x(r)
       }
     }
+
+    val runMode = parameter.get(ExecutionOptions.RUNTIME_MODE.key())
 
     var hasInsert = false
     val statementSet = context.createStatementSet()
@@ -121,6 +124,13 @@ object FlinkSqlExecutor extends Logger {
             case SELECT =>
               logError("StreamPark dose not support 'SELECT' statement now!")
               throw new RuntimeException("StreamPark dose not support 'select' statement now!")
+            case DELETE | UPDATE =>
+              if (runMode == "STREAMING") {
+                throw new UnsupportedOperationException(
+                  s"Currently, ${command.toUpperCase()} statement only supports in batch mode, " +
+                    s"and it requires the target table connector implements the SupportsRowLevelDelete, " +
+                    s"For more details please refer to: https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/dev/table/sql/$command")
+              }
             case _ =>
               try {
                 lock.lock()

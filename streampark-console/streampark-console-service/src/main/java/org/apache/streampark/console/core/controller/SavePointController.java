@@ -64,7 +64,7 @@ public class SavePointController {
   @Operation(summary = "List application savepoint histories")
   @PostMapping("history")
   public RestResponse history(SavePoint savePoint, RestRequest request) {
-    IPage<SavePoint> page = savePointService.page(savePoint, request);
+    IPage<SavePoint> page = savePointService.getPage(savePoint, request);
     return RestResponse.success(page);
   }
 
@@ -74,7 +74,7 @@ public class SavePointController {
   public RestResponse delete(Long id) throws InternalException {
     SavePoint savePoint = savePointService.getById(id);
     Application application = applicationManageService.getById(savePoint.getAppId());
-    Boolean deleted = savePointService.delete(id, application);
+    Boolean deleted = savePointService.remove(id, application);
     return RestResponse.success(deleted);
   }
 

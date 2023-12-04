@@ -25,7 +25,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
 
-  FlinkEnv getByAppId(@Param("appId") Long appId);
+  FlinkEnv selectByAppId(@Param("appId") Long appId);
 
   void setDefault(@Param("id") Long id);
 }

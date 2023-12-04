@@ -16,7 +16,8 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import com.esotericsoftware.kryo.Serializer
@@ -76,8 +77,8 @@ abstract class FlinkStreamTableTrait(
     execute(appName)
   }
 
-  @deprecated def execute(jobName: String): JobExecutionResult = {
-    printLogo(s"FlinkStreamTable $jobName Starting...")
+  @Deprecated def execute(jobName: String): JobExecutionResult = {
+    Utils.printLogo(s"FlinkStreamTable $jobName Starting...")
     if (isConvertedToDataStream) {
       streamEnv.execute(jobName)
     } else null
@@ -246,25 +247,25 @@ abstract class FlinkStreamTableTrait(
 
   def $isForceUnalignedCheckpoints: Boolean = this.streamEnv.isForceUnalignedCheckpoints
 
-  @deprecated def $enableCheckpointing(
+  @Deprecated def $enableCheckpointing(
       interval: Long,
       mode: CheckpointingMode,
       force: Boolean): StreamExecutionEnvironment =
     this.streamEnv.enableCheckpointing(interval, mode, force)
 
-  @deprecated def $enableCheckpointing(): StreamExecutionEnvironment =
+  @Deprecated def $enableCheckpointing(): StreamExecutionEnvironment =
     this.streamEnv.enableCheckpointing()
 
-  @deprecated def $generateSequence(from: Long, to: Long): DataStream[Long] =
+  @Deprecated def $generateSequence(from: Long, to: Long): DataStream[Long] =
     this.streamEnv.generateSequence(from, to)
 
-  @deprecated def $readFileStream(
+  @Deprecated def $readFileStream(
       StreamPath: String,
       intervalMillis: Long,
       watchType: FileMonitoringFunction.WatchType): DataStream[String] =
     this.streamEnv.readFileStream(StreamPath, intervalMillis, watchType)
 
-  @deprecated def $readFile[T](
+  @Deprecated def $readFile[T](
       inputFormat: FileInputFormat[T],
       filePath: String,
       watchType: FileProcessingMode,
@@ -403,38 +404,38 @@ abstract class FlinkStreamTableTrait(
    * @param dataStream
    * @tparam T
    */
-  @deprecated override def registerFunction[T](name: String, tf: TableFunction[T])(implicit
+  @Deprecated override def registerFunction[T](name: String, tf: TableFunction[T])(implicit
       info: TypeInformation[T]): Unit =
     tableEnv.registerFunction(name, tf)
 
-  @deprecated override def registerFunction[T, ACC](name: String, f: AggregateFunction[T, ACC])(
+  @Deprecated override def registerFunction[T, ACC](name: String, f: AggregateFunction[T, ACC])(
       implicit
       info1: TypeInformation[T],
       info2: TypeInformation[ACC]): Unit = tableEnv.registerFunction(name, f)
 
-  @deprecated override def registerFunction[T, ACC](
+  @Deprecated override def registerFunction[T, ACC](
       name: String,
       f: TableAggregateFunction[T, ACC])(implicit
       info1: TypeInformation[T],
       info2: TypeInformation[ACC]): Unit = tableEnv.registerFunction(name, f)
 
-  @deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T]): Unit =
+  @Deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T]): Unit =
     tableEnv.registerDataStream(name, dataStream)
 
-  @deprecated override def registerDataStream[T](
+  @Deprecated override def registerDataStream[T](
       name: String,
       dataStream: DataStream[T],
       fields: Expression*): Unit =
     tableEnv.registerDataStream(name, dataStream, fields: _*)
 
-  @deprecated override def registerFunction(name: String, function: ScalarFunction): Unit =
+  @Deprecated override def registerFunction(name: String, function: ScalarFunction): Unit =
     tableEnv.registerFunction(name, function)
 
-  @deprecated override def registerTable(name: String, table: Table): Unit =
+  @Deprecated override def registerTable(name: String, table: Table): Unit =
     tableEnv.registerTable(name, table)
 
-  @deprecated override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
+  @Deprecated override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
 
-  @deprecated override def getCompletionHints(statement: String, position: Int): Array[String] =
+  @Deprecated override def getCompletionHints(statement: String, position: Int): Array[String] =
     tableEnv.getCompletionHints(statement, position)
 }

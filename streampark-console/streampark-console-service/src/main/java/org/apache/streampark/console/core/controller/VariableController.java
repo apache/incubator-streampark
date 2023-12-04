@@ -63,7 +63,7 @@ public class VariableController {
   @PostMapping("page")
   @RequiresPermissions("variable:view")
   public RestResponse page(RestRequest restRequest, Variable variable) {
-    IPage<Variable> page = variableService.page(variable, restRequest);
+    IPage<Variable> page = variableService.getPage(variable, restRequest);
     for (Variable v : page.getRecords()) {
       v.dataMasking();
     }
@@ -80,7 +80,7 @@ public class VariableController {
   @Operation(summary = "List variables")
   @PostMapping("list")
   public RestResponse variableList(@RequestParam Long teamId, String keyword) {
-    List<Variable> variableList = variableService.findByTeamId(teamId, keyword);
+    List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
     for (Variable v : variableList) {
       v.dataMasking();
     }
@@ -91,7 +91,7 @@ public class VariableController {
   @PostMapping("dependApps")
   @RequiresPermissions("variable:depend_apps")
   public RestResponse dependApps(RestRequest restRequest, Variable variable) {
-    IPage<Application> dependApps = variableService.dependAppsPage(variable, restRequest);
+    IPage<Application> dependApps = variableService.getDependAppsPage(variable, restRequest);
     return RestResponse.success(dependApps);
   }
 
@@ -123,7 +123,7 @@ public class VariableController {
   @DeleteMapping("delete")
   @RequiresPermissions("variable:delete")
   public RestResponse deleteVariable(@Valid Variable variable) {
-    this.variableService.deleteVariable(variable);
+    this.variableService.remove(variable);
     return RestResponse.success();
   }
 

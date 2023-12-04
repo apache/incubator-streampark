@@ -51,14 +51,14 @@ public class TeamController {
   @Operation(summary = "List teams")
   @PostMapping("list")
   public RestResponse teamList(RestRequest restRequest, Team team) {
-    IPage<Team> teamList = teamService.findTeams(team, restRequest);
+    IPage<Team> teamList = teamService.getPage(team, restRequest);
     return RestResponse.success(teamList);
   }
 
   @Operation(summary = "Check the team name")
   @PostMapping("check/name")
   public RestResponse checkTeamName(@NotBlank(message = "{required}") String teamName) {
-    Team result = this.teamService.findByName(teamName);
+    Team result = this.teamService.getByName(teamName);
     return RestResponse.success(result == null);
   }
 
@@ -74,7 +74,7 @@ public class TeamController {
   @DeleteMapping("delete")
   @RequiresPermissions("team:delete")
   public RestResponse deleteTeam(Team team) {
-    this.teamService.deleteTeam(team.getId());
+    this.teamService.removeById(team.getId());
     return RestResponse.success();
   }
 

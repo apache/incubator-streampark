@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils
 
 import java.io._
 import java.net.URL
-import java.time.Duration
+import java.time.{Duration, LocalDateTime}
 import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
 import java.util.concurrent.locks.LockSupport
 import java.util.jar.{JarFile, JarInputStream}
@@ -66,7 +66,7 @@ object Utils extends Logger {
 
   def required(expression: Boolean, errorMessage: Any): Unit = {
     if (!expression) {
-      throw new IllegalArgumentException(s"requirement failed: ${errorMessage.toString}")
+      throw new IllegalArgumentException(s"Requirement failed: ${errorMessage.toString}")
     }
   }
 
@@ -147,13 +147,30 @@ object Utils extends Logger {
     Try(f) match {
       case Success(result) => Success(result)
       case Failure(e) if retryCount > 0 =>
-        logWarn(s"retry failed, execution caused by: ", e)
+        logWarn(s"Retry failed, execution caused by: ", e)
         logWarn(
           s"$retryCount times retry remaining, the next attempt will be in ${interval.toMillis} ms")
         LockSupport.parkNanos(interval.toNanos)
         retry(retryCount - 1, interval)(f)
       case Failure(e) => Failure(e)
     }
+  }
+
+  def printLogo(info: String): Unit = {
+    // scalastyle:off println
+    println("\n")
+    println("        _____ __                                             __       ")
+    println("       / ___// /_________  ____ _____ ___  ____  ____ ______/ /__     ")
+    println("       \\__ \\/ __/ ___/ _ \\/ __ `/ __ `__ \\/ __ \\  __ `/ ___/ //_/")
+    println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ")
+    println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ")
+    println("                                       /_/                        \n\n")
+    println("    Version:  2.2.0-SNAPSHOT                                          ")
+    println("    WebSite:  https://streampark.apache.org                           ")
+    println("    GitHub :  https://github.com/apache/incubator-streampark                    ")
+    println(s"    Info   :  $info                                 ")
+    println(s"    Time   :  ${LocalDateTime.now}              \n\n")
+    // scalastyle:on println
   }
 
 }

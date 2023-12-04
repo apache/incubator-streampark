@@ -82,9 +82,8 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         // This step is very critical. If the same name is not judged and the count is different,
         // then the set collection will default to the same element, and it will be overwritten.
         return this.word.compareTo(other.word) * -1;
-      } else {
-        return num * -1;
       }
+      return num * -1;
     }
 
     @Override
@@ -226,7 +225,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
      * @param now current FST node
      */
     private void getDFSWord(List<WordWithFrequency> returnSource, String buffer, TreeNode now) {
-      if (now.getNext().size() == 0 || now.isStop()) {
+      if (now.getNext().isEmpty() || now.isStop()) {
         returnSource.add(new WordWithFrequency(buffer + now.getStep(), now.getCount()));
       } else {
         now.getNext()

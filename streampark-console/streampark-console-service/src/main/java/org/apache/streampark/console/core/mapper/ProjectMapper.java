@@ -33,9 +33,9 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
   void updateBuildTime(@Param("id") Long id);
 
-  IPage<Project> page(Page<Project> page, @Param("project") Project project);
+  IPage<Project> selectPage(Page<Project> page, @Param("project") Project project);
 
-  Boolean existsByTeamId(@Param("teamId") Long teamId);
+  boolean existsByTeamId(@Param("teamId") Long teamId);
 
-  List<Project> selectByTeamId(@Param("teamId") Long teamId);
+  List<Project> selectProjectsByTeamId(@Param("teamId") Long teamId);
 }

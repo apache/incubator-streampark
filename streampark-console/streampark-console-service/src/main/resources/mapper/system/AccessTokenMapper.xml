@@ -37,7 +37,7 @@
         as finalStatus
     </sql>
 
-    <select id="page" resultType="org.apache.streampark.console.system.entity.AccessToken"
+    <select id="selectPage" resultType="org.apache.streampark.console.system.entity.AccessToken"
             parameterType="org.apache.streampark.console.system.entity.AccessToken">
         select
         <include refid="Base_Column_List"/>
@@ -49,7 +49,7 @@
         </where>
     </select>
 
-    <select id="getByUserId" resultType="org.apache.streampark.console.system.entity.AccessToken">
+    <select id="selectByUserId" resultType="org.apache.streampark.console.system.entity.AccessToken">
         select
         <include refid="Base_Column_List"/>
         from t_user t2
@@ -58,7 +58,7 @@
         where t1.user_id = #{userId}
     </select>
 
-    <select id="getByUserToken" resultType="org.apache.streampark.console.system.entity.AccessToken">
+    <select id="selectByUserToken" resultType="org.apache.streampark.console.system.entity.AccessToken">
         select
         <include refid="Base_Column_List"/>
         from t_user t2
@@ -67,7 +67,7 @@
         and t1.token = #{accessToken,jdbcType=VARCHAR}
     </select>
 
-    <select id="getById" resultType="org.apache.streampark.console.system.entity.AccessToken">
+    <select id="selectById" resultType="org.apache.streampark.console.system.entity.AccessToken">
         select
         <include refid="Base_Column_List"/>
         from t_access_token t1

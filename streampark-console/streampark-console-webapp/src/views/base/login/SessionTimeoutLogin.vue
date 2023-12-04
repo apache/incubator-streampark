@@ -16,7 +16,7 @@
 -->
 <template>
   <transition>
-    <div :class="prefixCls">
+    <div class="fixed z-[999999] w-full h-full bg-white dark:bg-[#151515]">
       <Login sessionTimeout />
     </div>
   </transition>
@@ -24,13 +24,11 @@
 <script lang="ts" setup>
   import { onBeforeUnmount, onMounted, ref } from 'vue';
   import Login from './Login.vue';
-  import { useDesign } from '/@/hooks/web/useDesign';
   import { useUserStore } from '/@/store/modules/user';
   import { usePermissionStore } from '/@/store/modules/permission';
   import { useAppStore } from '/@/store/modules/app';
   import { PermissionModeEnum } from '/@/enums/appEnum';
 
-  const { prefixCls } = useDesign('st-login');
   const userStore = useUserStore();
   const permissionStore = usePermissionStore();
   const appStore = useAppStore();
@@ -41,29 +39,14 @@
   };
 
   onMounted(() => {
-    // Record the current UserId
     userId.value = userStore.getUserInfo?.userId;
-    console.log('Mounted', userStore.getUserInfo);
   });
 
   onBeforeUnmount(() => {
     if (userId.value && userId.value !== userStore.getUserInfo.userId) {
-      // Not the same user is logged in, refresh the entire page to discard the previous user's page state
       document.location.reload();
     } else if (isBackMode() && permissionStore.getLastBuildMenuTime === 0) {
-      // In the background permission mode, if the menu is not loaded successfully, the entire page is reloaded. This usually happens when this module is loaded after pressing F5 to refresh the entire page after the session expires
       document.location.reload();
     }
   });
 </script>
-<style lang="less" scoped>
-  @prefix-cls: ~'@{namespace}-st-login';
-
-  .@{prefix-cls} {
-    position: fixed;
-    z-index: 9999999;
-    width: 100%;
-    height: 100%;
-    background: @component-background;
-  }
-</style>

@@ -25,8 +25,8 @@ object ElasticsearchUtils {
 
   def indexRequest(index: String, indexType: String, id: String, source: String)(implicit
       xContentType: XContentType = XContentType.JSON): IndexRequest = {
-    require(source != null, "indexRequest error:source can not be null...")
-    require(xContentType != null, "indexRequest error:xContentType can not be null...")
+    require(source != null, "EndexRequest error:source can not be null...")
+    require(xContentType != null, "IndexRequest error:xContentType can not be null...")
     val indexReq = new IndexRequest(index, indexType, id)
     val mapping = List("source" -> new BytesArray(source), "contentType" -> xContentType)
     mapping.foreach {

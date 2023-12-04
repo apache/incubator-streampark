@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.core.scala
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 import org.apache.streampark.flink.core.{FlinkTableInitializer, TableContext}
 

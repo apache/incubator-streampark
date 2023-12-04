@@ -40,7 +40,7 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
     implements ApplicationLogService {
 
   @Override
-  public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {
+  public IPage<ApplicationLog> getPage(ApplicationLog applicationLog, RestRequest request) {
     Page<ApplicationLog> page =
         new MybatisPager<ApplicationLog>().getPage(request, "option_time", Constant.ORDER_DESC);
     LambdaQueryWrapper<ApplicationLog> queryWrapper =
@@ -50,14 +50,9 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
   }
 
   @Override
-  public void removeApp(Long appId) {
+  public void removeByAppId(Long appId) {
     LambdaQueryWrapper<ApplicationLog> queryWrapper =
         new LambdaQueryWrapper<ApplicationLog>().eq(ApplicationLog::getAppId, appId);
     this.remove(queryWrapper);
-  }
-
-  @Override
-  public Boolean delete(ApplicationLog applicationLog) {
-    return removeById(applicationLog.getId());
   }
 }

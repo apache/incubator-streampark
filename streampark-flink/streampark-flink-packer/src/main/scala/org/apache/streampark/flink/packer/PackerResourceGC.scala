@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.packer
 
+import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.util.Logger
 
@@ -57,7 +58,7 @@ object PackerResourceGC extends Logger {
   }
 
   private def findLastModifiedOfSubFile(file: File): Array[(File, Long)] = {
-    val isApplicationMode = file.listFiles.map(_.getName).exists(_.contains(".jar"))
+    val isApplicationMode = file.listFiles.map(_.getName).exists(_.contains(Constant.JAR_SUFFIX))
     if (isApplicationMode) {
       Array(file -> file.listFiles.map(_.lastModified).max)
     } else {

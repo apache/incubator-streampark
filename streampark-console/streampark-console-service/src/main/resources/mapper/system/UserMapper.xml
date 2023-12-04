@@ -34,11 +34,11 @@
         <result column="login_type" jdbcType="INTEGER" property="loginType"/>
     </resultMap>
 
-    <select id="findUserDetail" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
+    <select id="selectPage" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
         select * from t_user
         <where>
             <if test="user.username != null and user.username != ''">
-                and username like '%${user.username}%'
+                and username like concat('%',#{user.username},'%')
             </if>
             <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
                 and create_time &gt; #{user.createTimeFrom}
@@ -58,13 +58,13 @@
         </if>
     </select>
 
-    <select id="getNoTokenUser" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
+    <select id="selectNoTokenUsers" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
         select u.* from t_user u left join t_access_token t
         on u.user_id = t.user_id
         where t.user_id is null
     </select>
 
-    <select id="findByAppOwner" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
+    <select id="selectUsersByAppOwner" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
         select u.* from t_user u inner join (
             select distinct(user_id) as user_id
             from t_flink_app

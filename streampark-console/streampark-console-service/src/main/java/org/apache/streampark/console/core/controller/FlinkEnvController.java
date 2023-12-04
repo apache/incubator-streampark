@@ -45,8 +45,8 @@ public class FlinkEnvController {
   @Operation(summary = "Get flink environment")
   @PostMapping("list")
   public RestResponse list() {
-    List<FlinkEnv> list = flinkEnvService.list();
-    return RestResponse.success(list);
+    List<FlinkEnv> flinkEnvList = flinkEnvService.list();
+    return RestResponse.success(flinkEnvList);
   }
 
   @Operation(summary = "Verify flink environment")
@@ -96,7 +96,7 @@ public class FlinkEnvController {
   @Operation(summary = "Delete flink environment")
   @PostMapping("delete")
   public RestResponse delete(Long id) {
-    flinkEnvService.delete(id);
+    flinkEnvService.removeById(id);
     return RestResponse.success();
   }
 

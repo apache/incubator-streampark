@@ -5,28 +5,28 @@
 
 ```shell
 set -e
-# 下载Python 3.7 miniconda.sh脚本。
+# Download the Python 3.7 miniconda.sh script.
 wget "https://repo.continuum.io/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh" -O "miniconda.sh"
 
-# 为Python 3.7 miniconda.sh脚本添加执行权限。
+# Add execute permissions to the Python 3.7 miniconda.sh script.
 chmod +x miniconda.sh
 
-# 创建Python的虚拟环境。
+# Create a Python virtual environment.
 ./miniconda.sh -b -p venv
 
-# 激活Conda Python虚拟环境。
+# Activate the Conda Python virtual environment.
 source venv/bin/activate ""
 
-# 安装PyFlink依赖。
+# Install PyFlink dependencies.
 pip install "apache-flink==1.16.2"
 
-# 退出Conda Python虚拟环境。
+# Exit the Conda Python virtual environment.
 conda deactivate
 
-# 删除缓存的包。
+# Delete the cached packages.
 rm -rf venv/pkgs
 
-# 将准备好的Conda Python虚拟环境打包。
+# Package the prepared Conda Python virtual environment.
 zip -r venv.zip venv
 ```
 

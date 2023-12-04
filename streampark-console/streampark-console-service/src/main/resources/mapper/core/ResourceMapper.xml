@@ -33,7 +33,7 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="page" resultType="org.apache.streampark.console.core.entity.Resource" parameterType="org.apache.streampark.console.core.entity.Resource">
+    <select id="selectPage" resultType="org.apache.streampark.console.core.entity.Resource" parameterType="org.apache.streampark.console.core.entity.Resource">
         select
         v.*,
         u.username as creatorName
@@ -42,10 +42,10 @@
         on v.creator_id = u.user_id
         and v.team_id = ${resource.teamId}
         <if test="resource.resourceName != null and resource.resourceName != ''">
-            and v.resourceName like '%${resource.resourceName}%'
+            and v.resourceName like concat('%',#{resource.resourceName},'%')
         </if>
         <if test="resource.description != null and resource.description != ''">
-            and v.description like '%${resource.description}%'
+            and v.description like concat('%',#{resource.description},'%')
         </if>
     </select>
 

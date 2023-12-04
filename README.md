@@ -50,11 +50,10 @@
 
 ## 🎉 Features
 
-* Apache Flink & Spark stream processing application development framework
-* Out-of-the-box connectors
+* Apache Flink & Spark application development scaffold
 * Support multiple versions of Flink & Spark
-* Scala 2.12 support
-* One-stop stream processing management platform
+* Wide range of out-of-the-box connectors
+* One-stop stream processing operation platform
 * Support catalog、olap、streaming-warehouse etc.
 * ...
 
@@ -67,18 +66,18 @@ git clone git@github.com:apache/incubator-streampark.git
 cd incubator-streampark
 ./build.sh
 ```
-🗄 Deatils:how to [Development](https://streampark.apache.org/docs/user-guide/development)
+🗄 Details:how to [Development](https://streampark.apache.org/docs/user-guide/development)
 ## 🧑‍💻 Downloads
 
 Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)
 
 ## 🚀 Quick Start
 
-click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
+Click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
 
 ## 💋 Our users
 
-Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project ? [Welcome to add your company](https://github.com/apache/incubator-streampark/issues/163)!
+Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project? [Welcome to add your company](https://github.com/apache/incubator-streampark/issues/163)!
 
 ![Our users](https://streampark.apache.org/image/users.png)
 
@@ -88,7 +87,7 @@ Various companies and organizations use StreamPark for research, production and 
 
 ### 🙋 Submit Pull Request and Issues
 
-You can submit any ideas as [pull requests](https://github.com/apache/incubator-streampark/pulls) or as [GitHub issues](https://github.com/apache/incubator-streampark/issues/new/choose).
+You can submit any ideas as [pull requests](https://github.com/apache/incubator-streampark/pulls) or as [issues](https://github.com/apache/incubator-streampark/issues/new/choose).
 
 > If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
@@ -99,6 +98,10 @@ We welcome your suggestions, comments (including criticisms), comments and contr
 Thank you to all the people who already contributed to StreamPark!
 
 [![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/incubator-streampark/graphs/contributors)
+
+## License
+
+Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## 💬 Social Media
 

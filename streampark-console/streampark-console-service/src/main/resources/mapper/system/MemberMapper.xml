@@ -39,7 +39,7 @@
         where role_id = #{roleId}
     </delete>
 
-    <select id="findUsers" resultType="org.apache.streampark.console.system.entity.Member" parameterType="org.apache.streampark.console.system.entity.Member">
+    <select id="selectPage" resultType="org.apache.streampark.console.system.entity.Member" parameterType="org.apache.streampark.console.system.entity.Member">
         select tur.*,
         u.username,
         r.role_name
@@ -51,10 +51,10 @@
         <where>
             tur.team_id = ${member.teamId}
             <if test="member.userName != null and member.userName != ''">
-                and u.username like '%${member.userName}%'
+                and u.username like concat('%',#{member.userName},'%')
             </if>
             <if test="member.roleName != null and member.roleName != ''">
-                and r.role_name = '${member.roleName}'
+                and r.role_name = ${member.roleName}
             </if>
             <if test="member.createTimeFrom != null and member.createTimeFrom !=''">
                 and tur.create_time &gt; #{member.createTimeFrom}
@@ -68,7 +68,7 @@
         </if>
     </select>
 
-    <select id="findUsersNotInTeam" resultType="org.apache.streampark.console.system.entity.User">
+    <select id="selectUsersNotInTeam" resultType="org.apache.streampark.console.system.entity.User">
         select tu.* from t_user tu
         where tu.user_id
         not in (

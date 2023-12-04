@@ -36,7 +36,7 @@ public interface MemberMapper extends BaseMapper<Member> {
    * @param userId user id
    * @return boolean
    */
-  Boolean deleteByUserId(@Param("userId") Long userId);
+  boolean deleteByUserId(@Param("userId") Long userId);
 
   /**
    * delete user by role id
@@ -44,9 +44,9 @@ public interface MemberMapper extends BaseMapper<Member> {
    * @param roleId role id
    * @return boolean
    */
-  Boolean deleteByRoleId(@Param("roleId") Long roleId);
+  boolean deleteByRoleId(@Param("roleId") Long roleId);
 
-  IPage<Member> findUsers(Page<Member> page, @Param("member") Member member);
+  IPage<Member> selectPage(Page<Member> page, @Param("member") Member member);
 
-  List<User> findUsersNotInTeam(@Param("teamId") Long teamId);
+  List<User> selectUsersNotInTeam(@Param("teamId") Long teamId);
 }

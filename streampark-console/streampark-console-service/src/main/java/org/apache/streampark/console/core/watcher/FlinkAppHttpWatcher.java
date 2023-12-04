@@ -186,7 +186,7 @@ public class FlinkAppHttpWatcher {
   public void doStop() {
     log.info(
         "FlinkAppHttpWatcher StreamPark Console will be shutdown,persistent application to database.");
-    WATCHING_APPS.forEach((k, v) -> applicationInfoService.persistMetrics(v));
+    WATCHING_APPS.forEach((k, v) -> applicationManageService.persistMetrics(v));
   }
 
   /**
@@ -253,7 +253,7 @@ public class FlinkAppHttpWatcher {
               ? jobsOverview.getJobs().stream()
                   .filter(a -> StringUtils.equals(application.getJobId(), a.getId()))
                   .findFirst()
-              : jobsOverview.getJobs().stream().findFirst();
+              : Optional.empty();
     } else {
       optional =
           jobsOverview.getJobs().stream()
@@ -307,15 +307,29 @@ public class FlinkAppHttpWatcher {
 
     if (flag != null) {
       log.info("FlinkAppHttpWatcher previous state: canceling.");
-      if (stopFromEnum.isNone()) {
-        log.error(
-            "FlinkAppHttpWatcher query previous state was canceling and stopFrom NotFound,savePoint expired!");
-        savePointService.expire(application.getId());
+      FlinkAppStateEnum flinkAppStateEnum = FlinkAppStateEnum.CANCELED;
+      try {
+        YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
+        if (yarnAppInfo != null) {
+          String state = yarnAppInfo.getApp().getFinalStatus();
+          flinkAppStateEnum = FlinkAppStateEnum.of(state);
+        }
+      } finally {
+        if (stopFromEnum.isNone()) {
+          log.error(
+              "FlinkAppHttpWatcher query previous state was canceling and stopFrom NotFound,savePoint expired!");
+          savePointService.expire(application.getId());
+          if (flinkAppStateEnum == FlinkAppStateEnum.KILLED
+              || flinkAppStateEnum == FlinkAppStateEnum.FAILED) {
+            doAlert(application, flinkAppStateEnum);
+          }
+        }
+        application.setState(flinkAppStateEnum.getValue());
+        cleanSavepoint(application);
+        cleanOptioning(optionStateEnum, application.getId());
+        doPersistMetrics(application, true);
       }
-      application.setState(FlinkAppStateEnum.CANCELED.getValue());
-      cleanSavepoint(application);
-      cleanOptioning(optionStateEnum, application.getId());
-      doPersistMetrics(application, true);
+
     } else {
       // query the status from the yarn rest Api
       YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
@@ -422,10 +436,9 @@ public class FlinkAppHttpWatcher {
     if (application.getStartTime() == null || startTime != application.getStartTime().getTime()) {
       application.setStartTime(new Date(startTime));
     }
-    if (endTime != -1) {
-      if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
-        application.setEndTime(new Date(endTime));
-      }
+    if (endTime != -1
+        && (application.getEndTime() == null || endTime != application.getEndTime().getTime())) {
+      application.setEndTime(new Date(endTime));
     }
 
     application.setJobId(jobOverview.getId());
@@ -515,7 +528,7 @@ public class FlinkAppHttpWatcher {
     } else {
       WATCHING_APPS.put(application.getId(), application);
     }
-    applicationInfoService.persistMetrics(application);
+    applicationManageService.persistMetrics(application);
   }
 
   /**
@@ -662,19 +675,18 @@ public class FlinkAppHttpWatcher {
 
   private Overview httpOverview(Application application) throws IOException {
     String appId = application.getAppId();
-    if (appId != null) {
-      if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
-          || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode()) {
-        String reqURL;
-        if (StringUtils.isBlank(application.getJobManagerUrl())) {
-          String format = "proxy/%s/overview";
-          reqURL = String.format(format, appId);
-        } else {
-          String format = "%s/overview";
-          reqURL = String.format(format, application.getJobManagerUrl());
-        }
-        return yarnRestRequest(reqURL, Overview.class);
+    if (appId != null
+        && (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
+            || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode())) {
+      String reqURL;
+      if (StringUtils.isBlank(application.getJobManagerUrl())) {
+        String format = "proxy/%s/overview";
+        reqURL = String.format(format, appId);
+      } else {
+        String format = "%s/overview";
+        reqURL = String.format(format, application.getJobManagerUrl());
       }
+      return yarnRestRequest(reqURL, Overview.class);
     }
     return null;
   }

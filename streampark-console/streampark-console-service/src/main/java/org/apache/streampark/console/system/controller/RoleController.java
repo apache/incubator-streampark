@@ -58,26 +58,26 @@ public class RoleController {
   @PostMapping("list")
   @RequiresPermissions("role:view")
   public RestResponse roleList(RestRequest restRequest, Role role) {
-    IPage<Role> roleList = roleService.findRoles(role, restRequest);
+    IPage<Role> roleList = roleService.getPage(role, restRequest);
     return RestResponse.success(roleList);
   }
 
   @Operation(summary = "Check the role name")
   @PostMapping("check/name")
   public RestResponse checkRoleName(@NotBlank(message = "{required}") String roleName) {
-    Role result = this.roleService.findByName(roleName);
+    Role result = this.roleService.getByName(roleName);
     return RestResponse.success(result == null);
   }
 
   @Operation(summary = "List role menus")
   @PostMapping("menu")
   public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
-    List<RoleMenu> list = this.roleMenuServie.getByRoleId(roleId);
-    List<String> roleMenus =
-        list.stream()
+    List<RoleMenu> roleMenuList = this.roleMenuServie.listByRoleId(roleId);
+    List<String> menuIdList =
+        roleMenuList.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
             .collect(Collectors.toList());
-    return RestResponse.success(roleMenus);
+    return RestResponse.success(menuIdList);
   }
 
   @Operation(summary = "Create role")
@@ -92,7 +92,7 @@ public class RoleController {
   @DeleteMapping("delete")
   @RequiresPermissions("role:delete")
   public RestResponse deleteRole(Long roleId) {
-    this.roleService.deleteRole(roleId);
+    this.roleService.removeById(roleId);
     return RestResponse.success();
   }
 

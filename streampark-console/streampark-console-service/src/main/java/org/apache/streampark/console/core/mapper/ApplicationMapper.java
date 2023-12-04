@@ -29,34 +29,34 @@ import java.util.List;
 
 public interface ApplicationMapper extends BaseMapper<Application> {
 
-  IPage<Application> page(Page<Application> page, @Param("application") Application application);
+  IPage<Application> selectPage(Page<Application> page, @Param("app") Application application);
 
-  Application getApp(@Param("application") Application application);
+  Application selectApp(@Param("app") Application application);
 
-  void persistMetrics(@Param("application") Application application);
+  void persistMetrics(@Param("app") Application application);
 
-  List<Application> getByTeamId(@Param("teamId") Long teamId);
+  List<Application> selectAppsByTeamId(@Param("teamId") Long teamId);
 
-  List<Application> getProbeApps();
+  List<Application> selectProbeApps();
 
-  boolean mapping(@Param("application") Application appParam);
+  boolean mapping(@Param("app") Application appParam);
 
-  List<String> getRecentK8sNamespace(@Param("limitSize") Integer limit);
+  List<String> selectRecentK8sNamespaces(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sClusterId(
+  List<String> selectRecentK8sClusterIds(
       @Param("executionMode") Integer executionMode, @Param("limitSize") Integer limit);
 
-  List<String> getRecentFlinkBaseImage(@Param("limitSize") Integer limit);
+  List<String> selectRecentFlinkBaseImages(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sPodTemplate(@Param("limitSize") Integer limit);
+  List<String> selectRecentK8sPodTemplates(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sJmPodTemplate(@Param("limitSize") Integer limit);
+  List<String> selectRecentK8sJmPodTemplates(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sTmPodTemplate(@Param("limitSize") Integer limit);
+  List<String> selectRecentK8sTmPodTemplates(@Param("limitSize") Integer limit);
 
   void resetOptionState();
 
-  List<Application> getByProjectId(@Param("projectId") Long id);
+  List<Application> selectAppsByProjectId(@Param("projectId") Long id);
 
   boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
 

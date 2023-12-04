@@ -38,7 +38,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
   FlinkSql getLatestFlinkSql(Long appId, boolean decode);
 
-  List<FlinkSql> history(Application application);
+  List<FlinkSql> listFlinkSqlHistory(Application application);
 
   FlinkSql getCandidate(Long appId, CandidateTypeEnum type);
 
@@ -46,13 +46,13 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
   void cleanCandidate(Long id);
 
-  void removeApp(Long appId);
+  void removeByAppId(Long appId);
 
   void rollback(Application application);
 
   FlinkSqlValidationResult verifySql(String sql, Long versionId);
 
-  List<FlinkSql> getByTeamId(Long teamId);
+  List<FlinkSql> listByTeamId(Long teamId);
 
-  IPage<FlinkSql> page(Long appId, RestRequest request);
+  IPage<FlinkSql> getPage(Long appId, RestRequest request);
 }

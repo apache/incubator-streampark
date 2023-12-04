@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.runner;
 
 import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.InternalOption;
 import org.apache.streampark.common.conf.Workspace;
@@ -72,7 +72,7 @@ public class EnvInitializer implements ApplicationRunner {
 
   private static final Pattern PATTERN_FLINK_SHIMS_JAR =
       Pattern.compile(
-          "^streampark-flink-shims_flink-(1.1[2-7])_(2.12)-(.*).jar$",
+          "^streampark-flink-shims_flink-(1.1[2-8])_(2.12)-(.*).jar$",
           Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
   @SneakyThrows
@@ -92,14 +92,14 @@ public class EnvInitializer implements ApplicationRunner {
                   + " The system initialization check failed. If started local for development and debugging,"
                   + " please ensure the -D%s parameter is clearly specified,"
                   + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
-              ConfigConst.KEY_APP_HOME()));
+              ConfigKeys.KEY_APP_HOME()));
     }
 
     // init InternalConfig
     initInternalConfig(context.getEnvironment());
     // overwrite system variable HADOOP_USER_NAME
     String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
-    overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
+    overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME(), hadoopUserName);
     // initialize local file system resources
     storageInitialize(LFS);
     // Launch the embedded http file server.

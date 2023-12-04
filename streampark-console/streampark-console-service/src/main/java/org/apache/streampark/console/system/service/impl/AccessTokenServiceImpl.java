@@ -82,14 +82,9 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   }
 
   @Override
-  public boolean deleteToken(Long id) {
-    return this.removeById(id);
-  }
-
-  @Override
-  public IPage<AccessToken> findAccessTokens(AccessToken tokenParam, RestRequest request) {
+  public IPage<AccessToken> getPage(AccessToken tokenParam, RestRequest request) {
     Page<AccessToken> page = new MybatisPager<AccessToken>().getDefaultPage(request);
-    this.baseMapper.page(page, tokenParam);
+    this.baseMapper.selectPage(page, tokenParam);
     List<AccessToken> records = page.getRecords();
     page.setRecords(records);
     return page;
@@ -97,13 +92,13 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
   @Override
   public boolean checkTokenEffective(Long userId, String token) {
-    AccessToken res = baseMapper.getByUserToken(userId, token);
+    AccessToken res = baseMapper.selectByUserToken(userId, token);
     return res != null && AccessToken.STATUS_ENABLE.equals(res.getFinalStatus());
   }
 
   @Override
   public RestResponse toggleToken(Long tokenId) {
-    AccessToken tokenInfo = baseMapper.getById(tokenId);
+    AccessToken tokenInfo = baseMapper.selectById(tokenId);
     if (Objects.isNull(tokenInfo)) {
       return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "accessToken could not be found!");
     }
@@ -127,6 +122,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
   @Override
   public AccessToken getByUserId(Long userId) {
-    return baseMapper.getByUserId(userId);
+    return baseMapper.selectByUserId(userId);
   }
 }

@@ -62,7 +62,7 @@ object FlinkRunOption {
    * @deprecated
    *   use non-prefixed variant {@link #DETACHED_OPTION} for both YARN and non-YARN deployments
    */
-  @deprecated val YARN_DETACHED_OPTION =
+  @Deprecated val YARN_DETACHED_OPTION =
     new Option(
       "yd",
       "yarndetached",
@@ -175,7 +175,7 @@ object FlinkRunOption {
       .desc("Allows specifying multiple generic configuration options. The available options can be found at https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html")
       .build
 
-  @deprecated val EXECUTOR_OPTION = new Option(
+  @Deprecated val EXECUTOR_OPTION = new Option(
     "e",
     "executor",
     true,

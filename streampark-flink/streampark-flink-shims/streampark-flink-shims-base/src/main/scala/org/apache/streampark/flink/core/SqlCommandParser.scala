@@ -16,7 +16,7 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.PARAM_PREFIX
+import org.apache.streampark.common.conf.ConfigKeys.PARAM_PREFIX
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType
 import org.apache.streampark.common.util.Logger
 
@@ -384,14 +384,20 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    * </pre>
    */
   /** This is SQL Client's syntax, don't use in our platform. */
-  @deprecated
+  @Deprecated
   case object BEGIN_STATEMENT_SET
     extends SqlCommand("begin statement set", "BEGIN\\s+STATEMENT\\s+SET", Converters.NO_OPERANDS)
 
   /** This is SQL Client's syntax, don't use in our platform. */
-  @deprecated
+  @Deprecated
   case object END_STATEMENT_SET
     extends SqlCommand("end statement set", "END", Converters.NO_OPERANDS)
+
+  // Since: 2.1.2 for flink 1.18
+  case object DELETE extends SqlCommand("delete", "(DELETE\\s+FROM\\s+.+)")
+
+  // Since: 2.1.2 for flink 1.18
+  case object UPDATE extends SqlCommand("update", "(UPDATE\\s+.+)")
 
   private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^(['\"])|(['\"])$", "")
 

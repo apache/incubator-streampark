@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.task;
 
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.GitUtils;
@@ -100,7 +101,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       File workTree = git.getRepository().getWorkTree();
       printWorkTree(workTree, "");
       String successMsg =
-          String.format("[StreamPark] project [%s] git clone successful!\n", project.getName());
+          String.format("[StreamPark] project [%s] git clone successful!%n", project.getName());
       fileLogger.info(successMsg);
       git.close();
       return true;
@@ -181,7 +182,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       } else {
         // 2) .jar file(normal or official standard flink project)
         Utils.checkJarFile(app.toURI().toURL());
-        String moduleName = app.getName().replace(".jar", "");
+        String moduleName = app.getName().replace(Constant.JAR_SUFFIX, "");
         File distHome = project.getDistHome();
         File targetDir = new File(distHome, moduleName);
         if (!targetDir.exists()) {
@@ -211,7 +212,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
             // 2) try look for jar files, there may be multiple jars found.
             if (!targetFile.getName().startsWith("original-")
                 && !targetFile.getName().endsWith("-sources.jar")
-                && targetFile.getName().endsWith(".jar")) {
+                && targetFile.getName().endsWith(Constant.JAR_SUFFIX)) {
               if (jar == null) {
                 jar = targetFile;
               } else {

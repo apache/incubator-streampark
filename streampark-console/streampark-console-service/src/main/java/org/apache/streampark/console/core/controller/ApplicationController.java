@@ -139,8 +139,8 @@ public class ApplicationController {
   @Operation(summary = "Get applications dashboard data")
   @PostMapping("dashboard")
   public RestResponse dashboard(Long teamId) {
-    Map<String, Serializable> map = applicationInfoService.dashboard(teamId);
-    return RestResponse.success(map);
+    Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
+    return RestResponse.success(dashboardMap);
   }
 
   @Operation(summary = "List applications")
@@ -157,7 +157,7 @@ public class ApplicationController {
   @PostMapping("mapping")
   @RequiresPermissions("app:mapping")
   public RestResponse mapping(Application app) {
-    boolean flag = applicationInfoService.mapping(app);
+    boolean flag = applicationManageService.mapping(app);
     return RestResponse.success(flag);
   }
 
@@ -319,14 +319,14 @@ public class ApplicationController {
   @Operation(summary = "List application backups")
   @PostMapping("backups")
   public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
-    IPage<ApplicationBackUp> backups = backUpService.page(backUp, request);
+    IPage<ApplicationBackUp> backups = backUpService.getPage(backUp, request);
     return RestResponse.success(backups);
   }
 
   @Operation(summary = "List application operation logs")
   @PostMapping("optionlog")
   public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
-    IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
+    IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
     return RestResponse.success(applicationList);
   }
 
@@ -334,8 +334,8 @@ public class ApplicationController {
   @PermissionAction(id = "#applicationLog.appId", type = PermissionTypeEnum.APP)
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
-  public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
-    Boolean deleted = applicationLogService.delete(applicationLog);
+  public RestResponse deleteOperationLog(Long id) {
+    Boolean deleted = applicationLogService.removeById(id);
     return RestResponse.success(deleted);
   }
 
@@ -344,7 +344,7 @@ public class ApplicationController {
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
-    Boolean deleted = applicationManageService.delete(app);
+    Boolean deleted = applicationManageService.remove(app);
     return RestResponse.success(deleted);
   }
 
@@ -352,7 +352,7 @@ public class ApplicationController {
   @PermissionAction(id = "#backUp.appId", type = PermissionTypeEnum.APP)
   @PostMapping("deletebak")
   public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
-    Boolean deleted = backUpService.delete(backUp.getId());
+    Boolean deleted = backUpService.removeById(backUp.getId());
     return RestResponse.success(deleted);
   }
 
@@ -405,9 +405,8 @@ public class ApplicationController {
     String error = applicationInfoService.checkSavepointPath(app);
     if (error == null) {
       return RestResponse.success(true);
-    } else {
-      return RestResponse.success(false).message(error);
     }
+    return RestResponse.success(false).message(error);
   }
 
   @Operation(summary = "Get application on k8s deploy logs")

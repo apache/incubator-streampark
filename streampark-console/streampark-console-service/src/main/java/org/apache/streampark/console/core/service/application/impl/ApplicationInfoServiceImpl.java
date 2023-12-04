@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
@@ -75,7 +76,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
 import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service
@@ -106,7 +106,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
   @Override
-  public Map<String, Serializable> dashboard(Long teamId) {
+  public Map<String, Serializable> getDashboardDataMap(Long teamId) {
     JobsOverview.Task overview = new JobsOverview.Task();
     Integer totalJmMemory = 0;
     Integer totalTmMemory = 0;
@@ -175,16 +175,16 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     }
 
     // result json
-    Map<String, Serializable> map = new HashMap<>(8);
-    map.put("task", overview);
-    map.put("jmMemory", totalJmMemory);
-    map.put("tmMemory", totalTmMemory);
-    map.put("totalTM", totalTm);
-    map.put("availableSlot", availableSlot);
-    map.put("totalSlot", totalSlot);
-    map.put("runningJob", runningJob);
+    Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
+    dashboardDataMap.put("task", overview);
+    dashboardDataMap.put("jmMemory", totalJmMemory);
+    dashboardDataMap.put("tmMemory", totalTmMemory);
+    dashboardDataMap.put("totalTM", totalTm);
+    dashboardDataMap.put("availableSlot", availableSlot);
+    dashboardDataMap.put("totalSlot", totalSlot);
+    dashboardDataMap.put("runningJob", runningJob);
 
-    return map;
+    return dashboardDataMap;
   }
 
   @Override
@@ -277,42 +277,42 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public List<String> getRecentK8sNamespace() {
-    return baseMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
+  public List<String> listRecentK8sNamespace() {
+    return baseMapper.selectRecentK8sNamespaces(DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentK8sClusterId(Integer executionMode) {
-    return baseMapper.getRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
+  public List<String> listRecentK8sClusterId(Integer executionMode) {
+    return baseMapper.selectRecentK8sClusterIds(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentFlinkBaseImage() {
-    return baseMapper.getRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
+  public List<String> listRecentFlinkBaseImage() {
+    return baseMapper.selectRecentFlinkBaseImages(DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentK8sPodTemplate() {
-    return baseMapper.getRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+  public List<String> listRecentK8sPodTemplate() {
+    return baseMapper.selectRecentK8sPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentK8sJmPodTemplate() {
-    return baseMapper.getRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+  public List<String> listRecentK8sJmPodTemplate() {
+    return baseMapper.selectRecentK8sJmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> getRecentK8sTmPodTemplate() {
-    return baseMapper.getRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+  public List<String> listRecentK8sTmPodTemplate() {
+    return baseMapper.selectRecentK8sTmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
   }
 
   @Override
-  public List<String> historyUploadJars() {
+  public List<String> listHistoryUploadJars() {
     return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
         .filter(File::isFile)
         .sorted(Comparator.comparingLong(File::lastModified).reversed())
         .map(File::getName)
-        .filter(fn -> fn.endsWith(".jar"))
+        .filter(fn -> fn.endsWith(Constant.JAR_SUFFIX))
         .limit(DEFAULT_HISTORY_RECORD_LIMIT)
         .collect(Collectors.toList());
   }
@@ -403,7 +403,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
           return AppExistsStateEnum.IN_YARN;
         }
         // check whether clusterId, namespace, jobId on kubernetes
-        else if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+        if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
             && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
           return AppExistsStateEnum.IN_KUBERNETES;
         }
@@ -419,7 +419,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         return AppExistsStateEnum.IN_YARN;
       }
       // check whether clusterId, namespace, jobId on kubernetes
-      else if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+      if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
           && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
         return AppExistsStateEnum.IN_KUBERNETES;
       }
@@ -456,22 +456,6 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public boolean mapping(Application appParam) {
-    boolean mapping = this.baseMapper.mapping(appParam);
-    Application application = getById(appParam.getId());
-    if (isKubernetesApp(application)) {
-      // todo mark
-      k8SFlinkTrackMonitor.doWatching(toTrackId(application));
-      if (K8sFlinkConfig.isV2Enabled()) {
-        flinkK8sObserver.watchApplication(application);
-      }
-    } else {
-      FlinkAppHttpWatcher.doWatching(application);
-    }
-    return mapping;
-  }
-
-  @Override
   public String checkSavepointPath(Application appParam) throws Exception {
     String savepointPath = appParam.getSavePoint();
     if (StringUtils.isBlank(savepointPath)) {
@@ -503,11 +487,6 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     } else {
       return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
     }
-  }
-
-  @Override
-  public void persistMetrics(Application appParam) {
-    this.baseMapper.persistMetrics(appParam);
   }
 
   private Boolean checkJobName(String jobName) {

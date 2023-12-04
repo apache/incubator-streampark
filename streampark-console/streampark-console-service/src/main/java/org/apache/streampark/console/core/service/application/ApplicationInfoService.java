@@ -35,14 +35,6 @@ import java.util.Map;
 public interface ApplicationInfoService extends IService<Application> {
 
   /**
-   * Maps the given application.
-   *
-   * @param appParam The application to be mapped.
-   * @return True if the mapping was successful, false otherwise.
-   */
-  boolean mapping(Application appParam);
-
-  /**
    * Checks the environment for the given application.
    *
    * @param appParam the application to check the environment for
@@ -143,13 +135,6 @@ public interface ApplicationInfoService extends IService<Application> {
   AppExistsStateEnum checkExists(Application appParam);
 
   /**
-   * Persists the metrics of the given application.
-   *
-   * @param appParam The application which metrics need to be persisted.
-   */
-  void persistMetrics(Application appParam);
-
-  /**
    * Reads the configuration for the given application and returns it as a String.
    *
    * @param appParam The application for which the configuration needs to be read.
@@ -172,7 +157,7 @@ public interface ApplicationInfoService extends IService<Application> {
    * @param teamId the ID of the team
    * @return a map containing the dashboard data
    */
-  Map<String, Serializable> dashboard(Long teamId);
+  Map<String, Serializable> getDashboardDataMap(Long teamId);
 
   /**
    * Retrieves the Kubernetes start log for a specific ID with an optional offset and limit.
@@ -190,7 +175,7 @@ public interface ApplicationInfoService extends IService<Application> {
    *
    * @return The list of recent Kubernetes namespaces as a List of Strings.
    */
-  List<String> getRecentK8sNamespace();
+  List<String> listRecentK8sNamespace();
 
   /**
    * Retrieves the list of recent K8s cluster IDs based on the specified execution mode.
@@ -199,40 +184,40 @@ public interface ApplicationInfoService extends IService<Application> {
    *     mode 2: Test mode 3: Development mode -1: All modes
    * @return The list of recent K8s cluster IDs based on the specified execution mode.
    */
-  List<String> getRecentK8sClusterId(Integer executionMode);
+  List<String> listRecentK8sClusterId(Integer executionMode);
 
   /**
    * Retrieves the list of recent Flink base images.
    *
    * @return a list of strings representing the recent Flink base images
    */
-  List<String> getRecentFlinkBaseImage();
+  List<String> listRecentFlinkBaseImage();
 
   /**
    * Retrieves the recent K8s pod templates.
    *
    * @return a List of Strings representing the recent K8s pod templates.
    */
-  List<String> getRecentK8sPodTemplate();
+  List<String> listRecentK8sPodTemplate();
 
   /**
    * Retrieves the list of recent Kubernetes Job Manager Pod templates.
    *
    * @return A List of string values representing the recent Kubernetes Job Manager Pod templates.
    */
-  List<String> getRecentK8sJmPodTemplate();
+  List<String> listRecentK8sJmPodTemplate();
 
   /**
    * Retrieves the list of recent K8s TM pod templates.
    *
    * @return The list of recent K8s TM pod templates as a List of String objects.
    */
-  List<String> getRecentK8sTmPodTemplate();
+  List<String> listRecentK8sTmPodTemplate();
 
   /**
    * Uploads a list of jars to the server for historical reference.
    *
    * @return A list of strings representing the names of the uploaded jars.
    */
-  List<String> historyUploadJars();
+  List<String> listHistoryUploadJars();
 }

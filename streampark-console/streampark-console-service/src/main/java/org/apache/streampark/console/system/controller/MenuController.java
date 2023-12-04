@@ -31,11 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -55,8 +52,7 @@ public class MenuController {
   @PostMapping("router")
   public RestResponse getUserRouters(Long teamId) {
     // TODO The teamId is required, get routers should be called after choose teamId.
-    List<VueRouter<Menu>> routers =
-        this.menuService.getUserRouters(commonService.getUserId(), teamId);
+    List<VueRouter<Menu>> routers = this.menuService.listRouters(commonService.getUserId(), teamId);
     return RestResponse.success(routers);
   }
 
@@ -64,22 +60,7 @@ public class MenuController {
   @PostMapping("list")
   @RequiresPermissions("menu:view")
   public RestResponse menuList(Menu menu) {
-    Map<String, Object> maps = this.menuService.findMenus(menu);
-    return RestResponse.success(maps);
-  }
-
-  @Operation(summary = "Create menu")
-  @PostMapping("post")
-  @RequiresPermissions("menu:add")
-  public RestResponse addMenu(@Valid Menu menu) {
-    this.menuService.createMenu(menu);
-    return RestResponse.success();
-  }
-
-  @PutMapping("update")
-  @RequiresPermissions("menu:update")
-  public RestResponse updateMenu(@Valid Menu menu) throws Exception {
-    this.menuService.updateMenu(menu);
-    return RestResponse.success();
+    Map<String, Object> menuMap = this.menuService.listMenuMap(menu);
+    return RestResponse.success(menuMap);
   }
 }

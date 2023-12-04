@@ -97,7 +97,7 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
 
   "Deploy a simple Flink application job with flinkConfiguration to Kubernetes" in unsafeRun {
     val spec = FlinkDeploymentDef(
-      name = "basic-appjob",
+      name = "simple-appjob",
       namespace = "fdev",
       image = "flink:1.16",
       flinkVersion = FlinkVersion.V1_16,
@@ -113,6 +113,29 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
       _ <- FlinkK8sOperator.deployApplicationJob(114514, spec)
       // subscribe job status
       _ <- FlinkK8sObserver.evaluatedJobSnaps.flatSubscribeValues().debugPretty.runDrain
+    } yield ()
+  }
+
+  "Deploy a simple Flink application job with flinkConfiguration to Kubernetes and subscribe job status and endpoint" in unsafeRun {
+    val spec = FlinkDeploymentDef(
+      name = "simple-appjob",
+      namespace = "fdev",
+      image = "flink:1.16",
+      flinkVersion = FlinkVersion.V1_16,
+      flinkConfiguration = Map("taskmanager.numberOfTaskSlots" -> "2"),
+      jobManager = JobManagerDef(cpu = 1, memory = "1024m", "2G"),
+      taskManager = TaskManagerDef(cpu = 1, memory = "1024m", "2G"),
+      job = JobDef(
+        jarURI = "local:///opt/flink/examples/streaming/StateMachineExample.jar",
+        parallelism = 1
+      )
+    )
+    for {
+      _ <- FlinkK8sOperator.deployApplicationJob(114514, spec)
+      // subscribe job status
+      _ <- FlinkK8sObserver.evaluatedJobSnaps.flatSubscribeValues().debugPretty.runDrain.fork
+      _ <- FlinkK8sObserver.restSvcEndpointSnaps.flatSubscribeValues().debugPretty.runDrain.fork
+      _ <- ZIO.never
     } yield ()
   }
 

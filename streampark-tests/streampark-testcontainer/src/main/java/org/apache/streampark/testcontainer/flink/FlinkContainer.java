@@ -31,11 +31,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.streampark.testcontainer.flink.FlinkComponent.JOBMANAGER;
 import static org.apache.streampark.testcontainer.flink.FlinkComponent.TASKMANAGER;
 
+/**
+ * The Flink container class. It would be created as a flink jobmanager container or a taskmanaager
+ * container. Note: It's an internal class to construct a flink session cluster.
+ */
 class FlinkContainer extends GenericContainer<FlinkContainer> {
 
-  public static final AtomicInteger TM_INDEX_SUFFIX = new AtomicInteger(0);
-
-  public static final String FLINK_PROPS_KEY = "FLINK_PROPERTIES";
+  private static final String FLINK_PROPS_KEY = "FLINK_PROPERTIES";
+  private static final AtomicInteger TM_INDEX_SUFFIX = new AtomicInteger(0);
 
   private final @Nonnull FlinkComponent component;
 
@@ -55,6 +58,7 @@ class FlinkContainer extends GenericContainer<FlinkContainer> {
     Optional.ofNullable(slf4jLogConsumer).ifPresent(this::withLogConsumer);
   }
 
+  @Nonnull
   protected String getFlinkContainerName() {
     if (component == JOBMANAGER) {
       return JOBMANAGER.getName();

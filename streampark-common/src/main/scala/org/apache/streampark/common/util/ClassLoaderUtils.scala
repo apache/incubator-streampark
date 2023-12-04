@@ -16,9 +16,11 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.Constant
+
 import java.io.{File, IOException}
 import java.net.{URL, URLClassLoader}
-import java.util.function.{Consumer, Supplier}
+import java.util.function.Supplier
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -106,7 +108,9 @@ object ClassLoaderUtils extends Logger {
     loopDirs(file)
   }
 
-  private[this] def loadPath(filepath: String, ext: List[String] = List(".jar", ".zip")): Unit = {
+  private[this] def loadPath(
+      filepath: String,
+      ext: List[String] = List(Constant.JAR_SUFFIX, Constant.ZIP_SUFFIX)): Unit = {
     val file = new File(filepath)
     loopFiles(file, ext)
   }

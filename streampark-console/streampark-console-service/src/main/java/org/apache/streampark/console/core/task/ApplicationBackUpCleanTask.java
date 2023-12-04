@@ -52,7 +52,7 @@ public class ApplicationBackUpCleanTask {
                   .forEach(
                       backUp -> {
                         try {
-                          backUpService.delete(backUp.getId());
+                          backUpService.removeById(backUp.getId());
                         } catch (Exception e) {
                           log.error(
                               "Clean application backup failed for app id: {} , backup id: {}",

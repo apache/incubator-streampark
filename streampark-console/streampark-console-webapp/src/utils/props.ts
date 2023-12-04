@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *    https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 // copy from element-plus
 
 import { warn } from 'vue';
@@ -44,8 +28,8 @@ export type BuildPropOption<T, D extends BuildPropType<T, V, C>, R, V, C> = {
   default?: R extends true
     ? never
     : D extends Record<string, unknown> | Array<any>
-    ? () => D
-    : (() => D) | D;
+      ? () => D
+      : (() => D) | D;
   validator?: ((val: any) => val is C) | ((val: any) => boolean);
 };
 
@@ -53,8 +37,8 @@ type _BuildPropType<T, V, C> =
   | (T extends PropWrapper<unknown>
       ? T[typeof wrapperKey]
       : [V] extends [never]
-      ? ResolvePropTypeWithReadonly<T>
-      : never)
+        ? ResolvePropTypeWithReadonly<T>
+        : never)
   | V
   | C;
 export type BuildPropType<T, V, C> = _BuildPropType<
@@ -69,8 +53,8 @@ type _BuildPropDefault<T, D> = [T] extends [
 ]
   ? D
   : D extends () => T
-  ? ReturnType<D>
-  : D;
+    ? ReturnType<D>
+    : D;
 
 export type BuildPropDefault<T, D, R> = R extends true
   ? { readonly default?: undefined }
@@ -162,12 +146,12 @@ export const buildProps = <
     [K in keyof O]: O[K] extends BuildPropReturn<any, any, any, any, any>
       ? O[K]
       : [O[K]] extends NativePropType
-      ? O[K]
-      : O[K] extends BuildPropOption<infer T, infer D, infer R, infer V, infer C>
-      ? D extends BuildPropType<T, V, C>
-        ? BuildPropOption<T, D, R, V, C>
-        : never
-      : never;
+        ? O[K]
+        : O[K] extends BuildPropOption<infer T, infer D, infer R, infer V, infer C>
+          ? D extends BuildPropType<T, V, C>
+            ? BuildPropOption<T, D, R, V, C>
+            : never
+          : never;
   },
 >(
   props: O,
@@ -178,17 +162,17 @@ export const buildProps = <
     [K in keyof O]: O[K] extends { [propKey]: boolean }
       ? O[K]
       : [O[K]] extends NativePropType
-      ? O[K]
-      : O[K] extends BuildPropOption<
-          infer T,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          infer _D,
-          infer R,
-          infer V,
-          infer C
-        >
-      ? BuildPropReturn<T, O[K]['default'], R, V, C>
-      : never;
+        ? O[K]
+        : O[K] extends BuildPropOption<
+              infer T,
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              infer _D,
+              infer R,
+              infer V,
+              infer C
+            >
+          ? BuildPropReturn<T, O[K]['default'], R, V, C>
+          : never;
   };
 
 export const definePropType = <T>(val: any) => ({ [wrapperKey]: val }) as PropWrapper<T>;

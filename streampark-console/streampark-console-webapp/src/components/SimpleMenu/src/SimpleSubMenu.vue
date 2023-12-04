@@ -1,32 +1,16 @@
-<!--
-  Licensed to the Apache Software Foundation (ASF) under one or more
-  contributor license agreements.  See the NOTICE file distributed with
-  this work for additional information regarding copyright ownership.
-  The ASF licenses this file to You under the Apache License, Version 2.0
-  (the "License"); you may not use this file except in compliance with
-  the License.  You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 <template>
   <MenuItem
     :name="item.path"
     v-if="!menuHasChildren(item) && getShowMenu"
     v-bind="$props"
-    :class="getLevelClass"
+    :class="[getLevelClass, theme]"
   >
-    <Icon v-if="getIcon" :icon="getIcon" :size="20" />
+    <SvgIcon v-if="item.path === '/spark'" name="spark" size="25" class="mr-2" />
     <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-1 collapse-title">
       {{ getI18nName }}
     </div>
     <template #title>
-      <span :class="['ml-2', `${prefixCls}-sub-title`]">
+      <span :class="[`${prefixCls}-sub-title`]">
         {{ getI18nName }}
       </span>
       <SimpleMenuTag :item="item" :collapseParent="getIsCollapseParent" />
@@ -39,11 +23,11 @@
     :collapsedShowTitle="collapsedShowTitle"
   >
     <template #title>
-      <span>
+      <span class="menu-down-svg">
         <SvgIcon v-if="item.path === '/system'" name="management" size="25" />
         <SvgIcon v-if="item.path === '/flink'" name="flink3" size="25" />
-        <SvgIcon v-if="item.path === '/spark'" name="spark" size="25" />
         <SvgIcon v-if="item.path === '/setting'" name="settings" size="25" />
+        <SvgIcon v-if="item.path === '/resource'" name="resource" size="25" />
       </span>
       <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-2 collapse-title">
         {{ getI18nName }}
@@ -64,7 +48,6 @@
 
   import { defineComponent, computed } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import Icon from '/@/components/Icon/index';
 
   import MenuItem from './components/MenuItem.vue';
   import SubMenu from './components/SubMenuItem.vue';
@@ -80,7 +63,6 @@
       SubMenu,
       MenuItem,
       SimpleMenuTag: createAsyncComponent(() => import('./SimpleMenuTag.vue')),
-      Icon,
     },
     props: {
       item: {

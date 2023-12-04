@@ -25,11 +25,11 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="findTeam" resultType="org.apache.streampark.console.system.entity.Team" parameterType="org.apache.streampark.console.system.entity.Team">
+    <select id="selectPage" resultType="org.apache.streampark.console.system.entity.Team" parameterType="org.apache.streampark.console.system.entity.Team">
         select * from t_team
         <where>
             <if test="team.teamName != null and team.teamName != ''">
-                and team_name like '%${team.teamName}%'
+                and team_name like concat('%',#{team.teamName},'%')
             </if>
             <if test="team.createTimeFrom != null and team.createTimeFrom !=''">
                 and create_time &gt; #{team.createTimeFrom}
@@ -43,7 +43,7 @@
         </if>
     </select>
 
-    <select id="findUserTeams" resultType="org.apache.streampark.console.system.entity.Team" parameterType="org.apache.streampark.console.system.entity.Team">
+    <select id="selectTeamsByUserId" resultType="org.apache.streampark.console.system.entity.Team" parameterType="org.apache.streampark.console.system.entity.Team">
         select t.* from t_team t
         join t_member m
         on t.id = m.team_id

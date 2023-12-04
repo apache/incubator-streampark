@@ -37,7 +37,7 @@ public interface ResourceService extends IService<Resource> {
    * @param restRequest queryRequest
    * @return IPage
    */
-  IPage<Resource> page(Resource resource, RestRequest restRequest);
+  IPage<Resource> getPage(Resource resource, RestRequest restRequest);
 
   /**
    * check resource exists by user id
@@ -73,7 +73,7 @@ public interface ResourceService extends IService<Resource> {
    *
    * @param resource
    */
-  void deleteResource(Resource resource);
+  void remove(Resource resource);
 
   /**
    * Get resource through team id.
@@ -81,7 +81,7 @@ public interface ResourceService extends IService<Resource> {
    * @param teamId
    * @return team resources
    */
-  List<Resource> findByTeamId(Long teamId);
+  List<Resource> listByTeamId(Long teamId);
 
   /**
    * change resource owner

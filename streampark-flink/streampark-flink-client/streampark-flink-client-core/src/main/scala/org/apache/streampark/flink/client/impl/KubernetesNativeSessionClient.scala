@@ -40,8 +40,12 @@ import scala.collection.convert.ImplicitConversions._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-/** kubernetes native session mode submit */
-@deprecated("use KubernetesSessionClientV2 instead")
+/**
+ * Kubernetes native session mode submit.
+ * @deprecated
+ *   Please use [[KubernetesSessionClientV2]] instead.
+ */
+@Deprecated
 object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Logger {
 
   @throws[Exception]
@@ -53,7 +57,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
       s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
-    super.trySubmit(submitRequest, flinkConfig)(restApiSubmit)(jobGraphSubmit)
+    super.trySubmit(submitRequest, flinkConfig)(jobGraphSubmit, restApiSubmit)
   }
 
   /** Submit flink session job via rest api. */
@@ -131,7 +135,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   def deploy(deployRequest: DeployRequest): DeployResponse = {
     logInfo(
       s"""
-         |--------------------------------------- kubernetes session start ---------------------------------------
+         |--------------------------------------- kubernetes cluster start ---------------------------------------
          |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
@@ -140,8 +144,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
          |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
-         |    properties       : ${deployRequest.properties.mkString(" ")}
-         |-------------------------------------------------------------------------------------------
+         |    properties       : ${deployRequest.properties.mkString(",")}
+         |--------------------------------------------------------------------------------------------------------
          |""".stripMargin)
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
@@ -237,7 +241,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
           .isPresent
       ) {
         kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
-        ShutDownResponse()
+        ShutDownResponse(shutDownRequest.clusterId)
       } else {
         null
       }

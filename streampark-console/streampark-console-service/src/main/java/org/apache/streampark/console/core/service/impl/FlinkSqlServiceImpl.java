@@ -118,7 +118,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  public List<FlinkSql> history(Application application) {
+  public List<FlinkSql> listFlinkSqlHistory(Application application) {
     LambdaQueryWrapper<FlinkSql> queryWrapper =
         new LambdaQueryWrapper<FlinkSql>()
             .eq(FlinkSql::getAppId, application.getId())
@@ -163,7 +163,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  public void removeApp(Long appId) {
+  public void removeByAppId(Long appId) {
     LambdaQueryWrapper<FlinkSql> queryWrapper =
         new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
     baseMapper.delete(queryWrapper);
@@ -210,12 +210,12 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  public List<FlinkSql> getByTeamId(Long teamId) {
-    return this.baseMapper.getByTeamId(teamId);
+  public List<FlinkSql> listByTeamId(Long teamId) {
+    return this.baseMapper.selectSqlsByTeamId(teamId);
   }
 
   @Override
-  public IPage<FlinkSql> page(Long appId, RestRequest request) {
+  public IPage<FlinkSql> getPage(Long appId, RestRequest request) {
     Page<FlinkSql> page =
         new MybatisPager<FlinkSql>().getPage(request, "version", Constant.ORDER_DESC);
     LambdaQueryWrapper<FlinkSql> queryWrapper =

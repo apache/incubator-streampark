@@ -16,7 +16,7 @@
  */
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigKeys._
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 

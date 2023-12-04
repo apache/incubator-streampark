@@ -87,7 +87,7 @@ public class FlinkAppLostWatcher {
 
   public void watch(List<Application> applications) {
     List<Application> probeApplication =
-        applications.isEmpty() ? applicationManageService.getProbeApps() : applications;
+        applications.isEmpty() ? applicationManageService.listProbeApps() : applications;
     if (probeApplication.isEmpty()) {
       log.info("there is no application that needs to be probe");
       return;
@@ -98,7 +98,7 @@ public class FlinkAppLostWatcher {
             .filter(application -> FlinkAppStateEnum.isLost(application.getState()))
             .collect(Collectors.toList());
     updateState(probeApplication);
-    probeApplication.stream().forEach(this::monitorApplication);
+    probeApplication.forEach(this::monitorApplication);
   }
 
   private void updateState(List<Application> applications) {
@@ -113,12 +113,12 @@ public class FlinkAppLostWatcher {
   }
 
   private void handleProbeResults() {
-    List<Application> probeApps = applicationManageService.getProbeApps();
+    List<Application> probeApps = applicationManageService.listProbeApps();
     if (shouldRetry(probeApps)) {
       watch(probeApps);
     } else {
       List<AlertProbeMsg> alertProbeMsgs = generateProbeResults(probeApps);
-      alertProbeMsgs.stream().forEach(this::alert);
+      alertProbeMsgs.forEach(this::alert);
       reset(probeApps);
     }
   }
@@ -135,7 +135,8 @@ public class FlinkAppLostWatcher {
   }
 
   private void alert(AlertProbeMsg alertProbeMsg) {
-    alertProbeMsg.getAlertId().stream()
+    alertProbeMsg
+        .getAlertId()
         .forEach((alterId) -> alertService.alert(alterId, AlertTemplate.of(alertProbeMsg)));
   }
 

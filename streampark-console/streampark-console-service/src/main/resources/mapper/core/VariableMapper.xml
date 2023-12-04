@@ -29,7 +29,7 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="page" resultType="org.apache.streampark.console.core.entity.Variable" parameterType="org.apache.streampark.console.core.entity.Variable">
+    <select id="selectPage" resultType="org.apache.streampark.console.core.entity.Variable" parameterType="org.apache.streampark.console.core.entity.Variable">
         select
             v.*,
             u.username as creatorName
@@ -38,10 +38,10 @@
         on v.creator_id = u.user_id
         and v.team_id = ${variable.teamId}
         <if test="variable.description != null and variable.description != ''">
-            and v.description like '%${variable.description}%'
+            and v.description like concat('%',#{variable.description},'%')
         </if>
         <if test="variable.variableCode != null and variable.variableCode != ''">
-            and v.variable_code like '%${variable.variableCode}%'
+            and v.variable_code like concat('%',#{variable.variableCode},'%')
         </if>
     </select>
 
@@ -55,7 +55,7 @@
              limit 1
     </select>
 
-    <select id="selectByTeamId" resultType="org.apache.streampark.console.core.entity.Variable">
+    <select id="selectVarsByTeamId" resultType="org.apache.streampark.console.core.entity.Variable">
         select *
         from t_variable
         <where>

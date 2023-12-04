@@ -134,11 +134,11 @@ object YarnSessionClient extends YarnClientTrait {
   }
 
   private[this] def executeClientAction[O, R <: SavepointRequestTrait](
-      request: R,
+      savepointRequestTrait: R,
       flinkConfig: Configuration,
       actFunc: (JobID, ClusterClient[_]) => O): O = {
     flinkConfig
-      .safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
+      .safeSet(YarnConfigOptions.APPLICATION_ID, savepointRequestTrait.clusterId)
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(s"""
                |------------------------------------------------------------------
@@ -152,10 +152,10 @@ object YarnSessionClient extends YarnClientTrait {
       val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       client = clusterDescriptor.retrieve(yarnClusterDescriptor._1).getClusterClient
-      actFunc(JobID.fromHexString(request.jobId), client)
+      actFunc(JobID.fromHexString(savepointRequestTrait.jobId), client)
     } catch {
       case e: Exception =>
-        logError(s"${request.getClass.getSimpleName} for flink yarn session job fail")
+        logError(s"${savepointRequestTrait.getClass.getSimpleName} for flink yarn session job fail")
         e.printStackTrace()
         throw e
     } finally {
@@ -176,15 +176,16 @@ object YarnSessionClient extends YarnClientTrait {
   }
 
   override def doTriggerSavepoint(
-      request: TriggerSavepointRequest,
+      savepointRequest: TriggerSavepointRequest,
       flinkConfig: Configuration): SavepointResponse = {
     executeClientAction(
-      request,
+      savepointRequest,
       flinkConfig,
       (jobID, clusterClient) => {
-        val actionResult = super.triggerSavepoint(request, jobID, clusterClient)
+        val actionResult = super.triggerSavepoint(savepointRequest, jobID, clusterClient)
         SavepointResponse(actionResult)
-      })
+      }
+    )
   }
 
   def deploy(deployRequest: DeployRequest): DeployResponse = {
@@ -195,8 +196,8 @@ object YarnSessionClient extends YarnClientTrait {
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
          |    clusterId        : ${deployRequest.clusterId}
-         |    properties       : ${deployRequest.properties.mkString(" ")}
-         |-------------------------------------------------------------------------------------------
+         |    properties       : ${deployRequest.properties.mkString(",")}
+         |-------------------------------------------------------------------------------------------------------
          |""".stripMargin)
     var clusterDescriptor: YarnClusterDescriptor = null
     var client: ClusterClient[ApplicationId] = null
@@ -271,7 +272,7 @@ object YarnSessionClient extends YarnClientTrait {
       logInfo(s"the ${shutDownRequest.clusterId}'s final status is ${clusterDescriptor.getYarnClient
           .getApplicationReport(ConverterUtils.toApplicationId(shutDownRequest.clusterId))
           .getFinalApplicationStatus}")
-      ShutDownResponse()
+      ShutDownResponse(shutDownRequest.clusterId)
     } catch {
       case e: Exception =>
         logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")

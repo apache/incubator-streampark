@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.entity;
 
-import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 
@@ -101,7 +101,7 @@ public class User implements Serializable {
   private Long lastTeamId;
 
   public void dataMasking() {
-    String dataMask = ConfigConst.DEFAULT_DATAMASK_STRING();
+    String dataMask = Constant.DEFAULT_DATAMASK_STRING;
     this.setPassword(dataMask);
     this.setSalt(dataMask);
   }

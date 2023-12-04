@@ -80,7 +80,8 @@ public class CheckPoints implements Serializable {
     public CheckPointTypeEnum getCheckPointType() {
       if ("CHECKPOINT".equals(this.checkpointType)) {
         return CheckPointTypeEnum.CHECKPOINT;
-      } else if ("SAVEPOINT".equals(this.checkpointType)) {
+      }
+      if ("SAVEPOINT".equals(this.checkpointType)) {
         return CheckPointTypeEnum.SAVEPOINT;
       }
       return CheckPointTypeEnum.SYNC_SAVEPOINT;

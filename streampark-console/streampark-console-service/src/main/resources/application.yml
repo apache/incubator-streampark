@@ -70,21 +70,6 @@ spring:
     converters:
       preferred-json-mapper: jackson
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: [ 'health', 'httptrace', 'metrics' ]
-  endpoint:
-    health:
-      enabled: true
-      show-details: always
-      probes:
-        enabled: true
-  health:
-    ldap:
-      enabled: false
-
 streampark:
   proxy:
     # knox process address https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
@@ -92,8 +77,8 @@ streampark:
     # lark alert proxy,default https://open.feishu.cn
     lark-url:
   yarn:
-    # default sample, or kerberos
-    http-auth: sample
+    # default simple, or kerberos
+    http-auth: simple
 
   # HADOOP_USER_NAME
   hadoop-user-name: hdfs

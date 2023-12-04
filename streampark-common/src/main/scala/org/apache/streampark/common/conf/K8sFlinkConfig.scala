@@ -32,7 +32,7 @@ object K8sFlinkConfig {
 
   //  ======= deprecated =======
 
-  @deprecated
+  @Deprecated
   val jobStatusTrackTaskTimeoutSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-task-timeout-sec.job-status",
     defaultValue = 120L,
@@ -40,7 +40,7 @@ object K8sFlinkConfig {
     description = "run timeout seconds of single flink-k8s metrics tracking task"
   )
 
-  @deprecated
+  @Deprecated
   val metricTrackTaskTimeoutSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric",
     defaultValue = 120L,
@@ -48,7 +48,7 @@ object K8sFlinkConfig {
     description = "run timeout seconds of single flink-k8s job status tracking task"
   )
 
-  @deprecated
+  @Deprecated
   val jobStatueTrackTaskIntervalSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-interval-sec.job-status",
     defaultValue = 5L,
@@ -56,7 +56,7 @@ object K8sFlinkConfig {
     description = "interval seconds between two single flink-k8s metrics tracking task"
   )
 
-  @deprecated
+  @Deprecated
   val metricTrackTaskIntervalSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-interval-sec.cluster-metric",
     defaultValue = 5L,
@@ -64,7 +64,7 @@ object K8sFlinkConfig {
     description = "interval seconds between two single flink-k8s metrics tracking task"
   )
 
-  @deprecated
+  @Deprecated
   val silentStateJobKeepTrackingSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.silent-state-keep-sec",
     defaultValue = 60,
@@ -85,7 +85,7 @@ object K8sFlinkConfig {
   )
 
   /** kubernetes default namespace */
-  @deprecated
+  @Deprecated
   val DEFAULT_KUBERNETES_NAMESPACE = "default"
 
 }

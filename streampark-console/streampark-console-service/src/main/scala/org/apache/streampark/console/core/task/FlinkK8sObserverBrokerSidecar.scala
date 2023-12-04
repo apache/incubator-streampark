@@ -34,7 +34,7 @@ trait FlinkK8sObserverBrokerSidecar {
   def applicationInfoService: ApplicationInfoService
   def flinkClusterService: FlinkClusterService
 
-  // Get Application record by appId from persistent storage.
+  /** Get Application record by appId from persistent storage. */
   protected def safeGetApplicationRecord(appId: Long): UIO[Option[Application]] = {
     ZIO
       .attemptBlocking(Option(applicationInfoService.getById(appId)))
@@ -42,7 +42,7 @@ trait FlinkK8sObserverBrokerSidecar {
       .catchAll(err => logError(s"Fail to get Application record: ${err.getMessage}").as(None))
   } @@ annotated("appId" -> appId.toString)
 
-  // Update Application record by appId into persistent storage.
+  /** Update Application record by appId into persistent storage. */
   protected def safeUpdateApplicationRecord(appId: Long)(update: LambdaUpdateWrapper[Application]): UIO[Unit] = {
     ZIO
       .attemptBlocking(applicationInfoService.update(null, update.eq(Application.SFunc.ID, appId)))
@@ -51,7 +51,7 @@ trait FlinkK8sObserverBrokerSidecar {
       .ignore
   } @@ annotated("appId" -> appId.toString)
 
-  // Get FlinkCluster record by appId from persistent storage.
+  /** Get FlinkCluster record by appId from persistent storage. */
   protected def safeGetFlinkClusterRecord(id: Long): UIO[Option[FlinkCluster]] = {
     ZIO
       .attemptBlocking(Option(flinkClusterService.getById(id)))
@@ -59,7 +59,7 @@ trait FlinkK8sObserverBrokerSidecar {
       .catchAll(err => logError(s"Fail to get FlinkCluster record: ${err.getMessage}").as(None))
   } @@ annotated("id" -> id.toString)
 
-  // Update FlinkCluster record by id into persistent storage.
+  /** Update FlinkCluster record by id into persistent storage. */
   protected def safeUpdateFlinkClusterRecord(id: Long)(update: LambdaUpdateWrapper[FlinkCluster]): UIO[Unit] = {
     ZIO
       .attemptBlocking(flinkClusterService.update(null, update.eq(FlinkCluster.SFunc.ID, id)))
@@ -68,7 +68,7 @@ trait FlinkK8sObserverBrokerSidecar {
       .ignore
   } @@ annotated("id" -> id.toString)
 
-  // Find Application record.
+  /** Find Application record. * */
   protected def safeFindApplication(query: LambdaQueryWrapper[Application])(retryN: Int): UIO[Vector[Application]] = {
     ZIO
       .attemptBlocking {
@@ -81,7 +81,7 @@ trait FlinkK8sObserverBrokerSidecar {
       }
   }
 
-  // Find Application record.
+  /** Find Application record. */
   protected def safeFindFlinkClusterRecord(query: LambdaQueryWrapper[FlinkCluster])(
       retryN: Int): UIO[Vector[FlinkCluster]] = {
     ZIO

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.jdbc.internal
 
-import org.apache.streampark.common.conf.ConfigConst.{DEFAULT_JDBC_INSERT_BATCH, KEY_JDBC_INSERT_BATCH}
+import org.apache.streampark.common.conf.ConfigKeys.{DEFAULT_JDBC_INSERT_BATCH, KEY_JDBC_INSERT_BATCH}
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.{JdbcUtils, Logger}

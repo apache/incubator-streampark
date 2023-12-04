@@ -30,9 +30,7 @@ public interface AccessTokenService extends IService<AccessToken> {
   RestResponse generateToken(Long userId, String expireTime, String description)
       throws InternalException;
 
-  boolean deleteToken(Long id);
-
-  IPage<AccessToken> findAccessTokens(AccessToken tokenParam, RestRequest request);
+  IPage<AccessToken> getPage(AccessToken tokenParam, RestRequest request);
 
   boolean checkTokenEffective(Long userId, String token);
 

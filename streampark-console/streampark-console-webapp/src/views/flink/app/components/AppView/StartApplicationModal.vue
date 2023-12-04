@@ -31,9 +31,9 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRouter } from 'vue-router';
-  import { fetchStart } from '/@/api/flink/app/app';
+  import { fetchStart } from '/@/api/flink/app';
   import { RestoreModeEnum } from '/@/enums/flinkEnum';
-  import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
+  import { fetchFlinkEnv } from '/@/api/flink/flinkEnv';
   import { renderFlinkAppRestoreMode } from '/@/views/flink/app/hooks/useFlinkRender';
 
   const SelectOption = Select.Option;

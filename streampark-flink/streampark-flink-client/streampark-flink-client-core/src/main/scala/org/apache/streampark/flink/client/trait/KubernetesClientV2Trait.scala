@@ -34,6 +34,7 @@ import scala.collection.mutable
 import scala.jdk.CollectionConverters.asScalaBufferConverter
 import scala.util.{Failure, Success, Try}
 
+/** Flink K8s session/application mode cancel and Savepoint */
 trait KubernetesClientV2Trait extends FlinkClientTrait {
 
   protected type FailureMessage = String
@@ -60,6 +61,7 @@ trait KubernetesClientV2Trait extends FlinkClientTrait {
     Try(yamlMapper.readValue(yaml, classOf[Pod]))
   }
 
+  /** Generate JobDef */
   protected def genJobDef(
       flinkConfObj: Configuration,
       jarUriHint: Option[String]): Either[FailureMessage, JobDef] = {
@@ -139,20 +141,20 @@ trait KubernetesClientV2Trait extends FlinkClientTrait {
 
   @throws[Exception]
   override def doTriggerSavepoint(
-      triggerSavepointRequest: TriggerSavepointRequest,
+      savepointRequest: TriggerSavepointRequest,
       flinkConf: Configuration): SavepointResponse = {
 
     val savepointDef = JobSavepointDef(
-      savepointPath = Option(triggerSavepointRequest.savepointPath),
-      formatType = Option(triggerSavepointRequest.nativeFormat)
+      savepointPath = Option(savepointRequest.savepointPath),
+      formatType = Option(savepointRequest.nativeFormat)
         .map(if (_) JobSavepointDef.NATIVE_FORMAT else JobSavepointDef.CANONICAL_FORMAT)
     )
 
     def richMsg: String => String =
-      s"[flink-trigger-savepoint][appId=${triggerSavepointRequest.id}] " + _
+      s"[flink-trigger-savepoint][appId=${savepointRequest.id}] " + _
 
     FlinkK8sOperator
-      .triggerJobSavepoint(triggerSavepointRequest.id, savepointDef)
+      .triggerJobSavepoint(savepointRequest.id, savepointDef)
       .flatMap {
         result =>
           if (result.isFailed) ZIO.fail(TriggerJobSavepointFail(result.failureCause.get))
@@ -165,7 +167,7 @@ trait KubernetesClientV2Trait extends FlinkClientTrait {
       case Failure(err) =>
         logError(
           richMsg(
-            s"Trigger flink job savepoint failed in ${triggerSavepointRequest.executionMode.getName}_V2 mode!"),
+            s"Trigger flink job savepoint failed in ${savepointRequest.executionMode.getName}_V2 mode!"),
           err)
         throw err
     }

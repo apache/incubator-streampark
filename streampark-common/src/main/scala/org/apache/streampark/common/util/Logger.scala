@@ -121,7 +121,7 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
   override def getLoggerFactory: ILoggerFactory = {
     if (contextSelectorBinder.getContextSelector == null) {
       throw new IllegalStateException(
-        "contextSelector cannot be null. See also " + CoreConstants.CODES_URL + "#null_CS")
+        "'contextSelector' cannot be null. See also " + CoreConstants.CODES_URL + "#null_CS")
     }
     contextSelectorBinder.getContextSelector.getLoggerContext
   }

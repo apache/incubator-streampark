@@ -24,10 +24,10 @@
   import { BasicForm, useForm } from '/@/components/Form';
   import { onMounted, reactive, ref, nextTick, unref } from 'vue';
   import { Alert } from 'ant-design-vue';
-  import { fetchMain, fetchUpload, fetchUpdate } from '/@/api/flink/app/app';
+  import { fetchMain, fetchUpload, fetchUpdate } from '/@/api/flink/app';
   import { handleSubmitParams } from './utils';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
-  import { fetchListJars } from '/@/api/flink/project';
+  import { fetchListJars } from '/@/api/resource/project';
   import { useEditFlinkSchema } from './hooks/useEditFlinkSchema';
   import { useEdit } from './hooks/useEdit';
   import { useMessage } from '/@/hooks/web/useMessage';

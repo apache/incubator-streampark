@@ -63,15 +63,15 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   @Autowired private CommonService commonService;
 
   @Override
-  public IPage<Team> findTeams(Team team, RestRequest request) {
+  public IPage<Team> getPage(Team team, RestRequest request) {
     Page<Team> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
-    return this.baseMapper.findTeam(page, team);
+    return this.baseMapper.selectPage(page, team);
   }
 
   @Override
-  public Team findByName(String teamName) {
+  public Team getByName(String teamName) {
     LambdaQueryWrapper<Team> queryWrapper =
         new LambdaQueryWrapper<Team>().eq(Team::getTeamName, teamName);
     return baseMapper.selectOne(queryWrapper);
@@ -79,7 +79,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
   @Override
   public void createTeam(Team team) {
-    Team existedTeam = findByName(team.getTeamName());
+    Team existedTeam = getByName(team.getTeamName());
     ApiAlertException.throwIfFalse(
         existedTeam == null,
         String.format(
@@ -92,7 +92,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   }
 
   @Override
-  public void deleteTeam(Long teamId) {
+  public void removeById(Long teamId) {
     log.info("{} Proceed delete team[Id={}]", commonService.getCurrentUser().getUsername(), teamId);
     Team team = this.getById(teamId);
 
@@ -113,9 +113,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         String.format(
             "Please delete the variables under the team[name=%s] first!", team.getTeamName()));
 
-    memberService.deleteByTeamId(teamId);
+    memberService.removeByTeamId(teamId);
     userService.clearLastTeam(teamId);
-    this.removeById(teamId);
+    super.removeById(teamId);
   }
 
   @Override
@@ -135,7 +135,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   }
 
   @Override
-  public List<Team> findUserTeams(Long userId) {
+  public List<Team> listByUserId(Long userId) {
     User user =
         Optional.ofNullable(userService.getById(userId))
             .orElseThrow(
@@ -144,6 +144,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     if (UserTypeEnum.ADMIN == user.getUserType()) {
       return this.list();
     }
-    return baseMapper.findUserTeams(userId);
+    return baseMapper.selectTeamsByUserId(userId);
   }
 }

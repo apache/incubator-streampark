@@ -85,18 +85,18 @@ public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
     try {
       robotResponse = alertRestTemplate.postForObject(url, entity, RobotResponse.class);
     } catch (Exception e) {
-      log.error("Failed to request WeCom robot alarm,\nurl:{}", url, e);
+      log.error("Failed to request WeCom robot alarm,%nurl:{}", url, e);
       throw new AlertException(
-          String.format("Failed to request WeCom robot alert,\nurl:%s", url), e);
+          String.format("Failed to request WeCom robot alert,%nurl:%s", url), e);
     }
 
     if (robotResponse == null) {
-      throw new AlertException(String.format("Failed to request WeCom robot alert,\nurl:%s", url));
+      throw new AlertException(String.format("Failed to request WeCom robot alert,%nurl:%s", url));
     }
     if (robotResponse.getErrcode() != 0) {
       throw new AlertException(
           String.format(
-              "Failed to request WeCom robot alert,\nurl:%s,\nerrorCode:%d,\nerrorMsg:%s",
+              "Failed to request WeCom robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
               url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
     }
   }

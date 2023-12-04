@@ -29,47 +29,85 @@ import java.util.List;
 public interface VariableService extends IService<Variable> {
 
   /**
-   * find variable
+   * Find variables based on the given variable and query request.
    *
-   * @param variable variable
-   * @param restRequest queryRequest
-   * @return IPage
+   * @param variable The variable to search for.
+   * @param restRequest The query request containing search filters and pagination options.
+   * @return An IPage object containing the found Variable objects matching the search criteria.
    */
-  IPage<Variable> page(Variable variable, RestRequest restRequest);
+  IPage<Variable> getPage(Variable variable, RestRequest restRequest);
 
   /**
-   * get variables through team
+   * Retrieves a list of variables based on the team ID.
    *
-   * @param teamId
-   * @return
+   * @param teamId The ID of the team to filter the variables by.
+   * @return A list of variables that belong to the specified team.
    */
-  List<Variable> findByTeamId(Long teamId);
+  List<Variable> listByTeamId(Long teamId);
 
   /**
-   * Get variables through team and search keywords.
+   * Retrieve a list of variables based on the team ID and search keywords.
    *
-   * @param teamId
-   * @param keyword Fuzzy search keywords through variable code or description, Nullable.
-   * @return
+   * @param teamId The ID of the team for which to retrieve the variables.
+   * @param keyword The fuzzy search keywords used to filter the variables. This parameter is
+   *     nullable.
+   * @return A List of Variable objects that match the specified team ID and search keywords.
    */
-  List<Variable> findByTeamId(Long teamId, String keyword);
+  List<Variable> listByTeamId(Long teamId, String keyword);
 
+  /**
+   * Check if a team exists by teamId.
+   *
+   * @param teamId the id of the team to check.
+   * @return true if a team exists with the given teamId, false otherwise.
+   */
   boolean existsByTeamId(Long teamId);
 
   /**
-   * create variable
+   * Create a variable.
    *
-   * @param variable variable
+   * @param variable The variable to be created.
    */
   void createVariable(Variable variable);
 
-  void deleteVariable(Variable variable);
+  /**
+   * Deletes a Variable.
+   *
+   * @param variable the Variable object to be deleted
+   */
+  void remove(Variable variable);
 
+  /**
+   * Find a Variable by its code and team ID.
+   *
+   * @param teamId The ID of the team to search within.
+   * @param variableCode The code of the variable to find.
+   * @return The Variable found, or null if no match is found.
+   */
   Variable findByVariableCode(Long teamId, String variableCode);
 
+  /**
+   * Replaces a specified variable in the given string with the corresponding variable value.
+   *
+   * @param teamId The identifier of the team.
+   * @param mixed The string that may contain variables to be replaced.
+   * @return The modified string after replacing the variables.
+   */
   String replaceVariable(Long teamId, String mixed);
 
-  IPage<Application> dependAppsPage(Variable variable, RestRequest request);
+  /**
+   * Retrieves a page of dependent applications based on the given variable and request.
+   *
+   * @param variable The variable to use for retrieving dependent applications.
+   * @param request The REST request containing additional parameters for retrieving the page.
+   * @return An instance of IPage<Application> containing the dependent applications.
+   */
+  IPage<Application> getDependAppsPage(Variable variable, RestRequest request);
 
+  /**
+   * Updates the given variable.
+   *
+   * @param variable the variable to be updated
+   */
   void updateVariable(Variable variable);
 }
