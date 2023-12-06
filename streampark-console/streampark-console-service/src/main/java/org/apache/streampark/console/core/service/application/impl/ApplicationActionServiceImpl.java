@@ -88,8 +88,8 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
-import org.apache.hadoop.yarn.exceptions.YarnException;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -102,7 +102,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
@@ -387,12 +386,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
         || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode()
         || FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
-      String jobName = appParam.getJobName();
-      if (checkAppRepeatInYarn(jobName)) {
-        ApiAlertException.throwIfTrue(
-            !application.isCanBeStart(),
-            "[StreamPark] The same task name is already running in the yarn queue");
-      }
+
+      ApiAlertException.throwIfTrue(
+          checkAppRepeatInYarn(application.getJobName()),
+          "[StreamPark] The same task name is already running in the yarn queue");
     }
 
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
@@ -589,11 +586,15 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     YarnClient yarnClient = HadoopUtils.yarnClient();
     try {
       return yarnClient.getApplications().stream()
-          .anyMatch(applicationReport -> applicationReport.getName().equals(jobName));
-    } catch (YarnException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+          .anyMatch(
+              applicationReport ->
+                  (applicationReport.getYarnApplicationState().equals(YarnApplicationState.ACCEPTED)
+                          || applicationReport
+                              .getYarnApplicationState()
+                              .equals(YarnApplicationState.RUNNING))
+                      && applicationReport.getName().equals(jobName));
+    } catch (Exception e) {
+      throw new RuntimeException("The yarn api is abnormal. Ensure that yarn is running properly.");
     }
   }
 
