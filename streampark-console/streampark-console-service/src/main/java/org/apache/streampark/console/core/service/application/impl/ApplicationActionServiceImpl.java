@@ -21,6 +21,7 @@ import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.FlinkRestoreMode;
@@ -88,12 +89,14 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,9 +107,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.net.URI;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -383,9 +389,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     ApiAlertException.throwIfTrue(
         !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
 
-    if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
-        || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode()
-        || FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
+    if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
 
       ApiAlertException.throwIfTrue(
           checkAppRepeatInYarn(application.getJobName()),
@@ -583,16 +587,20 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
    * @return
    */
   private boolean checkAppRepeatInYarn(String jobName) {
-    YarnClient yarnClient = HadoopUtils.yarnClient();
     try {
-      return yarnClient.getApplications().stream()
-          .anyMatch(
-              applicationReport ->
-                  (applicationReport.getYarnApplicationState().equals(YarnApplicationState.ACCEPTED)
-                          || applicationReport
-                              .getYarnApplicationState()
-                              .equals(YarnApplicationState.RUNNING))
-                      && applicationReport.getName().equals(jobName));
+      YarnClient yarnClient = HadoopUtils.yarnClient();
+      Set<String> types =
+          Sets.newHashSet(
+              ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
+      EnumSet<YarnApplicationState> states =
+          EnumSet.of(YarnApplicationState.RUNNING, YarnApplicationState.ACCEPTED);
+      List<ApplicationReport> applications = yarnClient.getApplications(types, states);
+      for (ApplicationReport report : applications) {
+        if (report.getName().equals(jobName)) {
+          return true;
+        }
+      }
+      return false;
     } catch (Exception e) {
       throw new RuntimeException("The yarn api is abnormal. Ensure that yarn is running properly.");
     }
