@@ -33,12 +33,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *    ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<
  *   /____/\__/_/   \___/\__,_/_/ /_/ /_/ ____/\__,_/_/  /_/|_|
  *                                     /_/
- *
- *     Version:  2.2.0-SNAPSHOT
- *     WebSite:  https://streampark.apache.org
- *     GitHub :  https://github.com/apache/incubator-streampark
- *     Info   :  streampark-console start successful
- *     Time   :  2023-12-07T22:07:50.104564290
+ *    Version:  2.2.0-SNAPSHOT
+ *    WebSite:  https://streampark.apache.org
+ *    GitHub :  https://github.com/apache/incubator-streampark
+ *    Info   :  streampark-console start successful
+ *    Time   :  2023-12-07T22:07:50.104564290
  *
  *   [StreamPark] Make stream processing easier ô~ô!
  *
