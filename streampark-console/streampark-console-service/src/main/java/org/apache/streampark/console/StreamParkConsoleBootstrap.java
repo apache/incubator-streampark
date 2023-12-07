@@ -37,7 +37,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *   WebSite:  https://streampark.apache.org
  *   GitHub :  https://github.com/apache/incubator-streampark
  *   Info   :  streampark-console start successful
- *   Time   :  2023-12-07T22:07:50.104564290
+ *   Time   :  xxxx-xx-xxTxx:xx:xx
  *
  *   [StreamPark] Make stream processing easier ô~ô!
  *
