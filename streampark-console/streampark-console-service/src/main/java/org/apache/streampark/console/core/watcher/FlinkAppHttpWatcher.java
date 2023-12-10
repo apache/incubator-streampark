@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.watcher;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -637,6 +638,7 @@ public class FlinkAppHttpWatcher {
     log.info("FlinkAppHttpWatcher stop app,appId:{}", appId);
     WATCHING_APPS.remove(appId);
   }
+
   public static void stopCanceledJob(Long appId) {
     if (!CANCELLED_JOB_MAP.containsKey(appId)) {
       return;
@@ -678,12 +680,13 @@ public class FlinkAppHttpWatcher {
         && (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
             || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode())) {
       String reqURL;
-      if (StringUtils.isBlank(application.getJobManagerUrl()) || ! application.getJobManagerUrl().contains("http") ) {
+      String jmURL = application.getJobManagerUrl();
+      if (StringUtils.isBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
         String format = "proxy/%s/overview";
         reqURL = String.format(format, appId);
       } else {
         String format = "%s/overview";
-        reqURL = String.format(format, application.getJobManagerUrl());
+        reqURL = String.format(format, jmURL);
       }
       return yarnRestRequest(reqURL, Overview.class);
     }
@@ -695,12 +698,13 @@ public class FlinkAppHttpWatcher {
     FlinkExecutionMode execMode = application.getFlinkExecutionMode();
     if (FlinkExecutionMode.isYarnMode(execMode)) {
       String reqURL;
-      if (StringUtils.isBlank(application.getJobManagerUrl()) || ! application.getJobManagerUrl().contains("http") ) {
+      String jmURL = application.getJobManagerUrl();
+      if (StringUtils.isBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
         String format = "proxy/%s/" + flinkUrl;
         reqURL = String.format(format, application.getAppId());
       } else {
         String format = "%s/" + flinkUrl;
-        reqURL = String.format(format, application.getJobManagerUrl());
+        reqURL = String.format(format, jmURL);
       }
       return yarnRestRequest(reqURL, JobsOverview.class);
     }
@@ -729,12 +733,13 @@ public class FlinkAppHttpWatcher {
     FlinkExecutionMode execMode = application.getFlinkExecutionMode();
     if (FlinkExecutionMode.isYarnMode(execMode)) {
       String reqURL;
-      if (StringUtils.isBlank(application.getJobManagerUrl()) || ! application.getJobManagerUrl().contains("http")) {
+      String jmURL = application.getJobManagerUrl();
+      if (StringUtils.isBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
         String format = "proxy/%s/" + flinkUrl;
         reqURL = String.format(format, application.getAppId(), application.getJobId());
       } else {
         String format = "%s/" + flinkUrl;
-        reqURL = String.format(format, application.getJobManagerUrl(), application.getJobId());
+        reqURL = String.format(format, jmURL, application.getJobId());
       }
       return yarnRestRequest(reqURL, CheckPoints.class);
     }
