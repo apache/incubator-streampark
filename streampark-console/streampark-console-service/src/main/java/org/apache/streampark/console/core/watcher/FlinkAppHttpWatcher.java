@@ -681,12 +681,12 @@ public class FlinkAppHttpWatcher {
             || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode())) {
       String reqURL;
       String jmURL = application.getJobManagerUrl();
-      if (StringUtils.isBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
-        String format = "proxy/%s/overview";
-        reqURL = String.format(format, appId);
-      } else {
+      if (StringUtils.isNotBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
         String format = "%s/overview";
         reqURL = String.format(format, jmURL);
+      } else {
+        String format = "proxy/%s/overview";
+        reqURL = String.format(format, appId);
       }
       return yarnRestRequest(reqURL, Overview.class);
     }
@@ -699,12 +699,12 @@ public class FlinkAppHttpWatcher {
     if (FlinkExecutionMode.isYarnMode(execMode)) {
       String reqURL;
       String jmURL = application.getJobManagerUrl();
-      if (StringUtils.isBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
-        String format = "proxy/%s/" + flinkUrl;
-        reqURL = String.format(format, application.getAppId());
-      } else {
+      if (StringUtils.isNotBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
         String format = "%s/" + flinkUrl;
         reqURL = String.format(format, jmURL);
+      } else {
+        String format = "proxy/%s/" + flinkUrl;
+        reqURL = String.format(format, application.getAppId());
       }
       return yarnRestRequest(reqURL, JobsOverview.class);
     }
@@ -734,12 +734,12 @@ public class FlinkAppHttpWatcher {
     if (FlinkExecutionMode.isYarnMode(execMode)) {
       String reqURL;
       String jmURL = application.getJobManagerUrl();
-      if (StringUtils.isBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
-        String format = "proxy/%s/" + flinkUrl;
-        reqURL = String.format(format, application.getAppId(), application.getJobId());
-      } else {
+      if (StringUtils.isNotBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
         String format = "%s/" + flinkUrl;
         reqURL = String.format(format, jmURL, application.getJobId());
+      } else {
+        String format = "proxy/%s/" + flinkUrl;
+        reqURL = String.format(format, application.getAppId(), application.getJobId());
       }
       return yarnRestRequest(reqURL, CheckPoints.class);
     }
