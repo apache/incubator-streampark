@@ -19,7 +19,7 @@ package org.apache.streampark.common.util
 import org.apache.commons.lang3.StringUtils
 
 import java.io._
-import java.net.URL
+import java.net.{HttpURLConnection, URL}
 import java.time.{Duration, LocalDateTime}
 import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
 import java.util.concurrent.locks.LockSupport
@@ -154,6 +154,15 @@ object Utils extends Logger {
         retry(retryCount - 1, interval)(f)
       case Failure(e) => Failure(e)
     }
+  }
+
+  def checkHttpURL(urlString: String) = {
+    Try {
+      val url = new URL(urlString)
+      val connection = url.openConnection.asInstanceOf[HttpURLConnection]
+      connection.setRequestMethod("HEAD")
+      connection.getResponseCode == HttpURLConnection.HTTP_OK
+    }.getOrElse(false)
   }
 
   def printLogo(info: String): Unit = {
