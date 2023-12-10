@@ -31,6 +31,8 @@ rules:
       - configmaps
       - secrets
       - nodes
+      - deployments
+      - ingresses
     verbs:
       - "*"
 {{- end }}
