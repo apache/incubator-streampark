@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+
 public enum ApplicationType {
 
   /** StreamPark Flink */
@@ -34,7 +36,7 @@ public enum ApplicationType {
   private final int type;
   private final String name;
 
-  ApplicationType(int type, String name) {
+  ApplicationType(int type, @Nonnull String name) {
     this.type = type;
     this.name = name;
   }
@@ -43,10 +45,13 @@ public enum ApplicationType {
     return type;
   }
 
+  @Nonnull
   public String getName() {
     return name;
   }
 
+  /** switch param use this, can't be null */
+  @Nonnull
   public static ApplicationType of(int type) {
     for (ApplicationType appType : ApplicationType.values()) {
       if (appType.getType() == type) {

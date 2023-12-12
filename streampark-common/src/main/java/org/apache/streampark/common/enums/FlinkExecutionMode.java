@@ -19,6 +19,9 @@ package org.apache.streampark.common.enums;
 
 import com.google.common.collect.Lists;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import java.util.List;
 
 public enum FlinkExecutionMode {
@@ -48,12 +51,14 @@ public enum FlinkExecutionMode {
 
   private final String name;
 
-  FlinkExecutionMode(Integer mode, String name) {
+  FlinkExecutionMode(@Nonnull Integer mode, @Nonnull String name) {
     this.mode = mode;
     this.name = name;
   }
 
-  public static FlinkExecutionMode of(Integer value) {
+  /** switch param use this, can't be null */
+  @Nonnull
+  public static FlinkExecutionMode of(@Nullable Integer value) {
     for (FlinkExecutionMode mode : values()) {
       if (mode.mode.equals(value)) {
         return mode;
@@ -62,7 +67,7 @@ public enum FlinkExecutionMode {
     return null;
   }
 
-  public static FlinkExecutionMode of(String name) {
+  public static FlinkExecutionMode of(@Nullable String name) {
     for (FlinkExecutionMode mode : values()) {
       if (mode.name.equals(name)) {
         return mode;
@@ -75,58 +80,60 @@ public enum FlinkExecutionMode {
     return mode;
   }
 
+  @Nonnull
   public String getName() {
     return name;
   }
 
-  public static boolean isYarnMode(FlinkExecutionMode mode) {
+  public static boolean isYarnMode(@Nullable FlinkExecutionMode mode) {
     return YARN_PER_JOB == mode || YARN_APPLICATION == mode || YARN_SESSION == mode;
   }
 
   // TODO: We'll inline this method back to the corresponding caller lines
   //  after dropping the yarn perjob mode.
-  public static boolean isYarnPerJobOrAppMode(FlinkExecutionMode mode) {
+  public static boolean isYarnPerJobOrAppMode(@Nullable FlinkExecutionMode mode) {
     return YARN_PER_JOB == mode || YARN_APPLICATION == mode;
   }
 
-  public static boolean isYarnSessionMode(FlinkExecutionMode mode) {
+  public static boolean isYarnSessionMode(@Nullable FlinkExecutionMode mode) {
     return YARN_SESSION == mode;
   }
 
-  public static boolean isYarnMode(Integer value) {
+  public static boolean isYarnMode(@Nullable Integer value) {
     return isYarnMode(of(value));
   }
 
-  public static boolean isKubernetesSessionMode(Integer value) {
+  public static boolean isKubernetesSessionMode(@Nullable Integer value) {
     return KUBERNETES_NATIVE_SESSION == of(value);
   }
 
-  public static boolean isKubernetesMode(FlinkExecutionMode mode) {
+  public static boolean isKubernetesMode(@Nullable FlinkExecutionMode mode) {
     return KUBERNETES_NATIVE_SESSION == mode || KUBERNETES_NATIVE_APPLICATION == mode;
   }
 
-  public static boolean isKubernetesMode(Integer value) {
+  public static boolean isKubernetesMode(@Nullable Integer value) {
     return isKubernetesMode(of(value));
   }
 
-  public static boolean isKubernetesApplicationMode(Integer value) {
+  public static boolean isKubernetesApplicationMode(@Nullable Integer value) {
     return KUBERNETES_NATIVE_APPLICATION == of(value);
   }
 
+  @Nonnull
   public static List<Integer> getKubernetesMode() {
     return Lists.newArrayList(
         KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
   }
 
-  public static boolean isSessionMode(FlinkExecutionMode mode) {
+  public static boolean isSessionMode(@Nullable FlinkExecutionMode mode) {
     return KUBERNETES_NATIVE_SESSION == mode || YARN_SESSION == mode;
   }
 
-  public static boolean isRemoteMode(Integer value) {
+  public static boolean isRemoteMode(@Nullable Integer value) {
     return isRemoteMode(of(value));
   }
 
-  public static boolean isRemoteMode(FlinkExecutionMode mode) {
+  public static boolean isRemoteMode(@Nullable FlinkExecutionMode mode) {
     return REMOTE == mode;
   }
 }

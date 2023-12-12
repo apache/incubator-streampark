@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public enum FlinkDevelopmentMode {
 
   /** custom code */
@@ -32,12 +35,14 @@ public enum FlinkDevelopmentMode {
 
   private final Integer mode;
 
-  FlinkDevelopmentMode(String name, Integer mode) {
+  FlinkDevelopmentMode(@Nonnull String name, @Nonnull Integer mode) {
     this.name = name;
     this.mode = mode;
   }
 
-  public static FlinkDevelopmentMode of(Integer value) {
+  /** switch param use this, can't be null */
+  @Nonnull
+  public static FlinkDevelopmentMode of(@Nullable Integer value) {
     for (FlinkDevelopmentMode flinkDevelopmentMode : values()) {
       if (flinkDevelopmentMode.mode.equals(value)) {
         return flinkDevelopmentMode;
@@ -46,6 +51,7 @@ public enum FlinkDevelopmentMode {
     return null;
   }
 
+  @Nonnull
   public Integer getMode() {
     return mode;
   }

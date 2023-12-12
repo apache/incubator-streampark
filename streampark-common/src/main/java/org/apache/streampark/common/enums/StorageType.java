@@ -19,6 +19,9 @@ package org.apache.streampark.common.enums;
 
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public enum StorageType {
 
   /** hdfs */
@@ -29,15 +32,17 @@ public enum StorageType {
 
   private final String type;
 
-  StorageType(String type) {
+  StorageType(@Nonnull String type) {
     this.type = type;
   }
 
+  @Nonnull
   public String getType() {
     return type;
   }
 
-  public static StorageType of(String identifier) {
+  @Nonnull
+  public static StorageType of(@Nullable String identifier) {
     if (StringUtils.isBlank(identifier)) {
       return LFS;
     }

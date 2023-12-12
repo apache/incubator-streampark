@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.util;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -26,7 +29,8 @@ public class ExceptionUtils {
 
   private ExceptionUtils() {}
 
-  public static String stringifyException(Throwable throwable) {
+  @Nonnull
+  public static String stringifyException(@Nullable Throwable throwable) {
     if (throwable == null) {
       return "(null)";
     }

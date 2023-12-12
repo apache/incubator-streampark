@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nullable;
+
 public enum FlinkSqlValidationFailedType {
 
   /** Basic test failed (such as null, etc.) */
@@ -40,6 +42,7 @@ public enum FlinkSqlValidationFailedType {
     this.failedType = failedType;
   }
 
+  @Nullable
   public static FlinkSqlValidationFailedType of(Integer value) {
     for (FlinkSqlValidationFailedType type : values()) {
       if (type.failedType == value) {
