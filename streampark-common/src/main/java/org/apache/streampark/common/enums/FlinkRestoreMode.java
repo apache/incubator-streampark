@@ -24,7 +24,6 @@ import java.util.Objects;
 
 public enum FlinkRestoreMode {
 
-
   /**
    * In this mode Flink claims ownership of the snapshot and essentially treats it like a
    * checkpoint: its controls the lifecycle and might delete it if it is not needed for recovery
