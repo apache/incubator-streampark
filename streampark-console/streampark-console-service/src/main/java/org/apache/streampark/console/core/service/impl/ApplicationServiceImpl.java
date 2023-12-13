@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.enums.ResolveOrder;
@@ -103,6 +104,9 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.client.api.YarnClient;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -112,6 +116,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -134,11 +139,13 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1423,6 +1430,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       throw new ApiAlertException("[StreamPark] can no found flink version");
     }
 
+    // check job on yarn is already running
+    if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+      ApiAlertException.throwIfTrue(
+          checkAppRepeatInYarn(application.getJobName()),
+          "[StreamPark] The same job name is already running in the yarn queue");
+    }
+
     // if manually started, clear the restart flag
     if (!auto) {
       application.setRestartCount(0);
@@ -1807,5 +1821,31 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   private boolean isYarnNotDefaultQueue(Application application) {
     return ExecutionMode.isYarnPerJobOrAppMode(application.getExecutionModeEnum())
         && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
+  }
+
+  /**
+   * Check whether a job with the same name is running in the yarn queue
+   *
+   * @param jobName
+   * @return
+   */
+  private boolean checkAppRepeatInYarn(String jobName) {
+    try {
+      YarnClient yarnClient = HadoopUtils.yarnClient();
+      Set<String> types =
+          Sets.newHashSet(
+              ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
+      EnumSet<YarnApplicationState> states =
+          EnumSet.of(YarnApplicationState.RUNNING, YarnApplicationState.ACCEPTED);
+      List<ApplicationReport> applications = yarnClient.getApplications(types, states);
+      for (ApplicationReport report : applications) {
+        if (report.getName().equals(jobName)) {
+          return true;
+        }
+      }
+      return false;
+    } catch (Exception e) {
+      throw new RuntimeException("The yarn api is abnormal. Ensure that yarn is running properly.");
+    }
   }
 }
