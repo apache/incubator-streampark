@@ -33,7 +33,8 @@ public enum Semantic {
 
   /** After the fault occurs, the counting results may be lost. */
   NONE;
-@Nullable
+
+  @Nullable
   public static Semantic of(@Nonnull String name) {
     for (Semantic semantic : Semantic.values()) {
       if (name.equals(semantic.name())) {
