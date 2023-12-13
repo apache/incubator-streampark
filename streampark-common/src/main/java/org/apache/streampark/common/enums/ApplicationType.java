@@ -18,6 +18,7 @@
 package org.apache.streampark.common.enums;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public enum ApplicationType {
 
@@ -51,7 +52,7 @@ public enum ApplicationType {
   }
 
   /** switch param use this, can't be null */
-  @Nonnull
+  @Nullable
   public static ApplicationType of(int type) {
     for (ApplicationType appType : ApplicationType.values()) {
       if (appType.getType() == type) {

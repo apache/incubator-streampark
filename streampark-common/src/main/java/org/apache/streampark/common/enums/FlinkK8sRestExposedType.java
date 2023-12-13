@@ -41,7 +41,7 @@ public enum FlinkK8sRestExposedType {
     this.type = type;
   }
 
-  @Nonnull
+  @Nullable
   public static FlinkK8sRestExposedType of(@Nullable Integer value) {
     for (FlinkK8sRestExposedType order : values()) {
       if (order.type.equals(value)) {

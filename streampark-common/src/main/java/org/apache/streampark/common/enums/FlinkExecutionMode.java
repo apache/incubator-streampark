@@ -57,7 +57,7 @@ public enum FlinkExecutionMode {
   }
 
   /** switch param use this, can't be null */
-  @Nonnull
+  @Nullable
   public static FlinkExecutionMode of(@Nullable Integer value) {
     for (FlinkExecutionMode mode : values()) {
       if (mode.mode.equals(value)) {
