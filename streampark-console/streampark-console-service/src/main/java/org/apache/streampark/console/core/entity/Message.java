@@ -40,7 +40,7 @@ public class Message {
   private String title;
 
   /** 1) build failure report 2) task monitoring exception */
-  private Integer type;
+  private NoticeTypeEnum type;
 
   private String context;
 
@@ -54,7 +54,7 @@ public class Message {
     this.appId = appId;
     this.title = title;
     this.context = context;
-    this.type = noticeTypeEnum.get();
+    this.type = noticeTypeEnum;
     this.createTime = new Date();
     this.isRead = false;
   }
