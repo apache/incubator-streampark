@@ -340,6 +340,13 @@ get_pid() {
   fi
 }
 
+ready() {
+  local mavenWrapper="$APP_HOME/bin/.mvn/wrapper/MavenWrapperHelper.class"
+  if [[ -f $mavenWrapper ]]; then
+    rm -f $mavenWrapper >/dev/null 2>&1
+  fi
+}
+
 # shellcheck disable=SC2120
 start() {
   # shellcheck disable=SC2006
@@ -604,9 +611,11 @@ main() {
         debug
         ;;
     "start")
+        ready
         start
         ;;
     "start_docker")
+        ready
         start_docker
         ;;
     "stop")
