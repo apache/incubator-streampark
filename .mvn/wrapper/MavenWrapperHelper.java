@@ -105,7 +105,7 @@ public final class MavenWrapperHelper {
                 }
                 String fileMd5 = getFileMd5(wrapperJar);
                 System.exit(wrapperMd5.equals(fileMd5) ? 0 : 1);
-                
+
             case "verify_dist":
                 propertiesPath = actionArgs[0];
                 properties = new Properties();
