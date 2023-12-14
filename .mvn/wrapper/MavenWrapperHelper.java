@@ -143,7 +143,6 @@ public final class MavenWrapperHelper {
 
     private static int deleteDistribution(LocalDistribution distribution) {
         String distPath = distribution.getZipFile().toFile().getAbsolutePath();
-        String unzipPath = distribution.getDistributionDir().toFile().getAbsolutePath();
         System.err.println("- check distribution error: " + distPath + "is invalid");
         try {
             distribution.getZipFile().toFile().delete();
