@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /** @since 1.2.3 */
 public enum ClusterState {
 
@@ -49,11 +52,12 @@ public enum ClusterState {
 
   private final Integer state;
 
-  ClusterState(Integer state) {
+  ClusterState(@Nonnull Integer state) {
     this.state = state;
   }
 
-  public static ClusterState of(Integer value) {
+  @Nonnull
+  public static ClusterState of(@Nullable Integer value) {
     for (ClusterState clusterState : values()) {
       if (clusterState.state.equals(value)) {
         return clusterState;
@@ -62,7 +66,8 @@ public enum ClusterState {
     return ClusterState.UNKNOWN;
   }
 
-  public static ClusterState of(String name) {
+  @Nonnull
+  public static ClusterState of(@Nullable String name) {
     for (ClusterState clusterState : values()) {
       if (clusterState.name().equals(name)) {
         return clusterState;
@@ -71,11 +76,12 @@ public enum ClusterState {
     return ClusterState.UNKNOWN;
   }
 
+  @Nonnull
   public Integer getState() {
     return state;
   }
 
-  public static boolean isRunning(ClusterState state) {
+  public static boolean isRunning(@Nullable ClusterState state) {
     return RUNNING.equals(state);
   }
 }

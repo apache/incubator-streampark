@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import java.util.Objects;
 
 public enum FlinkRestoreMode {
@@ -55,11 +58,13 @@ public enum FlinkRestoreMode {
     this.mode = mode;
   }
 
+  @Nonnull
   public String getName() {
     return this.toString();
   }
 
-  public static FlinkRestoreMode of(Integer value) {
+  @Nullable
+  public static FlinkRestoreMode of(@Nullable Integer value) {
     for (FlinkRestoreMode flinkRestoreModeEnum : values()) {
       if (Objects.equals(flinkRestoreModeEnum.mode, value)) {
         return flinkRestoreModeEnum;
