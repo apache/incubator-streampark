@@ -341,9 +341,19 @@ get_pid() {
 }
 
 ready() {
-  local mavenWrapper="$APP_HOME/bin/.mvn/wrapper/MavenWrapperHelper.class"
-  if [[ -f $mavenWrapper ]]; then
-    rm -f $mavenWrapper >/dev/null 2>&1
+  javaSource="$APP_HOME/bin/.mvn/wrapper/MavenWrapperHelper.java"
+  javaClass="$APP_HOME/bin/.mvn/wrapper/MavenWrapperHelper.class"
+  wrapperProperties="$APP_HOME/bin/.mvn/wrapper/maven-wrapper.properties"
+  # For Cygwin, switch paths to Windows format before running javac
+  if $cygwin; then
+    javaSource=$(cygpath --path --windows "$javaSource")
+    javaClass=$(cygpath --path --windows "$javaClass")
+  fi
+  ("$JAVA_HOME/bin/javac" "$javaSource")
+  # get distribution unzip path
+  dist_path=`("$JAVA_HOME/bin/java" -cp "$APP_HOME/bin/.mvn/wrapper" MavenWrapperHelper "path_dist" "$wrapperProperties")`
+  if [ $? -eq 0 ]; then
+    rm -f $dist_path > /dev/null 2>&1
   fi
 }
 

@@ -143,6 +143,14 @@ public final class MavenWrapperHelper {
                 }
                 break;
 
+            case "path_dist":
+                propertiesPath = actionArgs[0];
+                properties = new Properties();
+                properties.load(Files.newInputStream(new File(propertiesPath).toPath()));
+                distribution = getLocalDistribution(properties);
+                String unzip = distribution.getDistributionDir().toFile().getAbsolutePath();
+                System.out.println(unzip);
+                System.exit(0);
             default:
                 System.out.println("Unknown action");
                 System.exit(2);
@@ -301,4 +309,3 @@ public final class MavenWrapperHelper {
         }
     }
 }
-
