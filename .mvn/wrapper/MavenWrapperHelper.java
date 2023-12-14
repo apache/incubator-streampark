@@ -34,11 +34,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.jar.JarFile;
 import java.util.zip.ZipFile;
 
 public final class MavenWrapperHelper {
-
-    public static final String MVNW_VERBOSE = "MVNW_VERBOSE";
 
     public static final String PROJECT_STRING = "PROJECT";
 
@@ -99,12 +98,18 @@ public final class MavenWrapperHelper {
                 properties.load(Files.newInputStream(new File(propertiesPath).toPath()));
 
                 String wrapperMd5 = properties.getProperty("wrapperMd5");
-                if (wrapperMd5 == null) {
-                    System.err.println("wrapperMd5 not in " + propertiesPath);
-                    System.exit(1);
+                if (wrapperMd5 != null) {
+                    String fileMd5 = getFileMd5(wrapperJar);
+                    if (!wrapperMd5.equals(fileMd5)) {
+                        System.exit(1);
+                    }
+                } else {
+                    try (JarFile ignored = new JarFile(wrapperJar, true)) {
+                    } catch (Exception e) {
+                        System.exit(1);
+                    }
                 }
-                String fileMd5 = getFileMd5(wrapperJar);
-                System.exit(wrapperMd5.equals(fileMd5) ? 0 : 1);
+                break;
 
             case "verify_dist":
                 propertiesPath = actionArgs[0];
@@ -117,40 +122,43 @@ public final class MavenWrapperHelper {
                     if (distDir.isEmpty()) {
                         String distributionMd5 = properties.getProperty("distributionMd5");
                         if (distributionMd5 != null) {
-                            fileMd5 = getFileMd5(distributionPath);
+                            String fileMd5 = getFileMd5(distributionPath);
                             if (!distributionMd5.equals(fileMd5)) {
-                                int exit = deleteDistribution(distribution);
-                                System.out.println(distribution.getZipFile().toFile().getAbsolutePath());
-                                System.exit(exit);
+                                boolean success = deleteDistribution(distribution);
+                                if (!success) {
+                                    System.out.println(distribution.getZipFile().toFile().getAbsolutePath());
+                                    System.exit(1);
+                                }
                             }
                         } else {
-                            try {
-                                ZipFile zipFile = new ZipFile(distribution.getZipFile().toFile());
-                                zipFile.close();
+                            try (ZipFile ignored = new ZipFile(distribution.getZipFile().toFile())) {
                             } catch (Exception e) {
-                                int exit = deleteDistribution(distribution);
-                                System.out.println(distribution.getZipFile().toFile().getAbsolutePath());
-                                System.exit(exit);
+                                boolean success = deleteDistribution(distribution);
+                                if (!success) {
+                                    System.out.println(distribution.getZipFile().toFile().getAbsolutePath());
+                                    System.exit(1);
+                                }
                             }
                         }
                     }
                 }
-                System.exit(0);
+                break;
+
             default:
-                throw new UnsupportedOperationException("Unknown action \"" + action + "\".");
+                System.out.println("Unknown action");
+                System.exit(2);
         }
     }
 
-    private static int deleteDistribution(LocalDistribution distribution) {
+    private static boolean deleteDistribution(LocalDistribution distribution) {
         String distPath = distribution.getZipFile().toFile().getAbsolutePath();
-        String unzipPath = distribution.getDistributionDir().toFile().getAbsolutePath();
         System.err.println("- check distribution error: " + distPath + "is invalid");
         try {
             distribution.getZipFile().toFile().delete();
-            return 0;
+            return true;
         } catch (Exception e) {
             System.err.println("- delete distribution error: " + distPath);
-            return 1;
+            return false;
         }
     }
 
@@ -294,3 +302,4 @@ public final class MavenWrapperHelper {
         }
     }
 }
+
