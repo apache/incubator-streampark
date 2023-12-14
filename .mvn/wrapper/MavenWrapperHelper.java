@@ -104,11 +104,8 @@ public final class MavenWrapperHelper {
                     System.exit(1);
                 }
                 String fileMd5 = getFileMd5(wrapperJar);
-                if (!wrapperMd5.equals(fileMd5)) {
-                    System.exit(1);
-                }
                 System.exit(wrapperMd5.equals(fileMd5) ? 0 : 1);
-
+                
             case "verify_dist":
                 propertiesPath = actionArgs[0];
                 properties = new Properties();
