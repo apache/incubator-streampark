@@ -340,18 +340,6 @@ get_pid() {
   fi
 }
 
-ready() {
-  javaSource="$APP_HOME/bin/.mvn/wrapper/MavenWrapperHelper.java"
-  javaClass="$APP_HOME/bin/.mvn/wrapper/MavenWrapperHelper.class"
-  wrapperProperties="$APP_HOME/bin/.mvn/wrapper/maven-wrapper.properties"
-  # For Cygwin, switch paths to Windows format before running javac
-  if $cygwin; then
-    javaSource=$(cygpath --path --windows "$javaSource")
-    javaClass=$(cygpath --path --windows "$javaClass")
-  fi
-  ("$JAVA_HOME/bin/javac" "$javaSource")
-}
-
 # shellcheck disable=SC2120
 start() {
   # shellcheck disable=SC2006
@@ -616,11 +604,9 @@ main() {
         debug
         ;;
     "start")
-        ready
         start
         ;;
     "start_docker")
-        ready
         start_docker
         ;;
     "stop")
