@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.FlinkDevelopmentMode
@@ -25,7 +26,6 @@ import org.apache.streampark.common.util.{FileUtils, HdfsUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
-
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
@@ -39,7 +39,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.util
 import java.util.Collections
-
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -51,7 +50,15 @@ object YarnApplicationClient extends YarnClientTrait {
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
       submitRequest.flinkVersion.flinkHome)
+    if (StringUtils.isNotEmpty(submitRequest.hadoopUser)) {
+      UserGroupInformation.setLoginUser(
+        UserGroupInformation.createRemoteUser(submitRequest.hadoopUser));
+      //      UserGroupInformation.createProxyUser(
+      //        UserGroupInformation.getCurrentUser.getUserName,
+      //        UserGroupInformation.createRemoteUser(submitRequest.hadoopUser));
+    }
     val currentUser = UserGroupInformation.getCurrentUser
+    if (StringUtils.isNotEmpty(submitRequest.hadoopUser)) UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser(submitRequest.hadoopUser))
     logDebug(s"UserGroupInformation currentUser: $currentUser")
     if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
       logDebug(s"kerberos Security is Enabled...")

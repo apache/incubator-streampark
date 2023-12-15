@@ -537,7 +537,11 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     switch (appParam.getFlinkExecutionMode()) {
       case YARN_APPLICATION:
+        application.setHadoopUser(appParam.getHadoopUser());
+        break;
       case YARN_PER_JOB:
+        application.setHadoopUser(appParam.getHadoopUser());
+        break;
       case KUBERNETES_NATIVE_APPLICATION:
         application.setFlinkClusterId(null);
         break;
