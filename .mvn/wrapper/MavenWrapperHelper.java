@@ -64,6 +64,7 @@ public final class MavenWrapperHelper {
   public static void main(String[] args) throws Exception {
     String action = args[0].toLowerCase();
     String[] actionArgs = Arrays.copyOfRange(args, 1, args.length);
+    Properties properties;
 
     switch (action) {
       case "download":
@@ -90,10 +91,7 @@ public final class MavenWrapperHelper {
 
       case "verify_wrapper":
         String wrapperJar = actionArgs[0];
-        String propertiesPath = actionArgs[1];
-        Properties properties = new Properties();
-        properties.load(Files.newInputStream(new File(propertiesPath).toPath()));
-
+        properties = getProperties(actionArgs[1]);
         String wrapperMd5 = properties.getProperty("wrapperMd5");
         if (wrapperMd5 != null) {
           String fileMd5 = getFileMd5(wrapperJar);
@@ -109,9 +107,7 @@ public final class MavenWrapperHelper {
         break;
 
       case "verify_dist":
-        propertiesPath = actionArgs[0];
-        properties = new Properties();
-        properties.load(Files.newInputStream(new File(propertiesPath).toPath()));
+        properties = getProperties(actionArgs[0]);
         LocalDistribution distribution = getLocalDistribution(properties);
 
         File zipFile = distribution.getZipFile();
@@ -163,6 +159,12 @@ public final class MavenWrapperHelper {
         System.out.println("Unknown action");
         System.exit(2);
     }
+  }
+
+  private static Properties getProperties(String path) throws IOException {
+    Properties properties = new Properties();
+    properties.load(Files.newInputStream(new File(path).toPath()));
+    return properties;
   }
 
   private static String getMavenCheckCMD(String[] actionArgs) {
