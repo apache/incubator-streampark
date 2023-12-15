@@ -272,9 +272,9 @@ if [ ! -e "$wrapperJarPath" ]; then
 fi
 
 # check distribution file
-dist_path=`("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify_dist" "$wrapperProperties")`
+dist_path=`("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify_dist" "$wrapperProperties" "$JAVACMD" "$MAVEN_PROJECTBASEDIR")`
 if [ $? -eq 1 ]; then
-  rm -f $dist_path
+  rm -f $dist_path > /dev/null 2>&1
   echo "WARN: Check $dist_path invalided, forcefully delete the file...."
 fi
 

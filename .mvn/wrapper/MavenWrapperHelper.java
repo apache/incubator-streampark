@@ -24,10 +24,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,42 +118,59 @@ public final class MavenWrapperHelper {
                 properties = new Properties();
                 properties.load(Files.newInputStream(new File(propertiesPath).toPath()));
                 LocalDistribution distribution = getLocalDistribution(properties);
-                if (distribution.getZipFile().toFile().exists()) {
-                    String distributionPath = distribution.getZipFile().toFile().getAbsolutePath();
-                    List<Path> distDir = listDirs(distribution.getDistributionDir());
-                    if (distDir.isEmpty()) {
-                        String distributionMd5 = properties.getProperty("distributionMd5");
-                        if (distributionMd5 != null) {
-                            String fileMd5 = getFileMd5(distributionPath);
-                            if (!distributionMd5.equals(fileMd5)) {
-                                boolean success = deleteDistribution(distribution);
-                                if (!success) {
-                                    System.out.println(distribution.getZipFile().toFile().getAbsolutePath());
-                                    System.exit(1);
-                                }
+                List<Path> distUnzipDir = listDirs(distribution.getDistributionDir());
+
+                if (!distUnzipDir.isEmpty()) {
+                    // 1) check distribution unzip files
+                    String javaCMD = actionArgs[1];
+                    String mvnWrapperHome = actionArgs[2];
+                    String format =
+                        "%s -classpath %s/.mvn/wrapper/maven-wrapper.jar "
+                            + "-Dmaven.multiModuleProjectDirectory=%s "
+                            + "org.apache.maven.wrapper.MavenWrapperMain -h";
+                    String cmd = String.format(format, javaCMD, mvnWrapperHome, mvnWrapperHome);
+                    boolean success;
+                    try {
+                        Process process = Runtime.getRuntime().exec(cmd);
+                        success = process.exitValue() == 0;
+                    } catch (Exception e) {
+                        success = false;
+                    }
+                    if (!success) {
+                        try {
+                            for (Path dir : distUnzipDir) {
+                                deleteDir(dir);
                             }
-                        } else {
-                            try (ZipFile ignored = new ZipFile(distribution.getZipFile().toFile())) {
-                            } catch (Exception e) {
-                                boolean success = deleteDistribution(distribution);
-                                if (!success) {
-                                    System.out.println(distribution.getZipFile().toFile().getAbsolutePath());
-                                    System.exit(1);
-                                }
+                        } catch (Exception e1) {
+                        }
+                        System.out.println(distribution.getDistributionDir().toFile().getAbsolutePath());
+                        System.exit(1);
+                    }
+                } else if (distribution.getZipFile().toFile().exists()) {
+                    // 1) check distribution zip file
+                    String distributionPath = distribution.getZipFile().toFile().getAbsolutePath();
+                    String distributionMd5 = properties.getProperty("distributionMd5");
+                    if (distributionMd5 != null) {
+                        String fileMd5 = getFileMd5(distributionPath);
+                        if (!distributionMd5.equals(fileMd5)) {
+                            boolean success = deleteDistribution(distribution);
+                            if (!success) {
+                                System.out.println(distribution.getZipFile().toFile().getAbsolutePath());
+                                System.exit(1);
+                            }
+                        }
+                    } else {
+                        try (ZipFile ignored = new ZipFile(distribution.getZipFile().toFile())) {
+                        } catch (Exception e) {
+                            boolean success = deleteDistribution(distribution);
+                            if (!success) {
+                                System.out.println(distribution.getZipFile().toFile().getAbsolutePath());
+                                System.exit(1);
                             }
                         }
                     }
                 }
                 break;
-
-            case "path_dist":
-                propertiesPath = actionArgs[0];
-                properties = new Properties();
-                properties.load(Files.newInputStream(new File(propertiesPath).toPath()));
-                distribution = getLocalDistribution(properties);
-                String unzip = distribution.getDistributionDir().toFile().getAbsolutePath();
-                System.out.println(unzip);
-                System.exit(0);
             default:
                 System.out.println("Unknown action");
                 System.exit(2);
@@ -288,6 +308,28 @@ public final class MavenWrapperHelper {
             mavenUserHome = System.getenv(MAVEN_USER_HOME_ENV_KEY);
         }
         return mavenUserHome == null ? DEFAULT_MAVEN_USER_HOME : Paths.get(mavenUserHome);
+    }
+
+    private static void deleteDir(Path dirPath) throws IOException {
+        Files.walkFileTree(
+            dirPath,
+            new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    if (exc != null) {
+                        throw exc;
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                    throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
     }
 
     public static class LocalDistribution {

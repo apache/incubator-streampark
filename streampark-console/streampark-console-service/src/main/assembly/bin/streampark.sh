@@ -350,11 +350,6 @@ ready() {
     javaClass=$(cygpath --path --windows "$javaClass")
   fi
   ("$JAVA_HOME/bin/javac" "$javaSource")
-  # get distribution unzip path
-  dist_path=`("$JAVA_HOME/bin/java" -cp "$APP_HOME/bin/.mvn/wrapper" MavenWrapperHelper "path_dist" "$wrapperProperties")`
-  if [ $? -eq 0 ]; then
-    rm -f $dist_path > /dev/null 2>&1
-  fi
 }
 
 # shellcheck disable=SC2120
