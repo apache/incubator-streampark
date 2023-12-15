@@ -210,7 +210,7 @@ fi
 if [ -r "$wrapperJarPath" ]; then
   log "Found $wrapperJarPath"
   log "Check found $wrapperJarPath starting"
-  ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath" "$wrapperProperties")
+  ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify_wrapper" "$wrapperJarPath" "$wrapperProperties")
   if [ $? -eq 1 ]; then
     echo "WARN: Check found $wrapperJarPath invalided."
     rm -f $wrapperJarPath
@@ -264,12 +264,20 @@ if [ ! -e "$wrapperJarPath" ]; then
   fi
 
   log "Check $wrapperJarPath."
-  ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath" "$wrapperProperties")
+  ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify_wrapper" "$wrapperJarPath" "$wrapperProperties")
   if [ $? -eq 1 ]; then
     echo "ERROR: Check $wrapperJarPath invalided, please retry"
     exit 1
   fi
 fi
+
+# check distribution file
+dist_path=`("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify_dist" "$wrapperProperties" "$JAVACMD" "$MAVEN_PROJECTBASEDIR")`
+if [ $? -eq 1 ]; then
+  rm -f $dist_path > /dev/null 2>&1
+  echo "WARN: Check $dist_path invalided, forcefully delete the file...."
+fi
+
 ##########################################################################################
 # End of extension
 ##########################################################################################
