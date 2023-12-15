@@ -70,9 +70,9 @@ public class LdapService {
    *
    * @param userId user identity id
    * @param userPwd user login password
-   * @return user email
+   * @return boolean ldapLoginStatus
    */
-  public String ldapLogin(String userId, String userPwd) {
+  public boolean ldapLogin(String userId, String userPwd) {
     if (!enable) {
       throw new ApiAlertException(
           "ldap is not enabled, Please check the configuration: ldap.enable");
@@ -91,7 +91,7 @@ public class LdapService {
     try {
       LdapContext ctx = new InitialLdapContext(ldapEnv, null);
       SearchControls sc = new SearchControls();
-      sc.setReturningAttributes(new String[] {ldapEmailAttribute});
+      sc.setReturningAttributes(new String[] {ldapUserIdentifyingAttribute});
       sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
       EqualsFilter filter = new EqualsFilter(ldapUserIdentifyingAttribute, userId);
       NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, filter.toString(), sc);
@@ -105,18 +105,18 @@ public class LdapService {
             new InitialDirContext(ldapEnv);
           } catch (Exception e) {
             log.warn("invalid ldap credentials or ldap search error", e);
-            return null;
+            return false;
           }
           Attribute attr = attrs.next();
-          if (attr.getID().equals(ldapEmailAttribute)) {
-            return (String) attr.get();
+          if (attr.getID().equals(ldapUserIdentifyingAttribute)) {
+            return true;
           }
         }
       }
     } catch (NamingException e) {
       log.error("ldap search error", e);
-      return null;
+      return false;
     }
-    return null;
+    return false;
   }
 }

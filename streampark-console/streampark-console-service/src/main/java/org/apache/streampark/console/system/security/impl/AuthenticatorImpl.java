@@ -67,8 +67,8 @@ public class AuthenticatorImpl implements Authenticator {
   }
 
   private User ldapAuthenticate(String username, String password) throws Exception {
-    String ldapEmail = ldapService.ldapLogin(username, password);
-    if (ldapEmail == null) {
+    boolean ldapLoginStatus = ldapService.ldapLogin(username, password);
+    if (!ldapLoginStatus) {
       return null;
     }
     // check if user exist
