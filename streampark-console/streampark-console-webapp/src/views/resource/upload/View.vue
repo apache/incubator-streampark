@@ -25,6 +25,14 @@
       </template>
       <template #resetBefore> 1111 </template>
       <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'engineType'">
+          <span v-if="record.engineType === EngineTypeEnum.FLINK">
+            <SvgIcon name="flink" /> Apache Flink
+          </span>
+          <span v-if="record.engineType === EngineTypeEnum.SPARK">
+            <SvgIcon name="spark" /> Apache Spark
+          </span>
+        </template>
         <template v-if="column.dataIndex === 'resourceType'">
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.FLINK_APP">
             <template #icon>
@@ -47,11 +55,11 @@
             UDXF
           </Tag>
 
-          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.NORMAL_JAR">
+          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.JAR_LIBRARY">
             <template #icon>
-              <img :src="normalJarSvg" class="svg-icon" alt="Normal jar" />
+              <img :src="jarSvg" class="svg-icon" alt="jar library" />
             </template>
-            Normal Jar
+            Jar library
           </Tag>
 
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.GROUP">
@@ -60,14 +68,6 @@
             </template>
             GROUP
           </Tag>
-        </template>
-        <template v-if="column.dataIndex === 'engineType'">
-          <span v-if="record.engineType === EngineTypeEnum.FLINK">
-            <SvgIcon name="flink" /> Apache Flink
-          </span>
-          <span v-if="record.engineType === EngineTypeEnum.SPARK">
-            <SvgIcon name="spark" /> Apache Spark
-          </span>
         </template>
         <template v-if="column.dataIndex === 'action'">
           <TableAction
@@ -126,7 +126,7 @@
   import flinkAppSvg from '/@/assets/icons/flink2.svg';
   import connectorSvg from '/@/assets/icons/connector.svg';
   import udxfSvg from '/@/assets/icons/fx.svg';
-  import normalJarSvg from '/@/assets/icons/jar.svg';
+  import jarSvg from '/@/assets/icons/jar.svg';
   import groupSvg from '/@/assets/icons/group.svg';
 
   const teamResource = ref<Array<any>>([]);
