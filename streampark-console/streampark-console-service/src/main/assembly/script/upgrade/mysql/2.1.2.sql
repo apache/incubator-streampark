@@ -22,6 +22,6 @@ set foreign_key_checks = 0;
 
 alter table `t_flink_app`
     add column `dependency` text collate utf8mb4_general_ci default null after `main_class`,
-    modify column `modify_time` datetime not null comment 'modify time';
+    modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
 
 set foreign_key_checks = 1;
