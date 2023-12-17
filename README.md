@@ -26,7 +26,7 @@
 
 <div align="center">
 
-[![stars](https://img.shields.io/github/stars/apache/streampark?style=for-the-badge&label=stars)](https://github.com/apache/incubator-streampark/stargazers)
+[![Stars](https://img.shields.io/github/stars/apache/streampark?style=for-the-badge&label=stars)](https://github.com/apache/incubator-streampark/stargazers)
 [![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg?style=for-the-badge&label=release)](https://github.com/apache/incubator-streampark/releases)
 [![Total Downloads](https://img.shields.io/github/downloads/apache/streampark/total.svg?style=for-the-badge&label=downloads)](https://streampark.apache.org/download)
 [![Twitter Follow](https://img.shields.io/twitter/follow/ASFStreamPark?label=follow&logo=x&style=for-the-badge)](https://twitter.com/ASFStreamPark)
