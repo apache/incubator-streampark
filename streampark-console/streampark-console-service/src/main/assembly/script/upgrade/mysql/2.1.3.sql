@@ -21,6 +21,19 @@ set names utf8mb4;
 set foreign_key_checks = 0;
 
 alter table `t_flink_app`
+    modify column `args` longtext,
+    modify column `dynamic_properties` longtext,
+    modify column `k8s_pod_template` longtext,
+    modify column `k8s_jm_pod_template` longtext,
+    modify column `k8s_tm_pod_template` longtext,
+    modify column `options` longtext comment 'json form of parameter collection ',
     modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
+
+alter table `t_flink_cluster`
+    modify column `options` longtext comment 'json form of parameter collection ',
+    modify column `dynamic_properties` longtext comment 'allows specifying multiple generic configuration options',
+    modify column `exception` longtext comment 'exception information';
+
+alter table `t_message` modify column `context` longtext;
 
 set foreign_key_checks = 1;
