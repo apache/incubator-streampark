@@ -32,7 +32,10 @@ public enum ApplicationType {
   STREAMPARK_SPARK(3, "StreamPark Spark"),
 
   /** Apache Spark */
-  APACHE_SPARK(4, "Apache Spark");
+  APACHE_SPARK(4, "Apache Spark"),
+
+  /** Unknown type replace null */
+  UNKNOWN(5, "unknown");
 
   private final int type;
   private final String name;
@@ -52,13 +55,13 @@ public enum ApplicationType {
   }
 
   /** switch param use this, can't be null */
-  @Nullable
+  @Nonnull
   public static ApplicationType of(int type) {
     for (ApplicationType appType : ApplicationType.values()) {
       if (appType.getType() == type) {
         return appType;
       }
     }
-    return null;
+    return ApplicationType.UNKNOWN;
   }
 }
