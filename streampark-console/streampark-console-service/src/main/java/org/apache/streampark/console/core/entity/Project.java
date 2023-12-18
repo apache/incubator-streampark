@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.CommonUtils;
@@ -194,13 +193,21 @@ public class Project implements Serializable {
     if (mavenHome == null) {
       mavenHome = System.getenv("MAVEN_HOME");
     }
+
+    boolean useWrapper = true;
     if (mavenHome != null) {
       mvn = mavenHome + "/bin/" + mvn;
+      try {
+        Process process = Runtime.getRuntime().exec(mvn + " --version");
+        process.waitFor();
+        Utils.required(process.exitValue() == 0);
+        useWrapper = false;
+      } catch (Exception ignored) {
+        log.warn("try using user-installed maven failed, now use maven-wrapper.");
+      }
     }
 
-    try {
-      CommandUtils.execute(mvn + " --version");
-    } catch (Exception e) {
+    if (useWrapper) {
       if (windows) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
@@ -217,7 +224,7 @@ public class Project implements Serializable {
       } else {
         throw new IllegalArgumentException(
             String.format(
-                "Invalid build args, dangerous operation symbol detected: %s, in your buildArgs: %s",
+                "Invalid maven argument, dangerous operation symbol detected: %s, in your buildArgs: %s",
                 dangerArgs.stream().collect(Collectors.joining(",")), this.buildArgs));
       }
     }
@@ -231,12 +238,12 @@ public class Project implements Serializable {
           cmdBuffer.append(" --settings ").append(setting);
         } else {
           throw new IllegalArgumentException(
-              String.format("Invalid maven setting path, %s no exists or not file", setting));
+              String.format("Invalid maven-setting file path, %s no exists or not file", setting));
         }
       } else {
         throw new IllegalArgumentException(
             String.format(
-                "Invalid maven setting path, dangerous operation symbol detected: %s, in your maven setting path: %s",
+                "Invalid maven-setting file path, dangerous operation symbol detected: %s, in your maven setting path: %s",
                 dangerArgs.stream().collect(Collectors.joining(",")), setting));
       }
     }
