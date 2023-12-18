@@ -18,7 +18,6 @@
 package org.apache.streampark.common.enums;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public enum ApplicationType {
 
