@@ -201,6 +201,7 @@ create table "public"."t_flink_app" (
   "jar" varchar(255) collate "pg_catalog"."default",
   "jar_check_sum" int8,
   "main_class" varchar(255) collate "pg_catalog"."default",
+  "dependency" text collate "pg_catalog"."default",
   "args" text collate "pg_catalog"."default",
   "options" text collate "pg_catalog"."default",
   "hot_params" text collate "pg_catalog"."default",
