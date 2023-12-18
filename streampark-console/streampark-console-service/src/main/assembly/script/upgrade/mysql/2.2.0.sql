@@ -46,6 +46,9 @@ alter table `t_flink_sql`
 alter table `t_flink_app`
     add column `probing` tinyint default 0;
 
+alter table `t_flink_app`
+    add column `hadoop_user` varchar(64) default null;
+
 alter table `t_flink_cluster`
     add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`,
     add column `start_time` datetime default null comment 'start time',

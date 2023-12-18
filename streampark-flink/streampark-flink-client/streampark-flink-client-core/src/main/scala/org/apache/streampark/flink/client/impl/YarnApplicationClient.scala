@@ -53,12 +53,12 @@ object YarnApplicationClient extends YarnClientTrait {
     if (StringUtils.isNotEmpty(submitRequest.hadoopUser)) {
       UserGroupInformation.setLoginUser(
         UserGroupInformation.createRemoteUser(submitRequest.hadoopUser));
+      // TODO use proxy user will be better, but it takes not any effect when I test.
       //      UserGroupInformation.createProxyUser(
       //        UserGroupInformation.getCurrentUser.getUserName,
       //        UserGroupInformation.createRemoteUser(submitRequest.hadoopUser));
     }
     val currentUser = UserGroupInformation.getCurrentUser
-    if (StringUtils.isNotEmpty(submitRequest.hadoopUser)) UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser(submitRequest.hadoopUser))
     logDebug(s"UserGroupInformation currentUser: $currentUser")
     if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
       logDebug(s"kerberos Security is Enabled...")
