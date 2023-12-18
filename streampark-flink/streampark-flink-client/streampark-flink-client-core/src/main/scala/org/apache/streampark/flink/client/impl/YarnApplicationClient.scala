@@ -50,23 +50,31 @@ object YarnApplicationClient extends YarnClientTrait {
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
       submitRequest.flinkVersion.flinkHome)
-    if (StringUtils.isNotEmpty(submitRequest.hadoopUser)) {
-      UserGroupInformation.setLoginUser(
-        UserGroupInformation.createRemoteUser(submitRequest.hadoopUser));
-      // TODO use proxy user will be better, but it takes not any effect when I test.
-      //      UserGroupInformation.createProxyUser(
-      //        UserGroupInformation.getCurrentUser.getUserName,
-      //        UserGroupInformation.createRemoteUser(submitRequest.hadoopUser));
-    }
     val currentUser = UserGroupInformation.getCurrentUser
     logDebug(s"UserGroupInformation currentUser: $currentUser")
-    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
+    val isKerberosSecurityEnabled = HadoopUtils.isKerberosSecurityEnabled(currentUser)
+    if (isKerberosSecurityEnabled) {
       logDebug(s"kerberos Security is Enabled...")
       val useTicketCache =
         flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
       if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
         throw new RuntimeException(
           s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
+      }
+    }
+    if (StringUtils.isNotEmpty(submitRequest.hadoopUser)) {
+      if (isKerberosSecurityEnabled){
+        if(!submitRequest.hadoopUser.equals(currentUser.getUserName)){
+          throw new RuntimeException(
+            s"Hadoop security with Kerberos and use different submit user is not supported now!")
+        }
+      }else{
+        UserGroupInformation.setLoginUser(
+          UserGroupInformation.createRemoteUser(submitRequest.hadoopUser));
+        //TODO use proxy user will be better, but proxyUserUgi need pass to doSubmit method and use proxyUserUgi.doAs
+        //val proxyUserUgi = UserGroupInformation.createProxyUser(
+        //      UserGroupInformation.getCurrentUser.getUserName,
+        //      UserGroupInformation.createRemoteUser(submitRequest.hadoopUser));
       }
     }
     val providedLibs = {
