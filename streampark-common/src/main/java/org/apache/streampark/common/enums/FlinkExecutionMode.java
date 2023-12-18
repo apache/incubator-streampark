@@ -45,8 +45,10 @@ public enum FlinkExecutionMode {
   KUBERNETES_NATIVE_SESSION(5, "kubernetes-session"),
 
   /** kubernetes application */
-  KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
+  KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application"),
 
+  /** Unknown Mode */
+  UNKNOWN(7, "Unknown");
   private final Integer mode;
 
   private final String name;
@@ -57,23 +59,24 @@ public enum FlinkExecutionMode {
   }
 
   /** switch param use this, can't be null */
-  @Nullable
+  @Nonnull
   public static FlinkExecutionMode of(@Nullable Integer value) {
     for (FlinkExecutionMode mode : values()) {
       if (mode.mode.equals(value)) {
         return mode;
       }
     }
-    return null;
+    return FlinkExecutionMode.UNKNOWN;
   }
 
+  @Nonnull
   public static FlinkExecutionMode of(@Nullable String name) {
     for (FlinkExecutionMode mode : values()) {
       if (mode.name.equals(name)) {
         return mode;
       }
     }
-    return null;
+    return FlinkExecutionMode.UNKNOWN;
   }
 
   public int getMode() {
