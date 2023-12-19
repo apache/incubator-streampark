@@ -18,9 +18,11 @@
 package org.apache.streampark.common.enums;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public enum ApplicationType {
+
+  /** Unknown type replace null */
+  UNKNOWN(-1, "unknown"),
 
   /** StreamPark Flink */
   STREAMPARK_FLINK(1, "StreamPark Flink"),
@@ -52,13 +54,13 @@ public enum ApplicationType {
   }
 
   /** switch param use this, can't be null */
-  @Nullable
+  @Nonnull
   public static ApplicationType of(int type) {
     for (ApplicationType appType : ApplicationType.values()) {
       if (appType.getType() == type) {
         return appType;
       }
     }
-    return null;
+    return ApplicationType.UNKNOWN;
   }
 }

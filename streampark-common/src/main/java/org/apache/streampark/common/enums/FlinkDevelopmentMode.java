@@ -22,15 +22,17 @@ import javax.annotation.Nullable;
 
 public enum FlinkDevelopmentMode {
 
+  /** Unknown type replace null */
+  UNKNOWN("Unknown", -1),
+
   /** custom code */
   CUSTOM_CODE("Custom Code", 1),
 
   /** Flink SQL */
   FLINK_SQL("Flink SQL", 2),
 
-  /** Py flink */
+  /** Py flink Mode */
   PYFLINK("Python Flink", 3);
-
   private final String name;
 
   private final Integer mode;
@@ -41,14 +43,14 @@ public enum FlinkDevelopmentMode {
   }
 
   /** switch param use this, can't be null */
-  @Nullable
+  @Nonnull
   public static FlinkDevelopmentMode of(@Nullable Integer value) {
     for (FlinkDevelopmentMode flinkDevelopmentMode : values()) {
       if (flinkDevelopmentMode.mode.equals(value)) {
         return flinkDevelopmentMode;
       }
     }
-    return null;
+    return FlinkDevelopmentMode.UNKNOWN;
   }
 
   @Nonnull
