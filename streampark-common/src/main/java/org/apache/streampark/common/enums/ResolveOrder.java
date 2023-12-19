@@ -38,6 +38,7 @@ public enum ResolveOrder {
     this.order = order;
   }
 
+  /** Try to resolve the given resolve order value into a known {@link ResolveOrder} enum. */
   @Nullable
   public static ResolveOrder of(@Nullable Integer value) {
     for (ResolveOrder order : values()) {

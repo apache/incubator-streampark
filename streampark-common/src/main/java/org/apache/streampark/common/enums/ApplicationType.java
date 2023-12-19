@@ -19,6 +19,7 @@ package org.apache.streampark.common.enums;
 
 import javax.annotation.Nonnull;
 
+/** Application type enum. */
 public enum ApplicationType {
 
   /** Unknown type replace null */
@@ -44,16 +45,18 @@ public enum ApplicationType {
     this.name = name;
   }
 
+  /** Get the type value of the enum. */
   public int getType() {
     return type;
   }
 
+  /** Get the name of application type. */
   @Nonnull
   public String getName() {
     return name;
   }
 
-  /** switch param use this, can't be null */
+  /** Try to resolve the given application type value into a known {@link ApplicationType} enum. */
   @Nonnull
   public static ApplicationType of(int type) {
     for (ApplicationType appType : ApplicationType.values()) {
