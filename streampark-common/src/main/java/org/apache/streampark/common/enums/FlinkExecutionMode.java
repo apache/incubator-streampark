@@ -26,6 +26,9 @@ import java.util.List;
 
 public enum FlinkExecutionMode {
 
+  /** Unknown Mode */
+  UNKNOWN(-1, "Unknown"),
+
   /** Local mode */
   LOCAL(0, "local"),
 
@@ -45,10 +48,7 @@ public enum FlinkExecutionMode {
   KUBERNETES_NATIVE_SESSION(5, "kubernetes-session"),
 
   /** kubernetes application */
-  KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application"),
-
-  /** Unknown Mode */
-  UNKNOWN(7, "Unknown");
+  KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
   private final Integer mode;
 
   private final String name;

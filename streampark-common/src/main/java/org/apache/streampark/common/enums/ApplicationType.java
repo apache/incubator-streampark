@@ -21,6 +21,9 @@ import javax.annotation.Nonnull;
 
 public enum ApplicationType {
 
+  /** Unknown type replace null */
+  UNKNOWN(-1, "unknown"),
+
   /** StreamPark Flink */
   STREAMPARK_FLINK(1, "StreamPark Flink"),
 
@@ -31,10 +34,7 @@ public enum ApplicationType {
   STREAMPARK_SPARK(3, "StreamPark Spark"),
 
   /** Apache Spark */
-  APACHE_SPARK(4, "Apache Spark"),
-
-  /** Unknown type replace null */
-  UNKNOWN(5, "unknown");
+  APACHE_SPARK(4, "Apache Spark");
 
   private final int type;
   private final String name;

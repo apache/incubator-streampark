@@ -22,6 +22,9 @@ import javax.annotation.Nullable;
 
 public enum FlinkDevelopmentMode {
 
+  /** Unknown type replace null */
+  UNKNOWN("Unknown", -1),
+
   /** custom code */
   CUSTOM_CODE("Custom Code", 1),
 
@@ -29,10 +32,7 @@ public enum FlinkDevelopmentMode {
   FLINK_SQL("Flink SQL", 2),
 
   /** Py flink Mode */
-  PYFLINK("Python Flink", 3),
-
-  /** Unknown */
-  UNKNOWN("Unknown", 4);
+  PYFLINK("Python Flink", 3);
   private final String name;
 
   private final Integer mode;
