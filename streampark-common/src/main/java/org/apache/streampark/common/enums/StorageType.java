@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/** Storage type enum. */
 public enum StorageType {
 
   /** hdfs */
@@ -41,6 +42,7 @@ public enum StorageType {
     return type;
   }
 
+  /** Try to resolve the given storage type identifier into a known {@link StorageType}. */
   @Nonnull
   public static StorageType of(@Nullable String identifier) {
     if (StringUtils.isBlank(identifier)) {

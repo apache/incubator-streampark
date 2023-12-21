@@ -20,6 +20,7 @@ package org.apache.streampark.common.enums;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/** The flink deployment mode enum. */
 public enum FlinkDevelopmentMode {
 
   /** Unknown type replace null */
@@ -42,7 +43,12 @@ public enum FlinkDevelopmentMode {
     this.mode = mode;
   }
 
-  /** switch param use this, can't be null */
+  /**
+   * Try to resolve the mode value into {@link FlinkDevelopmentMode}.
+   *
+   * @param value The mode value of potential flink deployment mode.
+   * @return The parsed flink deployment mode.
+   */
   @Nonnull
   public static FlinkDevelopmentMode of(@Nullable Integer value) {
     for (FlinkDevelopmentMode flinkDevelopmentMode : values()) {
@@ -53,6 +59,7 @@ public enum FlinkDevelopmentMode {
     return FlinkDevelopmentMode.UNKNOWN;
   }
 
+  /** Get the mode value of the current {@link FlinkDevelopmentMode} enum. */
   @Nonnull
   public Integer getMode() {
     return mode;

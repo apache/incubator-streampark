@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 
 import java.util.Objects;
 
+/** Flink state restore mode enum. */
 public enum FlinkRestoreMode {
 
   /**
@@ -63,6 +64,9 @@ public enum FlinkRestoreMode {
     return this.toString();
   }
 
+  /**
+   * Try to resolve the given flink restore mode value into a known {@link FlinkRestoreMode} enum.
+   */
   @Nullable
   public static FlinkRestoreMode of(@Nullable Integer value) {
     for (FlinkRestoreMode flinkRestoreModeEnum : values()) {

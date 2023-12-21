@@ -41,6 +41,10 @@ public enum FlinkK8sRestExposedType {
     this.type = type;
   }
 
+  /**
+   * Try to resolve the given Flink K8s Rest-Exposed type value into a known {@link
+   * FlinkK8sRestExposedType} enum.
+   */
   @Nullable
   public static FlinkK8sRestExposedType of(@Nullable Integer value) {
     for (FlinkK8sRestExposedType order : values()) {

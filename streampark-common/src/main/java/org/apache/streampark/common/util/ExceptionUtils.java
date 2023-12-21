@@ -29,6 +29,12 @@ public class ExceptionUtils {
 
   private ExceptionUtils() {}
 
+  /**
+   * Stringify the exception object.
+   *
+   * @param throwable the target exception to stringify.
+   * @return the result of string-exception.
+   */
   @Nonnull
   public static String stringifyException(@Nullable Throwable throwable) {
     if (throwable == null) {
