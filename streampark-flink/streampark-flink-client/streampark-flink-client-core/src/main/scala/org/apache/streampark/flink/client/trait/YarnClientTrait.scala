@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.streampark.common.enums.ApplicationType
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 
@@ -37,6 +38,16 @@ import scala.util.Try
 
 /** yarn application mode submit */
 trait YarnClientTrait extends FlinkClientTrait {
+
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    // yarn application name
+    flinkConfig
+      .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
+      // yarn application Type
+      .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
+      // yarn application Tag
+      .safeSet(YarnConfigOptions.APPLICATION_TAGS, ApplicationType.STREAMPARK_FLINK.getName)
+  }
 
   private[this] def executeClientAction[R <: SavepointRequestTrait, O](
       request: R,

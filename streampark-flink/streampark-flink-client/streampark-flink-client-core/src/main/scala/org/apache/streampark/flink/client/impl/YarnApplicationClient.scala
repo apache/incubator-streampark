@@ -46,6 +46,7 @@ object YarnApplicationClient extends YarnClientTrait {
   private[this] lazy val workspace = Workspace.remote
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    super.setConfig(submitRequest, flinkConfig)
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
       submitRequest.flinkVersion.flinkHome)
     val currentUser = UserGroupInformation.getCurrentUser
@@ -85,10 +86,6 @@ object YarnApplicationClient extends YarnClientTrait {
         PipelineOptions.JARS,
         Collections.singletonList(
           submitRequest.buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath))
-      // yarn application name
-      .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
-      // yarn application Type
-      .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
 
     logInfo(s"""
                |------------------------------------------------------------------
