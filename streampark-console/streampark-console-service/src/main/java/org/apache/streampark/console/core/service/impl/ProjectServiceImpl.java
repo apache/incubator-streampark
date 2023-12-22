@@ -116,7 +116,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public boolean update(Project projectParam) {
     Project project = getById(projectParam.getId());
-    Utils.notNull(project);
+    Utils.requireNotNull(project);
     ApiAlertException.throwIfFalse(
         project.getTeamId().equals(projectParam.getTeamId()),
         "TeamId can't be changed, update project failed.");
@@ -159,7 +159,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public boolean removeById(Long id) {
     Project project = getById(id);
-    Utils.notNull(project);
+    Utils.requireNotNull(project);
     LambdaQueryWrapper<Application> queryWrapper =
         new LambdaQueryWrapper<Application>().eq(Application::getProjectId, id);
     long count = applicationManageService.count(queryWrapper);
@@ -231,7 +231,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public List<String> listModules(Long id) {
     Project project = getById(id);
-    Utils.notNull(project);
+    Utils.requireNotNull(project);
 
     if (BuildStateEnum.SUCCESSFUL != BuildStateEnum.of(project.getBuildState())
         || !project.getDistHome().exists()) {
@@ -297,7 +297,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       }
       List<Map<String, Object>> confList = new ArrayList<>();
       File[] files = unzipFile.listFiles(x -> "conf".equals(x.getName()));
-      Utils.notNull(files);
+      Utils.requireNotNull(files);
       for (File item : files) {
         eachFile(item, confList, true);
       }

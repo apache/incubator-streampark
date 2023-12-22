@@ -98,9 +98,9 @@ public class FlinkStandaloneSessionCluster implements Startable {
 
   @Override
   public void start() {
-    Utils.notNull(jobManagerContainer);
+    Utils.requireNotNull(jobManagerContainer);
     jobManagerContainer.start();
-    Utils.notNull(taskManagerContainers);
+    Utils.requireNotNull(taskManagerContainers);
     for (FlinkContainer taskManagerContainer : taskManagerContainers) {
       taskManagerContainer.start();
     }
@@ -108,11 +108,11 @@ public class FlinkStandaloneSessionCluster implements Startable {
 
   @Override
   public void stop() {
-    Utils.notNull(taskManagerContainers);
+    Utils.requireNotNull(taskManagerContainers);
     for (FlinkContainer taskManagerContainer : taskManagerContainers) {
       taskManagerContainer.stop();
     }
-    Utils.notNull(jobManagerContainer);
+    Utils.requireNotNull(jobManagerContainer);
     jobManagerContainer.stop();
   }
 
