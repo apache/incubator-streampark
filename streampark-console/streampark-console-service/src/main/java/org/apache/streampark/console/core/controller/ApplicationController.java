@@ -246,6 +246,14 @@ public class ApplicationController {
     }
   }
 
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  @PostMapping(value = "check_start")
+  @RequiresPermissions("app:start")
+  public RestResponse checkStart(Long id) {
+    AppExistsState stateEnum = applicationService.checkStart(id);
+    return RestResponse.success(stateEnum.get());
+  }
+
   @Operation(
       summary = "Cancel application",
       tags = {ApiDocConstant.FLINK_APP_OP_TAG})

@@ -639,6 +639,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
+  public AppExistsState checkStart(Long id) {
+    Application application = getById(id);
+    if (application == null) {
+      return AppExistsState.INVALID;
+    }
+    if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+      boolean exists = !getApplicationReports(application.getJobName()).isEmpty();
+      return exists ? AppExistsState.IN_YARN : AppExistsState.NO;
+    }
+    // todo on k8s check...
+    return AppExistsState.NO;
+  }
+
+  @Override
   public String getYarnName(Application appParam) {
     String[] args = new String[2];
     args[0] = "--name";

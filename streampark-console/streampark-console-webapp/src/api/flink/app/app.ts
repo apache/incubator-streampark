@@ -40,6 +40,7 @@ enum APP_API {
   DELETE = '/flink/app/delete',
   DELETE_BAK = '/flink/app/deletebak',
   CREATE = '/flink/app/create',
+  CHECK_START = '/flink/app/check_start',
   START = '/flink/app/start',
   CLEAN = '/flink/app/clean',
   BACKUPS = '/flink/app/backups',
@@ -172,6 +173,10 @@ export function fetchDeleteOperationLog(id: string) {
  */
 export function fetchForcedStop(data: { id: string }): Promise<boolean> {
   return defHttp.post({ url: APP_API.FORCED_STOP, data });
+}
+
+export function fetchCheckStart(data): Promise<AxiosResponse<number>> {
+  return defHttp.post({ url: APP_API.CHECK_START, data }, { isReturnNativeResponse: true });
 }
 
 export function fetchStart(data): Promise<AxiosResponse<Result>> {

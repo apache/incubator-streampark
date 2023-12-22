@@ -17,12 +17,18 @@
 import { Alert, Form, Input, Tag } from 'ant-design-vue';
 import { h, onMounted, reactive, ref, unref, VNode } from 'vue';
 import { handleAppBuildStatueText } from '../utils';
-import { fetchCheckName, fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app/app';
+import {
+  fetchCheckName,
+  fetchCopy,
+  fetchCheckStart,
+  fetchForcedStop,
+  fetchMapping,
+} from '/@/api/flink/app/app';
 import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
 import { fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
-import { AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
+import { AppExistsEnum, AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 
@@ -79,7 +85,31 @@ export const useFlinkApplication = (openStartModal: Fn) => {
   }
 
   /* start application */
-  function handleAppCheckStart(app: Recordable) {
+  async function handleAppCheckStart(app: Recordable) {
+    // when then app is building, show forced starting modal
+    const resp = await fetchCheckStart({
+      id: app.id,
+    });
+    if (resp.data === AppExistsEnum.IN_YARN) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: `current job already exists on yarn, are you sure resubmit the job and managed by StreamPark?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, resubmit',
+        denyButtonText: `No, close`,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await fetchForcedStop({
+            id: app.id,
+          });
+          await handleStart(app);
+          return Promise.resolve(true);
+        }
+      });
+    }
     // when then app is building, show forced starting modal
     if (app['appControl']['allowStart'] === false) {
       handleFetchBuildDetail(app);
