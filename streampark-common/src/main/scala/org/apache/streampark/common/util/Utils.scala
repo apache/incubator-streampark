@@ -43,7 +43,7 @@ object Utils extends Logger {
     notNull(obj, "this argument must not be null")
   }
 
-  def notEmpty(elem: Any): Boolean = {
+  def requireNotEmpty(elem: Any): Boolean = {
     elem match {
       case null => false
       case x if x.isInstanceOf[Array[_]] => elem.asInstanceOf[Array[_]].nonEmpty
@@ -56,7 +56,7 @@ object Utils extends Logger {
     }
   }
 
-  def isEmpty(elem: Any): Boolean = !notEmpty(elem)
+  def isEmpty(elem: Any): Boolean = !requireNotEmpty(elem)
 
   def required(expression: Boolean): Unit = {
     if (!expression) {
