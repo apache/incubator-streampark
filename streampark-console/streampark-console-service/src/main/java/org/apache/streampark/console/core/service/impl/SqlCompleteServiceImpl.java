@@ -184,7 +184,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         nowStep = nowStep.get(nowChar).getNext();
         loc += 1;
       }
-      Utils.notNull(preNode);
+      Utils.requireNotNull(preNode);
       preNode.setStop();
       preNode.setCount(count);
     }

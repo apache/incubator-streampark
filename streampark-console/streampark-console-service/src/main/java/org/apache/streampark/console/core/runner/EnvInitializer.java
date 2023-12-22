@@ -113,7 +113,7 @@ public class EnvInitializer implements ApplicationRunner {
         .forEach(
             key -> {
               InternalOption config = InternalConfigHolder.getConfig(key);
-              Utils.notNull(config);
+              Utils.requireNotNull(config);
               InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 

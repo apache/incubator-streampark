@@ -385,7 +385,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   public void start(Application appParam, boolean auto) throws Exception {
     // 1) check application
     final Application application = getById(appParam.getId());
-    Utils.notNull(application);
+    Utils.requireNotNull(application);
     ApiAlertException.throwIfTrue(
         !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
 
@@ -397,7 +397,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
-    Utils.notNull(buildPipeline);
+    Utils.requireNotNull(buildPipeline);
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
 
@@ -625,7 +625,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     switch (application.getDevelopmentMode()) {
       case FLINK_SQL:
         FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-        Utils.notNull(flinkSql);
+        Utils.requireNotNull(flinkSql);
         // 1) dist_userJar
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
         // 2) appConfig

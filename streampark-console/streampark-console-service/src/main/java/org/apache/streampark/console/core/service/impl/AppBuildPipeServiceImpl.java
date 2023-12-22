@@ -206,7 +206,7 @@ public class AppBuildPipeServiceImpl
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
     if (app.isFlinkSqlJobOrPyFlinkJob()) {
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
-      Utils.notNull(flinkSql);
+      Utils.requireNotNull(flinkSql);
       app.setDependency(flinkSql.getDependency());
       app.setTeamResource(flinkSql.getTeamResource());
     }

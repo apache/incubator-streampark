@@ -443,8 +443,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   private void expire(SavePoint entity) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
     Application application = applicationManageService.getById(entity.getAppId());
-    Utils.notNull(flinkEnv);
-    Utils.notNull(application);
+    Utils.requireNotNull(flinkEnv);
+    Utils.requireNotNull(application);
 
     int cpThreshold =
         tryGetChkNumRetainedFromDynamicProps(application.getDynamicProperties())

@@ -39,7 +39,7 @@ object Utils extends Logger {
     }
   }
 
-  def notNull(obj: Any): Unit = {
+  def requireNotNull(obj: Any): Unit = {
     requireNotNull(obj, "this argument must not be null")
   }
 
