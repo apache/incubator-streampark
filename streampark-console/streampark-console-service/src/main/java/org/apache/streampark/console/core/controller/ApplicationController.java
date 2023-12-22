@@ -361,7 +361,7 @@ public class ApplicationController {
   public RestResponse checkjar(String jar) {
     File file = new File(jar);
     try {
-      Utils.checkJarFile(file.toURI().toURL());
+      Utils.requireCheckJarFile(file.toURI().toURL());
       return RestResponse.success(true);
     } catch (IOException e) {
       return RestResponse.success(file).message(e.getLocalizedMessage());

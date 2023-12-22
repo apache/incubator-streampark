@@ -181,7 +181,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         }
       } else {
         // 2) .jar file(normal or official standard flink project)
-        Utils.checkJarFile(app.toURI().toURL());
+        Utils.requireCheckJarFile(app.toURI().toURL());
         String moduleName = app.getName().replace(Constant.JAR_SUFFIX, "");
         File distHome = project.getDistHome();
         File targetDir = new File(distHome, moduleName);

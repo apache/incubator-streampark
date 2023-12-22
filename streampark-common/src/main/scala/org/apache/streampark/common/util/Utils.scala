@@ -73,7 +73,7 @@ object Utils extends Logger {
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
   @throws[IOException]
-  def checkJarFile(jar: URL): Unit = {
+  def requireCheckJarFile(jar: URL): Unit = {
     val jarFile: File = Try(new File(jar.toURI)) match {
       case Success(x) => x
       case Failure(_) => throw new IOException(s"JAR file path is invalid $jar")
@@ -92,7 +92,7 @@ object Utils extends Logger {
   }
 
   def getJarManifest(jarFile: File): jar.Manifest = {
-    checkJarFile(jarFile.toURL)
+    requireCheckJarFile(jarFile.toURL)
     new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
   }
 

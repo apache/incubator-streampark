@@ -129,7 +129,7 @@ object ClassLoaderUtils extends Logger {
       if (ext.isEmpty) {
         addURL(file)
       } else if (ext.exists(x => file.getName.endsWith(x))) {
-        Utils.checkJarFile(file.toURI.toURL)
+        Utils.requireCheckJarFile(file.toURI.toURL)
         addURL(file)
       }
     }
