@@ -33,14 +33,14 @@ object Utils extends Logger {
 
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
-  def notNull(obj: Any, message: String): Unit = {
+  def requireNotNull(obj: Any, message: String): Unit = {
     if (obj == null) {
       throw new NullPointerException(message)
     }
   }
 
   def notNull(obj: Any): Unit = {
-    notNull(obj, "this argument must not be null")
+    requireNotNull(obj, "this argument must not be null")
   }
 
   def notEmpty(elem: Any): Boolean = {

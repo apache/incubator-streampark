@@ -76,7 +76,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   @Override
   public List<ExternalLink> render(Long appId) {
     Application app = applicationManageService.getById(appId);
-    Utils.notNull(app, "Application doesn't exist");
+    Utils.requireNotNull(app, "Application doesn't exist");
     List<ExternalLink> externalLink = this.list();
     if (externalLink != null && externalLink.size() > 0) {
       // Render the placeholder
