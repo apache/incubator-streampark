@@ -46,7 +46,7 @@ trait YarnClientTrait extends FlinkClientTrait {
       // yarn application Type
       .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
       // yarn application Tag
-      .safeSet(YarnConfigOptions.APPLICATION_TAGS, ApplicationType.STREAMPARK_FLINK.getName)
+      .safeSet(YarnConfigOptions.APPLICATION_TAGS, "streampark")
   }
 
   private[this] def executeClientAction[R <: SavepointRequestTrait, O](

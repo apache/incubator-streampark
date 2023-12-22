@@ -1835,8 +1835,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               YarnApplicationState.SUBMITTED,
               YarnApplicationState.ACCEPTED,
               YarnApplicationState.RUNNING);
-      Set<String> yarnTag = Sets.newHashSet(ApplicationType.STREAMPARK_FLINK.getName());
+      Set<String> yarnTag = Sets.newHashSet("streampark");
       List<ApplicationReport> applications = yarnClient.getApplications(types, states, yarnTag);
+      // Compatible with historical versions.
+      if (applications.isEmpty()) {
+        applications = yarnClient.getApplications(types, states);
+      }
       return applications.stream()
           .filter(report -> report.getName().equals(jobName))
           .collect(Collectors.toList());
