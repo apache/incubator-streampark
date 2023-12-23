@@ -249,8 +249,8 @@ public class ApplicationController {
   @PermissionAction(id = "#app.id", type = PermissionType.APP)
   @PostMapping(value = "check_start")
   @RequiresPermissions("app:start")
-  public RestResponse checkStart(Long id) {
-    AppExistsState stateEnum = applicationService.checkStart(id);
+  public RestResponse checkStart(Application app) {
+    AppExistsState stateEnum = applicationService.checkStart(app);
     return RestResponse.success(stateEnum.get());
   }
 

@@ -121,5 +121,5 @@ public interface ApplicationService extends IService<Application> {
 
   String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception;
 
-  AppExistsState checkStart(Long id);
+  AppExistsState checkStart(Application app);
 }
