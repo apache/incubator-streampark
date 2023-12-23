@@ -226,3 +226,11 @@ export enum RestoreModeEnum {
   CLAIM = 2,
   LEGACY = 3,
 }
+
+export enum AppExistsEnum {
+  NO = 0,
+  IN_DB = 1,
+  IN_YARN = 2,
+  IN_KUBERNETES = 3,
+  INVALID = 4,
+}

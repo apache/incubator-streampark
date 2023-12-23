@@ -21,6 +21,8 @@ import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.io.IOException;
@@ -220,4 +222,18 @@ public interface ApplicationInfoService extends IService<Application> {
    * @return A list of strings representing the names of the uploaded jars.
    */
   List<String> listHistoryUploadJars();
+
+  /**
+   * check application before start
+   *
+   * @param appParam
+   * @return org.apache.streampark.console.core.enums.AppExistsStateEnum
+   */
+  AppExistsStateEnum checkStart(Application appParam);
+
+  /**
+   * @param appName
+   * @return running,submitted, accepted job list in YARN
+   */
+  List<ApplicationReport> getYarnAppReport(String appName);
 }

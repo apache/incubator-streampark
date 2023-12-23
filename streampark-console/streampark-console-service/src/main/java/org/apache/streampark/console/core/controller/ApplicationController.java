@@ -171,6 +171,14 @@ public class ApplicationController {
     return RestResponse.success();
   }
 
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
+  @PostMapping(value = "check_start")
+  @RequiresPermissions("app:start")
+  public RestResponse checkStart(Application app) {
+    AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app);
+    return RestResponse.success(stateEnum.get());
+  }
+
   @Operation(
       summary = "Start application",
       tags = {ApiDocConstant.FLINK_APP_OP_TAG})
