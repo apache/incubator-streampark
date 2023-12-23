@@ -22,7 +22,7 @@ export enum ResourceTypeEnum {
   FLINK_APP = 'FLINK_APP',
   CONNECTOR = 'CONNECTOR',
   UDXF = 'UDXF',
-  NORMAL_JAR = 'NORMAL_JAR',
+  JAR_LIBRARY = 'JAR_LIBRARY',
   GROUP = 'GROUP',
 }
 

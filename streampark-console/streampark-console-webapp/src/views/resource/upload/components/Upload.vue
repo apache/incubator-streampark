@@ -210,58 +210,68 @@
 </script>
 
 <template>
-  <template v-if="props.formModel.resourceType === ResourceTypeEnum.FLINK_APP">
-    <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
-  </template>
-  <template v-else>
-    <Tabs type="card" v-model:activeKey="activeTab" class="pom-card">
-      <TabPane key="pom" tab="Maven pom">
-        <div class="relative">
-          <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
-        </div>
-      </TabPane>
-      <TabPane key="jar" tab="Upload Jar">
-        <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
-      </TabPane>
-    </Tabs>
-  </template>
+  <div class="upload_container">
+    <template v-if="props.formModel.resourceType === ResourceTypeEnum.FLINK_APP">
+      <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
+    </template>
+    <template v-else>
+      <Tabs type="card" v-model:activeKey="activeTab" class="pom-card">
+        <TabPane key="pom" tab="Maven pom">
+          <div class="relative">
+            <div ref="pomBox" class="pom-box" style="height: 300px"></div>
+          </div>
+        </TabPane>
+        <TabPane key="jar" tab="Upload Jar">
+          <UploadJobJar :custom-request="handleCustomDepsRequest" v-model:loading="loading" />
+        </TabPane>
+      </Tabs>
+    </template>
 
-  <div class="dependency-box" v-if="uploadJars.length > 0">
-    <Alert
-      class="dependency-item"
-      v-for="jar in uploadJars"
-      :key="`upload_jars_${jar}`"
-      type="info"
-    >
-      <template #message>
-        <Space>
-          <Tag class="tag-dependency" color="#108ee9">JAR</Tag>
-          {{ jar.split(':')[0] }}
-          <Icon
-            icon="ant-design:close-outlined"
-            class="icon-close cursor-pointer"
-            :size="12"
-            @click="handleRemoveJar(jar)"
-          />
-        </Space>
-      </template>
-    </Alert>
+    <div class="dependency-box" v-if="uploadJars.length > 0">
+      <Alert
+        class="dependency-item"
+        v-for="jar in uploadJars"
+        :key="`upload_jars_${jar}`"
+        type="info"
+      >
+        <template #message>
+          <Space>
+            <Tag class="tag-dependency" color="#108ee9">JAR</Tag>
+            {{ jar.split(':')[0] }}
+            <Icon
+              icon="ant-design:close-outlined"
+              class="icon-close cursor-pointer"
+              :size="12"
+              @click="handleRemoveJar(jar)"
+            />
+          </Space>
+        </template>
+      </Alert>
+    </div>
   </div>
 </template>
 
 <style lang="less">
-  .dependency-box {
-    margin-top: 10px;
-  }
-  .apply-pom {
-    z-index: 99;
-    position: absolute;
-    bottom: 20px;
-    float: right;
-    right: 20px;
-    cursor: pointer;
-    height: 26px;
-    padding: 0 12px;
-    font-size: 12px;
+  .upload_container > {
+    .dependency-box {
+      margin-top: 10px;
+    }
+    .ant-tabs-top > .ant-tabs-nav {
+      margin: 0;
+    }
+    .pom-box {
+      border: 1px solid @border-color-base;
+    }
+    .apply-pom {
+      z-index: 99;
+      position: absolute;
+      bottom: 20px;
+      float: right;
+      right: 20px;
+      cursor: pointer;
+      height: 26px;
+      padding: 0 12px;
+      font-size: 12px;
+    }
   }
 </style>

@@ -23,7 +23,7 @@
     @ok="handleSubmit"
   >
     <template #title>
-      <Icon icon="ant-design:code-outlined" />
+      <SvgIcon name="variable" />
       {{ getTitle }}
     </template>
     <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
@@ -39,9 +39,9 @@
   import { ref, h, computed, unref, reactive } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-  import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
+  import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
   import {
     fetchAddVariable,
     fetchCheckVariableCode,
