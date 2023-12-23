@@ -640,7 +640,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Override
   public AppExistsState checkStart(Application appParam) {
-    Application application = getById(app.getId());
+    Application application = getById(appParam.getId());
     if (application == null) {
       return AppExistsState.INVALID;
     }
