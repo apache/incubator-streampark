@@ -20,9 +20,11 @@ package org.apache.streampark.console.core.service.application.impl;
 import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -51,9 +53,13 @@ import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.client.api.YarnClient;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,9 +71,11 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Manifest;
@@ -315,6 +323,45 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         .filter(fn -> fn.endsWith(Constant.JAR_SUFFIX))
         .limit(DEFAULT_HISTORY_RECORD_LIMIT)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public AppExistsStateEnum checkStart(Application appParam) {
+    Application application = getById(appParam.getId());
+    if (application == null) {
+      return AppExistsStateEnum.INVALID;
+    }
+    if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+      boolean exists = !getYarnAppReport(application.getJobName()).isEmpty();
+      return exists ? AppExistsStateEnum.IN_YARN : AppExistsStateEnum.NO;
+    }
+    // todo on k8s check...
+    return AppExistsStateEnum.NO;
+  }
+
+  @Override
+  public List<ApplicationReport> getYarnAppReport(String appName) {
+    try {
+      YarnClient yarnClient = HadoopUtils.yarnClient();
+      Set<String> types =
+          Sets.newHashSet(
+              ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
+      EnumSet<YarnApplicationState> states =
+          EnumSet.of(
+              YarnApplicationState.NEW,
+              YarnApplicationState.NEW_SAVING,
+              YarnApplicationState.SUBMITTED,
+              YarnApplicationState.ACCEPTED,
+              YarnApplicationState.RUNNING);
+      Set<String> yarnTag = Sets.newHashSet("streampark");
+      List<ApplicationReport> applications = yarnClient.getApplications(types, states, yarnTag);
+      return applications.stream()
+          .filter(report -> report.getName().equals(appName))
+          .collect(Collectors.toList());
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "getYarnAppReport failed. Ensure that yarn is running properly. ", e);
+    }
   }
 
   @Override
