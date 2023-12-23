@@ -31,7 +31,8 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRouter } from 'vue-router';
-  import { fetchStart } from '/@/api/flink/app/app';
+  import { fetchCheckStart, fetchForcedStop, fetchStart } from '/@/api/flink/app/app';
+  import { AppExistsEnum } from '/@/enums/flinkEnum';
 
   const SelectOption = Select.Option;
 
@@ -110,8 +111,21 @@
     baseColProps: { span: 24 },
   });
 
-  /* submit */
   async function handleSubmit() {
+    // when then app is building, show forced starting modal
+    const resp = await fetchCheckStart({
+      id: receiveData.application.id,
+    });
+    if (resp.data.data === AppExistsEnum.IN_YARN) {
+      await fetchForcedStop({
+        id: receiveData.application.id,
+      });
+    }
+    await handleDoSubmit();
+  }
+
+  /* submit */
+  async function handleDoSubmit() {
     try {
       const formValue = (await validate()) as Recordable;
       const savePointed = formValue.startSavePointed;
