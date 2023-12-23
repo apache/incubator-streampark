@@ -127,8 +127,8 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
       .as(
         Request
           .get(s"$flinkJmRestUrl/overview")
-          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+          .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+          .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
           .execute
           .returnContent
           .asString(StandardCharsets.UTF_8))
@@ -140,8 +140,8 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
         .as(
           Request
             .get(s"$flinkJmRestUrl/jobmanager/config")
-            .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-            .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+            .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+            .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
             .execute
             .returnContent
             .asString(StandardCharsets.UTF_8))
