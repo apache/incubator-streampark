@@ -284,7 +284,7 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getMavenWorkHome() {
     String buildHome = this.getAppSource().getAbsolutePath();
-    if (StringUtils.isNotEmpty(this.getPom())) {
+    if (StringUtils.isNotBlank(this.getPom())) {
       buildHome =
           new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
     }

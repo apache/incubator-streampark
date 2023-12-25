@@ -202,7 +202,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   public Boolean remove(Long id, Application appParam) throws InternalException {
     SavePoint savePoint = getById(id);
     try {
-      if (StringUtils.isNotEmpty(savePoint.getPath())) {
+      if (StringUtils.isNotBlank(savePoint.getPath())) {
         appParam.getFsOperator().delete(savePoint.getPath());
       }
       return removeById(id);
