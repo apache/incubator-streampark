@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
@@ -31,6 +32,7 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
@@ -45,6 +47,7 @@ import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.EffectiveService;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
@@ -54,6 +57,7 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
@@ -130,6 +134,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   @Autowired private FlinkK8sObserverStub flinkK8sObserver;
 
   @Autowired private FlinkK8sDataTypeConverterStub flinkK8sDataTypeConverter;
+
+  @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
+  @Autowired private FlinkClusterService flinkClusterService;
 
   @PostConstruct
   public void resetOptionState() {
@@ -462,6 +470,19 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   @Override
   public boolean update(Application appParam) {
     Application application = getById(appParam.getId());
+
+    /* If the original mode is remote, k8s-session, yarn-session, check cluster status */
+    FlinkExecutionMode flinkExecutionMode = application.getFlinkExecutionMode();
+    switch (flinkExecutionMode) {
+      case REMOTE:
+      case YARN_SESSION:
+      case KUBERNETES_NATIVE_SESSION:
+        FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
+        ApiAlertException.throwIfFalse(
+            flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
+            "[StreamPark] update failed, because bind flink cluster not running");
+      default:
+    }
 
     boolean success = validateQueueIfNeeded(application, appParam);
     ApiAlertException.throwIfFalse(
