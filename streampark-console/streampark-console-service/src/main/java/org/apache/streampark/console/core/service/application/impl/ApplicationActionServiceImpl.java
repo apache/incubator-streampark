@@ -21,6 +21,7 @@ import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
+import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.FlinkRestoreMode;
@@ -67,6 +68,7 @@ import org.apache.streampark.console.core.service.application.ApplicationInfoSer
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -170,6 +172,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Autowired private ResourceService resourceService;
 
   @Autowired private FlinkK8sDataTypeConverterStub flinkK8sDataTypeConverter;
+
+  @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
   private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap =
       new ConcurrentHashMap<>();
@@ -389,6 +393,17 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     Utils.requireNotNull(application);
     ApiAlertException.throwIfTrue(
         !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
+
+    if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())
+        || FlinkExecutionMode.isYarnSessionMode(application.getFlinkExecutionMode())) {
+
+      checkBeforeStart(application);
+    }
+
+    if (FlinkExecutionMode.isKubernetesSessionMode(application.getFlinkExecutionMode().getMode())) {
+
+      checkBeforeStart(application);
+    }
 
     if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
 
@@ -812,5 +827,19 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       }
     }
     return null;
+  }
+  /* check flink cluster before job start job */
+  private void checkBeforeStart(Application application) {
+    FlinkEnv flinkEnv = flinkEnvService.getByAppId(application.getId());
+    ApiAlertException.throwIfNull(flinkEnv, "[StreamPark] can no found flink version");
+
+    ApiAlertException.throwIfFalse(
+        flinkClusterService.existsByFlinkEnvId(flinkEnv.getId()),
+        "[StreamPark] The flink cluster don't exist, please check it");
+
+    FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
+    ApiAlertException.throwIfFalse(
+        flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
+        "[StreamPark] The flink cluster not running, please start it");
   }
 }
