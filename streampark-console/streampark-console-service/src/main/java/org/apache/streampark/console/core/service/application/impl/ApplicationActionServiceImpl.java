@@ -477,6 +477,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                 ? null
                 : FlinkRestoreMode.of(appParam.getRestoreMode()),
             applicationArgs,
+            application.getHadoopUser(),
             buildResult,
             kubernetesSubmitParam,
             extraParameter);
