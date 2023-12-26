@@ -396,12 +396,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())
         || FlinkExecutionMode.isYarnSessionMode(application.getFlinkExecutionMode())) {
-
       checkBeforeStart(application);
     }
 
     if (FlinkExecutionMode.isKubernetesSessionMode(application.getFlinkExecutionMode().getMode())) {
-
       checkBeforeStart(application);
     }
 
