@@ -826,6 +826,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
     return null;
   }
+
   /* check flink cluster before job start job */
   private void checkBeforeStart(Application application) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(application.getId());
