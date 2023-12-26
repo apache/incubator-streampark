@@ -46,6 +46,13 @@ public class FlinkClusterController {
 
   @Autowired private FlinkClusterService flinkClusterService;
 
+  @Operation(summary = "List flink clusters that are eligible")
+  @PostMapping("availableList")
+  public RestResponse listAvailableCluster() {
+    List<FlinkCluster> flinkClusters = flinkClusterService.listAvailableCluster();
+    return RestResponse.success(flinkClusters);
+  }
+
   @Operation(summary = "List flink clusters")
   @PostMapping("list")
   public RestResponse list() {
