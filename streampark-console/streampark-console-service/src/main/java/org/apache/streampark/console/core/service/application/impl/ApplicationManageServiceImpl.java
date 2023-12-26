@@ -481,6 +481,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         ApiAlertException.throwIfFalse(
             flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
             "[StreamPark] update failed, because bind flink cluster not running");
+        break;
       default:
     }
 
