@@ -395,11 +395,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
 
     if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())
-        || FlinkExecutionMode.isYarnSessionMode(application.getFlinkExecutionMode())) {
-      checkBeforeStart(application);
-    }
-
-    if (FlinkExecutionMode.isKubernetesSessionMode(application.getFlinkExecutionMode().getMode())) {
+        || FlinkExecutionMode.isSessionMode(application.getFlinkExecutionMode())) {
       checkBeforeStart(application);
     }
 
