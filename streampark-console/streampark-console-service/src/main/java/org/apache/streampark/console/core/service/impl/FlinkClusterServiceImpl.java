@@ -101,6 +101,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Autowired private FlinkK8sObserverStub flinkK8sObserver;
 
   @Override
+  public List<FlinkCluster> listAvailableCluster() {
+    LambdaQueryWrapper<FlinkCluster> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+    lambdaQueryWrapper.eq(FlinkCluster::getClusterState, ClusterState.RUNNING);
+    return this.list(lambdaQueryWrapper);
+  }
+
+  @Override
   public ResponseResult check(FlinkCluster cluster) {
     ResponseResult result = new ResponseResult();
     result.setStatus(0);
