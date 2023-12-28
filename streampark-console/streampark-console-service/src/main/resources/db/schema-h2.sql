@@ -96,6 +96,7 @@ create table if not exists `t_flink_app` (
   `default_mode_ingress` text ,
   `tags` varchar(500) default null,
   `probing` tinyint default 0,
+  `hadoop_user` varchar(500) default null,
   primary key(`id`)
 );
 

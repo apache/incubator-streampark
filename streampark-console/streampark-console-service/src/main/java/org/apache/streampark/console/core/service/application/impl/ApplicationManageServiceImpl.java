@@ -438,6 +438,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     newApp.setJarCheckSum(oldApp.getJarCheckSum());
     newApp.setTags(oldApp.getTags());
     newApp.setTeamId(oldApp.getTeamId());
+    newApp.setHadoopUser(oldApp.getHadoopUser());
 
     boolean saved = save(newApp);
     if (saved) {
@@ -559,7 +560,11 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     switch (appParam.getFlinkExecutionMode()) {
       case YARN_APPLICATION:
+        application.setHadoopUser(appParam.getHadoopUser());
+        break;
       case YARN_PER_JOB:
+        application.setHadoopUser(appParam.getHadoopUser());
+        break;
       case KUBERNETES_NATIVE_APPLICATION:
         application.setFlinkClusterId(null);
         break;

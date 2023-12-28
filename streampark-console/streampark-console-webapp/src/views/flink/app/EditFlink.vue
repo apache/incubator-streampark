@@ -87,6 +87,7 @@
         args: app.args || '',
         jar: app.jar,
         description: app.description,
+        hadoopUser: app.hadoopUser,
         dynamicProperties: app.dynamicProperties,
         resolveOrder: app.resolveOrder,
         executionMode: app.executionMode,
