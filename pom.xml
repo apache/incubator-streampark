@@ -124,6 +124,7 @@
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <scala-maven-plugin.version>4.7.1</scala-maven-plugin.version>
+        <maven-apache-rat-plugin.version>0.15</maven-apache-rat-plugin.version>
         <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
@@ -740,6 +741,53 @@
                         </execution>
                     </executions>
                 </plugin>
+
+
+                <!--mvn apache-rat:check-->
+                <plugin>
+                    <groupId>org.apache.rat</groupId>
+                    <artifactId>apache-rat-plugin</artifactId>
+                    <version>${maven-apache-rat-plugin.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>.asf.yaml</exclude>
+                            <exclude>.git-blame-ignore-revs</exclude>
+                            <exclude>dist-material/**</exclude>
+                            <exclude>deploy/**</exclude>
+                            <exclude>**/.idea/</exclude>
+                            <exclude>**/*.iml</exclude>
+                            <exclude>**/*.txt</exclude>
+                            <exclude>**/*.json</exclude>
+                            <exclude>**/*.md</exclude>
+                            <exclude>.git/</exclude>
+                            <exclude>.gitignore</exclude>
+                            <exclude>**/.settings/*</exclude>
+                            <exclude>**/.classpath</exclude>
+                            <exclude>**/.project</exclude>
+                            <exclude>**/target/**</exclude>
+                            <exclude>**/out/**</exclude>
+                            <exclude>**/*.log</exclude>
+                            <exclude>README.md</exclude>
+                            <exclude>**/META-INF/**</exclude>
+                            <exclude>.github/**</exclude>
+                            <exclude>compiler/**</exclude>
+                            <exclude>.editorconfig</exclude>
+                            <exclude>mvnw</exclude>
+                            <exclude>mvnw.cmd</exclude>
+                            <exclude>.licenserc.yaml</exclude>
+                            <exclude>.scalafmt.conf</exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>rat-validate</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>validate</phase>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -772,6 +820,11 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
             </plugin>
         </plugins>
 
