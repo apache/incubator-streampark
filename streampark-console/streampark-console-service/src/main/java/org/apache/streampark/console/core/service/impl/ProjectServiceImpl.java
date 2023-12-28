@@ -85,6 +85,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
+  /* TODO improve 3.5 Concurrent Processing */
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,

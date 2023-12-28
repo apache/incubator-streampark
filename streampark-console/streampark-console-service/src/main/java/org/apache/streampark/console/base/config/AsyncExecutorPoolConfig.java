@@ -40,4 +40,107 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
     return executor;
   }
+
+  @Bean("triggerSavepointExecutor")
+  public Executor savepointExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("trigger-savepoint-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
+
+  @Bean("flinkRestAPIWatchingExecutor")
+  public Executor restAPIWatchingExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("flink-restapi-watching-executor-");
+    return executor;
+  }
+
+  @Bean("flinkClusterWatchingExecutor")
+  public Executor clusterWatchingExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("flink-cluster-watching-executor-");
+    return executor;
+  }
+
+  @Bean("streamparkBuildPipelineExecutor")
+  public Executor pipelineExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("streampark-build-pipeline-executor-");
+
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
+
+  @Bean("streamparkClusterExecutor")
+  public Executor clusterExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("streampark-cluster-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
+
+  @Bean("streamparkNotifyExecutor")
+  public Executor notifyExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(20);
+    executor.setThreadNamePrefix("streampark-notify-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
+
+  @Bean("streamparkDeployExecutor")
+  public Executor deployExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("streampark-deploy-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
+
+  @Bean("streamparkBuildExecutor")
+  public Executor buildExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("streampark-build-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
 }

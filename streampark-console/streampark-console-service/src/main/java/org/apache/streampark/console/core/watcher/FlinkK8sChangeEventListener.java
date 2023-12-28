@@ -74,7 +74,7 @@ public class FlinkK8sChangeEventListener {
   @Lazy @Autowired private AlertService alertService;
 
   @Lazy @Autowired private FlinkCheckpointProcessor checkpointProcessor;
-
+  /* TODO 3.5 Concurrent Processing */
   private final ExecutorService executor =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,

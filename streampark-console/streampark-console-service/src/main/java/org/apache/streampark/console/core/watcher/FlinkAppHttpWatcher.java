@@ -158,6 +158,7 @@ public class FlinkAppHttpWatcher {
 
   private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
+  /* TODO 3.5 Concurrent Processing */
   private static final ExecutorService EXECUTOR =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,

@@ -149,6 +149,7 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ResourceService resourceService;
 
+  /* TODO improve 3.5 Concurrent Processing */
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,

@@ -131,6 +131,7 @@ import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.
 public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements ApplicationActionService {
 
+  /* TODO improve 3.5 Concurrent Processing */
   private final ExecutorService executorService =
       new ThreadPoolExecutor(
           Runtime.getRuntime().availableProcessors() * 5,
