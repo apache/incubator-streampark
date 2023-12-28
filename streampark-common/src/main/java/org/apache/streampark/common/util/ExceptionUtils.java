@@ -48,4 +48,18 @@ public class ExceptionUtils {
       return e.getClass().getName() + " (error while printing stack trace)";
     }
   }
+
+  @FunctionalInterface
+  public interface WrapperRuntimeExceptionHandler<I, O> {
+    O handle(I input) throws Exception;
+  }
+
+  public static <I, O> O wrapRuntimeException(
+      I input, WrapperRuntimeExceptionHandler<I, O> handler) {
+    try {
+      return handler.handle(input);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
