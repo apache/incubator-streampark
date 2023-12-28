@@ -78,7 +78,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -498,8 +497,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
           project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
       jarFile = new File(modulePath, appParam.getJar());
     }
-    Manifest manifest = Utils.getJarManifest(jarFile);
-    return manifest.getMainAttributes().getValue("Main-Class");
+    return Utils.getJarManClass(jarFile);
   }
 
   @Override
