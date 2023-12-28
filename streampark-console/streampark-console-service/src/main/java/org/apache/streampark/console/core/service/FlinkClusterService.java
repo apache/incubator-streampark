@@ -29,6 +29,8 @@ import java.util.List;
 
 public interface FlinkClusterService extends IService<FlinkCluster> {
 
+  List<FlinkCluster> listAvailableCluster();
+
   ResponseResult check(FlinkCluster flinkCluster);
 
   Boolean create(FlinkCluster flinkCluster);
