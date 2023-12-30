@@ -23,7 +23,6 @@ import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -43,6 +42,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -53,9 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /** This implementation is currently used for tracing Cluster on yarn,remote,K8s mode */
@@ -69,6 +67,10 @@ public class FlinkClusterWatcher {
 
   @Autowired private ApplicationInfoService applicationInfoService;
 
+  @Qualifier("flinkClusterWatchingExecutor")
+  @Autowired
+  private Executor executorService;
+
   private Long lastWatchTime = 0L;
 
   // Track interval  every 30 seconds
@@ -81,16 +83,6 @@ public class FlinkClusterWatcher {
       Caffeine.newBuilder().expireAfterWrite(WATCHER_INTERVAL).build();
 
   private boolean immediateWatch = false;
-
-  /** Thread pool for processing status monitoring for each cluster */
-  private static final ExecutorService EXECUTOR =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("flink-cluster-watching-executor"));
 
   /** Initialize cluster cache */
   @PostConstruct
@@ -113,7 +105,7 @@ public class FlinkClusterWatcher {
       immediateWatch = false;
       WATCHER_CLUSTERS.forEach(
           (aLong, flinkCluster) ->
-              EXECUTOR.execute(
+              executorService.execute(
                   () -> {
                     ClusterState state = getClusterState(flinkCluster);
                     switch (state) {
