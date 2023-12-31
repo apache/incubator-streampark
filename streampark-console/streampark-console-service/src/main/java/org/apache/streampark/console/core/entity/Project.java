@@ -248,11 +248,7 @@ public class Project implements Serializable {
     Pattern pattern = Pattern.compile("(`.*?`)|(\\$\\((.*?)\\))");
     Matcher matcher = pattern.matcher(param);
     if (matcher.find()) {
-      String dangerArgs = matcher.group(1);
-      if (dangerArgs == null) {
-        dangerArgs = matcher.group(2);
-      }
-      return dangerArgs;
+      return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
     }
 
     String result = null;
