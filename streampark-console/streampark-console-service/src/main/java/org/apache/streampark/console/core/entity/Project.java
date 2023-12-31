@@ -264,7 +264,7 @@ public class Project implements Serializable {
     }
 
     String result = null;
-    Iterator<String> dangerIter = Arrays.asList(";", "|", "&", "||", "&&").iterator();
+    Iterator<String> dangerIter = Arrays.asList(";", "|", "&", ">").iterator();
     String[] argsList = param.split("\\s+");
     while (result == null && dangerIter.hasNext()) {
       String danger = dangerIter.next();
