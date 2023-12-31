@@ -248,19 +248,22 @@ public class Project implements Serializable {
     Pattern pattern = Pattern.compile("(`.*?`)|(\\$\\((.*?)\\))");
     Matcher matcher = pattern.matcher(param);
     if (matcher.find()) {
-      return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
+      String dangerArgs = matcher.group(1);
+      if (dangerArgs == null) {
+        dangerArgs = matcher.group(2);
+      }
+      return dangerArgs;
     }
 
     String result = null;
     Iterator<String> dangerIter = Arrays.asList(";", "|", "&", "||", "&&").iterator();
-    Iterator<String> argsIter = Arrays.stream(param.split("\\s+")).iterator();
-
+    String[] argsList = param.split("\\s+");
     while (result == null && dangerIter.hasNext()) {
       String danger = dangerIter.next();
-      while (result == null && argsIter.hasNext()) {
-        String arg = argsIter.next();
+      for (String arg : argsList) {
         if (arg.contains(danger)) {
           result = arg;
+          break;
         }
       }
     }
