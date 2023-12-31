@@ -64,10 +64,6 @@ public class Variable implements Serializable {
 
   private transient Date modifyTime;
 
-  private transient String sortField;
-
-  private transient String sortOrder;
-
   public void dataMasking() {
     if (desensitization) {
       this.setVariableValue(ConfigConst.DEFAULT_DATAMASK_STRING());

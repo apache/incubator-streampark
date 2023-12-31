@@ -48,10 +48,6 @@ public class Member implements Serializable {
 
   private transient String roleName;
 
-  private transient String sortField;
-
-  private transient String sortOrder;
-
   private transient String createTimeFrom;
 
   private transient String createTimeTo;

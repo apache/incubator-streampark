@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
@@ -64,9 +65,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
   @Override
   public IPage<Team> findTeams(Team team, RestRequest request) {
-    Page<Team> page = new Page<>();
-    page.setCurrent(request.getPageNum());
-    page.setSize(request.getPageSize());
+    Page<Team> page = new MybatisPager<Team>().getDefaultPage(request);
     return this.baseMapper.findTeam(page, team);
   }
 

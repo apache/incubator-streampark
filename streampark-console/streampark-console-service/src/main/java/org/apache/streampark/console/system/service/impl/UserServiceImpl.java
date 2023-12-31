@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.Team;
@@ -70,11 +71,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   public IPage<User> findUserDetail(User user, RestRequest request) {
-    Page<User> page = new Page<>();
-    page.setCurrent(request.getPageNum());
-    page.setSize(request.getPageSize());
+    Page<User> page = new MybatisPager<User>().getDefaultPage(request);
     IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
-
     Utils.notNull(resPage);
     if (resPage.getTotal() == 0) {
       resPage.setRecords(Collections.emptyList());

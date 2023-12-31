@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.RoleMenu;
 import org.apache.streampark.console.system.mapper.RoleMapper;
@@ -59,9 +60,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
   @Override
   public IPage<Role> findRoles(Role role, RestRequest request) {
-    Page<Role> page = new Page<>();
-    page.setCurrent(request.getPageNum());
-    page.setSize(request.getPageSize());
+    Page<Role> page = new MybatisPager<Role>().getDefaultPage(request);
     return this.baseMapper.findRole(page, role);
   }
 

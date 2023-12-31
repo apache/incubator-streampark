@@ -21,6 +21,7 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -74,9 +75,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest request) {
     Utils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
     Utils.notNull(yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
-    Page<YarnQueue> page = new Page<>();
-    page.setCurrent(request.getPageNum());
-    page.setSize(request.getPageSize());
+    Page<YarnQueue> page = new MybatisPager<YarnQueue>().getDefaultPage(request);
     return this.baseMapper.findQueues(page, yarnQueue);
   }
 

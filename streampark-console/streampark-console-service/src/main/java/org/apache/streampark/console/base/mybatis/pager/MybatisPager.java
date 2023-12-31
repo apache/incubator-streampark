@@ -33,7 +33,13 @@ import java.util.List;
 public final class MybatisPager<T> {
 
   public Page<T> getDefaultPage(RestRequest request) {
-    return getPage(request, Constant.DEFAULT_SORT_FIELD, Constant.ORDER_DESC);
+    if (request.getSortField() == null) {
+      request.setSortField(Constant.DEFAULT_SORT_FIELD);
+    }
+    if (request.getSortOrder() == null) {
+      request.setSortField(Constant.ORDER_DESC);
+    }
+    return getPage(request, request.getSortField(), request.getSortOrder());
   }
 
   public Page<T> getPage(RestRequest request, String defaultSort, String defaultOrder) {

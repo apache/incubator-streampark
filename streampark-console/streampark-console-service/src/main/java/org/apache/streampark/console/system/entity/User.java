@@ -84,10 +84,6 @@ public class User implements Serializable {
 
   private transient String oldPassword;
 
-  private transient String sortField;
-
-  private transient String sortOrder;
-
   private transient String createTimeFrom;
   private transient String createTimeTo;
 
