@@ -19,7 +19,6 @@ package org.apache.streampark.console.base.mybatis.pager;
 
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.WebUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,27 +43,25 @@ public final class MybatisPager<T> {
 
     List<OrderItem> orderItems = new ArrayList<>(0);
     if (!StringUtils.isAnyBlank(request.getSortField(), request.getSortOrder())) {
-      ApiAlertException.throwIfTrue(
-          checkField(request.getSortField()),
-          "Invalid sortField argument: " + request.getSortField());
+
+      checkField(request.getSortField(), "sortField");
 
       String sortField = WebUtils.camelToUnderscore(request.getSortField());
-      if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
+      if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
         orderItems.add(OrderItem.desc(sortField));
-      } else if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_ASC)) {
+      } else if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_ASC)) {
         orderItems.add(OrderItem.asc(sortField));
       } else {
-        throw new ApiAlertException("Invalid sortOrder argument: " + request.getSortOrder());
+        throw new IllegalArgumentException("Invalid argument sortOrder: " + request.getSortOrder());
       }
     } else if (StringUtils.isNotBlank(defaultSort)) {
-      ApiAlertException.throwIfTrue(
-          checkField(defaultSort), "Invalid defaultSort argument: " + defaultSort);
-      if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
+      checkField(defaultSort, "defaultSort");
+      if (StringUtils.equalsIgnoreCase(defaultOrder, Constant.ORDER_DESC)) {
         orderItems.add(OrderItem.desc(defaultSort));
-      } else if (StringUtils.equals(defaultOrder, Constant.ORDER_ASC)) {
+      } else if (StringUtils.equalsIgnoreCase(defaultOrder, Constant.ORDER_ASC)) {
         orderItems.add(OrderItem.asc(defaultSort));
       } else {
-        throw new ApiAlertException("Invalid sortOrder argument: " + defaultOrder);
+        throw new IllegalArgumentException("Invalid argument sortOrder: " + defaultOrder);
       }
     }
 
@@ -75,7 +72,11 @@ public final class MybatisPager<T> {
     return page;
   }
 
-  private boolean checkField(String value) {
-    return value != null && value.trim().split("\\s+").length > 1;
+  private void checkField(String field, String fieldName) {
+    boolean invalid = field != null && field.trim().split("\\s+").length > 1;
+    if (invalid) {
+      throw new IllegalArgumentException(
+          String.format("Invalid argument %s: %s", fieldName, field));
+    }
   }
 }
