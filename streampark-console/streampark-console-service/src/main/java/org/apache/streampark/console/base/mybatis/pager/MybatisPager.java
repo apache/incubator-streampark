@@ -30,59 +30,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public final class MybatisPager<T> {
+public final class MybatisPager {
 
-  public Page<T> getDefaultPage(RestRequest request) {
+  public static <T> Page<T> getPage(RestRequest request) {
     if (request.getSortField() == null) {
       request.setSortField(Constant.DEFAULT_SORT_FIELD);
+    } else {
+      boolean invalid = request.getSortField().trim().split("\\s+").length > 1;
+      if (invalid) {
+        throw new IllegalArgumentException(
+            String.format("Invalid argument sortField: %s", request.getSortField()));
+      }
     }
-    if (request.getSortOrder() == null) {
-      request.setSortField(Constant.ORDER_DESC);
-    }
-    return getPage(request, request.getSortField(), request.getSortOrder());
-  }
 
-  public Page<T> getPage(RestRequest request, String defaultSort, String defaultOrder) {
+    if (request.getSortOrder() == null) {
+      request.setSortOrder(Constant.ORDER_DESC);
+    }
+
     Page<T> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
 
     List<OrderItem> orderItems = new ArrayList<>(0);
-    if (!StringUtils.isAnyBlank(request.getSortField(), request.getSortOrder())) {
-
-      checkField(request.getSortField(), "sortField");
-
-      String sortField = WebUtils.camelToUnderscore(request.getSortField());
-      if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
-        orderItems.add(OrderItem.desc(sortField));
-      } else if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_ASC)) {
-        orderItems.add(OrderItem.asc(sortField));
-      } else {
-        throw new IllegalArgumentException("Invalid argument sortOrder: " + request.getSortOrder());
-      }
-    } else if (StringUtils.isNotBlank(defaultSort)) {
-      checkField(defaultSort, "defaultSort");
-      if (StringUtils.equalsIgnoreCase(defaultOrder, Constant.ORDER_DESC)) {
-        orderItems.add(OrderItem.desc(defaultSort));
-      } else if (StringUtils.equalsIgnoreCase(defaultOrder, Constant.ORDER_ASC)) {
-        orderItems.add(OrderItem.asc(defaultSort));
-      } else {
-        throw new IllegalArgumentException("Invalid argument sortOrder: " + defaultOrder);
-      }
+    String sortField = WebUtils.camelToUnderscore(request.getSortField());
+    if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
+      orderItems.add(OrderItem.desc(sortField));
+    } else if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_ASC)) {
+      orderItems.add(OrderItem.asc(sortField));
+    } else {
+      throw new IllegalArgumentException("Invalid argument sortOrder: " + request.getSortOrder());
     }
-
-    if (!orderItems.isEmpty()) {
-      page.setOrders(orderItems);
-    }
-
+    page.setOrders(orderItems);
     return page;
-  }
-
-  private void checkField(String field, String fieldName) {
-    boolean invalid = field != null && field.trim().split("\\s+").length > 1;
-    if (invalid) {
-      throw new IllegalArgumentException(
-          String.format("Invalid argument %s: %s", fieldName, field));
-    }
   }
 }

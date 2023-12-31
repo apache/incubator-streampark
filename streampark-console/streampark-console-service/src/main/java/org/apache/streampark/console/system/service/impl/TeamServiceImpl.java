@@ -65,7 +65,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
   @Override
   public IPage<Team> findTeams(Team team, RestRequest request) {
-    Page<Team> page = new MybatisPager<Team>().getDefaultPage(request);
+    Page<Team> page = MybatisPager.getPage(request);
     return this.baseMapper.findTeam(page, team);
   }
 

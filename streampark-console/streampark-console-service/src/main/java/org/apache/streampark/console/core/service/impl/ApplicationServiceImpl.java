@@ -483,7 +483,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (appParam.getTeamId() == null) {
       return null;
     }
-    Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
+    Page<Application> page = MybatisPager.getPage(request);
     if (CommonUtils.notEmpty(appParam.getStateArray())) {
       if (Arrays.stream(appParam.getStateArray())
           .anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {

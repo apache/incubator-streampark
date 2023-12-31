@@ -75,7 +75,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest request) {
     Utils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
     Utils.notNull(yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
-    Page<YarnQueue> page = new MybatisPager<YarnQueue>().getDefaultPage(request);
+    Page<YarnQueue> page = MybatisPager.getPage(request);
     return this.baseMapper.findQueues(page, yarnQueue);
   }
 

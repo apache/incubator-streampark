@@ -22,7 +22,6 @@ import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -422,8 +421,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Override
   public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
-    Page<SavePoint> page =
-        new MybatisPager<SavePoint>().getPage(request, "trigger_time", Constant.ORDER_DESC);
+    request.setSortField("trigger_time");
+    Page<SavePoint> page = MybatisPager.getPage(request);
     LambdaQueryWrapper<SavePoint> queryWrapper =
         new LambdaQueryWrapper<SavePoint>().eq(SavePoint::getAppId, savePoint.getAppId());
     return this.page(page, queryWrapper);

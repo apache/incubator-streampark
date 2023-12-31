@@ -71,7 +71,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   public IPage<User> findUserDetail(User user, RestRequest request) {
-    Page<User> page = new MybatisPager<User>().getDefaultPage(request);
+    Page<User> page = MybatisPager.getPage(request);
     IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
     Utils.notNull(resPage);
     if (resPage.getTotal() == 0) {

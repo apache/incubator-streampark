@@ -178,7 +178,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public IPage<Project> page(Project project, RestRequest request) {
-    Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
+    Page<Project> page = MybatisPager.getPage(request);
     return this.baseMapper.page(page, project);
   }
 
