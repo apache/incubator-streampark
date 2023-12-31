@@ -19,6 +19,7 @@ package org.apache.streampark.console.base.mybatis.pager;
 
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.WebUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("unchecked")
 public final class MybatisPager<T> {
@@ -42,26 +44,55 @@ public final class MybatisPager<T> {
     page.setSize(request.getPageSize());
 
     List<OrderItem> orderItems = new ArrayList<>(0);
-    if (StringUtils.isNotBlank(request.getSortField())
-        && StringUtils.isNotBlank(request.getSortOrder())) {
+    if (!StringUtils.isAnyBlank(request.getSortField(), request.getSortOrder())) {
+      ApiAlertException.throwIfTrue(
+          checkSqlInjection(request.getSortField()),
+          "Illegal sql injection detected, sortField: " + request.getSortField());
+
+      ApiAlertException.throwIfTrue(
+          checkSqlInjection(request.getSortOrder()),
+          "Illegal sql injection detected, sortOrder: " + request.getSortOrder());
+
       String sortField = WebUtils.camelToUnderscore(request.getSortField());
       if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
         orderItems.add(OrderItem.desc(sortField));
-      } else {
+      } else if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_ASC)) {
         orderItems.add(OrderItem.asc(sortField));
+      } else {
+        throw new ApiAlertException("Invalid sortOrder argument: " + request.getSortOrder());
       }
-    } else {
-      if (StringUtils.isNotBlank(defaultSort)) {
-        if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
-          orderItems.add(OrderItem.desc(defaultSort));
-        } else {
-          orderItems.add(OrderItem.asc(defaultSort));
-        }
+    } else if (StringUtils.isNotBlank(defaultSort)) {
+      ApiAlertException.throwIfTrue(
+          checkSqlInjection(defaultSort),
+          "Illegal sql injection detected, defaultSort: " + defaultSort);
+
+      if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
+        orderItems.add(OrderItem.desc(defaultSort));
+      } else if (StringUtils.equals(defaultOrder, Constant.ORDER_ASC)) {
+        orderItems.add(OrderItem.asc(defaultSort));
+      } else {
+        throw new ApiAlertException("Invalid sortOrder argument: " + defaultOrder);
       }
     }
+
     if (!orderItems.isEmpty()) {
       page.setOrders(orderItems);
     }
+
     return page;
+  }
+
+  private final Pattern SQL_SYNTAX_PATTERN =
+      Pattern.compile(
+          "(insert|delete|update|select|create|drop|truncate|grant|alter|deny|revoke|call|execute|exec|declare|show|rename|set)\\s+.*"
+              + "(into|from|set|where|table|database|view|index|on|cursor|procedure|trigger|for|password|union|and|or)|"
+              + "(select\\s*\\*\\s*from\\s+)|(and|or)\\s+.*(like|=|>|<|in|between|is|not|exists)",
+          Pattern.CASE_INSENSITIVE);
+
+  private final Pattern SQL_COMMENT_PATTERN =
+      Pattern.compile("'.*(or|union|--|#|/\\*|;)", Pattern.CASE_INSENSITIVE);
+
+  private boolean checkSqlInjection(String value) {
+    return SQL_COMMENT_PATTERN.matcher(value).find() || SQL_SYNTAX_PATTERN.matcher(value).find();
   }
 }
