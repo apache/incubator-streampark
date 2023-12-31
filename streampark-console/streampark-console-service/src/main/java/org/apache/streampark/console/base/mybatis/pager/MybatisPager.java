@@ -42,26 +42,41 @@ public final class MybatisPager<T> {
     page.setSize(request.getPageSize());
 
     List<OrderItem> orderItems = new ArrayList<>(0);
-    if (StringUtils.isNotBlank(request.getSortField())
-        && StringUtils.isNotBlank(request.getSortOrder())) {
+    if (!StringUtils.isAnyBlank(request.getSortField(), request.getSortOrder())) {
+
+      checkField(request.getSortField(), "sortField");
+
       String sortField = WebUtils.camelToUnderscore(request.getSortField());
-      if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
+      if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
         orderItems.add(OrderItem.desc(sortField));
-      } else {
+      } else if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_ASC)) {
         orderItems.add(OrderItem.asc(sortField));
+      } else {
+        throw new IllegalArgumentException("Invalid argument sortOrder: " + request.getSortOrder());
       }
-    } else {
-      if (StringUtils.isNotBlank(defaultSort)) {
-        if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
-          orderItems.add(OrderItem.desc(defaultSort));
-        } else {
-          orderItems.add(OrderItem.asc(defaultSort));
-        }
+    } else if (StringUtils.isNotBlank(defaultSort)) {
+      checkField(defaultSort, "defaultSort");
+      if (StringUtils.equalsIgnoreCase(defaultOrder, Constant.ORDER_DESC)) {
+        orderItems.add(OrderItem.desc(defaultSort));
+      } else if (StringUtils.equalsIgnoreCase(defaultOrder, Constant.ORDER_ASC)) {
+        orderItems.add(OrderItem.asc(defaultSort));
+      } else {
+        throw new IllegalArgumentException("Invalid argument sortOrder: " + defaultOrder);
       }
     }
+
     if (!orderItems.isEmpty()) {
       page.setOrders(orderItems);
     }
+
     return page;
+  }
+
+  private void checkField(String field, String fieldName) {
+    boolean invalid = field != null && field.trim().split("\\s+").length > 1;
+    if (invalid) {
+      throw new IllegalArgumentException(
+          String.format("Invalid argument %s: %s", fieldName, field));
+    }
   }
 }
