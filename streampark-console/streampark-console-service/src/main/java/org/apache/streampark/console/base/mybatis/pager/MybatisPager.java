@@ -33,14 +33,10 @@ import java.util.List;
 public final class MybatisPager {
 
   public static <T> Page<T> getPage(RestRequest request) {
-    if (request.getSortField() == null) {
-      request.setSortField(Constant.DEFAULT_SORT_FIELD);
-    } else {
-      boolean invalid = request.getSortField().trim().split("\\s+").length > 1;
-      if (invalid) {
-        throw new IllegalArgumentException(
-            String.format("Invalid argument sortField: %s", request.getSortField()));
-      }
+    boolean invalid = request.getSortField().trim().split("\\s+").length > 1;
+    if (invalid) {
+      throw new IllegalArgumentException(
+          String.format("Invalid argument sortField: %s", request.getSortField()));
     }
 
     if (request.getSortOrder() == null) {
