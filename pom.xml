@@ -124,7 +124,7 @@
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <scala-maven-plugin.version>4.7.1</scala-maven-plugin.version>
-        <maven-apache-rat-plugin.version>0.15</maven-apache-rat-plugin.version>
+        <maven-apache-rat-plugin.version>0.13</maven-apache-rat-plugin.version>
         <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
@@ -742,7 +742,6 @@
                     </executions>
                 </plugin>
 
-
                 <!--mvn apache-rat:check-->
                 <plugin>
                     <groupId>org.apache.rat</groupId>
@@ -752,30 +751,40 @@
                         <excludes>
                             <exclude>.asf.yaml</exclude>
                             <exclude>.git-blame-ignore-revs</exclude>
-                            <exclude>dist-material/**</exclude>
-                            <exclude>deploy/**</exclude>
+                            <exclude>.editorconfig</exclude>
+                            <exclude>.git/</exclude>
+                            <exclude>.github/**</exclude>
+                            <exclude>.gitignore</exclude>
+                            <exclude>.licenserc.yaml</exclude>
+                            <exclude>.scalafmt.conf</exclude>
+
                             <exclude>**/.idea/</exclude>
                             <exclude>**/*.iml</exclude>
                             <exclude>**/*.txt</exclude>
                             <exclude>**/*.json</exclude>
                             <exclude>**/*.md</exclude>
-                            <exclude>.git/</exclude>
-                            <exclude>.gitignore</exclude>
+                            <exclude>**/*.log</exclude>
+                            <exclude>**/.gitkeep</exclude>
                             <exclude>**/.settings/*</exclude>
                             <exclude>**/.classpath</exclude>
                             <exclude>**/.project</exclude>
                             <exclude>**/target/**</exclude>
                             <exclude>**/out/**</exclude>
-                            <exclude>**/*.log</exclude>
-                            <exclude>README.md</exclude>
                             <exclude>**/META-INF/**</exclude>
-                            <exclude>.github/**</exclude>
+
+                            <exclude>.mvn/**</exclude>
                             <exclude>compiler/**</exclude>
-                            <exclude>.editorconfig</exclude>
+                            <exclude>dist-material/**</exclude>
+                            <exclude>deploy/**</exclude>
                             <exclude>mvnw</exclude>
                             <exclude>mvnw.cmd</exclude>
-                            <exclude>.licenserc.yaml</exclude>
-                            <exclude>.scalafmt.conf</exclude>
+                            <exclude>README.md</exclude>
+
+                            <exclude>src/main/assembly/**</exclude>
+                            <exclude>src/main/resources/alert-template/**</exclude>
+                            <exclude>src/main/resources/*.dict</exclude>
+
+                            <exclude>streampark-console-webapp/**</exclude>
                         </excludes>
                     </configuration>
                     <executions>
