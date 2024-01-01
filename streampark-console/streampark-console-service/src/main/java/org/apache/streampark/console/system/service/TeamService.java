@@ -27,7 +27,7 @@ import java.util.List;
 
 public interface TeamService extends IService<Team> {
 
-  IPage<Team> findTeams(Team team, RestRequest request);
+  IPage<Team> page(Team team, RestRequest request);
 
   Team findByName(String teamName);
 

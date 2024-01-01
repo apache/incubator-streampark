@@ -64,7 +64,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   @Autowired private CommonService commonService;
 
   @Override
-  public IPage<Team> findTeams(Team team, RestRequest request) {
+  public IPage<Team> page(Team team, RestRequest request) {
     Page<Team> page = MybatisPager.getPage(request);
     return this.baseMapper.findTeam(page, team);
   }

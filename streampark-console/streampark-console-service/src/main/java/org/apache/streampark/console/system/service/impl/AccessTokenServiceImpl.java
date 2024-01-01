@@ -87,7 +87,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   }
 
   @Override
-  public IPage<AccessToken> findAccessTokens(AccessToken tokenParam, RestRequest request) {
+  public IPage<AccessToken> page(AccessToken tokenParam, RestRequest request) {
     Page<AccessToken> page = MybatisPager.getPage(request);
     this.baseMapper.page(page, tokenParam);
     List<AccessToken> records = page.getRecords();

@@ -70,7 +70,7 @@ public class UserController {
       value = {"user:view", "app:view"},
       logical = Logical.OR)
   public RestResponse userList(RestRequest restRequest, User user) {
-    IPage<User> userList = userService.findUserDetail(user, restRequest);
+    IPage<User> userList = userService.page(user, restRequest);
     return RestResponse.success(userList);
   }
 

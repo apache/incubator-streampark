@@ -51,7 +51,7 @@ public class TeamController {
   @Operation(summary = "List teams")
   @PostMapping("list")
   public RestResponse teamList(RestRequest restRequest, Team team) {
-    IPage<Team> teamList = teamService.findTeams(team, restRequest);
+    IPage<Team> teamList = teamService.page(team, restRequest);
     return RestResponse.success(teamList);
   }
 

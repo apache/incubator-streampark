@@ -72,7 +72,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Override
-  public IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest request) {
+  public IPage<YarnQueue> page(YarnQueue yarnQueue, RestRequest request) {
     Utils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
     Utils.notNull(yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
     Page<YarnQueue> page = MybatisPager.getPage(request);

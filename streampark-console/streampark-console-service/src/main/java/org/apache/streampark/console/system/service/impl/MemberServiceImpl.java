@@ -75,7 +75,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public IPage<Member> findUsers(Member member, RestRequest request) {
+  public IPage<Member> page(Member member, RestRequest request) {
     ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
     Page<Member> page = MybatisPager.getPage(request);
     return baseMapper.findUsers(page, member);

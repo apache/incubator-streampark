@@ -47,7 +47,7 @@ public final class MybatisPager {
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
 
-    List<OrderItem> orderItems = new ArrayList<>(0);
+    List<OrderItem> orderItems = new ArrayList<>(2);
     String sortField = WebUtils.camelToUnderscore(request.getSortField());
     if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
       orderItems.add(OrderItem.desc(sortField));

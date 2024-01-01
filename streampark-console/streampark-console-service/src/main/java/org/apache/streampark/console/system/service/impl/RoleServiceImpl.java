@@ -59,7 +59,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
   @Autowired private RoleMenuServie roleMenuService;
 
   @Override
-  public IPage<Role> findRoles(Role role, RestRequest request) {
+  public IPage<Role> page(Role role, RestRequest request) {
     Page<Role> page = MybatisPager.getPage(request);
     return this.baseMapper.findRole(page, role);
   }

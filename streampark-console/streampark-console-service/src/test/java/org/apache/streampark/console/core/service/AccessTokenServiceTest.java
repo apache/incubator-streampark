@@ -62,11 +62,11 @@ public class AccessTokenServiceTest extends SpringTestBase {
     // list
     AccessToken mockToken1 = new AccessToken();
     mockToken1.setUserId(100000L);
-    IPage<AccessToken> tokens1 = accessTokenService.findAccessTokens(mockToken1, new RestRequest());
+    IPage<AccessToken> tokens1 = accessTokenService.page(mockToken1, new RestRequest());
     Assertions.assertEquals(1, tokens1.getRecords().size());
     AccessToken mockToken2 = new AccessToken();
     mockToken2.setUserId(100001L);
-    IPage<AccessToken> tokens2 = accessTokenService.findAccessTokens(mockToken2, new RestRequest());
+    IPage<AccessToken> tokens2 = accessTokenService.page(mockToken2, new RestRequest());
     Assertions.assertTrue(tokens2.getRecords().isEmpty());
 
     // toggle
