@@ -42,9 +42,6 @@
                 and create_time &lt; #{yarnQueue.createTimeTo}
             </if>
         </where>
-        <if test="yarnQueue.sortField != null and yarnQueue.sortField != ''">
-            order by ${yarnQueue.sortField} ${yarnQueue.sortOrder}
-        </if>
     </select>
 
     <select id="existsByQueueLabel" resultType="java.lang.Boolean" parameterType="org.apache.streampark.console.core.entity.YarnQueue">

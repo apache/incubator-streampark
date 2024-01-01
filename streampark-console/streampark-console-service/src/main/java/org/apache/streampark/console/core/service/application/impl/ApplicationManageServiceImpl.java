@@ -245,7 +245,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     if (appParam.getTeamId() == null) {
       return null;
     }
-    Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
+    Page<Application> page = MybatisPager.getPage(request);
 
     if (ArrayUtils.isNotEmpty(appParam.getStateArray())
         && Arrays.stream(appParam.getStateArray())

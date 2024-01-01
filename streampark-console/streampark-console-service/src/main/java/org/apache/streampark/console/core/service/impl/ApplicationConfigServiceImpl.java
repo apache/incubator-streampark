@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -203,8 +202,8 @@ public class ApplicationConfigServiceImpl
 
   @Override
   public IPage<ApplicationConfig> getPage(ApplicationConfig config, RestRequest request) {
-    Page<ApplicationConfig> page =
-        new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC);
+    request.setSortField("version");
+    Page<ApplicationConfig> page = MybatisPager.getPage(request);
     IPage<ApplicationConfig> configList =
         this.baseMapper.selectPageByAppId(page, config.getAppId());
     fillEffectiveField(config.getAppId(), configList.getRecords());

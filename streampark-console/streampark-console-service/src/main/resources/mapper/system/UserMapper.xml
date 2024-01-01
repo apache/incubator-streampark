@@ -53,9 +53,6 @@
                 and status = #{user.status}
             </if>
         </where>
-        <if test="user.sortField != null and user.sortField != ''">
-            order by ${user.sortField} ${user.sortOrder}
-        </if>
     </select>
 
     <select id="selectNoTokenUsers" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">

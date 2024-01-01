@@ -32,36 +32,31 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public final class MybatisPager<T> {
 
-  public Page<T> getDefaultPage(RestRequest request) {
-    return getPage(request, Constant.DEFAULT_SORT_FIELD, Constant.ORDER_DESC);
-  }
+  public static <T> Page<T> getPage(RestRequest request) {
+    boolean invalid = request.getSortField().trim().split("\\s+").length > 1;
+    if (invalid) {
+      throw new IllegalArgumentException(
+          String.format("Invalid argument sortField: %s", request.getSortField()));
+    }
 
-  public Page<T> getPage(RestRequest request, String defaultSort, String defaultOrder) {
+    if (request.getSortOrder() == null) {
+      request.setSortOrder(Constant.ORDER_DESC);
+    }
+
     Page<T> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
 
-    List<OrderItem> orderItems = new ArrayList<>(0);
-    if (StringUtils.isNotBlank(request.getSortField())
-        && StringUtils.isNotBlank(request.getSortOrder())) {
-      String sortField = WebUtils.camelToUnderscore(request.getSortField());
-      if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
-        orderItems.add(OrderItem.desc(sortField));
-      } else {
-        orderItems.add(OrderItem.asc(sortField));
-      }
+    List<OrderItem> orderItems = new ArrayList<>(2);
+    String sortField = WebUtils.camelToUnderscore(request.getSortField());
+    if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
+      orderItems.add(OrderItem.desc(sortField));
+    } else if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_ASC)) {
+      orderItems.add(OrderItem.asc(sortField));
     } else {
-      if (StringUtils.isNotBlank(defaultSort)) {
-        if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
-          orderItems.add(OrderItem.desc(defaultSort));
-        } else {
-          orderItems.add(OrderItem.asc(defaultSort));
-        }
-      }
+      throw new IllegalArgumentException("Invalid argument sortOrder: " + request.getSortOrder());
     }
-    if (!orderItems.isEmpty()) {
-      page.setOrders(orderItems);
-    }
+    page.setOrders(orderItems);
     return page;
   }
 }
