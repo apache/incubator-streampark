@@ -63,9 +63,6 @@
                 and tur.create_time &lt; #{member.createTimeTo}
             </if>
         </where>
-        <if test="member.sortField != null and member.sortField != ''">
-            order by ${member.sortField} ${member.sortOrder}
-        </if>
     </select>
 
     <select id="selectUsersNotInTeam" resultType="org.apache.streampark.console.system.entity.User">

@@ -32,51 +32,31 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public final class MybatisPager<T> {
 
-  public Page<T> getDefaultPage(RestRequest request) {
-    return getPage(request, Constant.DEFAULT_SORT_FIELD, Constant.ORDER_DESC);
-  }
+  public static <T> Page<T> getPage(RestRequest request) {
+    boolean invalid = request.getSortField().trim().split("\\s+").length > 1;
+    if (invalid) {
+      throw new IllegalArgumentException(
+          String.format("Invalid argument sortField: %s", request.getSortField()));
+    }
 
-  public Page<T> getPage(RestRequest request, String defaultSort, String defaultOrder) {
+    if (request.getSortOrder() == null) {
+      request.setSortOrder(Constant.ORDER_DESC);
+    }
+
     Page<T> page = new Page<>();
     page.setCurrent(request.getPageNum());
     page.setSize(request.getPageSize());
 
-    List<OrderItem> orderItems = new ArrayList<>(0);
-    if (!StringUtils.isAnyBlank(request.getSortField(), request.getSortOrder())) {
-
-      checkField(request.getSortField(), "sortField");
-
-      String sortField = WebUtils.camelToUnderscore(request.getSortField());
-      if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
-        orderItems.add(OrderItem.desc(sortField));
-      } else if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_ASC)) {
-        orderItems.add(OrderItem.asc(sortField));
-      } else {
-        throw new IllegalArgumentException("Invalid argument sortOrder: " + request.getSortOrder());
-      }
-    } else if (StringUtils.isNotBlank(defaultSort)) {
-      checkField(defaultSort, "defaultSort");
-      if (StringUtils.equalsIgnoreCase(defaultOrder, Constant.ORDER_DESC)) {
-        orderItems.add(OrderItem.desc(defaultSort));
-      } else if (StringUtils.equalsIgnoreCase(defaultOrder, Constant.ORDER_ASC)) {
-        orderItems.add(OrderItem.asc(defaultSort));
-      } else {
-        throw new IllegalArgumentException("Invalid argument sortOrder: " + defaultOrder);
-      }
+    List<OrderItem> orderItems = new ArrayList<>(2);
+    String sortField = WebUtils.camelToUnderscore(request.getSortField());
+    if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
+      orderItems.add(OrderItem.desc(sortField));
+    } else if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_ASC)) {
+      orderItems.add(OrderItem.asc(sortField));
+    } else {
+      throw new IllegalArgumentException("Invalid argument sortOrder: " + request.getSortOrder());
     }
-
-    if (!orderItems.isEmpty()) {
-      page.setOrders(orderItems);
-    }
-
+    page.setOrders(orderItems);
     return page;
-  }
-
-  private void checkField(String field, String fieldName) {
-    boolean invalid = field != null && field.trim().split("\\s+").length > 1;
-    if (invalid) {
-      throw new IllegalArgumentException(
-          String.format("Invalid argument %s: %s", fieldName, field));
-    }
   }
 }

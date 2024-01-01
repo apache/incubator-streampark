@@ -79,10 +79,6 @@ public class Resource implements Serializable {
 
   private transient Date modifyTime;
 
-  private transient String sortField;
-
-  private transient String sortOrder;
-
   private transient String connector;
 
   public void setResourcePath(String resourcePath) {
