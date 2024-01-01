@@ -43,12 +43,12 @@ import org.eclipse.jgit.lib.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Data
@@ -255,30 +255,19 @@ public class Project implements Serializable {
       return dangerArgs;
     }
 
-    String[] args = param.split("\\s+");
-    List<String> dangerArgs = new ArrayList<>();
-    for (String arg : args) {
-      if (arg.length() == 1) {
-        if (arg.equals("|")) {
-          dangerArgs.add("|");
-        }
-        if (arg.equals("&")) {
-          dangerArgs.add("&");
-        }
-      } else {
-        arg = arg.substring(0, 2);
-        if (arg.equals("||")) {
-          dangerArgs.add("||");
-        }
-        if (arg.equals("&&")) {
-          dangerArgs.add("&&");
+    String result = null;
+    Iterator<String> dangerIter = Arrays.asList(";", "|", "&", ">").iterator();
+    String[] argsList = param.split("\\s+");
+    while (result == null && dangerIter.hasNext()) {
+      String danger = dangerIter.next();
+      for (String arg : argsList) {
+        if (arg.contains(danger)) {
+          result = arg;
+          break;
         }
       }
     }
-    if (!dangerArgs.isEmpty()) {
-      return dangerArgs.stream().collect(Collectors.joining(","));
-    }
-    return null;
+    return result;
   }
 
   @JsonIgnore
