@@ -18,7 +18,6 @@
 package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.console.core.entity.Project;
-import org.apache.streampark.console.core.enums.GitCredential;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -78,56 +77,52 @@ public class GitUtils {
   }
 
   private static void setCredentials(TransportCommand<?, ?> transportCommand, Project project) {
-    GitCredential gitCredential = GitCredential.of(project.getGitCredential());
-    switch (gitCredential) {
-      case HTTPS:
-        if (!StringUtils.isAllEmpty(project.getUserName(), project.getPassword())) {
-          UsernamePasswordCredentialsProvider credentialsProvider =
-              new UsernamePasswordCredentialsProvider(project.getUserName(), project.getPassword());
-          transportCommand.setCredentialsProvider(credentialsProvider);
-        }
-        break;
-      case SSH:
-        transportCommand.setTransportConfigCallback(
-            transport -> {
-              SshTransport sshTransport = (SshTransport) transport;
-              sshTransport.setSshSessionFactory(
-                  new JschConfigSessionFactory() {
-                    @Override
-                    protected void configure(OpenSshConfig.Host hc, Session session) {
-                      session.setConfig("StrictHostKeyChecking", "no");
-                    }
+    if (project.isHttpRepositoryUrl()) {
+      if (!StringUtils.isAllEmpty(project.getUserName(), project.getPassword())) {
+        UsernamePasswordCredentialsProvider credentialsProvider =
+            new UsernamePasswordCredentialsProvider(project.getUserName(), project.getPassword());
+        transportCommand.setCredentialsProvider(credentialsProvider);
+      }
+    } else if (project.isSshRepositoryUrl()) {
+      transportCommand.setTransportConfigCallback(
+          transport -> {
+            SshTransport sshTransport = (SshTransport) transport;
+            sshTransport.setSshSessionFactory(
+                new JschConfigSessionFactory() {
+                  @Override
+                  protected void configure(OpenSshConfig.Host hc, Session session) {
+                    session.setConfig("StrictHostKeyChecking", "no");
+                  }
 
-                    @Override
-                    protected JSch createDefaultJSch(FS fs) throws JSchException {
-                      JSch jSch = super.createDefaultJSch(fs);
-                      String prvkeyPath = project.getPrvkeyPath();
-                      if (StringUtils.isBlank(prvkeyPath)) {
-                        String userHome = System.getProperty("user.home");
-                        if (userHome != null) {
-                          String rsaPath = userHome.concat("/.ssh/id_rsa");
-                          File resFile = new File(rsaPath);
-                          if (resFile.exists()) {
-                            prvkeyPath = rsaPath;
-                          }
+                  @Override
+                  protected JSch createDefaultJSch(FS fs) throws JSchException {
+                    JSch jSch = super.createDefaultJSch(fs);
+                    String prvkeyPath = project.getPrvkeyPath();
+                    if (StringUtils.isBlank(prvkeyPath)) {
+                      String userHome = System.getProperty("user.home");
+                      if (userHome != null) {
+                        String rsaPath = userHome.concat("/.ssh/id_rsa");
+                        File resFile = new File(rsaPath);
+                        if (resFile.exists()) {
+                          prvkeyPath = rsaPath;
                         }
                       }
-                      if (prvkeyPath == null) {
-                        return jSch;
-                      }
-                      if (StringUtils.isEmpty(project.getPassword())) {
-                        jSch.addIdentity(prvkeyPath);
-                      } else {
-                        jSch.addIdentity(prvkeyPath, project.getPassword());
-                      }
+                    }
+                    if (prvkeyPath == null) {
                       return jSch;
                     }
-                  });
-            });
-        break;
-      default:
-        throw new IllegalStateException(
-            "[StreamPark] git setCredentials: unsupported protocol type");
+                    if (StringUtils.isEmpty(project.getPassword())) {
+                      jSch.addIdentity(prvkeyPath);
+                    } else {
+                      jSch.addIdentity(prvkeyPath, project.getPassword());
+                    }
+                    return jSch;
+                  }
+                });
+          });
+    } else {
+      throw new IllegalStateException(
+          "[StreamPark] repository URL is invalid, must be ssh or http(s)");
     }
   }
 }

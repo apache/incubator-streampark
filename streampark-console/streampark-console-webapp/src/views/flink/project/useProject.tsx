@@ -24,7 +24,7 @@ import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 import { filterOption } from '../app/utils';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { GitCredentialEnum, ProjectTypeEnum, CVSTypeEnum } from '/@/enums/projectEnum';
+import { ProjectTypeEnum, CVSTypeEnum } from '/@/enums/projectEnum';
 import RepositoryGroup from './components/RepositoryGroup';
 import { Form } from 'ant-design-vue';
 
@@ -43,19 +43,10 @@ export const useProject = () => {
     if (!values.url) {
       return Promise.reject(t('flink.project.form.repositoryURLRequired'));
     }
-    switch (values.gitCredential) {
-      case GitCredentialEnum.SSH:
-        if (/^git@(.*)/.test(values.url)) {
-          return Promise.resolve();
-        } else {
-          return Promise.reject(t('flink.project.form.gitChecked'));
-        }
-      default:
-        if (/^http(s)?:\/\//.test(values.url)) {
-          return Promise.resolve();
-        } else {
-          return Promise.reject(t('flink.project.form.httpChecked'));
-        }
+    if (/^git@(.*)/.test(values.url) || /^http(s)?:\/\//.test(values.url)) {
+      return Promise.resolve();
+    } else {
+      return Promise.reject(t('flink.project.form.credentialError'));
     }
   };
   const projectFormSchema = computed((): FormSchema[] => {
@@ -110,13 +101,6 @@ export const useProject = () => {
           },
         ],
       },
-      {
-        field: 'gitCredential',
-        label: '',
-        component: 'Input',
-        show: false,
-        defaultValue: GitCredentialEnum.HTTPS,
-      },
       { field: 'url', label: '', component: 'Input', show: false },
       {
         field: 'repositoryUrl',
@@ -131,10 +115,8 @@ export const useProject = () => {
             >
               <RepositoryGroup
                 value={{
-                  gitCredential: Number(model.gitCredential) || GitCredentialEnum.HTTPS,
                   url: model.url || '',
                 }}
-                onUpdateProtocol={(value) => (model.gitCredential = value)}
                 onUpdateUrl={(value) => (model.url = value)}
               />
             </Form.Item>
@@ -145,7 +127,7 @@ export const useProject = () => {
         field: 'prvkeyPath',
         label: t('flink.project.form.prvkeyPath'),
         component: 'Input',
-        ifShow: ({ values }) => values.gitCredential == GitCredentialEnum.SSH,
+        ifShow: ({ values }) => /^git@(.*)/.test(values.url || ''),
         componentProps: {
           placeholder: t('flink.project.form.prvkeyPathPlaceholder'),
         },
@@ -154,7 +136,7 @@ export const useProject = () => {
         field: 'userName',
         label: t('flink.project.form.userName'),
         component: 'Input',
-        ifShow: ({ values }) => values.gitCredential == GitCredentialEnum.HTTPS,
+        ifShow: ({ values }) => /^http(s)?:\/\//.test(values.url || ''),
         componentProps: {
           placeholder: t('flink.project.form.userNamePlaceholder'),
           autocomplete: 'new-password',
@@ -255,7 +237,6 @@ export const useProject = () => {
       const res = await gitCheck({
         url: values.url,
         branches: values.branches,
-        gitCredential: values.gitCredential,
         userName: values.userName || null,
         password: values.password || null,
         prvkeyPath: values.prvkeyPath || null,
@@ -292,14 +273,13 @@ export const useProject = () => {
     try {
       const url = values.url;
       if (url) {
-        const gitCredential = values.gitCredential;
         const userName = values.userName || null;
         const password = values.password || null;
         const prvkeyPath = values.prvkeyPath || null;
         const userNull = userName === null || userName === undefined || userName === '';
         const passNull = password === null || password === undefined || password === '';
         if ((userNull && passNull) || (!userNull && !passNull)) {
-          const res = await fetchBranches({ gitCredential, url, userName, password, prvkeyPath });
+          const res = await fetchBranches({ url, userName, password, prvkeyPath });
           if (res) branchList.value = res.map((i) => ({ label: i, value: i }));
         }
       }
@@ -318,7 +298,6 @@ export const useProject = () => {
         name: res.name,
         type: res.type,
         repository: res.repository,
-        gitCredential: res.gitCredential || GitCredentialEnum.HTTPS,
         url: res.url,
         userName: res.userName,
         password: res.password,
