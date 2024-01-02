@@ -353,11 +353,11 @@ trait FlinkClientTrait extends Logger {
         submitRequest.properties.foreach {
           key =>
             if (!key._1.startsWith(CoreOptions.FLINK_JVM_OPTIONS.key())) {
+              logInfo(s"submit application dynamicProperties:  ${key._1} :${key._2}")
               array += s"-D${key._1}=${key._2}"
             }
         }
       }
-
       array.toArray
     }
 
@@ -396,7 +396,11 @@ trait FlinkClientTrait extends Logger {
         val array = new ArrayBuffer[String]()
         // The priority of the parameters defined on the page is greater than the app conf file, property parameters etc.
         if (MapUtils.isNotEmpty(properties)) {
-          properties.foreach(x => array += s"-D${x._1}=${x._2.toString.trim}")
+          properties.foreach(
+            x => {
+              array += s"-D${x._1}=${x._2.toString.trim}"
+              logInfo(s"deploy cluster dynamicProperties:  ${x._1} :${x._2}")
+            })
         }
         array.toArray
       }
