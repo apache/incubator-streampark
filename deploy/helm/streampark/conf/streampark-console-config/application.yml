@@ -89,8 +89,8 @@ streampark:
     # lark alert proxy,default https://open.feishu.cn
     lark-url:
   yarn:
-    # default sample, or kerberos
-    http-auth: sample
+      # default simple, or kerberos
+    http-auth: simple
 
   # HADOOP_USER_NAME
   hadoop-user-name: hdfs
@@ -118,6 +118,9 @@ streampark:
       polling-interval-sec:
         job-status: 2
         cluster-metric: 3
+    # If you need to specify an ingress controller, you can use this.
+    ingress:
+      class: nginx
 
   # packer garbage resources collection configuration
   packer-gc:
