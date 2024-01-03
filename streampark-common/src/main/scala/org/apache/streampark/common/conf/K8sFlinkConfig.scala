@@ -79,7 +79,7 @@ object K8sFlinkConfig {
    */
   val ingressClass: InternalOption = InternalOption(
     key = "streampark.flink-k8s.ingress.class",
-    defaultValue = "streampark",
+    defaultValue = "nginx",
     classType = classOf[java.lang.String],
     description = "Direct ingress to the ingress controller."
   )
