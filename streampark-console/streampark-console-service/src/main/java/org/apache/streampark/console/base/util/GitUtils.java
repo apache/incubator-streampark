@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.base.util;
 
+import org.apache.streampark.common.util.FileUtils;
+import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.core.entity.Project;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -38,7 +40,6 @@ import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.util.FS;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -103,11 +104,10 @@ public class GitUtils {
                     JSch jSch = super.createDefaultJSch(fs);
                     String prvkeyPath = project.getPrvkeyPath();
                     if (StringUtils.isBlank(prvkeyPath)) {
-                      String userHome = System.getProperty("user.home");
+                      String userHome = SystemPropertyUtils.getUserHome();
                       if (userHome != null) {
                         String rsaPath = userHome.concat("/.ssh/id_rsa");
-                        File resFile = new File(rsaPath);
-                        if (resFile.exists()) {
+                        if (FileUtils.exists(rsaPath)) {
                           prvkeyPath = rsaPath;
                         }
                       }
@@ -115,7 +115,7 @@ public class GitUtils {
                     if (prvkeyPath == null) {
                       return jSch;
                     }
-                    if (StringUtils.isEmpty(project.getPassword())) {
+                    if (StringUtils.isBlank(project.getPassword())) {
                       jSch.addIdentity(prvkeyPath);
                     } else {
                       jSch.addIdentity(prvkeyPath, project.getPassword());
