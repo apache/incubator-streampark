@@ -68,8 +68,6 @@ public class Project implements Serializable {
 
   private Date lastBuild;
 
-  private Integer gitCredential;
-
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String userName;
 
@@ -297,5 +295,13 @@ public class Project implements Serializable {
   @JsonIgnore
   private String getLogHeader(String header) {
     return "---------------------------------[ " + header + " ]---------------------------------\n";
+  }
+
+  public boolean isHttpRepositoryUrl() {
+    return url != null && (url.trim().startsWith("https://") || url.trim().startsWith("http://"));
+  }
+
+  public boolean isSshRepositoryUrl() {
+    return url != null && url.trim().startsWith("git@");
   }
 }
