@@ -36,4 +36,6 @@ alter table `t_flink_cluster`
 
 alter table `t_message` modify column `context` longtext;
 
+alter table `t_flink_project` drop column `git_credential`;
+
 set foreign_key_checks = 1;

@@ -184,7 +184,6 @@ create table `t_flink_project` (
   `id` bigint not null auto_increment,
   `team_id` bigint not null,
   `name` varchar(255) collate utf8mb4_general_ci default null,
-  `git_credential` tinyint not null,
   `url` varchar(255) collate utf8mb4_general_ci default null,
   `branches` varchar(64) collate utf8mb4_general_ci default null,
   `user_name` varchar(64) collate utf8mb4_general_ci default null,
