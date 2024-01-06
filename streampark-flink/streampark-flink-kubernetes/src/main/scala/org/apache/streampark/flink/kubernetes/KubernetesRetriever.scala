@@ -37,6 +37,7 @@ import javax.annotation.Nullable
 import java.time.Duration
 
 import scala.collection.JavaConverters._
+import scala.util
 import scala.util.{Failure, Success, Try}
 
 object KubernetesRetriever extends Logger {
@@ -105,10 +106,10 @@ object KubernetesRetriever extends Logger {
   /**
    * check whether deployment exists on kubernetes cluster
    *
-   * @param name
-   *   deployment name
    * @param namespace
    *   deployment namespace
+   * @param deploymentName
+   *   deployment name
    */
   def isDeploymentExists(namespace: String, deploymentName: String): Boolean = {
     using(KubernetesRetriever.newK8sClient()) {
@@ -122,7 +123,18 @@ object KubernetesRetriever extends Logger {
           .getItems
           .asScala
           .exists(_.getMetadata.getName == deploymentName)
-    }(_ => false)
+    } {
+      e =>
+        logError(
+          s"""
+             |[StreamPark] check deploymentExists error,
+             |namespace: $namespace,
+             |deploymentName: $deploymentName,
+             |error: $e
+             |""".stripMargin
+        )
+        false
+    }
   }
 
   /** retrieve flink jobManager rest url */

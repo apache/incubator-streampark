@@ -130,6 +130,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
                 trackId.namespace,
                 trackId.clusterId
               )
+
               if (FlinkJobState.isEndState(jobState.jobState) && !deployExists) {
                 // remove trackId from cache of job that needs to be untracked
                 watchController.unWatching(trackId)
