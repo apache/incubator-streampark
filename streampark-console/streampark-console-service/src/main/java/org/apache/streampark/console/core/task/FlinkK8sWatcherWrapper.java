@@ -110,7 +110,7 @@ public class FlinkK8sWatcherWrapper {
                   FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum()));
               boolean deploymentExists =
                   KubernetesRetriever.isDeploymentExists(app.getClusterId(), app.getK8sNamespace());
-              return !isEndState && deploymentExists;
+              return !isEndState || deploymentExists;
             })
         .map(Bridge::toTrackId)
         .collect(Collectors.toList());
