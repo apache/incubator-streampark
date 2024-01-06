@@ -78,6 +78,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
@@ -136,6 +137,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
@@ -404,7 +406,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     removeApp(application);
 
     if (isKubernetesApp(application)) {
-      k8SFlinkTrackMonitor.unWatching(toTrackId(application));
+      TrackId trackId = FlinkK8sWatcherWrapper.Bridge.toTrackId(application);
+      KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
+      k8SFlinkTrackMonitor.unWatching(trackId);
     } else {
       FlinkRESTAPIWatcher.unWatching(paramApp.getId());
     }
@@ -458,6 +462,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     long cancelUserId = FlinkRESTAPIWatcher.getCanceledJobUserId(appId);
     long appUserId = application.getUserId();
     return cancelUserId != -1 && cancelUserId != appUserId;
+  }
+
+  @Override
+  public Map<String, String> getRumtimeConfig(Long id) {
+    Application application = getById(id);
+    if (application != null && application.getVersionId() != null) {
+      FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
+      if (flinkEnv != null) {
+        File yaml = new File(flinkEnv.getFlinkHome().concat("/conf/flink-conf.yaml"));
+        Map<String, String> config = PropertiesUtils.loadFlinkConfYaml(yaml);
+        Map<String, String> dynamicConf =
+            PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties());
+        config.putAll(dynamicConf);
+        return config;
+      }
+    }
+    return Collections.emptyMap();
   }
 
   private void removeApp(Application application) {
@@ -695,7 +716,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         // check whether clusterId, namespace, jobId on kubernetes
         else if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-            && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
+            && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(app))) {
           return AppExistsState.IN_KUBERNETES;
         }
       }
@@ -1135,10 +1156,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (isKubernetesApp(application)) {
       KubernetesDeploymentHelper.watchPodTerminatedLog(
           application.getK8sNamespace(), application.getJobName(), application.getJobId());
-      KubernetesDeploymentHelper.deleteTaskDeployment(
-          application.getK8sNamespace(), application.getJobName());
-      KubernetesDeploymentHelper.deleteTaskConfigMap(
-          application.getK8sNamespace(), application.getJobName());
+      KubernetesDeploymentHelper.delete(application.getK8sNamespace(), application.getJobName());
     }
     if (startFuture != null) {
       startFuture.cancel(true);
@@ -1322,6 +1340,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     cancelFutureMap.put(application.getId(), cancelFuture);
 
+    TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
+
     cancelFuture.whenComplete(
         (cancelResponse, throwable) -> {
           cancelFutureMap.remove(application.getId());
@@ -1345,9 +1365,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               }
               // re-tracking flink job on kubernetes and logging exception
               if (isKubernetesApp(application)) {
-                TrackId id = toTrackId(application);
-                k8SFlinkTrackMonitor.unWatching(id);
-                k8SFlinkTrackMonitor.doWatching(id);
+                KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
+                k8SFlinkTrackMonitor.unWatching(trackId);
               } else {
                 FlinkRESTAPIWatcher.unWatching(application.getId());
               }
@@ -1373,7 +1392,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           }
 
           if (isKubernetesApp(application)) {
-            k8SFlinkTrackMonitor.unWatching(toTrackId(application));
+            KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
+            k8SFlinkTrackMonitor.unWatching(trackId);
           }
         });
   }
@@ -1389,24 +1409,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       final URI uri = URI.create(savepointPath);
       final String scheme = uri.getScheme();
       final String pathPart = uri.getPath();
-      String error = null;
       if (scheme == null) {
-        error =
-            "This state.savepoints.dir value "
-                + savepointPath
-                + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
-      } else if (pathPart == null) {
-        error =
-            "This state.savepoints.dir value "
-                + savepointPath
-                + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-      } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
-        error =
-            "This state.savepoints.dir value "
-                + savepointPath
-                + " Cannot use the root directory for checkpoints.";
+        return "This state.savepoints.dir value "
+            + savepointPath
+            + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
       }
-      return error;
+      if (pathPart == null) {
+        return "This state.savepoints.dir value "
+            + savepointPath
+            + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+      }
+      if (pathPart.isEmpty() || "/".equals(pathPart)) {
+        return "This state.savepoints.dir value "
+            + savepointPath
+            + " Cannot use the root directory for checkpoints.";
+      }
+      return null;
     } else {
       return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
     }
@@ -1552,6 +1570,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       extraParameter.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
     }
 
+    TrackId trackId;
+    if (isKubernetesApp(application)) {
+      trackId = toTrackId(application);
+      KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
+    } else {
+      trackId = null;
+    }
+
     KubernetesSubmitParam kubernetesSubmitParam =
         new KubernetesSubmitParam(
             application.getClusterId(),
@@ -1613,7 +1639,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               app.setOptionState(OptionState.NONE.getValue());
               updateById(app);
               if (isKubernetesApp(app)) {
-                k8SFlinkTrackMonitor.unWatching(toTrackId(app));
+                k8SFlinkTrackMonitor.unWatching(trackId);
               } else {
                 FlinkRESTAPIWatcher.unWatching(appParam.getId());
               }
@@ -1649,7 +1675,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           // if start completed, will be added task to tracking queue
           if (isKubernetesApp(application)) {
             application.setRelease(ReleaseState.DONE.get());
-            k8SFlinkTrackMonitor.doWatching(toTrackId(application));
+            k8SFlinkTrackMonitor.doWatching(trackId);
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
               String domainName = settingService.getIngressModeDefault();
               if (StringUtils.isNotBlank(domainName)) {
@@ -1748,7 +1774,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // re-tracking flink job on kubernetes and logging exception
     if (isKubernetesApp(application)) {
       TrackId id = toTrackId(application);
-      k8SFlinkTrackMonitor.unWatching(id);
+      KubernetesDeploymentHelper.delete(id.namespace(), id.clusterId());
       k8SFlinkTrackMonitor.doWatching(id);
     } else {
       FlinkRESTAPIWatcher.unWatching(application.getId());

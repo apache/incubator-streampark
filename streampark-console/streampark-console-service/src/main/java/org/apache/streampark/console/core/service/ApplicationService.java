@@ -86,6 +86,8 @@ public interface ApplicationService extends IService<Application> {
 
   boolean checkAlter(Application application);
 
+  Map<String, String> getRumtimeConfig(Long id);
+
   void updateRelease(Application application);
 
   List<Application> getByProjectId(Long id);

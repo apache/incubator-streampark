@@ -23,6 +23,7 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
@@ -101,17 +102,16 @@ public class FlinkK8sWatcherWrapper {
     if (CollectionUtils.isEmpty(k8sApplication)) {
       return Lists.newArrayList();
     }
-    // correct corrupted data
-    List<Application> correctApps =
-        k8sApplication.stream()
-            .filter(app -> !Bridge.toTrackId(app).isLegal())
-            .collect(Collectors.toList());
-    if (CollectionUtils.isNotEmpty(correctApps)) {
-      applicationService.saveOrUpdateBatch(correctApps);
-    }
     // filter out the application that should be tracking
     return k8sApplication.stream()
-        .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum())))
+        .filter(
+            app -> {
+              boolean isEndState =
+                  FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum()));
+              boolean deploymentExists =
+                  KubernetesRetriever.isDeploymentExists(app.getClusterId(), app.getK8sNamespace());
+              return !isEndState && deploymentExists;
+            })
         .map(Bridge::toTrackId)
         .collect(Collectors.toList());
   }
@@ -121,6 +121,7 @@ public class FlinkK8sWatcherWrapper {
 
     // covert Application to TrackId
     public static TrackId toTrackId(@Nonnull Application app) {
+
       Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
       if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
         return TrackId.onApplication(
