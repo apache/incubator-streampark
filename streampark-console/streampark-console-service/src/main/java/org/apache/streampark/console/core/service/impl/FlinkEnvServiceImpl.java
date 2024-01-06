@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.enums.FlinkEnvStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
@@ -61,7 +62,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
       queryWrapper.ne(FlinkEnv::getId, version.getId());
     }
     if (this.count(queryWrapper) > 0) {
-      return 1;
+      return FlinkEnvStatus.NAME_REPEATED.getCode();
     }
 
     // 2) check dist_jar
@@ -70,12 +71,14 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     if (flinkLib.exists() && flinkLib.isDirectory()) {
       int distSize = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar")).length;
       if (distSize > 1) {
-        return 2;
+        return FlinkEnvStatus.FLINK_DIST_REPEATED.getCode();
       }
     } else {
-      return -1;
+
+      return FlinkEnvStatus.INVALID.getCode();
     }
-    return 0;
+
+    return FlinkEnvStatus.FEASIBLE.getCode();
   }
 
   @Override
