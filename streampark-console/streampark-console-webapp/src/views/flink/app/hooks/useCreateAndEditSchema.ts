@@ -491,7 +491,7 @@ export const useCreateAndEditSchema = (
       {
         field: 'hadoopUser',
         label: t('flink.app.hadoopUser'),
-        component: 'Input'
+        component: 'Input',
       },
       {
         field: 'description',
