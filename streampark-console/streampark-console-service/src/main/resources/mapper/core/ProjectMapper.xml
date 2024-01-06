@@ -83,7 +83,7 @@
         <where>
             t.team_id = #{project.teamId}
             <if test="project.name != null and project.name != ''">
-                and t.name like concat('%',#{project.name},'%')
+                and t.name like concat('%', CAST(#{project.name} AS CHAR), '%')
             </if>
             <if test="project.buildState != null">
                 and t.build_state = #{project.buildState}
