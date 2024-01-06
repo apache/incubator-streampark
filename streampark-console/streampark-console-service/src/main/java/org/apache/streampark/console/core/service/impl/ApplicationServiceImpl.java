@@ -406,7 +406,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     removeApp(application);
 
     if (isKubernetesApp(application)) {
-      TrackId trackId = FlinkK8sWatcherWrapper.Bridge.toTrackId(application);
+      TrackId trackId = toTrackId(application);
       KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
       k8SFlinkTrackMonitor.unWatching(trackId);
     } else {
