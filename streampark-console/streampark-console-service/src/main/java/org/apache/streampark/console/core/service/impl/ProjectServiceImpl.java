@@ -33,7 +33,6 @@ import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildStateEnum;
-import org.apache.streampark.console.core.enums.GitCredentialEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
@@ -118,14 +117,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     project.setName(projectParam.getName());
     project.setUrl(projectParam.getUrl());
     project.setBranches(projectParam.getBranches());
-    project.setGitCredential(projectParam.getGitCredential());
     project.setPrvkeyPath(projectParam.getPrvkeyPath());
     project.setUserName(projectParam.getUserName());
     project.setPassword(projectParam.getPassword());
     project.setPom(projectParam.getPom());
     project.setDescription(projectParam.getDescription());
     project.setBuildArgs(projectParam.getBuildArgs());
-    if (GitCredentialEnum.isSSH(project.getGitCredential())) {
+    if (project.isSshRepositoryUrl()) {
       project.setUserName(null);
     } else {
       project.setPrvkeyPath(null);
