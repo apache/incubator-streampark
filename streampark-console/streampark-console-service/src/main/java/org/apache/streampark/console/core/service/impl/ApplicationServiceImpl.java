@@ -153,7 +153,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -404,13 +403,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // 8) remove app
     removeApp(application);
 
-    if (isKubernetesApp(application)) {
-      TrackId trackId = toTrackId(application);
-      KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
-      k8SFlinkTrackMonitor.unWatching(trackId);
-    } else {
-      FlinkRESTAPIWatcher.unWatching(paramApp.getId());
-    }
     return true;
   }
 
@@ -1234,8 +1226,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           project.getDistHome().getAbsolutePath().concat("/").concat(application.getModule());
       jarFile = new File(modulePath, application.getJar());
     }
-    Manifest manifest = Utils.getJarManifest(jarFile);
-    return manifest.getMainAttributes().getValue("Main-Class");
+    return Utils.getJarManClass(jarFile);
   }
 
   @Override

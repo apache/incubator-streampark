@@ -125,7 +125,12 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
                 watchController.trackIds.update(trackId)
                 eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
               }
-              if (FlinkJobState.isEndState(jobState.jobState)) {
+
+              val deployExists = KubernetesRetriever.isDeploymentExists(
+                trackId.namespace,
+                trackId.clusterId
+              )
+              if (FlinkJobState.isEndState(jobState.jobState) && !deployExists) {
                 // remove trackId from cache of job that needs to be untracked
                 watchController.unWatching(trackId)
                 if (trackId.executeMode == APPLICATION) {
@@ -291,8 +296,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       case _ =>
         // whether deployment exists on kubernetes cluster
         val deployExists = KubernetesRetriever.isDeploymentExists(
-          trackId.clusterId,
-          trackId.namespace
+          trackId.namespace,
+          trackId.clusterId
         )
 
         val deployError = KubernetesDeploymentHelper.isDeploymentError(
