@@ -20,6 +20,8 @@ package org.apache.streampark.flink.kubernetes.model
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
+import java.lang.{Boolean => JavaBool}
+
 import scala.util.Try
 
 /** tracking identifier for flink on kubernetes */

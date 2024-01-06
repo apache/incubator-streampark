@@ -63,7 +63,7 @@ object KubernetesRetriever extends Logger {
   private val clusterClientServiceLoader = new DefaultClusterClientServiceLoader()
 
   /** get new flink cluster client of kubernetes mode */
-  def newFinkClusterClient(
+  private def newFinkClusterClient(
       clusterId: String,
       @Nullable namespace: String,
       executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
@@ -110,7 +110,7 @@ object KubernetesRetriever extends Logger {
    * @param namespace
    *   deployment namespace
    */
-  def isDeploymentExists(name: String, namespace: String): Boolean = {
+  def isDeploymentExists(namespace: String, deploymentName: String): Boolean = {
     using(KubernetesRetriever.newK8sClient()) {
       client =>
         client
@@ -121,7 +121,7 @@ object KubernetesRetriever extends Logger {
           .list()
           .getItems
           .asScala
-          .exists(e => e.getMetadata.getName == name)
+          .exists(_.getMetadata.getName == deploymentName)
     }(_ => false)
   }
 

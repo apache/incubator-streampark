@@ -125,7 +125,12 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
                 watchController.trackIds.update(trackId)
                 eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
               }
-              if (FlinkJobState.isEndState(jobState.jobState)) {
+
+              val deployExists = KubernetesRetriever.isDeploymentExists(
+                trackId.namespace,
+                trackId.clusterId
+              )
+              if (FlinkJobState.isEndState(jobState.jobState) && !deployExists) {
                 // remove trackId from cache of job that needs to be untracked
                 watchController.unWatching(trackId)
                 if (trackId.executeMode == APPLICATION) {
@@ -213,9 +218,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     } else {
       jobDetails.map {
         d =>
-          TrackId.onSession(namespace, clusterId, appId, d.jid, groupId) -> d.toJobStatusCV(
-            pollEmitTime,
-            System.currentTimeMillis)
+          TrackId.onSession(namespace, clusterId, appId, d.jid, groupId) -> d
+            .toJobStatusCV(pollEmitTime, System.currentTimeMillis)
       }
     }
   }
@@ -284,21 +288,27 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
     // infer from k8s deployment and event
     val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
-    logger.info(
-      s"Query the local cache result:${watchController.canceling.has(trackId).toString},trackId ${trackId.toString}.")
-    val jobState = {
-      if (watchController.canceling.has(trackId)) FlinkJobState.CANCELED
-      else {
-        // whether deployment exists on kubernetes cluster
-        val isDeployExists =
-          KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
-        val deployStateOfTheError = KubernetesDeploymentHelper.getDeploymentStatusChanges(
-          trackId.namespace,
-          trackId.clusterId)
-        val isConnection = KubernetesDeploymentHelper.isTheK8sConnectionNormal()
 
-        if (isDeployExists) {
-          if (!deployStateOfTheError) {
+    val jobState = trackId match {
+      case id if watchController.canceling.has(id) =>
+        logger.info(s"trackId ${trackId.toString} is canceling")
+        FlinkJobState.CANCELED
+      case _ =>
+        // whether deployment exists on kubernetes cluster
+        val deployExists = KubernetesRetriever.isDeploymentExists(
+          trackId.namespace,
+          trackId.clusterId
+        )
+
+        val deployError = KubernetesDeploymentHelper.isDeploymentError(
+          trackId.namespace,
+          trackId.clusterId
+        )
+
+        val isConnection = KubernetesDeploymentHelper.checkConnection()
+
+        if (deployExists) {
+          if (!deployError) {
             logger.info("Task Enter the initialization process.")
             FlinkJobState.K8S_INITIALIZING
           } else if (isConnection) {
@@ -307,7 +317,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
               trackId.namespace,
               trackId.clusterId,
               trackId.jobId)
-            KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
             FlinkJobState.FAILED
           } else {
             inferSilentOrLostFromPreCache(latest)
@@ -318,8 +327,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         } else {
           inferSilentOrLostFromPreCache(latest)
         }
-
-      }
     }
 
     val jobStatusCV = JobStatusCV(

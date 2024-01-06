@@ -97,6 +97,13 @@ object Utils extends Logger {
     new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
   }
 
+  def getJarManClass(jarFile: File): String = {
+    val manifest = getJarManifest(jarFile)
+    val mainAttr = manifest.getMainAttributes
+    Option(mainAttr.getValue("Main-Class"))
+      .getOrElse(Option(mainAttr.getValue("program-class")).orNull)
+  }
+
   def copyProperties(original: Properties, target: Properties): Unit =
     original.foreach(x => target.put(x._1, x._2))
 
