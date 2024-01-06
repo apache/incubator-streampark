@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.GitUtils;
@@ -193,13 +192,21 @@ public class Project implements Serializable {
     if (mavenHome == null) {
       mavenHome = System.getenv("MAVEN_HOME");
     }
+
+    boolean useWrapper = true;
     if (mavenHome != null) {
       mvn = mavenHome + "/bin/" + mvn;
+      try {
+        Process process = Runtime.getRuntime().exec(mvn + " --version");
+        process.waitFor();
+        Utils.required(process.exitValue() == 0);
+        useWrapper = false;
+      } catch (Exception ignored) {
+        log.warn("try using user-installed maven failed, now use maven-wrapper.");
+      }
     }
 
-    try {
-      CommandUtils.execute(mvn + " --version");
-    } catch (Exception e) {
+    if (useWrapper) {
       if (windows) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
@@ -210,62 +217,53 @@ public class Project implements Serializable {
     StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
     if (StringUtils.isNotBlank(this.buildArgs)) {
-      String dangerArgs = getDangerArgs(this.buildArgs);
-      if (dangerArgs == null) {
-        cmdBuffer.append(this.buildArgs.trim());
-      } else {
+      String args = getIllegalArgs(this.buildArgs);
+      if (args != null) {
         throw new IllegalArgumentException(
             String.format(
-                "Invalid maven argument, dangerous args: %s, in your buildArgs: %s",
-                dangerArgs, this.buildArgs));
+                "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
       }
+      cmdBuffer.append(this.buildArgs.trim());
     }
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
     if (StringUtils.isNotBlank(setting)) {
-      String dangerArgs = getDangerArgs(setting);
-      if (dangerArgs == null) {
-        File file = new File(setting);
-        if (file.exists() && file.isFile()) {
-          cmdBuffer.append(" --settings ").append(setting);
-        } else {
-          throw new IllegalArgumentException(
-              String.format("Invalid maven-setting file path, %s no exists or not file", setting));
-        }
+      String args = getIllegalArgs(setting);
+      if (args != null) {
+        throw new IllegalArgumentException(
+            String.format("Illegal argument \"%s\" in maven-setting file path: %s", args, setting));
+      }
+      File file = new File(setting);
+      if (file.exists() && file.isFile()) {
+        cmdBuffer.append(" --settings ").append(setting);
       } else {
         throw new IllegalArgumentException(
             String.format(
-                "Invalid maven-setting file path, dangerous args: %s, in your maven setting path: %s",
-                dangerArgs, setting));
+                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
+                setting));
       }
     }
     return cmdBuffer.toString();
   }
 
-  private String getDangerArgs(String param) {
+  private String getIllegalArgs(String param) {
     Pattern pattern = Pattern.compile("(`.*?`)|(\\$\\((.*?)\\))");
     Matcher matcher = pattern.matcher(param);
     if (matcher.find()) {
-      String dangerArgs = matcher.group(1);
-      if (dangerArgs == null) {
-        dangerArgs = matcher.group(2);
-      }
-      return dangerArgs;
+      return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
     }
 
-    String result = null;
-    Iterator<String> dangerIter = Arrays.asList(";", "|", "&", ">").iterator();
+    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">").iterator();
     String[] argsList = param.split("\\s+");
-    while (result == null && dangerIter.hasNext()) {
-      String danger = dangerIter.next();
+    while (iterator.hasNext()) {
+      String chr = iterator.next();
       for (String arg : argsList) {
-        if (arg.contains(danger)) {
-          result = arg;
-          break;
+        if (arg.contains(chr)) {
+          return arg;
         }
       }
     }
-    return result;
+    return null;
   }
 
   @JsonIgnore
