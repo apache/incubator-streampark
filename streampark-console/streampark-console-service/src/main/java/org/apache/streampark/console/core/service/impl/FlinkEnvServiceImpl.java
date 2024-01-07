@@ -52,7 +52,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
    * 2) flink-dist repeated <br>
    */
   @Override
-  public Integer check(FlinkEnv version) {
+  public FlinkEnvStatus check(FlinkEnv version) {
     // 1) check name
     LambdaQueryWrapper<FlinkEnv> queryWrapper =
         new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
@@ -60,7 +60,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
       queryWrapper.ne(FlinkEnv::getId, version.getId());
     }
     if (this.count(queryWrapper) > 0) {
-      return FlinkEnvStatus.NAME_REPEATED.getCode();
+      return FlinkEnvStatus.NAME_REPEATED;
     }
 
     // 2) check dist_jar
@@ -69,12 +69,12 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     if (flinkLib.exists() && flinkLib.isDirectory()) {
       int distSize = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar")).length;
       if (distSize > 1) {
-        return FlinkEnvStatus.FLINK_DIST_REPEATED.getCode();
+        return FlinkEnvStatus.FLINK_DIST_REPEATED;
       }
     } else {
-      return FlinkEnvStatus.INVALID.getCode();
+      return FlinkEnvStatus.INVALID;
     }
-    return FlinkEnvStatus.FEASIBLE.getCode();
+    return FlinkEnvStatus.FEASIBLE;
   }
 
   @Override
