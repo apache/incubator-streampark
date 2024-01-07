@@ -101,17 +101,19 @@
     });
     const checkResp = parseInt(resp.data);
     if (checkResp !== FlinkEvnEnum.FEASIBLE) {
-      // Environment detection is successful
-      if (checkResp === FlinkEvnEnum.INVALID) {
-        Swal.fire('Failed', 'FLINK_HOME invalid path.', 'error');
-      } else if (checkResp === FlinkEvnEnum.NAME_REPEATED) {
-        Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
-      } else if (checkResp === FlinkEvnEnum.FLINK_DIST_REPEATED) {
-        Swal.fire(
-          'Failed',
-          'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
-          'error',
-        );
+      switch (checkResp) {
+        case FlinkEvnEnum.INVALID:
+          Swal.fire('Failed', 'FLINK_HOME invalid path.', 'error');
+          break;
+        case FlinkEvnEnum.NAME_REPEATED:
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
+          break;
+        case FlinkEvnEnum.FLINK_DIST_REPEATED:
+          Swal.fire(
+              'Failed',
+              'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
+              'error',
+          );
       }
       changeOkLoading(false);
       return;
