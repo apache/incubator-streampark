@@ -50,8 +50,6 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
    * two places will be checked: <br>
    * 1) name repeated <br>
    * 2) flink-dist repeated <br>
-   * -1) invalid path <br>
-   * 0) ok <br>
    */
   @Override
   public Integer check(FlinkEnv version) {
@@ -74,10 +72,8 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
         return FlinkEnvStatus.FLINK_DIST_REPEATED.getCode();
       }
     } else {
-
       return FlinkEnvStatus.INVALID.getCode();
     }
-
     return FlinkEnvStatus.FEASIBLE.getCode();
   }
 

@@ -29,7 +29,7 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchCheckEnv, fetchFlinkCreate, fetchFlinkUpdate } from '/@/api/flink/flinkEnv';
-
+  import { FlinkEvnEnum } from '/@/enums/flinkEnum';
   const emit = defineEmits(['reload', 'register']);
   const versionId = ref<string | null>(null);
   const { t } = useI18n();
@@ -100,13 +100,13 @@
       flinkHome: formValue.flinkHome,
     });
     const checkResp = parseInt(resp.data);
-    if (checkResp != 0) {
+    if (checkResp !== FlinkEvnEnum.FEASIBLE) {
       // Environment detection is successful
-      if (checkResp == -1) {
+      if (checkResp === FlinkEvnEnum.INVALID) {
         Swal.fire('Failed', 'FLINK_HOME invalid path.', 'error');
-      } else if (checkResp == 1) {
+      } else if (checkResp === FlinkEvnEnum.NAME_REPEATED) {
         Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
-      } else if (checkResp == 2) {
+      } else if (checkResp === FlinkEvnEnum.FLINK_DIST_REPEATED) {
         Swal.fire(
           'Failed',
           'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
