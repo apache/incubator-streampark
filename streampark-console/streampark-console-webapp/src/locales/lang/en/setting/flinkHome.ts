@@ -28,10 +28,11 @@ export default {
   descriptionPlaceholder: 'Please enter description',
   operateMessage: {
     flinkNameTips: 'the flink name, e.g: flink-1.12',
-    flinkNameIsUnique: 'flink name is already exists',
+    flinkNameIsRepeated: 'flink name is already exists',
     flinkNameIsRequired: 'flink name is required',
     flinkHomeTips: 'The absolute path of the FLINK_HOME',
     flinkHomeIsRequired: 'flink home is required',
+    flinkHomePathIsInvalid: 'flink home path is invalid',
     flinkDistIsRepeated: 'FLINK_HOME error: can no found flink-dist or found multiple flink-dist.',
     createFlinkHomeSuccessful: ' create successful!',
     updateFlinkHomeSuccessful: ' update successful!',

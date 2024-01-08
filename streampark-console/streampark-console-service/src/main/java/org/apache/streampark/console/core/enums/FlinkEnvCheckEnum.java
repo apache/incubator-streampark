@@ -15,16 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.enums;
+package org.apache.streampark.console.core.enums;
+
+import lombok.Getter;
 
 /* the flink environment status */
-public enum FlinkEnvStatus {
+@Getter
+public enum FlinkEnvCheckEnum {
 
   /* FLINK_HOME path invalid */
   INVALID(-1),
 
-  /* this add/update operation are feasible */
-  FEASIBLE(0),
+  /* this add/update operation ok */
+  OK(0),
 
   /* defined flink name repeated */
   NAME_REPEATED(1),
@@ -34,11 +37,7 @@ public enum FlinkEnvStatus {
 
   private final int code;
 
-  FlinkEnvStatus(int code) {
+  FlinkEnvCheckEnum(int code) {
     this.code = code;
-  }
-
-  public int getCode() {
-    return code;
   }
 }
