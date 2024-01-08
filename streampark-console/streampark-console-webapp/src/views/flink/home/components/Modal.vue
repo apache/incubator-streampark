@@ -114,6 +114,7 @@
           break;
         case FlinkEnvCheckEnum.FLINK_DIST_REPEATED:
           Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistIsRepeated'), 'error');
+          break;
       }
       changeOkLoading(false);
       return;
