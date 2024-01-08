@@ -28,7 +28,7 @@ export default {
   descriptionPlaceholder: 'Flink描述',
   operateMessage: {
     flinkNameTips: 'Flink别名,举例: Flink-1.12',
-    flinkNameIsUnique: 'Flink名称已存在',
+    flinkNameIsRepeated: 'Flink名称已存在',
     flinkNameIsRequired: 'Flink名称必填',
     flinkHomeTips: 'Flink所在服务器的绝对路径,举例: /usr/local/flink',
     flinkHomeIsRequired: 'Flink安装路径必填',
