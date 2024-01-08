@@ -32,7 +32,6 @@ export default {
     flinkNameIsRequired: 'Flink名称必填',
     flinkHomeTips: 'Flink所在服务器的绝对路径,举例: /usr/local/flink',
     flinkHomeIsRequired: 'Flink安装路径必填',
-    flinkHomePathIsInvalid: 'Flink Home路径无效',
     flinkDistIsRepeated: 'flink/lib 路径下有且只能有一个flink-dist jar文件,当前未找到或找到多个,请检查!',
     createFlinkHomeSuccessful: ' 创建成功!',
     updateFlinkHomeSuccessful: ' 更新成功!',
