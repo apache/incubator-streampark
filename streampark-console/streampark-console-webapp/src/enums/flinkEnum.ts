@@ -234,3 +234,10 @@ export enum AppExistsEnum {
   IN_KUBERNETES = 3,
   INVALID = 4,
 }
+
+export enum FlinkEvnEnum {
+  INVALID = -1,
+  FEASIBLE = 0,
+  NAME_REPEATED = 1,
+ FLINK_DIST_REPEATED = 2,
+}

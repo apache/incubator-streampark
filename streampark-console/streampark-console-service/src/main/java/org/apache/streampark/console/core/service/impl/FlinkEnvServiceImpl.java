@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.enums.FlinkEnvStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
@@ -49,11 +50,9 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
    * two places will be checked: <br>
    * 1) name repeated <br>
    * 2) flink-dist repeated <br>
-   * -1) invalid path <br>
-   * 0) ok <br>
    */
   @Override
-  public Integer check(FlinkEnv version) {
+  public FlinkEnvStatus check(FlinkEnv version) {
     // 1) check name
     LambdaQueryWrapper<FlinkEnv> queryWrapper =
         new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
@@ -61,7 +60,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
       queryWrapper.ne(FlinkEnv::getId, version.getId());
     }
     if (this.count(queryWrapper) > 0) {
-      return 1;
+      return FlinkEnvStatus.NAME_REPEATED;
     }
 
     // 2) check dist_jar
@@ -70,12 +69,12 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     if (flinkLib.exists() && flinkLib.isDirectory()) {
       int distSize = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar")).length;
       if (distSize > 1) {
-        return 2;
+        return FlinkEnvStatus.FLINK_DIST_REPEATED;
       }
     } else {
-      return -1;
+      return FlinkEnvStatus.INVALID;
     }
-    return 0;
+    return FlinkEnvStatus.FEASIBLE;
   }
 
   @Override

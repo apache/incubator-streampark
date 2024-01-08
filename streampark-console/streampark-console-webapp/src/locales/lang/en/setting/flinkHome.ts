@@ -32,6 +32,7 @@ export default {
     flinkNameIsRequired: 'flink name is required',
     flinkHomeTips: 'The absolute path of the FLINK_HOME',
     flinkHomeIsRequired: 'flink home is required',
+    flinkDistIsRepeated: 'FLINK_HOME error: can no found flink-dist or found multiple flink-dist.',
     createFlinkHomeSuccessful: ' create successful!',
     updateFlinkHomeSuccessful: ' update successful!',
   },
