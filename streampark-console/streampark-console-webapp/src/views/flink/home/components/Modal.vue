@@ -103,13 +103,13 @@
     if (checkResp !== FlinkEvnEnum.FEASIBLE) {
       switch (checkResp) {
         case FlinkEvnEnum.INVALID:
-          Swal.fire('Failed', t('FLINK_HOME invalid path.'), 'error');
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkHomePathIsInvalid'), 'error');
           break;
         case FlinkEvnEnum.NAME_REPEATED:
           Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
           break;
         case FlinkEvnEnum.FLINK_DIST_REPEATED:
-          Swal.fire('Failed', t('can no found flink-dist or found multiple flink-dist, FLINK_HOME error.'), 'error');
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistIsRepeated'), 'error');
       }
       changeOkLoading(false);
       return;
