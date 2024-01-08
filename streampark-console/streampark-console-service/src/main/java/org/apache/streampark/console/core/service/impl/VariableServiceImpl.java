@@ -94,7 +94,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     if (variable.getTeamId() == null) {
       return null;
     }
-    Page<Variable> page = new MybatisPager<Variable>().getDefaultPage(request);
+    Page<Variable> page = MybatisPager.getPage(request);
     return this.baseMapper.selectPage(page, variable);
   }
 

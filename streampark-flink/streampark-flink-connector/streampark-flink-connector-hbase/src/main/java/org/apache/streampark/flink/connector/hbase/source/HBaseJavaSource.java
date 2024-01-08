@@ -42,8 +42,8 @@ public class HBaseJavaSource<T> {
       HBaseResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    Utils.notNull(queryFunction, "QueryFunction must not be null");
-    Utils.notNull(resultFunction, "ResultFunction must not be null");
+    Utils.requireNotNull(queryFunction, "QueryFunction must not be null");
+    Utils.requireNotNull(resultFunction, "ResultFunction must not be null");
     HBaseSourceFunction<T> sourceFunction =
         new HBaseSourceFunction<>(property, queryFunction, resultFunction, runningFunc, null);
     return context.getJavaEnv().addSource(sourceFunction);

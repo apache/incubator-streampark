@@ -60,7 +60,6 @@
       const { data } = await updateProject({
         id: route.query.id,
         name: values.name,
-        gitCredential: values.gitCredential,
         url: values.url,
         repository: values.repository,
         type: values.type,

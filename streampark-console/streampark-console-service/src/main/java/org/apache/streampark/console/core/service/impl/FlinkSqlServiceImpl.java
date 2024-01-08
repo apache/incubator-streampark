@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
@@ -216,8 +215,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
 
   @Override
   public IPage<FlinkSql> getPage(Long appId, RestRequest request) {
-    Page<FlinkSql> page =
-        new MybatisPager<FlinkSql>().getPage(request, "version", Constant.ORDER_DESC);
+    request.setSortField("version");
+    Page<FlinkSql> page = MybatisPager.getPage(request);
     LambdaQueryWrapper<FlinkSql> queryWrapper =
         new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
     IPage<FlinkSql> sqlList = this.baseMapper.selectPage(page, queryWrapper);

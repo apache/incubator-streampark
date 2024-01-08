@@ -52,6 +52,7 @@ case class SubmitRequest(
     savePoint: String,
     restoreMode: FlinkRestoreMode,
     args: String,
+    @Nullable hadoopUser: String,
     @Nullable buildResult: BuildResult,
     @Nullable k8sSubmitParam: KubernetesSubmitParam,
     @Nullable extraParameter: JavaMap[String, Any]) {

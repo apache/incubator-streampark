@@ -23,7 +23,6 @@ import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
@@ -34,7 +33,6 @@ import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildStateEnum;
-import org.apache.streampark.console.core.enums.GitCredentialEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
@@ -50,6 +48,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,9 +67,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,15 +82,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-build-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
+  @Qualifier("streamparkBuildExecutor")
+  @Autowired
+  private Executor executorService;
 
   @Override
   public RestResponse create(Project project) {
@@ -126,14 +117,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     project.setName(projectParam.getName());
     project.setUrl(projectParam.getUrl());
     project.setBranches(projectParam.getBranches());
-    project.setGitCredential(projectParam.getGitCredential());
     project.setPrvkeyPath(projectParam.getPrvkeyPath());
     project.setUserName(projectParam.getUserName());
     project.setPassword(projectParam.getPassword());
     project.setPom(projectParam.getPom());
     project.setDescription(projectParam.getDescription());
     project.setBuildArgs(projectParam.getBuildArgs());
-    if (GitCredentialEnum.isSSH(project.getGitCredential())) {
+    if (project.isSshRepositoryUrl()) {
       project.setUserName(null);
     } else {
       project.setPrvkeyPath(null);
@@ -177,7 +167,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public IPage<Project> getPage(Project project, RestRequest request) {
-    Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
+    Page<Project> page = MybatisPager.getPage(request);
     return this.baseMapper.selectPage(page, project);
   }
 

@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HttpClientUtils;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
@@ -52,6 +51,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -68,9 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -94,6 +92,10 @@ public class FlinkAppHttpWatcher {
   @Autowired private SavePointService savePointService;
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
+  @Qualifier("flinkRestAPIWatchingExecutor")
+  @Autowired
+  private Executor executorService;
 
   // track interval  every 5 seconds
   public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
@@ -158,15 +160,6 @@ public class FlinkAppHttpWatcher {
 
   private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
-  private static final ExecutorService EXECUTOR =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("flink-restapi-watching-executor"));
-
   @PostConstruct
   public void init() {
     WATCHING_APPS.clear();
@@ -217,7 +210,7 @@ public class FlinkAppHttpWatcher {
   }
 
   private void watch(Long id, Application application) {
-    EXECUTOR.execute(
+    executorService.execute(
         () -> {
           try {
             // query status from flink rest api

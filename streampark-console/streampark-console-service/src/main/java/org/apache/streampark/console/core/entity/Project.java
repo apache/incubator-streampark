@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.GitUtils;
@@ -43,12 +42,12 @@ import org.eclipse.jgit.lib.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Data
@@ -67,8 +66,6 @@ public class Project implements Serializable {
   private String branches;
 
   private Date lastBuild;
-
-  private Integer gitCredential;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String userName;
@@ -195,13 +192,21 @@ public class Project implements Serializable {
     if (mavenHome == null) {
       mavenHome = System.getenv("MAVEN_HOME");
     }
+
+    boolean useWrapper = true;
     if (mavenHome != null) {
       mvn = mavenHome + "/bin/" + mvn;
+      try {
+        Process process = Runtime.getRuntime().exec(mvn + " --version");
+        process.waitFor();
+        Utils.required(process.exitValue() == 0);
+        useWrapper = false;
+      } catch (Exception ignored) {
+        log.warn("try using user-installed maven failed, now use maven-wrapper.");
+      }
     }
 
-    try {
-      CommandUtils.execute(mvn + " --version");
-    } catch (Exception e) {
+    if (useWrapper) {
       if (windows) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
@@ -212,71 +217,51 @@ public class Project implements Serializable {
     StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
     if (StringUtils.isNotBlank(this.buildArgs)) {
-      String dangerArgs = getDangerArgs(this.buildArgs);
-      if (dangerArgs == null) {
-        cmdBuffer.append(this.buildArgs.trim());
-      } else {
+      String args = getIllegalArgs(this.buildArgs);
+      if (args != null) {
         throw new IllegalArgumentException(
             String.format(
-                "Invalid maven argument, dangerous args: %s, in your buildArgs: %s",
-                dangerArgs, this.buildArgs));
+                "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
       }
+      cmdBuffer.append(this.buildArgs.trim());
     }
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
     if (StringUtils.isNotBlank(setting)) {
-      String dangerArgs = getDangerArgs(setting);
-      if (dangerArgs == null) {
-        File file = new File(setting);
-        if (file.exists() && file.isFile()) {
-          cmdBuffer.append(" --settings ").append(setting);
-        } else {
-          throw new IllegalArgumentException(
-              String.format("Invalid maven-setting file path, %s no exists or not file", setting));
-        }
+      String args = getIllegalArgs(setting);
+      if (args != null) {
+        throw new IllegalArgumentException(
+            String.format("Illegal argument \"%s\" in maven-setting file path: %s", args, setting));
+      }
+      File file = new File(setting);
+      if (file.exists() && file.isFile()) {
+        cmdBuffer.append(" --settings ").append(setting);
       } else {
         throw new IllegalArgumentException(
             String.format(
-                "Invalid maven-setting file path, dangerous args: %s, in your maven setting path: %s",
-                dangerArgs, setting));
+                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
+                setting));
       }
     }
     return cmdBuffer.toString();
   }
 
-  private String getDangerArgs(String param) {
+  private String getIllegalArgs(String param) {
     Pattern pattern = Pattern.compile("(`.*?`)|(\\$\\((.*?)\\))");
     Matcher matcher = pattern.matcher(param);
     if (matcher.find()) {
-      String dangerArgs = matcher.group(1);
-      if (dangerArgs == null) {
-        dangerArgs = matcher.group(2);
-      }
-      return dangerArgs;
+      return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
     }
 
-    String[] args = param.split("\\s+");
-    List<String> dangerArgs = new ArrayList<>();
-    for (String arg : args) {
-      if (arg.length() == 1) {
-        if (arg.equals("|")) {
-          dangerArgs.add("|");
-        }
-        if (arg.equals("&")) {
-          dangerArgs.add("&");
-        }
-      } else {
-        arg = arg.substring(0, 2);
-        if (arg.equals("||")) {
-          dangerArgs.add("||");
-        }
-        if (arg.equals("&&")) {
-          dangerArgs.add("&&");
+    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">").iterator();
+    String[] argsList = param.split("\\s+");
+    while (iterator.hasNext()) {
+      String chr = iterator.next();
+      for (String arg : argsList) {
+        if (arg.contains(chr)) {
+          return arg;
         }
       }
-    }
-    if (!dangerArgs.isEmpty()) {
-      return dangerArgs.stream().collect(Collectors.joining(","));
     }
     return null;
   }
@@ -308,5 +293,13 @@ public class Project implements Serializable {
   @JsonIgnore
   private String getLogHeader(String header) {
     return "---------------------------------[ " + header + " ]---------------------------------\n";
+  }
+
+  public boolean isHttpRepositoryUrl() {
+    return url != null && (url.trim().startsWith("https://") || url.trim().startsWith("http://"));
+  }
+
+  public boolean isSshRepositoryUrl() {
+    return url != null && url.trim().startsWith("git@");
   }
 }

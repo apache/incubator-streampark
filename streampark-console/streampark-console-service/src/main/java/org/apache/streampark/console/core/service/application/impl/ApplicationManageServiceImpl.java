@@ -245,7 +245,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     if (appParam.getTeamId() == null) {
       return null;
     }
-    Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
+    Page<Application> page = MybatisPager.getPage(request);
 
     if (ArrayUtils.isNotEmpty(appParam.getStateArray())
         && Arrays.stream(appParam.getStateArray())
@@ -324,6 +324,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     appParam.setOptionState(OptionStateEnum.NONE.getValue());
     appParam.setCreateTime(new Date());
+    appParam.setModifyTime(new Date());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
 
     boolean success = validateQueueIfNeeded(appParam);
@@ -432,12 +433,14 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     newApp.setOptionState(OptionStateEnum.NONE.getValue());
     newApp.setCreateTime(new Date());
+    newApp.setModifyTime(new Date());
     newApp.setHotParams(oldApp.getHotParams());
 
     newApp.setJar(oldApp.getJar());
     newApp.setJarCheckSum(oldApp.getJarCheckSum());
     newApp.setTags(oldApp.getTags());
     newApp.setTeamId(oldApp.getTeamId());
+    newApp.setHadoopUser(oldApp.getHadoopUser());
 
     boolean saved = save(newApp);
     if (saved) {
@@ -559,7 +562,11 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     switch (appParam.getFlinkExecutionMode()) {
       case YARN_APPLICATION:
+        application.setHadoopUser(appParam.getHadoopUser());
+        break;
       case YARN_PER_JOB:
+        application.setHadoopUser(appParam.getHadoopUser());
+        break;
       case KUBERNETES_NATIVE_APPLICATION:
         application.setFlinkClusterId(null);
         break;

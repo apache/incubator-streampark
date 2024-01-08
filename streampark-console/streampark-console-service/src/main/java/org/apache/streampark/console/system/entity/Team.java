@@ -45,10 +45,6 @@ public class Team implements Serializable {
 
   private Date modifyTime;
 
-  private transient String sortField;
-
-  private transient String sortOrder;
-
   private transient String createTimeFrom;
 
   private transient String createTimeTo;

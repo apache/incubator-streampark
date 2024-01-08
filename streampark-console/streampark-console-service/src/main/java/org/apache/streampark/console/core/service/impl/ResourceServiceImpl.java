@@ -101,11 +101,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   @Autowired private FlinkSqlService flinkSqlService;
 
   @Override
-  public IPage<Resource> getPage(Resource resource, RestRequest restRequest) {
+  public IPage<Resource> getPage(Resource resource, RestRequest request) {
     if (resource.getTeamId() == null) {
       return null;
     }
-    Page<Resource> page = new MybatisPager<Resource>().getDefaultPage(restRequest);
+    Page<Resource> page = MybatisPager.getPage(request);
     return this.baseMapper.selectPage(page, resource);
   }
 
