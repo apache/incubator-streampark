@@ -82,8 +82,6 @@ spec:
                     type: string
                   allowNonRestoredState:
                     type: boolean
-                  savepointRedeployNonce:
-                    type: integer
                 type: object
               restartNonce:
                 type: integer
