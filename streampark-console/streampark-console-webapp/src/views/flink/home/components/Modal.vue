@@ -106,7 +106,7 @@
           Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkHomePathIsInvalid'), 'error');
           break;
         case FlinkEvnEnum.NAME_REPEATED:
-          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsRepeated'), 'error');
           break;
         case FlinkEvnEnum.FLINK_DIST_REPEATED:
           Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistIsRepeated'), 'error');
