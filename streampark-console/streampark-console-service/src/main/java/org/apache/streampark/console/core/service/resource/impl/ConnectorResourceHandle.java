@@ -23,12 +23,11 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.FlinkConnector;
 import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.service.impl.ResourceServiceImpl;
+import org.apache.streampark.console.core.service.ResourceService;
 
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.factories.Factory;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.ImmutableMap;
 
 import java.io.File;
@@ -50,7 +49,7 @@ import java.util.jar.JarFile;
 
 public class ConnectorResourceHandle extends AbstractResourceHandle {
 
-  public ConnectorResourceHandle(ResourceServiceImpl resourceService) {
+  public ConnectorResourceHandle(ResourceService resourceService) {
     super(resourceService);
   }
 
@@ -85,9 +84,12 @@ public class ConnectorResourceHandle extends AbstractResourceHandle {
       return buildExceptResponse(new RuntimeException("connector is null"), 3);
     }
 
+    Resource resource = new Resource();
+    resource.setId(resourceParam.getId());
+    resource.setResourceName(connectorResource.getFactoryIdentifier());
+    List<Resource> resources = resourceService.findResource(resource);
     // 2) check connector exists
-    boolean exists =
-        existsFlinkConnector(resourceParam.getId(), connectorResource.getFactoryIdentifier());
+    boolean exists = resources != null && !resources.isEmpty();
     if (exists) {
       return buildExceptResponse(new RuntimeException("connector is already exists"), 4);
     }
@@ -199,14 +201,5 @@ public class ConnectorResourceHandle extends AbstractResourceHandle {
       return value.toString().replace("PT", "").toLowerCase();
     }
     return value.toString();
-  }
-
-  private boolean existsFlinkConnector(Long id, String connectorId) {
-    LambdaQueryWrapper<Resource> lambdaQueryWrapper =
-        new LambdaQueryWrapper<Resource>().eq(Resource::getResourceName, connectorId);
-    if (id != null) {
-      lambdaQueryWrapper.ne(Resource::getId, id);
-    }
-    return resourceService.getBaseMapper().exists(lambdaQueryWrapper);
   }
 }

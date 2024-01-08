@@ -22,7 +22,7 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.service.impl.ResourceServiceImpl;
+import org.apache.streampark.console.core.service.ResourceService;
 
 import java.io.File;
 import java.io.Serializable;
@@ -31,7 +31,7 @@ import java.util.Map;
 
 public class FlinkAppResourceHandle extends AbstractResourceHandle {
 
-  public FlinkAppResourceHandle(ResourceServiceImpl resourceService) {
+  public FlinkAppResourceHandle(ResourceService resourceService) {
     super(resourceService);
   }
 

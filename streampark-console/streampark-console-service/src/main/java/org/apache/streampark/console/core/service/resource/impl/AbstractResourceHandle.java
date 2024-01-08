@@ -22,7 +22,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.service.impl.ResourceServiceImpl;
+import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.resource.ResourceHandle;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -38,9 +38,9 @@ public abstract class AbstractResourceHandle implements ResourceHandle {
   public static final String STATE = "state";
   public static final String EXCEPTION = "exception";
 
-  protected final ResourceServiceImpl resourceService;
+  protected final ResourceService resourceService;
 
-  protected AbstractResourceHandle(ResourceServiceImpl resourceService) {
+  protected AbstractResourceHandle(ResourceService resourceService) {
     this.resourceService = resourceService;
   }
 

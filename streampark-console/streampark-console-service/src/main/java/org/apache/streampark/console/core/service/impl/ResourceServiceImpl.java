@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -231,15 +232,45 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         .checkResource(resourceParam);
   }
 
+  @Override
+  public List<Resource> findResource(Resource resource) {
+    LambdaQueryWrapper<Resource> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+    Optional.ofNullable(resource.getId())
+        .ifPresent(id -> lambdaQueryWrapper.eq(Resource::getId, id));
+    Optional.ofNullable(resource.getResourceName())
+        .filter(StringUtils::isNotBlank)
+        .ifPresent(name -> lambdaQueryWrapper.eq(Resource::getResourceName, name));
+    Optional.ofNullable(resource.getResourcePath())
+        .filter(StringUtils::isNotBlank)
+        .ifPresent(resourcePath -> lambdaQueryWrapper.eq(Resource::getResourcePath, resourcePath));
+    Optional.ofNullable(resource.getResource())
+        .filter(StringUtils::isNotBlank)
+        .ifPresent(resourceStr -> lambdaQueryWrapper.eq(Resource::getResource, resourceStr));
+    Optional.ofNullable(resource.getDescription())
+        .filter(StringUtils::isNotBlank)
+        .ifPresent(description -> lambdaQueryWrapper.eq(Resource::getDescription, description));
+    Optional.ofNullable(resource.getCreatorId())
+        .ifPresent(creatorId -> lambdaQueryWrapper.eq(Resource::getCreatorId, creatorId));
+    Optional.ofNullable(resource.getResourceType())
+        .ifPresent(
+            resourceTypeEnum -> lambdaQueryWrapper.eq(Resource::getResourceType, resourceTypeEnum));
+    Optional.ofNullable(resource.getEngineType())
+        .ifPresent(typeEnum -> lambdaQueryWrapper.eq(Resource::getEngineType, typeEnum));
+    Optional.ofNullable(resource.getTeamId())
+        .ifPresent(teamId -> lambdaQueryWrapper.eq(Resource::getTeamId, teamId));
+    return baseMapper.selectList(lambdaQueryWrapper);
+  }
+
+  @Override
   public void transferTeamResource(Long teamId, String resourcePath) {
     String teamUploads = String.format("%s/%d", Workspace.local().APP_UPLOADS(), teamId);
-    if (!FsOperator.lfs().exists(teamUploads)) {
-      FsOperator.lfs().mkdirs(teamUploads);
-    }
     File localJar = new File(resourcePath);
     File teamUploadJar = new File(teamUploads, localJar.getName());
     ApiAlertException.throwIfFalse(
         localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
+    if (!FsOperator.lfs().exists(teamUploads)) {
+      FsOperator.lfs().mkdirs(teamUploads);
+    }
     FsOperator.lfs()
         .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
   }
