@@ -102,7 +102,7 @@
     const checkResp = parseInt(resp.data);
     if (checkResp !== FlinkEnvCheckEnum.OK) {
       switch (checkResp) {
-        case FlinkEnvCheckEnum.INVALID:
+        case FlinkEnvCheckEnum.INVALID_PATH:
           Swal.fire(
             'Failed',
             t('setting.flinkHome.operateMessage.flinkHomePathIsInvalid'),
@@ -111,6 +111,9 @@
           break;
         case FlinkEnvCheckEnum.NAME_REPEATED:
           Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsRepeated'), 'error');
+          break;
+        case FlinkEnvCheckEnum.FLINK_DIST_NOT_FOUND:
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistNotFound'), 'error');
           break;
         case FlinkEnvCheckEnum.FLINK_DIST_REPEATED:
           Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistIsRepeated'), 'error');

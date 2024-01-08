@@ -67,12 +67,16 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     File flinkLib = new File(lib);
     // 2) flink/lib path exists and is a directory
     if (!flinkLib.exists() || !flinkLib.isDirectory()) {
-      return FlinkEnvCheckEnum.INVALID;
+      return FlinkEnvCheckEnum.INVALID_PATH;
     }
 
     // 3) check flink-dist
     File[] files = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar"));
-    if (files == null || files.length != 1) {
+    if (files == null || files.length == 0) {
+      return FlinkEnvCheckEnum.FLINK_DIST_NOT_FOUND;
+    }
+
+    if (files.length > 1) {
       return FlinkEnvCheckEnum.FLINK_DIST_REPEATED;
     }
 

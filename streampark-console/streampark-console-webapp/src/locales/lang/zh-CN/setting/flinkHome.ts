@@ -33,8 +33,8 @@ export default {
     flinkHomeTips: 'Flink所在服务器的绝对路径,举例: /usr/local/flink',
     flinkHomeIsRequired: 'Flink Home必填',
     flinkHomePathIsInvalid: 'Flink Home路径无效',
-    flinkDistIsRepeated:
-      'flink/lib 路径下有且只能有一个flink-dist jar文件,当前未找到或找到多个,请检查!',
+    flinkDistNotFound: 'flink/lib 路径下未找到 flink-dist jar文件',
+    flinkDistIsRepeated: 'flink/lib 路径下存在多个flink-dist jar文件, 必须只能有一个!',
     createFlinkHomeSuccessful: ' 创建成功!',
     updateFlinkHomeSuccessful: ' 更新成功!',
   },

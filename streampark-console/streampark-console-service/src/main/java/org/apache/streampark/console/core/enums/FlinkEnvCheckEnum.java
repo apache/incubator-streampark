@@ -24,16 +24,20 @@ import lombok.Getter;
 public enum FlinkEnvCheckEnum {
 
   /* FLINK_HOME path invalid */
-  INVALID(-1),
+  INVALID_PATH(-1),
 
   /* this add/update operation ok */
   OK(0),
 
-  /* defined flink name repeated */
+  /** name repeated */
   NAME_REPEATED(1),
 
-  /* dist Jar more than one */
-  FLINK_DIST_REPEATED(2);
+  /* FLINK_DIST file not found */
+
+  FLINK_DIST_NOT_FOUND(2),
+
+  /* defined flink name repeated */
+  FLINK_DIST_REPEATED(3);
 
   private final int code;
 
