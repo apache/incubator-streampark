@@ -70,7 +70,7 @@ object FlinkClientHandler {
     }
   }
 
-  def shutdown(request: ShutDownRequest): ShutDownResponse = {
+  def shutdown(request: DeployRequest): ShutDownResponse = {
     request.executionMode match {
       case YARN_SESSION => YarnSessionClient.shutdown(request)
       case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.shutdown(request)

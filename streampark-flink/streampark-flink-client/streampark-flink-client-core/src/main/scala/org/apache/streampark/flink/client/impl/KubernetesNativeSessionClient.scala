@@ -25,6 +25,7 @@ import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 import org.apache.streampark.flink.core.FlinkKubernetesClient
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import io.fabric8.kubernetes.api.model.{Config => _}
@@ -134,7 +135,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     super.doCancel(cancelRequest, flinkConfig)
   }
 
-  def deploy(deployRequest: DeployRequest): DeployResponse = {
+  def deploy(deployReq: DeployRequest): DeployResponse = {
+    val deployRequest = deployReq.asInstanceOf[KubernetesDeployRequest]
     logInfo(
       s"""
          |--------------------------------------- kubernetes session start ---------------------------------------
@@ -142,10 +144,10 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
          |    clusterId        : ${deployRequest.clusterId}
-         |    namespace        : ${deployRequest.k8sDeployParam.kubernetesNamespace}
-         |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
-         |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
-         |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
+         |    namespace        : ${deployRequest.kubernetesNamespace}
+         |    exposedType      : ${deployRequest.flinkRestExposedType}
+         |    serviceAccount   : ${deployRequest.serviceAccount}
+         |    flinkImage       : ${deployRequest.flinkImage}
          |    properties       : ${deployRequest.properties.mkString(" ")}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
@@ -157,20 +159,16 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
       flinkConfig
         .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
-        .safeSet(
-          KubernetesConfigOptions.NAMESPACE,
-          deployRequest.k8sDeployParam.kubernetesNamespace)
-        .safeSet(
-          KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT,
-          deployRequest.k8sDeployParam.serviceAccount)
+        .safeSet(KubernetesConfigOptions.NAMESPACE, deployRequest.kubernetesNamespace)
+        .safeSet(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT, deployRequest.serviceAccount)
         .safeSet(
           KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
-          ServiceExposedType.valueOf(deployRequest.k8sDeployParam.flinkRestExposedType.getName))
+          ServiceExposedType.valueOf(deployRequest.flinkRestExposedType.getName))
         .safeSet(KubernetesConfigOptions.CLUSTER_ID, deployRequest.clusterId)
-        .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, deployRequest.k8sDeployParam.flinkImage)
+        .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, deployRequest.flinkImage)
         .safeSet(
           KubernetesConfigOptions.KUBE_CONFIG_FILE,
-          getDefaultKubernetesConf(deployRequest.k8sDeployParam.kubeConf))
+          getDefaultKubernetesConf(deployRequest.kubeConf))
         .safeSet(
           DeploymentOptionsInternal.CONF_DIR,
           s"${deployRequest.flinkVersion.flinkHome}/conf")
@@ -205,7 +203,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     }
   }
 
-  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
+  def shutdown(deployRequest: DeployRequest): ShutDownResponse = {
+    val shutDownRequest = deployRequest.asInstanceOf[KubernetesDeployRequest]
     var kubeClient: FlinkKubeClient = null
     try {
       val flinkConfig = getFlinkDefaultConfiguration(shutDownRequest.flinkVersion.flinkHome)
@@ -217,32 +216,24 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
           })
       flinkConfig
         .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
-        .safeSet(
-          KubernetesConfigOptions.NAMESPACE,
-          shutDownRequest.kubernetesDeployParam.kubernetesNamespace)
-        .safeSet(
-          KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT,
-          shutDownRequest.kubernetesDeployParam.serviceAccount)
+        .safeSet(KubernetesConfigOptions.NAMESPACE, shutDownRequest.kubernetesNamespace)
+        .safeSet(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT, shutDownRequest.serviceAccount)
         .safeSet(
           KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
-          ServiceExposedType.valueOf(
-            shutDownRequest.kubernetesDeployParam.flinkRestExposedType.getName))
+          ServiceExposedType.valueOf(shutDownRequest.flinkRestExposedType.getName))
         .safeSet(KubernetesConfigOptions.CLUSTER_ID, shutDownRequest.clusterId)
-        .safeSet(
-          KubernetesConfigOptions.CONTAINER_IMAGE,
-          shutDownRequest.kubernetesDeployParam.flinkImage)
+        .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, shutDownRequest.flinkImage)
         .safeSet(
           KubernetesConfigOptions.KUBE_CONFIG_FILE,
-          getDefaultKubernetesConf(shutDownRequest.kubernetesDeployParam.kubeConf))
+          getDefaultKubernetesConf(shutDownRequest.kubeConf))
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
-      val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
-
-      if (
-        shutDownRequest.clusterId != null && kubeClientWrapper
-          .getService(shutDownRequest.clusterId)
-          .isPresent
-      ) {
+      val flinkKubeClient = new FlinkKubernetesClient(kubeClient)
+      val k8sService = flinkKubeClient.getService(shutDownRequest.clusterId)
+      if (k8sService.isPresent) {
         kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
+        KubernetesDeploymentHelper.delete(
+          shutDownRequest.kubernetesNamespace,
+          shutDownRequest.clusterId)
         ShutDownResponse()
       } else {
         null

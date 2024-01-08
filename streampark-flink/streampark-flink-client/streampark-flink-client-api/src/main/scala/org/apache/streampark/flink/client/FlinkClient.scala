@@ -57,8 +57,8 @@ object FlinkClient extends Logger {
     proxy[DeployResponse](deployRequest, deployRequest.flinkVersion, DEPLOY_REQUEST)
   }
 
-  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
-    proxy[ShutDownResponse](shutDownRequest, shutDownRequest.flinkVersion, SHUTDOWN_REQUEST)
+  def shutdown(deployRequest: DeployRequest): ShutDownResponse = {
+    proxy[ShutDownResponse](deployRequest, deployRequest.flinkVersion, SHUTDOWN_REQUEST)
   }
 
   def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {
