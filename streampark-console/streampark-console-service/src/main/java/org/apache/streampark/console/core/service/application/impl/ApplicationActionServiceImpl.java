@@ -803,7 +803,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   private String getSavePointed(Application appParam) {
     if (appParam.getSavePointed()) {
-      if (StringUtils.isEmpty(appParam.getSavePoint())) {
+      if (StringUtils.isBlank(appParam.getSavePoint())) {
         SavePoint savePoint = savePointService.getLatest(appParam.getId());
         if (savePoint != null) {
           return savePoint.getPath();
