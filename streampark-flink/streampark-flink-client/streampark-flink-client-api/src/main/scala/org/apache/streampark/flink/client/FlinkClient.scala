@@ -40,7 +40,7 @@ object FlinkClient extends Logger {
     "org.apache.streampark.flink.client.bean.CancelRequest" -> "cancel"
 
   private[this] val SHUTDOWN_REQUEST =
-    "org.apache.streampark.flink.client.bean.ShutDownRequest" -> "shutdown"
+    "org.apache.streampark.flink.client.bean.DeployRequest" -> "shutdown"
 
   private[this] val SAVEPOINT_REQUEST =
     "org.apache.streampark.flink.client.bean.TriggerSavepointRequest" -> "triggerSavepoint"
