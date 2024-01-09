@@ -91,22 +91,22 @@ public class FlinkClusterController {
 
   @Operation(summary = "Start flink cluster")
   @PostMapping("start")
-  public RestResponse start(FlinkCluster cluster) {
-    flinkClusterService.start(cluster);
+  public RestResponse start(Long id) {
+    flinkClusterService.start(id);
     return RestResponse.success();
   }
 
   @Operation(summary = "Shutdown flink cluster")
   @PostMapping("shutdown")
-  public RestResponse shutdown(FlinkCluster cluster) {
-    flinkClusterService.shutdown(cluster);
+  public RestResponse shutdown(Long id) {
+    flinkClusterService.shutdown(id);
     return RestResponse.success();
   }
 
   @Operation(summary = "Delete flink cluster")
   @PostMapping("delete")
-  public RestResponse delete(FlinkCluster cluster) {
-    flinkClusterService.delete(cluster);
+  public RestResponse delete(Long id) {
+    flinkClusterService.delete(id);
     return RestResponse.success();
   }
 }

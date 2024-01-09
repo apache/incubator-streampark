@@ -148,8 +148,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
-  public void start(FlinkCluster cluster) {
-    FlinkCluster flinkCluster = getById(cluster.getId());
+  public void start(Long id) {
+    FlinkCluster flinkCluster = getById(id);
     try {
       ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
@@ -243,8 +243,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void shutdown(FlinkCluster cluster) {
-    FlinkCluster flinkCluster = this.getById(cluster.getId());
+  public void shutdown(Long id) {
+    FlinkCluster flinkCluster = this.getById(id);
     // 1) check mode
     ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
     String clusterId = flinkCluster.getClusterId();
@@ -274,7 +274,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     // 4) shutdown
-    DeployRequest deployRequest = getDeployRequest(cluster);
+    DeployRequest deployRequest = getDeployRequest(flinkCluster);
     try {
       Future<ShutDownResponse> future =
           executorService.submit(() -> FlinkClient.shutdown(deployRequest));
@@ -325,8 +325,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void delete(FlinkCluster cluster) {
-    Long id = cluster.getId();
+  public void delete(Long id) {
     FlinkCluster flinkCluster = getById(id);
     if (flinkCluster == null) {
       throw new ApiAlertException("flink cluster not exist, please check.");
