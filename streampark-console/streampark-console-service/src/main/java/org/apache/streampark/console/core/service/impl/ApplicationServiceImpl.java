@@ -1147,7 +1147,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (isKubernetesApp(application)) {
       KubernetesDeploymentHelper.watchPodTerminatedLog(
           application.getK8sNamespace(), application.getJobName(), application.getJobId());
-      KubernetesDeploymentHelper.delete(application.getK8sNamespace(), application.getJobName());
     }
     if (startFuture != null) {
       startFuture.cancel(true);
@@ -1355,7 +1354,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               }
               // re-tracking flink job on kubernetes and logging exception
               if (isKubernetesApp(application)) {
-                KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
                 k8SFlinkTrackMonitor.unWatching(trackId);
               } else {
                 FlinkRESTAPIWatcher.unWatching(application.getId());
@@ -1382,7 +1380,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           }
 
           if (isKubernetesApp(application)) {
-            KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
             k8SFlinkTrackMonitor.unWatching(trackId);
           }
         });
@@ -1560,13 +1557,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       extraParameter.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
     }
 
-    TrackId trackId;
-    if (isKubernetesApp(application)) {
-      trackId = toTrackId(application);
-      KubernetesDeploymentHelper.delete(trackId.namespace(), trackId.clusterId());
-    } else {
-      trackId = null;
-    }
+    TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
 
     KubernetesSubmitParam kubernetesSubmitParam =
         new KubernetesSubmitParam(
@@ -1764,7 +1755,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // re-tracking flink job on kubernetes and logging exception
     if (isKubernetesApp(application)) {
       TrackId id = toTrackId(application);
-      KubernetesDeploymentHelper.delete(id.namespace(), id.clusterId());
       k8SFlinkTrackMonitor.doWatching(id);
     } else {
       FlinkRESTAPIWatcher.unWatching(application.getId());

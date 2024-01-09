@@ -40,7 +40,7 @@ object FlinkClient extends Logger {
     "org.apache.streampark.flink.client.bean.CancelRequest" -> "cancel"
 
   private[this] val SHUTDOWN_REQUEST =
-    "org.apache.streampark.flink.client.bean.ShutDownRequest" -> "shutdown"
+    "org.apache.streampark.flink.client.bean.DeployRequest" -> "shutdown"
 
   private[this] val SAVEPOINT_REQUEST =
     "org.apache.streampark.flink.client.bean.TriggerSavepointRequest" -> "triggerSavepoint"
@@ -57,8 +57,8 @@ object FlinkClient extends Logger {
     proxy[DeployResponse](deployRequest, deployRequest.flinkVersion, DEPLOY_REQUEST)
   }
 
-  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
-    proxy[ShutDownResponse](shutDownRequest, shutDownRequest.flinkVersion, SHUTDOWN_REQUEST)
+  def shutdown(deployRequest: DeployRequest): ShutDownResponse = {
+    proxy[ShutDownResponse](deployRequest, deployRequest.flinkVersion, SHUTDOWN_REQUEST)
   }
 
   def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {

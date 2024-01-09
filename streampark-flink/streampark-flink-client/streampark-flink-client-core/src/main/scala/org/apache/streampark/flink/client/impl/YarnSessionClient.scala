@@ -245,7 +245,7 @@ object YarnSessionClient extends YarnClientTrait {
     }
   }
 
-  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
+  def shutdown(shutDownRequest: DeployRequest): ShutDownResponse = {
     var clusterDescriptor: YarnClusterDescriptor = null
     var client: ClusterClient[ApplicationId] = null
     try {

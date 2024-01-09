@@ -24,8 +24,6 @@ import org.apache.streampark.flink.util.FlinkUtils
 import org.apache.commons.io.FileUtils
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-import javax.annotation.Nullable
-
 import java.io.File
 import java.util.{Map => JavaMap}
 
@@ -33,8 +31,7 @@ case class DeployRequest(
     flinkVersion: FlinkVersion,
     executionMode: ExecutionMode,
     properties: JavaMap[String, Any],
-    clusterId: String,
-    @Nullable k8sDeployParam: KubernetesDeployParam) {
+    clusterId: String) {
 
   private[client] lazy val hdfsWorkspace = {
 
@@ -63,10 +60,38 @@ case class DeployRequest(
   }
 }
 
-case class KubernetesDeployParam(
-    clusterId: String,
-    kubernetesNamespace: String = KubernetesConfigOptions.NAMESPACE.defaultValue(),
-    kubeConf: String = "~/.kube/config",
-    serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
-    flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
-    @Nullable flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.CLUSTER_IP)
+class KubernetesDeployRequest(
+    override val flinkVersion: FlinkVersion,
+    override val executionMode: ExecutionMode,
+    override val properties: JavaMap[String, Any],
+    override val clusterId: String,
+    val kubernetesNamespace: String = KubernetesConfigOptions.NAMESPACE.defaultValue(),
+    val kubeConf: String = "~/.kube/config",
+    val serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
+    val flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
+    val flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.CLUSTER_IP)
+  extends DeployRequest(flinkVersion, executionMode, properties, clusterId)
+
+object KubernetesDeployRequest {
+  def apply(
+      flinkVersion: FlinkVersion,
+      executionMode: ExecutionMode,
+      properties: JavaMap[String, Any],
+      clusterId: String,
+      kubernetesNamespace: String,
+      kubeConf: String,
+      serviceAccount: String,
+      flinkImage: String,
+      flinkRestExposedType: FlinkK8sRestExposedType): KubernetesDeployRequest = {
+    new KubernetesDeployRequest(
+      flinkVersion,
+      executionMode,
+      properties,
+      clusterId,
+      kubernetesNamespace,
+      kubeConf,
+      serviceAccount,
+      flinkImage,
+      flinkRestExposedType)
+  }
+}

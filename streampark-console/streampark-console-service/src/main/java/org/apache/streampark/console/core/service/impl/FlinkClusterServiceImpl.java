@@ -35,8 +35,7 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
 import org.apache.streampark.flink.client.bean.DeployResponse;
-import org.apache.streampark.flink.client.bean.KubernetesDeployParam;
-import org.apache.streampark.flink.client.bean.ShutDownRequest;
+import org.apache.streampark.flink.client.bean.KubernetesDeployRequest;
 import org.apache.streampark.flink.client.bean.ShutDownResponse;
 
 import org.apache.commons.lang3.StringUtils;
@@ -149,37 +148,12 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Override
   @Transactional(rollbackFor = {Exception.class})
-  public void start(FlinkCluster cluster) {
-    FlinkCluster flinkCluster = getById(cluster.getId());
+  public void start(Long id) {
+    FlinkCluster flinkCluster = getById(id);
     try {
       ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
-      KubernetesDeployParam kubernetesDeployParam = null;
-      switch (executionModeEnum) {
-        case YARN_SESSION:
-          break;
-        case KUBERNETES_NATIVE_SESSION:
-          kubernetesDeployParam =
-              new KubernetesDeployParam(
-                  flinkCluster.getClusterId(),
-                  flinkCluster.getK8sNamespace(),
-                  flinkCluster.getK8sConf(),
-                  flinkCluster.getServiceAccount(),
-                  flinkCluster.getFlinkImage(),
-                  flinkCluster.getK8sRestExposedTypeEnum());
-          break;
-        default:
-          throw new ApiAlertException(
-              "the ExecutionModeEnum " + executionModeEnum.getName() + "can't start!");
-      }
-      FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
-      DeployRequest deployRequest =
-          new DeployRequest(
-              flinkEnv.getFlinkVersion(),
-              executionModeEnum,
-              flinkCluster.getProperties(),
-              flinkCluster.getClusterId(),
-              kubernetesDeployParam);
-      log.info("deploy cluster request " + deployRequest);
+      DeployRequest deployRequest = getDeployRequest(flinkCluster);
+      log.info("deploy cluster request: " + deployRequest);
       Future<DeployResponse> future =
           executorService.submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
@@ -205,6 +179,33 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkCluster.setException(e.toString());
       updateById(flinkCluster);
       throw new ApiDetailException(e);
+    }
+  }
+
+  private DeployRequest getDeployRequest(FlinkCluster flinkCluster) {
+    ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
+    FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
+    switch (executionModeEnum) {
+      case YARN_SESSION:
+        return DeployRequest.apply(
+            flinkEnv.getFlinkVersion(),
+            executionModeEnum,
+            flinkCluster.getProperties(),
+            flinkCluster.getClusterId());
+      case KUBERNETES_NATIVE_SESSION:
+        return KubernetesDeployRequest.apply(
+            flinkEnv.getFlinkVersion(),
+            executionModeEnum,
+            flinkCluster.getProperties(),
+            flinkCluster.getClusterId(),
+            flinkCluster.getK8sNamespace(),
+            flinkCluster.getK8sConf(),
+            flinkCluster.getServiceAccount(),
+            flinkCluster.getFlinkImage(),
+            flinkCluster.getK8sRestExposedTypeEnum());
+      default:
+        throw new ApiAlertException(
+            "the ExecutionModeEnum " + executionModeEnum.getName() + "can't start!");
     }
   }
 
@@ -242,29 +243,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void shutdown(FlinkCluster cluster) {
-    FlinkCluster flinkCluster = this.getById(cluster.getId());
+  public void shutdown(Long id) {
+    FlinkCluster flinkCluster = this.getById(id);
     // 1) check mode
     ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
     String clusterId = flinkCluster.getClusterId();
-    KubernetesDeployParam kubernetesDeployParam = null;
-    switch (executionModeEnum) {
-      case YARN_SESSION:
-        break;
-      case KUBERNETES_NATIVE_SESSION:
-        kubernetesDeployParam =
-            new KubernetesDeployParam(
-                flinkCluster.getClusterId(),
-                flinkCluster.getK8sNamespace(),
-                flinkCluster.getK8sConf(),
-                flinkCluster.getServiceAccount(),
-                flinkCluster.getFlinkImage(),
-                flinkCluster.getK8sRestExposedTypeEnum());
-        break;
-      default:
-        throw new ApiAlertException(
-            "the ExecutionModeEnum " + executionModeEnum.getName() + "can't shutdown!");
-    }
     if (StringUtils.isBlank(clusterId)) {
       throw new ApiAlertException("the clusterId can not be empty!");
     }
@@ -291,18 +274,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     // 4) shutdown
-    FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
-    ShutDownRequest stopRequest =
-        new ShutDownRequest(
-            flinkEnv.getFlinkVersion(),
-            executionModeEnum,
-            flinkCluster.getProperties(),
-            clusterId,
-            kubernetesDeployParam);
-
+    DeployRequest deployRequest = getDeployRequest(flinkCluster);
     try {
       Future<ShutDownResponse> future =
-          executorService.submit(() -> FlinkClient.shutdown(stopRequest));
+          executorService.submit(() -> FlinkClient.shutdown(deployRequest));
       ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
       if (shutDownResponse != null) {
         flinkCluster.setAddress(null);
@@ -350,8 +325,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void delete(FlinkCluster cluster) {
-    Long id = cluster.getId();
+  public void delete(Long id) {
     FlinkCluster flinkCluster = getById(id);
     if (flinkCluster == null) {
       throw new ApiAlertException("flink cluster not exist, please check.");
