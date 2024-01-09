@@ -235,9 +235,10 @@ export enum AppExistsEnum {
   INVALID = 4,
 }
 
-export enum FlinkEvnEnum {
-  INVALID = -1,
-  FEASIBLE = 0,
+export enum FlinkEnvCheckEnum {
+  INVALID_PATH = -1,
+  OK = 0,
   NAME_REPEATED = 1,
- FLINK_DIST_REPEATED = 2,
+  FLINK_DIST_NOT_FOUND = 2,
+  FLINK_DIST_REPEATED = 3,
 }
