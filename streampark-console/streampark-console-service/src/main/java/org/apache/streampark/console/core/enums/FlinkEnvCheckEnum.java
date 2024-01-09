@@ -29,7 +29,7 @@ public enum FlinkEnvCheckEnum {
   /* this add/update operation ok */
   OK(0),
 
-  /** name repeated */
+  /* flink name repeated */
   NAME_REPEATED(1),
 
   /* FLINK_DIST file not found */
