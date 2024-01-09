@@ -498,7 +498,13 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             String exception = ExceptionUtils.stringifyException(throwable);
             applicationLog.setException(exception);
             applicationLog.setSuccess(false);
-            applicationLogService.save(applicationLog);
+            try {
+              if (!applicationLogService.save(applicationLog)) {
+                log.error("save application log failed.");
+              }
+            } catch (Exception e) {
+              log.error("save application log failed.", e);
+            }
             if (throwable instanceof CancellationException) {
               doStopped(application);
             } else {
@@ -578,8 +584,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
    * @return
    */
   private boolean checkAppRepeatInYarn(String jobName) {
-    try {
-      YarnClient yarnClient = HadoopUtils.yarnClient();
+    try (YarnClient yarnClient = HadoopUtils.yarnClient()) {
       Set<String> types =
           Sets.newHashSet(
               ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
@@ -749,8 +754,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (FlinkExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-      try {
-        HadoopUtils.yarnClient();
+      try (YarnClient yarnClient = HadoopUtils.yarnClient()) {
         properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
       } catch (Exception e) {
         // skip
@@ -793,8 +797,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         List<ApplicationReport> applications =
             applicationInfoService.getYarnAppReport(application.getJobName());
         if (!applications.isEmpty()) {
-          YarnClient yarnClient = HadoopUtils.yarnClient();
-          yarnClient.killApplication(applications.get(0).getApplicationId());
+          try (YarnClient yarnClient = HadoopUtils.yarnClient()) {
+            yarnClient.killApplication(applications.get(0).getApplicationId());
+          }
         }
       } catch (Exception ignored) {
       }
