@@ -135,11 +135,12 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     super.doCancel(cancelRequest, flinkConfig)
   }
 
+  @throws[Exception]
   def deploy(deployReq: DeployRequest): DeployResponse = {
     val deployRequest = deployReq.asInstanceOf[KubernetesDeployRequest]
     logInfo(
       s"""
-         |--------------------------------------- kubernetes session start ---------------------------------------
+         |--------------------------------------- kubernetes session cluster start ---------------------------------------
          |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
@@ -196,24 +197,38 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     } catch {
       case e: Exception =>
         logError(s"start flink session fail in ${deployRequest.executionMode} mode")
-        e.printStackTrace()
         throw e
     } finally {
       Utils.close(client, clusterDescriptor, kubeClient)
     }
   }
 
+  @throws[Exception]
   def shutdown(deployRequest: DeployRequest): ShutDownResponse = {
     val shutDownRequest = deployRequest.asInstanceOf[KubernetesDeployRequest]
+    logInfo(
+      s"""
+         |--------------------------------------- kubernetes session cluster shutdown ---------------------------------------
+         |    userFlinkHome     : ${shutDownRequest.flinkVersion.version}
+         |    namespace         : ${shutDownRequest.kubernetesNamespace}
+         |    clusterId         : ${shutDownRequest.clusterId}
+         |    execMode          : ${shutDownRequest.executionMode.getName}
+         |    flinkImage        : ${shutDownRequest.flinkImage}
+         |    exposedType       : ${shutDownRequest.flinkRestExposedType.getName}
+         |    kubeConf          : ${shutDownRequest.kubeConf}
+         |    serviceAccount    : ${shutDownRequest.serviceAccount}
+         |    properties        : ${shutDownRequest.properties.mkString(" ")}
+         |-------------------------------------------------------------------------------------------
+         |""".stripMargin)
     var kubeClient: FlinkKubeClient = null
     try {
       val flinkConfig = getFlinkDefaultConfiguration(shutDownRequest.flinkVersion.flinkHome)
       shutDownRequest.properties.foreach(
-        m =>
-          m._2 match {
-            case v if v != null => flinkConfig.setString(m._1, m._2.toString)
-            case _ =>
-          })
+        p => {
+          if (p._2 != null) {
+            flinkConfig.setString(p._1, s"${p._2}")
+          }
+        })
       flinkConfig
         .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
         .safeSet(KubernetesConfigOptions.NAMESPACE, shutDownRequest.kubernetesNamespace)
@@ -227,21 +242,14 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
           KubernetesConfigOptions.KUBE_CONFIG_FILE,
           getDefaultKubernetesConf(shutDownRequest.kubeConf))
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
-      val flinkKubeClient = new FlinkKubernetesClient(kubeClient)
-      val k8sService = flinkKubeClient.getService(shutDownRequest.clusterId)
-      if (k8sService.isPresent) {
-        kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
-        KubernetesDeploymentHelper.delete(
-          shutDownRequest.kubernetesNamespace,
-          shutDownRequest.clusterId)
-        ShutDownResponse()
-      } else {
-        null
-      }
+      kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
+      KubernetesDeploymentHelper.delete(
+        shutDownRequest.kubernetesNamespace,
+        shutDownRequest.clusterId)
+      ShutDownResponse()
     } catch {
       case e: Exception =>
         logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")
-        e.printStackTrace()
         throw e
     } finally {
       Utils.close(kubeClient)
