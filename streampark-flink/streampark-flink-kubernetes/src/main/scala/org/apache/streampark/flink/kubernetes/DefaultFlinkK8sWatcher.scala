@@ -21,7 +21,7 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.{BuildInEvent, FlinkJobStateEvent, FlinkJobStatusChangeEvent}
 import org.apache.streampark.flink.kubernetes.model._
-import org.apache.streampark.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
+import org.apache.streampark.flink.kubernetes.watcher._
 
 import com.google.common.eventbus.{AllowConcurrentEvents, Subscribe}
 
@@ -42,10 +42,10 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   }
 
   // remote server tracking watcher
-  val k8sEventWatcher = new FlinkK8sEventWatcher()
-  val jobStatusWatcher = new FlinkJobStatusWatcher(conf.jobStatusWatcherConf)
-  val metricsWatcher = new FlinkMetricWatcher(conf.metricWatcherConf)
-  val checkpointWatcher = new FlinkCheckpointWatcher(conf.metricWatcherConf)
+  private val k8sEventWatcher = new FlinkK8sEventWatcher()
+  private val jobStatusWatcher = new FlinkJobStatusWatcher(conf.jobStatusWatcherConf)
+  private val metricsWatcher = new FlinkMetricWatcher(conf.metricWatcherConf)
+  private val checkpointWatcher = new FlinkCheckpointWatcher(conf.metricWatcherConf)
 
   private[this] val allWatchers =
     Array[FlinkWatcher](k8sEventWatcher, jobStatusWatcher, metricsWatcher, checkpointWatcher)
@@ -118,7 +118,7 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
     watchController.endpoints.get(trackId.toClusterKey)
 
   /** Build-in Event Listener of K8sFlinkTrackMonitor. */
-  class BuildInEventListener {
+  private class BuildInEventListener {
 
     /**
      * Watch the FlinkJobOperaEvent, then update relevant cache record and trigger a new

@@ -49,7 +49,7 @@
     "@vueuse/shared": "^9.6.0",
     "@zxcvbn-ts/core": "^2.1.0",
     "ant-design-vue": "^3.2.15",
-    "axios": "^1.2.1",
+    "axios": "^1.6.5",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.6",
     "lodash-es": "^4.17.21",

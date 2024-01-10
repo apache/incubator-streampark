@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.FileUtils;
@@ -378,7 +377,7 @@ public class AppBuildPipeServiceImpl
 
     FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
-    if (app.isFlinkSqlJob() || app.isApacheFlinkCustomCodeJob()) {
+    if (app.isFlinkSqlJob() || app.isCustomCodeJob()) {
       if (!app.getMavenDependency().getJar().isEmpty()) {
         for (String jar : app.getMavenDependency().getJar()) {
           File localJar = new File(WebUtils.getAppTempDir(), jar);
@@ -393,14 +392,14 @@ public class AppBuildPipeServiceImpl
       }
     }
 
-    if (app.isApacheFlinkCustomCodeJob()) {
+    if (app.isCustomCodeJob()) {
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
       ResourceFrom resourceFrom = ResourceFrom.of(app.getResourceFrom());
 
       File userJar;
       if (resourceFrom == ResourceFrom.CICD) {
-        userJar = getAppDistJar(app);
+        userJar = getCustomCodeAppDistJar(app);
       } else if (resourceFrom == ResourceFrom.UPLOAD) {
         userJar = new File(WebUtils.getAppTempDir(), app.getJar());
       } else {
@@ -484,15 +483,17 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  private File getAppDistJar(Application app) {
-    if (app.getApplicationType() == ApplicationType.STREAMPARK_FLINK) {
-      return new File(app.getDistHome(), app.getModule().concat(".jar"));
+  private File getCustomCodeAppDistJar(Application app) {
+    switch (app.getApplicationType()) {
+      case APACHE_FLINK:
+        return new File(app.getDistHome(), app.getJar());
+      case STREAMPARK_FLINK:
+        String userJar = String.format("%s/lib/%s.jar", app.getDistHome(), app.getModule());
+        return new File(userJar);
+      default:
+        throw new IllegalArgumentException(
+            "[StreamPark] unsupported ApplicationType of custom code: " + app.getApplicationType());
     }
-    if (app.getApplicationType() == ApplicationType.APACHE_FLINK) {
-      return new File(app.getDistHome(), app.getJar());
-    }
-    throw new IllegalArgumentException(
-        "[StreamPark] unsupported ApplicationType of custom code: " + app.getApplicationType());
   }
 
   /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
