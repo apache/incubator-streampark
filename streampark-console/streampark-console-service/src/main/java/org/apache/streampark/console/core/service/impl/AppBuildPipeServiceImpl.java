@@ -486,7 +486,7 @@ public class AppBuildPipeServiceImpl
 
   private File getAppDistJar(Application app) {
     if (app.getApplicationType() == ApplicationType.STREAMPARK_FLINK) {
-      return new File(app.getDistHome(), app.getModule().concat(".jar"));
+      return new File(app.getDistHome() + "/lib", app.getModule().concat(".jar"));
     }
     if (app.getApplicationType() == ApplicationType.APACHE_FLINK) {
       return new File(app.getDistHome(), app.getJar());
