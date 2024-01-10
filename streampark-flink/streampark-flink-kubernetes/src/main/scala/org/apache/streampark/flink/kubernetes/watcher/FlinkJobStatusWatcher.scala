@@ -31,7 +31,6 @@ import com.google.common.io.Files
 import org.apache.flink.core.fs.Path
 import org.apache.flink.runtime.history.FsJobArchivist
 import org.apache.hc.client5.http.fluent.Request
-import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JNothing, JNull}
 import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
@@ -116,9 +115,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             case Some(jobState) =>
               val trackId = id.copy(jobId = jobState.jobId)
               val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
-              if (
-                latest == null || latest.jobState != jobState.jobState || latest.jobId != jobState.jobId
-              ) {
+
+              val eventChanged = latest == null ||
+                latest.jobState != jobState.jobState ||
+                latest.jobId != jobState.jobId
+
+              if (eventChanged) {
+                logInfo(s"eventChanged.....$trackId")
                 // put job status to cache
                 watchController.jobStatuses.put(trackId, jobState)
                 // set jobId to trackIds
@@ -193,7 +196,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
           pollAckTime = System.currentTimeMillis)
       }
     }
-
     Some(jobState)
   }
 
@@ -204,7 +206,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * This method can be called directly from outside, without affecting the current cachePool
    * result.
    */
-  protected[kubernetes] def touchSessionAllJob(
+  private def touchSessionAllJob(
       @Nonnull clusterId: String,
       @Nonnull namespace: String,
       @Nonnull appId: Long,
@@ -219,8 +221,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     } else {
       jobDetails.map {
         d =>
-          TrackId.onSession(namespace, clusterId, appId, d.jid, groupId) -> d
-            .toJobStatusCV(pollEmitTime, System.currentTimeMillis)
+          TrackId.onSession(namespace, clusterId, appId, d.jid, groupId) ->
+            d.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
       }
     }
   }
@@ -238,7 +240,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     val namespace = trackId.namespace
     val jobDetails = listJobsDetails(ClusterKey(APPLICATION, namespace, clusterId))
     if (jobDetails.isEmpty || jobDetails.get.jobs.isEmpty) {
-      inferApplicationFlinkJobStateFromK8sEvent(trackId)
+      inferJobStateFromK8sEvent(trackId)
     } else {
       Some(jobDetails.get.jobs.head.toJobStatusCV(pollEmitTime, System.currentTimeMillis))
     }
@@ -284,7 +286,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * Infer the current flink state from the last relevant k8s events. This method is only used for
    * application-mode job inference in case of a failed JM rest request.
    */
-  private def inferApplicationFlinkJobStateFromK8sEvent(@Nonnull trackId: TrackId)(implicit
+  private def inferJobStateFromK8sEvent(@Nonnull trackId: TrackId)(implicit
       pollEmitTime: Long): Option[JobStatusCV] = {
 
     // infer from k8s deployment and event
@@ -301,14 +303,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
           trackId.clusterId
         )
 
-        val deployError = KubernetesDeploymentHelper.isDeploymentError(
-          trackId.namespace,
-          trackId.clusterId
-        )
-
         val isConnection = KubernetesDeploymentHelper.checkConnection()
 
         if (deployExists) {
+          val deployError = KubernetesDeploymentHelper.isDeploymentError(
+            trackId.namespace,
+            trackId.clusterId
+          )
           if (!deployError) {
             logger.info("Task Enter the initialization process.")
             FlinkJobState.K8S_INITIALIZING

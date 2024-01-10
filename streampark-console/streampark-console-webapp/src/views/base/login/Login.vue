@@ -59,7 +59,7 @@
         />
       </a>
       <p class="text-light-100 pt-10px" style="border-top: 1px solid #dad7d7">
-        Copyright © 2023 The Apache Software Foundation. Apache StreamPark, StreamPark, and its
+        Copyright © 2022-{{ `${new Date().getFullYear()}` }} The Apache Software Foundation. Apache StreamPark, StreamPark, and its
         feather logo are trademarks of The Apache Software Foundation.
       </p>
     </footer>
