@@ -120,12 +120,12 @@ object YarnPerJobClient extends YarnClientTrait {
     }
   }
 
-  override def doCancel(
-      cancelRequest: CancelRequest,
-      flinkConfig: Configuration): CancelResponse = {
-    val response = super.doCancel(cancelRequest, flinkConfig)
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    flinkConf
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+    val response = super.doCancel(cancelRequest, flinkConf)
     val clusterClientFactory = new YarnClusterClientFactory
-    val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfig)
+    val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
     clusterDescriptor.killCluster(ApplicationId.fromString(cancelRequest.clusterId))
     response
   }

@@ -470,10 +470,10 @@ trait FlinkClientTrait extends Logger {
     val savePointDir: String = tryGetSavepointPathIfNeed(cancelRequest)
 
     val clientWrapper = new FlinkClusterClient(client)
+    val withSavepoint = Try(cancelRequest.withSavepoint).getOrElse(false)
+    val withDrain = Try(cancelRequest.withDrain).getOrElse(false)
 
-    (
-      Try(cancelRequest.withSavepoint).getOrElse(false),
-      Try(cancelRequest.withDrain).getOrElse(false)) match {
+    (withSavepoint, withDrain) match {
       case (false, false) =>
         client.cancel(jobID).get()
         null

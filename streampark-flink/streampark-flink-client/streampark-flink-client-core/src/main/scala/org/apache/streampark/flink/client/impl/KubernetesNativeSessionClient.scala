@@ -25,7 +25,6 @@ import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 import org.apache.streampark.flink.core.FlinkKubernetesClient
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
-import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import io.fabric8.kubernetes.api.model.{Config => _}
@@ -128,11 +127,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     }
   }
 
-  override def doCancel(
-      cancelRequest: CancelRequest,
-      flinkConfig: Configuration): CancelResponse = {
-    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
-    super.doCancel(cancelRequest, flinkConfig)
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    flinkConf.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
+    super.doCancel(cancelRequest, flinkConf)
   }
 
   @throws[Exception]
@@ -206,30 +203,19 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |""".stripMargin)
 
     val flinkConfig = this.getFlinkK8sConfig(shutDownRequest)
-    val kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
+    val clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
+    val client = clusterDescriptor
+      .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+      .getClusterClient
     try {
-      val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
-      val kubeService = kubeClientWrapper.getService(deployRequest.clusterId)
-      if (kubeService.isPresent) {
-        kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
-      } else {
-        val kubernetesClusterDescriptor = getK8sClusterDescriptorAndSpecification(flinkConfig)
-        val clusterDescriptor = kubernetesClusterDescriptor._1
-        val client = clusterDescriptor.retrieve(deployRequest.clusterId).getClusterClient
-        if (client != null) {
-          client.shutDownCluster()
-        }
-      }
-      KubernetesDeploymentHelper.delete(
-        shutDownRequest.kubernetesNamespace,
-        shutDownRequest.clusterId)
+      client.shutDownCluster()
       ShutDownResponse()
     } catch {
       case e: Exception =>
         logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")
         throw e
     } finally {
-      Utils.close(kubeClient)
+      Utils.close(client)
     }
   }
 
@@ -251,8 +237,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
 
   override def doTriggerSavepoint(
       request: TriggerSavepointRequest,
-      flinkConfig: Configuration): SavepointResponse = {
-    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
-    super.doTriggerSavepoint(request, flinkConfig)
+      flinkConf: Configuration): SavepointResponse = {
+    flinkConf.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
+    super.doTriggerSavepoint(request, flinkConf)
   }
 }

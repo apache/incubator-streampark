@@ -30,7 +30,7 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.runtime.util.HadoopUtils
-import org.apache.flink.yarn.configuration.YarnConfigOptions
+import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
@@ -133,6 +133,12 @@ object YarnApplicationClient extends YarnClientTrait {
         }
       }
     })
+  }
+
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    flinkConf
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
+    super.doCancel(cancelRequest, flinkConf)
   }
 
 }

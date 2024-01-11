@@ -77,8 +77,8 @@ trait YarnClientTrait extends FlinkClientTrait {
     executeClientAction(
       request,
       flinkConf,
-      (jid, client) => {
-        SavepointResponse(super.triggerSavepoint(request, jid, client))
+      (jobID, client) => {
+        SavepointResponse(super.triggerSavepoint(request, jobID, client))
       })
   }
 
@@ -86,9 +86,11 @@ trait YarnClientTrait extends FlinkClientTrait {
     executeClientAction(
       cancelRequest,
       flinkConf,
-      (jid, client) => {
-        CancelResponse(super.cancelJob(cancelRequest, jid, client))
-      })
+      (jobId, client) => {
+        val resp = super.cancelJob(cancelRequest, jobId, client)
+        CancelResponse(resp)
+      }
+    )
   }
 
   private lazy val deployInternalMethod: Method = {
