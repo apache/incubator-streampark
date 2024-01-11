@@ -102,6 +102,15 @@ public class FlinkK8sWatcherWrapper {
     if (CollectionUtils.isEmpty(k8sApplication)) {
       return Lists.newArrayList();
     }
+    // correct corrupted data
+    List<Application> correctApps =
+        k8sApplication.stream()
+            .filter(app -> !Bridge.toTrackId(app).isLegal())
+            .collect(Collectors.toList());
+    if (CollectionUtils.isNotEmpty(correctApps)) {
+      applicationService.saveOrUpdateBatch(correctApps);
+    }
+
     // filter out the application that should be tracking
     return k8sApplication.stream()
         .filter(

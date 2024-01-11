@@ -170,13 +170,22 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    */
   def touchSessionJob(@Nonnull trackId: TrackId): Option[JobStatusCV] = {
     val pollEmitTime = System.currentTimeMillis
-    val clusterId = trackId.clusterId
-    val namespace = trackId.namespace
-    val appId = trackId.appId
-    val jobId = trackId.jobId
 
-    val rsMap = touchSessionAllJob(clusterId, namespace, appId, trackId.groupId).toMap
-    val id = TrackId.onSession(namespace, clusterId, appId, jobId, trackId.groupId)
+    val id = TrackId.onSession(
+      trackId.namespace,
+      trackId.clusterId,
+      trackId.appId,
+      trackId.jobId,
+      trackId.groupId
+    )
+
+    val rsMap = touchSessionAllJob(
+      trackId.namespace,
+      trackId.clusterId,
+      trackId.appId,
+      trackId.groupId
+    ).toMap
+
     val jobState = rsMap.get(id).filter(_.jobState != FlinkJobState.SILENT).getOrElse {
       val preCache = watchController.jobStatuses.get(id)
       val state = inferSilentOrLostFromPreCache(preCache)
@@ -207,22 +216,26 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * result.
    */
   private def touchSessionAllJob(
-      @Nonnull clusterId: String,
       @Nonnull namespace: String,
+      @Nonnull clusterId: String,
       @Nonnull appId: Long,
       @Nonnull groupId: String): Array[(TrackId, JobStatusCV)] = {
+
     lazy val defaultResult = Array.empty[(TrackId, JobStatusCV)]
     val pollEmitTime = System.currentTimeMillis
+
     val jobDetails = listJobsDetails(ClusterKey(SESSION, namespace, clusterId))
       .getOrElse(return defaultResult)
       .jobs
+
     if (jobDetails.isEmpty) {
       defaultResult
     } else {
       jobDetails.map {
         d =>
-          TrackId.onSession(namespace, clusterId, appId, d.jid, groupId) ->
-            d.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
+          val trackId = TrackId.onSession(namespace, clusterId, appId, d.jid, groupId)
+          val jobStatus = d.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
+          trackId -> jobStatus
       }
     }
   }
