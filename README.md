@@ -61,7 +61,7 @@
 
 ## 🚀 QuickStart
 - [Start with Docker](docker/README.md)
-- [Start with Kubernetes](deploy/helm/README.md)
+- [Start with Kubernetes](helm/README.md)
 
 Click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
 
