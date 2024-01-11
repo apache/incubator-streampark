@@ -90,7 +90,15 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
 
   override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
     flinkConf.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
-    super.doCancel(cancelRequest, flinkConf)
+    executeClientAction(
+      cancelRequest,
+      flinkConf,
+      (jobId, client) => {
+        val resp = super.cancelJob(cancelRequest, jobId, client)
+        client.shutDownCluster()
+        CancelResponse(resp)
+      }
+    )
   }
 
   override def doTriggerSavepoint(

@@ -95,7 +95,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
     )
   }
 
-  private[this] def executeClientAction[O, R <: SavepointRequestTrait](
+  private[client] def executeClientAction[O, R <: SavepointRequestTrait](
       request: R,
       flinkConfig: Configuration,
       actFunc: (JobID, ClusterClient[_]) => O): O = {

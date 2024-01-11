@@ -89,9 +89,6 @@ trait YarnClientTrait extends FlinkClientTrait {
       flinkConf,
       (jobId, client) => {
         val resp = super.cancelJob(cancelRequest, jobId, client)
-        if (cancelRequest.executionMode == ExecutionMode.YARN_PER_JOB) {
-          client.shutDownCluster()
-        }
         CancelResponse(resp)
       }
     )
