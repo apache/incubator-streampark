@@ -25,7 +25,7 @@ import org.apache.streampark.flink.util.FlinkUtils
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
-import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
+import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
@@ -120,14 +120,10 @@ object YarnPerJobClient extends YarnClientTrait {
     }
   }
 
-  override def doCancel(
-      cancelRequest: CancelRequest,
-      flinkConfig: Configuration): CancelResponse = {
-    val response = super.doCancel(cancelRequest, flinkConfig)
-    val clusterClientFactory = new YarnClusterClientFactory
-    val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfig)
-    clusterDescriptor.killCluster(ApplicationId.fromString(cancelRequest.clusterId))
-    response
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    flinkConf
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+    super.doCancel(cancelRequest, flinkConf)
   }
 
 }

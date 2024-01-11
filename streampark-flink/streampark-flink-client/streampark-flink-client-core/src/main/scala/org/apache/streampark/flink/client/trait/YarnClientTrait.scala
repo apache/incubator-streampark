@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 
@@ -77,8 +78,8 @@ trait YarnClientTrait extends FlinkClientTrait {
     executeClientAction(
       request,
       flinkConf,
-      (jid, client) => {
-        SavepointResponse(super.triggerSavepoint(request, jid, client))
+      (jobID, client) => {
+        SavepointResponse(super.triggerSavepoint(request, jobID, client))
       })
   }
 
@@ -86,9 +87,14 @@ trait YarnClientTrait extends FlinkClientTrait {
     executeClientAction(
       cancelRequest,
       flinkConf,
-      (jid, client) => {
-        CancelResponse(super.cancelJob(cancelRequest, jid, client))
-      })
+      (jobId, client) => {
+        val resp = super.cancelJob(cancelRequest, jobId, client)
+        if (cancelRequest.executionMode == ExecutionMode.YARN_PER_JOB) {
+          client.shutDownCluster()
+        }
+        CancelResponse(resp)
+      }
+    )
   }
 
   private lazy val deployInternalMethod: Method = {

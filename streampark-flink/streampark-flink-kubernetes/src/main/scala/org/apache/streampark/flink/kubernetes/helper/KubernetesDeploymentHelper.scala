@@ -68,30 +68,21 @@ object KubernetesDeploymentHelper extends Logger {
     }.getOrElse(true)
   }
 
-  private[this] def deleteDeployment(nameSpace: String, deploymentName: String): Boolean = {
+  private[this] def deleteDeployment(nameSpace: String, deploymentName: String): Unit = {
     using(KubernetesRetriever.newK8sClient()) {
       client =>
-        Try {
-          val r = client.apps.deployments
-            .inNamespace(nameSpace)
-            .withName(deploymentName)
-            .delete
-          Boolean.unbox(r)
-        }.getOrElse(false)
+        val map = client.apps.deployments.inNamespace(nameSpace)
+        map.withLabel("app", deploymentName).delete
+        map.withName(deploymentName).delete
     }
   }
 
-  private[this] def deleteConfigMap(nameSpace: String, deploymentName: String): Boolean = {
+  private[this] def deleteConfigMap(nameSpace: String, deploymentName: String): Unit = {
     using(KubernetesRetriever.newK8sClient()) {
       client =>
-        Try {
-          val r = client
-            .configMaps()
-            .inNamespace(nameSpace)
-            .withLabel("app", deploymentName)
-            .delete
-          Boolean.unbox(r)
-        }.getOrElse(false)
+        val map = client.configMaps().inNamespace(nameSpace)
+        map.withLabel("app", deploymentName).delete
+        map.withName(deploymentName).delete
     }
   }
 
