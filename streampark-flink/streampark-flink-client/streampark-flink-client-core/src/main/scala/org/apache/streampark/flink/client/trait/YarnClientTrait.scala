@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.enums.ExecutionMode
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 

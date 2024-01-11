@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
-import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
@@ -36,8 +35,6 @@ import org.apache.hadoop.yarn.util.ConverterUtils
 import java.util
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
 
 /** Submit Job to YARN Session Cluster */
 object YarnSessionClient extends YarnClientTrait {
