@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -29,11 +30,9 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
    * Checks if a specific version of Flink exists.
    *
    * @param version The version of Flink to check.
-   * @return Returns an Integer value indicating the existence of the specified version: - 0 if the
-   *     version exists - 1 if the version does not exist - null if the version is invalid or an
-   *     error occurred during the check
+   * @return Returns enum value indicating the existence of the specified version.
    */
-  Integer check(FlinkEnv version);
+  FlinkEnvCheckEnum check(FlinkEnv version);
 
   /**
    * Create a new instance.

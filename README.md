@@ -58,6 +58,12 @@
 
 ![](https://streampark.apache.org/image/sqlide.png)
 
+## 🚀 QuickStart
+- [Start with Docker](docker/README.md)
+- [Start with Kubernetes](helm/README.md)
+
+Click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
+
 ## 🔨 How to Build
 
 ```shell
@@ -69,10 +75,6 @@ cd incubator-streampark
 ## 🧑‍💻 Downloads
 
 Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)
-
-## 🚀 Quick Start
-
-Click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
 
 ## 💋 Our users
 
@@ -92,7 +94,7 @@ You can submit any ideas as [pull requests](https://github.com/apache/incubator-
 
 ### 🍻 How to Contribute
 
-We welcome your suggestions, comments (including criticisms), comments and contributions. See 🔗[How to Contribute](https://streampark.apache.org/community/submit_guide/submit_code) and 🔗[Code Submission Guide](https://streampark.apache.org/community/submit_guide/submit_code)
+We welcome your suggestions, comments (including criticisms), comments and contributions. See [How to Contribute](https://streampark.apache.org/community/submit_guide/submit_code) and [Code Submission Guide](https://streampark.apache.org/community/submit_guide/code_style_and_quality_guide)
 
 Thank you to all the people who already contributed to StreamPark!
 
