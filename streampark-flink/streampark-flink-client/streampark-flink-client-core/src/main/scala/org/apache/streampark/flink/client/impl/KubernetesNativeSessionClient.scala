@@ -51,7 +51,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       flinkConfig: Configuration): SubmitResponse = {
     // require parameters
     require(
-      StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
+      StringUtils.isNotBlank(submitRequest.clusterId),
       s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
     super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(
@@ -69,8 +69,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       // get jm rest url of flink session cluster
       val clusterKey = ClusterKey(
         FlinkK8sExecuteMode.SESSION,
-        submitRequest.k8sSubmitParam.kubernetesNamespace,
-        submitRequest.k8sSubmitParam.clusterId)
+        submitRequest.kubernetesNamespace,
+        submitRequest.clusterId)
       val jmRestUrl = KubernetesRetriever
         .retrieveFlinkRestUrl(clusterKey)
         .getOrElse(throw new Exception(

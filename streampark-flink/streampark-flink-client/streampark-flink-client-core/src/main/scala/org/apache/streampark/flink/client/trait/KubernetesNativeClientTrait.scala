@@ -40,11 +40,11 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     // extract from submitRequest
     flinkConfig
-      .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
-      .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.kubernetesNamespace)
       .safeSet(
         KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
-        covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))
+        covertToServiceExposedType(submitRequest.flinkRestExposedType))
 
     if (submitRequest.buildResult != null) {
       if (submitRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
