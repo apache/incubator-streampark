@@ -267,7 +267,7 @@
         from t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
-        where t.probing = 1 or (t.tracking = 1 and t.state = 13)
+        where t.probing = true or (t.tracking = 1 and t.state = 13)
     </select>
 
     <update id="mapping" parameterType="org.apache.streampark.console.core.entity.Application">
