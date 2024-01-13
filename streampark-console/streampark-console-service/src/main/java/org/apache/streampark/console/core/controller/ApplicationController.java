@@ -86,7 +86,7 @@ public class ApplicationController {
   @PostMapping("get")
   @RequiresPermissions("app:detail")
   public RestResponse get(Application app) {
-    Application application = applicationManageService.getApp(app);
+    Application application = applicationManageService.getApp(app.getId());
     return RestResponse.success(application);
   }
 
@@ -167,7 +167,7 @@ public class ApplicationController {
   @PostMapping("revoke")
   @RequiresPermissions("app:release")
   public RestResponse revoke(Application app) {
-    applicationActionService.revoke(app);
+    applicationActionService.revoke(app.getId());
     return RestResponse.success();
   }
 
@@ -175,7 +175,7 @@ public class ApplicationController {
   @PostMapping(value = "check_start")
   @RequiresPermissions("app:start")
   public RestResponse checkStart(Application app) {
-    AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app);
+    AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
     return RestResponse.success(stateEnum.get());
   }
 
@@ -286,7 +286,7 @@ public class ApplicationController {
   @PostMapping("forcedStop")
   @RequiresPermissions("app:cancel")
   public RestResponse forcedStop(Application app) {
-    applicationActionService.forcedStop(app);
+    applicationActionService.forcedStop(app.getId());
     return RestResponse.success();
   }
 
@@ -299,7 +299,7 @@ public class ApplicationController {
   @Operation(summary = "Get application on yarn name")
   @PostMapping("name")
   public RestResponse yarnName(Application app) {
-    String yarnName = applicationInfoService.getYarnName(app);
+    String yarnName = applicationInfoService.getYarnName(app.getConfig());
     return RestResponse.success(yarnName);
   }
 
@@ -313,7 +313,7 @@ public class ApplicationController {
   @Operation(summary = "Get application conf")
   @PostMapping("readConf")
   public RestResponse readConf(Application app) throws IOException {
-    String config = applicationInfoService.readConf(app);
+    String config = applicationInfoService.readConf(app.getConfig());
     return RestResponse.success(config);
   }
 
@@ -352,7 +352,7 @@ public class ApplicationController {
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
-    Boolean deleted = applicationManageService.remove(app);
+    Boolean deleted = applicationManageService.remove(app.getId());
     return RestResponse.success(deleted);
   }
 

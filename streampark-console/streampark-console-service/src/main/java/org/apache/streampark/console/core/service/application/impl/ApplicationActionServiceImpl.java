@@ -173,11 +173,11 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       new ConcurrentHashMap<>();
 
   @Override
-  public void revoke(Application appParam) throws ApplicationException {
-    Application application = getById(appParam.getId());
+  public void revoke(Long appId) throws ApplicationException {
+    Application application = getById(appId);
     ApiAlertException.throwIfNull(
         application,
-        String.format("The application id=%s not found, revoke failed.", appParam.getId()));
+        String.format("The application id=%s not found, revoke failed.", appId));
 
     // 1) delete files that have been published to workspace
     application.getFsOperator().delete(application.getAppHome());
@@ -206,10 +206,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public void forcedStop(Application appParam) {
-    CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(appParam.getId());
-    CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(appParam.getId());
-    Application application = this.baseMapper.selectApp(appParam);
+  public void forcedStop(Long id) {
+    CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(id);
+    CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(id);
+    Application application = this.baseMapper.selectApp(id);
     if (isKubernetesApp(application)) {
       KubernetesDeploymentHelper.watchPodTerminatedLog(
           application.getK8sNamespace(), application.getJobName(), application.getJobId());
@@ -225,7 +225,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       cancelFuture.cancel(true);
     }
     if (startFuture == null && cancelFuture == null) {
-      this.doStopped(appParam);
+      this.doStopped(id);
     }
   }
 
@@ -332,7 +332,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             applicationLogService.save(applicationLog);
 
             if (throwable instanceof CancellationException) {
-              doStopped(application);
+              doStopped(application.getId());
             } else {
               log.error("stop flink job failed.", throwable);
               application.setOptionState(OptionStateEnum.NONE.getValue());
@@ -500,7 +500,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             applicationLog.setSuccess(false);
             applicationLogService.save(applicationLog);
             if (throwable instanceof CancellationException) {
-              doStopped(application);
+              doStopped(application.getId());
             } else {
               Application app = getById(appParam.getId());
               app.setState(FlinkAppStateEnum.FAILED.getValue());
@@ -772,8 +772,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     return properties;
   }
 
-  private void doStopped(Application appParam) {
-    Application application = getById(appParam);
+  private void doStopped(Long id) {
+    Application application = getById(id);
     application.setOptionState(OptionStateEnum.NONE.getValue());
     application.setState(FlinkAppStateEnum.CANCELED.getValue());
     application.setOptionTime(new Date());
@@ -781,9 +781,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     savePointService.expire(application.getId());
     // re-tracking flink job on kubernetes and logging exception
     if (isKubernetesApp(application)) {
-      TrackId id = toTrackId(application);
-      k8SFlinkTrackMonitor.unWatching(id);
-      k8SFlinkTrackMonitor.doWatching(id);
+      TrackId trackId = toTrackId(application);
+      k8SFlinkTrackMonitor.unWatching(trackId);
+      k8SFlinkTrackMonitor.doWatching(trackId);
     } else {
       FlinkAppHttpWatcher.unWatching(application.getId());
     }

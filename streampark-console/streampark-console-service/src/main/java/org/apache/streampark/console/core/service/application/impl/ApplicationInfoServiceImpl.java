@@ -325,8 +325,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public AppExistsStateEnum checkStart(Application appParam) {
-    Application application = getById(appParam.getId());
+  public AppExistsStateEnum checkStart(Long id) {
+    Application application = getById(id);
     if (application == null) {
       return AppExistsStateEnum.INVALID;
     }
@@ -408,10 +408,10 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public String getYarnName(Application appParam) {
+  public String getYarnName(String appConfig) {
     String[] args = new String[2];
     args[0] = "--name";
-    args[1] = appParam.getConfig();
+    args[1] = appConfig;
     return ParameterCli.read(args);
   }
 
@@ -479,8 +479,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public String readConf(Application appParam) throws IOException {
-    File file = new File(appParam.getConfig());
+  public String readConf(String appConfig) throws IOException {
+    File file = new File(appConfig);
     String conf = org.apache.streampark.common.util.FileUtils.readFile(file);
     return Base64.getEncoder().encodeToString(conf.getBytes());
   }
