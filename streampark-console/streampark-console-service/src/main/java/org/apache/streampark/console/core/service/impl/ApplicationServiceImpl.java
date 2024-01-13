@@ -82,7 +82,6 @@ import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
-import org.apache.streampark.flink.client.bean.KubernetesSubmitParam;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.core.conf.ParameterCli;
@@ -1557,14 +1556,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       extraParameter.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
     }
 
-    TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
-
-    KubernetesSubmitParam kubernetesSubmitParam =
-        new KubernetesSubmitParam(
-            application.getClusterId(),
-            application.getK8sNamespace(),
-            application.getK8sRestExposedTypeEnum());
-
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
 
     Utils.notNull(buildPipeline);
@@ -1579,7 +1570,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         variableService.replaceVariable(application.getTeamId(), application.getArgs());
 
     SubmitRequest submitRequest =
-        new SubmitRequest(
+        SubmitRequest.apply(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
             getProperties(application),
@@ -1593,9 +1584,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             getSavePointed(appParam),
             applicationArgs,
             buildResult,
-            kubernetesSubmitParam,
-            extraParameter);
+            extraParameter,
+            application.getClusterId(),
+            application.getK8sNamespace(),
+            application.getK8sRestExposedTypeEnum());
 
+    TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
     CompletableFuture<SubmitResponse> future =
         CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
 
@@ -1608,6 +1602,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
           // 2) exception
           if (throwable != null) {
+            log.info(" start exception : " + throwable);
             String exception = Utils.stringifyException(throwable);
             applicationLog.setException(exception);
             applicationLog.setSuccess(false);
@@ -1655,6 +1650,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
           // if start completed, will be added task to tracking queue
           if (isKubernetesApp(application)) {
+            log.info(
+                "start job {} on {} success, doWatching...",
+                application.getJobName(),
+                application.getExecutionModeEnum().getName());
             application.setRelease(ReleaseState.DONE.get());
             flinkK8sWatcher.doWatching(trackId);
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {

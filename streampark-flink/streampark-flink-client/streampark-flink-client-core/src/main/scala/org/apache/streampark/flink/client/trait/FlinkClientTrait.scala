@@ -66,9 +66,9 @@ trait FlinkClientTrait extends Logger {
          |    appName          : ${submitRequest.appName}
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
-         |    k8sNamespace     : ${submitRequest.k8sSubmitParam.kubernetesNamespace}
-         |    flinkExposedType : ${submitRequest.k8sSubmitParam.flinkRestExposedType}
-         |    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
+         |    k8sNamespace     : ${submitRequest.kubernetesNamespace}
+         |    flinkExposedType : ${submitRequest.flinkRestExposedType}
+         |    clusterId        : ${submitRequest.clusterId}
          |    applicationType  : ${submitRequest.applicationType.getName}
          |    savePoint        : ${submitRequest.savePoint}
          |    properties       : ${submitRequest.properties.mkString(" ")}
