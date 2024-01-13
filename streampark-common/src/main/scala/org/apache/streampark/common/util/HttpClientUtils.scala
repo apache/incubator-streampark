@@ -21,6 +21,7 @@ import org.apache.http.auth.{AuthSchemeProvider, AuthScope, Credentials}
 import org.apache.http.client.config.{AuthSchemes, RequestConfig}
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods._
+import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.config.RegistryBuilder
 import org.apache.http.entity.StringEntity
@@ -35,6 +36,7 @@ import java.security.Principal
 import java.util
 
 import scala.collection.JavaConversions._
+import scala.util.Try
 
 object HttpClientUtils {
 
@@ -202,6 +204,19 @@ object HttpClientUtils {
     } catch {
       case e: Exception => throw e
     }
+  }
+
+  def tryCheckUrl(url: String, timeout: Int): Boolean = {
+    val httpClient = HttpClients.createDefault();
+    val context = HttpClientContext.create()
+    val httpGet = new HttpGet(url)
+    val requestConfig = RequestConfig
+      .custom()
+      .setSocketTimeout(timeout)
+      .setConnectTimeout(timeout)
+      .build()
+    httpGet.setConfig(requestConfig)
+    Try(httpClient.execute(httpGet, context)).isSuccess
   }
 
 }
