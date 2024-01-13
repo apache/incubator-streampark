@@ -35,7 +35,7 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   Boolean create(FlinkCluster flinkCluster);
 
-  void remove(FlinkCluster flinkCluster);
+  void remove(Long id);
 
   void update(FlinkCluster flinkCluster);
 
