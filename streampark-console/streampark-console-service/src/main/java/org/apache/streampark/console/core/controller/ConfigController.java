@@ -73,7 +73,7 @@ public class ConfigController {
   @Operation(summary = "List application config histories")
   @PostMapping("history")
   public RestResponse history(Application application) {
-    List<ApplicationConfig> history = applicationConfigService.list(application);
+    List<ApplicationConfig> history = applicationConfigService.list(application.getId());
     return RestResponse.success(history);
   }
 

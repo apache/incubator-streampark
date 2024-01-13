@@ -211,14 +211,14 @@ public class ApplicationConfigServiceImpl
   }
 
   @Override
-  public List<ApplicationConfig> list(Application appParam) {
+  public List<ApplicationConfig> list(Long appId) {
     LambdaQueryWrapper<ApplicationConfig> queryWrapper =
         new LambdaQueryWrapper<ApplicationConfig>()
-            .eq(ApplicationConfig::getAppId, appParam.getId())
+            .eq(ApplicationConfig::getAppId, appId)
             .orderByDesc(ApplicationConfig::getVersion);
 
     List<ApplicationConfig> configList = this.baseMapper.selectList(queryWrapper);
-    fillEffectiveField(appParam.getId(), configList);
+    fillEffectiveField(appId, configList);
     return configList;
   }
 
