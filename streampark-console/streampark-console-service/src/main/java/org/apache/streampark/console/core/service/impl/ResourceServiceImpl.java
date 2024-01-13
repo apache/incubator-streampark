@@ -207,8 +207,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   }
 
   @Override
-  public void remove(Resource resource) {
-    Resource findResource = getById(resource.getId());
+  public void remove(Long id) {
+    Resource findResource = getById(id);
     checkOrElseAlert(findResource);
 
     String filePath =
@@ -224,7 +224,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     FsOperator.lfs().delete(filePath);
 
-    this.removeById(resource);
+    this.removeById(id);
   }
 
   public List<Resource> listByTeamId(Long teamId) {

@@ -71,9 +71,9 @@ public interface ResourceService extends IService<Resource> {
   /**
    * delete resource
    *
-   * @param resource
+   * @param id
    */
-  void remove(Resource resource);
+  void remove(Long id);
 
   /**
    * Get resource through team id.
