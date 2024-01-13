@@ -112,7 +112,7 @@ public interface ApplicationManageService extends IService<Application> {
    *
    * @param id The Application object's id.
    * @return The Application object that matches the specified details, or null if no matching
-   * Application is found.
+   *     Application is found.
    */
   Application getApp(Long id);
 

@@ -176,8 +176,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   public void revoke(Long appId) throws ApplicationException {
     Application application = getById(appId);
     ApiAlertException.throwIfNull(
-        application,
-        String.format("The application id=%s not found, revoke failed.", appId));
+        application, String.format("The application id=%s not found, revoke failed.", appId));
 
     // 1) delete files that have been published to workspace
     application.getFsOperator().delete(application.getAppHome());

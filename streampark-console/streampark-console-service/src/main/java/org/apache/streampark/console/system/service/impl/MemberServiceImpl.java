@@ -154,9 +154,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     Member member =
         Optional.ofNullable(this.getById(id))
             .orElseThrow(
-                () ->
-                    new ApiAlertException(
-                        String.format("The member [id=%s] not found", id)));
+                () -> new ApiAlertException(String.format("The member [id=%s] not found", id)));
     this.removeById(member);
     userService.clearLastTeam(member.getUserId(), member.getTeamId());
   }
