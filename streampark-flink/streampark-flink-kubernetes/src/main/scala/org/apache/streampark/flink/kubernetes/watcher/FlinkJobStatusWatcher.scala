@@ -20,7 +20,7 @@ package org.apache.streampark.flink.kubernetes.watcher
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, JobStatusWatcherConfig, KubernetesRetriever}
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
+import org.apache.streampark.flink.kubernetes.enums.{FlinkJobState, FlinkK8sExecuteMode}
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
@@ -115,13 +115,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             case Some(jobState) =>
               val trackId = id.copy(jobId = jobState.jobId)
               val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
-
-              val eventChanged = latest == null ||
-                latest.jobState != jobState.jobState ||
-                latest.jobId != jobState.jobId
-
-              if (eventChanged) {
-                logInfo(s"eventChanged.....$trackId")
+              if (jobState.eq(latest)) {
                 // put job status to cache
                 watchController.jobStatuses.put(trackId, jobState)
                 // set jobId to trackIds
@@ -168,44 +162,36 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * This method can be called directly from outside, without affecting the current cachePool
    * result.
    */
-  def touchSessionJob(@Nonnull trackId: TrackId): Option[JobStatusCV] = {
+  def touchSessionJob(@Nonnull idArg: TrackId): Option[JobStatusCV] = {
     val pollEmitTime = System.currentTimeMillis
 
-    val id = TrackId.onSession(
-      trackId.namespace,
-      trackId.clusterId,
-      trackId.appId,
-      trackId.jobId,
-      trackId.groupId
-    )
+    val id = idArg.copy(executeMode = FlinkK8sExecuteMode.SESSION)
 
-    val rsMap = touchSessionAllJob(
-      trackId.namespace,
-      trackId.clusterId,
-      trackId.appId,
-      trackId.groupId
-    ).toMap
+    touchSessionAllJob(id).get(id).filter(_.jobState != FlinkJobState.SILENT) match {
+      case Some(state) => Option(state)
+      case _ =>
+        val preCache = watchController.jobStatuses.get(id)
+        val state = inferSilentOrLostFromPreCache(preCache)
 
-    val jobState = rsMap.get(id).filter(_.jobState != FlinkJobState.SILENT).getOrElse {
-      val preCache = watchController.jobStatuses.get(id)
-      val state = inferSilentOrLostFromPreCache(preCache)
-      val nonFirstSilent =
-        state == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT
-      if (nonFirstSilent) {
-        JobStatusCV(
-          jobState = state,
-          jobId = id.jobId,
-          pollEmitTime = preCache.pollEmitTime,
-          pollAckTime = preCache.pollAckTime)
-      } else {
-        JobStatusCV(
-          jobState = state,
-          jobId = id.jobId,
-          pollEmitTime = pollEmitTime,
-          pollAckTime = System.currentTimeMillis)
-      }
+        val nonFirstSilent = state == FlinkJobState.SILENT &&
+          preCache != null &&
+          preCache.jobState == FlinkJobState.SILENT
+
+        val jobState = if (nonFirstSilent) {
+          JobStatusCV(
+            jobState = state,
+            jobId = id.jobId,
+            pollEmitTime = preCache.pollEmitTime,
+            pollAckTime = preCache.pollAckTime)
+        } else {
+          JobStatusCV(
+            jobState = state,
+            jobId = id.jobId,
+            pollEmitTime = pollEmitTime,
+            pollAckTime = System.currentTimeMillis)
+        }
+        Option(jobState)
     }
-    Some(jobState)
   }
 
   /**
@@ -215,28 +201,23 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * This method can be called directly from outside, without affecting the current cachePool
    * result.
    */
-  private def touchSessionAllJob(
-      @Nonnull namespace: String,
-      @Nonnull clusterId: String,
-      @Nonnull appId: Long,
-      @Nonnull groupId: String): Array[(TrackId, JobStatusCV)] = {
-
-    lazy val defaultResult = Array.empty[(TrackId, JobStatusCV)]
+  private def touchSessionAllJob(trackId: TrackId): Map[TrackId, JobStatusCV] = {
     val pollEmitTime = System.currentTimeMillis
-
-    val jobDetails = listJobsDetails(ClusterKey(SESSION, namespace, clusterId))
-      .getOrElse(return defaultResult)
-      .jobs
-
-    if (jobDetails.isEmpty) {
-      defaultResult
-    } else {
-      jobDetails.map {
-        d =>
-          val trackId = TrackId.onSession(namespace, clusterId, appId, d.jid, groupId)
-          val jobStatus = d.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
-          trackId -> jobStatus
-      }
+    val jobDetails = listJobsDetails(ClusterKey(SESSION, trackId.namespace, trackId.clusterId))
+    jobDetails match {
+      case Some(details) if details.jobs.nonEmpty =>
+        details.jobs.map {
+          d =>
+            val id = TrackId.onSession(
+              trackId.namespace,
+              trackId.clusterId,
+              trackId.appId,
+              d.jid,
+              trackId.groupId)
+            val jobStatus = d.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
+            id -> jobStatus
+        }.toMap
+      case None => Map.empty
     }
   }
 

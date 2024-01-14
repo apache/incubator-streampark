@@ -483,6 +483,10 @@ public class Application implements Serializable {
     return this.getAppType() == ApplicationType.STREAMPARK_FLINK.getType();
   }
 
+  public boolean isKubernetesModeJob() {
+    return ExecutionMode.isKubernetesMode(this.getExecutionModeEnum());
+  }
+
   @JsonIgnore
   @SneakyThrows
   public MavenDependency getMavenDependency() {

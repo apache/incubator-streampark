@@ -157,7 +157,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
 import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service
@@ -515,7 +514,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 record -> {
                   // status of flink job on kubernetes mode had been automatically persisted to db
                   // in time.
-                  if (isKubernetesApp(record)) {
+                  if (record.isKubernetesModeJob()) {
                     // set duration
                     String restUrl = flinkK8sWatcher.getRemoteRestUrl(toTrackId(record));
                     record.setFlinkRestUrl(restUrl);
@@ -1143,7 +1142,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(app.getId());
     CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(app.getId());
     Application application = this.baseMapper.getApp(app);
-    if (isKubernetesApp(application)) {
+    if (application.isKubernetesModeJob()) {
       KubernetesDeploymentHelper.watchPodTerminatedLog(
           application.getK8sNamespace(), application.getJobName(), application.getJobId());
     }
@@ -1194,7 +1193,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
     // add flink web url info for k8s-mode
-    if (isKubernetesApp(application)) {
+    if (application.isKubernetesModeJob()) {
       String restUrl = flinkK8sWatcher.getRemoteRestUrl(toTrackId(application));
       application.setFlinkRestUrl(restUrl);
 
@@ -1231,7 +1230,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   public boolean mapping(Application appParam) {
     boolean mapping = this.baseMapper.mapping(appParam);
     Application application = getById(appParam.getId());
-    if (isKubernetesApp(application)) {
+    if (application.isKubernetesModeJob()) {
       flinkK8sWatcher.doWatching(toTrackId(application));
     } else {
       FlinkRESTAPIWatcher.doWatching(application);
@@ -1329,7 +1328,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     cancelFutureMap.put(application.getId(), cancelFuture);
 
-    TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
+    TrackId trackId = application.isKubernetesModeJob() ? toTrackId(application) : null;
 
     cancelFuture.whenComplete(
         (cancelResponse, throwable) -> {
@@ -1353,7 +1352,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 savePointService.expire(application.getId());
               }
               // re-tracking flink job on kubernetes and logging exception
-              if (isKubernetesApp(application)) {
+              if (application.isKubernetesModeJob()) {
                 flinkK8sWatcher.unWatching(trackId);
               } else {
                 FlinkRESTAPIWatcher.unWatching(application.getId());
@@ -1379,7 +1378,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             savePointService.save(savePoint);
           }
 
-          if (isKubernetesApp(application)) {
+          if (application.isKubernetesModeJob()) {
             flinkK8sWatcher.unWatching(trackId);
           }
         });
@@ -1590,7 +1589,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.getK8sNamespace(),
             application.getK8sRestExposedTypeEnum());
 
-    TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
     CompletableFuture<SubmitResponse> future =
         CompletableFuture.supplyAsync(
             () -> FlinkClientHandler.submit(submitRequest), executorService);
@@ -1616,7 +1614,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               app.setState(FlinkAppState.FAILED.getValue());
               app.setOptionState(OptionState.NONE.getValue());
               updateById(app);
-              if (isKubernetesApp(app)) {
+              if (app.isKubernetesModeJob()) {
+                TrackId trackId = toTrackId(application);
                 flinkK8sWatcher.unWatching(trackId);
               } else {
                 FlinkRESTAPIWatcher.unWatching(appParam.getId());
@@ -1651,13 +1650,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           application.setEndTime(null);
 
           // if start completed, will be added task to tracking queue
-          if (isKubernetesApp(application)) {
+          if (application.isKubernetesModeJob()) {
             log.info(
                 "start job {} on {} success, doWatching...",
                 application.getJobName(),
                 application.getExecutionModeEnum().getName());
             application.setRelease(ReleaseState.DONE.get());
+
+            TrackId trackId = toTrackId(application);
             flinkK8sWatcher.doWatching(trackId);
+
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
               String domainName = settingService.getIngressModeDefault();
               if (StringUtils.isNotBlank(domainName)) {
@@ -1754,7 +1756,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     updateById(application);
     savePointService.expire(application.getId());
     // re-tracking flink job on kubernetes and logging exception
-    if (isKubernetesApp(application)) {
+    if (application.isKubernetesModeJob()) {
       TrackId id = toTrackId(application);
       flinkK8sWatcher.doWatching(id);
     } else {

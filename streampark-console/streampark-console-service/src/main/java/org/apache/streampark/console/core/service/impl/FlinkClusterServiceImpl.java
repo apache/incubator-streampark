@@ -151,14 +151,17 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Transactional(rollbackFor = {Exception.class})
   public void start(Long id) {
     FlinkCluster flinkCluster = getById(id);
-    ApiAlertException.throwIfTrue(
-        !applicationService.getYARNApplication(flinkCluster.getClusterName()).isEmpty(),
-        "The same job name: "
-            + flinkCluster.getClusterName()
-            + " is already running in the yarn queue");
+    ApiAlertException.throwIfTrue(flinkCluster == null, "Invalid id, no related cluster found.");
+    ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
+    if (executionModeEnum == ExecutionMode.YARN_SESSION) {
+      ApiAlertException.throwIfTrue(
+          !applicationService.getYARNApplication(flinkCluster.getClusterName()).isEmpty(),
+          "The application name: "
+              + flinkCluster.getClusterName()
+              + " is already running in the yarn queue, please check!");
+    }
 
     try {
-      ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
       log.info("deploy cluster request: " + deployRequest);
 

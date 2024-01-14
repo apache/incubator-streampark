@@ -42,4 +42,12 @@ case class JobStatusCV(
     duration: Long = 0,
     taskTotal: Int = 0,
     pollEmitTime: Long,
-    pollAckTime: Long)
+    pollAckTime: Long) {
+
+  def eq(that: JobStatusCV): Boolean = {
+    that == null ||
+    that.jobState != this.jobState ||
+    that.jobId != this.jobId
+  }
+
+}
