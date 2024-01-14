@@ -656,7 +656,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       return AppExistsState.INVALID;
     }
     if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      boolean exists = !getApplicationReports(application.getJobName()).isEmpty();
+      boolean exists = !getYARNApplication(application.getJobName()).isEmpty();
       return exists ? AppExistsState.IN_YARN : AppExistsState.NO;
     }
     // todo on k8s check...
@@ -1451,7 +1451,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // check job on yarn is already running
     if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
       ApiAlertException.throwIfTrue(
-          !getApplicationReports(application.getJobName()).isEmpty(),
+          !getYARNApplication(application.getJobName()).isEmpty(),
           "The same job name is already running in the yarn queue");
     }
 
@@ -1763,7 +1763,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // kill application
     if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
       try {
-        List<ApplicationReport> applications = getApplicationReports(application.getJobName());
+        List<ApplicationReport> applications = getYARNApplication(application.getJobName());
         if (!applications.isEmpty()) {
           YarnClient yarnClient = HadoopUtils.yarnClient();
           yarnClient.killApplication(applications.get(0).getApplicationId());
@@ -1845,7 +1845,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         || yarnQueueService.isDefaultQueue(application.getYarnQueue());
   }
 
-  private List<ApplicationReport> getApplicationReports(String jobName) {
+  @Override
+  public List<ApplicationReport> getYARNApplication(String appName) {
     try {
       YarnClient yarnClient = HadoopUtils.yarnClient();
       Set<String> types =
@@ -1861,7 +1862,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       Set<String> yarnTag = Sets.newHashSet("streampark");
       List<ApplicationReport> applications = yarnClient.getApplications(types, states, yarnTag);
       return applications.stream()
-          .filter(report -> report.getName().equals(jobName))
+          .filter(report -> report.getName().equals(appName))
           .collect(Collectors.toList());
     } catch (Exception e) {
       throw new RuntimeException("The yarn api is abnormal. Ensure that yarn is running properly.");

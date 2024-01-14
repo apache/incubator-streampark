@@ -151,10 +151,17 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Transactional(rollbackFor = {Exception.class})
   public void start(Long id) {
     FlinkCluster flinkCluster = getById(id);
+    ApiAlertException.throwIfTrue(
+        !applicationService.getYARNApplication(flinkCluster.getClusterName()).isEmpty(),
+        "The same job name: "
+            + flinkCluster.getClusterName()
+            + " is already running in the yarn queue");
+
     try {
       ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
       log.info("deploy cluster request: " + deployRequest);
+
       Future<DeployResponse> future =
           executorService.submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
@@ -193,13 +200,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             flinkEnv.getFlinkVersion(),
             executionModeEnum,
             flinkCluster.getProperties(),
-            flinkCluster.getClusterId());
+            flinkCluster.getClusterId(),
+            flinkCluster.getClusterName());
       case KUBERNETES_NATIVE_SESSION:
         return KubernetesDeployRequest.apply(
             flinkEnv.getFlinkVersion(),
             executionModeEnum,
             flinkCluster.getProperties(),
             flinkCluster.getClusterId(),
+            flinkCluster.getClusterName(),
             flinkCluster.getK8sNamespace(),
             flinkCluster.getK8sConf(),
             flinkCluster.getServiceAccount(),

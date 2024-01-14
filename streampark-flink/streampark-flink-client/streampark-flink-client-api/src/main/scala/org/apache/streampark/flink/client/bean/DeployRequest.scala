@@ -31,7 +31,8 @@ case class DeployRequest(
     flinkVersion: FlinkVersion,
     executionMode: ExecutionMode,
     properties: JavaMap[String, Any],
-    clusterId: String) {
+    clusterId: String,
+    clusterName: String) {
 
   private[client] lazy val hdfsWorkspace = {
 
@@ -65,12 +66,13 @@ class KubernetesDeployRequest(
     override val executionMode: ExecutionMode,
     override val properties: JavaMap[String, Any],
     override val clusterId: String,
+    override val clusterName: String,
     val kubernetesNamespace: String = KubernetesConfigOptions.NAMESPACE.defaultValue(),
     val kubeConf: String = "~/.kube/config",
     val serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
     val flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
     val flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.CLUSTER_IP)
-  extends DeployRequest(flinkVersion, executionMode, properties, clusterId)
+  extends DeployRequest(flinkVersion, executionMode, properties, clusterId, clusterName)
 
 object KubernetesDeployRequest {
   def apply(
@@ -78,6 +80,7 @@ object KubernetesDeployRequest {
       executionMode: ExecutionMode,
       properties: JavaMap[String, Any],
       clusterId: String,
+      clusterName: String,
       kubernetesNamespace: String,
       kubeConf: String,
       serviceAccount: String,
@@ -88,6 +91,7 @@ object KubernetesDeployRequest {
       executionMode,
       properties,
       clusterId,
+      clusterName,
       kubernetesNamespace,
       kubeConf,
       serviceAccount,

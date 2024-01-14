@@ -21,6 +21,7 @@ import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
@@ -58,7 +59,10 @@ object YarnSessionClient extends YarnClientTrait {
    * @param deployRequest
    * @param flinkConfig
    */
-  def deployClusterConfig(deployRequest: DeployRequest, flinkConfig: Configuration): Unit = {
+  private def deployClusterConfig(
+      deployRequest: DeployRequest,
+      flinkConfig: Configuration): Unit = {
+
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
       deployRequest.flinkVersion.flinkHome)
     val currentUser = UserGroupInformation.getCurrentUser
@@ -86,6 +90,10 @@ object YarnSessionClient extends YarnClientTrait {
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
       // conf dir
       .safeSet(DeploymentOptionsInternal.CONF_DIR, s"${deployRequest.flinkVersion.flinkHome}/conf")
+      // app tags
+      .safeSet(YarnConfigOptions.APPLICATION_TAGS, "streampark")
+      // app name
+      .safeSet(YarnConfigOptions.APPLICATION_NAME, deployRequest.clusterName)
 
     logInfo(s"""
                |------------------------------------------------------------------
@@ -164,10 +172,12 @@ object YarnSessionClient extends YarnClientTrait {
     try {
       val flinkConfig =
         extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
+
       deployClusterConfig(deployRequest, flinkConfig)
+
       val yarnClusterDescriptor = getSessionClusterDeployDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
-      if (null != deployRequest.clusterId && deployRequest.clusterId.nonEmpty) {
+      if (StringUtils.isNotBlank(deployRequest.clusterId)) {
         try {
           val applicationStatus =
             clusterDescriptor.getYarnClient
@@ -183,8 +193,7 @@ object YarnSessionClient extends YarnClientTrait {
             }
           }
         } catch {
-          case _: ApplicationNotFoundException =>
-            logInfo("this applicationId have not managed by yarn ,need deploy ...")
+          case e: ApplicationNotFoundException => return DeployResponse(null, null, e)
         }
       }
       val clientProvider = clusterDescriptor.deploySessionCluster(yarnClusterDescriptor._1)
