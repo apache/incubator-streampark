@@ -189,16 +189,9 @@ object YarnSessionClient extends YarnClientTrait {
       }
       val clientProvider = clusterDescriptor.deploySessionCluster(yarnClusterDescriptor._1)
       client = clientProvider.getClusterClient
-      if (client.getWebInterfaceURL != null) {
-        DeployResponse(client.getWebInterfaceURL, client.getClusterId.toString)
-      } else {
-        null
-      }
+      getDeployResponse(client)
     } catch {
-      case e: Exception =>
-        logError(s"start flink session fail in ${deployRequest.executionMode} mode")
-        e.printStackTrace()
-        throw e
+      case e: Exception => DeployResponse(null, null, e)
     } finally {
       Utils.close(client, clusterDescriptor)
     }
@@ -234,10 +227,7 @@ object YarnSessionClient extends YarnClientTrait {
           .getFinalApplicationStatus}")
       ShutDownResponse()
     } catch {
-      case e: Exception =>
-        logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")
-        e.printStackTrace()
-        throw e
+      case e: Exception => ShutDownResponse(e)
     } finally {
       Utils.close(client, clusterDescriptor)
     }

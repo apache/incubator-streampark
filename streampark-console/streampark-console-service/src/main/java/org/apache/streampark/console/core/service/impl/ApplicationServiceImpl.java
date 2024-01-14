@@ -79,7 +79,7 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
-import org.apache.streampark.flink.client.FlinkClient;
+import org.apache.streampark.flink.client.FlinkClientHandler;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
@@ -1324,7 +1324,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
-        CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
+        CompletableFuture.supplyAsync(
+            () -> FlinkClientHandler.cancel(cancelRequest), executorService);
 
     cancelFutureMap.put(application.getId(), cancelFuture);
 
@@ -1591,7 +1592,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
     CompletableFuture<SubmitResponse> future =
-        CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
+        CompletableFuture.supplyAsync(
+            () -> FlinkClientHandler.submit(submitRequest), executorService);
 
     startFutureMap.put(application.getId(), future);
 
