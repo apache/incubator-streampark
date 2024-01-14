@@ -171,7 +171,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       }
       getDeployResponse(client)
     } catch {
-      case e: Exception => DeployResponse(null, null, e)
+      case e: Exception => DeployResponse(error = e)
     } finally {
       Utils.close(client, clusterDescriptor, kubeClient)
     }

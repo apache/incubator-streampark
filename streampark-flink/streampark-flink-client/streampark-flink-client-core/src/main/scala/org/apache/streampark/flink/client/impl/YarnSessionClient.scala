@@ -193,14 +193,14 @@ object YarnSessionClient extends YarnClientTrait {
             }
           }
         } catch {
-          case e: ApplicationNotFoundException => return DeployResponse(null, null, e)
+          case e: Exception => return DeployResponse(error = e)
         }
       }
       val clientProvider = clusterDescriptor.deploySessionCluster(yarnClusterDescriptor._1)
       client = clientProvider.getClusterClient
       getDeployResponse(client)
     } catch {
-      case e: Exception => DeployResponse(null, null, e)
+      case e: Exception => DeployResponse(error = e)
     } finally {
       Utils.close(client, clusterDescriptor)
     }

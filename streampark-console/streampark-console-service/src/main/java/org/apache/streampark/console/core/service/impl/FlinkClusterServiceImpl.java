@@ -165,7 +165,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       Future<DeployResponse> future =
           executorService.submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
-      if (deployResponse.error() == null) {
+      if (deployResponse.error() != null) {
+        throw new ApiDetailException(
+            "deploy cluster "
+                + flinkCluster.getClusterName()
+                + "failed, exception:\n"
+                + Utils.stringifyException(deployResponse.error()));
+      } else {
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
           String address =
               YarnUtils.getRMWebAppURL(true) + "/proxy/" + deployResponse.clusterId() + "/";
@@ -177,10 +183,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flinkCluster.setClusterState(ClusterState.STARTED.getValue());
         flinkCluster.setException(null);
         updateById(flinkCluster);
-      } else {
-        throw new ApiAlertException(
-            "deploy cluster failed, exception:\n"
-                + Utils.stringifyException(deployResponse.error()));
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
