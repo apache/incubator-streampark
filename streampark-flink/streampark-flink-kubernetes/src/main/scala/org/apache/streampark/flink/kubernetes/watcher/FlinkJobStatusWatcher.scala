@@ -101,53 +101,56 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         .getOrElse(return
         )
 
-      // retrieve flink job status in thread pool
-      val tracksFuture: Set[Future[Option[JobStatusCV]]] = trackIds.map {
+      // 1) k8s application mode
+      val appFuture: Set[Future[Option[JobStatusCV]]] =
+        trackIds.filter(_.executeMode == FlinkK8sExecuteMode.APPLICATION).map {
+          id =>
+            val future = Future(touchApplicationJob(id))
+            future.onComplete(_.getOrElse(None) match {
+              case Some(jobState) =>
+                updateState(id.copy(jobId = jobState.jobId), jobState)
+              case _ =>
+            })
+            future
+        }
+
+      // 2) k8s session mode
+      val sessionIds = trackIds.filter(_.executeMode == FlinkK8sExecuteMode.SESSION)
+      val sessionCluster = sessionIds.groupBy(_.toClusterKey.toString).flatMap(_._2).toSet
+      val sessionFuture = sessionCluster.map {
         id =>
-          val future = Future {
-            id.executeMode match {
-              case SESSION => touchSessionJob(id)
-              case APPLICATION => touchApplicationJob(id)
-            }
-          }
-
-          future.onComplete(_.getOrElse(None) match {
-            case Some(jobState) =>
-              val trackId = id.copy(jobId = jobState.jobId)
-              val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
-              if (jobState.eq(latest)) {
-                // put job status to cache
-                watchController.jobStatuses.put(trackId, jobState)
-                // set jobId to trackIds
-                watchController.trackIds.update(trackId)
-                eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
-              }
-
-              val deployExists = KubernetesRetriever.isDeploymentExists(
-                trackId.namespace,
-                trackId.clusterId
-              )
-
-              if (FlinkJobState.isEndState(jobState.jobState) && !deployExists) {
-                // remove trackId from cache of job that needs to be untracked
-                watchController.unWatching(trackId)
-                if (trackId.executeMode == APPLICATION) {
-                  watchController.endpoints.invalidate(trackId.toClusterKey)
-                }
-              }
+          val future = Future(touchSessionAllJob(id))
+          future.onComplete(_.toOption match {
+            case Some(map) =>
+              sessionIds.foreach(
+                id => {
+                  map.find(_._1.jobId == id.jobId) match {
+                    case Some(job) => updateState(job._1.copy(appId = id.appId), job._2)
+                    case _ => interState(id)
+                  }
+                })
             case _ =>
           })
           future
       }
 
       // blocking until all future are completed or timeout is reached
-      Try(Await.ready(Future.sequence(tracksFuture), conf.requestTimeoutSec seconds)).failed.map {
+      Try(Await.ready(Future.sequence(appFuture), conf.requestTimeoutSec seconds)).failed.map {
         _ =>
           logWarn(
-            s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
+            s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes native application mode timeout," +
               s" limitSeconds=${conf.requestTimeoutSec}," +
               s" trackIds=${trackIds.mkString(",")}")
       }
+
+      Try(Await.ready(Future.sequence(sessionFuture), conf.requestTimeoutSec seconds)).failed.map {
+        _ =>
+          logWarn(
+            s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes native session mode timeout," +
+              s" limitSeconds=${conf.requestTimeoutSec}," +
+              s" trackIds=${trackIds.mkString(",")}")
+      }
+
       logDebug(
         "[FlinkJobStatusWatcher]: End of status monitoring process - " + Thread
           .currentThread()
@@ -162,36 +165,11 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * This method can be called directly from outside, without affecting the current cachePool
    * result.
    */
-  def touchSessionJob(@Nonnull idArg: TrackId): Option[JobStatusCV] = {
-    val pollEmitTime = System.currentTimeMillis
-
-    val id = idArg.copy(executeMode = FlinkK8sExecuteMode.SESSION)
-
-    touchSessionAllJob(id).get(id).filter(_.jobState != FlinkJobState.SILENT) match {
-      case Some(state) => Option(state)
-      case _ =>
-        val preCache = watchController.jobStatuses.get(id)
-        val state = inferSilentOrLostFromPreCache(preCache)
-
-        val nonFirstSilent = state == FlinkJobState.SILENT &&
-          preCache != null &&
-          preCache.jobState == FlinkJobState.SILENT
-
-        val jobState = if (nonFirstSilent) {
-          JobStatusCV(
-            jobState = state,
-            jobId = id.jobId,
-            pollEmitTime = preCache.pollEmitTime,
-            pollAckTime = preCache.pollAckTime)
-        } else {
-          JobStatusCV(
-            jobState = state,
-            jobId = id.jobId,
-            pollEmitTime = pollEmitTime,
-            pollAckTime = System.currentTimeMillis)
-        }
-        Option(jobState)
-    }
+  def touchSessionJob(@Nonnull trackId: TrackId): Option[JobStatusCV] = {
+    touchSessionAllJob(trackId)
+      .find(id => id._1.jobId == trackId.jobId && id._2.jobState != FlinkJobState.SILENT)
+      .map(_._2)
+      .orElse(interState(trackId))
   }
 
   /**
@@ -203,21 +181,16 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    */
   private def touchSessionAllJob(trackId: TrackId): Map[TrackId, JobStatusCV] = {
     val pollEmitTime = System.currentTimeMillis
-    val jobDetails = listJobsDetails(ClusterKey(SESSION, trackId.namespace, trackId.clusterId))
+    val jobDetails = listJobsDetails(ClusterKey.of(trackId))
     jobDetails match {
       case Some(details) if details.jobs.nonEmpty =>
         details.jobs.map {
           d =>
-            val id = TrackId.onSession(
-              trackId.namespace,
-              trackId.clusterId,
-              trackId.appId,
-              d.jid,
-              trackId.groupId)
             val jobStatus = d.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
-            id -> jobStatus
+            val trackItem = trackId.copy(jobId = d.jid, appId = null)
+            trackItem -> jobStatus
         }.toMap
-      case None => Map.empty
+      case None => Map.empty[TrackId, JobStatusCV]
     }
   }
 
@@ -230,14 +203,59 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    */
   def touchApplicationJob(@Nonnull trackId: TrackId): Option[JobStatusCV] = {
     implicit val pollEmitTime: Long = System.currentTimeMillis
-    val clusterId = trackId.clusterId
-    val namespace = trackId.namespace
-    val jobDetails = listJobsDetails(ClusterKey(APPLICATION, namespace, clusterId))
+    val jobDetails = listJobsDetails(ClusterKey.of(trackId))
     if (jobDetails.isEmpty || jobDetails.get.jobs.isEmpty) {
-      inferJobStateFromK8sEvent(trackId)
+      inferStateFromK8sEvent(trackId)
     } else {
       Some(jobDetails.get.jobs.head.toJobStatusCV(pollEmitTime, System.currentTimeMillis))
     }
+  }
+
+  private[this] def updateState(trackId: TrackId, jobState: JobStatusCV): Unit = {
+    val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
+    if (jobState.diff(latest)) {
+      // put job status to cache
+      watchController.jobStatuses.put(trackId, jobState)
+      // set jobId to trackIds
+      watchController.trackIds.update(trackId)
+      eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
+    }
+
+    val deployExists = KubernetesRetriever.isDeploymentExists(
+      trackId.namespace,
+      trackId.clusterId
+    )
+
+    if (FlinkJobState.isEndState(jobState.jobState) && !deployExists) {
+      // remove trackId from cache of job that needs to be untracked
+      watchController.unWatching(trackId)
+      if (trackId.executeMode == APPLICATION) {
+        watchController.endpoints.invalidate(trackId.toClusterKey)
+      }
+    }
+  }
+
+  private[this] def interState(id: TrackId): Option[JobStatusCV] = {
+    lazy val pollEmitTime = System.currentTimeMillis
+    val preCache = watchController.jobStatuses.get(id)
+    val state = inferFromPreCache(preCache)
+    val nonFirstSilent = state == FlinkJobState.SILENT &&
+      preCache != null &&
+      preCache.jobState == FlinkJobState.SILENT
+    val jobState = if (nonFirstSilent) {
+      JobStatusCV(
+        jobState = state,
+        jobId = id.jobId,
+        pollEmitTime = preCache.pollEmitTime,
+        pollAckTime = preCache.pollAckTime)
+    } else {
+      JobStatusCV(
+        jobState = state,
+        jobId = id.jobId,
+        pollEmitTime = pollEmitTime,
+        pollAckTime = System.currentTimeMillis)
+    }
+    Option(jobState)
   }
 
   /** list flink jobs details */
@@ -280,7 +298,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * Infer the current flink state from the last relevant k8s events. This method is only used for
    * application-mode job inference in case of a failed JM rest request.
    */
-  private def inferJobStateFromK8sEvent(@Nonnull trackId: TrackId)(implicit
+  private def inferStateFromK8sEvent(@Nonnull trackId: TrackId)(implicit
       pollEmitTime: Long): Option[JobStatusCV] = {
 
     // infer from k8s deployment and event
@@ -315,13 +333,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
               trackId.jobId)
             FlinkJobState.FAILED
           } else {
-            inferSilentOrLostFromPreCache(latest)
+            inferFromPreCache(latest)
           }
         } else if (isConnection) {
           logger.info("The deployment is deleted and enters the task failure process.")
           FlinkJobState.of(FlinkHistoryArchives.getJobStateFromArchiveFile(trackId.jobId))
         } else {
-          inferSilentOrLostFromPreCache(latest)
+          inferFromPreCache(latest)
         }
     }
 
@@ -340,7 +358,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     }
   }
 
-  private[this] def inferSilentOrLostFromPreCache(preCache: JobStatusCV) = preCache match {
+  private[this] def inferFromPreCache(preCache: JobStatusCV) = preCache match {
     case preCache if preCache == null => FlinkJobState.SILENT
     case preCache
         if preCache.jobState == FlinkJobState.SILENT &&

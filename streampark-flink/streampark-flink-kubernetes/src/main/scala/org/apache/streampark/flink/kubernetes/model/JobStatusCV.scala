@@ -44,7 +44,7 @@ case class JobStatusCV(
     pollEmitTime: Long,
     pollAckTime: Long) {
 
-  def eq(that: JobStatusCV): Boolean = {
+  def diff(that: JobStatusCV): Boolean = {
     that == null ||
     that.jobState != this.jobState ||
     that.jobId != this.jobId
