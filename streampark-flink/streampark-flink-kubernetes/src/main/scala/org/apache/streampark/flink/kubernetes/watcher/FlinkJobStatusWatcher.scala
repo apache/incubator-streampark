@@ -21,7 +21,7 @@ import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, JobStatusWatcherConfig, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.enums.{FlinkJobState, FlinkK8sExecuteMode}
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.APPLICATION
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.model._
@@ -125,8 +125,18 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
               sessionIds.foreach(
                 id => {
                   map.find(_._1.jobId == id.jobId) match {
-                    case Some(job) => updateState(job._1.copy(appId = id.appId), job._2)
-                    case _ => interState(id)
+                    case Some(job) =>
+                      updateState(job._1.copy(appId = id.appId), job._2)
+                    case _ =>
+                      // can't find that job in the k8s cluster.
+                      watchController.unWatching(id)
+                      val lostState = JobStatusCV(
+                        jobState = FlinkJobState.LOST,
+                        jobId = id.jobId,
+                        pollEmitTime = System.currentTimeMillis,
+                        pollAckTime = System.currentTimeMillis
+                      )
+                      eventBus.postSync(FlinkJobStatusChangeEvent(id, lostState))
                   }
                 })
             case _ =>
@@ -169,7 +179,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     touchSessionAllJob(trackId)
       .find(id => id._1.jobId == trackId.jobId && id._2.jobState != FlinkJobState.SILENT)
       .map(_._2)
-      .orElse(interState(trackId))
+      .orElse(inferState(trackId))
   }
 
   /**
@@ -221,7 +231,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
     }
 
-    val deployExists = KubernetesRetriever.isDeploymentExists(
+    lazy val deployExists = KubernetesRetriever.isDeploymentExists(
       trackId.namespace,
       trackId.clusterId
     )
@@ -235,7 +245,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     }
   }
 
-  private[this] def interState(id: TrackId): Option[JobStatusCV] = {
+  private[this] def inferState(id: TrackId): Option[JobStatusCV] = {
     lazy val pollEmitTime = System.currentTimeMillis
     val preCache = watchController.jobStatuses.get(id)
     val state = inferFromPreCache(preCache)
@@ -283,15 +293,15 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
   /** list flink jobs details from rest api */
   private def callJobsOverviewsApi(restUrl: String): Option[JobDetails] = {
-    val jobDetails = JobDetails.as(
+    JobDetails.as(
       Request
         .get(s"$restUrl/jobs/overview")
         .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
         .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
         .execute
         .returnContent()
-        .asString(StandardCharsets.UTF_8))
-    jobDetails
+        .asString(StandardCharsets.UTF_8)
+    )
   }
 
   /**
@@ -303,7 +313,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
     // infer from k8s deployment and event
     val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
-
     val jobState = trackId match {
       case id if watchController.canceling.has(id) =>
         logger.info(s"trackId ${trackId.toString} is canceling")
@@ -372,11 +381,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
 object FlinkJobStatusWatcher {
 
-  private val effectEndStates: Seq[FlinkJobState.Value] =
-    FlinkJobState.endingStates.filter(_ != FlinkJobState.LOST)
-
   /**
-   * infer flink job state before persistence. so drama, so sad.
+   * infer flink job state before persistence.
    *
    * @param current
    *   current flink job state
@@ -387,15 +393,15 @@ object FlinkJobStatusWatcher {
       current: FlinkJobState.Value,
       previous: FlinkJobState.Value): FlinkJobState.Value = {
     current match {
-      case FlinkJobState.LOST =>
-        if (effectEndStates.contains(current)) previous else FlinkJobState.TERMINATED
       case FlinkJobState.POS_TERMINATED | FlinkJobState.TERMINATED =>
         previous match {
           case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
           case FlinkJobState.FAILING => FlinkJobState.FAILED
           case _ =>
-            if (current == FlinkJobState.POS_TERMINATED) FlinkJobState.FINISHED
-            else FlinkJobState.TERMINATED
+            current match {
+              case FlinkJobState.POS_TERMINATED => FlinkJobState.FINISHED
+              case _ => FlinkJobState.TERMINATED
+            }
         }
       case _ => current
     }
