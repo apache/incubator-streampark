@@ -121,7 +121,7 @@ public class FlinkK8sWatcherWrapper {
     if (app.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
       return TrackId.onApplication(
           app.getK8sNamespace(),
-          app.getClusterId(),
+          app.getJobName(),
           app.getId(),
           app.getJobId(),
           app.getTeamId().toString());

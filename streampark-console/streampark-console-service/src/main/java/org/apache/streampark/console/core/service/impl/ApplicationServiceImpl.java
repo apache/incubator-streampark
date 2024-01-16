@@ -1300,19 +1300,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     }
 
-    Tuple2<String, String> clusterIdNamespace = getCompatibleK8sClusterId(application);
+    Tuple2<String, String> clusterIdNamespace = getNamespaceClusterId(application);
+    String namespace = clusterIdNamespace._1;
+    String clusterId = clusterIdNamespace._2;
 
     CancelRequest cancelRequest =
         new CancelRequest(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
             properties,
-            clusterIdNamespace._2,
+            clusterId,
             application.getJobId(),
             appParam.getSavePointed(),
             appParam.getDrain(),
             customSavepoint,
-            clusterIdNamespace._1);
+            namespace);
 
     final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
@@ -1649,7 +1651,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
             }
           }
-          application.setAppId(response.clusterId());
+
+          if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            application.setAppId(response.clusterId());
+            applicationLog.setYarnAppId(response.clusterId());
+          }
+
           if (StringUtils.isNoneEmpty(response.jobId())) {
             application.setJobId(response.jobId());
           }
@@ -1658,7 +1665,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setJobManagerUrl(response.jobManagerUrl());
             applicationLog.setJobManagerUrl(response.jobManagerUrl());
           }
-          applicationLog.setYarnAppId(response.clusterId());
+
           application.setStartTime(new Date());
           application.setEndTime(null);
 
@@ -1894,19 +1901,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
   }
 
-  private Tuple2<String, String> getCompatibleK8sClusterId(Application application) {
+  private Tuple2<String, String> getNamespaceClusterId(Application application) {
     String clusterId = null;
     String k8sNamespace = null;
     FlinkCluster cluster;
     switch (application.getExecutionModeEnum()) {
+      case YARN_APPLICATION:
+      case YARN_PER_JOB:
       case YARN_SESSION:
-        cluster = flinkClusterService.getById(application.getFlinkClusterId());
-        ApiAlertException.throwIfNull(
-            cluster,
-            String.format(
-                "The yarn session clusterId=%s can't found, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
-                application.getFlinkClusterId()));
-        clusterId = cluster.getClusterId();
+        clusterId = application.getAppId();
+        break;
+      case KUBERNETES_NATIVE_APPLICATION:
+        clusterId = application.getJobName();
+        k8sNamespace = application.getK8sNamespace();
         break;
       case KUBERNETES_NATIVE_SESSION:
         if (application.getFlinkClusterId() == null) {
@@ -1922,9 +1929,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           clusterId = cluster.getClusterId();
           k8sNamespace = cluster.getK8sNamespace();
         }
-        break;
-      case YARN_APPLICATION:
-        clusterId = application.getAppId();
         break;
       default:
         break;
