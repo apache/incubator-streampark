@@ -363,7 +363,7 @@ public class AppBuildPipeServiceImpl
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
                 app.getMavenArtifact(),
-                app.getClusterId(),
+                app.getJobName(),
                 app.getK8sNamespace(),
                 app.getFlinkImage(),
                 app.getK8sPodTemplates(),
