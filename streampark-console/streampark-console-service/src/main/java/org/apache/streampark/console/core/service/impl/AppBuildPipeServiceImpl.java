@@ -30,6 +30,7 @@ import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
@@ -45,6 +46,7 @@ import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
@@ -124,6 +126,8 @@ public class AppBuildPipeServiceImpl
   @Autowired private MessageService messageService;
 
   @Autowired private ApplicationService applicationService;
+
+  @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private ApplicationLogService applicationLogService;
 
@@ -327,6 +331,13 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", buildRequest);
         return FlinkRemoteBuildPipeline.of(buildRequest);
       case KUBERNETES_NATIVE_SESSION:
+        String k8sNamespace = app.getK8sNamespace();
+        String clusterId = app.getClusterId();
+        if (app.getFlinkClusterId() != null) {
+          FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
+          k8sNamespace = flinkCluster.getK8sNamespace();
+          clusterId = flinkCluster.getClusterId();
+        }
         FlinkK8sSessionBuildRequest k8sSessionBuildRequest =
             new FlinkK8sSessionBuildRequest(
                 app.getJobName(),
@@ -337,8 +348,8 @@ public class AppBuildPipeServiceImpl
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
                 app.getMavenArtifact(),
-                app.getClusterId(),
-                app.getK8sNamespace());
+                clusterId,
+                k8sNamespace);
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
         return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
       case KUBERNETES_NATIVE_APPLICATION:

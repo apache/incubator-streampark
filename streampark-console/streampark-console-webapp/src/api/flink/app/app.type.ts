@@ -56,6 +56,7 @@ export interface AppListRecord {
   clusterId?: string;
   flinkImage?: string;
   k8sNamespace: string;
+  serviceAccount?: string;
   state: number;
   release: number;
   build: boolean;

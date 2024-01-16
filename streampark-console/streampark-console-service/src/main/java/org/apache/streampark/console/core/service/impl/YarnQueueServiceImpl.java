@@ -235,7 +235,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
             .stream()
             .filter(
                 application -> {
-                  application.setYarnQueueByHotParams();
+                  application.setByHotParams();
                   return StringUtils.equals(application.getYarnQueue(), queueLabel);
                 })
             .collect(Collectors.toList());

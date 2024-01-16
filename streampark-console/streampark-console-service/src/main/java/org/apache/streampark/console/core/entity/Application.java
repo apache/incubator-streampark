@@ -239,6 +239,7 @@ public class Application implements Serializable {
   private transient String createTimeTo;
   private transient String backUpDescription;
   private transient String yarnQueue;
+  private transient String serviceAccount;
 
   /** Flink Web UI Url */
   private transient String flinkRestUrl;
@@ -281,20 +282,34 @@ public class Application implements Serializable {
     this.tracking = shouldTracking(appState);
   }
 
-  public void setYarnQueueByHotParams() {
-    if (!(ExecutionMode.YARN_APPLICATION == this.getExecutionModeEnum()
-        || ExecutionMode.YARN_PER_JOB == this.getExecutionModeEnum())) {
+  public void setByHotParams() {
+    Map<String, Object> hotParamsMap = this.getHotParamsMap();
+    if (hotParamsMap.isEmpty()) {
       return;
     }
 
-    Map<String, Object> hotParamsMap = this.getHotParamsMap();
-    if (!hotParamsMap.isEmpty() && hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
-      String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
-      String labelExpr =
-          Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
-              .map(Object::toString)
-              .orElse(null);
-      this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
+    switch (getExecutionModeEnum()) {
+      case YARN_APPLICATION:
+      case YARN_PER_JOB:
+        // 1) set yarnQueue from hostParam
+        if (hotParamsMap.containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
+          String yarnQueue = hotParamsMap.get(ConfigConst.KEY_YARN_APP_QUEUE()).toString();
+          String labelExpr =
+              Optional.ofNullable(hotParamsMap.get(ConfigConst.KEY_YARN_APP_NODE_LABEL()))
+                  .map(Object::toString)
+                  .orElse(null);
+          this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
+        }
+        break;
+      case KUBERNETES_NATIVE_APPLICATION:
+        // 2) service-account.
+        Object serviceAccount = hotParamsMap.get(ConfigConst.KEY_KERBEROS_SERVICE_ACCOUNT());
+        if (serviceAccount != null) {
+          this.setServiceAccount(serviceAccount.toString());
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -573,6 +588,11 @@ public class Application implements Serializable {
     Map<String, String> hotParams = new HashMap<>(0);
     if (needFillYarnQueueLabel(executionModeEnum)) {
       hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
+    }
+    if (executionModeEnum == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+      if (StringUtils.isNotBlank(appParam.getServiceAccount())) {
+        hotParams.put(ConfigConst.KEY_KERBEROS_SERVICE_ACCOUNT(), appParam.getServiceAccount());
+      }
     }
     if (!hotParams.isEmpty()) {
       this.setHotParams(JacksonUtils.write(hotParams));

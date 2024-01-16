@@ -19,13 +19,14 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -41,8 +42,6 @@ import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import scala.Enumeration;
 
 import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
 
@@ -62,6 +61,8 @@ public class FlinkK8sWatcherWrapper {
   @Lazy @Autowired private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
 
   @Lazy @Autowired private ApplicationService applicationService;
+
+  @Lazy @Autowired private FlinkClusterService flinkClusterService;
 
   /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
   @Bean(destroyMethod = "close")
@@ -102,15 +103,6 @@ public class FlinkK8sWatcherWrapper {
     if (CollectionUtils.isEmpty(k8sApplication)) {
       return Lists.newArrayList();
     }
-    // correct corrupted data
-    List<Application> correctApps =
-        k8sApplication.stream()
-            .filter(app -> !Bridge.toTrackId(app).isLegal())
-            .collect(Collectors.toList());
-    if (CollectionUtils.isNotEmpty(correctApps)) {
-      applicationService.saveOrUpdateBatch(correctApps);
-    }
-
     // filter out the application that should be tracking
     return k8sApplication.stream()
         .filter(
@@ -121,43 +113,30 @@ public class FlinkK8sWatcherWrapper {
                   KubernetesRetriever.isDeploymentExists(app.getK8sNamespace(), app.getClusterId());
               return !isEndState || deploymentExists;
             })
-        .map(Bridge::toTrackId)
+        .map(this::toTrackId)
         .collect(Collectors.toList());
   }
 
-  /** Type converter bridge */
-  public static class Bridge {
-
-    // covert Application to TrackId
-    public static TrackId toTrackId(@Nonnull Application app) {
-
-      Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
-      if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
-        return TrackId.onApplication(
-            app.getK8sNamespace(),
-            app.getClusterId(),
-            app.getId(),
-            app.getJobId(),
-            app.getTeamId().toString());
-      } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
-        return TrackId.onSession(
-            app.getK8sNamespace(),
-            app.getClusterId(),
-            app.getId(),
-            app.getJobId(),
-            app.getTeamId().toString());
-      } else {
-        throw new IllegalArgumentException(
-            "Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
+  public TrackId toTrackId(Application app) {
+    if (app.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+      return TrackId.onApplication(
+          app.getK8sNamespace(),
+          app.getClusterId(),
+          app.getId(),
+          app.getJobId(),
+          app.getTeamId().toString());
+    } else if (app.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION) {
+      String namespace = app.getK8sNamespace();
+      String clusterId = app.getClusterId();
+      if (app.getFlinkClusterId() != null) {
+        FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
+        namespace = flinkCluster.getK8sNamespace();
+        clusterId = flinkCluster.getClusterId();
       }
+      return TrackId.onSession(
+          namespace, clusterId, app.getId(), app.getJobId(), app.getTeamId().toString());
+    } else {
+      throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
     }
-  }
-
-  /** Determine if application it is flink-on-kubernetes mode. */
-  public static boolean isKubernetesApp(Application application) {
-    if (application == null) {
-      return false;
-    }
-    return ExecutionMode.isKubernetesMode(application.getExecutionMode());
   }
 }

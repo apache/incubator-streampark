@@ -46,6 +46,7 @@ export default {
   uploadJar: '上传依赖Jar文件',
   kubernetesNamespace: 'K8S命名空间',
   kubernetesClusterId: 'K8S ClusterId',
+  kubernetesCluster: 'Kubernetes Session Cluster',
   flinkBaseDockerImage: 'Flink基础docker镜像',
   restServiceExposedType: 'K8S服务对外类型',
   resourceFrom: '资源来源',
@@ -216,8 +217,14 @@ export default {
     appNameNotUniqueMessage: '作业名称必须唯一, 输入的作业名称已经存在',
     appNameExistsInYarnMessage: '应用程序名称已经在YARN集群中存在，不能重复。请检查',
     appNameExistsInK8sMessage: '该应用程序名称已经在K8S集群中存在，不能重复。请检查',
-    appNameNotValid:
-      '应用程序名称无效。字符必须是(中文 或 英文 或 "-" 或 "_")，不能出现两个连续的空格，请检查',
+    appNameValid: '应用程序名称不合法',
+    appNameRole: '应用名称必须遵循以下规则：',
+    appNameK8sClusterIdRole:
+      '当前部署模式是 K8s Application模式，会将作业名称作为k8s的 clusterId，因此作业名称要遵循以下规则：',
+    appNameK8sClusterIdRoleLength: '不应超过 45 个字符',
+    appNameK8sClusterIdRoleRegexp:
+      '只能由小写字母、数字、字符、和"-" 组成，必须满足正则格式 [a-z]([-a-z0-9]*[a-z0-9])',
+    appNameRoleContent: '字符必须是(中文 或 英文 或 "-" 或 "_")，不能出现两个连续的空格',
     flinkClusterIsRequiredMessage: 'Flink集群必填',
     flinkSqlIsRequiredMessage: 'Flink SQL必填',
     tagsPlaceholder: '请输入标签，如果超过一个，用逗号（，）分隔',
@@ -229,10 +236,9 @@ export default {
     tmPlaceholder: '请选择要设置的资源参数',
     yarnQueuePlaceholder: '请输入yarn队列标签名称',
     descriptionPlaceholder: '请输入此应用程序的描述',
+    serviceAccountPlaceholder: '请输入K8S服务账号(service-account)',
     kubernetesNamespacePlaceholder: '请输入K8S命名空间, 如: default',
     kubernetesClusterIdPlaceholder: '请选择K8S ClusterId',
-    kubernetesClusterIdRequire:
-      '小写字母、数字、“-”，并且必须以字母数字字符开头和结尾，并且不超过45个字符',
     kubernetesClusterIdIsRequiredMessage: 'K8S ClusterId必填',
     flinkImagePlaceholder: '请输入Flink基础docker镜像的标签,如:flink:1.13.0-scala_2.11-java8',
     flinkImageIsRequiredMessage: 'Flink基础docker镜像是必填的',
