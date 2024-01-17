@@ -167,7 +167,7 @@
         },
       );
       Object.assign(titleLenRef.value, stateLenMap);
-      console.log('dataSource', dataSource);
+
       return dataSource;
     },
     fetchSetting: { listField: 'records' },

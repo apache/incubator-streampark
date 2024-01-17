@@ -158,9 +158,11 @@ export default defineComponent({
       const dom = document.createElement('span');
       dom.style.display = 'inline-block';
       dom.style.fontSize = '10px';
+      dom.style.padding = '0 3px';
+      dom.style.borderRadius = '1px';
       dom.textContent = props.maxTitle;
       document.body.appendChild(dom);
-      const width = dom.clientWidth;
+      const width = dom.clientWidth + 2;
       document.body.removeChild(dom);
       return width;
     });
@@ -177,7 +179,7 @@ export default defineComponent({
     };
     const getStyle = computed(() => {
       if (tagWidth.value > 0) {
-        return { minWidth: `${tagWidth.value}px`, textAlign: 'center' };
+        return { width: `${tagWidth.value}px`, textAlign: 'center' };
       }
       return {};
     });
