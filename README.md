@@ -40,16 +40,15 @@
 </div>
 
 
-## 🚀 What is StreamPark?
+## 🚀 What is Apache StreamPark™?
 
-<h4>StreamPark is a stream processing development framework and professional management platform. </h4>
+<h4>Apache StreamPark is a stream processing development framework and professional management platform. </h4>
 
-> StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing stream processing application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application
-, including application development, debugging, interactive query, deployment, operation, maintenance, etc. It was initially known as StreamX and renamed to StreamPark in August 2022.
+> Apache StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing stream processing application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application, including application development, debugging, interactive query, deployment, operation, maintenance, etc. It was initially known as StreamX and renamed to StreamPark in August 2022.
 
 ## 🎉 Features
 
-* Apache Flink & Spark application development scaffold
+* Apache Flink & Apache Spark application development scaffold
 * Support multiple versions of Flink & Spark
 * Wide range of out-of-the-box connectors
 * One-stop stream processing operation platform
@@ -59,6 +58,7 @@
 ![](https://streampark.apache.org/image/sqlide.png)
 
 ## 🚀 QuickStart
+
 - [Start with Docker](docker/README.md)
 - [Start with Kubernetes](helm/README.md)
 
@@ -71,10 +71,12 @@ git clone git@github.com:apache/incubator-streampark.git
 cd incubator-streampark
 ./build.sh
 ```
+
 🗄 Details:how to [Development](https://streampark.apache.org/docs/user-guide/development)
+
 ## 🧑‍💻 Downloads
 
-Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)
+Download address for run-directly software package: https://streampark.apache.org/download
 
 ## 💋 Our users
 
@@ -106,7 +108,7 @@ Licensed under the [Apache License, Version 2.0](LICENSE)
 
 ## 💬 Social Media
 
-- [ X (twitter)](https://twitter.com/ASFStreamPark)
+- [X (Twitter)](https://twitter.com/ASFStreamPark)
 - [Zhihu](https://www.zhihu.com/people/streampark) (in Chinese)
 - [bilibili](https://space.bilibili.com/455330087) (in Chinese)
 - WeChat Official Account (in Chinese, scan the QR code to follow)
