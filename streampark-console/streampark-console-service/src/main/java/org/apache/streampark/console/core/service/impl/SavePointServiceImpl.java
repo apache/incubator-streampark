@@ -318,12 +318,20 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     CompletableFuture<SavepointResponse> savepointFuture =
         CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
 
-    handleSavepointResponseFuture(application, applicationLog, savepointFuture);
+    SavePoint savePoint = new SavePoint();
+    savePoint.setAppId(appId);
+    savePoint.setLatest(true);
+    savePoint.setType(CheckPointType.SAVEPOINT.get());
+    savePoint.setCreateTime(new Date());
+    savePoint.setTriggerTime(new Date());
+
+    handleSavepointResponseFuture(application, applicationLog, savePoint, savepointFuture);
   }
 
   private void handleSavepointResponseFuture(
       Application application,
       ApplicationLog applicationLog,
+      SavePoint savePoint,
       CompletableFuture<SavepointResponse> savepointFuture) {
     CompletableFutureUtils.runTimeout(
             savepointFuture,
@@ -333,6 +341,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               if (savepointResponse != null && savepointResponse.savePointDir() != null) {
                 applicationLog.setSuccess(true);
                 String savePointDir = savepointResponse.savePointDir();
+                savePoint.setPath(savePointDir);
+                this.save(savePoint);
                 log.info("Request savepoint successful, savepointDir: {}", savePointDir);
               }
             },
