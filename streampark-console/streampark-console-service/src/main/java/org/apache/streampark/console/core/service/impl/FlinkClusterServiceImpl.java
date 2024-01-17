@@ -286,7 +286,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     boolean existsRunningJob = applicationService.existsRunningJobByClusterId(flinkCluster.getId());
     if (existsRunningJob) {
       throw new ApiAlertException(
-          "some app is running on this cluster, the cluster cannot be shutdown");
+          "There are some jobs running on the cluster, so the cluster cannot be shut down. \uD83D\uDE14\n"
+              + "\n");
     }
 
     // 4) shutdown
