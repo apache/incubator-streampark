@@ -25,7 +25,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
   import { useTimeoutFn } from '@vueuse/core';
-  import { Tooltip, Badge, Divider, Tag } from 'ant-design-vue';
+  import { Tooltip, Badge, Divider, Tag, Popover } from 'ant-design-vue';
   import { fetchAppRecord } from '/@/api/flink/app';
   import { useTable } from '/@/components/Table';
   import { PageWrapper } from '/@/components/Page';
@@ -167,6 +167,7 @@
         },
       );
       Object.assign(titleLenRef.value, stateLenMap);
+      console.log('dataSource', dataSource);
       return dataSource;
     },
     fetchSetting: { listField: 'records' },
@@ -273,7 +274,27 @@
             }"
             @click="handleJobView(record)"
           >
-            <Tooltip :title="record.description"> {{ record.jobName }} </Tooltip>
+            <Popover :title="t('common.detailText')">
+              <template #content>
+                <div class="flex">
+                  <span class="pr-6px font-bold">{{ t('flink.app.appName') }}:</span>
+                  <div class="max-w-300px break-words">{{ record.jobName }}</div>
+                </div>
+                <div class="pt-2px">
+                  <span class="pr-6px font-bold">{{ t('flink.app.jobType') }}:</span>
+                  <Tag color="blue">
+                    <span v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
+                    <span v-if="record['jobType'] == JobTypeEnum.SQL"> SQL </span>
+                    <span v-if="record['jobType'] == JobTypeEnum.PYFLINK"> PyFlink </span>
+                  </Tag>
+                </div>
+                <div class="pt-2px flex">
+                  <span class="pr-6px font-bold">{{ t('common.description') }}:</span>
+                  <div class="max-w-300px break-words">{{ record.description }}</div>
+                </div>
+              </template>
+              {{ record.jobName }}
+            </Popover>
           </span>
 
           <template v-if="record['jobType'] == JobTypeEnum.JAR">

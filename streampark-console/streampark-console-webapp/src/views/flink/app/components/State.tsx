@@ -157,6 +157,7 @@ export default defineComponent({
       // create a dom to calculate the width of the tag
       const dom = document.createElement('span');
       dom.style.display = 'inline-block';
+      dom.style.fontSize = '10px';
       dom.textContent = props.maxTitle;
       document.body.appendChild(dom);
       const width = dom.clientWidth;

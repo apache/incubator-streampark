@@ -58,6 +58,7 @@ export const useAppTableColumns = () => {
     {
       title: t('flink.app.runStatus'),
       dataIndex: 'state',
+      fixed: 'right',
       width: unref(tableColumnWidth).state,
       filters: [
         { text: t('flink.app.runStatusOptions.added'), value: String(AppStateEnum.ADDED) },
@@ -75,7 +76,12 @@ export const useAppTableColumns = () => {
         },
       ],
     },
-    { title: t('flink.app.releaseBuild'), dataIndex: 'release', width: 220 },
+    {
+      title: t('flink.app.releaseBuild'),
+      dataIndex: 'release',
+      width: unref(tableColumnWidth).release,
+      fixed: 'right',
+    },
     {
       title: t('flink.app.duration'),
       dataIndex: 'duration',
