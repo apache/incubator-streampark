@@ -597,7 +597,7 @@ public class FlinkRESTAPIWatcher {
   }
 
   public static void doWatching(Application application) {
-    if (isKubernetesApp(application)) {
+    if (application.isKubernetesModeJob()) {
       return;
     }
     log.info("FlinkRESTAPIWatcher add app to tracking,appId:{}", application.getId());
@@ -642,13 +642,12 @@ public class FlinkRESTAPIWatcher {
     return WATCHING_APPS.values();
   }
 
-  private static boolean isKubernetesApp(Application application) {
-    return FlinkK8sWatcherWrapper.isKubernetesApp(application);
-  }
-
   private static boolean isKubernetesApp(Long appId) {
     Application app = WATCHING_APPS.get(appId);
-    return FlinkK8sWatcherWrapper.isKubernetesApp(app);
+    if (app == null) {
+      return false;
+    }
+    return app.isKubernetesModeJob();
   }
 
   private YarnAppInfo httpYarnAppInfo(Application application) throws Exception {

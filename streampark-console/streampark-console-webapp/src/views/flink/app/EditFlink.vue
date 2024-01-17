@@ -106,12 +106,21 @@
           ? 'yarnSessionClusterId'
           : 'flinkClusterId']: app.flinkClusterId,
         flinkImage: app.flinkImage,
-        k8sNamespace: app.k8sNamespace,
+        k8sNamespace: app.k8sNamespace || null,
+        serviceAccount: app.serviceAccount || null,
         alertId: selectAlertId,
         projectName: app.projectName,
         module: app.module,
         ...resetParams,
       };
+
+      if (app.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
+        Object.assign(defaultParams, { flinkClusterId: app.flinkClusterId });
+      } else if (app.executionMode == ExecModeEnum.YARN_SESSION) {
+        Object.assign(defaultParams, { flinkClusterId: app.flinkClusterId });
+      } else if (app.executionMode == ExecModeEnum.REMOTE) {
+      }
+
       if (!executionMode) {
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }

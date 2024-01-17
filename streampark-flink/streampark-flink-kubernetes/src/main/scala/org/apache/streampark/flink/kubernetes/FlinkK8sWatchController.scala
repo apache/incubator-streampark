@@ -17,11 +17,12 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.flink.kubernetes.model._
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 
+import java.util.Objects
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConversions._
@@ -107,9 +108,19 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
 }
 
 //----cache----
-case class CacheKey(key: java.lang.Long) extends Serializable
+case class CacheKey(key: java.lang.Long) extends Serializable {
+  override def hashCode(): Int = Utils.hashCode(key)
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case that: CacheKey => Objects.equals(key, that.key)
+      case _ => false
+    }
+  }
+}
 
 class TrackIdCache {
+
   private[this] lazy val cache: Cache[CacheKey, TrackId] = Caffeine.newBuilder.build()
 
   def update(k: TrackId): Unit = {
@@ -153,7 +164,9 @@ class JobStatusCache {
   def getAsMap(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] =
     cache.getAllPresent(trackIds.map(t => t.appId)).toMap
 
-  def get(k: TrackId): JobStatusCV = cache.getIfPresent(CacheKey(k.appId))
+  def get(k: TrackId): JobStatusCV = {
+    cache.getIfPresent(CacheKey(k.appId))
+  }
 
   def invalidate(k: TrackId): Unit = cache.invalidate(CacheKey(k.appId))
 

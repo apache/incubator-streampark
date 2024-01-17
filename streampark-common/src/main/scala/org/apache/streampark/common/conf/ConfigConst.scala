@@ -54,6 +54,8 @@ object ConfigConst {
   /** kerberos */
   val KEY_KERBEROS = "kerberos"
 
+  val KEY_KERBEROS_SERVICE_ACCOUNT = "kubernetes.service-account"
+
   val KEY_HADOOP_USER_NAME = "HADOOP_USER_NAME"
 
   /** hadoop.security.authentication */

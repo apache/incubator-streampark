@@ -20,7 +20,7 @@ package org.apache.streampark.flink.kubernetes.model
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
-import java.lang.{Boolean => JavaBool}
+import java.lang.{Boolean => JavaBool, Long => JavaLong}
 
 import scala.util.Try
 
@@ -29,7 +29,7 @@ case class TrackId(
     executeMode: FlinkK8sExecuteMode.Value,
     namespace: String = "default",
     clusterId: String,
-    appId: Long,
+    appId: JavaLong = null,
     jobId: String,
     groupId: String) {
 

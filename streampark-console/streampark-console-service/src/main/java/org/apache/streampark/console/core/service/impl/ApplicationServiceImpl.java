@@ -22,6 +22,7 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.DevelopmentMode;
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
@@ -78,6 +79,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
@@ -155,9 +157,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import scala.Tuple2;
+
 import static org.apache.streampark.common.enums.StorageType.LFS;
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service
@@ -220,6 +222,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private LogClientService logClient;
 
   @Autowired private YarnQueueService yarnQueueService;
+
+  @Autowired private FlinkK8sWatcherWrapper k8sWatcherWrapper;
 
   @PostConstruct
   public void resetOptionState() {
@@ -515,9 +519,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 record -> {
                   // status of flink job on kubernetes mode had been automatically persisted to db
                   // in time.
-                  if (isKubernetesApp(record)) {
+                  if (record.isKubernetesModeJob()) {
                     // set duration
-                    String restUrl = flinkK8sWatcher.getRemoteRestUrl(toTrackId(record));
+                    String restUrl =
+                        flinkK8sWatcher.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
                     record.setFlinkRestUrl(restUrl);
                     if (record.getTracking() == 1
                         && record.getStartTime() != null
@@ -656,7 +661,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       return AppExistsState.INVALID;
     }
     if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      boolean exists = !getApplicationReports(application.getJobName()).isEmpty();
+      boolean exists = !getYARNApplication(application.getJobName()).isEmpty();
       return exists ? AppExistsState.IN_YARN : AppExistsState.NO;
     }
     // todo on k8s check...
@@ -706,7 +711,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         // check whether clusterId, namespace, jobId on kubernetes
         else if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-            && flinkK8sWatcher.checkIsInRemoteCluster(toTrackId(app))) {
+            && flinkK8sWatcher.checkIsInRemoteCluster(k8sWatcherWrapper.toTrackId(app))) {
           return AppExistsState.IN_KUBERNETES;
         }
       }
@@ -722,7 +727,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
       // check whether clusterId, namespace, jobId on kubernetes
       else if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-          && flinkK8sWatcher.checkIsInRemoteCluster(toTrackId(appParam))) {
+          && flinkK8sWatcher.checkIsInRemoteCluster(k8sWatcherWrapper.toTrackId(appParam))) {
         return AppExistsState.IN_KUBERNETES;
       }
     }
@@ -951,7 +956,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     application.setExecutionMode(appParam.getExecutionMode());
     application.setClusterId(appParam.getClusterId());
     application.setFlinkImage(appParam.getFlinkImage());
-    application.setK8sNamespace(appParam.getK8sNamespace());
     application.updateHotParams(appParam);
     application.setK8sRestExposedType(appParam.getK8sRestExposedType());
     application.setK8sPodTemplate(appParam.getK8sPodTemplate());
@@ -974,6 +978,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       case YARN_PER_JOB:
       case KUBERNETES_NATIVE_APPLICATION:
         application.setFlinkClusterId(null);
+        if (appParam.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+          application.setK8sNamespace(appParam.getK8sNamespace());
+          application.setServiceAccount(appParam.getServiceAccount());
+          application.doSetHotParams();
+        }
         break;
       case REMOTE:
       case YARN_SESSION:
@@ -1143,7 +1152,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(app.getId());
     CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(app.getId());
     Application application = this.baseMapper.getApp(app);
-    if (isKubernetesApp(application)) {
+    if (application.isKubernetesModeJob()) {
       KubernetesDeploymentHelper.watchPodTerminatedLog(
           application.getK8sNamespace(), application.getJobName(), application.getJobId());
     }
@@ -1194,8 +1203,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
     // add flink web url info for k8s-mode
-    if (isKubernetesApp(application)) {
-      String restUrl = flinkK8sWatcher.getRemoteRestUrl(toTrackId(application));
+    if (application.isKubernetesModeJob()) {
+      String restUrl = flinkK8sWatcher.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(application));
       application.setFlinkRestUrl(restUrl);
 
       // set duration
@@ -1206,9 +1215,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setDuration(now - application.getStartTime().getTime());
       }
     }
-
-    application.setYarnQueueByHotParams();
-
+    application.setByHotParams();
     return application;
   }
 
@@ -1231,8 +1238,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   public boolean mapping(Application appParam) {
     boolean mapping = this.baseMapper.mapping(appParam);
     Application application = getById(appParam.getId());
-    if (isKubernetesApp(application)) {
-      flinkK8sWatcher.doWatching(toTrackId(application));
+    if (application.isKubernetesModeJob()) {
+      flinkK8sWatcher.doWatching(k8sWatcherWrapper.toTrackId(application));
     } else {
       FlinkRESTAPIWatcher.doWatching(application);
     }
@@ -1278,23 +1285,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
 
-    String clusterId = null;
-    if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
-      clusterId = application.getClusterId();
-    } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-        FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-        ApiAlertException.throwIfNull(
-            cluster,
-            String.format(
-                "The yarn session clusterId=%s can't found, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
-                application.getFlinkClusterId()));
-        clusterId = cluster.getClusterId();
-      } else {
-        clusterId = application.getAppId();
-      }
-    }
-
     Map<String, Object> properties = new HashMap<>();
 
     if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
@@ -1310,6 +1300,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     }
 
+    Tuple2<String, String> clusterIdNamespace = getNamespaceClusterId(application);
+    String namespace = clusterIdNamespace._1;
+    String clusterId = clusterIdNamespace._2;
+
     CancelRequest cancelRequest =
         new CancelRequest(
             flinkEnv.getFlinkVersion(),
@@ -1320,7 +1314,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getSavePointed(),
             appParam.getDrain(),
             customSavepoint,
-            application.getK8sNamespace());
+            namespace);
 
     final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
@@ -1328,7 +1322,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     cancelFutureMap.put(application.getId(), cancelFuture);
 
-    TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
+    TrackId trackId =
+        application.isKubernetesModeJob() ? k8sWatcherWrapper.toTrackId(application) : null;
 
     cancelFuture.whenComplete(
         (cancelResponse, throwable) -> {
@@ -1352,7 +1347,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 savePointService.expire(application.getId());
               }
               // re-tracking flink job on kubernetes and logging exception
-              if (isKubernetesApp(application)) {
+              if (application.isKubernetesModeJob()) {
                 flinkK8sWatcher.unWatching(trackId);
               } else {
                 FlinkRESTAPIWatcher.unWatching(application.getId());
@@ -1378,7 +1373,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             savePointService.save(savePoint);
           }
 
-          if (isKubernetesApp(application)) {
+          if (application.isKubernetesModeJob()) {
             flinkK8sWatcher.unWatching(trackId);
           }
         });
@@ -1450,7 +1445,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // check job on yarn is already running
     if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
       ApiAlertException.throwIfTrue(
-          !getApplicationReports(application.getJobName()).isEmpty(),
+          !getYARNApplication(application.getJobName()).isEmpty(),
           "The same job name is already running in the yarn queue");
     }
 
@@ -1569,6 +1564,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     String applicationArgs =
         variableService.replaceVariable(application.getTeamId(), application.getArgs());
 
+    String k8sNamespace = null;
+    String k8sClusterId = null;
+    FlinkK8sRestExposedType exposedType = null;
+    if (application.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION) {
+      // For compatibility with historical versions
+      if (application.getFlinkClusterId() == null) {
+        k8sClusterId = application.getClusterId();
+        k8sNamespace = application.getK8sNamespace();
+        exposedType = application.getK8sRestExposedTypeEnum();
+      } else {
+        FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+        k8sClusterId = cluster.getClusterId();
+        k8sNamespace = cluster.getK8sNamespace();
+        exposedType = cluster.getK8sRestExposedTypeEnum();
+      }
+    } else if (application.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+      k8sClusterId = application.getJobName();
+      k8sNamespace = application.getK8sNamespace();
+      exposedType = application.getK8sRestExposedTypeEnum();
+    }
+
     SubmitRequest submitRequest =
         SubmitRequest.apply(
             flinkEnv.getFlinkVersion(),
@@ -1585,11 +1601,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             applicationArgs,
             buildResult,
             extraParameter,
-            application.getClusterId(),
-            application.getK8sNamespace(),
-            application.getK8sRestExposedTypeEnum());
+            k8sClusterId,
+            k8sNamespace,
+            exposedType);
 
-    TrackId trackId = isKubernetesApp(application) ? toTrackId(application) : null;
     CompletableFuture<SubmitResponse> future =
         CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
 
@@ -1614,7 +1629,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               app.setState(FlinkAppState.FAILED.getValue());
               app.setOptionState(OptionState.NONE.getValue());
               updateById(app);
-              if (isKubernetesApp(app)) {
+              if (app.isKubernetesModeJob()) {
+                TrackId trackId = k8sWatcherWrapper.toTrackId(application);
                 flinkK8sWatcher.unWatching(trackId);
               } else {
                 FlinkRESTAPIWatcher.unWatching(appParam.getId());
@@ -1635,7 +1651,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
             }
           }
-          application.setAppId(response.clusterId());
+
+          if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            application.setAppId(response.clusterId());
+            applicationLog.setYarnAppId(response.clusterId());
+          }
+
           if (StringUtils.isNoneEmpty(response.jobId())) {
             application.setJobId(response.jobId());
           }
@@ -1644,18 +1665,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setJobManagerUrl(response.jobManagerUrl());
             applicationLog.setJobManagerUrl(response.jobManagerUrl());
           }
-          applicationLog.setYarnAppId(response.clusterId());
+
           application.setStartTime(new Date());
           application.setEndTime(null);
 
           // if start completed, will be added task to tracking queue
-          if (isKubernetesApp(application)) {
+          if (application.isKubernetesModeJob()) {
             log.info(
                 "start job {} on {} success, doWatching...",
                 application.getJobName(),
                 application.getExecutionModeEnum().getName());
             application.setRelease(ReleaseState.DONE.get());
+
+            TrackId trackId = k8sWatcherWrapper.toTrackId(application);
             flinkK8sWatcher.doWatching(trackId);
+
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
               String domainName = settingService.getIngressModeDefault();
               if (StringUtils.isNotBlank(domainName)) {
@@ -1735,7 +1759,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     Map<String, String> dynamicProperties =
         PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties());
+
     properties.putAll(dynamicProperties);
+
+    String kerberosKeySvcAccount = ConfigConst.KEY_KERBEROS_SERVICE_ACCOUNT();
+    String svcAcc1 = (String) application.getHotParamsMap().get(kerberosKeySvcAccount);
+    String svcAcc2 = dynamicProperties.get(kerberosKeySvcAccount);
+    if (svcAcc1 != null) {
+      properties.put(kerberosKeySvcAccount, svcAcc1);
+    } else if (svcAcc2 != null) {
+      properties.put(kerberosKeySvcAccount, svcAcc2);
+    }
+
     ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
     if (resolveOrder != null) {
       properties.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
@@ -1752,8 +1787,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     updateById(application);
     savePointService.expire(application.getId());
     // re-tracking flink job on kubernetes and logging exception
-    if (isKubernetesApp(application)) {
-      TrackId id = toTrackId(application);
+    if (application.isKubernetesModeJob()) {
+      TrackId id = k8sWatcherWrapper.toTrackId(application);
       flinkK8sWatcher.doWatching(id);
     } else {
       FlinkRESTAPIWatcher.unWatching(application.getId());
@@ -1761,7 +1796,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     // kill application
     if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
       try {
-        List<ApplicationReport> applications = getApplicationReports(application.getJobName());
+        List<ApplicationReport> applications = getYARNApplication(application.getJobName());
         if (!applications.isEmpty()) {
           YarnClient yarnClient = HadoopUtils.yarnClient();
           yarnClient.killApplication(applications.get(0).getApplicationId());
@@ -1821,8 +1856,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (isYarnNotDefaultQueue(newApp)) {
       return true;
     }
-
-    oldApp.setYarnQueueByHotParams();
+    oldApp.setByHotParams();
     if (ExecutionMode.isYarnPerJobOrAppMode(newApp.getExecutionModeEnum())
         && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
       return true;
@@ -1843,7 +1877,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         || yarnQueueService.isDefaultQueue(application.getYarnQueue());
   }
 
-  private List<ApplicationReport> getApplicationReports(String jobName) {
+  @Override
+  public List<ApplicationReport> getYARNApplication(String appName) {
     try {
       YarnClient yarnClient = HadoopUtils.yarnClient();
       Set<String> types =
@@ -1859,10 +1894,45 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       Set<String> yarnTag = Sets.newHashSet("streampark");
       List<ApplicationReport> applications = yarnClient.getApplications(types, states, yarnTag);
       return applications.stream()
-          .filter(report -> report.getName().equals(jobName))
+          .filter(report -> report.getName().equals(appName))
           .collect(Collectors.toList());
     } catch (Exception e) {
       throw new RuntimeException("The yarn api is abnormal. Ensure that yarn is running properly.");
     }
+  }
+
+  private Tuple2<String, String> getNamespaceClusterId(Application application) {
+    String clusterId = null;
+    String k8sNamespace = null;
+    FlinkCluster cluster;
+    switch (application.getExecutionModeEnum()) {
+      case YARN_APPLICATION:
+      case YARN_PER_JOB:
+      case YARN_SESSION:
+        clusterId = application.getAppId();
+        break;
+      case KUBERNETES_NATIVE_APPLICATION:
+        clusterId = application.getJobName();
+        k8sNamespace = application.getK8sNamespace();
+        break;
+      case KUBERNETES_NATIVE_SESSION:
+        if (application.getFlinkClusterId() == null) {
+          clusterId = application.getClusterId();
+          k8sNamespace = application.getK8sNamespace();
+        } else {
+          cluster = flinkClusterService.getById(application.getFlinkClusterId());
+          ApiAlertException.throwIfNull(
+              cluster,
+              String.format(
+                  "The Kubernetes session clusterId=%s can't found, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
+                  application.getFlinkClusterId()));
+          clusterId = cluster.getClusterId();
+          k8sNamespace = cluster.getK8sNamespace();
+        }
+        break;
+      default:
+        break;
+    }
+    return Tuple2.apply(k8sNamespace, clusterId);
   }
 }

@@ -169,16 +169,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         client =
           clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
       }
-
-      if (client.getWebInterfaceURL != null) {
-        DeployResponse(client.getWebInterfaceURL, client.getClusterId)
-      } else {
-        null
-      }
+      getDeployResponse(client)
     } catch {
-      case e: Exception =>
-        logError(s"start flink session fail in ${deployRequest.executionMode} mode")
-        throw e
+      case e: Exception => DeployResponse(error = e)
     } finally {
       Utils.close(client, clusterDescriptor, kubeClient)
     }
@@ -204,18 +197,17 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
 
     val flinkConfig = this.getFlinkK8sConfig(shutDownRequest)
     val clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
-    val client = clusterDescriptor
-      .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-      .getClusterClient
-    try {
-      client.shutDownCluster()
-      ShutDownResponse()
-    } catch {
-      case e: Exception =>
-        logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")
-        throw e
-    } finally {
-      Utils.close(client)
+    Try(
+      clusterDescriptor
+        .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+        .getClusterClient
+    ) match {
+      case Failure(e) => ShutDownResponse(e)
+      case Success(c) =>
+        Try(c.shutDownCluster()) match {
+          case Success(_) => ShutDownResponse()
+          case Failure(e) => ShutDownResponse(e)
+        }
     }
   }
 

@@ -26,11 +26,11 @@ import java.util.{Map => JavaMap}
 
 /** Trigger savepoint request. */
 case class TriggerSavepointRequest(
-    flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
-    jobId: String,
-    savepointPath: String,
+    override val flinkVersion: FlinkVersion,
+    override val executionMode: ExecutionMode,
+    @Nullable override val properties: JavaMap[String, Any],
+    override val clusterId: String,
+    override val jobId: String,
+    override val savepointPath: String,
     override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE)
   extends SavepointRequestTrait

@@ -20,6 +20,7 @@ import { executionModes, k8sRestExposedType, resolveOrder } from '../data';
 import optionData from '../data/option';
 import {
   getAlertSvgIcon,
+  renderJobName,
   renderDynamicProperties,
   renderInputDropdown,
   renderInputGroup,
@@ -199,7 +200,7 @@ export const useCreateAndEditSchema = (
         ],
       },
       {
-        field: 'flinkClusterId',
+        field: 'remoteClusterId',
         label: t('flink.app.flinkCluster'),
         component: 'Select',
         componentProps: {
@@ -225,10 +226,23 @@ export const useCreateAndEditSchema = (
         ],
       },
       {
+        field: 'k8sSessionClusterId',
+        label: t('flink.app.flinkCluster'),
+        component: 'Select',
+        componentProps: {
+          placeholder: t('flink.app.flinkCluster'),
+          options: getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION, 'id'),
+        },
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
+        rules: [
+          { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
+        ],
+      },
+      {
         field: 'k8sNamespace',
         label: t('flink.app.kubernetesNamespace'),
         component: 'Input',
-        ifShow: ({ values }) => isK8sExecMode(values.executionMode),
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder: t('flink.app.addAppTips.kubernetesNamespacePlaceholder'),
@@ -236,39 +250,15 @@ export const useCreateAndEditSchema = (
           }),
       },
       {
-        field: 'clusterId',
-        label: t('flink.app.kubernetesClusterId'),
+        field: 'serviceAccount',
+        label: t('setting.flinkCluster.form.serviceAccount'),
         component: 'Input',
-        componentProps: ({ formModel }) => {
-          return {
-            placeholder: t('flink.app.addAppTips.kubernetesClusterIdRequire'),
-            onChange: (e: ChangeEvent) => (formModel.jobName = e.target.value),
-          };
-        },
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
-        rules: [
-          {
-            required: true,
-            message: t('flink.app.addAppTips.kubernetesClusterIdRequire'),
-            pattern: /^(?=.{1,45}$)[a-z]([-a-z0-9]*[a-z0-9])$/,
-          },
-        ],
-      },
-      {
-        field: 'clusterId',
-        label: t('flink.app.kubernetesClusterId'),
-        component: 'Select',
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
-        componentProps: {
-          placeholder: t('flink.app.addAppTips.kubernetesClusterIdPlaceholder'),
-          options: getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION, 'clusterId'),
-        },
-        rules: [
-          {
-            required: true,
-            message: t('flink.app.addAppTips.kubernetesClusterIdIsRequiredMessage'),
-          },
-        ],
+        render: ({ model, field }) =>
+          renderInputDropdown(model, field, {
+            placeholder: t('flink.app.addAppTips.serviceAccountPlaceholder'),
+            options: unref(historyRecord)?.k8sNamespace || [],
+          }),
       },
       {
         field: 'flinkImage',
@@ -296,25 +286,32 @@ export const useCreateAndEditSchema = (
   });
 
   /* Detect job name field */
-  async function getJobNameCheck(_rule: RuleObject, value: StoreValue) {
+  async function getJobNameCheck(_rule: RuleObject, value: StoreValue, model: Recordable) {
     if (value === null || value === undefined || value === '') {
       return Promise.reject(t('flink.app.addAppTips.appNameIsRequiredMessage'));
-    } else {
-      const params = { jobName: value };
-      if (edit?.appId) Object.assign(params, { id: edit.appId });
-      const res = await fetchCheckName(params);
-      switch (parseInt(res)) {
-        case 0:
-          return Promise.resolve();
-        case 1:
-          return Promise.reject(t('flink.app.addAppTips.appNameNotUniqueMessage'));
-        case 2:
-          return Promise.reject(t('flink.app.addAppTips.appNameExistsInYarnMessage'));
-        case 3:
-          return Promise.reject(t('flink.app.addAppTips.appNameExistsInK8sMessage'));
-        default:
-          return Promise.reject(t('flink.app.addAppTips.appNameNotValid'));
+    }
+    if (model.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
+      const regexp = /^(?=.{1,45}$)[a-z]([-a-z0-9]*[a-z0-9])$/;
+      if (!regexp.test(value)) {
+        return Promise.reject(t('flink.app.addAppTips.appNameValid'));
       }
+    }
+    const params = { jobName: value };
+    if (edit?.appId) {
+      Object.assign(params, { id: edit.appId });
+    }
+    const res = await fetchCheckName(params);
+    switch (parseInt(res)) {
+      case 0:
+        return Promise.resolve();
+      case 1:
+        return Promise.reject(t('flink.app.addAppTips.appNameNotUniqueMessage'));
+      case 2:
+        return Promise.reject(t('flink.app.addAppTips.appNameExistsInYarnMessage'));
+      case 3:
+        return Promise.reject(t('flink.app.addAppTips.appNameExistsInK8sMessage'));
+      default:
+        return Promise.reject(t('flink.app.addAppTips.appNameValid'));
     }
   }
 
@@ -329,9 +326,16 @@ export const useCreateAndEditSchema = (
         field: 'jobName',
         label: t('flink.app.appName'),
         component: 'Input',
-        componentProps: { placeholder: t('flink.app.addAppTips.appNamePlaceholder') },
-        dynamicRules: () => {
-          return [{ required: true, trigger: 'blur', validator: getJobNameCheck }];
+        render: (renderCallbackParams) => renderJobName(renderCallbackParams),
+        dynamicRules: ({ model }) => {
+          return [
+            {
+              required: true,
+              trigger: 'blur',
+              validator: (rule: RuleObject, value: StoreValue) =>
+                getJobNameCheck(rule, value, model),
+            },
+          ];
         },
       },
       {

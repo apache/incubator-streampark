@@ -524,4 +524,11 @@ trait FlinkClientTrait extends Logger {
     clientWrapper.triggerSavepoint(jobID, savepointPath).get()
   }
 
+  def getDeployResponse(client: ClusterClient[_]): DeployResponse = {
+    if (client.getWebInterfaceURL != null) {
+      DeployResponse(address = client.getWebInterfaceURL, clusterId = client.getClusterId.toString)
+    } else {
+      DeployResponse(error = new RuntimeException("get the cluster getWebInterfaceURL failed."))
+    }
+  }
 }

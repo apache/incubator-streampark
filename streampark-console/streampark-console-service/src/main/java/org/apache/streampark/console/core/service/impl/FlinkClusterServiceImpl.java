@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -150,14 +151,30 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Transactional(rollbackFor = {Exception.class})
   public void start(Long id) {
     FlinkCluster flinkCluster = getById(id);
+    ApiAlertException.throwIfTrue(flinkCluster == null, "Invalid id, no related cluster found.");
+    ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
+    if (executionModeEnum == ExecutionMode.YARN_SESSION) {
+      ApiAlertException.throwIfTrue(
+          !applicationService.getYARNApplication(flinkCluster.getClusterName()).isEmpty(),
+          "The application name: "
+              + flinkCluster.getClusterName()
+              + " is already running in the yarn queue, please check!");
+    }
+
     try {
-      ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
       log.info("deploy cluster request: " + deployRequest);
+
       Future<DeployResponse> future =
           executorService.submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
-      if (deployResponse != null) {
+      if (deployResponse.error() != null) {
+        throw new ApiDetailException(
+            "deploy cluster "
+                + flinkCluster.getClusterName()
+                + "failed, exception:\n"
+                + Utils.stringifyException(deployResponse.error()));
+      } else {
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
           String address =
               YarnUtils.getRMWebAppURL(true) + "/proxy/" + deployResponse.clusterId() + "/";
@@ -169,9 +186,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flinkCluster.setClusterState(ClusterState.STARTED.getValue());
         flinkCluster.setException(null);
         updateById(flinkCluster);
-      } else {
-        throw new ApiAlertException(
-            "deploy cluster failed, unknown reason，please check you params or StreamPark error log");
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -191,13 +205,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             flinkEnv.getFlinkVersion(),
             executionModeEnum,
             flinkCluster.getProperties(),
-            flinkCluster.getClusterId());
+            flinkCluster.getClusterId(),
+            flinkCluster.getClusterName());
       case KUBERNETES_NATIVE_SESSION:
         return KubernetesDeployRequest.apply(
             flinkEnv.getFlinkVersion(),
             executionModeEnum,
             flinkCluster.getProperties(),
             flinkCluster.getClusterId(),
+            flinkCluster.getClusterName(),
             flinkCluster.getK8sNamespace(),
             flinkCluster.getK8sConf(),
             flinkCluster.getServiceAccount(),
@@ -279,12 +295,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       Future<ShutDownResponse> future =
           executorService.submit(() -> FlinkClient.shutdown(deployRequest));
       ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
-      if (shutDownResponse != null) {
+      if (shutDownResponse.error() != null) {
+        throw new ApiDetailException(
+            "shutdown cluster failed, error: \n"
+                + Utils.stringifyException(shutDownResponse.error()));
+      } else {
         flinkCluster.setAddress(null);
         flinkCluster.setClusterState(ClusterState.STOPPED.getValue());
         updateById(flinkCluster);
-      } else {
-        throw new ApiAlertException("get shutdown response failed");
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
