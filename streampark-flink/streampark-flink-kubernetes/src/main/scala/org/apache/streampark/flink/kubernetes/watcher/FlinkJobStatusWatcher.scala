@@ -91,10 +91,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   /** single flink job status tracking task */
   override def doWatch(): Unit = {
     this.synchronized {
-      logDebug(
-        "[FlinkJobStatusWatcher]: Status monitoring process begins - " + Thread
-          .currentThread()
-          .getName)
       // get all legal tracking ids
       val trackIds = Try(watchController.getAllWatchingIds())
         .filter(_.nonEmpty)
@@ -160,11 +156,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
               s" limitSeconds=${conf.requestTimeoutSec}," +
               s" trackIds=${trackIds.mkString(",")}")
       }
-
-      logDebug(
-        "[FlinkJobStatusWatcher]: End of status monitoring process - " + Thread
-          .currentThread()
-          .getName)
     }
   }
 

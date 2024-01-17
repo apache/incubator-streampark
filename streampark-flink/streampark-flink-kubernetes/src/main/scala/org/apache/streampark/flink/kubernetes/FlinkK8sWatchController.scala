@@ -93,7 +93,9 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
 
   /** get flink job-manager rest url from cache which will auto refresh when it it empty. */
   def getClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
-    Option(endpoints.get(clusterKey)).filter(_.nonEmpty).orElse(refreshClusterRestUrl(clusterKey))
+    Option(endpoints.get(clusterKey))
+      .filter(_.nonEmpty)
+      .orElse(refreshClusterRestUrl(clusterKey))
   }
 
   /** refresh flink job-manager rest url from remote flink cluster, and cache it. */

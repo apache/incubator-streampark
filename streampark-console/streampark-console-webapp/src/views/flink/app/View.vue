@@ -25,7 +25,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
   import { useTimeoutFn } from '@vueuse/core';
-  import { Tooltip, Badge, Divider, Tag, Popover } from 'ant-design-vue';
+  import { Tooltip, Badge, Tag, Popover } from 'ant-design-vue';
   import { fetchAppRecord } from '/@/api/flink/app/app';
   import { useTable } from '/@/components/Table';
   import { PageWrapper } from '/@/components/Page';
@@ -192,11 +192,6 @@
     optionApps,
   );
 
-  // build Detail
-  function openBuildProgressDetailDrawer(app: AppListRecord) {
-    openBuildDrawer(true, { appId: app.id });
-  }
-
   /* view */
   async function handleJobView(app: AppListRecord) {
     // Task is running, restarting, in savePoint
@@ -329,13 +324,6 @@
             option="release"
             :maxTitle="titleLenRef.maxRelease"
             :title="releaseTitleMap[record.release] || ''"
-            :data="record"
-          />
-          <Divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus" />
-          <State
-            option="build"
-            :maxTitle="titleLenRef.maxBuild"
-            :click="openBuildProgressDetailDrawer.bind(null, record)"
             :data="record"
           />
         </template>

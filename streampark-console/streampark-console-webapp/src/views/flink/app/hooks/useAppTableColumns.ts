@@ -29,7 +29,7 @@ export const useAppTableColumns = () => {
     flinkVersion: 110,
     tags: 150,
     state: 120,
-    release: 190,
+    release: 120,
     duration: 150,
     modifyTime: 165,
     nickName: 100,
