@@ -27,7 +27,7 @@ export const stateMap = {
   [AppStateEnum.ADDED]: { color: '#2f54eb', title: t('flink.app.runState.added') },
   [AppStateEnum.INITIALIZING]: {
     color: '#738df8',
-    title: 'INITIALIZING',
+    title: t('flink.app.runState.initializing'),
     class: 'status-processing-initializing',
   },
   [AppStateEnum.CREATED]: { color: '#2f54eb', title: t('flink.app.runState.created') },
@@ -159,7 +159,7 @@ export default defineComponent({
       // create a dom to calculate the width of the tag
       const dom = document.createElement('span');
       dom.style.display = 'inline-block';
-      dom.style.fontSize = '10px';
+      dom.style.fontSize = '12px';
       dom.style.padding = '0 3px';
       dom.style.borderRadius = '1px';
       dom.textContent = props.maxTitle;
