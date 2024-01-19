@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,8 +53,8 @@ public class FlinkEnvController {
   @Operation(summary = "Verify flink environment")
   @PostMapping("check")
   public RestResponse check(FlinkEnv version) {
-    Integer checkResp = flinkEnvService.check(version);
-    return RestResponse.success(checkResp);
+    FlinkEnvCheckEnum checkResp = flinkEnvService.check(version);
+    return RestResponse.success(checkResp.getCode());
   }
 
   @Operation(summary = "Create flink environment")

@@ -103,6 +103,7 @@ create table `t_flink_app` (
   `default_mode_ingress` text collate utf8mb4_general_ci,
   `tags` varchar(500) default null,
   `probing` tinyint default 0,
+  `hadoop_user` varchar(64) collate utf8mb4_general_ci default null,
   primary key (`id`) using btree,
   key `inx_job_type` (`job_type`) using btree,
   key `inx_track` (`tracking`) using btree,

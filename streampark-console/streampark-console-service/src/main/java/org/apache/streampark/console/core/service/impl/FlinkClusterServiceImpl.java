@@ -123,6 +123,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     // 3) Check connection
     if (FlinkExecutionMode.isRemoteMode(cluster.getFlinkExecutionModeEnum())
+        && cluster.getClusterId() != null
         && !flinkClusterWatcher.verifyClusterConnection(cluster)) {
       result.setMsg("The remote cluster connection failed, please check!");
       result.setStatus(3);
