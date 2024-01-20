@@ -68,7 +68,6 @@ import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -206,7 +205,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Autowired private SettingService settingService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private EnvInitializer envInitializer;
 
@@ -221,8 +220,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private YarnQueueService yarnQueueService;
 
   @Autowired private FlinkK8sWatcherWrapper k8sWatcherWrapper;
-
-  @Autowired private ServiceHelper serviceHelper;
 
   @PostConstruct
   public void resetOptionState() {
@@ -741,7 +738,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
 
     appParam.setBuild(true);
-    appParam.setUserId(commonService.getUserId());
+    appParam.setUserId(serviceHelper.getUserId());
     appParam.setState(FlinkAppState.ADDED.getValue());
     appParam.setRelease(ReleaseState.NEED_RELEASE.get());
     appParam.setOptionState(OptionState.NONE.getValue());
@@ -835,7 +832,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     newApp.setResourceFrom(oldApp.getResourceFrom());
     newApp.setProjectId(oldApp.getProjectId());
     newApp.setModule(oldApp.getModule());
-    newApp.setUserId(commonService.getUserId());
+    newApp.setUserId(serviceHelper.getUserId());
     newApp.setState(FlinkAppState.ADDED.getValue());
     newApp.setRelease(ReleaseState.NEED_RELEASE.get());
     newApp.setOptionState(OptionState.NONE.getValue());
@@ -1268,7 +1265,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     application.setOptionTime(new Date());
     this.baseMapper.updateById(application);
 
-    Long userId = commonService.getUserId();
+    Long userId = serviceHelper.getUserId();
     if (!application.getUserId().equals(userId)) {
       FlinkRESTAPIWatcher.addCanceledApp(application.getId(), userId);
     }
@@ -1526,7 +1523,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
       Utils.notNull(flinkSql);
       // 1) dist_userJar
-      String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
+      String sqlDistJar = serviceHelper.getSqlClientJar(flinkEnv);
       // 2) appConfig
       appConf =
           applicationConfig == null

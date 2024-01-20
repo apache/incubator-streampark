@@ -24,7 +24,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.PermissionType;
-import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.TeamService;
@@ -62,7 +62,7 @@ public class UserController {
 
   @Autowired private TeamService teamService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Operation(summary = "List users")
   @PostMapping("list")
@@ -148,7 +148,7 @@ public class UserController {
     if (team == null) {
       return RestResponse.fail("TeamId is invalid, set team failed.", ResponseCode.CODE_FAIL_ALERT);
     }
-    User user = commonService.getCurrentUser();
+    User user = serviceHelper.getLoginUser();
     ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
     // 1) set the latest team
     userService.setLastTeam(teamId, user.getUserId());

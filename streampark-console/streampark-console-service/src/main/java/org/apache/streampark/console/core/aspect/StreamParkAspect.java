@@ -25,7 +25,7 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.Member;
@@ -57,7 +57,7 @@ import java.util.Objects;
 public class StreamParkAspect {
 
   @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
   @Autowired private MemberService memberService;
   @Autowired private ApplicationService applicationService;
 
@@ -104,7 +104,7 @@ public class StreamParkAspect {
     PermissionAction permissionAction =
         methodSignature.getMethod().getAnnotation(PermissionAction.class);
 
-    User currentUser = commonService.getCurrentUser();
+    User currentUser = serviceHelper.getLoginUser();
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
     boolean isAdmin = currentUser.getUserType() == UserType.ADMIN;

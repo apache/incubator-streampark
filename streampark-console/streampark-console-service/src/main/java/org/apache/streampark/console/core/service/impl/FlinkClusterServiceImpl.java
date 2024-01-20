@@ -29,7 +29,6 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.ServiceHelper;
@@ -84,13 +83,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Autowired private FlinkEnvService flinkEnvService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private ApplicationService applicationService;
 
   @Autowired private YarnQueueService yarnQueueService;
-
-  @Autowired private ServiceHelper serviceHelper;
 
   @Override
   public ResponseResult check(FlinkCluster cluster) {
@@ -138,7 +135,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   @Override
   public Boolean create(FlinkCluster flinkCluster) {
-    flinkCluster.setUserId(commonService.getUserId());
+    flinkCluster.setUserId(serviceHelper.getUserId());
     boolean successful = validateQueueIfNeeded(flinkCluster);
     ApiAlertException.throwIfFalse(
         successful, String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()));

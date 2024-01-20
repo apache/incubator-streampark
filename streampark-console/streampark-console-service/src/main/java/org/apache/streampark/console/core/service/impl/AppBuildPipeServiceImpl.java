@@ -45,11 +45,11 @@ import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
@@ -119,7 +119,7 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationBackUpService backUpService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private SettingService settingService;
 
@@ -243,7 +243,7 @@ public class AppBuildPipeServiceImpl
             } else {
               Message message =
                   new Message(
-                      commonService.getUserId(),
+                      serviceHelper.getUserId(),
                       app.getId(),
                       app.getJobName().concat(" release failed"),
                       Utils.stringifyException(snapshot.error().exception()),
@@ -523,7 +523,7 @@ public class AppBuildPipeServiceImpl
                     + app.getApplicationType());
         }
       case FLINK_SQL:
-        String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
+        String sqlDistJar = serviceHelper.getSqlClientJar(flinkEnv);
         return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
       default:
         throw new UnsupportedOperationException(
