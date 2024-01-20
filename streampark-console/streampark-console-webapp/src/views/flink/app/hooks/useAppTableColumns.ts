@@ -28,7 +28,7 @@ export const useAppTableColumns = () => {
     jobName: 250,
     flinkVersion: 110,
     tags: 150,
-    state: 120,
+    state: 130,
     release: 120,
     duration: 150,
     modifyTime: 165,

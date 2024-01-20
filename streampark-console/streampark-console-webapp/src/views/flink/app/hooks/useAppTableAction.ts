@@ -273,6 +273,16 @@ export const useAppTableAction = (
       },
       schemas: [
         {
+          label: t('flink.app.searchName'),
+          field: 'jobName',
+          component: 'Input',
+          componentProps: {
+            placeholder: t('flink.app.searchName'),
+            onChange: handlePageDataReload.bind(null, false),
+            onSearch: handlePageDataReload.bind(null, false),
+          },
+        },
+        {
           label: t('flink.app.tags'),
           field: 'tags',
           component: 'Select',
@@ -308,16 +318,6 @@ export const useAppTableAction = (
               { label: 'SQL', value: JobTypeEnum.SQL },
             ],
             onChange: handlePageDataReload.bind(null, false),
-          },
-        },
-        {
-          label: t('flink.app.searchName'),
-          field: 'jobName',
-          component: 'Input',
-          componentProps: {
-            placeholder: t('flink.app.searchName'),
-            onChange: handlePageDataReload.bind(null, false),
-            onSearch: handlePageDataReload.bind(null, false),
           },
         },
       ],
