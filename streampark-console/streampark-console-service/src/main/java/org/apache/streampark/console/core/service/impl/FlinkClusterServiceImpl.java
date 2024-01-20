@@ -180,7 +180,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                 + "failed, exception:\n"
                 + Utils.stringifyException(deployResponse.error()));
       } else {
-        // 2) set address.
+        // 2) setAddress
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
           String address =
               YarnUtils.getRMWebAppURL(true) + "/proxy/" + deployResponse.clusterId() + "/";
@@ -193,12 +193,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flinkCluster.setException(null);
         updateById(flinkCluster);
 
-        // 3) k8s session ingress
-        try {
-          serviceHelper.configureIngress(
-              flinkCluster.getClusterId(), flinkCluster.getK8sNamespace());
-        } catch (KubernetesClientException e) {
-          log.info("Failed to create ingress: {}", e.getMessage());
+        // k8s session mode ingress
+        if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(executionModeEnum)) {
+          try {
+            serviceHelper.configureIngress(
+                flinkCluster.getClusterId(), flinkCluster.getK8sNamespace());
+          } catch (KubernetesClientException e) {
+            log.info("Failed to create ingress: {}", e.getMessage());
+          }
         }
       }
     } catch (Exception e) {
