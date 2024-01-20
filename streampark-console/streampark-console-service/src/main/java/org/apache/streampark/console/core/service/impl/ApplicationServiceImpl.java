@@ -143,7 +143,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -315,7 +314,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public String upload(MultipartFile file) throws Exception {
     File temp = WebUtils.getAppTempDir();
-    String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
+    String originalFilename = file.getOriginalFilename();
+    String nameWithoutExtension = FilenameUtils.getBaseName(originalFilename);
+    String extension = FilenameUtils.getExtension(originalFilename);
+    // Append timestamp to the original file name
+    String fileName =
+        String.format("%s_%d.%s", nameWithoutExtension, System.currentTimeMillis(), extension);
     File saveFile = new File(temp, fileName);
     // delete when exists
     if (saveFile.exists()) {
