@@ -117,7 +117,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
    * This method can be called directly from outside, without affecting the current cachePool
    * result.
    */
-  def collectMetrics(id: TrackId): Option[FlinkMetricCV] = {
+  private def collectMetrics(id: TrackId): Option[FlinkMetricCV] = {
     // get flink rest api
     val clusterKey: ClusterKey = ClusterKey.of(id)
     val flinkJmRestUrl =

@@ -18,35 +18,44 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.exception.ApiDetailException;
+import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** log client */
-@Slf4j
 @Component
-public class LogClientService {
+public class ServiceHelper {
+
+  @Autowired private SettingService settingService;
+
   public String rollViewLog(String path, int offset, int limit) {
     try {
       File file = new File(path);
       if (file.exists() && file.isFile()) {
         try (Stream<String> stream = Files.lines(Paths.get(path))) {
-          List<String> lines = stream.skip(offset).limit(limit).collect(Collectors.toList());
-          StringBuilder builder = new StringBuilder();
-          lines.forEach(line -> builder.append(line).append("\r\n"));
-          return builder.toString();
+          return stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n"));
         }
       }
       return null;
     } catch (Exception e) {
       throw new ApiDetailException("roll view log error: " + e);
+    }
+  }
+
+  public void configureIngress(String clusterId, String namespace)
+      throws KubernetesClientException {
+    String domainName = settingService.getIngressModeDefault();
+    if (StringUtils.isNotBlank(domainName)) {
+      IngressController.configureIngress(domainName, clusterId, namespace);
     }
   }
 }

@@ -73,9 +73,9 @@ import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.service.LogClientService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.YarnQueueService;
@@ -89,7 +89,6 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
-import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -219,11 +218,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Autowired private VariableService variableService;
 
-  @Autowired private LogClientService logClient;
-
   @Autowired private YarnQueueService yarnQueueService;
 
   @Autowired private FlinkK8sWatcherWrapper k8sWatcherWrapper;
+
+  @Autowired private ServiceHelper serviceHelper;
 
   @PostConstruct
   public void resetOptionState() {
@@ -642,7 +641,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                   future.cancel(true);
                 }
                 if (path != null) {
-                  return logClient.rollViewLog(path, offset, limit);
+                  return serviceHelper.rollViewLog(path, offset, limit);
                 }
                 return null;
               })
@@ -1681,19 +1680,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             flinkK8sWatcher.doWatching(trackId);
 
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-              String domainName = settingService.getIngressModeDefault();
-              if (StringUtils.isNotBlank(domainName)) {
-                try {
-                  IngressController.configureIngress(
-                      domainName, application.getClusterId(), application.getK8sNamespace());
-                } catch (KubernetesClientException e) {
-                  log.info("Failed to create ingress, stack info:{}", e.getMessage());
-                  applicationLog.setException(e.getMessage());
-                  applicationLog.setSuccess(false);
-                  applicationLogService.save(applicationLog);
-                  application.setState(FlinkAppState.FAILED.getValue());
-                  application.setOptionState(OptionState.NONE.getValue());
-                }
+              try {
+                serviceHelper.configureIngress(
+                    application.getClusterId(), application.getK8sNamespace());
+              } catch (KubernetesClientException e) {
+                log.info("Failed to create ingress, stack info:{}", e.getMessage());
+                applicationLog.setException(e.getMessage());
+                applicationLog.setSuccess(false);
+                applicationLogService.save(applicationLog);
+                application.setState(FlinkAppState.FAILED.getValue());
+                application.setOptionState(OptionState.NONE.getValue());
               }
             }
           } else {

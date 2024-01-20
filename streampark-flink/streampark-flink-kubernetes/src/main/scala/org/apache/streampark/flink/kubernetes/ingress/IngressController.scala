@@ -32,7 +32,6 @@ object IngressController extends Logger {
   private lazy val ingressStrategy: IngressStrategy = {
     using(new DefaultKubernetesClient()) {
       client =>
-        val versionInfo = client.getVersion
         val version = VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
         if (version >= 1.19) {
           new IngressStrategyV1()

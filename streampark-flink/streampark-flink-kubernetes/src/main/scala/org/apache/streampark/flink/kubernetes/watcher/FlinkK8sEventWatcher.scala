@@ -27,7 +27,7 @@ import org.apache.flink.kubernetes.kubeclient.resources.{CompatibleKubernetesWat
 
 import javax.annotation.concurrent.ThreadSafe
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * K8s Event Watcher for Flink Native-K8s Mode. Currently only flink-native-application mode events
@@ -63,15 +63,21 @@ class FlinkK8sEventWatcher(implicit watchController: FlinkK8sWatchController)
 
   override def doWatch(): Unit = {
     // watch k8s deployment events
-    k8sClient
-      .apps()
-      .deployments()
-      .withLabel("type", "flink-native-kubernetes")
-      .watch(new CompatibleKubernetesWatcher[Deployment, CompKubernetesDeployment] {
-        override def eventReceived(action: Watcher.Action, event: Deployment): Unit = {
-          handleDeploymentEvent(action, event)
-        }
-      })
+    Try {
+      k8sClient
+        .apps()
+        .deployments()
+        .withLabel("type", "flink-native-kubernetes")
+        .watch(new CompatibleKubernetesWatcher[Deployment, CompKubernetesDeployment] {
+          override def eventReceived(action: Watcher.Action, event: Deployment): Unit = {
+            handleDeploymentEvent(action, event)
+          }
+        })
+    } match {
+      case Failure(e) =>
+        logError(s"k8sClient error: $e")
+      case _ =>
+    }
   }
 
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {

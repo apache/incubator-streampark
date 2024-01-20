@@ -32,6 +32,7 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
@@ -45,6 +46,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,6 +89,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Autowired private ApplicationService applicationService;
 
   @Autowired private YarnQueueService yarnQueueService;
+
+  @Autowired private ServiceHelper serviceHelper;
 
   @Override
   public ResponseResult check(FlinkCluster cluster) {
@@ -162,12 +166,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     try {
+      // 1) deployRequest
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
       log.info("deploy cluster request: " + deployRequest);
 
       Future<DeployResponse> future =
           executorService.submit(() -> FlinkClient.deploy(deployRequest));
-      DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
+      DeployResponse deployResponse = future.get(5, TimeUnit.SECONDS);
       if (deployResponse.error() != null) {
         throw new ApiDetailException(
             "deploy cluster "
@@ -175,6 +180,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                 + "failed, exception:\n"
                 + Utils.stringifyException(deployResponse.error()));
       } else {
+        // 2) set address.
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
           String address =
               YarnUtils.getRMWebAppURL(true) + "/proxy/" + deployResponse.clusterId() + "/";
@@ -186,6 +192,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flinkCluster.setClusterState(ClusterState.STARTED.getValue());
         flinkCluster.setException(null);
         updateById(flinkCluster);
+
+        // 3) k8s session ingress
+        try {
+          serviceHelper.configureIngress(
+              flinkCluster.getClusterId(), flinkCluster.getK8sNamespace());
+        } catch (KubernetesClientException e) {
+          log.info("Failed to create ingress: {}", e.getMessage());
+        }
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
