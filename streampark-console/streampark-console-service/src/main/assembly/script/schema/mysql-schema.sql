@@ -557,3 +557,36 @@ create table if not exists `t_resource` (
 );
 
 set foreign_key_checks = 1;
+
+CREATE TABLE t_catalog(
+`id` bigint auto_increment NOT NULL,
+`catalog_name` varchar(10) NOT NULL comment 'catalog name',
+`catalog_type` varchar(10) NOT NULL comment '1.jdbc 2.hive',
+`default_database` varchar(50) NOT NULL,
+`username` varchar(50),
+`password` varchar(50),
+`base-url` varchar(100) comment 'jdbc connection',
+`hive-conf-dir` varchar(100) comment 'hive config path',
+`create_time` datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+`update_time` datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+primary key (`id`) using btree
+)engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+CREATE TABLE t_catalog_databases (
+`id` bigint auto_increment NOT NULL,
+`catalog_id` bigint NOT NULL,
+`database_name` varchar(100) NOT NULL comment 'databbase name in catalog',
+`create_time` datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+`update_time` datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+ primary key (`id`) using btree
+)engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci
+
+CREATE TABLE t_catalog_tables (
+`id` bigint auto_increment NOT NULL,
+`catalog_id` bigint NOT NULL,
+`catalog_database_id` bigint NOT NULL,
+`table_name` varchar(100) NOT NULL comment 'table name in database',
+`create_time` datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+`update_time` datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+primary key (`id`) using btree
+)engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
