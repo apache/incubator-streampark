@@ -38,10 +38,10 @@
         on v.creator_id = u.user_id
         and v.team_id = ${variable.teamId}
         <if test="variable.description != null and variable.description != ''">
-            and v.description like concat('%', CAST(#{variable.description} AS CHAR), '%')
+            and v.description like concat('%', '${variable.description}', '%')
         </if>
         <if test="variable.variableCode != null and variable.variableCode != ''">
-            and v.variable_code like concat('%', CAST(#{variable.variableCode} AS CHAR), '%')
+            and v.variable_code like concat('%', '${variable.variableCode}', '%')
         </if>
     </select>
 
@@ -61,7 +61,7 @@
         <where>
             team_id = #{teamId}
             <if test="keyword != null and keyword != ''">
-                and variable_code like concat('%', CAST(#{keyword} AS CHAR), '%') or description like concat('%', CAST(#{keyword} AS CHAR), '%')
+                and variable_code like concat('%', '${keyword}', '%') or description like concat('%', '${keyword}', '%')
             </if>
         </where>
     </select>
