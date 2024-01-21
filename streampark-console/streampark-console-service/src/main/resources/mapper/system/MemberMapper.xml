@@ -51,7 +51,7 @@
         <where>
             tur.team_id = ${member.teamId}
             <if test="member.userName != null and member.userName != ''">
-                and u.username like concat('%', CAST(#{member.userName} AS CHAR), '%')
+                and u.username like concat('%', '${member.userName}', '%')
             </if>
             <if test="member.roleName != null and member.roleName != ''">
                 and r.role_name = ${member.roleName}

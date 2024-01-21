@@ -38,7 +38,7 @@
         select * from t_user
         <where>
             <if test="user.username != null and user.username != ''">
-                and username like concat('%', CAST(#{user.username} AS CHAR), '%')
+                and username like concat('%', '${user.username}', '%')
             </if>
             <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
                 and create_time &gt; #{user.createTimeFrom}

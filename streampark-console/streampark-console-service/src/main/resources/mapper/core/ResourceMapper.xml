@@ -42,10 +42,10 @@
         on v.creator_id = u.user_id
         and v.team_id = ${resource.teamId}
         <if test="resource.resourceName != null and resource.resourceName != ''">
-            and v.resourceName like concat('%', CAST(#{resource.resourceName} AS CHAR), '%')
+            and v.resourceName like concat('%', '${resource.resourceName}', '%')
         </if>
         <if test="resource.description != null and resource.description != ''">
-            and v.description like concat('%', CAST(#{resource.description} AS CHAR), '%')
+            and v.description like concat('%', '${resource.description}', '%')
         </if>
     </select>
 

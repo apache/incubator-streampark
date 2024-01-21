@@ -33,7 +33,7 @@
                 team_id = #{yarnQueue.teamId}
             </if>
             <if test="yarnQueue.queueLabel != null and yarnQueue.queueLabel != ''">
-                and queue_label like concat('%', CAST(#{yarnQueue.queueLabel} AS CHAR), '%')
+                and queue_label like concat('%', '${yarnQueue.queueLabel}', '%')
             </if>
             <if test="yarnQueue.createTimeFrom != null and yarnQueue.createTimeFrom !=''">
                 and create_time &gt; #{yarnQueue.createTimeFrom}
