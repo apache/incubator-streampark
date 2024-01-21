@@ -51,6 +51,8 @@ export default {
   restServiceExposedType: 'K8S服务对外类型',
   resourceFrom: '资源来源',
   uploadJobJar: '上传jar文件',
+  useExisting: '使用当前配置',
+  reselect: '重新选择配置',
   mainClass: '程序入口类',
   project: '项目',
   module: '模块',
@@ -89,6 +91,12 @@ export default {
     releaseDesc: '您确定要强制进行另一次构建吗',
     releaseFail: '发布作业失败',
     releasing: '当前作业正在发布中',
+  },
+  clusterState: {
+    created: '新增',
+    started: '运行中',
+    canceled: '停止',
+    lost: '失联',
   },
   detail: {
     detailTitle: '作业详情',

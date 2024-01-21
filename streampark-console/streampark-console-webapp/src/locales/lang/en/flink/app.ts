@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 export default {
   id: 'ID',
   appName: 'Job Name',
@@ -44,6 +45,8 @@ export default {
   yarnQueue: 'Yarn Queue',
   mavenPom: 'Maven pom',
   uploadJar: 'Upload Jar',
+  useExisting: 'use existing',
+  reselect: 'reselect',
   kubernetesNamespace: 'Kubernetes Namespace',
   kubernetesClusterId: 'Kubernetes ClusterId',
   kubernetesCluster: 'Kubernetes Cluster',
@@ -91,6 +94,12 @@ export default {
     waiting: 'WAITING',
     releasing: 'RELEASING',
     pending: 'PENDING',
+  },
+  clusterState: {
+    created: 'CREATED',
+    started: 'STARTED',
+    canceled: 'SHUTDOWN',
+    lost: 'LOST',
   },
   release: {
     releaseTitle: 'The current release of the application is in progress.',

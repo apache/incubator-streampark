@@ -28,6 +28,7 @@ import {
   renderOptionsItems,
   renderTotalMemory,
   renderYarnQueue,
+  renderFlinkCluster,
 } from './useFlinkRender';
 
 import { fetchCheckName } from '/@/api/flink/app/app';
@@ -50,7 +51,7 @@ import { fetchFlinkEnv } from '/@/api/flink/setting/flinkEnv';
 import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
-import { AppTypeEnum, ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
+import { AppTypeEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
@@ -90,18 +91,10 @@ export const useCreateAndEditSchema = (
   /* filter cluster */
   const getExecutionCluster = (
     executionMode: number,
-    valueKey: string,
-  ): Array<{ label: string; value: string }> => {
+  ): Array<{ id: string; label: string; state: number }> => {
     return (unref(flinkClusters) || [])
-      .filter((o) => {
-        // Edit mode has one more filter condition
-        if (edit?.mode) {
-          return o.executionMode == executionMode && o.clusterState === ClusterStateEnum.STARTED;
-        } else {
-          return o.executionMode == executionMode;
-        }
-      })
-      .map((i) => ({ label: i.clusterName, value: i[valueKey] }));
+      .filter((o) => o.executionMode == executionMode)
+      .map((item) => ({ id: item.id, label: item.clusterName, state: item.clusterState }));
   };
 
   const getFlinkSqlSchema = computed((): FormSchema[] => {
@@ -203,10 +196,7 @@ export const useCreateAndEditSchema = (
         field: 'remoteClusterId',
         label: t('flink.app.flinkCluster'),
         component: 'Select',
-        componentProps: {
-          placeholder: t('flink.app.flinkCluster'),
-          options: getExecutionCluster(ExecModeEnum.REMOTE, 'id'),
-        },
+        render: (param) => renderFlinkCluster(getExecutionCluster(ExecModeEnum.REMOTE), param),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
         rules: [
           { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
@@ -216,10 +206,8 @@ export const useCreateAndEditSchema = (
         field: 'yarnSessionClusterId',
         label: t('flink.app.flinkCluster'),
         component: 'Select',
-        componentProps: {
-          placeholder: t('flink.app.flinkCluster'),
-          options: getExecutionCluster(ExecModeEnum.YARN_SESSION, 'id'),
-        },
+        render: (param) =>
+          renderFlinkCluster(getExecutionCluster(ExecModeEnum.YARN_SESSION), param),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         rules: [
           { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
@@ -229,10 +217,8 @@ export const useCreateAndEditSchema = (
         field: 'k8sSessionClusterId',
         label: t('flink.app.flinkCluster'),
         component: 'Select',
-        componentProps: {
-          placeholder: t('flink.app.flinkCluster'),
-          options: getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION, 'id'),
-        },
+        render: (param) =>
+          renderFlinkCluster(getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION), param),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         rules: [
           { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },

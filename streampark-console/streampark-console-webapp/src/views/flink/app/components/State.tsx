@@ -61,7 +61,7 @@ export const stateMap = {
     title: t('flink.app.runState.reconciling'),
     class: 'status-processing-reconciling',
   },
-  [AppStateEnum.LOST]: { color: '#000000', title: t('flink.app.runState.lost') },
+  [AppStateEnum.LOST]: { color: '#333333', title: t('flink.app.runState.lost') },
   [AppStateEnum.MAPPING]: {
     color: '#13c2c2',
     title: t('flink.app.runState.mapping'),

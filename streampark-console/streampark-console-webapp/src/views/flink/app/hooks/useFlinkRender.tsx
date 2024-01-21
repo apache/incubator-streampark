@@ -42,6 +42,7 @@ import { SelectValue } from 'ant-design-vue/lib/select';
 import {
   AppTypeEnum,
   CandidateTypeEnum,
+  ClusterStateEnum,
   ExecModeEnum,
   FailoverStrategyEnum,
 } from '/@/enums/flinkEnum';
@@ -306,6 +307,38 @@ export const renderJobName = ({ model, field }: RenderCallbackParams) => {
   );
 };
 
+export const renderFlinkCluster = (clusters, { model, field }: RenderCallbackParams) => {
+  return (
+    <Select
+      placeholder={t('flink.app.flinkCluster')}
+      value={model[field]}
+      onChange={(value: any) => (model[field] = value)}
+    >
+      {clusters.map((item) => {
+        return (
+          <Select.Option key={item.id}>
+            {item.label}
+            <span style="margin-left: 50px;">
+              {item.state == ClusterStateEnum.CREATED && (
+                <Tag color="#108ee9">{t('flink.app.clusterState.created')}</Tag>
+              )}
+              {item.state == ClusterStateEnum.STARTED && (
+                <Tag color="#52c41a">{t('flink.app.clusterState.started')}</Tag>
+              )}
+              {item.state == ClusterStateEnum.CANCELED && (
+                <Tag color="#fa8c16">{t('flink.app.clusterState.canceled')}</Tag>
+              )}
+              {item.state == ClusterStateEnum.LOST && (
+                <Tag color="#333333">{t('flink.app.clusterState.lost')}</Tag>
+              )}
+            </span>
+          </Select.Option>
+        );
+      })}
+    </Select>
+  );
+};
+
 /* render memory option */
 export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) => {
   return (
@@ -484,7 +517,7 @@ export const renderSqlHistory = (
       if (!isCompareSelect) return false;
       return compareSQL.value.length == 2 && compareSQL.value.findIndex((i) => i === ver.id) === -1;
     };
-    console.log('flinkSqlHistory', flinkSqlHistory);
+
     return (flinkSqlHistory || []).map((ver) => {
       return (
         <Select.Option key={ver.id} disabled={isDisabled(ver)}>

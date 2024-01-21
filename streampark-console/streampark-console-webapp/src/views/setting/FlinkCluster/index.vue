@@ -15,9 +15,8 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { defineComponent, onUnmounted } from 'vue';
   import { useTimeoutFn } from '@vueuse/core';
-  import { onUnmounted } from 'vue';
 
   export default defineComponent({
     name: 'FlinkClusterSetting',
@@ -107,8 +106,7 @@
   async function getFlinkCluster() {
     try {
       loading.value = true;
-      const clusterList = await fetchFlinkCluster();
-      clusters.value = clusterList;
+      clusters.value = await fetchFlinkCluster();
     } catch (error) {
       console.error(error);
     } finally {
