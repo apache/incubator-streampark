@@ -30,8 +30,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/** Create asynchronous thread pools for different services */
 @Configuration
 public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
+
+  /**
+   * Create a standard asynchronous task performer.
+   *
+   * @return Executor
+   */
   @Bean
   public Executor taskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -46,6 +53,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     return executor;
   }
 
+  /**
+   * Create a ThreadPoolTaskExecutor for SavePointService.
+   *
+   * @return Executor
+   */
   @Bean("triggerSavepointExecutor")
   public Executor savepointExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -59,6 +71,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     return executor;
   }
 
+  /**
+   * Create a ThreadPoolTaskExecutor for FlinkAppHttpWatcher.
+   *
+   * @return Executor
+   */
   @Bean("flinkRestAPIWatchingExecutor")
   public Executor restAPIWatchingExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -71,6 +88,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     return executor;
   }
 
+  /**
+   * Create a ThreadPoolTaskExecutor for FlinkClusterWatcher.
+   *
+   * @return Executor
+   */
   @Bean("flinkClusterWatchingExecutor")
   public Executor clusterWatchingExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -83,6 +105,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     return executor;
   }
 
+  /**
+   * Create a ThreadPoolExecutor for AppBuildPipeService.
+   *
+   * @return ExecutorService
+   */
   @Bean("streamparkBuildPipelineExecutor")
   public ExecutorService pipelineExecutor() {
     return new ThreadPoolExecutor(
@@ -95,6 +122,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
         new ThreadPoolExecutor.AbortPolicy());
   }
 
+  /**
+   * Create a ThreadPoolExecutor for FlinkClusterService.
+   *
+   * @return ExecutorService
+   */
   @Bean("streamparkClusterExecutor")
   public ExecutorService clusterExecutor() {
     return new ThreadPoolExecutor(
@@ -107,6 +139,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
         new ThreadPoolExecutor.AbortPolicy());
   }
 
+  /**
+   * Create a ThreadPoolTaskExecutor for FlinkK8sChangeEventListener.
+   *
+   * @return Executor
+   */
   @Bean("streamparkNotifyExecutor")
   public Executor notifyExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -120,6 +157,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     return executor;
   }
 
+  /**
+   * Create a ThreadPoolTaskExecutor for ApplicationActionService.
+   *
+   * @return Executor
+   */
   @Bean("streamparkDeployExecutor")
   public Executor deployExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -133,6 +175,11 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     return executor;
   }
 
+  /**
+   * Create a ThreadPoolTaskExecutor for ProjectService.
+   *
+   * @return Executor
+   */
   @Bean("streamparkBuildExecutor")
   public Executor buildExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

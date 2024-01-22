@@ -25,6 +25,7 @@ import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 
 import java.time.LocalDateTime;
 
+/** Specifies the log output format of SQL statements in the console */
 public class P6spySqlFormatConfig implements MessageFormattingStrategy {
 
   @Override

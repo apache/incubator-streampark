@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.Map;
 
+/** An interceptor used to handle file uploads */
 @Component
 public class UploadFileTypeInterceptor implements HandlerInterceptor {
 

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 
 import java.text.SimpleDateFormat;
 
+/** Serialization utils */
 public final class JacksonUtils {
 
   private JacksonUtils() {}

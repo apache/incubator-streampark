@@ -43,6 +43,7 @@ import javax.validation.Path;
 import java.util.List;
 import java.util.Set;
 
+/** A global exception handler that takes over all exceptions */
 @Slf4j
 @RestControllerAdvice
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
