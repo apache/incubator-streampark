@@ -48,10 +48,10 @@ public interface ApplicationActionService extends IService<Application> {
   /**
    * Revokes access for the given application.
    *
-   * @param appParam The application for which access needs to be revoked.
+   * @param appId The application's id for which access needs to be revoked.
    * @throws ApplicationException if an error occurs while revoking access.
    */
-  void revoke(Application appParam) throws ApplicationException;
+  void revoke(Long appId) throws ApplicationException;
 
   /**
    * Cancels the given application. Throws an exception if cancellation fails.
@@ -64,7 +64,7 @@ public interface ApplicationActionService extends IService<Application> {
   /**
    * Forces the given application to stop.
    *
-   * @param appParam the application to be stopped
+   * @param id the application's id which need to be stopped
    */
-  void forcedStop(Application appParam);
+  void forcedStop(Long id);
 }

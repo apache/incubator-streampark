@@ -177,11 +177,11 @@
         </where>
     </select>
 
-    <select id="selectApp" resultType="org.apache.streampark.console.core.entity.Application" parameterType="org.apache.streampark.console.core.entity.Application">
+    <select id="selectApp" resultType="org.apache.streampark.console.core.entity.Application" parameterType="long">
         select t.*, p.name as projectName
         from t_flink_app t left join t_flink_project p
         on t.project_id = p.id
-        where t.id = #{app.id}
+        where t.id = #{id}
     </select>
 
     <update id="persistMetrics" parameterType="org.apache.streampark.console.core.entity.Application">

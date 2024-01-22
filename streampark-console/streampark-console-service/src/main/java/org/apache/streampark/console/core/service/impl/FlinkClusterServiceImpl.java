@@ -342,8 +342,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public void remove(FlinkCluster cluster) {
-    Long id = cluster.getId();
+  public void remove(Long id) {
     FlinkCluster flinkCluster = getById(id);
     ApiAlertException.throwIfNull(flinkCluster, "Flink cluster not exist, please check.");
 

@@ -117,14 +117,14 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
   }
 
   @Override
-  public List<FlinkSql> listFlinkSqlHistory(Application application) {
+  public List<FlinkSql> listFlinkSqlHistory(Long appId) {
     LambdaQueryWrapper<FlinkSql> queryWrapper =
         new LambdaQueryWrapper<FlinkSql>()
-            .eq(FlinkSql::getAppId, application.getId())
+            .eq(FlinkSql::getAppId, appId)
             .orderByDesc(FlinkSql::getVersion);
 
     List<FlinkSql> sqlList = this.baseMapper.selectList(queryWrapper);
-    FlinkSql effective = getEffective(application.getId(), false);
+    FlinkSql effective = getEffective(appId, false);
     if (effective != null && !sqlList.isEmpty()) {
       for (FlinkSql sql : sqlList) {
         if (sql.getId().equals(effective.getId())) {

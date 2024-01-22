@@ -150,13 +150,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public void remove(Member memberArg) {
+  public void remove(Long id) {
     Member member =
-        Optional.ofNullable(this.getById(memberArg.getId()))
+        Optional.ofNullable(this.getById(id))
             .orElseThrow(
-                () ->
-                    new ApiAlertException(
-                        String.format("The member [id=%s] not found", memberArg.getId())));
+                () -> new ApiAlertException(String.format("The member [id=%s] not found", id)));
     this.removeById(member);
     userService.clearLastTeam(member.getUserId(), member.getTeamId());
   }

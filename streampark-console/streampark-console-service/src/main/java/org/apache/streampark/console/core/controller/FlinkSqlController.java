@@ -118,7 +118,7 @@ public class FlinkSqlController {
   @Operation(summary = "List the applications sql histories")
   @PostMapping("history")
   public RestResponse sqlhistory(Application application) {
-    List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(application);
+    List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(application.getId());
     return RestResponse.success(sqlList);
   }
 

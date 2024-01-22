@@ -38,7 +38,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
   FlinkSql getLatestFlinkSql(Long appId, boolean decode);
 
-  List<FlinkSql> listFlinkSqlHistory(Application application);
+  List<FlinkSql> listFlinkSqlHistory(Long appId);
 
   FlinkSql getCandidate(Long appId, CandidateTypeEnum type);
 
