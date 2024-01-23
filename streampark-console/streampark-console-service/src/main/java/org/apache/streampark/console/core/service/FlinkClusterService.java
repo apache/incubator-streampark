@@ -56,9 +56,9 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
   /**
    * Remove flink cluster
    *
-   * @param flinkCluster FlinkCluster to be remove
+   * @param id FlinkCluster id whitch to be removed
    */
-  void remove(FlinkCluster flinkCluster);
+  void remove(Long id);
 
   /**
    * Update flink cluster

@@ -110,7 +110,7 @@ class ApplicationManageServiceITest extends SpringIntegrationTestBase {
     Application appParam = new Application();
     appParam.setId(100000L);
     appParam.setTeamId(100000L);
-    Application application = applicationManageService.getApp(appParam);
+    Application application = applicationManageService.getApp(appParam.getId());
     application.setFlinkClusterId(1L);
     application.setSqlId(100000L);
     application.setVersionId(1L);

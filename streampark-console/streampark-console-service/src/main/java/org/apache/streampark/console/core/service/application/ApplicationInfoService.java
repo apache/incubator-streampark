@@ -123,10 +123,10 @@ public interface ApplicationInfoService extends IService<Application> {
   /**
    * Gets the YARN name for the given application.
    *
-   * @param appParam The application for which to retrieve the YARN name.
+   * @param appConfig The application's config for which to retrieve the YARN name.
    * @return The YARN name of the application as a String.
    */
-  String getYarnName(Application appParam);
+  String getYarnName(String appConfig);
 
   /**
    * Checks if the given application exists in the system.
@@ -139,11 +139,11 @@ public interface ApplicationInfoService extends IService<Application> {
   /**
    * Reads the configuration for the given application and returns it as a String.
    *
-   * @param appParam The application for which the configuration needs to be read.
+   * @param appConfig The application's config for which the configuration needs to be read.
    * @return The configuration for the given application as a String.
    * @throws IOException If an I/O error occurs while reading the configuration.
    */
-  String readConf(Application appParam) throws IOException;
+  String readConf(String appConfig) throws IOException;
 
   /**
    * Retrieves the main configuration value for the given Application.
@@ -226,10 +226,10 @@ public interface ApplicationInfoService extends IService<Application> {
   /**
    * check application before start
    *
-   * @param appParam
+   * @param id the application's id which need to check before start.
    * @return org.apache.streampark.console.core.enums.AppExistsStateEnum
    */
-  AppExistsStateEnum checkStart(Application appParam);
+  AppExistsStateEnum checkStart(Long id);
 
   /**
    * @param appName

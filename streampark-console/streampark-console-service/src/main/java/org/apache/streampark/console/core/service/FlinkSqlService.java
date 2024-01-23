@@ -66,10 +66,10 @@ public interface FlinkSqlService extends IService<FlinkSql> {
   /**
    * Get all historical SQL through Application
    *
-   * @param application Application
+   * @param appId Application id
    * @return list of History FLinkSQL
    */
-  List<FlinkSql> listFlinkSqlHistory(Application application);
+  List<FlinkSql> listFlinkSqlHistory(Long appId);
 
   /**
    * Get FlinkSQL by Application id and Candidate Type

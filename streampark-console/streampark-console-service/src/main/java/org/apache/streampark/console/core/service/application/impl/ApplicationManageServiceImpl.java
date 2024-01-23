@@ -183,9 +183,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public Boolean remove(Application appParam) {
+  public Boolean remove(Long appId) {
 
-    Application application = getById(appParam.getId());
+    Application application = getById(appId);
 
     // 1) remove flink sql
     flinkSqlService.removeByAppId(application.getId());
@@ -217,7 +217,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         flinkK8sObserver.unWatchById(application.getId());
       }
     } else {
-      FlinkAppHttpWatcher.unWatching(appParam.getId());
+      FlinkAppHttpWatcher.unWatching(appId);
     }
     return true;
   }
@@ -762,10 +762,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public Application getApp(Application appParam) {
-    Application application = this.baseMapper.selectApp(appParam);
-    ApplicationConfig config = configService.getEffective(appParam.getId());
-    config = config == null ? configService.getLatest(appParam.getId()) : config;
+  public Application getApp(Long id) {
+    Application application = this.baseMapper.selectApp(id);
+    ApplicationConfig config = configService.getEffective(id);
+    config = config == null ? configService.getLatest(id) : config;
     if (config != null) {
       config.setToApplication(application);
     }

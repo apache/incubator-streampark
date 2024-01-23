@@ -102,9 +102,9 @@ public interface MemberService extends IService<Member> {
   /**
    * Remove a member
    *
-   * @param member Member to be removed
+   * @param id Member id to be removed
    */
-  void remove(Member member);
+  void remove(Long id);
 
   /**
    * Update Member

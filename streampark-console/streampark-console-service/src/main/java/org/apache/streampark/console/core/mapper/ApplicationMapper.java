@@ -31,7 +31,7 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
   IPage<Application> selectPage(Page<Application> page, @Param("app") Application application);
 
-  Application selectApp(@Param("app") Application application);
+  Application selectApp(@Param("id") Long id);
 
   void persistMetrics(@Param("app") Application application);
 

@@ -31,11 +31,11 @@ public interface AlertConfigService extends IService<AlertConfig> {
   /**
    * Retrieves a page of {@link AlertConfigParams} objects based on the provided parameters.
    *
-   * @param params The {@link AlertConfigParams} object containing the search criteria.
+   * @param params The {@link userId} object containing the search criteria.
    * @param request The {@link RestRequest} object used for pagination and sorting.
    * @return An {@link IPage} containing the retrieved {@link AlertConfigParams} objects.
    */
-  IPage<AlertConfigParams> page(AlertConfigParams params, RestRequest request);
+  IPage<AlertConfigParams> page(Long userId, RestRequest request);
 
   /**
    * check whether the relevant alarm configuration exists

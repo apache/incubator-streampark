@@ -92,7 +92,7 @@ public class AlertController {
   @PostMapping(value = "/list")
   public RestResponse alertConfigsPaginationList(
       @RequestBody AlertConfigParams params, RestRequest request) {
-    IPage<AlertConfigParams> page = alertConfigService.page(params, request);
+    IPage<AlertConfigParams> page = alertConfigService.page(params.getUserId(), request);
     return RestResponse.success(page);
   }
 
