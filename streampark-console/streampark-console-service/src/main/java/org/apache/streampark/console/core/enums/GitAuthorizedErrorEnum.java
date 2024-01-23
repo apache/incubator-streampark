@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.enums;
 
+/** Git authentication results */
 public enum GitAuthorizedErrorEnum {
 
   /** Success. */

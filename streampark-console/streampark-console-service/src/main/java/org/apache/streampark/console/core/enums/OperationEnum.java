@@ -21,6 +21,7 @@ import lombok.Getter;
 
 import java.util.Arrays;
 
+/** Operation type */
 @Getter
 public enum OperationEnum {
   RELEASE(0),

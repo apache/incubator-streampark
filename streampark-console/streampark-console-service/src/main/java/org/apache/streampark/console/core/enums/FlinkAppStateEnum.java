@@ -23,6 +23,7 @@ import lombok.Getter;
 
 import scala.Enumeration;
 
+/** Describe the status of Flink Application */
 @Getter
 public enum FlinkAppStateEnum {
 

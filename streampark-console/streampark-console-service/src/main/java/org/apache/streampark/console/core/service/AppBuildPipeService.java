@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/** Applications can be built asynchronously, can manage pipeline and get info */
 public interface AppBuildPipeService extends IService<AppBuildPipeline> {
 
   /**
@@ -48,17 +49,32 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
    */
   Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId);
 
-  /** Get Docker resolved snapshot of specified application. */
+  /**
+   * Get Docker resolved snapshot of specified application.
+   *
+   * @param appId application id
+   * @return DockerResolvedSnapshot instance
+   */
   DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId);
 
-  /** Whether the application can currently start a new building progress */
+  /**
+   * Whether the application can currently start a new building progress
+   *
+   * @param appId application id
+   * @return Whether construction can be started at this time
+   */
   boolean allowToBuildNow(@Nonnull Long appId);
 
-  /** list pipeline status on application id list */
+  /**
+   * List pipeline status on application id list
+   *
+   * @param appIds list of application ids
+   * @return Map structure, key is application id, value is for the pipeline state
+   */
   Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds);
 
   /**
-   * delete appBuildPipeline By application
+   * Delete appBuildPipeline By application id
    *
    * @param appId
    */

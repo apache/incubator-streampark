@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.enums;
 
 import java.util.Arrays;
 
+/** Git connection method */
 public enum GitCredentialEnum {
   HTTPS(1),
   SSH(2);

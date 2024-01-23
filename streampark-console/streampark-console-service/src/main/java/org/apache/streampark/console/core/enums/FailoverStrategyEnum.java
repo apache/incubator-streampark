@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.enums;
 
 import java.util.Arrays;
 
+/** Provides how to deal with problems when encountering them */
 public enum FailoverStrategyEnum {
 
   /** send alert */
