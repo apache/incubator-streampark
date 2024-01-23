@@ -25,16 +25,52 @@ import org.apache.streampark.console.system.entity.AccessToken;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+/** This interface is related to Token information acquisition and operation */
 public interface AccessTokenService extends IService<AccessToken> {
 
+  /**
+   * Generate token based on user ID's expiration time and description
+   *
+   * @param userId User id
+   * @param expireTime expiration
+   * @param description more description
+   * @return RestResponse
+   * @throws InternalException
+   */
   RestResponse generateToken(Long userId, String expireTime, String description)
       throws InternalException;
 
+  /**
+   * Retrieves a page of {@link AccessToken} objects based on the provided parameters.
+   *
+   * @param tokenParam The {@link AccessToken} object containing the search criteria.
+   * @param request The {@link RestRequest} object used for pagination and sorting.
+   * @return An {@link IPage} containing the retrieved {@link AccessToken} objects.
+   */
   IPage<AccessToken> getPage(AccessToken tokenParam, RestRequest request);
 
+  /**
+   * Check whether the incoming token is valid
+   *
+   * @param userId User id
+   * @param token 被Checked token
+   * @return Whether the token is valid
+   */
   boolean checkTokenEffective(Long userId, String token);
 
+  /**
+   * Update information in token
+   *
+   * @param tokenId AccessToken id
+   * @return RestResponse
+   */
   RestResponse toggleToken(Long tokenId);
 
+  /**
+   * Get the corresponding AccessToken based on the user ID
+   *
+   * @param userId User id
+   * @return AccessToken
+   */
   AccessToken getByUserId(Long userId);
 }

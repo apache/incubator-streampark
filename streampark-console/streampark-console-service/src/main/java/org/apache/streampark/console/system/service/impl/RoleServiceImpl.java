@@ -26,7 +26,7 @@ import org.apache.streampark.console.system.entity.RoleMenu;
 import org.apache.streampark.console.system.mapper.RoleMapper;
 import org.apache.streampark.console.system.mapper.RoleMenuMapper;
 import org.apache.streampark.console.system.service.MemberService;
-import org.apache.streampark.console.system.service.RoleMenuServie;
+import org.apache.streampark.console.system.service.RoleMenuService;
 import org.apache.streampark.console.system.service.RoleService;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -57,7 +57,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
   @Autowired private MemberService memberService;
 
-  @Autowired private RoleMenuServie roleMenuService;
+  @Autowired private RoleMenuService roleMenuService;
 
   @Override
   public IPage<Role> getPage(Role role, RestRequest request) {
