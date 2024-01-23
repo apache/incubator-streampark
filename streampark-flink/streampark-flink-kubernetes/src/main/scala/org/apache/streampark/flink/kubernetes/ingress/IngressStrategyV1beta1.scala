@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
+import org.apache.streampark.common.conf.{InternalConfigHolder, K8sFlinkConfig}
 import org.apache.streampark.common.util.ImplicitsUtils._
 
 import io.fabric8.kubernetes.api.model.IntOrString
@@ -61,6 +62,7 @@ class IngressStrategyV1beta1 extends IngressStrategy {
           .addToOwnerReferences(ownerReference)
           .endMetadata()
           .withNewSpec()
+          .withIngressClassName(InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass))
           .addNewRule()
           .withHost(domainName)
           .withNewHttp()
