@@ -333,6 +333,16 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               if (savepointResponse != null && savepointResponse.savePointDir() != null) {
                 applicationLog.setSuccess(true);
                 String savePointDir = savepointResponse.savePointDir();
+
+                SavePoint savePoint = new SavePoint();
+                savePoint.setAppId(application.getId());
+                savePoint.setLatest(true);
+                savePoint.setType(CheckPointType.SAVEPOINT.get());
+                savePoint.setCreateTime(new Date());
+                savePoint.setTriggerTime(new Date());
+                savePoint.setPath(savePointDir);
+                this.save(savePoint);
+
                 log.info("Request savepoint successful, savepointDir: {}", savePointDir);
               }
             },
