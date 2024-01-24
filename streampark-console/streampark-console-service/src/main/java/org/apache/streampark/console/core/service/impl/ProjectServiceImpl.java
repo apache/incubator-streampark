@@ -269,10 +269,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   public String getAppConfPath(Long id, String module) {
     Project project = getById(id);
     File appHome = project.getDistHome();
+    File[] files = appHome.listFiles();
+    if (!appHome.exists() || files == null) {
+      return null;
+    }
     Optional<File> fileOptional =
-        Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-            .filter((x) -> x.getName().equals(module))
-            .findFirst();
+        Arrays.stream(files).filter((x) -> x.getName().equals(module)).findFirst();
     return fileOptional.map(File::getAbsolutePath).orElse(null);
   }
 
