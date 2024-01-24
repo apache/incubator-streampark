@@ -109,8 +109,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         .getClusterClient
       val submitResult = client.submitJob(jobGraph)
       val jobId = submitResult.get().toString
+      val url = getClientURL(client, submitRequest.kubernetesNamespace, submitRequest.clusterId)
       val result =
-        SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+        SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId, url)
       logInfo(
         s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId: $jobId")
       result
@@ -169,7 +170,12 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         client =
           clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
       }
-      getDeployResponse(client)
+      val url = getClientURL(client, deployRequest.kubernetesNamespace, deployRequest.clusterId)
+      if (url != null) {
+        DeployResponse(address = url, clusterId = client.getClusterId)
+      } else {
+        DeployResponse(error = new RuntimeException("get the cluster getWebInterfaceURL failed."))
+      }
     } catch {
       case e: Exception => DeployResponse(error = e)
     } finally {

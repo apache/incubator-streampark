@@ -198,7 +198,13 @@ object YarnSessionClient extends YarnClientTrait {
       }
       val clientProvider = clusterDescriptor.deploySessionCluster(yarnClusterDescriptor._1)
       client = clientProvider.getClusterClient
-      getDeployResponse(client)
+      if (client.getWebInterfaceURL != null) {
+        DeployResponse(
+          address = client.getWebInterfaceURL,
+          clusterId = client.getClusterId.toString)
+      } else {
+        DeployResponse(error = new RuntimeException("get the cluster getWebInterfaceURL failed."))
+      }
     } catch {
       case e: Exception => DeployResponse(error = e)
     } finally {

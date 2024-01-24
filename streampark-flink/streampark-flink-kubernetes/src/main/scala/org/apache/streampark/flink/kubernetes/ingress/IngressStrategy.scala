@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
-import org.apache.streampark.common.conf.{ConfigConst, InternalConfigHolder, K8sFlinkConfig}
+import org.apache.streampark.common.conf.{InternalConfigHolder, K8sFlinkConfig}
 
 import io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
@@ -28,12 +28,9 @@ import java.io.File
 
 trait IngressStrategy {
 
-  lazy val ingressClass = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
+  lazy val ingressClass: String = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
 
-  def ingressUrlAddress(
-      nameSpace: String,
-      clusterId: String,
-      clusterClient: ClusterClient[_]): String
+  def getIngressUrl(nameSpace: String, clusterId: String, clusterClient: ClusterClient[_]): String
 
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit
 
@@ -50,7 +47,7 @@ trait IngressStrategy {
   }
 
   def buildIngressAnnotations(clusterId: String, namespace: String): Map[String, String] = {
-    var annotations = Map(
+    val annotations = Map(
       "kubernetes.io/ingress.class" -> ingressClass,
       "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
       "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",

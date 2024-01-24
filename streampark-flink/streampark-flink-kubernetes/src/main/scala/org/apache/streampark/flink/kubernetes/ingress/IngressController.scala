@@ -45,11 +45,11 @@ object IngressController extends Logger {
     ingressStrategy.configureIngress(domainName, clusterId, nameSpace)
   }
 
-  def ingressUrlAddress(
+  def getIngressUrl(
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
-    ingressStrategy.ingressUrlAddress(nameSpace, clusterId, clusterClient)
+    ingressStrategy.getIngressUrl(nameSpace, clusterId, clusterClient)
   }
 
   def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {

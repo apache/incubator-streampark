@@ -34,10 +34,7 @@ import org.apache.hc.core5.util.Timeout
 
 import javax.annotation.Nullable
 
-import java.time.Duration
-
 import scala.collection.JavaConverters._
-import scala.util
 import scala.util.{Failure, Success, Try}
 
 object KubernetesRetriever extends Logger {
@@ -145,7 +142,7 @@ object KubernetesRetriever extends Logger {
         .getOrElse(return None)) {
       client =>
         val url =
-          IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+          IngressController.getIngressUrl(clusterKey.namespace, clusterKey.clusterId, client)
         logger.info(s"retrieve flink jobManager rest url: $url")
         client.close()
         Some(url)

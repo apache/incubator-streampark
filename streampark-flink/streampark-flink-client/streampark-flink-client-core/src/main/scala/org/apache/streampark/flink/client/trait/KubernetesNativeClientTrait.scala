@@ -19,6 +19,7 @@ package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
 import org.apache.streampark.flink.client.bean._
+import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 
 import org.apache.commons.lang3.StringUtils
@@ -33,6 +34,7 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.Service
 import javax.annotation.Nonnull
 
 import scala.language.postfixOps
+import scala.util.Try
 
 /** kubernetes native mode submit */
 trait KubernetesNativeClientTrait extends FlinkClientTrait {
@@ -182,4 +184,10 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
     if (k8sConf != null) k8sConf.replace("~", homePath)
     else homePath.concat("/.kube/config")
   }
+
+  def getClientURL(client: ClusterClient[_], namespace: String, clusterId: String): String = {
+    Try(IngressController.getIngressUrl(namespace, clusterId, client))
+      .getOrElse(client.getWebInterfaceURL)
+  }
+
 }

@@ -30,7 +30,7 @@ import scala.util.Try
 
 class IngressStrategyV1beta1 extends IngressStrategy {
 
-  override def ingressUrlAddress(
+  override def getIngressUrl(
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
