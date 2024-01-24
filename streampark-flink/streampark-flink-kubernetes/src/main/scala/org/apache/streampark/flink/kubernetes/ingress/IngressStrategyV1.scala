@@ -62,6 +62,7 @@ class IngressStrategyV1 extends IngressStrategy {
           .addToOwnerReferences(ownerReference) // Add OwnerReference
           .endMetadata()
           .withNewSpec()
+          .withIngressClassName(ingressClass)
           .addNewRule()
           .withHost(domainName)
           .withNewHttp()
