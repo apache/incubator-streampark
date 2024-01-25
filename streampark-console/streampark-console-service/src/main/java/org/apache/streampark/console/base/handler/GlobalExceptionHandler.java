@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.base.handler;
 
-import org.apache.streampark.console.base.domain.ResponseCode;
+import org.apache.streampark.common.domain.ResponseCode;
+import org.apache.streampark.common.exception.AbstractApiException;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;

@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.common.exception.InternalException;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.service.FlinkSqlService;
