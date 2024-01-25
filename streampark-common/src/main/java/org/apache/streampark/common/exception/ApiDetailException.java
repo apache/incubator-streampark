@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.exception;
+package org.apache.streampark.common.exception;
 
+import org.apache.streampark.common.domain.ResponseCode;
 import org.apache.streampark.common.util.ExceptionUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 
 /**
  *

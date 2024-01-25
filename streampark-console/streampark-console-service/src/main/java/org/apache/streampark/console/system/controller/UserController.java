@@ -17,10 +17,10 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.ResponseCode;
+import org.apache.streampark.common.domain.ResponseCode;
+import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.enums.PermissionTypeEnum;

@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.base.interceptor;
 
+import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;

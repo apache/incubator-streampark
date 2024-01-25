@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.security.impl;
 
-import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.enums.UserTypeEnum;

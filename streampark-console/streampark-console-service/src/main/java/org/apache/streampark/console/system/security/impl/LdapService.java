@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.security.impl;
 
-import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.common.exception.ApiAlertException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

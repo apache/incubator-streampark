@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.common.exception.ApiDetailException;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.service.FlinkEnvService;

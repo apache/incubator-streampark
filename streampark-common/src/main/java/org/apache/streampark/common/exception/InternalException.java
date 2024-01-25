@@ -15,35 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.exception;
+package org.apache.streampark.common.exception;
 
-/**
- *
- *
- * <pre>
- * An exception message that needs to be notified to front-end.
- * </pre>
- */
-public abstract class AbstractApiException extends RuntimeException {
+/** System Internal Exception */
+public class InternalException extends Exception {
 
-  private final long responseCode;
-
-  protected AbstractApiException(String message, long responseCode) {
+  public InternalException(String message) {
     super(message);
-    this.responseCode = responseCode;
   }
 
-  protected AbstractApiException(Throwable cause, long responseCode) {
-    super(cause);
-    this.responseCode = responseCode;
-  }
-
-  protected AbstractApiException(String message, Throwable cause, long responseCode) {
+  public InternalException(String message, Throwable cause) {
     super(message, cause);
-    this.responseCode = responseCode;
-  }
-
-  public long getResponseCode() {
-    return responseCode;
   }
 }
